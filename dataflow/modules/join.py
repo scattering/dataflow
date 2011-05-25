@@ -6,11 +6,14 @@ from .. import config
 from ..core import Module
 
 def join_module(id=None, datatype=None, action=None, 
-                version='0.0', fields=[]):
-    """Module for combining multiple datasets"""
+                version='0.0', fields=[],
+                description="Combine multiple datasets"):
+    """
+    Return a module for combining multiple datasets
+    """
 
     icon = {
-        'URI': '/lib/tracks/sum.png',
+        'URI': config.MEDIA+'/sum.png',
         'terminals': {
             'input': (-15,1, -1, 0),
             'output': (15,1, 1, 0),
@@ -37,7 +40,7 @@ def join_module(id=None, datatype=None, action=None,
     module = Module(id=id,
                   name='Join',
                   version=version,
-                  description=action.__doc__,
+                  description=description,
                   icon=icon,
                   terminals=terminals,
                   fields=fields,

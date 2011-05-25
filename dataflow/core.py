@@ -1,36 +1,29 @@
 """
-
-Functional interface:
-
-    template + config => workflow
-
-        convert the stored template and config into an executable workflow
-
-    evaluate workflow
-
-        evaluate an executable workflow
-
-    data => json
-
-        serialize data
-
-
-names are one to three words long with each word capitalized
-
-tooltips are short phrases with the first word capitalized and no period
+Core class definitions
 """
 
-from deps import processing_order
+from . import config
+from .deps import processing_order
 
 _registry = {}
 def register_instrument(instrument):
+    """
+    Add a new instrument to the server.
+    """
+    config.INSTRUMENTS.append(instrument.id)
     for m in instrument.modules:
         register_module(m)
 def register_module(module):
-    if module.id in _registry:
+    """
+    Register a new calculation module.
+    """
+    if module.id in _registry and module != _registry[module.id]:
         raise ValueError("Module already registered")
     _registry[module.id] = module
 def lookup_module(id):
+    """
+    Lookup a module in the registry.
+    """
     return _registry[id]
 
 
@@ -147,14 +140,20 @@ class Template(object):
     ----------
 
     name : string
+    
+        String identifier for the template
 
     description : string
     
+        Extended description to be displayed as help to the template user.
+    
     instrument : string
+    
+        Instrument to which the template applies
 
     modules : [TemplateModule]
 
-        modules used in the template
+        Modules used in the template
         
         module : string
     
@@ -170,7 +169,7 @@ class Template(object):
 
     wires : [TemplateWire]
 
-        wires connecting the modules
+        Wires connecting the modules
         
         source : [int, string]
     
@@ -211,12 +210,22 @@ class Data(object):
     ----------
 
     name : string
+    
+        User visible identifier for the data.  Usually this is file name.
 
     datatype : string
     
+        Type of the data.  This determines how the data may be plotted
+        and filtered.
+    
     intent : string
+    
+        What role the data is intended for, such as 'background' for
+        data that is used for background subtraction.
 
     data : object
+    
+        Data content.  The details of the content depend on the data type.
 
     history : list
 
@@ -246,7 +255,7 @@ class Instrument(object):
 
     id : string
 
-        instrument identifier.  By convention this will be a dotted
+        Instrument identifier.  By convention this will be a dotted
         structure '<facility>.<instrument class>.<instrument>'
 
     name : string
@@ -255,7 +264,8 @@ class Instrument(object):
 
     menu : [(string, [Module, ...]), ...]
     
-        Group names and modules in groups
+        Modules available.  Modules are organized into groups of related
+        operations, such as Input, Reduce, Analyze, ...
 
     datatypes : [Datatype]
     
@@ -263,7 +273,9 @@ class Instrument(object):
         
     archive : URI
     
-        location of the data archive for the instrument
+        Location of the data archive for the instrument.  Archives must
+        implement an interface that allows data sets to be listed and
+        retrieved for a particular instrument/experiment.
     """
     def __init__(self, id, name=None, menu=None, 
                  datatypes=None, requires=None, archive=None):
