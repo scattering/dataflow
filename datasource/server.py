@@ -1,5 +1,20 @@
-# TODO: Add /jobs/<id>/data.zip to fetch all files at once in a zip file format
-# TODO: Store completed work in /path/to/store/<id>.zip
+"""
+RESTful data server for NCNR data.
+
+Requires flask.
+
+Run the test server using:
+
+    python server.py
+
+This starts the server on localhost:5000.
+
+You can then navigate to localhost:5000/data.html to see a list of
+instruments, and drill down from there to some sample experiments.
+"""
+
+DATASTORE = '/tmp'
+INSTRUMENTS = ['BT7','ANDR']
 
 import os, sys
 import logging
@@ -26,8 +41,6 @@ def _format_response(response, format='.json', template=None):
     else:
         flask.abort(400) # Bad request
 
-DATASTORE = '/tmp'
-INSTRUMENTS = ['BT7','ANDR']
 @app.route('/data<format>', methods=['GET'])
 def list_instruments(format='.json'):
     """
