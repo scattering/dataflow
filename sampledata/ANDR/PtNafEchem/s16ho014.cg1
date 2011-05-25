@@ -1,0 +1,16 @@
+'s16ho014.cg1' 'Dec  1 2010 11:19' 'I'         60.    2  'TIME'   76  'RAW'
+  Filename         Date            Scan       Mon    Prf  Base   #pts  Type
+s16ho pt nafion in 0p1 m h2so4 potential is 1p125 
+ 460    1  500  512 608 512   0   5.0010     0.00000 0.00000   0.00000    1
+ Collimation      Mosaic    Wavelength   T-Start   Incr.   H-field #Det    
+  1       2.60000    0.00000    2.60000
+  2       2.60000    0.00000    2.60000
+  3       6.50000    0.04000    9.50000
+  4      13.00000    0.08000   19.00000
+  5       7.80000    0.00000    7.80000
+  6      10.40000    0.00000   10.40000
+ Mot:    Start       Step      End
+     A3         A4       MIN      MONITOR      COUNTS 
+      6.500     13.000    2.00      339807        1443
+      6.540     13.080    2.00      340567        1452
+      6.580     13.160    2.00      339970        1464

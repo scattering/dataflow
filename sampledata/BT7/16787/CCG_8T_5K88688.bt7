@@ -1,0 +1,44 @@
+#ICE           0.4.0
+#ICERepositoryInfo ice/server/releases/ALL_2010_11_04
+#Filename    CCG_8T_5K88688
+#Date        2010-12-16 21:10:33 EST
+#InstrName   BT7
+#Epoch       1292551833.91
+#ExptID      16787
+#ExptName    Dynamic freezing in pyroclore spin glass
+#ExptParticipants D. K. SIngh
+#ExptDetails Thank you!
+#ExptComment 
+#User        bt7
+#Comment     
+#Npoints     3
+#TemperatureUnits Kelvin
+#Ncolumns    97
+#DetectorDims
+#Signal      9 Detector
+#Reference   8 Monitor
+#ScanType   VECTOR
+#Scan        4 E 
+#ScanRanges: 4 E 
+#DetectorEfficiencies Monitor=1.0 PSDC37=1.0 Monitor2=1.0 PSDC02=1.0 PSDC03=1.0 PSDC00=1.0 PSDC01=1.0 PSDC06=1.0 PSDC07=1.0 PSDC04=1.0 PSDC05=1.0 PSDC08=1.0 PSDC09=1.0 SDC0=1.0 SDC1=1.0 SDC2=1.0 PSDC11=1.0 PSDC10=1.0 PSDC13=1.0 PSDC12=1.0 PSDC15=1.0 PSDC14=1.0 PSDC17=1.0 PSDC16=1.0 PSDC19=1.0 PSDC18=1.0 PSDC46=1.0 PSDC47=1.0 PSDC45=1.0 PSDC43=1.0 PSDC40=1.0 PSDC32=1.0 PSDC41=1.0 PSDC31=1.0 PSDC28=1.0 PSDC29=1.0 PSDC24=1.0 PSDC25=1.0 PSDC26=1.0 PSDC27=1.0 PSDC20=1.0 PSDC21=1.0 PSDC22=1.0 PSDC23=1.0 Time=1.0 PSDC34=1.0 DDC1=1.0 DDC0=1.0 DDC2=1.0 PSDC39=1.0 PSDC38=1.0 PSDC33=1.0 PSDC30=1.0 PSDC36=1.0 PSDC35=1.0 PSDC44=1.0 TDC08=1.0 TDC10=1.0 PSDC42=1.0 TDC06=1.0 TDC07=1.0 TDC04=1.0 TDC05=1.0 TDC02=1.0 TDC03=1.0 TDC00=1.0 TDC01=1.0 TDC09=1.0 
+#FixedE      Ef 14.7
+#Lattice     4.1648 4.1648 10.233 90 90 90
+#Orient      1 1 0 0 0 1
+#MonoSpacing 3.35416
+#AnaSpacing  3.35416
+#UBEnabled   0
+#MonoVertiFocus SAGITTAL
+#MonoHorizFocus FLAT
+#AnalyzerDetectorMode 2 SingDetFlat
+#AnalyzerDetectorDevicesOfInterest SDC0 SDC1 SDC2
+#AnalyzerDDGroup DDC0 DDC1 DDC2
+#AnalyzerDoorDetectorGroup TDC00 TDC01 TDC02 TDC03 TDC04 TDC05 TDC06 TDC07 TDC08
+#AnalyzerPSDGroup PSDC00 PSDC01 PSDC02 PSDC03 PSDC04 PSDC05 PSDC06 PSDC07 PSDC08 PSDC09 PSDC10 PSDC11 PSDC12 PSDC13 PSDC14 PSDC15 PSDC16 PSDC17 PSDC18 PSDC19 PSDC20 PSDC21 PSDC22 PSDC23 PSDC24 PSDC25 PSDC26 PSDC27 PSDC28 PSDC29 PSDC30 PSDC31 PSDC32 PSDC33 PSDC34 PSDC35 PSDC36 PSDC37 PSDC38 PSDC39 PSDC40 PSDC41 PSDC42 PSDC43 PSDC44 PSDC45 PSDC46 PSDC47
+#AnalyzerSDGroup SDC0 SDC1 SDC2
+#AnalyzerFocusMode FLAT
+#Fixed       AnalyzerBlade01 AnalyzerBlade02 AnalyzerBlade03 AnalyzerBlade04 AnalyzerBlade05 AnalyzerBlade06 AnalyzerBlade07 AnalyzerBlade08 AnalyzerBlade09 AnalyzerBlade10 AnalyzerBlade11 AnalyzerBlade12 AnalyzerBlade13 AnalyzerRotation SmplGFRot 
+#ScanDescr   Scan:SubID=16787:JType=VECTOR:Fixed=1:FixedE=14.7:Npts=3:Counts=25000.0:Prefac=30.0:DetectorType=Detector:CountType=Monitor:Filename=CCG_8T_5K:HoldScan=0.0:Range=Q=0.27~0.27~1.47 0.0~0.0~0.0:Range=E=-1.5 0.25:Title=EnergyScan
+#Columns             QX            QY            QZ             E            A4          Time          Temp       Monitor      Detector        DFMRot            A2            A3            A5            A6           DFM            A1 AnalyzerBlade01 AnalyzerBlade02 AnalyzerBlade03 AnalyzerBlade04 AnalyzerBlade05 AnalyzerBlade06 AnalyzerBlade07 AnalyzerBlade08 AnalyzerBlade09 AnalyzerBlade10 AnalyzerBlade11 AnalyzerBlade12 AnalyzerBlade13 AnalyzerRotation     ApertHori     ApertVert     BkSltHght     BkSltWdth          DDC0          DDC1          DDC2       DiffDet            Ef            Ei          FLIP        FilRot       FilTilt       FilTran       FocusCu       FocusPG             H           HKL             K             L      MagField      Monitor2   MonoBlade01   MonoBlade02   MonoBlade03   MonoBlade04   MonoBlade05   MonoBlade06   MonoBlade07   MonoBlade08   MonoBlade09   MonoBlade10      MonoElev     MonoTrans         PSDet   PostAnaColl  PostMonoColl    PreAnaColl   PreMonoColl            RC            SC          SDC0          SDC1          SDC2     SingleDet      SmplElev     SmplGFRot      SmplHght     SmplLTilt      SmplLTrn     SmplUTilt      SmplUTrn      SmplWdth         TDC00         TDC01         TDC02         TDC03         TDC04         TDC05         TDC06         TDC07         TDC08         TDC09         TDC10 TemperatureControlReading TemperatureSetpoint TemperatureHeaterPower    timestamp
+                   0.27          0.27          1.47         -1.75       23.6641       321.107             5        750000           110        22.003       44.0068       60.5681       20.5885       41.1775       22.0034       22.0034               0               0               0               0               0               0               0               0               0               0               0               0               0          20.5883       59.9999           140       99.9974       79.9973             6             4            10           198       14.6997         12.95             A             0             0           OUT          9000          1093      0.270883 [0.271,0.271,1.468]      0.270883       1.46801             8             1             0             0             0             0             0             0             0             0             0             0             0         2.313      -85.0001           N/A           N/A           N/A          OPEN       243.001        -4.008            15            76            19       41.1775            75       90.0003            25             0        0.0002             0             0       15.9956             5            10             8             5            10             9             8             8             2             1             4 0.0 5.0 N/A    1292552156.6124711
+                   0.27          0.27          1.47          -1.5       23.6271       315.623         5.001        750000           350        21.783       43.5666       62.0622       20.5885       41.1775       21.7833       21.7833               0               0               0               0               0               0               0               0               0               0               0               0               0          20.5883       59.9999           140       99.9974       79.9973             4             8             5           198       14.6997          13.2             A             0             0           OUT          9000          1083      0.269087 [0.269,0.269,1.472]      0.269087       1.47199             8             1             0             0             0             0             0             0             0             0             0             0             0         2.338      -85.0001           N/A           N/A           N/A          OPEN       243.001        -4.008            24           257            69       41.1775            75       90.0003            25             0        0.0002             0             0       15.9956             2             5             3             2            19            11             6            10             4             4             3 0.0 5.0 N/A    1292552489.2449729
+                   0.27          0.27          1.47         -1.25       23.5791       309.579         4.999        750000          1195        21.569       43.1393       63.2048       20.5885       41.1775       21.5696       21.5696               0               0               0               0               0               0               0               0               0               0               0               0               0          20.5883       59.9999           140       99.9974       79.9973             5            11             3           198       14.6997         13.45             A             0             0           OUT          9000          1073      0.269733 [0.270,0.270,1.471]      0.269733       1.47056             8             1             0             0             0             0             0             0             0             0             0             0             0         2.364      -85.0001           N/A           N/A           N/A          OPEN       243.001        -4.008            72           929           194       41.1775            75       90.0003            25             0        0.0002             0             0       15.9956             4             2             2             7            22            12             6             3             3             2             3 0.0 5.0 N/A    1292552816.2519131

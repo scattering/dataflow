@@ -1,0 +1,15 @@
+'n10ss001.cg1' 'Nov 30 2010 10:31' 'I'      50000.    1  'NEUT'    2  'RAW'
+  Filename         Date            Scan       Mon    Prf  Base   #pts  Type
+n10ss november 2010 slit scans PtNafion Echem     
+ 460    1  500  512 608 512   0   5.0010     0.00000 0.00000   0.00000    1
+ Collimation      Mosaic    Wavelength   T-Start   Incr.   H-field #Det    
+  1       0.05000    0.05000    0.10000
+  2       0.05000    0.05000    0.10000
+  3       0.00000    0.00000    0.00000
+  4       0.00000    0.00000    0.00000
+  5       0.60000    0.00000    0.60000
+  6       0.80000    0.00000    0.80000
+ Mot:    Start       Step      End
+     A1         A2       MIN       COUNTS 
+      0.050      0.050    3.59       22861
+      0.100      0.100    2.96       74660

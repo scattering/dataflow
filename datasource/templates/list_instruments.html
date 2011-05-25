@@ -1,0 +1,8 @@
+<title>{% block title %}{% endblock %}</title>
+The following instruments are available:
+
+<ul>
+{% for f in instruments %}
+  <li><a href="{{ f }}.html">{{f}} </a>
+{% endfor %}
+</ul>

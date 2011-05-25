@@ -1,0 +1,8 @@
+<title>{% block title %}{% endblock %}</title>
+<table>
+<caption>Recent experiments for <a href="/data/{{instrument}}.html">{{instrument}}</a></caption>
+<tr><th>Name</th></tr>
+{% for f in experiments %}
+  <tr><td><a href="{{ f }}.html">{{f}} </a></td></tr>
+{% endfor %}
+</table>

@@ -1,0 +1,1615 @@
+16:07:03: PA
+ Soft: A01=   0.500  A02=   0.250  A03=   0.132  A04=   0.300  A05=   2.001
+ Hard: A01=   0.499  A02=   0.249  A03=   1.319  A04=   0.300  A05=   2.001
+ Soft: A06=   0.500  A07=   6.043  A08=  -0.409  A09=   0.700  A10=   0.500
+ Hard: A06=   0.500  A07=   6.043  A08=  -0.449  A09=   0.700  A10=   0.500
+ Soft: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  14.000
+ Hard: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  17.801
+ Soft: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Hard: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Soft: A21=   0.028  A22=   0.322  A23=   0.715  A24=  -0.815
+ Hard: A21=   0.028  A22=   0.246  A23=   0.715  A24=   0.746
+16:07:39: D7=5.92
+16:08:00: FP3,.1,.005
+ File created: fpx03054.cg1
+ Find_peak:  Dec  1 2010 16:08
+ Angle no =  3,  Range = [   0.082 ...   0.182 ],  Step =   0.005, Mon =      -1
+ Peak found at    0.122  with an intensity of        985
+  Fit Results:   BG =      2.435
+             Height =   1041.003
+                Pos =      0.1256
+              Width =      0.0320
+ Driving to fitted peak position!
+16:09:40: FP8,4,.2
+ File created: fpx08013.cg1
+ Find_peak:  Dec  1 2010 16:09
+ Angle no =  8,  Range = [  -2.409 ...   1.591 ],  Step =   0.200, Mon =      -1
+ Peak found at   -0.209  with an intensity of       1166
+  Fit Results:   BG =    136.834
+             Height =   1074.224
+                Pos =      0.1303
+              Width =      1.9338
+ Driving to fitted peak position!
+16:11:15: FP3,.1,.005
+ File created: fpx03055.cg1
+ Find_peak:  Dec  1 2010 16:11
+ Angle no =  3,  Range = [   0.076 ...   0.176 ],  Step =   0.005, Mon =      -1
+ Peak found at    0.121  with an intensity of       1240
+  Fit Results:   BG =      9.254
+             Height =   1324.430
+                Pos =      0.1271
+              Width =      0.0277
+ Driving to fitted peak position!
+16:13:31: FP7,.5,.05
+ File created: fpx07038.cg1
+ Find_peak:  Dec  1 2010 16:13
+ Angle no =  7,  Range = [   5.665 ...   6.165 ],  Step =   0.050, Mon =      -1
+ Peak found at    5.915  with an intensity of       1169
+  Fit Results:   BG =    -19.215
+             Height =   1442.630
+                Pos =      5.9731
+              Width =      0.2316
+ Driving to fitted peak position!
+16:14:39: FP3,.1,.005
+ File created: fpx03056.cg1
+ Find_peak:  Dec  1 2010 16:14
+ Angle no =  3,  Range = [   0.077 ...   0.177 ],  Step =   0.005, Mon =      -1
+ Peak found at    0.122  with an intensity of       1198
+  Fit Results:   BG =      8.900
+             Height =   1336.565
+                Pos =      0.1264
+              Width =      0.0287
+ Driving to fitted peak position!
+16:16:33: PA
+ Soft: A01=   0.500  A02=   0.250  A03=   0.126  A04=   0.300  A05=   2.001
+ Hard: A01=   0.499  A02=   0.249  A03=   1.314  A04=   0.300  A05=   2.001
+ Soft: A06=   0.500  A07=   5.973  A08=   0.130  A09=   0.700  A10=   0.500
+ Hard: A06=   0.500  A07=   5.973  A08=   0.089  A09=   0.700  A10=   0.500
+ Soft: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  14.000
+ Hard: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  17.801
+ Soft: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Hard: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Soft: A21=   0.028  A22=   0.322  A23=   0.715  A24=  -0.815
+ Hard: A21=   0.028  A22=   0.246  A23=   0.715  A24=   0.746
+16:16:40: SET3=.15
+16:16:42: PA
+ Soft: A01=   0.500  A02=   0.250  A03=   0.150  A04=   0.300  A05=   2.001
+ Hard: A01=   0.499  A02=   0.249  A03=   1.314  A04=   0.300  A05=   2.001
+ Soft: A06=   0.500  A07=   5.973  A08=   0.130  A09=   0.700  A10=   0.500
+ Hard: A06=   0.500  A07=   5.973  A08=   0.089  A09=   0.700  A10=   0.500
+ Soft: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  14.000
+ Hard: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  17.801
+ Soft: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Hard: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Soft: A21=   0.028  A22=   0.322  A23=   0.715  A24=  -0.815
+ Hard: A21=   0.028  A22=   0.246  A23=   0.715  A24=   0.746
+16:18:37: RS=RI1-3
+16:18:41: PRS
+16:18:49: RS
+16:18:49: RS: RI1
+16:18:49: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/sd07w001.cg1  Dec  1 2010 16:18
+ IBuffer  1:  sd07w sample sd07 pt_naf in water annealed at 210
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.0100  A3-end=  0.5000
+ A4-beg=  0.0000  Inc-4=  0.0200  A4-end=  1.0000
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: sd07w001.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+16:38:10: RS: RI2
+16:38:10: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/sd07w002.cg1  Dec  1 2010 16:38
+ IBuffer  2:  sd07w sample sd07 pt_naf in water annealed at 210
+ A1-beg=  0.2000  Inc-1=  0.0040  A1-end=  0.4000
+ A2-beg=  0.2000  Inc-2=  0.0040  A2-end=  0.4000
+ A3-beg=  0.5000  Inc-3=  0.0100  A3-end=  1.0000
+ A4-beg=  1.0000  Inc-4=  0.0200  A4-end=  2.0000
+ A5-beg=  0.6000  Inc-5=  0.0120  A5-end=  1.2000
+ A6-beg=  0.8000  Inc-6=  0.0160  A6-end=  1.6000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: sd07w002.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+17:02:11: RS: RI3
+17:02:11: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/sd07w003.cg1  Dec  1 2010 17:02
+ IBuffer  3:  sd07w sample sd07 pt_naf in water annealed at 210
+ A1-beg=  0.4000  Inc-1=  0.0080  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0080  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.0200  A3-end=  2.0000
+ A4-beg=  2.0000  Inc-4=  0.0400  A4-end=  4.0000
+ A5-beg=  1.2000  Inc-5=  0.0240  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.0320  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: sd07w003.cg1
+ Estimated duration of that buffer:    0.4 hrs.
+17:36:09: Command sequence terminated !
+17:50:26: D4T=.3
+17:50:53: D1=.5
+17:50:57: D2=.25
+17:51:02: D5=2.
+17:51:06: D6=.5
+17:51:12: PA
+ Soft: A01=   0.500  A02=   0.250  A03=   0.150  A04=   0.300  A05=   2.000
+ Hard: A01=   0.499  A02=   0.249  A03=   1.314  A04=   0.300  A05=   2.000
+ Soft: A06=   0.500  A07=   5.973  A08=   0.130  A09=   0.700  A10=   0.500
+ Hard: A06=   0.500  A07=   5.973  A08=   0.089  A09=   0.700  A10=   0.500
+ Soft: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  14.000
+ Hard: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  17.801
+ Soft: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Hard: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Soft: A21=   0.028  A22=   0.322  A23=   0.715  A24=  -0.815
+ Hard: A21=   0.028  A22=   0.246  A23=   0.715  A24=   0.746
+17:51:15: !INSERTED ACID
+17:51:25: FP3,.1,.005
+ File created: fpx03057.cg1
+ Find_peak:  Dec  1 2010 17:51
+ Angle no =  3,  Range = [   0.100 ...   0.200 ],  Step =   0.005, Mon =      -1
+ Peak found at    0.145  with an intensity of       1258
+  Fit Results:   BG =      9.881
+             Height =   1363.032
+                Pos =      0.1507
+              Width =      0.0278
+ Driving to fitted peak position!
+17:53:00: SET3=.15
+17:53:08: RS=RI1-3
+17:53:11: PRS
+17:53:14: RS
+17:53:14: RS: RI1
+17:53:14: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/sd07w004.cg1  Dec  1 2010 17:53
+ IBuffer  1:  sd07w sample sd07 pt_naf in water annealed at 210
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.0100  A3-end=  0.5000
+ A4-beg=  0.0000  Inc-4=  0.0200  A4-end=  1.0000
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: sd07w004.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+17:53:36:  **** ABORT during count ****
+17:53:36:   Request aborted by Contrl_A
+17:55:36: Command sequence terminated !
+17:55:44: RS=RI1-3
+17:55:46: PRS
+17:55:49: RS
+17:55:49: RS: RI1
+17:55:49: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07hs001.cg1  Dec  1 2010 17:55
+ IBuffer  1:  s07hs sample sd07 pt_naf in 0p1 m sulfuric acid an
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.0100  A3-end=  0.5000
+ A4-beg=  0.0000  Inc-4=  0.0200  A4-end=  1.0000
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s07hs001.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+18:13:53: RS: RI2
+18:13:53: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07hs002.cg1  Dec  1 2010 18:13
+ IBuffer  2:  s07hs sample sd07 pt_naf in 0p1 m sulfuric acid an
+ A1-beg=  0.2000  Inc-1=  0.0040  A1-end=  0.4000
+ A2-beg=  0.2000  Inc-2=  0.0040  A2-end=  0.4000
+ A3-beg=  0.5000  Inc-3=  0.0100  A3-end=  1.0000
+ A4-beg=  1.0000  Inc-4=  0.0200  A4-end=  2.0000
+ A5-beg=  0.6000  Inc-5=  0.0120  A5-end=  1.2000
+ A6-beg=  0.8000  Inc-6=  0.0160  A6-end=  1.6000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s07hs002.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+18:37:23: RS: RI3
+18:37:23: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07hs003.cg1  Dec  1 2010 18:37
+ IBuffer  3:  s07hs sample sd07 pt_naf in 0p1 m sulfuric acid an
+ A1-beg=  0.4000  Inc-1=  0.0080  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0080  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.0200  A3-end=  2.0000
+ A4-beg=  2.0000  Inc-4=  0.0400  A4-end=  4.0000
+ A5-beg=  1.2000  Inc-5=  0.0240  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.0320  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07hs003.cg1
+ Estimated duration of that buffer:    0.4 hrs.
+18:49:58:  **** ABORT during count ****
+18:49:58:   Request aborted by Contrl_A
+18:49:58: Command sequence terminated !
+19:48:01: D1=.5
+19:48:04: D2=.25
+19:48:09: D5=2.
+19:48:13: D6=.5
+19:48:18: D4T=.3
+19:48:39: CT-1
+ Timer set to:       1 sec.   Count initiated!
+ Time:       1   Monitor:       772 Counter_1:      1158 Seconds:      1.00
+19:48:40: PA
+ Soft: A01=   0.500  A02=   0.250  A03=   0.150  A04=   0.300  A05=   2.001
+ Hard: A01=   0.499  A02=   0.249  A03=   1.314  A04=   0.300  A05=   2.001
+ Soft: A06=   0.500  A07=   5.973  A08=   0.130  A09=   0.700  A10=   0.500
+ Hard: A06=   0.500  A07=   5.973  A08=   0.089  A09=   0.700  A10=   0.500
+ Soft: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  14.000
+ Hard: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  17.801
+ Soft: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Hard: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Soft: A21=   0.028  A22=   0.322  A23=   0.715  A24=  -0.815
+ Hard: A21=   0.028  A22=   0.246  A23=   0.715  A24=   0.746
+19:48:51: FP3,.08,.005
+ File created: fpx03058.cg1
+ Find_peak:  Dec  1 2010 19:48
+ Angle no =  3,  Range = [   0.110 ...   0.190 ],  Step =   0.005, Mon =      -1
+ Peak found at    0.145  with an intensity of       1228
+  Fit Results:   BG =      9.625
+             Height =   1306.280
+                Pos =      0.1501
+              Width =      0.0285
+ Driving to fitted peak position!
+19:50:04: FP7,.5,.05
+ File created: fpx07039.cg1
+ Find_peak:  Dec  1 2010 19:50
+ Angle no =  7,  Range = [   5.723 ...   6.223 ],  Step =   0.050, Mon =      -1
+ Peak found at    5.923  with an intensity of       1192
+  Fit Results:   BG =   -139.475
+             Height =   1515.575
+                Pos =      5.9755
+              Width =      0.2741
+ Driving to fitted peak position!
+19:51:07: FP3,.08,.005
+ File created: fpx03059.cg1
+ Find_peak:  Dec  1 2010 19:51
+ Angle no =  3,  Range = [   0.110 ...   0.190 ],  Step =   0.005, Mon =      -1
+ Peak found at    0.145  with an intensity of       1227
+  Fit Results:   BG =      4.721
+             Height =   1351.337
+                Pos =      0.1503
+              Width =      0.0284
+ Driving to fitted peak position!
+19:52:33: SET3=.15
+19:52:45: RS=RI1-3
+19:52:47: PRS
+19:52:48: DRS
+19:52:48: Entire command sequence checked
+19:57:31: RS
+19:57:31: RS: RI1
+19:57:31: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sc001.cg1  Dec  1 2010 19:57
+ IBuffer  1:  s07sc sd07 pt_naf  0p1 m h2so4 ocv after cycling
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.0100  A3-end=  0.5000
+ A4-beg=  0.0000  Inc-4=  0.0200  A4-end=  1.0000
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s07sc001.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+20:14:25: RS: RI2
+20:14:25: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sc002.cg1  Dec  1 2010 20:14
+ IBuffer  2:  s07sc sd07 pt_naf  0p1 m h2so4 ocv after cycling
+ A1-beg=  0.2000  Inc-1=  0.0040  A1-end=  0.4000
+ A2-beg=  0.2000  Inc-2=  0.0040  A2-end=  0.4000
+ A3-beg=  0.5000  Inc-3=  0.0100  A3-end=  1.0000
+ A4-beg=  1.0000  Inc-4=  0.0200  A4-end=  2.0000
+ A5-beg=  0.6000  Inc-5=  0.0120  A5-end=  1.2000
+ A6-beg=  0.8000  Inc-6=  0.0160  A6-end=  1.6000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s07sc002.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+20:36:01: RS: RI3
+20:36:01: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sc003.cg1  Dec  1 2010 20:36
+ IBuffer  3:  s07sc sd07 pt_naf  0p1 m h2so4 ocv after cycling
+ A1-beg=  0.4000  Inc-1=  0.0080  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0080  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.0200  A3-end=  2.0000
+ A4-beg=  2.0000  Inc-4=  0.0400  A4-end=  4.0000
+ A5-beg=  1.2000  Inc-5=  0.0240  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.0320  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07sc003.cg1
+ Estimated duration of that buffer:    0.4 hrs.
+20:58:48:  **** ABORT during count ****
+20:58:48:   Request aborted by Contrl_A
+20:58:48: Command sequence terminated !
+20:59:04: D1=.5
+20:59:08: D2=.25
+20:59:12: D5=2.
+20:59:17: D6=.5
+20:59:23: D4T=.3
+20:59:47: PA
+ Soft: A01=   0.500  A02=   0.250  A03=   0.150  A04=   0.300  A05=   2.000
+ Hard: A01=   0.500  A02=   0.249  A03=   1.314  A04=   0.300  A05=   2.000
+ Soft: A06=   0.500  A07=   5.975  A08=   0.130  A09=   0.700  A10=   0.500
+ Hard: A06=   0.500  A07=   5.975  A08=   0.089  A09=   0.700  A10=   0.500
+ Soft: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  14.000
+ Hard: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  17.801
+ Soft: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Hard: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Soft: A21=   0.028  A22=   0.322  A23=   0.715  A24=  -0.815
+ Hard: A21=   0.028  A22=   0.246  A23=   0.715  A24=   0.746
+21:04:46: FP3,.1,.005
+ File created: fpx03060.cg1
+ Find_peak:  Dec  1 2010 21:04
+ Angle no =  3,  Range = [   0.100 ...   0.200 ],  Step =   0.005, Mon =      -1
+ Peak found at    0.145  with an intensity of       1161
+  Fit Results:   BG =     10.012
+             Height =   1297.491
+                Pos =      0.1499
+              Width =      0.0287
+ Driving to fitted peak position!
+21:06:34: SET3=.15
+21:06:35: PA
+ Soft: A01=   0.500  A02=   0.250  A03=   0.150  A04=   0.300  A05=   2.000
+ Hard: A01=   0.500  A02=   0.249  A03=   1.314  A04=   0.300  A05=   2.000
+ Soft: A06=   0.500  A07=   5.975  A08=   0.130  A09=   0.700  A10=   0.500
+ Hard: A06=   0.500  A07=   5.975  A08=   0.089  A09=   0.700  A10=   0.500
+ Soft: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  14.000
+ Hard: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  17.801
+ Soft: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Hard: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Soft: A21=   0.028  A22=   0.322  A23=   0.715  A24=  -0.815
+ Hard: A21=   0.028  A22=   0.246  A23=   0.715  A24=   0.746
+21:41:01: DRSF VAP.COM
+21:41:01: Entire Command Sequence checked !
+21:41:05: PRSF VAP.COM
+ ri10;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+21:41:15: RSF VAP.COM
+21:41:15: RSF: RI10
+21:41:15: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so001.cg1  Dec  1 2010 21:41
+ IBuffer 10:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.5000  Inc-1=  0.0000  A1-end=  0.5000
+ A2-beg=  0.2500  Inc-2=  0.0000  A2-end=  0.2500
+ A3-beg=  0.1000  Inc-3=  0.0040  A3-end=  0.2000
+ A4-beg=  0.3000  Inc-4=  0.0000  A4-end=  0.3000
+ A5-beg=  2.0000  Inc-5=  0.0000  A5-end=  2.0000
+ A6-beg=  0.5000  Inc-6=  0.0000  A6-end=  0.5000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=   10000    Prefac=    1    Type= NEUT           Datafile: s07so001.cg1
+ Estimated duration of that buffer:    0.1 hrs.
+21:48:58: RSF: RI1
+21:48:58: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so002.cg1  Dec  1 2010 21:48
+ IBuffer  1:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.0100  A3-end=  0.5000
+ A4-beg=  0.0000  Inc-4=  0.0200  A4-end=  1.0000
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s07so002.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+22:07:31: RSF: RI2
+22:07:31: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so003.cg1  Dec  1 2010 22:07
+ IBuffer  2:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.2000  Inc-1=  0.0040  A1-end=  0.4000
+ A2-beg=  0.2000  Inc-2=  0.0040  A2-end=  0.4000
+ A3-beg=  0.5000  Inc-3=  0.0100  A3-end=  1.0000
+ A4-beg=  1.0000  Inc-4=  0.0200  A4-end=  2.0000
+ A5-beg=  0.6000  Inc-5=  0.0120  A5-end=  1.2000
+ A6-beg=  0.8000  Inc-6=  0.0160  A6-end=  1.6000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s07so003.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+22:30:22: RSF: RI3
+22:30:22: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so004.cg1  Dec  1 2010 22:30
+ IBuffer  3:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.4000  Inc-1=  0.0080  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0080  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.0200  A3-end=  2.0000
+ A4-beg=  2.0000  Inc-4=  0.0400  A4-end=  4.0000
+ A5-beg=  1.2000  Inc-5=  0.0240  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.0320  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07so004.cg1
+ Estimated duration of that buffer:    0.4 hrs.
+23:04:21: RSF: RI4
+23:04:21: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so005.cg1  Dec  1 2010 23:04
+ IBuffer  4:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.8000  Inc-1=  0.0080  A1-end=  1.6000
+ A2-beg=  0.8000  Inc-2=  0.0080  A2-end=  1.6000
+ A3-beg=  2.0000  Inc-3=  0.0200  A3-end=  4.0000
+ A4-beg=  4.0000  Inc-4=  0.0400  A4-end=  8.0000
+ A5-beg=  2.4000  Inc-5=  0.0240  A5-end=  4.8000
+ A6-beg=  3.2000  Inc-6=  0.0320  A6-end=  6.4000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07so005.cg1
+ Estimated duration of that buffer:    0.8 hrs.
+00:11:38: RSF: RI5
+00:11:38: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so006.cg1  Dec  2 2010 00:11
+ IBuffer  5:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  1.6000  Inc-1=  0.0160  A1-end=  2.6080
+ A2-beg=  1.6000  Inc-2=  0.0160  A2-end=  2.6080
+ A3-beg=  4.0000  Inc-3=  0.0400  A3-end=  6.5200
+ A4-beg=  8.0000  Inc-4=  0.0800  A4-end=  13.040
+ A5-beg=  4.8000  Inc-5=  0.0480  A5-end=  7.8240
+ A6-beg=  6.4000  Inc-6=  0.0640  A6-end=  10.432
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07so006.cg1
+ Estimated duration of that buffer:    0.5 hrs.
+00:54:19: RSF: RI10
+00:54:19: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so007.cg1  Dec  2 2010 00:54
+ IBuffer 10:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.5000  Inc-1=  0.0000  A1-end=  0.5000
+ A2-beg=  0.2500  Inc-2=  0.0000  A2-end=  0.2500
+ A3-beg=  0.1000  Inc-3=  0.0040  A3-end=  0.2000
+ A4-beg=  0.3000  Inc-4=  0.0000  A4-end=  0.3000
+ A5-beg=  2.0000  Inc-5=  0.0000  A5-end=  2.0000
+ A6-beg=  0.5000  Inc-6=  0.0000  A6-end=  0.5000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=   10000    Prefac=    1    Type= NEUT           Datafile: s07so007.cg1
+ Estimated duration of that buffer:    0.0 hrs.
+01:03:12: RSF: RI30
+01:03:12: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so008.cg1  Dec  2 2010 01:03
+ IBuffer 30:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.0500  Inc-1=  0.0000  A1-end=  0.0500
+ A2-beg=  0.0500  Inc-2=  0.0000  A2-end=  0.0500
+ A3-beg=  0.0000  Inc-3=  0.0100  A3-end=  0.5000
+ A4-beg=  0.0000  Inc-4=  0.0200  A4-end=  1.0000
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    2    Type= TIME           Datafile: s07so008.cg1
+ Estimated duration of that buffer:    0.4 hrs.
+01:35:00: RSF: RI1
+01:35:00: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so009.cg1  Dec  2 2010 01:35
+ IBuffer  1:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.0100  A3-end=  0.5000
+ A4-beg=  0.0000  Inc-4=  0.0200  A4-end=  1.0000
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s07so009.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+01:53:26: RSF: RI2
+01:53:26: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so010.cg1  Dec  2 2010 01:53
+ IBuffer  2:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.2000  Inc-1=  0.0040  A1-end=  0.4000
+ A2-beg=  0.2000  Inc-2=  0.0040  A2-end=  0.4000
+ A3-beg=  0.5000  Inc-3=  0.0100  A3-end=  1.0000
+ A4-beg=  1.0000  Inc-4=  0.0200  A4-end=  2.0000
+ A5-beg=  0.6000  Inc-5=  0.0120  A5-end=  1.2000
+ A6-beg=  0.8000  Inc-6=  0.0160  A6-end=  1.6000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s07so010.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+02:16:04: RSF: RI3
+02:16:04: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so011.cg1  Dec  2 2010 02:16
+ IBuffer  3:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.4000  Inc-1=  0.0080  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0080  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.0200  A3-end=  2.0000
+ A4-beg=  2.0000  Inc-4=  0.0400  A4-end=  4.0000
+ A5-beg=  1.2000  Inc-5=  0.0240  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.0320  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07so011.cg1
+ Estimated duration of that buffer:    0.4 hrs.
+02:50:03: RSF: RI4
+02:50:03: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so012.cg1  Dec  2 2010 02:50
+ IBuffer  4:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.8000  Inc-1=  0.0080  A1-end=  1.6000
+ A2-beg=  0.8000  Inc-2=  0.0080  A2-end=  1.6000
+ A3-beg=  2.0000  Inc-3=  0.0200  A3-end=  4.0000
+ A4-beg=  4.0000  Inc-4=  0.0400  A4-end=  8.0000
+ A5-beg=  2.4000  Inc-5=  0.0240  A5-end=  4.8000
+ A6-beg=  3.2000  Inc-6=  0.0320  A6-end=  6.4000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07so012.cg1
+ Estimated duration of that buffer:    0.8 hrs.
+03:57:23: RSF: RI5
+03:57:23: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so013.cg1  Dec  2 2010 03:57
+ IBuffer  5:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  1.6000  Inc-1=  0.0160  A1-end=  2.6080
+ A2-beg=  1.6000  Inc-2=  0.0160  A2-end=  2.6080
+ A3-beg=  4.0000  Inc-3=  0.0400  A3-end=  6.5200
+ A4-beg=  8.0000  Inc-4=  0.0800  A4-end=  13.040
+ A5-beg=  4.8000  Inc-5=  0.0480  A5-end=  7.8240
+ A6-beg=  6.4000  Inc-6=  0.0640  A6-end=  10.432
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07so013.cg1
+ Estimated duration of that buffer:    0.5 hrs.
+04:40:00: RSF: RI6
+04:40:00: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so014.cg1  Dec  2 2010 04:40
+ IBuffer  6:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  2.6000  Inc-1=  0.0000  A1-end=  2.6000
+ A2-beg=  2.6000  Inc-2=  0.0000  A2-end=  2.6000
+ A3-beg=  6.5000  Inc-3=  0.0400  A3-end=  9.5000
+ A4-beg=  13.000  Inc-4=  0.0800  A4-end=  19.000
+ A5-beg=  7.8000  Inc-5=  0.0000  A5-end=  7.8000
+ A6-beg=  10.400  Inc-6=  0.0000  A6-end=  10.400
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    1    Type= TIME           Datafile: s07so014.cg1
+ Estimated duration of that buffer:    1.3 hrs.
+06:01:45: RSF: RI10
+06:01:45: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so015.cg1  Dec  2 2010 06:01
+ IBuffer 10:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.5000  Inc-1=  0.0000  A1-end=  0.5000
+ A2-beg=  0.2500  Inc-2=  0.0000  A2-end=  0.2500
+ A3-beg=  0.1000  Inc-3=  0.0040  A3-end=  0.2000
+ A4-beg=  0.3000  Inc-4=  0.0000  A4-end=  0.3000
+ A5-beg=  2.0000  Inc-5=  0.0000  A5-end=  2.0000
+ A6-beg=  0.5000  Inc-6=  0.0000  A6-end=  0.5000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=   10000    Prefac=    1    Type= NEUT           Datafile: s07so015.cg1
+ Estimated duration of that buffer:    0.0 hrs.
+06:11:01: RSF: RI26
+06:11:01: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so016.cg1  Dec  2 2010 06:11
+ IBuffer 26:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.0500  Inc-1=  0.0000  A1-end=  0.0500
+ A2-beg=  0.0500  Inc-2=  0.0000  A2-end=  0.0500
+ A3-beg=  0.0000  Inc-3=  0.1000  A3-end=  0.5000
+ A4-beg=  0.6250  Inc-4=  0.1250  A4-end=  1.2500
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    2    Type= TIME           Datafile: s07so016.cg1
+ Estimated duration of that buffer:    0.1 hrs.
+06:14:55: RSF: RI27
+06:14:55: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so017.cg1  Dec  2 2010 06:14
+ IBuffer 27:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.0500  Inc-1=  0.0000  A1-end=  0.0500
+ A2-beg=  0.0500  Inc-2=  0.0000  A2-end=  0.0500
+ A3-beg=  0.0000  Inc-3=  0.1000  A3-end=  0.5000
+ A4-beg=  0.3750  Inc-4=  0.0750  A4-end=  0.7500
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    2    Type= TIME           Datafile: s07so017.cg1
+ Estimated duration of that buffer:    0.1 hrs.
+06:18:41: RSF: RI11
+06:18:41: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so018.cg1  Dec  2 2010 06:18
+ IBuffer 11:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.1000  A3-end=  0.5000
+ A4-beg=  0.6250  Inc-4=  0.1250  A4-end=  1.2500
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    2    Type= TIME           Datafile: s07so018.cg1
+ Estimated duration of that buffer:    0.1 hrs.
+06:22:26: RSF: RI16
+06:22:26: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so019.cg1  Dec  2 2010 06:22
+ IBuffer 16:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.1000  A3-end=  0.5000
+ A4-beg=  0.3750  Inc-4=  0.0750  A4-end=  0.7500
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    2    Type= TIME           Datafile: s07so019.cg1
+ Estimated duration of that buffer:    0.1 hrs.
+06:26:11: RSF: RI12
+06:26:11: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so020.cg1  Dec  2 2010 06:26
+ IBuffer 12:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.2000  Inc-1=  0.0400  A1-end=  0.4000
+ A2-beg=  0.2000  Inc-2=  0.0400  A2-end=  0.4000
+ A3-beg=  0.5000  Inc-3=  0.1000  A3-end=  1.0000
+ A4-beg=  1.2500  Inc-4=  0.2500  A4-end=  2.5000
+ A5-beg=  0.6000  Inc-5=  0.1200  A5-end=  1.2000
+ A6-beg=  0.8000  Inc-6=  0.1600  A6-end=  1.6000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    2    Type= TIME           Datafile: s07so020.cg1
+ Estimated duration of that buffer:    0.1 hrs.
+06:30:20: RSF: RI17
+06:30:20: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so021.cg1  Dec  2 2010 06:30
+ IBuffer 17:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.2000  Inc-1=  0.0400  A1-end=  0.4000
+ A2-beg=  0.2000  Inc-2=  0.0400  A2-end=  0.4000
+ A3-beg=  0.5000  Inc-3=  0.1000  A3-end=  1.0000
+ A4-beg=  0.7500  Inc-4=  0.1500  A4-end=  1.5000
+ A5-beg=  0.6000  Inc-5=  0.1200  A5-end=  1.2000
+ A6-beg=  0.8000  Inc-6=  0.1600  A6-end=  1.6000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    2    Type= TIME           Datafile: s07so021.cg1
+ Estimated duration of that buffer:    0.1 hrs.
+06:34:42: RSF: RI13
+06:34:42: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so022.cg1  Dec  2 2010 06:34
+ IBuffer 13:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.4000  Inc-1=  0.0800  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0800  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.2000  A3-end=  2.0000
+ A4-beg=  2.5000  Inc-4=  0.5000  A4-end=  5.0000
+ A5-beg=  1.2000  Inc-5=  0.2400  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.3200  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    2    Type= TIME           Datafile: s07so022.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+06:48:00: RSF: RI18
+06:48:00: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so023.cg1  Dec  2 2010 06:48
+ IBuffer 18:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.4000  Inc-1=  0.0800  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0800  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.2000  A3-end=  2.0000
+ A4-beg=  1.5000  Inc-4=  0.3000  A4-end=  3.0000
+ A5-beg=  1.2000  Inc-5=  0.2400  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.3200  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    2    Type= TIME           Datafile: s07so023.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+07:01:32: RSF: RI14
+07:01:32: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so024.cg1  Dec  2 2010 07:01
+ IBuffer 14:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.8000  Inc-1=  0.1600  A1-end=  1.6000
+ A2-beg=  0.8000  Inc-2=  0.1600  A2-end=  1.6000
+ A3-beg=  2.0000  Inc-3=  0.4000  A3-end=  4.0000
+ A4-beg=  5.0000  Inc-4=  1.0000  A4-end=  10.000
+ A5-beg=  2.4000  Inc-5=  0.4800  A5-end=  4.8000
+ A6-beg=  3.2000  Inc-6=  0.6400  A6-end=  6.4000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    2    Type= TIME           Datafile: s07so024.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+07:15:01: RSF: RI19
+07:15:01: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so025.cg1  Dec  2 2010 07:15
+ IBuffer 19:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.8000  Inc-1=  0.1600  A1-end=  1.6000
+ A2-beg=  0.8000  Inc-2=  0.1600  A2-end=  1.6000
+ A3-beg=  2.0000  Inc-3=  0.4000  A3-end=  4.0000
+ A4-beg=  3.0000  Inc-4=  0.6000  A4-end=  6.0000
+ A5-beg=  2.4000  Inc-5=  0.4800  A5-end=  4.8000
+ A6-beg=  3.2000  Inc-6=  0.6400  A6-end=  6.4000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    2    Type= TIME           Datafile: s07so025.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+07:28:52: RSF: RI15
+07:28:52: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so026.cg1  Dec  2 2010 07:28
+ IBuffer 15:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  1.6000  Inc-1=  0.1600  A1-end=  2.5600
+ A2-beg=  1.6000  Inc-2=  0.1600  A2-end=  2.5600
+ A3-beg=  4.0000  Inc-3=  0.4000  A3-end=  6.4000
+ A4-beg=  10.000  Inc-4=  1.0000  A4-end=  16.000
+ A5-beg=  4.8000  Inc-5=  0.4800  A5-end=  7.6800
+ A6-beg=  6.4000  Inc-6=  0.6400  A6-end=  10.240
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    2    Type= TIME           Datafile: s07so026.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+07:44:44: RSF: RI20
+07:44:44: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so027.cg1  Dec  2 2010 07:44
+ IBuffer 20:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  1.6000  Inc-1=  0.1600  A1-end=  2.5600
+ A2-beg=  1.6000  Inc-2=  0.1600  A2-end=  2.5600
+ A3-beg=  4.0000  Inc-3=  0.4000  A3-end=  6.4000
+ A4-beg=  6.0000  Inc-4=  0.6000  A4-end=  9.6000
+ A5-beg=  4.8000  Inc-5=  0.4800  A5-end=  7.6800
+ A6-beg=  6.4000  Inc-6=  0.6400  A6-end=  10.240
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    2    Type= TIME           Datafile: s07so027.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+08:01:02: RSF: RI28
+08:01:02: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so028.cg1  Dec  2 2010 08:01
+ IBuffer 28:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  2.6000  Inc-1=  0.0000  A1-end=  2.6000
+ A2-beg=  2.6000  Inc-2=  0.0000  A2-end=  2.6000
+ A3-beg=  6.5000  Inc-3=  0.8000  A3-end=  9.7000
+ A4-beg=  16.250  Inc-4=  2.0000  A4-end=  24.250
+ A5-beg=  7.8000  Inc-5=  0.0000  A5-end=  7.8000
+ A6-beg=  10.400  Inc-6=  0.0000  A6-end=  10.400
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    4    Type= TIME           Datafile: s07so028.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+08:13:05: RSF: RI29
+08:13:05: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so029.cg1  Dec  2 2010 08:13
+ IBuffer 29:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  2.6000  Inc-1=  0.0000  A1-end=  2.6000
+ A2-beg=  2.6000  Inc-2=  0.0000  A2-end=  2.6000
+ A3-beg=  6.5000  Inc-3=  0.8000  A3-end=  12.900
+ A4-beg=  9.7500  Inc-4=  1.2000  A4-end=  19.350
+ A5-beg=  7.8000  Inc-5=  0.0000  A5-end=  7.8000
+ A6-beg=  10.400  Inc-6=  0.0000  A6-end=  10.400
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    4    Type= TIME           Datafile: s07so029.cg1
+ Estimated duration of that buffer:    0.3 hrs.
+08:34:28: RSF: RI10
+08:34:28: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so030.cg1  Dec  2 2010 08:34
+ IBuffer 10:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.5000  Inc-1=  0.0000  A1-end=  0.5000
+ A2-beg=  0.2500  Inc-2=  0.0000  A2-end=  0.2500
+ A3-beg=  0.1000  Inc-3=  0.0040  A3-end=  0.2000
+ A4-beg=  0.3000  Inc-4=  0.0000  A4-end=  0.3000
+ A5-beg=  2.0000  Inc-5=  0.0000  A5-end=  2.0000
+ A6-beg=  0.5000  Inc-6=  0.0000  A6-end=  0.5000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=   10000    Prefac=    1    Type= NEUT           Datafile: s07so030.cg1
+ Estimated duration of that buffer:    0.0 hrs.
+08:43:44: RSF: RI30
+08:43:44: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so031.cg1  Dec  2 2010 08:43
+ IBuffer 30:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.0500  Inc-1=  0.0000  A1-end=  0.0500
+ A2-beg=  0.0500  Inc-2=  0.0000  A2-end=  0.0500
+ A3-beg=  0.0000  Inc-3=  0.0100  A3-end=  0.5000
+ A4-beg=  0.0000  Inc-4=  0.0200  A4-end=  1.0000
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    2    Type= TIME           Datafile: s07so031.cg1
+ Estimated duration of that buffer:    0.4 hrs.
+09:14:40: RSF: RI1
+09:14:40: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so032.cg1  Dec  2 2010 09:14
+ IBuffer  1:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.0100  A3-end=  0.5000
+ A4-beg=  0.0000  Inc-4=  0.0200  A4-end=  1.0000
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s07so032.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+09:32:13: RSF: RI2
+09:32:13: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so033.cg1  Dec  2 2010 09:32
+ IBuffer  2:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.2000  Inc-1=  0.0040  A1-end=  0.4000
+ A2-beg=  0.2000  Inc-2=  0.0040  A2-end=  0.4000
+ A3-beg=  0.5000  Inc-3=  0.0100  A3-end=  1.0000
+ A4-beg=  1.0000  Inc-4=  0.0200  A4-end=  2.0000
+ A5-beg=  0.6000  Inc-5=  0.0120  A5-end=  1.2000
+ A6-beg=  0.8000  Inc-6=  0.0160  A6-end=  1.6000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s07so033.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+09:54:34: RSF: RI3
+09:54:34: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so034.cg1  Dec  2 2010 09:54
+ IBuffer  3:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.4000  Inc-1=  0.0080  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0080  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.0200  A3-end=  2.0000
+ A4-beg=  2.0000  Inc-4=  0.0400  A4-end=  4.0000
+ A5-beg=  1.2000  Inc-5=  0.0240  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.0320  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07so034.cg1
+ Estimated duration of that buffer:    0.4 hrs.
+10:28:30: RSF: RI4
+10:28:30: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so035.cg1  Dec  2 2010 10:28
+ IBuffer  4:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.8000  Inc-1=  0.0080  A1-end=  1.6000
+ A2-beg=  0.8000  Inc-2=  0.0080  A2-end=  1.6000
+ A3-beg=  2.0000  Inc-3=  0.0200  A3-end=  4.0000
+ A4-beg=  4.0000  Inc-4=  0.0400  A4-end=  8.0000
+ A5-beg=  2.4000  Inc-5=  0.0240  A5-end=  4.8000
+ A6-beg=  3.2000  Inc-6=  0.0320  A6-end=  6.4000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07so035.cg1
+ Estimated duration of that buffer:    0.8 hrs.
+11:19:20:  **** ABORT during count ****
+11:19:20:   Request aborted by Contrl_A
+11:19:20:  Sequence terminated by control A
+11:44:27: D1=.5
+11:44:32: D2=.25
+11:44:36: D5=2.
+11:44:42: D6=.5
+11:44:50: D4T=.3
+11:45:32: D3=.15
+11:45:32: PT
+11:45:32:  You must define your temperature device before executing this operation!
+11:45:32:  Use the command TDEV.
+11:45:32: PA
+ Soft: A01=   0.500  A02=   0.250  A03=   0.150  A04=   0.300  A05=   2.000
+ Hard: A01=   0.499  A02=   0.249  A03=   1.314  A04=   0.300  A05=   2.000
+ Soft: A06=   0.500  A07=   5.975  A08=   0.129  A09=   0.700  A10=   0.500
+ Hard: A06=   0.500  A07=   5.975  A08=   0.089  A09=   0.700  A10=   0.500
+ Soft: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  14.000
+ Hard: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  17.801
+ Soft: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Hard: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Soft: A21=   0.028  A22=   0.322  A23=   0.715  A24=  -0.815
+ Hard: A21=   0.028  A22=   0.246  A23=   0.715  A24=   0.746
+12:21:01: FP3,.1,.005
+ File created: fpx03061.cg1
+ Find_peak:  Dec  2 2010 12:21
+ Angle no =  3,  Range = [   0.100 ...   0.200 ],  Step =   0.005, Mon =      -1
+ Peak found at    0.145  with an intensity of       1113
+  Fit Results:   BG =      7.603
+             Height =   1246.786
+                Pos =      0.1499
+              Width =      0.0292
+ Driving to fitted peak position!
+12:25:06: PA
+ Soft: A01=   0.500  A02=   0.250  A03=   0.150  A04=   0.300  A05=   2.000
+ Hard: A01=   0.499  A02=   0.249  A03=   1.314  A04=   0.300  A05=   2.000
+ Soft: A06=   0.500  A07=   5.975  A08=   0.129  A09=   0.700  A10=   0.500
+ Hard: A06=   0.500  A07=   5.975  A08=   0.089  A09=   0.700  A10=   0.500
+ Soft: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  14.000
+ Hard: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  17.801
+ Soft: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Hard: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Soft: A21=   0.028  A22=   0.322  A23=   0.715  A24=  -0.815
+ Hard: A21=   0.028  A22=   0.246  A23=   0.715  A24=   0.746
+12:26:00: DRSF VAP.COM
+12:26:00: Entire Command Sequence checked !
+12:26:04: PRSF VAP.COM
+ ri10;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+12:26:17: RSF VAP.COM
+12:26:17: RSF: RI10
+12:26:17: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07so036.cg1  Dec  2 2010 12:26
+ IBuffer 10:  s07so sd07 pt_naf 0p1 m h2so4 1p16 v oxide surf
+ A1-beg=  0.5000  Inc-1=  0.0000  A1-end=  0.5000
+ A2-beg=  0.2500  Inc-2=  0.0000  A2-end=  0.2500
+ A3-beg=  0.1000  Inc-3=  0.0040  A3-end=  0.2000
+ A4-beg=  0.3000  Inc-4=  0.0000  A4-end=  0.3000
+ A5-beg=  2.0000  Inc-5=  0.0000  A5-end=  2.0000
+ A6-beg=  0.5000  Inc-6=  0.0000  A6-end=  0.5000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=   10000    Prefac=    1    Type= NEUT           Datafile: s07so036.cg1
+12:26:20:  **** ABORT during monitor rating ****
+12:26:20:   Request aborted by Contrl_A
+12:26:20:  Sequence terminated by control A
+12:27:54: DRSF VAP.COM
+12:27:54: Entire Command Sequence checked !
+12:28:03: PRSF VAP.COM
+ ri10;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+12:28:10: RSF VAP.COM
+12:28:10: RSF: RI10
+12:28:10: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sn001.cg1  Dec  2 2010 12:28
+ IBuffer 10:  s07sn sd07 pt_naf 0p1 m h2so4 0p175 v pt surf
+ A1-beg=  0.5000  Inc-1=  0.0000  A1-end=  0.5000
+ A2-beg=  0.2500  Inc-2=  0.0000  A2-end=  0.2500
+ A3-beg=  0.1000  Inc-3=  0.0040  A3-end=  0.2000
+ A4-beg=  0.3000  Inc-4=  0.0000  A4-end=  0.3000
+ A5-beg=  2.0000  Inc-5=  0.0000  A5-end=  2.0000
+ A6-beg=  0.5000  Inc-6=  0.0000  A6-end=  0.5000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=   10000    Prefac=    1    Type= NEUT           Datafile: s07sn001.cg1
+ Estimated duration of that buffer:    0.1 hrs.
+12:35:46: RSF: RI1
+12:35:46: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sn002.cg1  Dec  2 2010 12:35
+ IBuffer  1:  s07sn sd07 pt_naf 0p1 m h2so4 0p175 v pt surf
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.0100  A3-end=  0.5000
+ A4-beg=  0.0000  Inc-4=  0.0200  A4-end=  1.0000
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s07sn002.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+12:54:28: RSF: RI2
+12:54:28: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sn003.cg1  Dec  2 2010 12:54
+ IBuffer  2:  s07sn sd07 pt_naf 0p1 m h2so4 0p175 v pt surf
+ A1-beg=  0.2000  Inc-1=  0.0040  A1-end=  0.4000
+ A2-beg=  0.2000  Inc-2=  0.0040  A2-end=  0.4000
+ A3-beg=  0.5000  Inc-3=  0.0100  A3-end=  1.0000
+ A4-beg=  1.0000  Inc-4=  0.0200  A4-end=  2.0000
+ A5-beg=  0.6000  Inc-5=  0.0120  A5-end=  1.2000
+ A6-beg=  0.8000  Inc-6=  0.0160  A6-end=  1.6000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s07sn003.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+13:17:04: RSF: RI3
+13:17:04: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sn004.cg1  Dec  2 2010 13:17
+ IBuffer  3:  s07sn sd07 pt_naf 0p1 m h2so4 0p175 v pt surf
+ A1-beg=  0.4000  Inc-1=  0.0080  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0080  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.0200  A3-end=  2.0000
+ A4-beg=  2.0000  Inc-4=  0.0400  A4-end=  4.0000
+ A5-beg=  1.2000  Inc-5=  0.0240  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.0320  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07sn004.cg1
+ Estimated duration of that buffer:    0.4 hrs.
+13:51:02: RSF: RI4
+13:51:02: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sn005.cg1  Dec  2 2010 13:51
+ IBuffer  4:  s07sn sd07 pt_naf 0p1 m h2so4 0p175 v pt surf
+ A1-beg=  0.8000  Inc-1=  0.0080  A1-end=  1.6000
+ A2-beg=  0.8000  Inc-2=  0.0080  A2-end=  1.6000
+ A3-beg=  2.0000  Inc-3=  0.0200  A3-end=  4.0000
+ A4-beg=  4.0000  Inc-4=  0.0400  A4-end=  8.0000
+ A5-beg=  2.4000  Inc-5=  0.0240  A5-end=  4.8000
+ A6-beg=  3.2000  Inc-6=  0.0320  A6-end=  6.4000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07sn005.cg1
+ Estimated duration of that buffer:    0.8 hrs.
+14:58:20: RSF: RI5
+14:58:20: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sn006.cg1  Dec  2 2010 14:58
+ IBuffer  5:  s07sn sd07 pt_naf 0p1 m h2so4 0p175 v pt surf
+ A1-beg=  1.6000  Inc-1=  0.0160  A1-end=  2.6080
+ A2-beg=  1.6000  Inc-2=  0.0160  A2-end=  2.6080
+ A3-beg=  4.0000  Inc-3=  0.0400  A3-end=  6.5200
+ A4-beg=  8.0000  Inc-4=  0.0800  A4-end=  13.040
+ A5-beg=  4.8000  Inc-5=  0.0480  A5-end=  7.8240
+ A6-beg=  6.4000  Inc-6=  0.0640  A6-end=  10.432
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07sn006.cg1
+ Estimated duration of that buffer:    0.5 hrs.
+15:41:04: RSF: RI10
+15:41:04: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sn007.cg1  Dec  2 2010 15:41
+ IBuffer 10:  s07sn sd07 pt_naf 0p1 m h2so4 0p175 v pt surf
+ A1-beg=  0.5000  Inc-1=  0.0000  A1-end=  0.5000
+ A2-beg=  0.2500  Inc-2=  0.0000  A2-end=  0.2500
+ A3-beg=  0.1000  Inc-3=  0.0040  A3-end=  0.2000
+ A4-beg=  0.3000  Inc-4=  0.0000  A4-end=  0.3000
+ A5-beg=  2.0000  Inc-5=  0.0000  A5-end=  2.0000
+ A6-beg=  0.5000  Inc-6=  0.0000  A6-end=  0.5000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=   10000    Prefac=    1    Type= NEUT           Datafile: s07sn007.cg1
+ Estimated duration of that buffer:    0.0 hrs.
+15:49:51: RSF: RI1
+15:49:51: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sn008.cg1  Dec  2 2010 15:49
+ IBuffer  1:  s07sn sd07 pt_naf 0p1 m h2so4 0p175 v pt surf
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.0100  A3-end=  0.5000
+ A4-beg=  0.0000  Inc-4=  0.0200  A4-end=  1.0000
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s07sn008.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+16:08:16: RSF: RI2
+16:08:16: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sn009.cg1  Dec  2 2010 16:08
+ IBuffer  2:  s07sn sd07 pt_naf 0p1 m h2so4 0p175 v pt surf
+ A1-beg=  0.2000  Inc-1=  0.0040  A1-end=  0.4000
+ A2-beg=  0.2000  Inc-2=  0.0040  A2-end=  0.4000
+ A3-beg=  0.5000  Inc-3=  0.0100  A3-end=  1.0000
+ A4-beg=  1.0000  Inc-4=  0.0200  A4-end=  2.0000
+ A5-beg=  0.6000  Inc-5=  0.0120  A5-end=  1.2000
+ A6-beg=  0.8000  Inc-6=  0.0160  A6-end=  1.6000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s07sn009.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+16:30:19: RSF: RI3
+16:30:19: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sn010.cg1  Dec  2 2010 16:30
+ IBuffer  3:  s07sn sd07 pt_naf 0p1 m h2so4 0p175 v pt surf
+ A1-beg=  0.4000  Inc-1=  0.0080  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0080  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.0200  A3-end=  2.0000
+ A4-beg=  2.0000  Inc-4=  0.0400  A4-end=  4.0000
+ A5-beg=  1.2000  Inc-5=  0.0240  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.0320  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07sn010.cg1
+ Estimated duration of that buffer:    0.4 hrs.
+17:04:16: RSF: RI4
+17:04:16: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sn011.cg1  Dec  2 2010 17:04
+ IBuffer  4:  s07sn sd07 pt_naf 0p1 m h2so4 0p175 v pt surf
+ A1-beg=  0.8000  Inc-1=  0.0080  A1-end=  1.6000
+ A2-beg=  0.8000  Inc-2=  0.0080  A2-end=  1.6000
+ A3-beg=  2.0000  Inc-3=  0.0200  A3-end=  4.0000
+ A4-beg=  4.0000  Inc-4=  0.0400  A4-end=  8.0000
+ A5-beg=  2.4000  Inc-5=  0.0240  A5-end=  4.8000
+ A6-beg=  3.2000  Inc-6=  0.0320  A6-end=  6.4000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07sn011.cg1
+ Estimated duration of that buffer:    0.8 hrs.
+18:11:33: RSF: RI5
+18:11:33: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sn012.cg1  Dec  2 2010 18:11
+ IBuffer  5:  s07sn sd07 pt_naf 0p1 m h2so4 0p175 v pt surf
+ A1-beg=  1.6000  Inc-1=  0.0160  A1-end=  2.6080
+ A2-beg=  1.6000  Inc-2=  0.0160  A2-end=  2.6080
+ A3-beg=  4.0000  Inc-3=  0.0400  A3-end=  6.5200
+ A4-beg=  8.0000  Inc-4=  0.0800  A4-end=  13.040
+ A5-beg=  4.8000  Inc-5=  0.0480  A5-end=  7.8240
+ A6-beg=  6.4000  Inc-6=  0.0640  A6-end=  10.432
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07sn012.cg1
+ Estimated duration of that buffer:    0.5 hrs.
+18:54:16: RSF: RI15
+18:54:16: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sn013.cg1  Dec  2 2010 18:54
+ IBuffer 15:  s07sn sd07 pt_naf 0p1 m h2so4 0p175 v pt surf
+ A1-beg=  1.6000  Inc-1=  0.1600  A1-end=  2.5600
+ A2-beg=  1.6000  Inc-2=  0.1600  A2-end=  2.5600
+ A3-beg=  4.0000  Inc-3=  0.4000  A3-end=  6.4000
+ A4-beg=  10.000  Inc-4=  1.0000  A4-end=  16.000
+ A5-beg=  4.8000  Inc-5=  0.4800  A5-end=  7.6800
+ A6-beg=  6.4000  Inc-6=  0.6400  A6-end=  10.240
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    2    Type= TIME           Datafile: s07sn013.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+19:10:06: RSF: RI20
+19:10:06: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sn014.cg1  Dec  2 2010 19:10
+ IBuffer 20:  s07sn sd07 pt_naf 0p1 m h2so4 0p175 v pt surf
+ A1-beg=  1.6000  Inc-1=  0.1600  A1-end=  2.5600
+ A2-beg=  1.6000  Inc-2=  0.1600  A2-end=  2.5600
+ A3-beg=  4.0000  Inc-3=  0.4000  A3-end=  6.4000
+ A4-beg=  6.0000  Inc-4=  0.6000  A4-end=  9.6000
+ A5-beg=  4.8000  Inc-5=  0.4800  A5-end=  7.6800
+ A6-beg=  6.4000  Inc-6=  0.6400  A6-end=  10.240
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    2    Type= TIME           Datafile: s07sn014.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+19:26:27: RSF: RI3
+19:26:27: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s07sn015.cg1  Dec  2 2010 19:26
+ IBuffer  3:  s07sn sd07 pt_naf 0p1 m h2so4 0p175 v pt surf
+ A1-beg=  0.4000  Inc-1=  0.0080  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0080  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.0200  A3-end=  2.0000
+ A4-beg=  2.0000  Inc-4=  0.0400  A4-end=  4.0000
+ A5-beg=  1.2000  Inc-5=  0.0240  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.0320  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s07sn015.cg1
+ Estimated duration of that buffer:    0.4 hrs.
+19:52:18:  **** ABORT during count ****
+19:52:18:   Request aborted by Contrl_A
+19:52:18:  Sequence terminated by control A
+20:27:37: D1=.5
+20:27:42: D2=.25
+20:27:47: D5=2.
+20:27:51: D6=.5
+20:27:57: D4T=.3
+20:28:21: PA
+ Soft: A01=   0.499  A02=   0.250  A03=   0.150  A04=   0.300  A05=   2.000
+ Hard: A01=   0.499  A02=   0.249  A03=   1.314  A04=   0.300  A05=   2.000
+ Soft: A06=   0.500  A07=   5.975  A08=   0.129  A09=   0.700  A10=   0.500
+ Hard: A06=   0.500  A07=   5.975  A08=   0.089  A09=   0.700  A10=   0.500
+ Soft: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  14.000
+ Hard: A11=  48.085  A12=  49.997  A13=   1.962  A14=   0.000  A15=  17.801
+ Soft: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Hard: A16=  25.000  A17=   0.000  A18=  58.262  A19=   0.001  A20=  -5.750
+ Soft: A21=   0.028  A22=   0.322  A23=   0.715  A24=  -0.815
+ Hard: A21=   0.028  A22=   0.246  A23=   0.715  A24=   0.746
+20:51:05: FP3,.1,.005
+ File created: fpx03062.cg1
+ Find_peak:  Dec  2 2010 20:51
+ Angle no =  3,  Range = [   0.100 ...   0.200 ],  Step =   0.005, Mon =      -1
+ Peak found at    0.145  with an intensity of       1103
+  Fit Results:   BG =      7.643
+             Height =   1179.142
+                Pos =      0.1501
+              Width =      0.0296
+ Driving to fitted peak position!
+20:54:56: DRSF VAP.COM
+20:54:56: Entire Command Sequence checked !
+20:55:00: PRSF VAP.COM
+ ri10;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+21:07:07: RSF VAP.COM
+21:07:07: RSF: RI10
+21:07:07: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2001.cg1  Dec  2 2010 21:07
+ IBuffer 10:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.5000  Inc-1=  0.0000  A1-end=  0.5000
+ A2-beg=  0.2500  Inc-2=  0.0000  A2-end=  0.2500
+ A3-beg=  0.1000  Inc-3=  0.0040  A3-end=  0.2000
+ A4-beg=  0.3000  Inc-4=  0.0000  A4-end=  0.3000
+ A5-beg=  2.0000  Inc-5=  0.0000  A5-end=  2.0000
+ A6-beg=  0.5000  Inc-6=  0.0000  A6-end=  0.5000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=   10000    Prefac=    1    Type= NEUT           Datafile: s7so2001.cg1
+ Estimated duration of that buffer:    0.1 hrs.
+21:14:53: RSF: RI1
+21:14:53: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2002.cg1  Dec  2 2010 21:14
+ IBuffer  1:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.0100  A3-end=  0.5000
+ A4-beg=  0.0000  Inc-4=  0.0200  A4-end=  1.0000
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s7so2002.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+21:32:27: RSF: RI2
+21:32:27: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2003.cg1  Dec  2 2010 21:32
+ IBuffer  2:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.2000  Inc-1=  0.0040  A1-end=  0.4000
+ A2-beg=  0.2000  Inc-2=  0.0040  A2-end=  0.4000
+ A3-beg=  0.5000  Inc-3=  0.0100  A3-end=  1.0000
+ A4-beg=  1.0000  Inc-4=  0.0200  A4-end=  2.0000
+ A5-beg=  0.6000  Inc-5=  0.0120  A5-end=  1.2000
+ A6-beg=  0.8000  Inc-6=  0.0160  A6-end=  1.6000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s7so2003.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+21:54:21: RSF: RI3
+21:54:21: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2004.cg1  Dec  2 2010 21:54
+ IBuffer  3:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.4000  Inc-1=  0.0080  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0080  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.0200  A3-end=  2.0000
+ A4-beg=  2.0000  Inc-4=  0.0400  A4-end=  4.0000
+ A5-beg=  1.2000  Inc-5=  0.0240  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.0320  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s7so2004.cg1
+ Estimated duration of that buffer:    0.4 hrs.
+22:28:19: RSF: RI4
+22:28:19: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2005.cg1  Dec  2 2010 22:28
+ IBuffer  4:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.8000  Inc-1=  0.0080  A1-end=  1.6000
+ A2-beg=  0.8000  Inc-2=  0.0080  A2-end=  1.6000
+ A3-beg=  2.0000  Inc-3=  0.0200  A3-end=  4.0000
+ A4-beg=  4.0000  Inc-4=  0.0400  A4-end=  8.0000
+ A5-beg=  2.4000  Inc-5=  0.0240  A5-end=  4.8000
+ A6-beg=  3.2000  Inc-6=  0.0320  A6-end=  6.4000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s7so2005.cg1
+ Estimated duration of that buffer:    0.8 hrs.
+23:35:35: RSF: RI5
+23:35:35: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2006.cg1  Dec  2 2010 23:35
+ IBuffer  5:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  1.6000  Inc-1=  0.0160  A1-end=  2.6080
+ A2-beg=  1.6000  Inc-2=  0.0160  A2-end=  2.6080
+ A3-beg=  4.0000  Inc-3=  0.0400  A3-end=  6.5200
+ A4-beg=  8.0000  Inc-4=  0.0800  A4-end=  13.040
+ A5-beg=  4.8000  Inc-5=  0.0480  A5-end=  7.8240
+ A6-beg=  6.4000  Inc-6=  0.0640  A6-end=  10.432
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s7so2006.cg1
+ Estimated duration of that buffer:    0.5 hrs.
+00:18:14: RSF: RI10
+00:18:14: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2007.cg1  Dec  3 2010 00:18
+ IBuffer 10:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.5000  Inc-1=  0.0000  A1-end=  0.5000
+ A2-beg=  0.2500  Inc-2=  0.0000  A2-end=  0.2500
+ A3-beg=  0.1000  Inc-3=  0.0040  A3-end=  0.2000
+ A4-beg=  0.3000  Inc-4=  0.0000  A4-end=  0.3000
+ A5-beg=  2.0000  Inc-5=  0.0000  A5-end=  2.0000
+ A6-beg=  0.5000  Inc-6=  0.0000  A6-end=  0.5000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=   10000    Prefac=    1    Type= NEUT           Datafile: s7so2007.cg1
+ Estimated duration of that buffer:    0.0 hrs.
+00:27:03: RSF: RI1
+00:27:03: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2008.cg1  Dec  3 2010 00:27
+ IBuffer  1:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.0100  A3-end=  0.5000
+ A4-beg=  0.0000  Inc-4=  0.0200  A4-end=  1.0000
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s7so2008.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+00:45:21: RSF: RI2
+00:45:21: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2009.cg1  Dec  3 2010 00:45
+ IBuffer  2:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.2000  Inc-1=  0.0040  A1-end=  0.4000
+ A2-beg=  0.2000  Inc-2=  0.0040  A2-end=  0.4000
+ A3-beg=  0.5000  Inc-3=  0.0100  A3-end=  1.0000
+ A4-beg=  1.0000  Inc-4=  0.0200  A4-end=  2.0000
+ A5-beg=  0.6000  Inc-5=  0.0120  A5-end=  1.2000
+ A6-beg=  0.8000  Inc-6=  0.0160  A6-end=  1.6000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s7so2009.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+01:08:20: RSF: RI3
+01:08:20: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2010.cg1  Dec  3 2010 01:08
+ IBuffer  3:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.4000  Inc-1=  0.0080  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0080  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.0200  A3-end=  2.0000
+ A4-beg=  2.0000  Inc-4=  0.0400  A4-end=  4.0000
+ A5-beg=  1.2000  Inc-5=  0.0240  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.0320  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s7so2010.cg1
+ Estimated duration of that buffer:    0.4 hrs.
+01:42:25: RSF: RI4
+01:42:25: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2011.cg1  Dec  3 2010 01:42
+ IBuffer  4:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.8000  Inc-1=  0.0080  A1-end=  1.6000
+ A2-beg=  0.8000  Inc-2=  0.0080  A2-end=  1.6000
+ A3-beg=  2.0000  Inc-3=  0.0200  A3-end=  4.0000
+ A4-beg=  4.0000  Inc-4=  0.0400  A4-end=  8.0000
+ A5-beg=  2.4000  Inc-5=  0.0240  A5-end=  4.8000
+ A6-beg=  3.2000  Inc-6=  0.0320  A6-end=  6.4000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s7so2011.cg1
+ Estimated duration of that buffer:    0.8 hrs.
+02:49:45: RSF: RI5
+02:49:45: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2012.cg1  Dec  3 2010 02:49
+ IBuffer  5:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  1.6000  Inc-1=  0.0160  A1-end=  2.6080
+ A2-beg=  1.6000  Inc-2=  0.0160  A2-end=  2.6080
+ A3-beg=  4.0000  Inc-3=  0.0400  A3-end=  6.5200
+ A4-beg=  8.0000  Inc-4=  0.0800  A4-end=  13.040
+ A5-beg=  4.8000  Inc-5=  0.0480  A5-end=  7.8240
+ A6-beg=  6.4000  Inc-6=  0.0640  A6-end=  10.432
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s7so2012.cg1
+ Estimated duration of that buffer:    0.5 hrs.
+03:32:27: RSF: RI10
+03:32:27: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2013.cg1  Dec  3 2010 03:32
+ IBuffer 10:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.5000  Inc-1=  0.0000  A1-end=  0.5000
+ A2-beg=  0.2500  Inc-2=  0.0000  A2-end=  0.2500
+ A3-beg=  0.1000  Inc-3=  0.0040  A3-end=  0.2000
+ A4-beg=  0.3000  Inc-4=  0.0000  A4-end=  0.3000
+ A5-beg=  2.0000  Inc-5=  0.0000  A5-end=  2.0000
+ A6-beg=  0.5000  Inc-6=  0.0000  A6-end=  0.5000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=   10000    Prefac=    1    Type= NEUT           Datafile: s7so2013.cg1
+ Estimated duration of that buffer:    0.0 hrs.
+03:41:17: RSF: RI30
+03:41:17: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2014.cg1  Dec  3 2010 03:41
+ IBuffer 30:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.0500  Inc-1=  0.0000  A1-end=  0.0500
+ A2-beg=  0.0500  Inc-2=  0.0000  A2-end=  0.0500
+ A3-beg=  0.0000  Inc-3=  0.0100  A3-end=  0.5000
+ A4-beg=  0.0000  Inc-4=  0.0200  A4-end=  1.0000
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    2    Type= TIME           Datafile: s7so2014.cg1
+ Estimated duration of that buffer:    0.4 hrs.
+04:12:17: RSF: RI1
+04:12:17: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2015.cg1  Dec  3 2010 04:12
+ IBuffer  1:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.0100  A3-end=  0.5000
+ A4-beg=  0.0000  Inc-4=  0.0200  A4-end=  1.0000
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s7so2015.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+04:30:20: RSF: RI2
+04:30:20: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2016.cg1  Dec  3 2010 04:30
+ IBuffer  2:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.2000  Inc-1=  0.0040  A1-end=  0.4000
+ A2-beg=  0.2000  Inc-2=  0.0040  A2-end=  0.4000
+ A3-beg=  0.5000  Inc-3=  0.0100  A3-end=  1.0000
+ A4-beg=  1.0000  Inc-4=  0.0200  A4-end=  2.0000
+ A5-beg=  0.6000  Inc-5=  0.0120  A5-end=  1.2000
+ A6-beg=  0.8000  Inc-6=  0.0160  A6-end=  1.6000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    1    Type= TIME           Datafile: s7so2016.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+04:52:18: RSF: RI3
+04:52:18: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2017.cg1  Dec  3 2010 04:52
+ IBuffer  3:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.4000  Inc-1=  0.0080  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0080  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.0200  A3-end=  2.0000
+ A4-beg=  2.0000  Inc-4=  0.0400  A4-end=  4.0000
+ A5-beg=  1.2000  Inc-5=  0.0240  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.0320  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s7so2017.cg1
+ Estimated duration of that buffer:    0.4 hrs.
+05:26:16: RSF: RI4
+05:26:16: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2018.cg1  Dec  3 2010 05:26
+ IBuffer  4:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.8000  Inc-1=  0.0080  A1-end=  1.6000
+ A2-beg=  0.8000  Inc-2=  0.0080  A2-end=  1.6000
+ A3-beg=  2.0000  Inc-3=  0.0200  A3-end=  4.0000
+ A4-beg=  4.0000  Inc-4=  0.0400  A4-end=  8.0000
+ A5-beg=  2.4000  Inc-5=  0.0240  A5-end=  4.8000
+ A6-beg=  3.2000  Inc-6=  0.0320  A6-end=  6.4000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s7so2018.cg1
+ Estimated duration of that buffer:    0.8 hrs.
+06:33:33: RSF: RI5
+06:33:33: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2019.cg1  Dec  3 2010 06:33
+ IBuffer  5:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  1.6000  Inc-1=  0.0160  A1-end=  2.6080
+ A2-beg=  1.6000  Inc-2=  0.0160  A2-end=  2.6080
+ A3-beg=  4.0000  Inc-3=  0.0400  A3-end=  6.5200
+ A4-beg=  8.0000  Inc-4=  0.0800  A4-end=  13.040
+ A5-beg=  4.8000  Inc-5=  0.0480  A5-end=  7.8240
+ A6-beg=  6.4000  Inc-6=  0.0640  A6-end=  10.432
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    1    Type= TIME           Datafile: s7so2019.cg1
+ Estimated duration of that buffer:    0.5 hrs.
+07:16:18: RSF: RI10
+07:16:18: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2020.cg1  Dec  3 2010 07:16
+ IBuffer 10:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.5000  Inc-1=  0.0000  A1-end=  0.5000
+ A2-beg=  0.2500  Inc-2=  0.0000  A2-end=  0.2500
+ A3-beg=  0.1000  Inc-3=  0.0040  A3-end=  0.2000
+ A4-beg=  0.3000  Inc-4=  0.0000  A4-end=  0.3000
+ A5-beg=  2.0000  Inc-5=  0.0000  A5-end=  2.0000
+ A6-beg=  0.5000  Inc-6=  0.0000  A6-end=  0.5000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=   10000    Prefac=    1    Type= NEUT           Datafile: s7so2020.cg1
+ Estimated duration of that buffer:    0.0 hrs.
+07:25:09: RSF: RI26
+07:25:09: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2021.cg1  Dec  3 2010 07:25
+ IBuffer 26:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.0500  Inc-1=  0.0000  A1-end=  0.0500
+ A2-beg=  0.0500  Inc-2=  0.0000  A2-end=  0.0500
+ A3-beg=  0.0000  Inc-3=  0.1000  A3-end=  0.5000
+ A4-beg=  0.6250  Inc-4=  0.1250  A4-end=  1.2500
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    2    Type= TIME           Datafile: s7so2021.cg1
+ Estimated duration of that buffer:    0.1 hrs.
+07:29:03: RSF: RI27
+07:29:03: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2022.cg1  Dec  3 2010 07:29
+ IBuffer 27:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.0500  Inc-1=  0.0000  A1-end=  0.0500
+ A2-beg=  0.0500  Inc-2=  0.0000  A2-end=  0.0500
+ A3-beg=  0.0000  Inc-3=  0.1000  A3-end=  0.5000
+ A4-beg=  0.3750  Inc-4=  0.0750  A4-end=  0.7500
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    2    Type= TIME           Datafile: s7so2022.cg1
+ Estimated duration of that buffer:    0.1 hrs.
+07:32:48: RSF: RI11
+07:32:48: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2023.cg1  Dec  3 2010 07:32
+ IBuffer 11:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.1000  A3-end=  0.5000
+ A4-beg=  0.6250  Inc-4=  0.1250  A4-end=  1.2500
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    2    Type= TIME           Datafile: s7so2023.cg1
+ Estimated duration of that buffer:    0.1 hrs.
+07:36:33: RSF: RI16
+07:36:33: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2024.cg1  Dec  3 2010 07:36
+ IBuffer 16:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.1000  Inc-1=  0.0000  A1-end=  0.1000
+ A2-beg=  0.1000  Inc-2=  0.0000  A2-end=  0.1000
+ A3-beg=  0.0000  Inc-3=  0.1000  A3-end=  0.5000
+ A4-beg=  0.3750  Inc-4=  0.0750  A4-end=  0.7500
+ A5-beg=  0.6000  Inc-5=  0.0000  A5-end=  0.6000
+ A6-beg=  0.8000  Inc-6=  0.0000  A6-end=  0.8000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    2    Type= TIME           Datafile: s7so2024.cg1
+ Estimated duration of that buffer:    0.1 hrs.
+07:40:18: RSF: RI12
+07:40:18: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2025.cg1  Dec  3 2010 07:40
+ IBuffer 12:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.2000  Inc-1=  0.0400  A1-end=  0.4000
+ A2-beg=  0.2000  Inc-2=  0.0400  A2-end=  0.4000
+ A3-beg=  0.5000  Inc-3=  0.1000  A3-end=  1.0000
+ A4-beg=  1.2500  Inc-4=  0.2500  A4-end=  2.5000
+ A5-beg=  0.6000  Inc-5=  0.1200  A5-end=  1.2000
+ A6-beg=  0.8000  Inc-6=  0.1600  A6-end=  1.6000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    2    Type= TIME           Datafile: s7so2025.cg1
+ Estimated duration of that buffer:    0.1 hrs.
+07:44:29: RSF: RI17
+07:44:29: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2026.cg1  Dec  3 2010 07:44
+ IBuffer 17:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.2000  Inc-1=  0.0400  A1-end=  0.4000
+ A2-beg=  0.2000  Inc-2=  0.0400  A2-end=  0.4000
+ A3-beg=  0.5000  Inc-3=  0.1000  A3-end=  1.0000
+ A4-beg=  0.7500  Inc-4=  0.1500  A4-end=  1.5000
+ A5-beg=  0.6000  Inc-5=  0.1200  A5-end=  1.2000
+ A6-beg=  0.8000  Inc-6=  0.1600  A6-end=  1.6000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      15    Prefac=    2    Type= TIME           Datafile: s7so2026.cg1
+ Estimated duration of that buffer:    0.1 hrs.
+07:48:50: RSF: RI13
+07:48:50: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2027.cg1  Dec  3 2010 07:48
+ IBuffer 13:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.4000  Inc-1=  0.0800  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0800  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.2000  A3-end=  2.0000
+ A4-beg=  2.5000  Inc-4=  0.5000  A4-end=  5.0000
+ A5-beg=  1.2000  Inc-5=  0.2400  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.3200  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    2    Type= TIME           Datafile: s7so2027.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+08:02:06: RSF: RI18
+08:02:06: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2028.cg1  Dec  3 2010 08:02
+ IBuffer 18:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.4000  Inc-1=  0.0800  A1-end=  0.8000
+ A2-beg=  0.4000  Inc-2=  0.0800  A2-end=  0.8000
+ A3-beg=  1.0000  Inc-3=  0.2000  A3-end=  2.0000
+ A4-beg=  1.5000  Inc-4=  0.3000  A4-end=  3.0000
+ A5-beg=  1.2000  Inc-5=  0.2400  A5-end=  2.4000
+ A6-beg=  1.6000  Inc-6=  0.3200  A6-end=  3.2000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    2    Type= TIME           Datafile: s7so2028.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+08:15:38: RSF: RI14
+08:15:38: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2029.cg1  Dec  3 2010 08:15
+ IBuffer 14:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.8000  Inc-1=  0.1600  A1-end=  1.6000
+ A2-beg=  0.8000  Inc-2=  0.1600  A2-end=  1.6000
+ A3-beg=  2.0000  Inc-3=  0.4000  A3-end=  4.0000
+ A4-beg=  5.0000  Inc-4=  1.0000  A4-end=  10.000
+ A5-beg=  2.4000  Inc-5=  0.4800  A5-end=  4.8000
+ A6-beg=  3.2000  Inc-6=  0.6400  A6-end=  6.4000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    2    Type= TIME           Datafile: s7so2029.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+08:29:07: RSF: RI19
+08:29:07: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2030.cg1  Dec  3 2010 08:29
+ IBuffer 19:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  0.8000  Inc-1=  0.1600  A1-end=  1.6000
+ A2-beg=  0.8000  Inc-2=  0.1600  A2-end=  1.6000
+ A3-beg=  2.0000  Inc-3=  0.4000  A3-end=  4.0000
+ A4-beg=  3.0000  Inc-4=  0.6000  A4-end=  6.0000
+ A5-beg=  2.4000  Inc-5=  0.4800  A5-end=  4.8000
+ A6-beg=  3.2000  Inc-6=  0.6400  A6-end=  6.4000
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    2    Type= TIME           Datafile: s7so2030.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+08:42:56: RSF: RI15
+08:42:56: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2031.cg1  Dec  3 2010 08:42
+ IBuffer 15:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  1.6000  Inc-1=  0.1600  A1-end=  2.5600
+ A2-beg=  1.6000  Inc-2=  0.1600  A2-end=  2.5600
+ A3-beg=  4.0000  Inc-3=  0.4000  A3-end=  6.4000
+ A4-beg=  10.000  Inc-4=  1.0000  A4-end=  16.000
+ A5-beg=  4.8000  Inc-5=  0.4800  A5-end=  7.6800
+ A6-beg=  6.4000  Inc-6=  0.6400  A6-end=  10.240
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    2    Type= TIME           Datafile: s7so2031.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+08:58:48: RSF: RI20
+08:58:48: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2032.cg1  Dec  3 2010 08:58
+ IBuffer 20:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  1.6000  Inc-1=  0.1600  A1-end=  2.5600
+ A2-beg=  1.6000  Inc-2=  0.1600  A2-end=  2.5600
+ A3-beg=  4.0000  Inc-3=  0.4000  A3-end=  6.4000
+ A4-beg=  6.0000  Inc-4=  0.6000  A4-end=  9.6000
+ A5-beg=  4.8000  Inc-5=  0.4800  A5-end=  7.6800
+ A6-beg=  6.4000  Inc-6=  0.6400  A6-end=  10.240
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    2    Type= TIME           Datafile: s7so2032.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+09:15:04: RSF: RI28
+09:15:04: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2033.cg1  Dec  3 2010 09:15
+ IBuffer 28:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  2.6000  Inc-1=  0.0000  A1-end=  2.6000
+ A2-beg=  2.6000  Inc-2=  0.0000  A2-end=  2.6000
+ A3-beg=  6.5000  Inc-3=  0.8000  A3-end=  9.7000
+ A4-beg=  16.250  Inc-4=  2.0000  A4-end=  24.250
+ A5-beg=  7.8000  Inc-5=  0.0000  A5-end=  7.8000
+ A6-beg=  10.400  Inc-6=  0.0000  A6-end=  10.400
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    4    Type= TIME           Datafile: s7so2033.cg1
+ Estimated duration of that buffer:    0.2 hrs.
+09:27:07: RSF: RI29
+09:27:07: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2034.cg1  Dec  3 2010 09:27
+ IBuffer 29:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  2.6000  Inc-1=  0.0000  A1-end=  2.6000
+ A2-beg=  2.6000  Inc-2=  0.0000  A2-end=  2.6000
+ A3-beg=  6.5000  Inc-3=  0.8000  A3-end=  12.900
+ A4-beg=  9.7500  Inc-4=  1.2000  A4-end=  19.350
+ A5-beg=  7.8000  Inc-5=  0.0000  A5-end=  7.8000
+ A6-beg=  10.400  Inc-6=  0.0000  A6-end=  10.400
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      30    Prefac=    4    Type= TIME           Datafile: s7so2034.cg1
+ Estimated duration of that buffer:    0.3 hrs.
+09:39:56:  **** ABORT during count ****
+09:39:56:   Request aborted by Contrl_A
+09:39:56:  Sequence terminated by control A
+09:40:00: DRSF VAP.COM
+09:40:00:  Star found in line:
+09:40:00: ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29*;ri6;
+09:40:00:  ERROR: Multiple * in command file
+09:40:00: Entire Command Sequence checked !
+09:40:03: PRSF VAP.COM
+ ri10;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29*;ri6;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+ ri10;ri30;ri1;ri2;ri3;ri4;ri5;ri6;
+ ri10;ri26;ri27;ri11;ri16;ri12;ri17;ri13;ri18;ri14;ri19;ri15;ri20;ri28;ri29;
+09:40:06: RSF VAP.COM
+09:40:06: RSF: RI6
+09:40:06: /home/NCNRWIN/cg1/DeCaluwe/PtNafEchem/s7so2035.cg1  Dec  3 2010 09:40
+ IBuffer  6:  s7so2 sd07 pt_naf 0p1 m h2so4 1p16 v pt surf 2nd r
+ A1-beg=  2.6000  Inc-1=  0.0000  A1-end=  2.6000
+ A2-beg=  2.6000  Inc-2=  0.0000  A2-end=  2.6000
+ A3-beg=  6.5000  Inc-3=  0.0400  A3-end=  9.5000
+ A4-beg=  13.000  Inc-4=  0.0800  A4-end=  19.000
+ A5-beg=  7.8000  Inc-5=  0.0000  A5-end=  7.8000
+ A6-beg=  10.400  Inc-6=  0.0000  A6-end=  10.400
+ Temp  = .00000  Inc-T= .00000  T-Err= .00   T-wait=   0 min  HField=     0.0000
+ Monitor=      60    Prefac=    1    Type= TIME           Datafile: s7so2035.cg1
+ Estimated duration of that buffer:    1.3 hrs.
+10:11:50:  **** ABORT during count ****
+10:11:50:   Request aborted by Contrl_A
+10:11:50:  Sequence terminated by control A
+10:12:17: D1=.5
+10:12:23: D2=.25
+10:12:31: D4T=0.
+10:24:55:  
+10:24:58: EXIT
