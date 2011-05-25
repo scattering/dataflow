@@ -38,7 +38,7 @@ def list_instruments(format='.json'):
     response = { 'instruments': INSTRUMENTS }
     return _format_response(response, format, template='list_instruments.html')
 
-@app.route('/data/<instrument><format>', methods=['GET'])
+@app.route('/data/<instrument>/experiments<format>', methods=['GET'])
 def recent_experiments(instrument, format='.json'):
     """
     GET /data/<instrument>/experiments<format>
@@ -58,7 +58,7 @@ def recent_experiments(instrument, format='.json'):
 def list_files(instrument, experiment, format=".json"):
     if instrument not in INSTRUMENTS:
         raise ValueError("invalid instrument "+instrument)
-    experiment = secure_file(experiment)
+    experiment = secure_filename(experiment)
     path = os.path.join(DATASTORE,instrument,experiment)
     try:
         files = sorted(os.listdir(path))
@@ -75,13 +75,13 @@ def list_files(instrument, experiment, format=".json"):
 def get_file(instrument, experiment, filename):
     if instrument not in INSTRUMENTS:
         raise ValueError("invalid instrument "+instrument)
-    experiment = secure_file(experiment)
+    experiment = secure_filename(experiment)
     path = os.path.join(DATASTORE,instrument,experiment)
     mimetype = None
     as_attachment = True
 
     return send_from_directory(path, filename,
-                               mimetype=mimetype, 
+                               mimetype=mimetype,
                                as_attachment=as_attachment)
 
 def serve():

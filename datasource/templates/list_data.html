@@ -1,10 +1,10 @@
 <title>{% block title %}{% endblock %}</title>
+Available files for
+  <a href="/data/{{instrument}}/experiments.html">{{instrument}}</a>
+experiment {{experiment}}:
 <table>
-<caption>Available files for 
-  <a href="/data/{{instrument}}/{{experiment}}.html">{{instrument}}-{{experiment}}</a>
-  </caption>
 <tr><th>Name</th><th>Size</th></tr>
 {% for f,size in files %}
-  <tr><td><a href="{{ f }}">{{f}} </a></td><td>{{size}} bytes</td></tr>
+  <tr><td><a href="data/{{ f }}">{{f}} </a></td><td>{{size}} bytes</td></tr>
 {% endfor %}
 </table>
