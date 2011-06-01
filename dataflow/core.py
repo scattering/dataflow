@@ -143,6 +143,10 @@ class Template(object):
     
         String identifier for the template
 
+    version : string
+
+        Version number of the template
+
     description : string
     
         Extended description to be displayed as help to the template user.
@@ -158,7 +162,11 @@ class Template(object):
         module : string
     
             module id for template node
-    
+
+        version : string
+
+            version number of the module
+
         config : map
     
             initial values for the fields
