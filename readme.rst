@@ -1,4 +1,4 @@
-Tracks is a template-based system for analyzing data.
+Dataflow is a template-based system for analyzing data.
 
 The architecture is a basic dataflow architecture with the algorithm
 visible on the screen as a series of boxes and lines.  Users can compose
