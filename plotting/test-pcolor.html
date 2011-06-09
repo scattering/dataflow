@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>jqPlot error bars</title>
+
+<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="jqplot/excanvas.js"></script><![endif]-->
+<script language="javascript" type="text/javascript" src="jqplot/jquery-1.5.1.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/jquery.jqplot.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.pcolorRenderer.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.logAxisRenderer.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.AxisTickRenderer.js"></script>
+<link rel="stylesheet" type="text/css" href="jqplot/jquery.jqplot.css" />
+<style rel="stylesheet" type="text/css">
+.jqplot-target { font-family: helvetica; }
+</style>
+<script type="text/javascript">
+var data =
+[
+  { name: "Test",
+    points: matrixfy(-4, 4, 0.1, -4, 4, 0.1, noob2, 1),
+    zs: matrixfy(-4, 4, 0.1, -4, 4, 0.1, noob2, 3)
+  }
+];
+
+
+var arrayMax = function( array ){
+    return Math.max.apply( Math, array );
+};
+var arrayMin = function( array ){
+    return Math.min.apply( Math, array );
+};
+function array_to_rgb(array) {
+  return 'rgb(' + array[0] + ',' + array[1] + ',' + array[2] + ')';
+}
+function edges(data,type,n,min,max) {
+  var types = { lin: [function(i, step) { return i + step; }, function(min,max,n) { return (max-min)/n; }],
+                log: [function(i, step) { return Math.exp(Math.log(i) + Math.log(step)); }, function(min,max,n) { return Math.exp((Math.log(max)-Math.log(min))/n); }]
+              };
+  var edges_ = [];
+  
+  if (!min) min = arrayMin(data);
+  if (!max) max = arrayMax(data);
+  if (min == max) max += 1;
+
+  var step = types[type][1](min,max,n-1);
+  console.log(min,max,step);
+  for (var i = min; i < max; i = types[type][0](i, step))
+    edges_.push(i);
+  return edges_;
+}
+function searchsorted(array, value) {
+  for (var i in array)
+    if (value <= array[i])
+      break;
+  return i;
+}
+function scale_min_floor(array, scalar) {
+  for (var i in array) {
+    array[i] = Math.floor(255 * Math.min(1, array[i]));
+  }
+  return array;
+}
+var copper = function(n) {
+  var map = [];
+  for (var i = 0; i < 1; i += 1 / n) {
+    map.push(scale_min_floor([1.25 * i, 0.8 * i, 0.5 * i]));
+  }
+  return map;
+}
+function noob(x,y) {
+  return (1 - x/2 + Math.pow(x,5) + Math.pow(y,3))*Math.exp(-Math.pow(x,2)-Math.pow(y,2));
+}
+function noob2(x,y) {
+  return Math.sin(x*x + y*y);
+}
+function matrixfy(xmin, xmax, dx, ymin, ymax, dy, func, format) {
+  var matrix = [];
+  for (var x = xmin; x < xmax; x += dx) {
+    var row = [];
+    for (var y = ymin; y < ymax; y += dy) {
+      switch (format) {
+        case 1: row.push([x, y, func(x,y)]); break;
+        case 2:
+        case 3: row.push(func(x,y)); break;
+      }
+    }
+    switch (format) {
+      case 1:
+      case 3: matrix.push.apply(matrix, row); break;
+      case 2: matrix.push(row); break;
+    }
+  }
+  return matrix;
+}
+
+
+function renderData(data) {
+  var series = [];
+  var options = { title: 'Title', series: [], axes: {} };
+  
+  for (index in data) {
+    var s_ = data[index].points;
+    var n = 256;
+    var edges_ = edges(data[index].zs,'lin',n);
+    var palette = copper(n);
+    
+    for (var i in s_) {
+      var sortedindex = searchsorted(edges_, data[index].zs[i]);
+      s_[i][2] = 3.87;
+      s_[i].push({ color: array_to_rgb(palette[sortedindex]) });
+    }
+    series.push(s_);
+    //options.axes = { xaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } } , yaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } }};
+    options.series.push({ renderer: $.jqplot.pcolorRenderer, rendererOptions: { autoscaleBubbles: false, /*bodyWidth: 1, wickColor: 'red', openColor: 'yellow', closeColor: 'blue'*/ } });
+  }
+  console.log(series);
+  console.log(options);
+  var plot = $.jqplot('chart1', series, options);
+
+}
+
+$(document).ready(function() {
+  $.jqplot.config.enablePlugins = true;
+  renderData(data);
+});
+</script>
+</head>
+<body>
+<div id="chart1" style="height: 600px; width: 600px;"></div>
+</body>
+</html>
