@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>jqPlot error bars</title>
+
+<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="jqplot/excanvas.js"></script><![endif]-->
+<script language="javascript" type="text/javascript" src="jqplot/jquery-1.5.1.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/jquery.jqplot.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.pcolorRenderer.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.logAxisRenderer.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.AxisTickRenderer.js"></script>
+<script language="javascript" type="text/javascript" src="palettes.js"></script>
+<link rel="stylesheet" type="text/css" href="jqplot/jquery.jqplot.css" />
+<style rel="stylesheet" type="text/css">
+.jqplot-target { font-family: helvetica; }
+</style>
+<script type="text/javascript">
+var data =
+[
+  DataSeries({
+    name: "Test",
+    func: noob,
+    axis: 'lin',
+    dims: { xmin: -3, xmax: 3, dx: 0.05, ymin: -3, ymax: 3, dy: 0.05 },
+    palette: 'jet',
+    edges: 256,
+  })
+];
+function DataSeries(props) {
+  props.matrixfy = function(format) {
+    return matrixfy(this.dims, this.func, format);
+  }
+  props.points = props.matrixfy(1);
+  props.zs = props.matrixfy(3);
+  return props;
+}
+
+
+var arrayMax = function( array ){
+    return Math.max.apply( Math, array );
+};
+var arrayMin = function( array ){
+    return Math.min.apply( Math, array );
+};
+function array_to_rgb(array) {
+  return 'rgb(' + array[0] + ',' + array[1] + ',' + array[2] + ')';
+}
+function edges(data,type,n,min,max) {
+  var types = { lin: [function(i, step) { return i + step; }, function(min,max,n) { return (max-min)/n; }],
+                log: [function(i, step) { return Math.exp(Math.log(i) + Math.log(step)); }, function(min,max,n) { return Math.exp((Math.log(max)-Math.log(min))/n); }]
+              };
+  var edges_ = [];
+  
+  if (!min) min = arrayMin(data);
+  if (!max) max = arrayMax(data);
+  if (min == max) max += 1;
+
+  var step = types[type][1](min,max,n-1);
+  console.log(min,max,step);
+  for (var i = min; i < max; i = types[type][0](i, step))
+    edges_.push(i);
+  return edges_;
+}
+function searchsorted(array, value) {
+  for (var i = 0; i < array.length; i ++)
+    if (value <= array[i])
+      break;
+  return i;
+}
+function searchsorted_r(array, value) {
+  for (var i = 0; i < array.length; i ++)
+    if (value < array[i])
+      break;
+  return i;
+}
+function scale_min_floor(array, scalar) {
+  for (var i in array) {
+    array[i] = Math.floor(scalar * Math.min(1, array[i]));
+  }
+  return array;
+}
+function noob(x,y) {
+  return (1 - x/2 + Math.pow(x,5) + Math.pow(y,3))*Math.exp(-Math.pow(x,2)-Math.pow(y,2));
+}
+function noob2(x,y) {
+  return Math.sin(x*x + y*y);
+}
+function noob3(x,y) { return x; }
+function matrixfy(d, func, format) {
+  var matrix = [];
+  for (var x = d.xmin; x < d.xmax; x += d.dx) {
+    var row = [];
+    for (var y = d.ymin; y < d.ymax; y += d.dy) {
+      switch (format) {
+        case 1: row.push([x, y, func(x,y)]); break;
+        case 2:
+        case 3: row.push(func(x,y)); break;
+      }
+    }
+    switch (format) {
+      case 1:
+      case 3: matrix.push.apply(matrix, row); break;
+      case 2: matrix.push(row); break;
+    }
+  }
+  return matrix;
+}
+
+
+function renderData(data) {
+  var series = [];
+  var options = { title: 'Title', series: [], axes: {} };
+  
+  for (index in data) {
+//    data[index].points = matrixfy(
+    var s_ = data[index].points;
+    var n  = data[index].edges;
+    var edges_ = edges(data[index].zs,data[index].axis,n);
+    var palette = palettes[data[index].palette](n);
+
+    for (var i in s_) {
+      var sortedindex = searchsorted(edges_, data[index].zs[i]);
+      s_[i][2] = 3.87;
+      s_[i].push({ color: array_to_rgb(palette[sortedindex]) });
+    }
+    series.push(s_);
+    //options.axes = { xaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } } , yaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } }};
+    options.series.push({ renderer: $.jqplot.pcolorRenderer, rendererOptions: { autoscaleBubbles: false, /*bodyWidth: 1, wickColor: 'red', openColor: 'yellow', closeColor: 'blue'*/ } });
+  }
+  console.log(series);
+  console.log(options);
+  var plot = $.jqplot('chart1', series, options);
+
+}
+
+$(document).ready(function() {
+  $.jqplot.config.enablePlugins = true;
+  renderData(data);
+});
+</script>
+</head>
+<body>
+<div id="chart1" style="height: 600px; width: 600px;"></div>
+</body>
+</html>
