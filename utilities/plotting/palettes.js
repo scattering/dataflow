@@ -41,7 +41,7 @@ var Palettify = function(palettes) {
 var palettes = Palettify({
   copper: _fs([1.25, 0.8, 0.5]),
   myjet: _h2rgb,
-  jet: _
+  jet: function(h) { return color_blend_segments(h, jet_segmentdata); },
 });
 
 
@@ -98,3 +98,20 @@ function color_blend_alpha(blend_alpha, color_params_type, color_start, color_en
   return color_params_type + '(' + color_blend.join(', ') + ')';
 }
 
+function color_blend_segments(h, segmentdata) {
+  if (h < 0 || h > 1) throw 'Error: h is not in the domain [0, 1]';
+  var colors = ['red', 'green', 'blue'];
+  var color_blend = [];
+  for (i in colors) {
+    var colordata = segmentdata[colors[i]];
+    var left = searchsorted(colordata, h, 'left', 0);
+    var right = Math.min(searchsorted(colordata, h, 'right', 0), colordata.length - 1);
+    if (right == left) left -= 1;
+    var h_ = (h - colordata[left][0]) / (colordata[right][0] - colordata[left][0]);
+
+    if (!isFinite(h_)) h_ = 0;
+    //console.log('#', colordata, ', L:',left, ', R:', right, ', l:', colordata[left][2], ', r:', colordata[right][1], ', h_:', h_);
+    color_blend[i] = colordata[left][2] * (1 - h_) + colordata[right][1] * h_;
+  }
+  return color_blend;
+}

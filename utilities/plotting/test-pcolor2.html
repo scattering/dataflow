@@ -14,6 +14,7 @@
 <link rel="stylesheet" type="text/css" href="jqplot/jquery.jqplot.css" />
 <style rel="stylesheet" type="text/css">
 .jqplot-target { font-family: helvetica; }
+.m { font-family: cambria,serif; }
 </style>
 <script type="text/javascript">
 var data =
@@ -21,8 +22,9 @@ var data =
   DataSeries({
     name: "Test",
     func: noob,
+    desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = (1 &minus; <i>x</i>/2 + <i>x</i><sup>5</sup> + <i>y</i><sup>3</sup>) * exp(&minus;<i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup>)</span>',
     axis: 'lin',
-    dims: { xmin: -3, xmax: 3, dx: 0.05, ymin: -3, ymax: 3, dy: 0.05 },
+    dims: { xmin: -3, xmax: 3, dx: 1/14, ymin: -3, ymax: 3, dy: 1/14 },
     palette: 'jet',
     edges: 256,
   })
@@ -62,16 +64,24 @@ function edges(data,type,n,min,max) {
     edges_.push(i);
   return edges_;
 }
-function searchsorted(array, value) {
-  for (var i = 0; i < array.length; i ++)
-    if (value <= array[i])
-      break;
-  return i;
-}
-function searchsorted_r(array, value) {
-  for (var i = 0; i < array.length; i ++)
-    if (value < array[i])
-      break;
+function searchsorted(array, value, dir, at) {
+  if (dir != 'right') dir = 'left';
+  //console.log('i v c !at');
+  
+  for (var i = 0, compare; i < array.length; i ++) {
+    compare = (!at && at !== 0) ? array[i] : array[i][at];
+    //console.log(i, value, compare, !at && at !== 0);
+    
+    if (dir == 'left') {
+      if (value <= compare)
+        break;
+    }
+    else {
+      if (value < compare)
+        break;
+    }
+  }
+  //console.log('value:', value,', compare:',compare.toFixed(3),', i:',i);
   return i;
 }
 function scale_min_floor(array, scalar) {
@@ -110,15 +120,15 @@ function matrixfy(d, func, format) {
 
 function renderData(data) {
   var series = [];
-  var options = { title: 'Title', series: [], axes: {} };
+  var options = { title: data[0].desc, series: [], axes: {} };
   
   for (index in data) {
 //    data[index].points = matrixfy(
     var s_ = data[index].points;
     var n  = data[index].edges;
-    var edges_ = edges(data[index].zs,data[index].axis,n);
+    var edges_ = edges(data[index].zs,data[index].axis,n-1);
     var palette = palettes[data[index].palette](n);
-
+    
     for (var i in s_) {
       var sortedindex = searchsorted(edges_, data[index].zs[i]);
       s_[i][2] = 3.87;
