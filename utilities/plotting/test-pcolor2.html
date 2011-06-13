@@ -24,11 +24,12 @@ var data =
     func: noob,
     desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = (1 &minus; <i>x</i>/2 + <i>x</i><sup>5</sup> + <i>y</i><sup>3</sup>) * exp(&minus;<i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup>)</span>',
     axis: 'lin',
-    dims: { xmin: -3, xmax: 3, dx: 1/14, ymin: -3, ymax: 3, dy: 1/14 },
+    dims: { xmin: -3, xmax: 3, dx: 2/14, ymin: -3, ymax: 3, dy: 2/14 },
     palette: 'jet',
     edges: 256,
   })
 ];
+var plot;
 function DataSeries(props) {
   props.matrixfy = function(format) {
     return matrixfy(this.dims, this.func, format);
@@ -128,11 +129,13 @@ function renderData(data) {
     var n  = data[index].edges;
     var edges_ = edges(data[index].zs,data[index].axis,n-1);
     var palette = palettes[data[index].palette](n);
+    $('#colormaps').val(data[index].palette);
     
     for (var i in s_) {
       var sortedindex = searchsorted(edges_, data[index].zs[i]);
       s_[i][2] = 3.87;
-      s_[i].push({ color: array_to_rgb(palette[sortedindex]) });
+      s_[i][3] = { color: array_to_rgb(palette[sortedindex]) };
+      s_[i][4] = palette[sortedindex];
     }
     series.push(s_);
     //options.axes = { xaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } } , yaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } }};
@@ -140,17 +143,39 @@ function renderData(data) {
   }
   console.log(series);
   console.log(options);
-  var plot = $.jqplot('chart1', series, options);
+  plot = $.jqplot('chart1', series, options);
+  return series;
 
+}
+function test(series) {
+  var dims = series.dims;
+  var w = Math.floor((dims.xmax-dims.xmin)/dims.dx), h = Math.floor((dims.ymax-dims.ymin)/dims.dy);
+  
+  var ctx = plot.grid._ctx;
+  var imgd = ctx.createImageData(w,h);
+  var pix = imgd.data;
+  for (var i = 0; n = pix.length, i < n; i += 4) {
+    var rgba = series.points[i/4];
+    pix[i] = rgba[0];
+    pix[i+1] = rgba[1];
+    pix[i+2] = rgba[2];
+    pix[i+3] = 255;
+  }
+  
+  ctx.putImageData(imgd, 0, 0);
 }
 
 $(document).ready(function() {
   $.jqplot.config.enablePlugins = true;
+  renderSelect('colormaps');
   renderData(data);
 });
 </script>
 </head>
 <body>
 <div id="chart1" style="height: 600px; width: 600px;"></div>
+<form id="form1">
+<p><label for="colormaps">Select a colormap:</label> <select id="colormaps"></select></p>
+</form>
 </body>
 </html>
