@@ -24,11 +24,22 @@ var data =
     func: noob,
     desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = (1 &minus; <i>x</i>/2 + <i>x</i><sup>5</sup> + <i>y</i><sup>3</sup>) * exp(&minus;<i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup>)</span>',
     axis: 'lin',
-    dims: { xmin: -3, xmax: 3, dx: 2/14, ymin: -3, ymax: 3, dy: 2/14 },
+    dims: { xmin: -3, xmax: 3, dx: 6/1024, ymin: -3, ymax: 3, dy: 6/1024 },
     palette: 'jet',
-    edges: 256,
+    edges: 999,
   })
 ];
+var types = { lin: {
+                incr: function(i, step) { return i + step; },
+                step: function(min,max,n) { return (max-min)/n; },
+                index: function(value,min,step) { return Math.ceil((value-min)/step); },
+              },
+              log: {
+                incr: function(i, step) { return Math.exp(Math.log(i) + Math.log(step)); },
+                step: function(min,max,n) { return Math.exp((Math.log(max)-Math.log(min))/n); },
+                index: function(step,min,value) { return Math.ceil(Math.log((value/min)/step)); },
+              }
+            };
 var plot;
 function DataSeries(props) {
   props.matrixfy = function(format) {
@@ -41,29 +52,37 @@ function DataSeries(props) {
 
 
 var arrayMax = function( array ){
+    var max = array[0];
+    for (var i in array)
+      if (max < array[i])
+        max = array[i];
+    return max;
     return Math.max.apply( Math, array );
 };
 var arrayMin = function( array ){
+    var min = array[0];
+    for (var i in array)
+      if (min > array[i])
+        min = array[i];
+    return min;
     return Math.min.apply( Math, array );
 };
 function array_to_rgb(array) {
   return 'rgb(' + array[0] + ',' + array[1] + ',' + array[2] + ')';
 }
 function edges(data,type,n,min,max) {
-  var types = { lin: [function(i, step) { return i + step; }, function(min,max,n) { return (max-min)/n; }],
-                log: [function(i, step) { return Math.exp(Math.log(i) + Math.log(step)); }, function(min,max,n) { return Math.exp((Math.log(max)-Math.log(min))/n); }]
-              };
   var edges_ = [];
-  
   if (!min) min = arrayMin(data);
   if (!max) max = arrayMax(data);
   if (min == max) max += 1;
-
-  var step = types[type][1](min,max,n-1);
-  console.log(min,max,step);
-  for (var i = min; i < max; i = types[type][0](i, step))
+  var step = types[type].step(min,max,n);
+  //console.log(min,max,step);
+  for (var i = min; i < max; i = types[type].incr(i, step))
     edges_.push(i);
-  return edges_;
+  return { type: type, min: min, max: max, step: step, edges_: edges_ };
+}
+function sortedindex(edges_, value) {
+  return types[edges_.type].index(value, edges_.min, edges_.step);
 }
 function searchsorted(array, value, dir, at) {
   if (dir != 'right') dir = 'left';
@@ -98,11 +117,12 @@ function noob2(x,y) {
   return Math.sin(x*x + y*y);
 }
 function noob3(x,y) { return x; }
+
 function matrixfy(d, func, format) {
   var matrix = [];
-  for (var x = d.xmin; x < d.xmax; x += d.dx) {
+  for (var y = d.ymax; y > d.ymin; y -= d.dy) {
     var row = [];
-    for (var y = d.ymin; y < d.ymax; y += d.dy) {
+    for (var x = d.xmin; x < d.xmax; x += d.dx) {
       switch (format) {
         case 1: row.push([x, y, func(x,y)]); break;
         case 2:
@@ -127,35 +147,43 @@ function renderData(data) {
 //    data[index].points = matrixfy(
     var s_ = data[index].points;
     var n  = data[index].edges;
-    var edges_ = edges(data[index].zs,data[index].axis,n-1);
+    var edges_ = edges(data[index].zs,data[index].axis,n);
     var palette = palettes[data[index].palette](n);
     $('#colormaps').val(data[index].palette);
+    //console.log(edges_.edges_);
     
     for (var i in s_) {
-      var sortedindex = searchsorted(edges_, data[index].zs[i]);
+      //This is slow:
+      //var sortedindex1 = searchsorted(edges_.edges_, data[index].zs[i]);
+      var sortedindex2 = sortedindex(edges_, data[index].zs[i]);
+      //To compare if we compute the same sortedindex using each method:
+      //console.log(data[index].zs[i], sortedindex1,sortedindex2);
       s_[i][2] = 3.87;
-      s_[i][3] = { color: array_to_rgb(palette[sortedindex]) };
-      s_[i][4] = palette[sortedindex];
+      s_[i][3] = { color: array_to_rgb(palette[sortedindex2]) };
+      s_[i][4] = palette[sortedindex2];
     }
     series.push(s_);
     //options.axes = { xaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } } , yaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } }};
     options.series.push({ renderer: $.jqplot.pcolorRenderer, rendererOptions: { autoscaleBubbles: false, /*bodyWidth: 1, wickColor: 'red', openColor: 'yellow', closeColor: 'blue'*/ } });
   }
-  console.log(series);
-  console.log(options);
-  plot = $.jqplot('chart1', series, options);
+  //console.log(series);
+  //console.log(options);
+  //plot = $.jqplot('chart1', series, options);
+  //plot = $.jqplot('chart1', [[1,1]], {});
   return series;
 
 }
 function test(series) {
   var dims = series.dims;
-  var w = Math.floor((dims.xmax-dims.xmin)/dims.dx), h = Math.floor((dims.ymax-dims.ymin)/dims.dy);
+  var w = Math.ceil((dims.xmax-dims.xmin)/dims.dx), h = Math.ceil((dims.ymax-dims.ymin)/dims.dy);
   
-  var ctx = plot.grid._ctx;
+  //var ctx = plot.grid._ctx;
+  var ctx = getCanvas('mycanvas');
+  
   var imgd = ctx.createImageData(w,h);
   var pix = imgd.data;
   for (var i = 0; n = pix.length, i < n; i += 4) {
-    var rgba = series.points[i/4];
+    var rgba = series.points[i/4][4];
     pix[i] = rgba[0];
     pix[i+1] = rgba[1];
     pix[i+2] = rgba[2];
@@ -163,17 +191,33 @@ function test(series) {
   }
   
   ctx.putImageData(imgd, 0, 0);
+  return [w,h];
+}
+function getCanvas(id) {
+  var elem = document.getElementById(id);
+  if (!elem || !elem.getContext) {
+    return;
+  }
+
+  // Get the canvas 2d context.
+  var context = elem.getContext('2d');
+  if (!context) {
+    return;
+  }
+  return context;
 }
 
 $(document).ready(function() {
   $.jqplot.config.enablePlugins = true;
   renderSelect('colormaps');
   renderData(data);
+  console.log('Ready');
 });
 </script>
 </head>
 <body>
-<div id="chart1" style="height: 600px; width: 600px;"></div>
+<!--<div id="chart1" style="height: 600px; width: 600px;"></div>-->
+<canvas id="mycanvas" width="1024" height="1024" style="border: 1px dotted #bbb;"></canvas>
 <form id="form1">
 <p><label for="colormaps">Select a colormap:</label> <select id="colormaps"></select></p>
 </form>
