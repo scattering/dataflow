@@ -1,7 +1,13 @@
 # Django settings for dataflow project.
-
+import os
+HOMEDIR=__file__[:-12]
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+
+
+template_dir = os.path.join(HOMEDIR,r'templates')
+static_dir = os.path.join(HOMEDIR, r'static')
+#print 'template', template_dir
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -68,7 +74,7 @@ STATIC_URL = '/static/'
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # Additional locations of static files
-STATICFILES_DIRS = (
+STATICFILES_DIRS = (static_dir,
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -95,14 +101,14 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    #'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'dataflow.urls'
+ROOT_URLCONF = 'repo.urls'
 
-TEMPLATE_DIRS = (
+TEMPLATE_DIRS = (template_dir,
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.

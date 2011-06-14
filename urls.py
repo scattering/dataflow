@@ -1,10 +1,14 @@
 from django.conf.urls.defaults import patterns, include, url
+from tracks.views import xhr_test, mytest, home
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = patterns('', 
+		('^hello/$', xhr_test),
+		('^test/$', mytest),
+		('', home),
     # Examples:
     # url(r'^$', 'dataflow.views.home', name='home'),
     # url(r'^dataflow/', include('dataflow.foo.urls')),
