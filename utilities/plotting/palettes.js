@@ -44,7 +44,15 @@ var palettes = Palettify({
   jet: function(h) { return color_blend_segments(h, jet_segmentdata); },
 });
 
-
+function renderSelect(id) {
+  for (palette in palettes)
+    $('#' + id).append($('<option />', { value: palette, text: palette })).change({ id: id }, updatePalette);
+}
+function updatePalette(e) {
+  data[0].palette = $('#' + e.data.id).val();
+  plot.series[0] = renderData(data);
+  plot.replot();
+}
 
 
 var jet_segmentdata = 
