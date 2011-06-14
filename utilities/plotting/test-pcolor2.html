@@ -4,40 +4,41 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>jqPlot error bars</title>
 
-<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="jqplot/excanvas.js"></script><![endif]-->
+<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="jqplot/excanvas.js"></<!script><![endif]-->
 <script language="javascript" type="text/javascript" src="jqplot/jquery-1.5.1.js"></script>
 <script language="javascript" type="text/javascript" src="jqplot/jquery.jqplot.js"></script>
-<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.pcolorRenderer.js"></script>
+<!--<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.pcolorRenderer.js"></script>
 <script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.logAxisRenderer.js"></script>
-<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.AxisTickRenderer.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.AxisTickRenderer.js"></script>-->
 <script language="javascript" type="text/javascript" src="palettes.js"></script>
 <link rel="stylesheet" type="text/css" href="jqplot/jquery.jqplot.css" />
 <style rel="stylesheet" type="text/css">
 .jqplot-target { font-family: helvetica; }
 .m { font-family: cambria,serif; }
+h3 { font-weight: normal; }
 </style>
 <script type="text/javascript">
 var data =
 [
   DataSeries({
     name: "Test",
-    func: noob,
+    func: noob3,
     desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = (1 &minus; <i>x</i>/2 + <i>x</i><sup>5</sup> + <i>y</i><sup>3</sup>) * exp(&minus;<i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup>)</span>',
     axis: 'lin',
     dims: { xmin: -3, xmax: 3, dx: 6/1024, ymin: -3, ymax: 3, dy: 6/1024 },
     palette: 'jet',
-    edges: 999,
+    edges: 255,
   })
 ];
 var types = { lin: {
                 incr: function(i, step) { return i + step; },
                 step: function(min,max,n) { return (max-min)/n; },
-                index: function(value,min,step) { return Math.ceil((value-min)/step); },
+                index: function(value,min,step) { return Math.floor((value-min)/step); },
               },
               log: {
                 incr: function(i, step) { return Math.exp(Math.log(i) + Math.log(step)); },
                 step: function(min,max,n) { return Math.exp((Math.log(max)-Math.log(min))/n); },
-                index: function(step,min,value) { return Math.ceil(Math.log((value/min)/step)); },
+                index: function(step,min,value) { return Math.floor(Math.log((value/min)/step)); },
               }
             };
 var plot;
@@ -71,18 +72,24 @@ function array_to_rgb(array) {
   return 'rgb(' + array[0] + ',' + array[1] + ',' + array[2] + ')';
 }
 function edges(data,type,n,min,max) {
-  var edges_ = [];
+  //var edges_ = [];
   if (!min) min = arrayMin(data);
   if (!max) max = arrayMax(data);
   if (min == max) max += 1;
   var step = types[type].step(min,max,n);
   //console.log(min,max,step);
-  for (var i = min; i < max; i = types[type].incr(i, step))
-    edges_.push(i);
-  return { type: type, min: min, max: max, step: step, edges_: edges_ };
+  //for (var i = min; i < max; i = types[type].incr(i, step))
+  //  edges_.push(i);
+  return sortedindexify({ type: type, min: min, max: max, n: n, step: step }); //, edges_: edges_ };
+}
+function sortedindexify(o) {
+  o.sortedindex = function(value) { return sortedindex(this, value); };
+  return o;
 }
 function sortedindex(edges_, value) {
-  return types[edges_.type].index(value, edges_.min, edges_.step);
+  var sortedindex = types[edges_.type].index(value, edges_.min, edges_.step);
+  if (sortedindex >= edges_.n) return 1 * edges_.n;
+  return sortedindex;
 }
 function searchsorted(array, value, dir, at) {
   if (dir != 'right') dir = 'left';
@@ -117,6 +124,18 @@ function noob2(x,y) {
   return Math.sin(x*x + y*y);
 }
 function noob3(x,y) { return x; }
+function noob4(x,y) { return x*y; }
+function noob5(x,y) { return x*y*y*y-y*x*x*x; }
+function noob6(x,y) { return -x*y*Math.exp(-x*x-y*y); }
+var funcs = {
+  noob: { f: noob, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = (1 &minus; <i>x</i>/2 + <i>x</i><sup>5</sup> + <i>y</i><sup>3</sup>) * exp(&minus;<i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup>)</span>' },
+  noob2: { f: noob2, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = sin(<i>x</i><sup>2</sup> + <i>y</i><sup>2</sup>)</span>' },
+  noob3: { f: noob3, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = <i>x</i></span>' },
+  noob4: { f: noob4, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = <i>x</i><i>y</i></span>' },
+  noob5: { f: noob5, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = <i>x</i><i>y</i><sup>3</sup> &minus; <i>y</i><i>x</i><sup>3</sup></span>' },
+  noob6: { f: noob6, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = &minus;<i>x</i><i>y</i> * exp(&minus;<i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup>)</span></span>' },
+};
+
 
 function matrixfy(d, func, format) {
   var matrix = [];
@@ -148,16 +167,21 @@ function renderData(data) {
     var s_ = data[index].points;
     var n  = data[index].edges;
     var edges_ = edges(data[index].zs,data[index].axis,n);
-    var palette = palettes[data[index].palette](n);
-    $('#colormaps').val(data[index].palette);
+    data[index].edges_ = edges_;
+    var palette = palettes[data[index].palette](n+1);
+    data[index].palette_ = palette;
+    $('#palettes').val(data[index].func);
+    $('#palettes').val(data[index].palette);
+    $('#numedges').val(data[index].edges);
     //console.log(edges_.edges_);
+    console.log(palette.length);
     
     for (var i in s_) {
       //This is slow:
       //var sortedindex1 = searchsorted(edges_.edges_, data[index].zs[i]);
-      var sortedindex2 = sortedindex(edges_, data[index].zs[i]);
+      var sortedindex2 = edges_.sortedindex(data[index].zs[i]);
       //To compare if we compute the same sortedindex using each method:
-      //console.log(data[index].zs[i], sortedindex1,sortedindex2);
+      //console.log(data[index].zs[i], sortedindex2);
       s_[i][2] = 3.87;
       s_[i][3] = { color: array_to_rgb(palette[sortedindex2]) };
       s_[i][4] = palette[sortedindex2];
@@ -209,7 +233,7 @@ function getCanvas(id) {
 
 $(document).ready(function() {
   $.jqplot.config.enablePlugins = true;
-  renderSelect('colormaps');
+  renderSelects(['funcs', 'palettes', 'numedges', 'submit']);
   renderData(data);
   console.log('Ready');
 });
@@ -217,9 +241,13 @@ $(document).ready(function() {
 </head>
 <body>
 <!--<div id="chart1" style="height: 600px; width: 600px;"></div>-->
-<canvas id="mycanvas" width="1024" height="1024" style="border: 1px dotted #bbb;"></canvas>
 <form id="form1">
-<p><label for="colormaps">Select a colormap:</label> <select id="colormaps"></select></p>
+<p><label for="funcs">Select a function:</label> <select id="funcs"></select></p>
+<p><label for="palettes">Select a palette:</label> <select id="palettes"></select></p>
+<p><label for="edges">Select the number of edges:</label> <select id="numedges"></select></p>
+<p><input id="submit" type="button" value="Update plot" /></p>
 </form>
+<h3 id="desc"></h3>
+<canvas id="mycanvas" width="1024" height="1024" style="border: 1px dotted #bbb;"></canvas>
 </body>
 </html>
