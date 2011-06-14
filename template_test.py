@@ -15,12 +15,23 @@ joinMod_d3 = dict(module='joinMod',version='0.0', config=[], position=[40,50])
 wire1 = dict(source=[0,'output'], target=[2,'input'])
 wire2 = dict(source=[1,'output'], target=[2,'input'])
 
-a = core.Template('testy','Template Testing', [joinMod_d1, joinMod_d2, joinMod_d3], [wire1, wire2], 'tas')
+diag = wireit.template_to_wireit_diagram(core.Template('testy','Template Testing', [joinMod_d1, joinMod_d2, joinMod_d3], [wire1, wire2], 'tas'))
+format_diag = ''
+def diag_to_WireIt_str(diagram):
+	underlying_module = core.lookup_module('joinMod')
+	print underlying_module.icon	
+	diag_str = ''
+	
+diag_to_WireIt_str(diag)
 
+print diag
+	
 
 #wire_it diagram
 f = open('wireit_diagram.txt', 'w')
-
-f.write(str(wireit.template_to_wireit_diagram(a)))
+for i in diag:
+	format_diag += str(i).replace("'", '') + ": " + str(diag[i]) + ',\n \t'
+#print format_diag
+f.write(format_diag)
 f.close()
 

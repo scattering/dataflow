@@ -179,14 +179,17 @@ def _emit_module_connection(wire):
 
 def _emit_module_position(module):
     underlying_module = lookup_module(module['module'])
+    terms = ''; #adds terminals to WireIt diagram
     if underlying_module.icon:
         xtype = 'WireIt.ImageContainer'
+	terms = underlying_module.icon['terminals'] # finds terminals from module
     else:
         xtype = 'WireIt.Container'
     position = module['position']
     return dict(config={'position': position, 'xtype': xtype},
                 name=underlying_module.name,
-                value={})
+                value={}, 
+		terminals=terms)
 
 def wireit_diagram_to_template(diagram, instrument):
     """

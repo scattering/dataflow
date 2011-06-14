@@ -20,6 +20,7 @@ def join_module(id=None, datatype=None, action=None,
         }
     }
     
+    
     terminals=[
         dict(id='input',
              datatype=datatype,
