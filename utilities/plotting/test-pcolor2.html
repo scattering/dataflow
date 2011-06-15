@@ -89,6 +89,9 @@ function sortedindexify(o) {
 function sortedindex(edges_, value) {
   var sortedindex = types[edges_.type].index(value, edges_.min, edges_.step);
   if (sortedindex >= edges_.n) return 1 * edges_.n;
+  // Note: some of the data might fall of the bottom of the color scale, too - 
+  // to treat it the same as the data at the top, shouldn't we set it all to zero? - brian
+  if (sortedindex < 0) return 0;
   return sortedindex;
 }
 function searchsorted(array, value, dir, at) {
