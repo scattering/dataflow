@@ -14,8 +14,10 @@ if __name__=="__main__":
                   'python-numpy',
                   'python-scipy',
                   'python-dev',
+                  'vim',
+                  'subversion',
                   ]
-    easy_commands=['simplejson','openopt','stompservice','orbited']
+    easy_commands=['simplejson','stompservice','orbited']
     
     for command in apt_commands:
         s='apt-get -y install %s'%(command,)
@@ -24,6 +26,10 @@ if __name__=="__main__":
         #Popen(['apt-get','install','-y',command])
     
     call('easy_install pip',shell=True)
+    call('easy_install openopt', shell=True)
+    #call('wget http://trac.openopt.org/openopt/changeset/latest/PythonPackages?old_path=%2F&format=zip',shell=True)
+    call('svn co svn://openopt.org/PythonPackages OOSuite',shell=True)
+    call('cd OOSuite; python install_all.py; cd ..',shell=True)
     for command in easy_commands:
         call('pip install %s'%(command,),shell=True)
 
