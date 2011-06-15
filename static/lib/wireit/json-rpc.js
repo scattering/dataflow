@@ -5,7 +5,7 @@
 WireIt.WiringEditor.adapters.JsonRpc = {
 	
 	config: {
-		url: '../../backend/php/WiringEditor.php'
+		url: 'WiringEditor.php'
 	},
 	
 	init: function() {
@@ -27,7 +27,7 @@ WireIt.WiringEditor.adapters.JsonRpc = {
 	// private method to send a json-rpc request using ajax
 	_sendJsonRpcRequest: function(method, value, callbacks) {
 		var postData = YAHOO.lang.JSON.stringify({"id":(this._requestId++),"method":method,"params":value,"version":"json-rpc-2.0"});
-
+		/* This request causes an error. We need a server.*/
 		YAHOO.util.Connect.asyncRequest('POST', this.config.url, {
 			success: function(o) {
 				var s = o.responseText,
@@ -37,6 +37,7 @@ WireIt.WiringEditor.adapters.JsonRpc = {
 			failure: function(o) {
 				var error = o.status + " " + o.statusText;
 				callbacks.failure.call(callbacks.scope, error);
+				console.log('Fail')
 			}
 		},postData);
 	},

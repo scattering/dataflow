@@ -7,8 +7,8 @@ var _f = function(k) {
 var _mapify = function(rgbfunc) {
   return function(n) {
     var map = [];
-    for (var i = 0; i < 1; i += 1 / n)
-      map.push(scale_min_floor(rgbfunc(i), 255));
+    for (var i = 0; i < n; i ++)
+      map.push(scale_min_floor(rgbfunc(i / n), 255));
     return map;
   };
 };
@@ -40,29 +40,53 @@ var Palettify = function(palettes) {
 };
 var palettes = Palettify({
   copper: _fs([1.25, 0.8, 0.5]),
+  grey: _fs([1,1,1]),
   myjet: _h2rgb,
   jet: function(h) { return color_blend_segments(h, jet_segmentdata); },
 });
+var numedges = { 1: '1 (Malevich)',3:'3 (choppiest)',7:7,15:15,31:31,63:63,127:127,255:255,511:'511 (smoothest)' };
 
-
+function renderSelects(ids) {
+  for (func in funcs)
+    $('#' + ids[0]).append($('<option />', { value: func, text: func }));
+  for (palette in palettes)
+    $('#' + ids[1]).append($('<option />', { value: palette, text: palette }));
+  for (numedge in numedges)
+    $('#' + ids[2]).append($('<option />', { value: numedge, text: numedges[numedge] }));
+  $('#' + ids[3]).click({ ids: ids }, updatePalette);
+}
+function updatePalette(e) {
+  var func = $('#' + e.data.ids[0]).val();
+  data[0].func = funcs[func].f;
+  data[0].desc = funcs[func].desc;
+  $('#desc').html(funcs[func].desc);
+  data[0] = DataSeries(data[0]);
+  data[0].palette = $('#' + e.data.ids[1]).val();
+  data[0].edges = 1 * $('#' + e.data.ids[2]).val();
+  var newData = renderData(data);
+//  plot.series[0] = newData;
+//  plot.replot();
+  test(data[0]);
+  return false;
+}
 
 
 var jet_segmentdata = 
 {'blue': [[0.0, 0.5, 0.5],
           [0.11, 1, 1],
-          [0.34000000000000002, 1, 1],
-          [0.65000000000000002, 0, 0],
+          [0.34, 1, 1],
+          [0.65, 0, 0],
           [1, 0, 0]],
  'green': [[0.0, 0, 0],
            [0.125, 0, 0],
            [0.375, 1, 1],
-           [0.64000000000000001, 1, 1],
-           [0.91000000000000003, 0, 0],
+           [0.64, 1, 1],
+           [0.91, 0, 0],
            [1, 0, 0]],
  'red': [[0.0, 0, 0],
-         [0.34999999999999998, 0, 0],
-         [0.66000000000000003, 1, 1],
-         [0.89000000000000001, 1, 1],
+         [0.35, 0, 0],
+         [0.66, 1, 1],
+         [0.89, 1, 1],
          [1, 0.5, 0.5]]};
 
 

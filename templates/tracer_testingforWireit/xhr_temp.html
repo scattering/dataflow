@@ -1,0 +1,22 @@
+<html>
+<head>
+<title> xhr_test </title>
+<script type="text/javascript" src="/static/lib/jquery-min.js">
+</script>  
+<script> 
+$(document).ready(
+(function() {
+$.post("/hello/",{
+        name:"Monty",
+        food:"Spam"
+        },         
+        function(data) {
+	alert(data);
+	})
+})
+)
+</script>
+</head>
+<body>
+</body>
+</html>
