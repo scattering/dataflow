@@ -33,4 +33,4 @@ if __name__=="__main__":
     for command in easy_commands:
         call('pip install %s'%(command,),shell=True)
 
-
+#NOTE: Also install matplotlib and download and install natgrid (https://github.com/matplotlib/natgrid)
