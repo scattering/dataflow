@@ -22,7 +22,7 @@ var data =
 [
   DataSeries({
     name: "Test",
-    func: noob3,
+    func: noob7,
     desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = (1 &minus; <i>x</i>/2 + <i>x</i><sup>5</sup> + <i>y</i><sup>3</sup>) * exp(&minus;<i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup>)</span>',
     axis: 'lin',
     dims: { xmin: -3, xmax: 3, dx: 6/1024, ymin: -3, ymax: 3, dy: 6/1024 },
@@ -88,10 +88,9 @@ function sortedindexify(o) {
 }
 function sortedindex(edges_, value) {
   var sortedindex = types[edges_.type].index(value, edges_.min, edges_.step);
+  // If data falls off the top or bottom of the scale (i.e., if value is infinite)
   if (sortedindex >= edges_.n) return 1 * edges_.n;
-  // Note: some of the data might fall of the bottom of the color scale, too - 
-  // to treat it the same as the data at the top, shouldn't we set it all to zero? - brian
-  if (sortedindex < 0) return 0;
+  if (isNaN(sortedindex) || sortedindex < 0) return 0;
   return sortedindex;
 }
 function searchsorted(array, value, dir, at) {
@@ -130,6 +129,7 @@ function noob3(x,y) { return x; }
 function noob4(x,y) { return x*y; }
 function noob5(x,y) { return x*y*y*y-y*x*x*x; }
 function noob6(x,y) { return -x*y*Math.exp(-x*x-y*y); }
+function noob7(x,y) { return (Math.floor(-Math.exp(-x*y/1)*Math.cos((x*x+y*y)/10))+14*Math.log(10000/(x*x+y*y)+.01))*Math.floor(Math.cos(x*x+y*y)/10)+3*(Math.ceil(x)-Math.floor(x))*(Math.ceil(y)-Math.floor(y)); }
 var funcs = {
   noob: { f: noob, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = (1 &minus; <i>x</i>/2 + <i>x</i><sup>5</sup> + <i>y</i><sup>3</sup>) * exp(&minus;<i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup>)</span>' },
   noob2: { f: noob2, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = sin(<i>x</i><sup>2</sup> + <i>y</i><sup>2</sup>)</span>' },
@@ -137,6 +137,7 @@ var funcs = {
   noob4: { f: noob4, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = <i>x</i><i>y</i></span>' },
   noob5: { f: noob5, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = <i>x</i><i>y</i><sup>3</sup> &minus; <i>y</i><i>x</i><sup>3</sup></span>' },
   noob6: { f: noob6, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = &minus;<i>x</i><i>y</i> * exp(&minus;<i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup>)</span></span>' },
+  noob7: { f: noob7, desc: 'I dunno lol ¯\\(°_o)/¯' }
 };
 
 
@@ -205,7 +206,7 @@ function test(series) {
   var w = Math.ceil((dims.xmax-dims.xmin)/dims.dx), h = Math.ceil((dims.ymax-dims.ymin)/dims.dy);
   
   //var ctx = plot.grid._ctx;
-  var ctx = getCanvas('mycanvas');
+  var ctx = getContext('mycanvas');
   
   var imgd = ctx.createImageData(w,h);
   var pix = imgd.data;
@@ -216,11 +217,11 @@ function test(series) {
     pix[i+2] = rgba[2];
     pix[i+3] = 255;
   }
-  
+  x=imgd;
   ctx.putImageData(imgd, 0, 0);
   return [w,h];
 }
-function getCanvas(id) {
+function getContext(id) {
   var elem = document.getElementById(id);
   if (!elem || !elem.getContext) {
     return;
@@ -232,6 +233,12 @@ function getCanvas(id) {
     return;
   }
   return context;
+}
+function canvas2img(canvasid) {
+  var cvs = document.getElementById(canvasid);
+  var img = new Image();
+  img.src = cvs.toDataUrl('image/png');
+  return img;
 }
 
 $(document).ready(function() {
@@ -247,10 +254,11 @@ $(document).ready(function() {
 <form id="form1">
 <p><label for="funcs">Select a function:</label> <select id="funcs"></select></p>
 <p><label for="palettes">Select a palette:</label> <select id="palettes"></select></p>
-<p><label for="edges">Select the number of edges:</label> <select id="numedges"></select></p>
+<p><label for="numedges">Select the number of edges:</label> <select id="numedges"></select></p>
 <p><input id="submit" type="button" value="Update plot" /></p>
 </form>
 <h3 id="desc"></h3>
 <canvas id="mycanvas" width="1024" height="1024" style="border: 1px dotted #bbb;"></canvas>
+<canvas id="invis" width="1024" height="1024" style="display: none;"></canvas>
 </body>
 </html>
