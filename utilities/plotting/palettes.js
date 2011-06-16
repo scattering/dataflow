@@ -66,7 +66,7 @@ function updatePalette(e) {
   var newData = renderData(data);
 //  plot.series[0] = newData;
 //  plot.replot();
-  test(data[0]);
+  test('mycanvas', data[0]);
   return false;
 }
 

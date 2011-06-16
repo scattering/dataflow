@@ -7,9 +7,9 @@
 <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="jqplot/excanvas.js"></<!script><![endif]-->
 <script language="javascript" type="text/javascript" src="jqplot/jquery-1.5.1.js"></script>
 <script language="javascript" type="text/javascript" src="jqplot/jquery.jqplot.js"></script>
-<!--<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.pcolorRenderer.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.pcolorRenderer.js"></script>
 <script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.logAxisRenderer.js"></script>
-<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.AxisTickRenderer.js"></script>-->
+<!--<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.AxisTickRenderer.js"></script>-->
 <script language="javascript" type="text/javascript" src="palettes.js"></script>
 <link rel="stylesheet" type="text/css" href="jqplot/jquery.jqplot.css" />
 <style rel="stylesheet" type="text/css">
@@ -22,10 +22,10 @@ var data =
 [
   DataSeries({
     name: "Test",
-    func: noob7,
+    func: noob,
     desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = (1 &minus; <i>x</i>/2 + <i>x</i><sup>5</sup> + <i>y</i><sup>3</sup>) * exp(&minus;<i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup>)</span>',
     axis: 'lin',
-    dims: { xmin: -3, xmax: 3, dx: 6/1024, ymin: -3, ymax: 3, dy: 6/1024 },
+    dims: { xmin: -3, xmax: 3, dx: .5*96/1024, ymin: -3, ymax: 3, dy: .5*96/1024 },
     palette: 'jet',
     edges: 255,
   })
@@ -58,7 +58,7 @@ var arrayMax = function( array ){
       if (max < array[i])
         max = array[i];
     return max;
-    return Math.max.apply( Math, array );
+    //return Math.max.apply( Math, array );
 };
 var arrayMin = function( array ){
     var min = array[0];
@@ -66,7 +66,7 @@ var arrayMin = function( array ){
       if (min > array[i])
         min = array[i];
     return min;
-    return Math.min.apply( Math, array );
+    //return Math.min.apply( Math, array );
 };
 function array_to_rgb(array) {
   return 'rgb(' + array[0] + ',' + array[1] + ',' + array[2] + ')';
@@ -129,7 +129,7 @@ function noob3(x,y) { return x; }
 function noob4(x,y) { return x*y; }
 function noob5(x,y) { return x*y*y*y-y*x*x*x; }
 function noob6(x,y) { return -x*y*Math.exp(-x*x-y*y); }
-function noob7(x,y) { return (Math.floor(-Math.exp(-x*y/1)*Math.cos((x*x+y*y)/10))+14*Math.log(10000/(x*x+y*y)+.01))*Math.floor(Math.cos(x*x+y*y)/10)+3*(Math.ceil(x)-Math.floor(x))*(Math.ceil(y)-Math.floor(y)); }
+
 var funcs = {
   noob: { f: noob, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = (1 &minus; <i>x</i>/2 + <i>x</i><sup>5</sup> + <i>y</i><sup>3</sup>) * exp(&minus;<i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup>)</span>' },
   noob2: { f: noob2, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = sin(<i>x</i><sup>2</sup> + <i>y</i><sup>2</sup>)</span>' },
@@ -137,7 +137,6 @@ var funcs = {
   noob4: { f: noob4, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = <i>x</i><i>y</i></span>' },
   noob5: { f: noob5, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = <i>x</i><i>y</i><sup>3</sup> &minus; <i>y</i><i>x</i><sup>3</sup></span>' },
   noob6: { f: noob6, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = &minus;<i>x</i><i>y</i> * exp(&minus;<i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup>)</span></span>' },
-  noob7: { f: noob7, desc: 'I dunno lol ¯\\(°_o)/¯' }
 };
 
 
@@ -186,28 +185,32 @@ function renderData(data) {
       var sortedindex2 = edges_.sortedindex(data[index].zs[i]);
       //To compare if we compute the same sortedindex using each method:
       //console.log(data[index].zs[i], sortedindex2);
-      s_[i][2] = 3.87;
+      s_[i][2] = data[index].zs[i];
       s_[i][3] = { color: array_to_rgb(palette[sortedindex2]) };
       s_[i][4] = palette[sortedindex2];
     }
     series.push(s_);
     //options.axes = { xaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } } , yaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } }};
-    options.series.push({ renderer: $.jqplot.pcolorRenderer, rendererOptions: { autoscaleBubbles: false, /*bodyWidth: 1, wickColor: 'red', openColor: 'yellow', closeColor: 'blue'*/ } });
+    options.series.push({ renderer: $.jqplot.pcolorRenderer, rendererOptions: { dims: data[index].dims, autoscaleBubbles: false, /*bodyWidth: 1, wickColor: 'red', openColor: 'yellow', closeColor: 'blue'*/ } });
   }
   //console.log(series);
   //console.log(options);
-  //plot = $.jqplot('chart1', series, options);
+  plot = $.jqplot('chart1', series, options);
   //plot = $.jqplot('chart1', [[1,1]], {});
   return series;
 
 }
-function test(series) {
+function test(canvasid, series) {
   var dims = series.dims;
   var w = Math.ceil((dims.xmax-dims.xmin)/dims.dx), h = Math.ceil((dims.ymax-dims.ymin)/dims.dy);
+  var cvs = document.getElementById(canvasid);
+  cvs.width = w; cvs.height = h;
   
   //var ctx = plot.grid._ctx;
-  var ctx = getContext('mycanvas');
-  
+  var ctx = getContext(canvasid);
+
+  if (!series.points) series.points = series._plotData;
+
   var imgd = ctx.createImageData(w,h);
   var pix = imgd.data;
   for (var i = 0; n = pix.length, i < n; i += 4) {
@@ -219,7 +222,7 @@ function test(series) {
   }
   x=imgd;
   ctx.putImageData(imgd, 0, 0);
-  return [w,h];
+  return imgd;
 }
 function getContext(id) {
   var elem = document.getElementById(id);
@@ -237,7 +240,7 @@ function getContext(id) {
 function canvas2img(canvasid) {
   var cvs = document.getElementById(canvasid);
   var img = new Image();
-  img.src = cvs.toDataUrl('image/png');
+  img.src = cvs.toDataURL('image/png');
   return img;
 }
 
@@ -250,7 +253,8 @@ $(document).ready(function() {
 </script>
 </head>
 <body>
-<!--<div id="chart1" style="height: 600px; width: 600px;"></div>-->
+<div id="chart1" style="height: 600px; width: 600px;"></div>
+<hr>
 <form id="form1">
 <p><label for="funcs">Select a function:</label> <select id="funcs"></select></p>
 <p><label for="palettes">Select a palette:</label> <select id="palettes"></select></p>
@@ -259,6 +263,6 @@ $(document).ready(function() {
 </form>
 <h3 id="desc"></h3>
 <canvas id="mycanvas" width="1024" height="1024" style="border: 1px dotted #bbb;"></canvas>
-<canvas id="invis" width="1024" height="1024" style="display: none;"></canvas>
+<canvas id="invis" width="1024" height="1024" style="display: one;"></canvas>
 </body>
 </html>
