@@ -51,6 +51,12 @@ def instrument_to_wireit_menu(instrument):
             ]
 
     The menu is readily converted to JSON.
+    
+    Apparently there is a security risk associated with sending json
+    arrays (search flask jsonify for details), and so you may need to
+    send this as:
+    
+        menu = {'menu': instrument_to_wireit_menu(instrument)}
     """
     return [dict(group=group,modules=[m.id for m in modules])
             for group,modules in instrument.menu]

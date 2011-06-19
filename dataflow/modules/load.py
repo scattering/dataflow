@@ -5,7 +5,7 @@ Load data sets.
 from .. import config
 from ..core import Module
 
-def load_module(id=None, datatype=None, action=None, 
+def load_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[]):
     """Module for loading a dataset"""
 

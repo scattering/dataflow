@@ -188,70 +188,43 @@ class Template(object):
             module id in template and terminal name in module
         
     """
-    def __init__(self, name, description, modules, wires, instrument):
+    def __init__(self, name, description, modules, wires, instrument,
+                 version='0.0'):
         self.name = name
         self.description = description
         self.modules = modules
         self.wires = wires
         self.instrument = instrument
+        self.version = version
 
     def order(self):
         """
         Return the module ids in processing order.
         """
-        pairs = [(w.source[0],w.target[0]) for w in self.wires]
-        return processing_order(self.modules, pairs)
+        pairs = [(w['source'][0],w['target'][0]) for w in self.wires]
+        return processing_order(len(self.modules), pairs)
 
     def __iter__(self):
         """
-        Yields module, inputs for each module in the template in order.
+        Yields module#, inputs for each module in the template in order.
         """
         for id in self.order():
-            inputs = [w for w in self.wires if w.target[0] == id]
-            yield self.modules[id],inputs
+            inputs = [w for w in self.wires if w['target'][0] == id]
+            yield id,inputs
 
-class Data(object):
-    """
-    Data objects represent the information flowing over a wire.
-
-    Attributes
-    ----------
-
-    name : string
-    
-        User visible identifier for the data.  Usually this is file name.
-
-    datatype : string
-    
-        Type of the data.  This determines how the data may be plotted
-        and filtered.
-    
-    intent : string
-    
-        What role the data is intended for, such as 'background' for
-        data that is used for background subtraction.
-
-    data : object
-    
-        Data content.  The details of the content depend on the data type.
-
-    history : list
-
-        History is the set of modules used to create the data.  Each module
-        is identified by the module id, its version number and the module
-        configuration used for this data set.  For input terminals, the
-        configuration will be the {index: int, terminal: string} identifying
-        the connection between nodes in the history list.
-
-        module : string
-
-        version : string
-
-        inputs : { terminal : None | (hist id
-
-        config : { field : value, ... }
-
-    """
+    def __getstate__(self):
+        """
+        Version aware pickler.  Returns (version, state)
+        """
+        return '1.0', self.__dict__
+    def __setstate__(self, state):
+        """
+        Version aware unpickler.  Expects (version, state)
+        """
+        version, state = state
+        if version != '1.0':
+            raise TypeError('Template definition mismatch')
+        self.__dict__ = state
 
 class Instrument(object):
     """
@@ -339,8 +312,63 @@ class Datatype(object):
 
         javascript code to set up a plot of the data, or empty if
         data is not plottable
+    
+    
     """
     def __init__(self, id, name=None, plot=None):
         self.id = id
         self.name = name if name is not None else id.capitalize()
         self.plot = plot
+        
+class Data(object):
+    """
+    Data objects represent the information flowing over a wire.
+
+    Attributes
+    ----------
+
+    name : string
+    
+        User visible identifier for the data.  Usually this is file name.
+
+    datatype : string
+    
+        Type of the data.  This determines how the data may be plotted
+        and filtered.
+    
+    intent : string
+    
+        What role the data is intended for, such as 'background' for
+        data that is used for background subtraction.
+
+    dataid : string
+    
+        Key to the data. The data itself can be stored and retrieved by key.
+
+    history : list
+
+        History is the set of modules used to create the data.  Each module
+        is identified by the module id, its version number and the module
+        configuration used for this data set.  For input terminals, the
+        configuration will be {string: [int,...]} identifying
+        the connection between nodes in the history list for each input.
+
+        module : string
+
+        version : string
+
+        inputs : { <input terminal name> : [(<hist iindex>, <output terminal>), ...] }
+
+        config : { <field name> : value, ... }
+        
+        dataid : string
+
+    """
+    
+    def __getstate__(self):
+        return "1.0",__dict__
+    def __setstate__(self, state):
+        version,state = state
+        self.__dict__ = state
+
+

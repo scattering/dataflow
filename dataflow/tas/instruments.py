@@ -2,6 +2,11 @@
 Triple Axis Spectrometer reduction and analysis modules
 """
 import math
+import os
+from pprint import pprint
+
+import numpy
+
 from .. import config
 from ..core import Instrument, Datatype
 from ..modules.load import load_module
@@ -28,8 +33,8 @@ def init_data():
     f1['dy'] = [math.sqrt(v) for v in f1['y']]
     f2['dy'] = [math.sqrt(v) for v in f2['y']]
     for f in f1,f2: FILES[f['name']] = f
-def save_data(data):
-    FILES[data.name] = data
+def save_data(data, name):
+    FILES[name] = data
 def load_data(name):
     return FILES.get(name, None)
 
@@ -41,10 +46,12 @@ def load_data(name):
 #
 def data_join(files, align):
     # Join code: belongs in reduction.tripleaxis
-    if align != 'y': raise TypeError("Can only align on x for now")
+    #if align != 'x': raise TypeError("Can only align on x for now")
+    align = 'x' # Ignore align field for now since our data only has x,y,dy
     new = {}
+    #print "files"; pprint(files)
     for f in files:
-        for x,y,dy,mon in zip(f['x'],f['y'],f['dy'],f['mon']):
+        for x,y,dy,mon in zip(f['x'],f['y'],f['dy'],f['monitor']):
             if x not in new: new['x'] = (0,0,0)
             Sy,Sdy,Smon = new['x']
             new[x] = (y+Sy,dy**2+Sdy,mon+Smon)
@@ -54,19 +61,20 @@ def data_join(files, align):
         points.append((xi,Sy,math.sqrt(Sdy),Smon))
     x,y,dy,mon = zip(*points)
 
-    basename = min(f.name for f in input)
+    basename = min(f['name'] for f in files)
     outname = os.path.splitext(basename)[0] + '.join'
-    result = {'name': outname,'x': x, 'y': y, 'dy': dy, 'mon': mon}
+    result = {'name': outname,'x': x, 'y': y, 'dy': dy, 'monitor': mon}
     return result
 
 def data_scale(data, scale):
     x = data['x']
     y = [v*scale for v in data['y']]
     dy = [v*scale for v in data['dy']]
-    mon = [v*scale for v in data['mon']]
+    mon = [v*scale for v in data['monitor']]
     basename = data['name']
     outname = os.path.splitext(basename)[0] + '.scale'
-    result = {'name': outname,'x': x, 'y': y, 'dy': dy, 'mon': mon}
+    result = {'name': outname,'x': x, 'y': y, 'dy': dy, 'monitor': mon}
+    return result
 
 
 
@@ -80,22 +88,27 @@ data1d = Datatype(id=TAS_DATA,
 
 # === Component binding ===
 
-def load_action(files=None):
-    print "load",files
+def load_action(files=None, intent=None):
+    print "loading",files
     result = [load_data(f) for f in files]
+    #print "loaded"; pprint(result)
     return dict(output=result)
 load = load_module(id='tas.load', datatype=TAS_DATA,
                    version='1.0', action=load_action)
 
 def save_action(input=None, ext=None):
-    print "save",input
-    outname = input.name
-    if ext is not None:
-        outname = os.path.splitext(outname)[0] + ext
-    data = copy(input)
-    data['name'] = outname
-    save_data(data)
+    # Note that save does not accept inputs from multiple components, so
+    # we only need to deal with the bundle, not the list of bundles.
+    # This is specified by terminal['multiple'] = False in modules/save.py
+    for f in input: _save_one(f,ext)
     return {}
+def _save_one(input, ext):
+    #pprint(input)
+    outname = input['name']
+    if ext is not None:
+        outname = ".".join([os.path.splitext(outname)[0],ext])
+    print "saving",input['name'],'as',outname
+    save_data(input, name=outname)
 save_ext = {
     "type":"[string]", 
     "label": "Save extension", 
@@ -108,8 +121,16 @@ save = save_module(id='tas.save', datatype=TAS_DATA,
 
 
 def join_action(input=None, align=None):
-    print "combining",input,"on", ", ".join(align)
-    result = data_join(input, align)    
+    # This is confusing because load returns a bundle and join, which can
+    # link to multiple loads, has a list of bundles.  So flatten this list.
+    # The confusion between bundles and items will bother us continuously,
+    # and it is probably best if every filter just operates on and returns
+    # bundles, which I do in this example.
+    flat = []
+    for bundle in input: flat.extend(bundle)
+    print "joining on",", ".join(align)
+    #pprint(flat)
+    result = [data_join(flat, align)]
     return dict(output=result)
 align_field = {
     "type":"[string]", 
@@ -122,8 +143,13 @@ join = join_module(id='tas.join', datatype=TAS_DATA,
                    fields=[align_field])
 
 def scale_action(input=None, scale=None):
-    print "scale",input,"by",scale
-    result = data_scale(input, scale)
+    # operate on a bundle; need to resolve confusion between bundles and
+    # individual inputs
+    print "scale by",scale
+    if numpy.isscalar(scale): scale = [scale]*len(input)
+    flat = []
+    for bundle in input: flat.extend(bundle)
+    result = [data_scale(f, s) for f,s in zip(flat,scale)]
     return dict(output=result)
 scale = scale_module(id='tas.scale', datatype=TAS_DATA, 
                      version='1.0', action=scale_action)
