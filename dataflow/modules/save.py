@@ -21,6 +21,8 @@ def save_module(id=None, datatype=None, action=None,
              datatype=datatype,
              use='in',
              description='data',
+             multiple=False,
+             required=True,
              ),
     ]
 
