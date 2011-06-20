@@ -10,6 +10,13 @@ pizza_prefs = {
         ]
     }, 
     "ophir": {
+        "likes": [
+            "olives",
+            "onions",
+            "pineapple",
+            "peppers",
+            "tomatoes"
+        ],
         "dislikes": [
             "mushrooms"
         ]
