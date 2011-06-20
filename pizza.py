@@ -37,7 +37,7 @@ pizza_prefs = {
             "olives",
             "tomatoes",
         ]
-    }
+    },
     "brendan": {
         "likes": [
             "pepperoni",
