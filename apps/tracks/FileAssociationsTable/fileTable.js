@@ -12,7 +12,7 @@ Field:
 
 Editing:
 	-Double-click on a cell to edit an individual record's field values.
-	-Shift + right-click will allow you to edit the filetype and group of 			all selected rows.		
+	-Shift + right-click will allow you to edit the filetype and group of all selected rows.		
 	-the group field will accept a single integer or a list of integers.
 		The latter option is to allow association of a single file 
 		with multiple groups

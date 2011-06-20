@@ -48,5 +48,24 @@ pizza_prefs = {
             "anchovies",
             "onions"
         ]
-    }
+    },
+    "andrew":{
+	"likes": [
+	    "mushrooms",
+	    "onions",
+	    "olives",
+            "peppers",
+            "artichoke",
+            "eggplant",
+            "tomatoes",
+        ],
+	"dislikes": [
+	    "pineapple",
+            "anchovies",
+        ],
+	"streng verboten": [
+	    "meats of any kind"
+        ],
+    },
+	    
 }

@@ -5,7 +5,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 
-template_dir = os.path.join(HOMEDIR,r'templates')
+template_dir = os.path.join(HOMEDIR,r'site-templates')
 static_dir = os.path.join(HOMEDIR, r'static')
 #print 'template', template_dir
 

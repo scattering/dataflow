@@ -228,7 +228,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
        	return;
     	}
 
-		this.tempSavedWiring = {name: value.name, working: value.working, language: this.options.languageName };
+		this.tempSavedWiring = {name: value.name, /*working: value.working,*/ language: this.options.languageName };
                 
     	this.adapter.saveWiring(this.tempSavedWiring, {
        	success: this.saveModuleSuccess,
