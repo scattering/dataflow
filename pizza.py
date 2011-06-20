@@ -1,4 +1,4 @@
-var pizza_prefs = {
+pizza_prefs = {
     "brian": {
         "dislikes": [
             "anchovies"
@@ -14,4 +14,4 @@ var pizza_prefs = {
             "mushrooms"
         ]
     }
-};
+}
