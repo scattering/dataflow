@@ -21,4 +21,15 @@ pizza_prefs = {
             "mushrooms"
         ]
     }
+    "brendan": {
+        "likes": [
+            "pepperoni",
+            "sausage"
+        ],
+        "dislikes": [
+            "mushrooms",
+            "anchovies",
+            "onions"
+        ]
+    }
 }
