@@ -11,6 +11,11 @@ WireIt.WiringEditor.adapters.tracks = {
 		listWirings: {
 			method: 'POST',
 			url: 'listWirings/'
+		},
+
+		saveWiring: {
+			method: 'POST',
+			url: 'saveWiring/'
 		}
 	},
 	
@@ -20,6 +25,12 @@ WireIt.WiringEditor.adapters.tracks = {
 	
 	listWirings: function(val, callbacks) {
 		this._sendRequest("listWirings", val, callbacks);
+	},
+	
+	saveWiring: function(val, callbacks) {
+		var wiring = {};
+		YAHOO.lang.augmentObject(wiring, val);	
+		this._sendRequest("saveWiring", wiring, callbacks);
 	},
 	
 	
