@@ -20,5 +20,22 @@ pizza_prefs = {
         "dislikes": [
             "mushrooms"
         ]
+    },
+    "george": {
+        "likes": [
+            "pepperoni",
+            "sausage",
+            "ham",
+            "pineapple",
+            "bacon",
+        ],
+        "dislikes": [
+            "peppers",
+            "mushrooms",
+            "onions",
+            "anchovies",
+            "olives",
+            "tomatoes",
+        ]
     }
 }
