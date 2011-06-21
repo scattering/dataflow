@@ -30,5 +30,9 @@ def listWirings(request):
         print 'I am loading'
 	return HttpResponse(simplejson.dumps(a))
 
+def saveWiring(request):
+	print 'I am saving'
+	return HttpResponse('Save')
+
 def displayEditor(request):
 	return render_to_response('tracer_testingforWireit/editor.html')

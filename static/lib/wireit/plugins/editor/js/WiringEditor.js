@@ -222,19 +222,20 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
  	save: function() {
   
     	var value = this.getValue();
+	this.alert(value)
     
     	if(value.name === "") {
        	this.alert("Please choose a name");
        	return;
     	}
-
-		this.tempSavedWiring = {name: value.name, /*working: value.working,*/ language: this.options.languageName };
-                
-    	this.adapter.saveWiring(this.tempSavedWiring, {
-       	success: this.saveModuleSuccess,
-       	failure: this.saveModuleFailure,
-       	scope: this
-    	});
+		// THIS IS WHERE THE MAGIC HAPPENS
+		// getValue returns the current wiring, and the tempSavedWiring parses all the relevant info
+		this.tempSavedWiring = {name: value.name, modules: value.working.modules, properties: value.working.properties, wires:value.working.wires, language: this.options.languageName };
+  //  	this.adapter.saveWiring(this.tempSavedWiring, {
+  //     	success: this.saveModuleSuccess,
+  //     	failure: this.saveModuleFailure,
+  //     	scope: this
+  //  	});
  	},
 
 	 /**
