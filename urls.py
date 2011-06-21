@@ -13,8 +13,12 @@ urlpatterns = patterns('repo.tracks.views',
 		('^test/$','mytest'),
 		('^listWirings/$', 'listWirings'),
 		('^editor/$', 'displayEditor'),
+
+		#Wiring editor adapter urls
 		('^editor/listWirings/$', 'listWirings'),
 		('^editor/saveWiring/$', 'saveWiring'),
+		('^editor/runReduction/$', 'runReduction'),
+
 		('', 'home'),
     # Examples:
     # url(r'^$', 'dataflow.views.home', name='home'),

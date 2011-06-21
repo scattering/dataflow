@@ -258,6 +258,40 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	    this.alert("Unable to save the wiring : "+errorStr);
 	 },
 
+// added 6/21/11, Tracer
+// sends current wiring diagram to server as POST, should get reduced data to display/plot as a response
+	/**
+	* @method runReduction
+	*/
+
+	runReduction: function() {
+	var value = this.getValue()
+
+	if(value.name === "") {
+       		this.alert("Please choose a name");
+       	return;
+    	}
+	this.toReduce = {name: value.name, modules: value.working.modules, properties: 			value.working.properties, wires:value.working.wires, language: this.options.languageName };
+
+	this.adapter.runReduction(this.toReduce, {
+       	success: this.runModuleSuccess,
+       	failure: this.runModuleFailure,
+       	scope: this
+    	});
+ 	},
+
+	runModuleSuccess: function(display) {
+		this.alert(display)
+		},
+	
+	runModuleFailture: function(error) {
+		this.alert("Unable to run the reduction: " + error)
+		},
+		
+
+
+
+
 
 	 /**
 	  * @method onNew

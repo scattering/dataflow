@@ -29,6 +29,8 @@ a = [{"name":"TASWires","wires": [{"src": {"terminal": "output", "moduleId": 0},
 
 b = {'save':'successful'}
 
+c = {'reduction':'successful'}
+
 def listWirings(request):
         print 'I am loading'
 	return HttpResponse(simplejson.dumps(a))
@@ -36,6 +38,10 @@ def listWirings(request):
 def saveWiring(request):
 	print 'I am saving'
 	return HttpResponse(simplejson.dumps(b))
+
+def runReduction(request):
+	print 'I am reducing'
+	return HttpResponse(simplejson.dumps(c))
 
 def displayEditor(request):
 	return render_to_response('tracer_testingforWireit/editor.html')
