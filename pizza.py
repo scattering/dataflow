@@ -2,16 +2,16 @@ pizza_prefs = {
     "brian": {
         "dislikes": [
             "anchovies"
-        ], 
+        ],
         "likes": [
-            "pepperoni", 
-            "sausage", 
+            "pepperoni",
+            "sausage",
             "mushrooms"
-        ], 
+        ],
         "comments": [
             "Doesn't really understand young people these days and their rejection of fungus as a food source"
         ]
-    }, 
+    },
     "ophir": {
         "likes": [
             "olives",

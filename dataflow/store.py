@@ -43,7 +43,7 @@ def loads(str):
     elif classname == 'Data':
         obj = core.Data()
     else:
-        raise TypeError('unknown object "%s"'%classname)
+        raise TypeError('unknown object "%s"' % classname)
     obj.__setstate__((version, state))
     return obj
 

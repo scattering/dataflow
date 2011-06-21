@@ -9,23 +9,23 @@ from ..modules.normalize import normalize_module
 from ..modules.footprint import footprint
 
 def join_action(input=None):
-    print "combining",input
+    print "combining", input
     result = None
     return dict(output=result)
 join = join_module(id='refl.join', datatype='data1d.refl', \
                    version='1.0', action=join_action)
 
 def scale_action(input=None, scale=None):
-    print "scale",input,"by",scale
+    print "scale", input, "by", scale
     result = None
     return dict(output=result)
-scale = scale_module(id='refl.scale', datatype='data1d.refl', 
+scale = scale_module(id='refl.scale', datatype='data1d.refl',
                      version='1.0', action=scale_action)
 
 def subtract_action(input=None):
     result = None
     return dict(output=result)
-subtract = scale_module(id='refl.subtract', datatype='data1d.refl', 
+subtract = scale_module(id='refl.subtract', datatype='data1d.refl',
                      version='1.0', action=subtract_action)
 
 def normalize_action(input=None):
