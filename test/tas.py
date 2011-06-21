@@ -50,7 +50,8 @@ template = Template(name='test tas',
 # verify wire json objects
 print "== instrument\n", ppjson(json.dumps(instrument_to_wireit_language(BT7)))
 print "== menu\n", ppjson(json.dumps(instrument_to_wireit_menu(BT7)))
-print "== diagram\n", ppjson(json.dumps(template_to_wireit_diagram(template)))
+tjson = json.dumps(template_to_wireit_diagram(template))
+print "== diagram\n", ppjson(tjson)
 t = wireit_diagram_to_template(json.loads(tjson), instrument=BT7)
 print "== template\n", t.name, ":", t.description
 pprint(t.modules)
