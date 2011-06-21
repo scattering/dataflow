@@ -5,19 +5,19 @@ Scale data sets
 from .. import config
 from ..core import Module
 
-def scale_module(id=None, datatype=None, action=None, 
+def scale_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
     """Module for scaling a dataset"""
 
     icon = {
-        'URI': config.IMAGES+"scale.png",
+        'URI': config.IMAGES + "scale.png",
         'terminals': {
-            'input': (0,10, -1, 0),
-            'output': (20,10, 1, 0),
+            'input': (0, 10, -1, 0),
+            'output': (20, 10, 1, 0),
         }
     }
     
-    terminals=[
+    terminals = [
         dict(id='input',
              datatype=datatype,
              use='in',
@@ -33,8 +33,8 @@ def scale_module(id=None, datatype=None, action=None,
     ]
 
     scale_field = {
-        "type":"float", 
-        "label": "Scale factor", 
+        "type":"float",
+        "label": "Scale factor",
         "name": "scale",
         "value": 1.0,
     }
@@ -46,7 +46,7 @@ def scale_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[scale_field]+fields,
+                  fields=[scale_field] + fields,
                   action=action,
                   )
 

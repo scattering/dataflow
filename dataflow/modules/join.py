@@ -5,7 +5,7 @@ Join data sets
 from .. import config
 from ..core import Module
 
-def join_module(id=None, datatype=None, action=None, 
+def join_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[],
                 description="Combine multiple datasets"):
     """
@@ -13,15 +13,15 @@ def join_module(id=None, datatype=None, action=None,
     """
 
     icon = {
-        'URI': config.MEDIA+'/sum.png',
+        'URI': config.MEDIA + '/sum.png',
         'terminals': {
-            'input': (-15,1, -1, 0),
-            'output': (15,1, 1, 0),
+            'input': (-15, 1, -1, 0),
+            'output': (15, 1, 1, 0),
         }
     }
     
     
-    terminals=[
+    terminals = [
         dict(id='input',
              datatype=datatype,
              use='in',

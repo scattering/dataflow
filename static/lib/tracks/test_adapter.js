@@ -16,7 +16,12 @@ WireIt.WiringEditor.adapters.tracks = {
 		saveWiring: {
 			method: 'POST',
 			url: 'saveWiring/'
-		}
+		},
+		
+		runReduction: {
+			method: 'POST',
+			url: 'runReduction/'
+		},
 	},
 	
 	init: function() {
@@ -31,6 +36,12 @@ WireIt.WiringEditor.adapters.tracks = {
 		var wiring = {};
 		YAHOO.lang.augmentObject(wiring, val);	
 		this._sendRequest("saveWiring", wiring, callbacks);
+	},
+	
+	runReduction: function(val, callbacks) {
+		var wiring = {};
+		YAHOO.lang.augmentObject(wiring, val);
+		this._sendRequest("runReduction", wiring, callbacks);
 	},
 	
 	
@@ -51,7 +62,6 @@ WireIt.WiringEditor.adapters.tracks = {
 		else {
 			url = this.config[action].url;
 		}
-		
 		var method = "";
 		if( YAHOO.lang.isFunction(this.config[action].url) ) {
 			method = this.config[action].method(value);

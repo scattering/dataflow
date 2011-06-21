@@ -10,13 +10,13 @@ def load_module(id=None, datatype=None, action=None,
     """Module for loading a dataset"""
 
     icon = {
-        'URI': config.IMAGES+"load.png",
+        'URI': config.IMAGES + "load.png",
         'terminals': {
-            'output': (20,10, 1, 0),
+            'output': (20, 10, 1, 0),
         }
     }
     
-    terminals=[
+    terminals = [
         dict(id='output',
              datatype=datatype,
              use='out',
@@ -25,8 +25,8 @@ def load_module(id=None, datatype=None, action=None,
     ]
 
     files_field = {
-        "type":"[file]", 
-        "label": "Files", 
+        "type":"[file]",
+        "label": "Files",
         "name": "files",
         "value": '',
     }
@@ -34,7 +34,7 @@ def load_module(id=None, datatype=None, action=None,
         "type":"string",
         "label":"Intent",
         "name": "intent",
-        "value": '',   
+        "value": '',
     }
     
     # Combine everything into a module.
@@ -44,7 +44,7 @@ def load_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   #icon=icon,
                   terminals=terminals,
-                  fields=[files_field, intent_field]+fields,
+                  fields=[files_field, intent_field] + fields,
                   action=action,
                   )
 
