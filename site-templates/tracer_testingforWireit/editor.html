@@ -60,6 +60,10 @@ div.Bubble div.body {
 </style>
 
 
+<!-- JQPLOT -->
+<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
+<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery.jqplot.js"></script>
+
 <!-- YUI -->
 <script type="text/javascript" src="../../static/lib/yui/yahoo/yahoo.js"></script>
 <script type="text/javascript" src="../../static/lib/yui/yahoo/yahoo-debug.js"></script>
@@ -243,6 +247,11 @@ YAHOO.util.Event.onDOMReady( function() {
 
 		// setting up the WireEditor with the adapter 'tracks'
 		testLanguage['adapter'] = WireIt.WiringEditor.adapters.tracks;
+		
+		// initial settings
+		plotCreated = false;
+
+		// editor
 		editor = new WireIt.WiringEditor(testLanguage);
 
 		// setting up events for wires
@@ -267,6 +276,7 @@ YAHOO.util.Event.onDOMReady( function() {
 </head>
 
 <body class="yui-skin-sam">
+
 
 	<div id="top">
 		<div class="logo">Dataflow / Tracks</a></div>
@@ -299,6 +309,13 @@ YAHOO.util.Event.onDOMReady( function() {
 				<div id="layerMap"></div>
 			</div>
 		</li>
+		<li>
+		<h2> Plotting! </h2>
+		<div>
+		<div id="plot" style="display: block; border:1px solid; width:500px; height: 500px;"></div>
+		</div>
+		</li>
+
 		<li>
 			<h2>Info</h2>
 			<div>

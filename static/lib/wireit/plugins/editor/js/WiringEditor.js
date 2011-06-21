@@ -281,7 +281,15 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
  	},
 
 	runModuleSuccess: function(display) {
-		this.alert(display)
+		console.log(display.data)
+		if (! plotCreated) {
+		  plot=$.jqplot('plot', [display.data]);
+		  plotCreated = true;
+			}
+		else {
+		  plot.series[0].data = display.data;
+		  plot.replot();
+		}
 		},
 	
 	runModuleFailture: function(error) {

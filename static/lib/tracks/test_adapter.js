@@ -62,7 +62,6 @@ WireIt.WiringEditor.adapters.tracks = {
 		else {
 			url = this.config[action].url;
 		}
-		console.log('in here')
 		var method = "";
 		if( YAHOO.lang.isFunction(this.config[action].url) ) {
 			method = this.config[action].method(value);
