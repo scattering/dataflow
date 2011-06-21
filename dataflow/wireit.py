@@ -58,8 +58,8 @@ def instrument_to_wireit_menu(instrument):
     
         menu = {'menu': instrument_to_wireit_menu(instrument)}
     """
-    return [dict(group=group,modules=[m.id for m in modules])
-            for group,modules in instrument.menu]
+    return [dict(group=group, modules=[m.id for m in modules])
+            for group, modules in instrument.menu]
 
 def instrument_to_wireit_language(instrument):
     """
@@ -74,9 +74,9 @@ def instrument_to_wireit_language(instrument):
                 )
 _DIAGRAM_PROPERTIES = [
     # default fields (the "name" field is required by the WiringEditor):
-    {"type": "string", "name": "name", "label": "Title", 
+    {"type": "string", "name": "name", "label": "Title",
      "typeInvite": "Enter a title" },
-    {"type": "text", "name": "description", "label": "Description", 
+    {"type": "text", "name": "description", "label": "Description",
      "cols": 30},
 ]
 
@@ -96,13 +96,13 @@ def _module_to_wireit(module):
         location_ids = set(terminal_locations.keys())
         terminal_ids = set(t['id'] for t in module.terminals)
         if location_ids != terminal_ids:
-            raise TypeError("incorrect terminals on icon for "+module.name)
+            raise TypeError("incorrect terminals on icon for " + module.name)
         
         # Assign positions to terminals
-        for i,t in enumerate(module.terminals):
-            x,y,dx,dy = terminal_locations[t['id']]
+        for i, t in enumerate(module.terminals):
+            x, y, dx, dy = terminal_locations[t['id']]
             terminals[i]['offsetPosition'] = dict(left=x, top=y)
-            terminals[i]['direction'] = (dx,dy)
+            terminals[i]['direction'] = (dx, dy)
             
         container = dict(xtype='WireIt.ImageContainer',
                          icon=icon,
@@ -111,14 +111,14 @@ def _module_to_wireit(module):
     else:
         step = config.TERMINAL_SPACING
         in_offset = out_offset = 1
-        for i,t in enumerate(module.terminals):
+        for i, t in enumerate(module.terminals):
             if t['use'] == 'in':
-                terminals[i]['offsetPosition'] = dict(left=-step, top=in_offset)
-                terminals[i]['direction'] = [-1,0]
+                terminals[i]['offsetPosition'] = dict(left= -step, top=in_offset)
+                terminals[i]['direction'] = [-1, 0]
                 in_offset += step
             else:
-                terminals[i]['offsetPosition'] = dict(right=-step, top=out_offset)
-                terminals[i]['direction'] = [1,0]
+                terminals[i]['offsetPosition'] = dict(right= -step, top=out_offset)
+                terminals[i]['direction'] = [1, 0]
                 out_offset += step
         height = max(in_offset, out_offset)
         height = min(height, step)        
@@ -134,8 +134,8 @@ def _terminal_to_wireit(terminal):
     """
     Return a wireit container terminal representing the module terminal.
     """
-    din = terminal['datatype']+':'+'in'
-    dout = terminal['datatype']+':'+'out'
+    din = terminal['datatype'] + ':' + 'in'
+    dout = terminal['datatype'] + ':' + 'out'
     if terminal['use'] == 'in':
         ddConfig = dict(type=din, allowedTypes=[dout])
         alwaysSrc = False
@@ -146,11 +146,11 @@ def _terminal_to_wireit(terminal):
         alwaysSrc = True
         required = False
         multiple = True
-    return dict(name = terminal['id'],
-                required = required,
-                multiple = multiple,
-                alwaysSrc = alwaysSrc,
-                ddConfig = ddConfig,
+    return dict(name=terminal['id'],
+                required=required,
+                multiple=multiple,
+                alwaysSrc=alwaysSrc,
+                ddConfig=ddConfig,
                 )
 
 def template_list(templates):
@@ -194,7 +194,7 @@ def _emit_module_position(module):
     position = module['position']
     return dict(config={'position': position, 'xtype': xtype},
                 name=underlying_module.name,
-                value={}, 
+                value={},
 		terminals=terms)
 
 def wireit_diagram_to_template(diagram, instrument):
@@ -206,7 +206,7 @@ def wireit_diagram_to_template(diagram, instrument):
     modules = [_parse_module_position(m, instrument) 
                for m in diagram['modules']]    
     wires = [_parse_module_connection(w) for w in diagram['wires']]
-    return Template(name=name, description=description, 
+    return Template(name=name, description=description,
                     modules=modules, wires=wires, instrument=instrument.id)
 
 def _parse_module_connection(wire):
