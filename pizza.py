@@ -70,5 +70,17 @@ pizza_prefs = {
 	    "meats of any kind"
         ],
     },
+    "elakian":{
+	"likes": [
+	    "mushrooms",
+	    "onions",
+	    "olives",
+            "peppers",
+        ],
+	"dislikes": [
+	    "pineapple",
+            "tomatoes",
+        ],
+    },
 	    
 }
