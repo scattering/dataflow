@@ -18,6 +18,8 @@ def random_module(id=None, datatype=None, action=None,
     """Module for adding random values to a dataset"""
 
     # Define the icon with proper location and terminal sizes
+    # URI: the path to the icon
+    # terminals: the input and output sizes (x, y, dx, dy)
     icon = {
         'URI': config.IMAGES + "random.png",
         'terminals': {
@@ -27,6 +29,9 @@ def random_module(id=None, datatype=None, action=None,
     }
     
     # Define the terminal details
+    # The required and multiple keys are used only on input terminals.
+    # required: True if input is needed
+    # multiple: True if multiple inputs are accepted
     terminals = [
         dict(id='input',
              datatype=datatype,
@@ -69,6 +74,8 @@ def random_module(id=None, datatype=None, action=None,
 ROWAN_DATA = 'data1d.rowan'
 
 # helper methods
+# as stated before, this module adds random values to the data:
+# transformed_data - data| <= |max_change|
 def _offset(max_change):
     return (1 if random() >= .5 else -1) * random()*(max_change + 1)
 def _data_randomize(data, max_change):
@@ -114,7 +121,7 @@ def _save_one(input, ext):
         outname = ".".join([os.path.splitext(outname)[0], ext])
     print "saving", input['name'], 'as', outname
     save_data(input, name=outname)
-# the 'ext'ension field; no use of saving fields though
+# the 'ext'ension field; there's no use in saving fields though (hopefully there will be a need later?)
 save_ext = {
     "type":"[string]",
     "label": "Save extension",
@@ -179,7 +186,8 @@ wires = [
     dict(source=[0, 'output'], target=[1, 'input']),
     dict(source=[1, 'output'], target=[2, 'input']),
     ]
-# I'm unsure why config is needed currently if I don't need to supply anything
+# I'm unsure why config is needed currently if nothing needs to be supplied
+# However, it does need to be the same length as the modules list
 config = [
     {},
     {},
@@ -191,6 +199,7 @@ template = Template(name='test rowan',
                     wires=wires,
                     instrument=ROWAN26.id,
                     )
+# the actual call to perform the reduction
 result = run_template(template, config)
 pprint(result)
 
