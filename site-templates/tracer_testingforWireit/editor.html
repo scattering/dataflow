@@ -256,10 +256,17 @@ YAHOO.util.Event.onDOMReady( function() {
 
 		// setting up events for wires
 		WireIt.Wire.prototype.onWireIn = function(x,y) {
-			console.log('WIRE IN!')
+			this.color = 'rgb(255,0,0)';
+			this.redraw();
+			}
+		WireIt.Wire.prototype.onWireOut = function(x,y) {
+			this.color = 'rgb(173, 216, 230)';
+			this.redraw();
 			}		
 		WireIt.Wire.prototype.onWireClick = function(x,y) {
 			console.log('WIRE CLICK!')
+			editor.wireClickSource = this.src.moduleId
+			editor.wireClickTarget = this.tgt.moduleId
 			editor.runReduction()
 			}
 		// Open the infos panel
