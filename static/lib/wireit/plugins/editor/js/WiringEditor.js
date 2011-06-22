@@ -266,13 +266,13 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 
 	runReduction: function() {
 	var value = this.getValue()
+	console.log(value)
 
 	if(value.name === "") {
        		this.alert("Please choose a name");
        	return;
     	}
 	this.toReduce = {name: value.name, modules: value.working.modules, properties: 			value.working.properties, wires:value.working.wires, language: this.options.languageName };
-
 	this.adapter.runReduction(this.toReduce, {
        	success: this.runModuleSuccess,
        	failure: this.runModuleFailure,
@@ -281,7 +281,6 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
  	},
 
 	runModuleSuccess: function(display) {
-		console.log(display.data)
 		if (! plotCreated) {
 		  plot=$.jqplot('plot', [display.data]);
 		  plotCreated = true;

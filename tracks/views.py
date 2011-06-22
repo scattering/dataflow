@@ -1,7 +1,7 @@
 # Create your views here.
 
 from django.shortcuts import render_to_response
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
 
 import random
@@ -41,6 +41,7 @@ def saveWiring(request):
 
 def runReduction(request):
 	print 'I am reducing'
+	print request.POST.values()
 	data = [[random.random(), random.random()] for i in range(10)]
 	c = {'reduction':'successful', 'data': data}
 	return HttpResponse(simplejson.dumps(c))

@@ -41,7 +41,7 @@ WireIt.WiringEditor.adapters.tracks = {
 	runReduction: function(val, callbacks) {
 		var wiring = {};
 		YAHOO.lang.augmentObject(wiring, val);
-		this._sendRequest("runReduction", wiring, callbacks);
+		this._sendRequest("runReduction", val, callbacks);
 	},
 	
 	
@@ -50,7 +50,8 @@ WireIt.WiringEditor.adapters.tracks = {
 		var params = [];
 		for(var key in value) {
 			if(value.hasOwnProperty(key)) {
-				params.push(window.encodeURIComponent(key)+"="+window.encodeURIComponent(value[key]));
+				params.push(window.encodeURIComponent(key) +"="+window.encodeURIComponent(YAHOO.lang.JSON.stringify(value[key])));							
+				//params.push(window.encodeURIComponent(key)+"="+window.encodeURIComponent(value[key]));
 			}
 		}
 		var postData = params.join('&');
@@ -69,7 +70,6 @@ WireIt.WiringEditor.adapters.tracks = {
 		else {
 			method = this.config[action].method;
 		}
-
 		YAHOO.util.Connect.asyncRequest(method, url, {
 			success: function(o) {
 				var s = o.responseText,

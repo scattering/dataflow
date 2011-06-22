@@ -298,24 +298,41 @@
         
         var xp = this._xaxis.series_u2p;
         var yp = this._yaxis.series_u2p;
-        var xmin = xp.call(this._xaxis, this.dims.xmin), xmax = xp.call(this._xaxis, this.dims.xmax);
-        var ymin = yp.call(this._yaxis, this.dims.ymin), ymax = yp.call(this._yaxis, this.dims.ymax);
-        console.log(xmin,xmax,ymin,ymax,  xmin+','+ymax+','+(xmax-xmin)+','+(ymin-ymax));
         
-        test('invis', this);
-        img = canvas2img('invis');
+        var xmin = Math.max(this._xaxis.min, this.dims.xmin), xmax = Math.min(this._xaxis.max, this.dims.xmax);
+        var ymin = Math.max(this._yaxis.min, this.dims.ymin), ymax = Math.min(this._yaxis.max, this.dims.ymax);
+        console.log('x', xmin,xmax, 'y', ymin,ymax, 'w', (xmax-xmin), 'h', (ymax-ymin));
+        console.log('dims', this.dims);
         
-        var idx = 0;
-        this.bubbleCanvases[idx] = new $.jqplot.BubbleCanvas();
-        this.canvas._elem.append(this.bubbleCanvases[idx].createElement(gd[0], gd[1], (xmax-xmin)/2));
-        this.bubbleCanvases[idx].setContext();
-        var ctx = this.bubbleCanvases[idx]._ctx;
-        var x = ctx.canvas.width/2;
-        var y = ctx.canvas.height/2;
+        var sx  = (xmin - this.dims.xmin)/this.dims.dx, sy  = (this.dims.ymax - ymax)/this.dims.dy,
+            sx2 = (xmax - this.dims.xmin)/this.dims.dx, sy2 = (this.dims.ymax - ymin)/this.dims.dy,
+            sw = sx2 - sx, sh = sy2 - sy;
+        console.log('sx', sx, 'sy', sy, 'sw', sw, 'sh', sh, '   sx2 ', sx2, 'sy2 ', sy2);
         
+        var dx = xp.call(this._xaxis, xmin), dy = yp.call(this._yaxis, ymax),
+            dw = xp.call(this._xaxis, xmax) - xp.call(this._xaxis, xmin), dh = yp.call(this._yaxis, ymin) - yp.call(this._yaxis, ymax);
+        console.log('dx', dx, 'dy', dy, 'dw', dw, 'dh', dh);
         
-        c=ctx;
-        ctx.drawImage(img, xmin, ymax, xmax - xmin, ymin - ymax);
+        if (sw > 0 && sh > 0) {
+            test('invis', this);
+            img = canvas2img('invis');
+            
+            var idx = 0;
+            this.bubbleCanvases[idx] = new $.jqplot.BubbleCanvas();
+            this.canvas._elem.append(this.bubbleCanvases[idx].createElement(gd[0], gd[1], dw, dh, dx, dy));
+            this.bubbleCanvases[idx].setContext();
+            
+            console.log(ctx);
+            var ctx = this.bubbleCanvases[idx]._ctx;
+            var x = ctx.canvas.width/2;
+            var y = ctx.canvas.height/2;
+
+            
+            c=ctx;
+            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, dw, dh);
+        }
+        console.log(this._xaxis);
+        console.log('# x', this._xaxis.min, this._xaxis.max, '; y', this._yaxis.min, this._yaxis.max);
         
         return;
         
@@ -408,7 +425,7 @@
     $.jqplot.BubbleCanvas.prototype.constructor = $.jqplot.BubbleCanvas;
     
     // initialize with the x,y pont of bubble center and the bubble radius.
-    $.jqplot.BubbleCanvas.prototype.createElement = function(x, y, r) {     
+    $.jqplot.BubbleCanvas.prototype.createElement = function(x, y, w, h, l, t) {     
         var klass = 'jqplot-bubble-point';
 
         var elem;
@@ -419,12 +436,12 @@
         else {
             elem = document.createElement('canvas');
         }
-        
-        elem.width = (r != null) ? 2*r : elem.width;
-        elem.height = (r != null) ? 2*r : elem.height;
+        console.log(this._offsets,this._plotDimensions)
+        elem.width = (w != null) ? w : elem.width;
+        elem.height = (h != null) ? h : elem.height;
         this._elem = $(elem);
-        var l = (x != null && r != null) ? x - r : this._elem.css('left');
-        var t = (y != null && r != null) ? y - r : this._elem.css('top');
+        var l = (l != null) ? l : this._elem.css('left');
+        var t = (t != null) ? t : this._elem.css('top');
         this._elem.css({ position: 'absolute', left: l, top: t });
         
         this._elem.addClass(klass);
