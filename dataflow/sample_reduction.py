@@ -11,8 +11,6 @@ from dataflow.modules.save import save_module
 from numpy.random import random
 from pprint import pprint
 
-ROWAN_DATA = 'data1d.rowan'
-
 # ====== Define the module =======
 
 def random_module(id=None, datatype=None, action=None,
@@ -67,17 +65,23 @@ def random_module(id=None, datatype=None, action=None,
 
 # ======== Define the action and declare the module =======
 
+# the data id; used for datatype of modules and instrument
+ROWAN_DATA = 'data1d.rowan'
+
+# helper methods
 def _offset(max_change):
     return (1 if random() >= .5 else -1) * random()*(max_change + 1)
 def _data_randomize(data, max_change):
-    x = [v + offset(max_change) for v in data['x']]
-    y = [v + offset(max_change) for v in data['y']]
-    dy = [v + offset(max_change) for v in data['dy']]
-    mon = [v + offset(max_change) for v in data['monitor']]
+    x = [v + _offset(max_change) for v in data['x']]
+    y = [v + _offset(max_change) for v in data['y']]
+    dy = [v + _offset(max_change) for v in data['dy']]
+    mon = [v + _offset(max_change) for v in data['monitor']]
     basename = data['name']
     outname = os.path.splitext(basename)[0] + '.random'
     result = {'name': outname, 'x': x, 'y': y, 'dy': dy, 'monitor': mon}
     return result
+
+# the actual "action" for the rand module
 def random_action(input=None, max_change=None):
     """Action that adds or subtracts random values under a given limit."""
     print "randomize <=", max_change
@@ -85,7 +89,7 @@ def random_action(input=None, max_change=None):
     # operate on a bundle rather than individual input
     # because the multiple field is True
     for bundle in input: flat.extend(bundle)
-    result = [data_randomize(f, max_change) for f in flat]
+    result = [_data_randomize(f, max_change) for f in flat]
     return dict(output=result)
 rand = random_module(id='rowan.random', datatype=ROWAN_DATA,
                      version='1.0', action=random_action)
@@ -93,6 +97,7 @@ rand = random_module(id='rowan.random', datatype=ROWAN_DATA,
 # ======== Other modules ==========
 
 def load_action(files=None, intent=None):
+    """Loads files for data manipulation"""
     print "loading", files
     result = [load_data(f) for f in files]
     return dict(output=result)
@@ -100,6 +105,7 @@ load = load_module(id='rowan.load', datatype=ROWAN_DATA,
                    version='1.0', action=load_action)
 
 def save_action(input=None, ext=None):
+    """Saves files to another extension"""
     for f in input: _save_one(f, ext)
     return {}
 def _save_one(input, ext):
@@ -108,6 +114,7 @@ def _save_one(input, ext):
         outname = ".".join([os.path.splitext(outname)[0], ext])
     print "saving", input['name'], 'as', outname
     save_data(input, name=outname)
+# the 'ext'ension field; no use of saving fields though
 save_ext = {
     "type":"[string]",
     "label": "Save extension",
@@ -145,6 +152,8 @@ def load_data(name):
 rowan1d = Datatype(id=ROWAN_DATA,
                   name='1-D Rowan Data',
                   plot='rowanplot')
+# it has three modules: load, save, and rand
+# when the instrument is registered, these modules will also be registered
 ROWAN26 = Instrument(id='ncnr.rowan26',
                  name='NCNR ROWAN26',
                  archive=config.NCNR_DATA + '/rowan26',
@@ -170,7 +179,7 @@ wires = [
     dict(source=[0, 'output'], target=[1, 'input']),
     dict(source=[1, 'output'], target=[2, 'input']),
     ]
-# I'm unsure why config is needed currently
+# I'm unsure why config is needed currently if I don't need to supply anything
 config = [
     {},
     {},
