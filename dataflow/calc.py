@@ -35,9 +35,10 @@ def run_template(template, config):
                       for k, v in inputs.items())
         
         # Include configuration information
-        kwargs.update(node['config'])
+        kwargs.update(node.get('config', {}))
         kwargs.update(config[nodenum])
         result = module.action(**kwargs)
+        print result
         all_results[nodenum] = result
         
     return all_results

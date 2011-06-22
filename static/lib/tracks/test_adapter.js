@@ -46,15 +46,17 @@ WireIt.WiringEditor.adapters.tracks = {
 	
 	
 	_sendRequest: function(action, value, callbacks) {
-	
+		/*
 		var params = [];
 		for(var key in value) {
 			if(value.hasOwnProperty(key)) {
-				params.push(window.encodeURIComponent(key) +"="+window.encodeURIComponent(YAHOO.lang.JSON.stringify(value[key])));							
-				//params.push(window.encodeURIComponent(key)+"="+window.encodeURIComponent(value[key]));
+				// edited 6/22, now stringifies value
+				params.push(window.encodeURIComponent(key) +"="+window.encodeURIComponent(value[key]));							
 			}
 		}
 		var postData = params.join('&');
+		*/
+		var postData = 'data=' + YAHOO.lang.JSON.stringify(value);
 		
 		var url = "";
 		if( YAHOO.lang.isFunction(this.config[action].url) ) {
