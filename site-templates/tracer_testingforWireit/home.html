@@ -5,14 +5,13 @@
 
 </head>
 <body>
-	<h1></h1>
-	<p><big><i>DATAFLOW / TRACKS </i></big></p>
+	<h2>DATAFLOW / TRACKS </h2>
 	<hr/>
 	<p> Why not look around? </p>
-	<table>
+	<ul>
 	{% for i in site_list %}
-	<p> -- {{ i }} </p> 
+    	<li><a href="{{ i }}">{{ i }} </a></li>
 	{% endfor %}
-	</table>
+	</ul>
 </body>
 </html>

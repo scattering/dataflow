@@ -171,12 +171,12 @@ ROWAN26 = Instrument(id='ncnr.rowan26',
                  datatypes=[rowan1d],
                  )
 init_data()
-print 'FILES', FILES
 instruments = [ROWAN26]
+for instrument in instruments:
+    register_instrument(instrument)
 
 
 # ========== Run the reductions =========
-register_instrument(ROWAN26)
 modules = [
     dict(module="rowan.load", position=(5, 20),
          config={'files': ['f1.rowan26'], 'intent': 'signal'}),
@@ -202,7 +202,7 @@ template = Template(name='test rowan',
                     )
 # the actual call to perform the reduction
 result = run_template(template, config)
-#pprint(result)
+pprint(result)
 
 # (testing, andy)
 # ========= Convert the instrument definition to WireIt language =========
@@ -214,9 +214,3 @@ from dataflow.wireit import template_to_wireit_diagram as wdiag
 #print
 #print "DIAGRAM:"
 #print wdiag(template)
-
-
-
-
-
-
