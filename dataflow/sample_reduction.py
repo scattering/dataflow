@@ -171,12 +171,12 @@ ROWAN26 = Instrument(id='ncnr.rowan26',
                  datatypes=[rowan1d],
                  )
 init_data()
-print 'FILES', FILES
 instruments = [ROWAN26]
+for instrument in instruments:
+    register_instrument(instrument)
 
 
 # ========== Run the reductions =========
-register_instrument(ROWAN26)
 modules = [
     dict(module="rowan.load", position=(5, 20),
          config={'files': ['f1.rowan26'], 'intent': 'signal'}),
