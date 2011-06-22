@@ -19,25 +19,23 @@
             /yui
             excanvas.js
             jquery-min.js
-    /templates -> /site-templates
+    /site-templates
     
-    /apps *
+    /apps
         /tracks
             /doc
-            /FileAssociationsTable -> /utilities/FileAssociationsTable
+            /FileAssociationsTable
+            /instruments
+                /reflectometry
+                    /static
+                    /templates
+                    /wireit
+                /sans
+                /tripleaxis
         /fileview
         /accounts
         /monkeypatch
             
-    /instruments -> /tracks/instruments
-        /reflectometry
-            /static *
-                ...
-            /templates *
-            /wireit *
-                ...
-        /sans
-        /tripleaxis
     /reduction
         /common
         /reflectometry
