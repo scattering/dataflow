@@ -51,9 +51,6 @@ def runReduction(request):
 	register_instrument(BT7)
 	template = wireit.wireit_diagram_to_template(simplejson.loads(str(request.POST['data'])), BT7)
 	a = run_template(template, [{'files': ['f1.bt7','f2.bt7']},{'align': ['A3']},{'scale': 2.5},{'ext': 'dat'}])
-	#print wireit.wireit_diagram_to_template(simplejson.loads(request.POST), [{},{},{},{}])	
-#temp = wireit_diagram_to_template(request.POST)
-	
 	data = [[random.random(), random.random()] for i in range(10)]
 	c = {'reduction':'successful', 'data': data}
 	return HttpResponse(simplejson.dumps(a))

@@ -281,14 +281,13 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
  	},
 
 	runModuleSuccess: function(display) {
-		console.log(display);
-		var toPlot = display[2].output[0], zipped = [];
+		var toPlot = display[this.wireClickSource].output[0], zipped = [];
 		if (toPlot.x.length != toPlot.y.length)
 			throw "Your data sucks";
 		for (i in toPlot.x)
 			if (!isNaN(toPlot.x[i]))
 				zipped.push([toPlot.x[i], toPlot.y[i]]);
-		console.log(zipped);
+		//console.log(zipped);
 		
 
 		if (! plotCreated) {
@@ -296,6 +295,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		  plotCreated = true;
 			}
 		else {
+		  plot.resetAxesScale();
 		  plot.series[0].data = zipped;
 		  plot.replot();
 		}

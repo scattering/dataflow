@@ -260,6 +260,8 @@ YAHOO.util.Event.onDOMReady( function() {
 			}		
 		WireIt.Wire.prototype.onWireClick = function(x,y) {
 			console.log('WIRE CLICK!')
+			editor.wireClickSource = this.src.moduleId
+			editor.wireClickTarget = this.tgt.moduleId
 			editor.runReduction()
 			}
 		// Open the infos panel
