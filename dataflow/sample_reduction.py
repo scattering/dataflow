@@ -171,6 +171,7 @@ ROWAN26 = Instrument(id='ncnr.rowan26',
                  datatypes=[rowan1d],
                  )
 init_data()
+print 'FILES', FILES
 instruments = [ROWAN26]
 
 
@@ -201,7 +202,7 @@ template = Template(name='test rowan',
                     )
 # the actual call to perform the reduction
 result = run_template(template, config)
-pprint(result)
+#pprint(result)
 
 # (testing, andy)
 # ========= Convert the instrument definition to WireIt language =========

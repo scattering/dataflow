@@ -266,7 +266,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 
 	runReduction: function() {
 	var value = this.getValue()
-	console.log(value)
+	//console.log(value)
 
 	if(value.name === "") {
        		this.alert("Please choose a name");
@@ -281,12 +281,22 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
  	},
 
 	runModuleSuccess: function(display) {
+		console.log(display);
+		var toPlot = display[2].output[0], zipped = [];
+		if (toPlot.x.length != toPlot.y.length)
+			throw "Your data sucks";
+		for (i in toPlot.x)
+			if (!isNaN(toPlot.x[i]))
+				zipped.push([toPlot.x[i], toPlot.y[i]]);
+		console.log(zipped);
+		
+
 		if (! plotCreated) {
-		  plot=$.jqplot('plot', [display.data]);
+		  plot=$.jqplot('plot', [zipped]);
 		  plotCreated = true;
 			}
 		else {
-		  plot.series[0].data = display.data;
+		  plot.series[0].data = zipped;
 		  plot.replot();
 		}
 		},

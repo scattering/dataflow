@@ -4,6 +4,11 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
 
+from dataflow import wireit
+from dataflow.calc import run_template
+from dataflow.core import register_instrument
+from dataflow.tas.instruments import BT7
+
 import random
 
 def xhr_test(request):
@@ -41,10 +46,17 @@ def saveWiring(request):
 
 def runReduction(request):
 	print 'I am reducing'
-	print request.POST.values()
+	#init_data()
+	#print FILES
+	register_instrument(BT7)
+	template = wireit.wireit_diagram_to_template(simplejson.loads(str(request.POST['data'])), BT7)
+	a = run_template(template, [{'files': ['f1.bt7','f2.bt7']},{'align': ['A3']},{'scale': 2.5},{'ext': 'dat'}])
+	#print wireit.wireit_diagram_to_template(simplejson.loads(request.POST), [{},{},{},{}])	
+#temp = wireit_diagram_to_template(request.POST)
+	
 	data = [[random.random(), random.random()] for i in range(10)]
 	c = {'reduction':'successful', 'data': data}
-	return HttpResponse(simplejson.dumps(c))
+	return HttpResponse(simplejson.dumps(a))
 
 def displayEditor(request):
 	return render_to_response('tracer_testingforWireit/editor.html')
