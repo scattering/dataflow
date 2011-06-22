@@ -217,9 +217,3 @@ from dataflow.wireit import template_to_wireit_diagram as wdiag
 #print
 #print "DIAGRAM:"
 #print wdiag(template)
-
-
-
-
-
-
