@@ -12,4 +12,4 @@ class FilterableMetaArray(MetaArray):
         return filters.__getattribute__(filtername)(*args, **kwargs).apply(self)
         
     def __deepcopy__(self, memo):
-        return FilterableMetaArray(self.view(ndarray).copy(), info = self.infoCopy())
+        return FilterableMetaArray(self.view(ndarray).copy(), info=self.infoCopy())

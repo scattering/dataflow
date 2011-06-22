@@ -1,11 +1,15 @@
 from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty
-import os, simplejson, datetime
+import os, simplejson, datetime, sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import types
 from copy import deepcopy
+
+# **fix these imports**
+import FilterableMetaArray as MetaArray
 from FilterableMetaArray import FilterableMetaArray as MetaArray
-from He3Analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
-import reflectometry.reduction as red
-from reflectometry.reduction import rebin as reb
+from he3analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
+import reflred as red
+from reflred import rebin as reb
 #import get_timestamps
 import xml.dom.minidom
 
@@ -993,99 +997,4 @@ class CombinePolcorrect(Filter2D):
     """ combine and polarization-correct """
     def apply(self, list_of_datasets, grid=None):
         pass
-
-from pylab import *
-from plot_2d3 import *
-import wx
-#default_supervisor = Supervisor()
-
-class filter_plot_2d_data(plot_2d_data):
-    """overriding the context menus to add interaction with other objects known to supervisor"""
-    supervisor = Supervisor()
     
-    def __init__(self, *args, **kwargs):
-        plot_2d_data.__init__(self, *args, **kwargs)
-        self.supervisor.AddPlot2d(self, None, self.window_title)
-    
-    def get_all_plot_2d_instances(self):
-        """get all other plots that are open (from supervisor?)"""
-
-        supervisor = self.supervisor
-        instances = []
-        instance_names = []
-        #for dataset in supervisor.rebinned_data_objects:
-            ##instances.append(dataset)
-            #for subkey in dataset.__dict__.keys():
-                    #if isinstance(dataset.__dict__[subkey], plottable_2d_data):
-            ##print('plottable_2d_data yes')
-            #instance_names.append(str(dataset.number) + ': ' + subkey + ': ' + dataset.description)
-            #instances.append(dataset.__dict__[subkey])
-        instances = self.supervisor.plots2d_data_objects
-        instance_names = self.supervisor.plots2d_names
-
-        return instances, instance_names
-
-    def other_plots_menu(self):
-        other_plots, other_plot_names = self.get_all_plot_2d_instances()
-        other_menu = wx.Menu()
-        for op in other_plot_names:
-            item = other_menu.Append(wx.ID_ANY, op, op)
-        return other_menu
-
-    def other_plots_dialog(self):
-        other_plots, other_plot_names = self.get_all_plot_2d_instances()
-        #selection_num = wx.GetSingleChoiceIndex('Choose other plot', '', other_plot_names)
-        dlg = wx.SingleChoiceDialog(None, 'Choose other plot', '', other_plot_names)
-        dlg.SetSize(wx.Size(640, 480))
-        if dlg.ShowModal() == wx.ID_OK:
-            selection_num = dlg.GetSelection()
-        dlg.Destroy()
-        return other_plots[selection_num]
-
-    def dummy(self, evt):
-        print 'the event is: ' + str(evt)
-
-    def area_context(self, mpl_mouseevent, evt):
-        area_popup = wx.Menu()
-        item1 = area_popup.Append(wx.ID_ANY, '&Grid on/off', 'Toggle grid lines')
-        wx.EVT_MENU(self, item1.GetId(), self.OnGridToggle)
-        cmapmenu = CMapMenu(self, callback=self.OnColormap, mapper=self.mapper, canvas=self.canvas)
-        item2 = area_popup.Append(wx.ID_ANY, '&Toggle log/lin', 'Toggle log/linear scale')
-        wx.EVT_MENU(self, item2.GetId(), lambda evt: self.toggle_log_lin(mpl_mouseevent))
-        item3 = area_popup.AppendMenu(wx.ID_ANY, "Colourmaps", cmapmenu)
-        #other_plots, other_plot_names = self.get_all_plot_2d_instances()
-        #if not (other_plot_names == []):
-            #other_menu = wx.Menu()
-            #for op in other_plot_names:
-                #item = other_menu.Append(wx.ID_ANY, op, op)
-        #other_menu = self.other_plots_menu()
-        item4 = area_popup.Append(wx.ID_ANY, "copy intens. scale from", '')
-        wx.EVT_MENU(self, item4.GetId(), lambda evt: self.copy_intensity_range_from(self.other_plots_dialog()))
-        item5 = area_popup.Append(wx.ID_ANY, "copy slice region from", '')
-        wx.EVT_MENU(self, item5.GetId(), lambda evt: self.sliceplot(self.other_plots_dialog().slice_xy_range))
-        self.PopupMenu(area_popup, evt.GetPositionTuple())
-
-def ShowNormData(data, scale='log'):
-    dnorm = (data[:, :, 'counts'] / data[:, :, 'monitor']).view(ndarray).T
-    
-    info = data.infoCopy()
-    ext_y = [info[0]['values'].min(), info[0]['values'].max()]
-    y_label = '{name} ({units})'.format(name=info[0]['name'], units=info[0].get('units', ''))
-    ext_x = [info[1]['values'].min(), info[1]['values'].max()]
-    x_label = '{name} ({units})'.format(name=info[1]['name'], units=info[1].get('units', ''))
-    extent = ext_x + ext_y
-    #figure()
-    #if logscale:
-    #    dnorm = log(dnorm + 1e-7)
-    
-    #imshow(dnorm, origin='lower', aspect='auto', extent = extent)
-    #xlabel(label_x)
-    #ylabel(label_y)
-    pixel_mask = data[:, :, 'pixels'].copy()
-    plot_title = data.extrainfo['CreationStory']
-    frame = filter_plot_2d_data(dnorm, extent, None, scale=scale, pixel_mask=pixel_mask, window_title=plot_title, plot_title=plot_title, x_label=x_label, y_label=y_label)
-    frame.Show()
-    return frame
-    
-    
-        
