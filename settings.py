@@ -106,7 +106,9 @@ MIDDLEWARE_CLASSES = (
     #'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'repo.urls'
+REPO_ROOT = HOMEDIR.split('/')[-2]
+ROOT_URLCONF = REPO_ROOT+'.urls'
+print 'root', ROOT_URLCONF
 
 TEMPLATE_DIRS = (template_dir,
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
