@@ -141,6 +141,8 @@ def init_data():
           'y': [20, 40, 60, 80, 60, 40, 20, 6],
           'monitor': [100] * 8,
           }
+    # shows multiple files
+    # f2 is intentionally unused
     f2 = {'name': 'f2.rowan26',
           'x': [4, 5, 6, 7, 8, 9],
           'y': [37, 31, 18, 11, 2, 1],
@@ -153,6 +155,8 @@ def save_data(data, name):
     FILES[name] = data
 def load_data(name):
     return FILES.get(name, None)
+# setup the datastore
+init_data()
 
 # ========== Data and instrument definitions ========
 
@@ -170,12 +174,12 @@ ROWAN26 = Instrument(id='ncnr.rowan26',
                  requires=[config.JSCRIPT + '/rowanplot.js'],
                  datatypes=[rowan1d],
                  )
-init_data()
-instruments = [ROWAN26]
+instruments = [ROWAN26] # I assume there will be more?
+for instrument in instruments:
+    register_instrument(instrument)
 
 
 # ========== Run the reductions =========
-register_instrument(ROWAN26)
 modules = [
     dict(module="rowan.load", position=(5, 20),
          config={'files': ['f1.rowan26'], 'intent': 'signal'}),
