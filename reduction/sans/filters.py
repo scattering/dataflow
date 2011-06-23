@@ -164,23 +164,34 @@ def convert_q(sansdata):
     x0=sansdata.metadata['det.beamx']  #should be close to 64
     y0=sansdata.metadata['det.beamy']  #should be close to 64
     wavelength=sansdata.metadata['resolution.lmda']
-    shape=(128,128)#sansdata.data.shape
-    theta=np.empty(shape,'Float64')
-    q=np.empty(shape,'Float64')
+    shape=sansdata.data.x.shape
+#    theta=np.empty(shape,'Float64')
+#    q=np.empty(shape,'Float64')
     qx=np.empty(shape,'Float64')
     qy=np.empty(shape,'Float64')
     #vectorize this loop, it will be slow at 128x128
     #test against this simpleminded implentation
-    for x in range(0,shape[0]):
-        for y in range(0,shape[1]):
-            X=PIXEL_SIZE_X_CM*(x-x0)
-            Y=PIXEL_SIZE_Y_CM*(y-y0)
-            r=np.sqrt(X**2+Y**2)
-            theta[x,y]=np.arctan2(r,L2)/2
-            q[x,y]=(4*np.pi/wavelength)*np.sin(theta[x,y])
-            alpha=np.arctan2(Y,X)
-            qx[x,y]=q[x,y]*np.cos(alpha)
-            qy[x,y]=q[x,y]*np.sin(alpha)
+    
+    ### switching to vectorized form - bbm
+#    for x in range(0,shape[0]):
+#        for y in range(0,shape[1]):
+#            X=PIXEL_SIZE_X_CM*(x-x0)
+#            Y=PIXEL_SIZE_Y_CM*(y-y0)
+#            r=np.sqrt(X**2+Y**2)
+#            theta[x,y]=np.arctan2(r,L2)/2
+#            q[x,y]=(4*np.pi/wavelength)*np.sin(theta[x,y])
+#            alpha=np.arctan2(Y,X)
+#            qx[x,y]=q[x,y]*np.cos(alpha)
+#            qy[x,y]=q[x,y]*np.sin(alpha)
+    x,y = np.indices(shape)
+    X = PIXEL_SIZE_X_CM*(x-x0)
+    Y=PIXEL_SIZE_Y_CM*(y-y0)
+    r=np.sqrt(X**2+Y**2)
+    theta=np.arctan2(r,L2)/2
+    q=(4*np.pi/wavelength)*np.sin(theta)
+    alpha=np.arctan2(Y,X)
+    qx=q*np.cos(alpha)
+    qy=q*np.sin(alpha)
     res=SansData()
     res.data=copy(sansdata.data)
     res.metadata=deepcopy(sansdata.metadata)
