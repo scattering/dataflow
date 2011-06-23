@@ -199,7 +199,7 @@ function renderData(data) {
     series.push(s_);
     //options.axes = { xaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } } , yaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } }};
     options.series.push({ renderer: $.jqplot.pcolorRenderer, rendererOptions: { dims: data[index].dims, autoscaleBubbles: false, /*bodyWidth: 1, wickColor: 'red', openColor: 'yellow', closeColor: 'blue'*/ } });
-    renderColorbar('colorbar', palette, edges_, 20);
+    renderColorbar('colorbar', palette, edges_, 25);
   }
   console.log(series);
   //console.log(options);
@@ -245,7 +245,7 @@ function renderColorbar(canvasid, palette, edges, nlabels) {
   
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'right';
-  for (var i = 0; i < nlabels; i ++) {
+  for (var i = 0; i <= nlabels - 1; i ++) {
     var r = i / (nlabels - 1);
     var val = types[edges.type].dist(r, edges.min, edges.max);
     var h = types.lin.dist(1 - r, 12, cvs.height - 12);
