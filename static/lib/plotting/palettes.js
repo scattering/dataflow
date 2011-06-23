@@ -46,6 +46,7 @@ var palettes = Palettify({
   accent: function(h) { return color_blend_segments(h, accent_segmentdata); },
 });
 var numedges = { 1: '1 (Malevich)',3:'3 (choppiest)',7:7,15:15,31:31,63:63,127:127,255:255,511:'511 (smoothest)' };
+var reses = [ 2, 4, 8, 16, 32, 64, 128, 256, 311 ];
 
 function renderSelects(ids) {
   for (func in funcs)
@@ -54,20 +55,28 @@ function renderSelects(ids) {
     $('#' + ids[1]).append($('<option />', { value: palette, text: palette }));
   for (numedge in numedges)
     $('#' + ids[2]).append($('<option />', { value: numedge, text: numedges[numedge] }));
-  $('#' + ids[3]).click({ ids: ids }, updatePalette);
+  for (res in reses)
+    $('#' + ids[3]).append($('<option />', { value: reses[res], text: reses[res] }));
+  $('#' + ids[4]).click({ ids: ids }, updatePalette);
 }
 function updatePalette(e) {
+  if (e == undefined)
+    e = { data: { ids: ['funcs', 'palettes', 'numedges', 'res', 'submit'] }};
+    
   var func = $('#' + e.data.ids[0]).val();
   data[0].func = funcs[func].f;
   data[0].desc = funcs[func].desc;
   $('#desc').html(funcs[func].desc);
-  data[0] = DataSeries(data[0]);
+  data[0].dims.dx = (data[0].dims.xmax - data[0].dims.xmin) / $('#' + e.data.ids[3]).val();
+  data[0].dims.dy = (data[0].dims.ymax - data[0].dims.ymin) / $('#' + e.data.ids[3]).val();
   data[0].palette = $('#' + e.data.ids[1]).val();
   data[0].edges = 1 * $('#' + e.data.ids[2]).val();
-  var newData = renderData(data);
+  data[0] = DataSeries(data[0]);
 //  plot.series[0] = newData;
 //  plot.replot();
+  var newData = renderData(data);
   test('mycanvas', data[0]);
+  plot.replot();
   return false;
 }
 
