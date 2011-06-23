@@ -232,7 +232,7 @@ def trunc(val):
 
 if __name__ == '__main__':
     sensitivity = readNCNRSensitivity("test.div")
-    print sensitivity
+    #print sensitivity
     detdata,metadata=readNCNRData("MAY06001.SA3_CM_D545")
     plt.figure()
     plt.imshow(detdata)
