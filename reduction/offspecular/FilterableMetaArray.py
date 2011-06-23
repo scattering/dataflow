@@ -1,5 +1,4 @@
 from MetaArray import MetaArray
-import filters
 from numpy import ndarray
 import copy
 
@@ -13,3 +12,6 @@ class FilterableMetaArray(MetaArray):
         
     def __deepcopy__(self, memo):
         return FilterableMetaArray(self.view(ndarray).copy(), info=self.infoCopy())
+
+
+import filters

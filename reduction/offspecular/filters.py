@@ -1,15 +1,12 @@
 from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty
 import os, simplejson, datetime, sys
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import types
 from copy import deepcopy
 
-# **fix these imports**
-import FilterableMetaArray as MetaArray
 from FilterableMetaArray import FilterableMetaArray as MetaArray
 from he3analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
 import reflred as red
-from reflred import rebin as reb
+import rebin as reb
 #import get_timestamps
 import xml.dom.minidom
 
