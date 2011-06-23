@@ -201,7 +201,7 @@ def convert_q(sansdata):
     return res         
     
 def chain_corrections():
-    """a sampe chain of corrections"""
+    """a sample chain of corrections"""
     
     #read the files 
     sample_4m=read_sample(map_files('sample_4m'))
@@ -252,8 +252,24 @@ def chain_corrections():
     print 'transmission=',transmission_empty_cell_4m_rat
     print 'hi'
     
+   #Initial Correction
+    SAM = sample_4m_solid.data
+    print SAM.x
+    EMP = empty_4m_solid.data  
+    BGD = blocked_beam_4m_solid.data 
+    Tsam = transmission_sample_cell_4m_rat 
+    Temp = transmission_empty_cell_4m_rat 
+    COR1 = SAM.__sub__(BGD)
+    COR2 = (EMP.__sub__(BGD)).__mul__(Tsam/Temp)
+    COR = COR1.__sub__(COR2)
+    print "after initial correction: "
+    print COR.x
    
-    
+   #Test initial correction
+    plt.figure()
+    plt.imshow(COR.x)
+    plt.show()
+    #-------------Initial Correction Ends------------------------
     
 def map_files(key):
     """
