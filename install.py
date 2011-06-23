@@ -13,6 +13,7 @@ if __name__=="__main__":
                   'python-setuptools',
                   'python-numpy',
                   'python-scipy',
+                  'python-matplotlib',
                   'python-dev',
                   'vim',
                   'subversion',

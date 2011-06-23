@@ -5,8 +5,8 @@ from copy import deepcopy
 
 from FilterableMetaArray import FilterableMetaArray as MetaArray
 from he3analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
-import reflred as red
-import rebin as reb
+from reduction.formats import load
+import reduction.rebin as reb
 #import get_timestamps
 import xml.dom.minidom
 
@@ -443,7 +443,7 @@ class ICPDataFromFile(MetaArray):
         Filter2D.default_path = path
         
         def new_single(filename, path, auto_PolState, PolState):
-            file_obj = red.load(os.path.join(path, filename))
+            file_obj = load(os.path.join(path, filename))
             if not (len(file_obj.detector.counts.shape) == 2):
                 # not a 2D object!
                 return
@@ -497,7 +497,7 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     lookup = {"a":"--", "b":"+-", "c":"-+", "d":"++", "g": ""}
     if path == None:
         path = os.getcwd()
-    file_obj = red.load(os.path.join(path, filename))
+    file_obj = load(os.path.join(path, filename))
     if not (len(file_obj.detector.counts.shape) == 2):
         # not a 2D object!
         return
@@ -994,4 +994,3 @@ class CombinePolcorrect(Filter2D):
     """ combine and polarization-correct """
     def apply(self, list_of_datasets, grid=None):
         pass
-    
