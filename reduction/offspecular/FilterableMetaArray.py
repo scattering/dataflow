@@ -7,11 +7,12 @@ class FilterableMetaArray(MetaArray):
         subarr = MetaArray.__new__(*args, **kwargs)
         subarr.extrainfo = subarr._info[-1]
         return subarr
+    
     def filter(self, filtername, *args, **kwargs):
-        return filters.__getattribute__(filtername)(*args, **kwargs).apply(self)
+        import filters
+#        return filters.__getattribute__(filtername)(*args, **kwargs).apply(self)
+        return filters.__getattribute__(filtername)(*args).apply(self, **kwargs)
         
     def __deepcopy__(self, memo):
         return FilterableMetaArray(self.view(ndarray).copy(), info=self.infoCopy())
 
-
-import filters

@@ -13,6 +13,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from formats import load
 
 PATH = os.path.dirname(os.path.realpath(__file__))
+print PATH
 #data = load(os.path.join(PATH, 'psdca022.cg1.gz'))
 #data = load(os.path.join(PATH, 'Ipsdca022.cg1'))
 data = load(os.path.join(PATH, 'small.cg1'))

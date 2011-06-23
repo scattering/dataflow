@@ -994,3 +994,12 @@ class CombinePolcorrect(Filter2D):
     """ combine and polarization-correct """
     def apply(self, list_of_datasets, grid=None):
         pass
+
+# brendan testing
+if __name__ == '__main__':
+    from pprint import pprint
+    data = LoadICPData('Isabc2003.cg1', '/home/brendan/dataflow/sampledata/ANDR/sabc/')
+#    off = CoordinateOffset()
+#    new_data = off.apply(data, offsets={'theta': 0.01})
+#    pprint(new_data)
+    print data.filter('CoordinateOffset', offsets={'theta': 0.01})
