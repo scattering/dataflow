@@ -140,26 +140,29 @@ class Filter2D:
     
     def __init__(self, *args, **kwargs):
         self.valid_column_labels = [['', '']]
-    
-    def updateCreationStory(apply):
-        """ 
-        decorator for 'apply' method - it updates the Creation Story
-        for each filter application.
-        """
-        
-        def newfunc(self, data, *args, **kwargs):
-            result = apply(self, *args, **kwargs)
-            name = self.__class__.__name__
-            new_info = result.infoCopy()
-            new_type = result.dtype
-            new_data = result.view(ndarray)
-            new_args = "".join([', {arg}'.format(arg=arg) for arg in args])
-            new_kwargs = "".join([', {key}={value}'.format(key=key, value=kwargs[key]) for key in kwargs])
-            new_creation_story = "{old_cs}.filter('{fname}', {args}, {kwargs})".format(old_cs=old_cs, fname=name, args=new_args, kwargs=new_kwargs)
-            #print new_creation_story
-            #new_info[-1]["CreationStory"]
-            return result
-        return newfunc
+
+# ******duplicate decorator, so I commented it out********
+
+#    def updateCreationStory(apply):
+#        """ 
+#        decorator for 'apply' method - it updates the Creation Story
+#        for each filter application.
+#        """
+#        
+#        def newfunc(self, data, *args, **kwargs):
+#            result = apply(self, *args, **kwargs)
+#            name = self.__class__.__name__
+#            new_info = result.infoCopy()
+#            new_type = result.dtype
+#            new_data = result.view(ndarray)
+#            new_args = "".join([', {arg}'.format(arg=arg) for arg in args])
+#            new_kwargs = "".join([', {key}={value}'.format(key=key, value=kwargs[key]) for key in kwargs])
+#            new_creation_story = "{old_cs}.filter('{fname}', {args}, {kwargs})".format(old_cs=old_cs, fname=name, args=new_args, kwargs=new_kwargs)
+#            #print new_creation_story
+#            #new_info[-1]["CreationStory"]
+#            return result
+#        return newfunc
+
     
     def check_labels(self, data):
         validated = True
@@ -423,68 +426,70 @@ class Autogrid(Filter2D):
         return output_grid
         
     
+# *******duplicate?********
     
-class ICPDataFromFile(MetaArray):
-    default_path = None
-       
-    def __new__(subtype, filename, path=None, auto_PolState=False, PolState=''):
-        """ 
-        loads a data file into a MetaArray and returns that.
-        Checks to see if data being loaded is 2D; if not, quits
-        
-        Need to rebin and regrid if the detector is moving...
-        """
-        lookup = {"a":"--", "b":"+-", "c":"-+", "d":"++", "g": ""}
-        if path == None:
-            path = subtype.default_path
-        if path == None:
-            path = os.getcwd()
-        subtype.default_path = path
-        Filter2D.default_path = path
-        
-        def new_single(filename, path, auto_PolState, PolState):
-            file_obj = load(os.path.join(path, filename))
-            if not (len(file_obj.detector.counts.shape) == 2):
-                # not a 2D object!
-                return
-            if auto_PolState:
-                key = filename[-2] # na1, ca1 etc. are --, nc1, cc1 are -+...
-                PolState = lookup[key]
-            # force PolState to a regularized version:
-            if not PolState in lookup.values():
-                PolState = ''
-            datalen, xpixels = file_obj.detector.counts.shape
-            creation_story = "ICPDataFromFile('{fn}'".format(fn=filename)
-            if not PolState == '':
-                creation_story += ", PolState='{0}'".format(PolState)
-            creation_story += ")" 
-            info = [{"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x, "det_angle":file_obj.detector.angle_x },
-                    {"name": "xpixel", "units": "pixels", "values": range(xpixels) },
-                    {"name": "Measurements", "cols": [
-                            {"name": "counts"},
-                            {"name": "pixels"},
-                            {"name": "monitor"},
-                            {"name": "count_time"}]},
-                    {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date,
-                     "CreationStory":creation_story, "path":path}]
-            data_array = zeros((datalen, xpixels, 4))
-            mon = file_obj.monitor.counts
-            mon.shape += (1,) # broadcast the monitor over the other dimension
-            count_time = file_obj.monitor.count_time
-            count_time.shape += (1,)
-            data_array[:, :, 0] = file_obj.detector.counts
-            data_array[:, :, 1] = 1
-            data_array[:, :, 2] = mon
-            data_array[:, :, 3] = count_time
-            # data_array[:,:,4]... I wish!!!  Have to do by hand.
-            data = MetaArray(data_array, dtype='float', info=info)
-            return data
-        
-        if type(filename) is types.ListType:
-            result = [new_single(fn, path, auto_PolState, PolState) for fn in filename]
-            return result
-        else:
-            return new_single(filename, path, auto_PolState, PolState)
+#class ICPDataFromFile(MetaArray):
+#    default_path = None
+#       
+#    def __new__(subtype, filename, path=None, auto_PolState=False, PolState=''):
+#        """ 
+#        loads a data file into a MetaArray and returns that.
+#        Checks to see if data being loaded is 2D; if not, quits
+#        
+#        Need to rebin and regrid if the detector is moving...
+#        """
+#        lookup = {"a":"--", "b":"+-", "c":"-+", "d":"++", "g": ""}
+#        if path == None:
+#            path = subtype.default_path
+#        if path == None:
+#            path = os.getcwd()
+#        subtype.default_path = path
+#        Filter2D.default_path = path
+#        
+#        def new_single(filename, path, auto_PolState, PolState):
+#            file_obj = load(os.path.join(path, filename))
+#            if not (len(file_obj.detector.counts.shape) == 2):
+#                # not a 2D object!
+#                return
+#            if auto_PolState:
+#                key = filename[-2] # na1, ca1 etc. are --, nc1, cc1 are -+...
+#                PolState = lookup[key]
+#            # force PolState to a regularized version:
+#            if not PolState in lookup.values():
+#                PolState = ''
+#            datalen, xpixels = file_obj.detector.counts.shape
+#            creation_story = "ICPDataFromFile('{fn}'".format(fn=filename)
+#            if not PolState == '':
+#                creation_story += ", PolState='{0}'".format(PolState)
+#            creation_story += ")" 
+#            info = [{"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x, "det_angle":file_obj.detector.angle_x },
+#                    {"name": "xpixel", "units": "pixels", "values": range(xpixels) },
+#                    {"name": "Measurements", "cols": [
+#                            {"name": "counts"},
+#                            {"name": "pixels"},
+#                            {"name": "monitor"},
+#                            {"name": "count_time"}]},
+#                    {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date,
+#                     "CreationStory":creation_story, "path":path}]
+#            data_array = zeros((datalen, xpixels, 4))
+#            mon = file_obj.monitor.counts
+#            mon.shape += (1,) # broadcast the monitor over the other dimension
+#            count_time = file_obj.monitor.count_time
+#            count_time.shape += (1,)
+#            data_array[:, :, 0] = file_obj.detector.counts
+#            data_array[:, :, 1] = 1
+#            data_array[:, :, 2] = mon
+#            data_array[:, :, 3] = count_time
+#            # data_array[:,:,4]... I wish!!!  Have to do by hand.
+#            data = MetaArray(data_array, dtype='float', info=info)
+#            return data
+#        
+#        if type(filename) is types.ListType:
+#            result = [new_single(fn, path, auto_PolState, PolState) for fn in filename]
+#            return result
+#        else:
+#            return new_single(filename, path, auto_PolState, PolState)
+
         
 
 def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
@@ -508,9 +513,14 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     if not PolState in lookup.values():
         PolState = ''
     datalen, xpixels = file_obj.detector.counts.shape
-    creation_story = "LoadICPData('{fn}'".format(fn=filename)
-    if not PolState == '':
-        creation_story += ", PolState='{0}'".format(PolState)
+    creation_story = "LoadICPData('{fn}', path='{p}', auto_PolState={aPS}, PolState='{PS}'".format(fn=filename, p=path, aPS=auto_PolState, PS=PolState)
+
+# doesn't really matter; changing so that each keyword (whether it took the default value
+# provided or not) will be defined
+#    if not PolState == '':
+#        creation_story += ", PolState='{0}'".format(PolState)
+
+        
     creation_story += ")" 
     info = [{"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x, "det_angle":file_obj.detector.angle_x },
             {"name": "xpixel", "units": "pixels", "values": range(xpixels) },
@@ -995,11 +1005,14 @@ class CombinePolcorrect(Filter2D):
     def apply(self, list_of_datasets, grid=None):
         pass
 
-# brendan testing
+# rowan tests
 if __name__ == '__main__':
-    from pprint import pprint
     data = LoadICPData('Isabc2003.cg1', '/home/brendan/dataflow/sampledata/ANDR/sabc/')
-#    off = CoordinateOffset()
-#    new_data = off.apply(data, offsets={'theta': 0.01})
-#    pprint(new_data)
-    print data.filter('CoordinateOffset', offsets={'theta': 0.01})
+    data = data.filter('CoordinateOffset', offsets={'theta': 0.1})
+    data = data.filter('WiggleCorrection')
+    #print data._info[-1]["CreationStory"]
+    #print eval(data._info[-1]["CreationStory"])
+    #print data
+    assert data.all() == eval(data._info[-1]["CreationStory"]).all()
+
+

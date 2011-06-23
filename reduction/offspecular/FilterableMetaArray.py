@@ -10,9 +10,10 @@ class FilterableMetaArray(MetaArray):
     
     def filter(self, filtername, *args, **kwargs):
         import filters
-#        return filters.__getattribute__(filtername)(*args, **kwargs).apply(self)
-        return filters.__getattribute__(filtername)(*args).apply(self, **kwargs)
-        
+        return filters.__getattribute__(filtername)().apply(self, *args, **kwargs)
+        #return filters.__getattribute__(filtername)(*args, **kwargs).apply(self)
+
+    
     def __deepcopy__(self, memo):
         return FilterableMetaArray(self.view(ndarray).copy(), info=self.infoCopy())
 
