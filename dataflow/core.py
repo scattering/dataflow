@@ -201,7 +201,7 @@ class Template(object):
         """
         Return the module ids in processing order.
         """
-        pairs = [(w['source'][0],w['target'][0]) for w in self.wires]
+        pairs = [(w['source'][0], w['target'][0]) for w in self.wires]
         return processing_order(len(self.modules), pairs)
 
     def __iter__(self):
@@ -210,7 +210,7 @@ class Template(object):
         """
         for id in self.order():
             inputs = [w for w in self.wires if w['target'][0] == id]
-            yield id,inputs
+            yield id, inputs
 
     def __getstate__(self):
         """
@@ -258,7 +258,7 @@ class Instrument(object):
         implement an interface that allows data sets to be listed and
         retrieved for a particular instrument/experiment.
     """
-    def __init__(self, id, name=None, menu=None, 
+    def __init__(self, id, name=None, menu=None,
                  datatypes=None, requires=None, archive=None):
         self.id = id
         self.name = name
@@ -268,7 +268,7 @@ class Instrument(object):
         self.archive = archive
 
         self.modules = []
-        for _,m in menu:
+        for _, m in menu:
             self.modules.extend(m)
         self._check_datatypes()
         self._check_names()
@@ -279,9 +279,9 @@ class Instrument(object):
         for m in self.modules:
             used |= set(t['datatype'] for t in m.terminals)
         if used - defined:
-            raise TypeError("undefined types: %s"%", ".join(used-defined))
+            raise TypeError("undefined types: %s" % ", ".join(used - defined))
         if defined - used:
-            raise TypeError("unused types: %s"%", ".join(defined-used))
+            raise TypeError("unused types: %s" % ", ".join(defined - used))
 
     def _check_names(self):
         names = set(m.name for m in self.modules)
@@ -291,7 +291,7 @@ class Instrument(object):
     def id_by_name(self, name):
         for m in self.modules:
             if m.name == name: return m.id
-        raise KeyError(name+' does not exist in instrument '+self.name)
+        raise KeyError(name + ' does not exist in instrument ' + self.name)
 
 class Datatype(object):
     """
@@ -366,9 +366,9 @@ class Data(object):
     """
     
     def __getstate__(self):
-        return "1.0",__dict__
+        return "1.0", __dict__
     def __setstate__(self, state):
-        version,state = state
+        version, state = state
         self.__dict__ = state
 
 

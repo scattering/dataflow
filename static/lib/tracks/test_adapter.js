@@ -11,7 +11,17 @@ WireIt.WiringEditor.adapters.tracks = {
 		listWirings: {
 			method: 'POST',
 			url: 'listWirings/'
-		}
+		},
+
+		saveWiring: {
+			method: 'POST',
+			url: 'saveWiring/'
+		},
+		
+		runReduction: {
+			method: 'POST',
+			url: 'runReduction/'
+		},
 	},
 	
 	init: function() {
@@ -22,16 +32,31 @@ WireIt.WiringEditor.adapters.tracks = {
 		this._sendRequest("listWirings", val, callbacks);
 	},
 	
+	saveWiring: function(val, callbacks) {
+		var wiring = {};
+		YAHOO.lang.augmentObject(wiring, val);	
+		this._sendRequest("saveWiring", wiring, callbacks);
+	},
+	
+	runReduction: function(val, callbacks) {
+		var wiring = {};
+		YAHOO.lang.augmentObject(wiring, val);
+		this._sendRequest("runReduction", val, callbacks);
+	},
+	
 	
 	_sendRequest: function(action, value, callbacks) {
-	
+		/*
 		var params = [];
 		for(var key in value) {
 			if(value.hasOwnProperty(key)) {
-				params.push(window.encodeURIComponent(key)+"="+window.encodeURIComponent(value[key]));
+				// edited 6/22, now stringifies value
+				params.push(window.encodeURIComponent(key) +"="+window.encodeURIComponent(value[key]));							
 			}
 		}
 		var postData = params.join('&');
+		*/
+		var postData = 'data=' + YAHOO.lang.JSON.stringify(value);
 		
 		var url = "";
 		if( YAHOO.lang.isFunction(this.config[action].url) ) {
@@ -40,7 +65,6 @@ WireIt.WiringEditor.adapters.tracks = {
 		else {
 			url = this.config[action].url;
 		}
-		
 		var method = "";
 		if( YAHOO.lang.isFunction(this.config[action].url) ) {
 			method = this.config[action].method(value);
@@ -48,7 +72,6 @@ WireIt.WiringEditor.adapters.tracks = {
 		else {
 			method = this.config[action].method;
 		}
-
 		YAHOO.util.Connect.asyncRequest(method, url, {
 			success: function(o) {
 				var s = o.responseText,

@@ -5,18 +5,18 @@ Save data sets.
 from .. import config
 from ..core import Module
 
-def save_module(id=None, datatype=None, action=None, 
+def save_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[]):
     """Module for saving a dataset"""
 
     icon = {
-        'URI': config.IMAGES+"save.png",
+        'URI': config.IMAGES + "save.png",
         'terminals': {
-            'input': (0,10, -1, 0),
+            'input': (0, 10, -1, 0),
         }
     }
     
-    terminals=[
+    terminals = [
         dict(id='input',
              datatype=datatype,
              use='in',
@@ -30,7 +30,7 @@ def save_module(id=None, datatype=None, action=None,
         "type":"string",
         "label":"Intent",
         "name": "intent",
-        "value": '',   
+        "value": '',
     }
     
     # Combine everything into a module.
@@ -40,7 +40,7 @@ def save_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   #icon=icon,
                   terminals=terminals,
-                  fields=[intent_field]+fields,
+                  fields=[intent_field] + fields,
                   action=action,
                   )
 

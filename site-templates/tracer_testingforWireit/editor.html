@@ -60,6 +60,10 @@ div.Bubble div.body {
 </style>
 
 
+<!-- JQPLOT -->
+<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
+<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery.jqplot.js"></script>
+
 <!-- YUI -->
 <script type="text/javascript" src="../../static/lib/yui/yahoo/yahoo.js"></script>
 <script type="text/javascript" src="../../static/lib/yui/yahoo/yahoo-debug.js"></script>
@@ -239,8 +243,32 @@ inputEx.spacerUrl = "/inputex/trunk/images/space.gif";
 
 YAHOO.util.Event.onDOMReady( function() {
 	try {	
+
+
+		// setting up the WireEditor with the adapter 'tracks'
 		testLanguage['adapter'] = WireIt.WiringEditor.adapters.tracks;
+		
+		// initial settings
+		plotCreated = false;
+
+		// editor
 		editor = new WireIt.WiringEditor(testLanguage);
+
+		// setting up events for wires
+		WireIt.Wire.prototype.onWireIn = function(x,y) {
+			this.color = 'rgb(255,0,0)';
+			this.redraw();
+			}
+		WireIt.Wire.prototype.onWireOut = function(x,y) {
+			this.color = 'rgb(173, 216, 230)';
+			this.redraw();
+			}		
+		WireIt.Wire.prototype.onWireClick = function(x,y) {
+			console.log('WIRE CLICK!')
+			editor.wireClickSource = this.src.moduleId
+			editor.wireClickTarget = this.tgt.moduleId
+			editor.runReduction()
+			}
 		// Open the infos panel
 		editor.accordionView.openPanel(1);
 	}
@@ -255,6 +283,7 @@ YAHOO.util.Event.onDOMReady( function() {
 </head>
 
 <body class="yui-skin-sam">
+
 
 	<div id="top">
 		<div class="logo">Dataflow / Tracks</a></div>
@@ -287,6 +316,13 @@ YAHOO.util.Event.onDOMReady( function() {
 				<div id="layerMap"></div>
 			</div>
 		</li>
+		<li>
+		<h2> Plotting! </h2>
+		<div>
+		<div id="plot" style="display: block; border:1px solid; width:500px; height: 500px;"></div>
+		</div>
+		</li>
+
 		<li>
 			<h2>Info</h2>
 			<div>

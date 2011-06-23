@@ -2,13 +2,16 @@ pizza_prefs = {
     "brian": {
         "dislikes": [
             "anchovies"
-        ], 
+        ],
         "likes": [
-            "pepperoni", 
-            "sausage", 
+            "pepperoni",
+            "sausage",
             "mushrooms"
+        ],
+        "comments": [
+            "Doesn't really understand young people these days and their rejection of fungus as a food source"
         ]
-    }, 
+    },
     "ophir": {
         "likes": [
             "olives",
@@ -48,5 +51,37 @@ pizza_prefs = {
             "anchovies",
             "onions"
         ]
-    }
+    },
+    "andrew":{
+	   "likes": [
+	    "mushrooms",
+	    "onions",
+	    "olives",
+            "peppers",
+            "artichoke",
+            "eggplant",
+            "tomatoes",
+        ],
+	"dislikes": [
+	    "pineapple",
+            "anchovies",
+        ],
+	"streng verboten": [
+	    "meats of any kind"
+        ],
+    },
+    "elakian":{
+	"likes": [
+	    "mushrooms",
+	    "onions",
+	    "olives",
+            "peppers",
+        ],
+	"dislikes": [
+	    "pineapple",
+            "tomatoes",
+        ],
+    },
 }
+
+

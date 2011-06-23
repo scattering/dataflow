@@ -9,6 +9,7 @@
 <script language="javascript" type="text/javascript" src="jqplot/jquery.jqplot.js"></script>
 <script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.pcolorRenderer.js"></script>
 <script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.logAxisRenderer.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.cursor.js"></script>
 <!--<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.AxisTickRenderer.js"></script>-->
 <script language="javascript" type="text/javascript" src="palettes.js"></script>
 <link rel="stylesheet" type="text/css" href="jqplot/jquery.jqplot.css" />
@@ -16,6 +17,7 @@
 .jqplot-target { font-family: helvetica; }
 .m { font-family: cambria,serif; }
 h3 { font-weight: normal; }
+.jqplot-bubble-point { border: 1px solid green; }
 </style>
 <script type="text/javascript">
 var data =
@@ -42,6 +44,7 @@ var types = { lin: {
               }
             };
 var plot;
+var stage = 1;
 function DataSeries(props) {
   props.matrixfy = function(format) {
     return matrixfy(this.dims, this.func, format);
@@ -163,7 +166,7 @@ function matrixfy(d, func, format) {
 
 function renderData(data) {
   var series = [];
-  var options = { title: data[0].desc, series: [], axes: {} };
+  var options = { title: data[0].desc, series: [], axes: {}, cursor: { show: true, zoom: true } };
   
   for (index in data) {
 //    data[index].points = matrixfy(
@@ -195,7 +198,14 @@ function renderData(data) {
   }
   //console.log(series);
   //console.log(options);
-  plot = $.jqplot('chart1', series, options);
+  if (stage == 1)
+    plot = $.jqplot('chart1', series, options);
+  else {
+    stage = 2;
+    plot.series = series;
+    plot.options = options;
+    plot.redraw();
+  }
   //plot = $.jqplot('chart1', [[1,1]], {});
   return series;
 

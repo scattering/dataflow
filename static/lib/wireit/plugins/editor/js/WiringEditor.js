@@ -227,9 +227,9 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
        	this.alert("Please choose a name");
        	return;
     	}
-
-		this.tempSavedWiring = {name: value.name, working: value.working, language: this.options.languageName };
-                
+		// THIS IS WHERE THE MAGIC HAPPENS
+		// getValue returns the current wiring, and the tempSavedWiring parses all the relevant info
+		this.tempSavedWiring = {name: value.name, modules: value.working.modules, properties: value.working.properties, wires:value.working.wires, language: this.options.languageName };
     	this.adapter.saveWiring(this.tempSavedWiring, {
        	success: this.saveModuleSuccess,
        	failure: this.saveModuleFailure,
@@ -257,6 +257,57 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	 saveModuleFailure: function(errorStr) {
 	    this.alert("Unable to save the wiring : "+errorStr);
 	 },
+
+// added 6/21/11, Tracer
+// sends current wiring diagram to server as POST, should get reduced data to display/plot as a response
+	/**
+	* @method runReduction
+	*/
+
+	runReduction: function() {
+	var value = this.getValue()
+	//console.log(value)
+
+	if(value.name === "") {
+       		this.alert("Please choose a name");
+       	return;
+    	}
+	this.toReduce = {name: value.name, modules: value.working.modules, properties: 			value.working.properties, wires:value.working.wires, language: this.options.languageName };
+	this.adapter.runReduction(this.toReduce, {
+       	success: this.runModuleSuccess,
+       	failure: this.runModuleFailure,
+       	scope: this
+    	});
+ 	},
+
+	runModuleSuccess: function(display) {
+		var toPlot = display[this.wireClickSource].output[0], zipped = [];
+		if (toPlot.x.length != toPlot.y.length)
+			throw "Your data sucks";
+		for (i in toPlot.x)
+			if (!isNaN(toPlot.x[i]))
+				zipped.push([toPlot.x[i], toPlot.y[i]]);
+		//console.log(zipped);
+		
+
+		if (! plotCreated) {
+		  plot=$.jqplot('plot', [zipped]);
+		  plotCreated = true;
+			}
+		else {
+		  plot.resetAxesScale();
+		  plot.series[0].data = zipped;
+		  plot.replot();
+		}
+		},
+	
+	runModuleFailture: function(error) {
+		this.alert("Unable to run the reduction: " + error)
+		},
+		
+
+
+
 
 
 	 /**

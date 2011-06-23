@@ -5,12 +5,21 @@ from django.conf.urls.defaults import patterns, include, url
 # from django.contrib import admin
 # admin.autodiscover()
 
-urlpatterns = patterns('repo.tracks.views', 
+## PULLS VIEWS FROM TRACKS/VIEWS
+## WE WOULD LIKE IT TO PULL FROM APPS/TRACKS/VIEWS
+from django.conf import settings
+
+urlpatterns = patterns(settings.REPO_ROOT + '.apps.tracks.views', 
 		('^hello/$', 'xhr_test'),
 		('^test/$','mytest'),
 		('^listWirings/$', 'listWirings'),
 		('^editor/$', 'displayEditor'),
+
+		#Wiring editor adapter urls
 		('^editor/listWirings/$', 'listWirings'),
+		('^editor/saveWiring/$', 'saveWiring'),
+		('^editor/runReduction/$', 'runReduction'),
+
 		('', 'home'),
     # Examples:
     # url(r'^$', 'dataflow.views.home', name='home'),
