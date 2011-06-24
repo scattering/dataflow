@@ -234,45 +234,49 @@ def chain_corrections():
     transmission_sample_cell_4m_norm=monitor_normalize(transmission_sample_cell_4m)
     transmission_empty_cell_4m_norm=monitor_normalize(transmission_empty_cell_4m)
     empty_4m_norm=monitor_normalize(empty_4m) 
-    blocked_beam_4m_norm=monitor_normalize(blocked_beam_4m)
+    #Don't normalized this by monitor - it is a blocked beam and so should be independent of monitor
+    #blocked_beam_4m_norm=monitor_normalize(blocked_beam_4m)
         
     #calculate q
-    sample_4m_norm_q=convert_q(sample_4m_norm)
-    empty_cell_4m_norm_q=convert_q(empty_cell_4m)
-    blocked_beam_4m_norm_q=convert_q(blocked_beam_4m_norm)
-    transmission_sample_cell_4m_norm_q=convert_q(transmission_sample_cell_4m_norm)
-    transmission_empty_cell_4m_norm_q=convert_q(transmission_empty_cell_4m_norm)
-    empty_4m_norm_q=convert_q(empty_4m_norm)
-    
+#   Just do Q conversion at the end
+#    sample_4m_norm_q=convert_q(sample_4m_norm)
+#    empty_cell_4m_norm_q=convert_q(empty_cell_4m)
+#    blocked_beam_4m_norm_q=convert_q(blocked_beam_4m_norm)
+#    transmission_sample_cell_4m_norm_q=convert_q(transmission_sample_cell_4m_norm)
+#    transmission_empty_cell_4m_norm_q=convert_q(transmission_empty_cell_4m_norm)
+#    empty_4m_norm_q=convert_q(empty_4m_norm)
+
     
     print 'converted'
     #convert flatness
-    sample_4m_solid=correct_solid_angle(sample_4m_norm_q)
-    empty_cell_4m_solid=correct_solid_angle(empty_cell_4m_norm_q)
-    blocked_beam_4m_solid=correct_solid_angle(blocked_beam_4m_norm_q)
-    transmission_sample_cell_4m_solid=correct_solid_angle(transmission_sample_cell_4m_norm_q)
-    transmission_empty_cell_4m_solid=correct_solid_angle(transmission_empty_cell_4m_norm_q)
-    empty_4m_solid=correct_solid_angle(empty_4m_norm_q)
+    # Do this at the end
+#    sample_4m_solid=correct_solid_angle(sample_4m_norm_q)
+#    empty_cell_4m_solid=correct_solid_angle(empty_cell_4m_norm_q)
+#    blocked_beam_4m_solid=correct_solid_angle(blocked_beam_4m_norm_q)
+    #Transmission runs don't need this
+    #transmission_sample_cell_4m_solid=correct_solid_angle(transmission_sample_cell_4m_norm_q)
+    #transmission_empty_cell_4m_solid=correct_solid_angle(transmission_empty_cell_4m_norm_q)
+#    empty_4m_solid=correct_solid_angle(empty_4m_norm_q)
     
     
     #calculate transmission
     coord_left=(60,60)
     coord_right=(70,70)
-    transmission_sample_cell_4m_rat=generate_transmission(transmission_sample_cell_4m_solid,empty_4m_solid,
+    transmission_sample_cell_4m_rat=generate_transmission(transmission_sample_cell_4m_norm,empty_4m_norm,
                                                       coord_left,coord_right)
-    transmission_empty_cell_4m_rat=generate_transmission(transmission_empty_cell_4m_solid,empty_4m_solid,
+    transmission_empty_cell_4m_rat=generate_transmission(transmission_empty_cell_4m_norm,empty_4m_norm,
                                                       coord_left,coord_right)
     print 'Sample transmission= {0} (IGOR Value = 0.724): '.format(transmission_sample_cell_4m_rat)
     print 'Empty Cell transmission= {0} (IGOR Value = 0.929): '.format(transmission_empty_cell_4m_rat)
     print 'hi'
    
     #Initial Correction 
-    SAM = sample_4m_solid
+    SAM = sample_4m_norm
     print SAM.data.x 
-    EMP = empty_4m_solid
+    EMP = empty_cell_4m_norm
     print "EMP: "
     print EMP.data.x
-    BGD = blocked_beam_4m_solid
+    BGD = blocked_beam_4m
     print "BGD"
     print BGD.data.x
     Tsam = transmission_sample_cell_4m_rat
@@ -294,12 +298,45 @@ def chain_corrections():
     #-------------Initial Correction Ends------------------------
     
     ##Detector Efficiency Corrections (.DIV) 
-    CAL = COR.__truediv__(sensitivity)
-    print "After DIV: "
-    print CAL.data.x
+    CAL1 = COR.__truediv__(sensitivity)
+    #CAL = COR
+    #print "After DIV: "
+    #print CAL.data.x
+    CAL2 = convert_q(CAL1)
+    CAL = correct_solid_angle(CAL2)
+    
     ##Test DIV
-    plt.figure()
-    plt.imshow(CAL.data.x)
+    fig = plt.figure()
+    ax1 = fig.add_subplot(331, aspect='equal')
+    plt.title("SAM")
+    ax2 = fig.add_subplot(332, aspect='equal')
+    plt.title("EMP")
+    ax3 = fig.add_subplot(333, aspect='equal')
+    plt.title("BGD")
+    ax4 = fig.add_subplot(334, aspect='equal')
+    plt.title("COR1")
+    ax5 = fig.add_subplot(335, aspect='equal')
+    plt.title("COR3")
+    ax6 = fig.add_subplot(336, aspect='equal')
+    plt.title("COR")
+    ax7 = fig.add_subplot(337, aspect='equal')
+    plt.title("CAL1")
+    ax8 = fig.add_subplot(338, aspect='equal')
+    plt.title("CAL2")
+    ax9 = fig.add_subplot(339, aspect='equal')
+    plt.title("CAL")
+
+    
+    ax1.imshow(SAM.data.x)
+    ax2.imshow(EMP.data.x)
+    ax3.imshow(BGD.data.x)
+    ax4.imshow(COR1.data.x)
+    ax5.imshow(COR3.data.x)
+    ax6.imshow(COR.data.x)
+    ax7.imshow(CAL1.data.x)
+    ax8.imshow(CAL2.data.x)
+    ax9.imshow(CAL.data.x)
+    
     plt.show()
     #-------------DIV Ends------------------------
 
