@@ -61,6 +61,7 @@ pprint(t.wires)
 # run the reductions
 print "== calc"
 result = run_template(template, config)
+pprint(result)
 
 
 # commented out (for now) because it writes to system files
