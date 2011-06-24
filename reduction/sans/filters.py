@@ -33,7 +33,7 @@ from uncertainty import Measurement
 #implement line cut
 #ask andrew about reading mask files
 
-
+#----------Workflow change is on the verge of taking place------------
 PIXEL_SIZE_X_CM=.508
 PIXEL_SIZE_Y_CM=.508
 
@@ -79,7 +79,13 @@ def read_sample(myfilestr="MAY06001.SA3_CM_D545"):
     """Reads in a raw SANS datafile and returns a SansData
 """
     detdata,metadata=data.readNCNRData(myfilestr) #note that it should be None for the default
-    return SansData(detdata, metadata)
+    sansdata = SansData(detdata,metadata = meta)
+    sansdata = correct_solid_angle(sansdata)
+    sansdata = monitor_normalize(sansdata)
+    
+    
+    return sansdata
+   #return SansData(detdata, metadata)
 
 def read_div(myfilestr="test.div"):
     sensitivity = data.readNCNRSensitivity(myfilestr)
@@ -374,18 +380,15 @@ def chain_corrections():
     #-------------Absolute Scaling----------------
     
     #The Following values are needed for absolute scaling
-    #-TSTAND value: 1
-    #-DSTAND value: 1
-    #-IZERO - the value for this set of data: 6617.1
-    #-XSEC value: 1
-    #-Tsam - already have this value from above
+    #-TSTAND      value: 1
+    #-DSTAND      value: 1
+    #-IZERO - the value for this set of data: 6617.1 - this is Kappa also, i believe
+    #-XSEC        value: 1 
+    #-Tsam - already have this value from above 
     #-Dsam - sample thickness
     # Equation : ABS = (1/Kappa*Dsam*Tsam)*CAL
-    Dsam = CAL.metadata['sample.thk']
-    #Problem, q is not zero anywhere?
-    metadata['run.npre'],
-     
-    
+    Dsam =  CAL.metadata['sample.thk']
+    #Problem, q is not zero anywhere
     print "CAL.q: "
     print data.trunc(CAL.metadata['det.beamx'])
     print data.trunc(CAL.metadata['det.beamy'])
@@ -395,6 +398,10 @@ def chain_corrections():
     #x,y = q_is_zero_at(CAL)
     #IZERO = CAL.data.x[x,y]
     #print IZERO
+    
+    #ABS = CAL.__mul__.(1/IZERO*Dsam*Tsam)
+    
+    #-------------END of Absolute Scaling-------------
     
 
 def map_files(key):
