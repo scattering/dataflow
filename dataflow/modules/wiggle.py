@@ -28,7 +28,7 @@ def wiggle_module(id=None, datatype=None, action=None,
         dict(id='output',
              datatype=datatype,
              use='out',
-             description='scaled data',
+             description='corrected data',
              ),
     ]
 

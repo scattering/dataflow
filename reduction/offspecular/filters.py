@@ -1,4 +1,4 @@
-from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize
+from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin
 import os, simplejson, datetime, sys
 import types
 from copy import deepcopy

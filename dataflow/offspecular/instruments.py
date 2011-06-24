@@ -6,8 +6,6 @@ dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir)
 from pprint import pprint
 
-from numpy import zeros, arange, resize, ndarray
-
 from dataflow import config
 from dataflow.calc import run_template
 from dataflow.core import Datatype, Instrument, Template, register_instrument
@@ -19,6 +17,7 @@ from dataflow.modules.autogrid import autogrid_module
 from dataflow.modules.offset import offset_module
 from dataflow.modules.wiggle import wiggle_module
 from dataflow.modules.pixels_two_theta import pixels_two_theta_module
+from dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
 from reduction.offspecular.filters import *
 #from reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
 #from reduction.offspecular.reduction.formats import load as load_icp
@@ -51,7 +50,7 @@ def save_action(input=None, ext=None):
 def _save_one(input, ext):
     default_filename = "default.cg1"
     # modules like autogrid return MetaArrays that don't have filenames
-    outname = initname = input._info[-1]["path"] + "/" + input._info[-1].get("filename", default_filename)
+    outname = initname = input.extrainfo["path"] + "/" + input.extrainfo.get("filename", default_filename)
     if ext is not None:
         outname = ".".join([os.path.splitext(outname)[0], ext])
     print "saving", initname, 'as', outname
@@ -114,12 +113,24 @@ def _pixels_two_theta(data):
     return PixelsToTwotheta().apply(data)
 pixels_two_theta = pixels_two_theta_module(id='ospec.twotheta', datatype=OSPEC_DATA, version='1.0', action=pixels_two_theta_action)
 
+
+# Two theta to qxqz module
+def two_theta_qxqz_action(input=None):
+    flat = []
+    for bundle in input:
+        flat.extend(bundle)
+    result = [_two_theta_qxqz(f) for f in flat]
+    return dict(output=result)
+def _two_theta_qxqz(data):
+    return ThetaTwothetaToQxQz().apply(data)
+two_theta_qxqz = two_theta_qxqz_module(id='ospec.qxqz', datatype=OSPEC_DATA, version='1.0', action=two_theta_qxqz_action)
+
 #Instrument definitions
 ANDR = Instrument(id='ncnr.ospec.andr',
                  name='NCNR ANDR',
                  archive=config.NCNR_DATA + '/andr',
                  menu=[('Input', [load, save]),
-                       ('Reduction', [autogrid, join, offset, wiggle, pixels_two_theta])
+                       ('Reduction', [autogrid, join, offset, wiggle, pixels_two_theta, two_theta_qxqz])
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],
                  datatypes=[data2d],
@@ -141,13 +152,16 @@ if __name__ == '__main__':
         dict(module="ospec.offset", position=(420 , 100), config={'offsets':{'theta':0.1}}),
         dict(module="ospec.wiggle", position=(440 , 120), config={}),
         dict(module="ospec.twotheta", position=(460 , 140), config={}),
+        dict(module="ospec.qxqz", position=(480 , 160), config={}),
         ]
     wires = [
         dict(source=[0, 'output'], target=[3, 'input']),
         dict(source=[3, 'output'], target=[4, 'input']),
         dict(source=[4, 'output'], target=[5, 'input']),
         dict(source=[5, 'output'], target=[6, 'input']),
-        dict(source=[6, 'output'], target=[1, 'input']),
+        dict(source=[6, 'output'], target=[7, 'input']),
+        dict(source=[7, 'output'], target=[1, 'input']),
+
         ]
     config = [d['config'] for d in modules]
     template = Template(name='test ospec',
@@ -157,6 +171,7 @@ if __name__ == '__main__':
                         instrument=ANDR.id,
                         )
     result = run_template(template, config)
-    #pprint(result)
-    data = result[6]['output'][0] # output of the twotheta conversion
-    assert data.all() == eval(data._info[-1]["CreationStory"]).all()
+    pprint(result)
+    data = result[7]['output'][0] # output of the twotheta conversion
+    assert data.all() == eval(data.extrainfo["CreationStory"]).all()
+
