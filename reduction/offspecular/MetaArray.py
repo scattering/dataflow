@@ -33,7 +33,7 @@ def axis(name=None, cols=None, values=None, units=None):
       if type(c) != types.ListType and type(c) != types.TupleType:
         c = [c]
       col = {}
-      for i in range(0,len(c)):
+      for i in range(0, len(c)):
         col[cNameOrder[i]] = c[i]
       ax['cols'].append(col)
   return ax
@@ -97,11 +97,11 @@ class MetaArray(ndarray):
           info = list(info)
         except:
           raise Exception("Info must be a list of axis specifications")
-        if len(info) < subarr.ndim+1:
-          info.extend([{}]*(subarr.ndim+1-len(info)))
-        elif len(info) > subarr.ndim+1:
+        if len(info) < subarr.ndim + 1:
+          info.extend([{}]*(subarr.ndim + 1 - len(info)))
+        elif len(info) > subarr.ndim + 1:
           raise Exception("Info parameter must be list of length ndim+1 or less.")
-        for i in range(0,len(info)):
+        for i in range(0, len(info)):
           if type(info[i]) != types.DictType:
             if info[i] is None:
               info[i] = {}
@@ -142,9 +142,9 @@ class MetaArray(ndarray):
     return subarr
 
 
-  def __array_finalize__(self,obj):
+  def __array_finalize__(self, obj):
     # We use the getattr method to set a default if 'obj' doesn't have the 'info' attribute
-    self._info = getattr(obj, 'info', [{}]*(obj.ndim+1))
+    self._info = getattr(obj, 'info', [{}]*(obj.ndim + 1))
     self._infoOwned = False  ## Do not make changes to _info until it is copied at least once
       
     # We could have checked first whether self._info was already defined:
@@ -204,7 +204,7 @@ class MetaArray(ndarray):
     keyList = self[key]
     order = keyList.argsort()
     if type(axis) == types.IntType:
-      ind = [slice(None)]*axis
+      ind = [slice(None)] * axis
       ind.append(order)
     elif type(axis) == types.StringType:
       ind = (slice(axis, order),)
@@ -218,8 +218,8 @@ class MetaArray(ndarray):
     axis = self._interpretAxis(axis)
     s[axis] += 1
     n = MetaArray(tuple(s), info=self._info, dtype=self.dtype)
-    ind = [slice(None)]*self.ndim
-    ind[axis] = slice(None,-1)
+    ind = [slice(None)] * self.ndim
+    ind[axis] = slice(None, -1)
     n[tuple(ind)] = self
     ind[axis] = -1
     n[tuple(ind)] = val
@@ -258,9 +258,9 @@ class MetaArray(ndarray):
   def _interpretIndexes(self, ind):
     if type(ind) != types.TupleType:
       ind = (ind,)
-    nInd = [slice(None)]*self.ndim
+    nInd = [slice(None)] * self.ndim
     numOk = True  ## Named indices not started yet; numbered sill ok
-    for i in range(0,len(ind)):
+    for i in range(0, len(ind)):
       (axis, index, isNamed) = self._interpretIndex(ind[i], i, numOk)
       nInd[axis] = index
       if isNamed:

@@ -1,11 +1,12 @@
 from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty
-import os, simplejson, datetime
+import os, simplejson, datetime, sys
 import types
 from copy import deepcopy
+
 from FilterableMetaArray import FilterableMetaArray as MetaArray
-from He3Analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
-import reflectometry.reduction as red
-from reflectometry.reduction import rebin as reb
+from he3analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
+from reduction.formats import load
+import reduction.rebin as reb
 #import get_timestamps
 import xml.dom.minidom
 
@@ -139,26 +140,29 @@ class Filter2D:
     
     def __init__(self, *args, **kwargs):
         self.valid_column_labels = [['', '']]
-    
-    def updateCreationStory(apply):
-        """ 
-        decorator for 'apply' method - it updates the Creation Story
-        for each filter application.
-        """
-        
-        def newfunc(self, data, *args, **kwargs):
-            result = apply(self, *args, **kwargs)
-            name = self.__class__.__name__
-            new_info = result.infoCopy()
-            new_type = result.dtype
-            new_data = result.view(ndarray)
-            new_args = "".join([', {arg}'.format(arg=arg) for arg in args])
-            new_kwargs = "".join([', {key}={value}'.format(key=key, value=kwargs[key]) for key in kwargs])
-            new_creation_story = "{old_cs}.filter('{fname}', {args}, {kwargs})".format(old_cs=old_cs, fname=name, args=new_args, kwargs=new_kwargs)
-            #print new_creation_story
-            #new_info[-1]["CreationStory"]
-            return result
-        return newfunc
+
+# ******duplicate decorator, so I commented it out********
+
+#    def updateCreationStory(apply):
+#        """ 
+#        decorator for 'apply' method - it updates the Creation Story
+#        for each filter application.
+#        """
+#        
+#        def newfunc(self, data, *args, **kwargs):
+#            result = apply(self, *args, **kwargs)
+#            name = self.__class__.__name__
+#            new_info = result.infoCopy()
+#            new_type = result.dtype
+#            new_data = result.view(ndarray)
+#            new_args = "".join([', {arg}'.format(arg=arg) for arg in args])
+#            new_kwargs = "".join([', {key}={value}'.format(key=key, value=kwargs[key]) for key in kwargs])
+#            new_creation_story = "{old_cs}.filter('{fname}', {args}, {kwargs})".format(old_cs=old_cs, fname=name, args=new_args, kwargs=new_kwargs)
+#            #print new_creation_story
+#            #new_info[-1]["CreationStory"]
+#            return result
+#        return newfunc
+
     
     def check_labels(self, data):
         validated = True
@@ -422,68 +426,70 @@ class Autogrid(Filter2D):
         return output_grid
         
     
+# *******duplicate?********
     
-class ICPDataFromFile(MetaArray):
-    default_path = None
-       
-    def __new__(subtype, filename, path=None, auto_PolState=False, PolState=''):
-        """ 
-        loads a data file into a MetaArray and returns that.
-        Checks to see if data being loaded is 2D; if not, quits
-        
-        Need to rebin and regrid if the detector is moving...
-        """
-        lookup = {"a":"--", "b":"+-", "c":"-+", "d":"++", "g": ""}
-        if path == None:
-            path = subtype.default_path
-        if path == None:
-            path = os.getcwd()
-        subtype.default_path = path
-        Filter2D.default_path = path
-        
-        def new_single(filename, path, auto_PolState, PolState):
-            file_obj = red.load(os.path.join(path, filename))
-            if not (len(file_obj.detector.counts.shape) == 2):
-                # not a 2D object!
-                return
-            if auto_PolState:
-                key = filename[-2] # na1, ca1 etc. are --, nc1, cc1 are -+...
-                PolState = lookup[key]
-            # force PolState to a regularized version:
-            if not PolState in lookup.values():
-                PolState = ''
-            datalen, xpixels = file_obj.detector.counts.shape
-            creation_story = "ICPDataFromFile('{fn}'".format(fn=filename)
-            if not PolState == '':
-                creation_story += ", PolState='{0}'".format(PolState)
-            creation_story += ")" 
-            info = [{"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x, "det_angle":file_obj.detector.angle_x },
-                    {"name": "xpixel", "units": "pixels", "values": range(xpixels) },
-                    {"name": "Measurements", "cols": [
-                            {"name": "counts"},
-                            {"name": "pixels"},
-                            {"name": "monitor"},
-                            {"name": "count_time"}]},
-                    {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date,
-                     "CreationStory":creation_story, "path":path}]
-            data_array = zeros((datalen, xpixels, 4))
-            mon = file_obj.monitor.counts
-            mon.shape += (1,) # broadcast the monitor over the other dimension
-            count_time = file_obj.monitor.count_time
-            count_time.shape += (1,)
-            data_array[:, :, 0] = file_obj.detector.counts
-            data_array[:, :, 1] = 1
-            data_array[:, :, 2] = mon
-            data_array[:, :, 3] = count_time
-            # data_array[:,:,4]... I wish!!!  Have to do by hand.
-            data = MetaArray(data_array, dtype='float', info=info)
-            return data
-        
-        if type(filename) is types.ListType:
-            result = [new_single(fn, path, auto_PolState, PolState) for fn in filename]
-            return result
-        else:
-            return new_single(filename, path, auto_PolState, PolState)
+#class ICPDataFromFile(MetaArray):
+#    default_path = None
+#       
+#    def __new__(subtype, filename, path=None, auto_PolState=False, PolState=''):
+#        """ 
+#        loads a data file into a MetaArray and returns that.
+#        Checks to see if data being loaded is 2D; if not, quits
+#        
+#        Need to rebin and regrid if the detector is moving...
+#        """
+#        lookup = {"a":"--", "b":"+-", "c":"-+", "d":"++", "g": ""}
+#        if path == None:
+#            path = subtype.default_path
+#        if path == None:
+#            path = os.getcwd()
+#        subtype.default_path = path
+#        Filter2D.default_path = path
+#        
+#        def new_single(filename, path, auto_PolState, PolState):
+#            file_obj = load(os.path.join(path, filename))
+#            if not (len(file_obj.detector.counts.shape) == 2):
+#                # not a 2D object!
+#                return
+#            if auto_PolState:
+#                key = filename[-2] # na1, ca1 etc. are --, nc1, cc1 are -+...
+#                PolState = lookup[key]
+#            # force PolState to a regularized version:
+#            if not PolState in lookup.values():
+#                PolState = ''
+#            datalen, xpixels = file_obj.detector.counts.shape
+#            creation_story = "ICPDataFromFile('{fn}'".format(fn=filename)
+#            if not PolState == '':
+#                creation_story += ", PolState='{0}'".format(PolState)
+#            creation_story += ")" 
+#            info = [{"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x, "det_angle":file_obj.detector.angle_x },
+#                    {"name": "xpixel", "units": "pixels", "values": range(xpixels) },
+#                    {"name": "Measurements", "cols": [
+#                            {"name": "counts"},
+#                            {"name": "pixels"},
+#                            {"name": "monitor"},
+#                            {"name": "count_time"}]},
+#                    {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date,
+#                     "CreationStory":creation_story, "path":path}]
+#            data_array = zeros((datalen, xpixels, 4))
+#            mon = file_obj.monitor.counts
+#            mon.shape += (1,) # broadcast the monitor over the other dimension
+#            count_time = file_obj.monitor.count_time
+#            count_time.shape += (1,)
+#            data_array[:, :, 0] = file_obj.detector.counts
+#            data_array[:, :, 1] = 1
+#            data_array[:, :, 2] = mon
+#            data_array[:, :, 3] = count_time
+#            # data_array[:,:,4]... I wish!!!  Have to do by hand.
+#            data = MetaArray(data_array, dtype='float', info=info)
+#            return data
+#        
+#        if type(filename) is types.ListType:
+#            result = [new_single(fn, path, auto_PolState, PolState) for fn in filename]
+#            return result
+#        else:
+#            return new_single(filename, path, auto_PolState, PolState)
+
         
 
 def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
@@ -496,7 +502,7 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     lookup = {"a":"--", "b":"+-", "c":"-+", "d":"++", "g": ""}
     if path == None:
         path = os.getcwd()
-    file_obj = red.load(os.path.join(path, filename))
+    file_obj = load(os.path.join(path, filename))
     if not (len(file_obj.detector.counts.shape) == 2):
         # not a 2D object!
         return
@@ -507,9 +513,14 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     if not PolState in lookup.values():
         PolState = ''
     datalen, xpixels = file_obj.detector.counts.shape
-    creation_story = "LoadICPData('{fn}'".format(fn=filename)
-    if not PolState == '':
-        creation_story += ", PolState='{0}'".format(PolState)
+    creation_story = "LoadICPData('{fn}', path='{p}', auto_PolState={aPS}, PolState='{PS}'".format(fn=filename, p=path, aPS=auto_PolState, PS=PolState)
+
+# doesn't really matter; changing so that each keyword (whether it took the default value
+# provided or not) will be defined
+#    if not PolState == '':
+#        creation_story += ", PolState='{0}'".format(PolState)
+
+        
     creation_story += ")" 
     info = [{"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x, "det_angle":file_obj.detector.angle_x },
             {"name": "xpixel", "units": "pixels", "values": range(xpixels) },
@@ -994,98 +1005,14 @@ class CombinePolcorrect(Filter2D):
     def apply(self, list_of_datasets, grid=None):
         pass
 
-from pylab import *
-from plot_2d3 import *
-import wx
-#default_supervisor = Supervisor()
+# rowan tests
+if __name__ == '__main__':
+    data = LoadICPData('Isabc2003.cg1', '/home/brendan/dataflow/sampledata/ANDR/sabc/')
+    data = data.filter('CoordinateOffset', offsets={'theta': 0.1})
+    data = data.filter('WiggleCorrection')
+    #print data._info[-1]["CreationStory"]
+    #print eval(data._info[-1]["CreationStory"])
+    #print data
+    assert data.all() == eval(data._info[-1]["CreationStory"]).all()
 
-class filter_plot_2d_data(plot_2d_data):
-    """overriding the context menus to add interaction with other objects known to supervisor"""
-    supervisor = Supervisor()
-    
-    def __init__(self, *args, **kwargs):
-        plot_2d_data.__init__(self, *args, **kwargs)
-        self.supervisor.AddPlot2d(self, None, self.window_title)
-    
-    def get_all_plot_2d_instances(self):
-        """get all other plots that are open (from supervisor?)"""
 
-        supervisor = self.supervisor
-        instances = []
-        instance_names = []
-        #for dataset in supervisor.rebinned_data_objects:
-            ##instances.append(dataset)
-            #for subkey in dataset.__dict__.keys():
-                    #if isinstance(dataset.__dict__[subkey], plottable_2d_data):
-            ##print('plottable_2d_data yes')
-            #instance_names.append(str(dataset.number) + ': ' + subkey + ': ' + dataset.description)
-            #instances.append(dataset.__dict__[subkey])
-        instances = self.supervisor.plots2d_data_objects
-        instance_names = self.supervisor.plots2d_names
-
-        return instances, instance_names
-
-    def other_plots_menu(self):
-        other_plots, other_plot_names = self.get_all_plot_2d_instances()
-        other_menu = wx.Menu()
-        for op in other_plot_names:
-            item = other_menu.Append(wx.ID_ANY, op, op)
-        return other_menu
-
-    def other_plots_dialog(self):
-        other_plots, other_plot_names = self.get_all_plot_2d_instances()
-        #selection_num = wx.GetSingleChoiceIndex('Choose other plot', '', other_plot_names)
-        dlg = wx.SingleChoiceDialog(None, 'Choose other plot', '', other_plot_names)
-        dlg.SetSize(wx.Size(640, 480))
-        if dlg.ShowModal() == wx.ID_OK:
-            selection_num = dlg.GetSelection()
-        dlg.Destroy()
-        return other_plots[selection_num]
-
-    def dummy(self, evt):
-        print 'the event is: ' + str(evt)
-
-    def area_context(self, mpl_mouseevent, evt):
-        area_popup = wx.Menu()
-        item1 = area_popup.Append(wx.ID_ANY, '&Grid on/off', 'Toggle grid lines')
-        wx.EVT_MENU(self, item1.GetId(), self.OnGridToggle)
-        cmapmenu = CMapMenu(self, callback=self.OnColormap, mapper=self.mapper, canvas=self.canvas)
-        item2 = area_popup.Append(wx.ID_ANY, '&Toggle log/lin', 'Toggle log/linear scale')
-        wx.EVT_MENU(self, item2.GetId(), lambda evt: self.toggle_log_lin(mpl_mouseevent))
-        item3 = area_popup.AppendMenu(wx.ID_ANY, "Colourmaps", cmapmenu)
-        #other_plots, other_plot_names = self.get_all_plot_2d_instances()
-        #if not (other_plot_names == []):
-            #other_menu = wx.Menu()
-            #for op in other_plot_names:
-                #item = other_menu.Append(wx.ID_ANY, op, op)
-        #other_menu = self.other_plots_menu()
-        item4 = area_popup.Append(wx.ID_ANY, "copy intens. scale from", '')
-        wx.EVT_MENU(self, item4.GetId(), lambda evt: self.copy_intensity_range_from(self.other_plots_dialog()))
-        item5 = area_popup.Append(wx.ID_ANY, "copy slice region from", '')
-        wx.EVT_MENU(self, item5.GetId(), lambda evt: self.sliceplot(self.other_plots_dialog().slice_xy_range))
-        self.PopupMenu(area_popup, evt.GetPositionTuple())
-
-def ShowNormData(data, scale='log'):
-    dnorm = (data[:, :, 'counts'] / data[:, :, 'monitor']).view(ndarray).T
-    
-    info = data.infoCopy()
-    ext_y = [info[0]['values'].min(), info[0]['values'].max()]
-    y_label = '{name} ({units})'.format(name=info[0]['name'], units=info[0].get('units', ''))
-    ext_x = [info[1]['values'].min(), info[1]['values'].max()]
-    x_label = '{name} ({units})'.format(name=info[1]['name'], units=info[1].get('units', ''))
-    extent = ext_x + ext_y
-    #figure()
-    #if logscale:
-    #    dnorm = log(dnorm + 1e-7)
-    
-    #imshow(dnorm, origin='lower', aspect='auto', extent = extent)
-    #xlabel(label_x)
-    #ylabel(label_y)
-    pixel_mask = data[:, :, 'pixels'].copy()
-    plot_title = data.extrainfo['CreationStory']
-    frame = filter_plot_2d_data(dnorm, extent, None, scale=scale, pixel_mask=pixel_mask, window_title=plot_title, plot_title=plot_title, x_label=x_label, y_label=y_label)
-    frame.Show()
-    return frame
-    
-    
-        

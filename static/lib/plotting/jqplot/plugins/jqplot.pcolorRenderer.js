@@ -314,6 +314,8 @@
         console.log('dx', dx, 'dy', dy, 'dw', dw, 'dh', dh);
         
         if (sw > 0 && sh > 0) {
+            //test('mycanvas', this);
+            this.points = data[0].points;//
             test('invis', this);
             img = canvas2img('invis');
             
@@ -322,16 +324,20 @@
             this.canvas._elem.append(this.bubbleCanvases[idx].createElement(gd[0], gd[1], dw, dh, dx, dy));
             this.bubbleCanvases[idx].setContext();
             
-            console.log(ctx);
+            console.log('ctx', ctx);
             var ctx = this.bubbleCanvases[idx]._ctx;
             var x = ctx.canvas.width/2;
             var y = ctx.canvas.height/2;
 
             
             c=ctx;
-            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, dw, dh);
+            console.log('c.drawImage(img,'+sx+','+sy+','+sw+','+sh+',0,0,'+dw+','+dh+');');
+            // SUBRACTING ONE BECAUSE JAVASCRIPT HAS FLOATING POINT NUMBER ISSUES
+            img.onload = function() { console.log('ONLOAD'); ctx.drawImage(this, sx, sy, sw - 1, sh - 1, 0, 0, dw, dh); };
         }
-        console.log(this._xaxis);
+        else
+            throw "No data within bounds";
+        console.log('_xaxis', this._xaxis);
         console.log('# x', this._xaxis.min, this._xaxis.max, '; y', this._yaxis.min, this._yaxis.max);
         
         return;
@@ -436,7 +442,7 @@
         else {
             elem = document.createElement('canvas');
         }
-        console.log(this._offsets,this._plotDimensions)
+        
         elem.width = (w != null) ? w : elem.width;
         elem.height = (h != null) ? h : elem.height;
         this._elem = $(elem);
