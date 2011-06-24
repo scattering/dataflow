@@ -15,7 +15,7 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-AUTH_PROFILE_MODULE = 'apps.tracks.UserProfile'
+AUTH_PROFILE_MODULE = 'apps.tracks.Userprofile'
 
 DATABASES = {
     'default': {
