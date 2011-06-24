@@ -199,6 +199,7 @@ function renderData(data) {
     series.push(s_);
     //options.axes = { xaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } } , yaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } }};
     options.series.push({ renderer: $.jqplot.pcolorRenderer, rendererOptions: { dims: data[index].dims, autoscaleBubbles: false, /*bodyWidth: 1, wickColor: 'red', openColor: 'yellow', closeColor: 'blue'*/ } });
+    renderColorbar('colorbar', palette, edges_, 25);
   }
   console.log(series);
   //console.log(options);
@@ -235,19 +236,20 @@ function colorbar(canvasid, palette) {
   return imgd;
 }
 function renderColorbar(canvasid, palette, edges, nlabels) {
-  var imgd = colorbar('colorbar', palette);
-  img2 = canvas2img('colorbar');
+  var imgd = colorbar('invis2', palette);
+  img2 = canvas2img('invis2');
 
   var cvs = document.getElementById(canvasid);
   var ctx = getContext(canvasid);
-  img2.onload = function() { ctx.drawImage(this, 0, 0, 1, palette.length, 24, 0, cvs.width, cvs.height);
+  img2.onload = function() { ctx.clearRect(0, 0, cvs.width, cvs.height); ctx.drawImage(this, 0, 0, 1, palette.length, 48, 12, cvs.width, cvs.height - 24);
   
   ctx.textBaseline = 'middle';
-  for (var i = 0; i < nlabels; i ++) {
+  ctx.textAlign = 'right';
+  for (var i = 0; i <= nlabels - 1; i ++) {
     var r = i / (nlabels - 1);
     var val = types[edges.type].dist(r, edges.min, edges.max);
-    var h = types.lin.dist(1 - r, 0, cvs.height);
-    ctx.fillText(val.toPrecision(3), 0, h);
+    var h = types.lin.dist(1 - r, 12, cvs.height - 12);
+    ctx.fillText(val.toPrecision(3), 40, h);
   }
   };
 }
@@ -304,8 +306,9 @@ $(document).ready(function() {
 </script>
 </head>
 <body>
-<div id="chart1" style="height: 600px; width: 600px;"></div>
-<hr>
+<div id="chart1" style="float: left; height: 600px; width: 600px;"></div>
+<canvas id="colorbar" width="60" height="600" style="float: left;"></canvas>
+<hr style="clear: left;" />
 <form id="form1">
 <p><label for="funcs">Select a function:</label> <select id="funcs"></select></p>
 <p><label for="palettes">Select a palette:</label> <select id="palettes"></select></p>
@@ -316,6 +319,6 @@ $(document).ready(function() {
 <h3 id="desc"></h3>
 <canvas id="mycanvas" width="1024" height="1024" style="border: 1px dotted #bbb;"></canvas>
 <canvas id="invis" width="1024" height="1024" style="display: one;"></canvas>
-<canvas id="colorbar" width="1" height="1024" style="display: one;"></canvas>
+<canvas id="invis2" width="1" height="1024" style="display: one;"></canvas>
 </body>
 </html>
