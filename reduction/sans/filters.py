@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 
 import struct
@@ -49,13 +48,28 @@ class SansData(object):
     # Note that I have not defined an inplace subtraction    
     def __sub__(self,other):
         if isinstance(other,SansData):
-            SansData(self.data-other.data,deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+            return SansData(self.data-other.data,deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
         else:
             return SansData(data=self.data-other,metadata=deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
-        
+    #Actual subtraction
+    def __sub1__(self,other):
+        if isinstance(other,SansData):
+            return SansData(self.data.x-other.data.x,deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+        else:
+            return SansData(data=self.data.x-other.data.x,metadata=deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))       
     def __rsub__(self, other):
-        return SansData(data=other-self.data, metadata=deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
-
+        return SansData(data=other-self.data, metadata=deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))    
+    def __truediv__(self,other):
+        if isinstance(other,SansData):
+            return SansData(Measurement(*err1d.div(self.data.x,self.data.variance,other.data.x,other.data.variance)).x,deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+        else:
+            return SansData(data=Measurement(self.data.x/other, self.data.variance/other**2).x,metadata=deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+    def __mul__(self,other):
+        if isinstance(other,SansData):
+            return SansData(Measurement(*err1d.mul(self.data.x,self.data.variance,other.data.x,other.data.variance)).x,deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+        else:
+            return SansData(data = self.data.__mul__(other).x,metadata=deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+        
 def read_sample(myfilestr="MAY06001.SA3_CM_D545"):
     """Reads in a raw SANS datafile and returns a SansData
     """
@@ -129,8 +143,8 @@ def generate_transmission(in_beam,empty_beam,coords_bottom_left,coords_upper_rig
     The box is definied by its bottom left and upper right corner.  These are registered to pixel coordinates
     the coords are assumed to be tuple or a list in the order of (x,y).  I start counting at (0,0).
     """
-    I_in_beam=0
-    I_empty_beam=0
+    I_in_beam=0.0
+    I_empty_beam=0.0
     #Vectorize this loop, it's quick, but could be quicker
     #test against this simple minded implementation
     for x in range(coords_bottom_left[0],coords_upper_right[0]):
@@ -242,35 +256,53 @@ def chain_corrections():
     
     
     #calculate transmission
-    coord_left=(80,80)
-    coord_right=(110,110)
+    coord_left=(60,60)
+    coord_right=(70,70)
     transmission_sample_cell_4m_rat=generate_transmission(transmission_sample_cell_4m_solid,empty_4m_solid,
                                                       coord_left,coord_right)
     transmission_empty_cell_4m_rat=generate_transmission(transmission_empty_cell_4m_solid,empty_4m_solid,
                                                       coord_left,coord_right)
-    print 'transmission=',transmission_sample_cell_4m_rat
-    print 'transmission=',transmission_empty_cell_4m_rat
+    print 'Sample transmission= {0} (IGOR Value = 0.724): '.format(transmission_sample_cell_4m_rat)
+    print 'Empty Cell transmission= {0} (IGOR Value = 0.929): '.format(transmission_empty_cell_4m_rat)
     print 'hi'
-    
-   #Initial Correction
-    SAM = sample_4m_solid.data
-    print SAM.x
-    EMP = empty_4m_solid.data  
-    BGD = blocked_beam_4m_solid.data 
-    Tsam = transmission_sample_cell_4m_rat 
-    Temp = transmission_empty_cell_4m_rat 
-    COR1 = SAM.__sub__(BGD)
-    COR2 = (EMP.__sub__(BGD)).__mul__(Tsam/Temp)
-    COR = COR1.__sub__(COR2)
-    print "after initial correction: "
-    print COR.x
    
-   #Test initial correction
-    plt.figure()
-    plt.imshow(COR.x)
-    plt.show()
+    #Initial Correction 
+    SAM = sample_4m_solid
+    print SAM.data.x 
+    EMP = empty_4m_solid
+    print "EMP: "
+    print EMP.data.x
+    BGD = blocked_beam_4m_solid
+    print "BGD"
+    print BGD.data.x
+    Tsam = transmission_sample_cell_4m_rat
+    Temp = transmission_empty_cell_4m_rat
+    COR1 = SAM.__sub1__(BGD)
+    print COR1.data.x    #check=works
+    COR2 = (EMP.__sub1__(BGD))   #check=works
+    COR3 = COR2.__mul__(Tsam/Temp)       
+    print COR2.data.x
+    print COR3.data.x
+    COR = COR1.__sub1__(COR2)
+    print "after initial correction: "
+    print COR.data.x
+    
+    ##Test initial correction
+    #plt.figure()
+    #plt.imshow(COR.data.x)
+    #plt.show()
     #-------------Initial Correction Ends------------------------
     
+    ##Detector Efficiency Corrections (.DIV) 
+    CAL = COR.__truediv__(sensitivity)
+    print "After DIV: "
+    print CAL.data.x
+    ##Test DIV
+    plt.figure()
+    plt.imshow(CAL.data.x)
+    plt.show()
+    #-------------DIV Ends------------------------
+
 def map_files(key):
     """
     Generate the mapping between files and their roles
