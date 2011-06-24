@@ -41,34 +41,39 @@ class SansData(object):
     def __init__(self,data=None,metadata=None,q=None,qx=None,qy=None,theta=None):
         self.data=Measurement(data,data)
         self.metadata=metadata
-        self.q=q
+        self.q=q   #There are many places where q was not set, i think i fixed most, but there might be more; be wary
         self.qx=qx
         self.qy=qy
         self.theta=theta
     # Note that I have not defined an inplace subtraction    
     def __sub__(self,other):
         if isinstance(other,SansData):
-            return SansData(self.data-other.data,deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+            return SansData(self.data-other.data,deepcopy(self.metadata),q=copy(self.qx),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
         else:
-            return SansData(data=self.data-other,metadata=deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+            return SansData(data=self.data-other,metadata=deepcopy(self.metadata),q=copy(self.qx),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
     #Actual subtraction
     def __sub1__(self,other):
         if isinstance(other,SansData):
-            return SansData(self.data.x-other.data.x,deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+            return SansData(self.data.x-other.data.x,deepcopy(self.metadata),q=copy(self.qx),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
         else:
-            return SansData(data=self.data.x-other.data.x,metadata=deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))       
+            return SansData(data=self.data.x-other.data.x,metadata=deepcopy(self.metadata),q=copy(self.qx),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))  
+    def __add__(self,other):
+        if isinstance(other,SansData):
+            return SansData(self.data.x+other.data.x,deepcopy(self.metadata),q=copy(self.qx),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+        else:
+            return SansData(data=self.data.x+other.data.x,metadata=deepcopy(self.metadata),q=copy(self.qx),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))          
     def __rsub__(self, other):
-        return SansData(data=other-self.data, metadata=deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))    
+        return SansData(data=other-self.data, metadata=deepcopy(self.metadata),q=copy(self.qx),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))    
     def __truediv__(self,other):
         if isinstance(other,SansData):
-            return SansData(Measurement(*err1d.div(self.data.x,self.data.variance,other.data.x,other.data.variance)).x,deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+            return SansData(Measurement(*err1d.div(self.data.x,self.data.variance,other.data.x,other.data.variance)).x,deepcopy(self.metadata),q=copy(self.qx),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
         else:
-            return SansData(data=Measurement(self.data.x/other, self.data.variance/other**2).x,metadata=deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+            return SansData(data=Measurement(self.data.x/other, self.data.variance/other**2).x,metadata=deepcopy(self.metadata),q=copy(self.qx),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
     def __mul__(self,other):
         if isinstance(other,SansData):
-            return SansData(Measurement(*err1d.mul(self.data.x,self.data.variance,other.data.x,other.data.variance)).x,deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+            return SansData(Measurement(*err1d.mul(self.data.x,self.data.variance,other.data.x,other.data.variance)).x,deepcopy(self.metadata),q=copy(self.qx),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
         else:
-            return SansData(data = self.data.__mul__(other).x,metadata=deepcopy(self.metadata),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+            return SansData(data = self.data.__mul__(other).x,metadata=deepcopy(self.metadata),q=copy(self.qx),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
         
 def read_sample(myfilestr="MAY06001.SA3_CM_D545"):
     """Reads in a raw SANS datafile and returns a SansData
@@ -89,6 +94,8 @@ def monitor_normalize(sansdata,mon0=1e8):
     res=SansData()
     res.data=result
     res.metadata=deepcopy(sansdata.metadata)
+    #added res.q
+    res.q=copy(sansdata.q)
     res.qx=copy(sansdata.qx)
     res.qy=copy(sansdata.qy)
     res.theta=copy(sansdata.theta)
@@ -104,6 +111,8 @@ def correct_detector_efficiency(sansdata,sensitivity):
     res=SansData()
     res.data=result
     res.metadata=deepcopy(sansdata.metadata)
+    #added res.q
+    res.q=copy(sansdata.q)
     res.qx=copy(sansdata.qx)
     res.qy=copy(sansdata.qy)
     res.theta=copy(sansdata.theta)
@@ -124,6 +133,8 @@ def correct_blocked_beam(sample,blocked_beam,transmission):
     res=SansData()
     res.data=result
     res.metadata=deepcopy(sample.metadata)
+    #added res.q
+    res.q = copy(sample.q)
     res.qx=copy(sample.qx)
     res.qy=copy(sample.qy)
     res.theta=copy(sample.theta)
@@ -163,6 +174,8 @@ def correct_solid_angle(sansdata):
     res=SansData()
     res.data=result
     res.metadata=deepcopy(sansdata.metadata)
+    #adding res.q
+    res.q = copy(sansdata.q)
     res.qx=copy(sansdata.qx)
     res.qy=copy(sansdata.qy)
     res.theta=copy(sansdata.theta)
@@ -209,11 +222,24 @@ def convert_q(sansdata):
     res=SansData()
     res.data=copy(sansdata.data)
     res.metadata=deepcopy(sansdata.metadata)
+    #Adding res.q
+    res.q = q 
     res.qx=qx
     res.qy=qy
     res.theta=theta
-    return res         
-    
+    return res 
+#Made new function to get intensity value at which q is zero for absolute scaling
+def q_is_zero_at(sansdata):
+    sansdata = SansData(sansdata.data,sansdata.metadata,sansdata.q,sansdata.qx,sansdata.qy,sansdata.theta)
+    q = sansdata.q
+    print "q: "
+    print q
+    shape=(128,128)
+    for x in range(0,shape[0]):
+        for y in range(0,shape[1]):
+            if q[x,y] == 0.0:
+                return x,y
+            
 def chain_corrections():
     """a sample chain of corrections"""
     
@@ -257,7 +283,7 @@ def chain_corrections():
     #transmission_sample_cell_4m_solid=correct_solid_angle(transmission_sample_cell_4m_norm_q)
     #transmission_empty_cell_4m_solid=correct_solid_angle(transmission_empty_cell_4m_norm_q)
 #    empty_4m_solid=correct_solid_angle(empty_4m_norm_q)
-    
+
     
     #calculate transmission
     coord_left=(60,60)
@@ -266,10 +292,15 @@ def chain_corrections():
                                                       coord_left,coord_right)
     transmission_empty_cell_4m_rat=generate_transmission(transmission_empty_cell_4m_norm,empty_4m_norm,
                                                       coord_left,coord_right)
-    print 'Sample transmission= {0} (IGOR Value = 0.724): '.format(transmission_sample_cell_4m_rat)
+    print 'Sample transmission= {0} (IGOR Value = 0.724): '.format(transmission_sample_cell_4m_rat) #works now
     print 'Empty Cell transmission= {0} (IGOR Value = 0.929): '.format(transmission_empty_cell_4m_rat)
     print 'hi'
-   
+   #return sample,blocked,empty,Tsam,Temp,div
+    #return sample_4m_solid,blocked_beam_4m_solid,empty_4m_solid,transmission_sample_cell_4m_rat,transmission_empty_cell_4m_rat,sensitivity
+## ----------------Reduction Steps will now be inside reduction()------------------------
+#def reduction(): 
+    #SAM,BGD,EMP,Tsam,Temp,sensitivity = chain_corrections()
+    
     #Initial Correction 
     SAM = sample_4m_norm
     print SAM.data.x 
@@ -282,13 +313,14 @@ def chain_corrections():
     Tsam = transmission_sample_cell_4m_rat
     Temp = transmission_empty_cell_4m_rat
     COR1 = SAM.__sub1__(BGD)
-    print COR1.data.x    #check=works
-    COR2 = (EMP.__sub1__(BGD))   #check=works
+    print COR1.data.x    
+    COR2 = (EMP.__sub1__(BGD))   
     COR3 = COR2.__mul__(Tsam/Temp)       
     print COR2.data.x
     print COR3.data.x
-    COR = COR1.__sub1__(COR2)
+    COR = COR1.__sub1__(COR3)
     print "after initial correction: "
+    
     print COR.data.x
     
     ##Test initial correction
@@ -339,6 +371,32 @@ def chain_corrections():
     
     plt.show()
     #-------------DIV Ends------------------------
+    
+    #-------------Absolute Scaling----------------
+    
+    #The Following values are needed for absolute scaling
+    #-TSTAND      value: 1
+    #-DSTAND      value: 1
+    #-IZERO - the value for this set of data: 6617.1
+    #-XSEC        value: 1 
+    #-Tsam - already have this value from above 
+    #-Dsam - sample thickness
+    # Equation : ABS = (1/Kappa*Dsam*Tsam)*CAL
+    Dsam =  CAL.metadata['sample.thk']
+    #Problem, q is not zero anywhere?
+    metadata['run.npre'],
+     
+    
+    print "CAL.q: "
+    print data.trunc(CAL.metadata['det.beamx'])
+    print data.trunc(CAL.metadata['det.beamy'])
+    print CAL.data[data.trunc(CAL.metadata['det.beamx']),data.trunc(CAL.metadata['det.beamy'])]
+    print CAL.q
+    
+    #x,y = q_is_zero_at(CAL)
+    #IZERO = CAL.data.x[x,y]
+    #print IZERO
+    
 
 def map_files(key):
     """
