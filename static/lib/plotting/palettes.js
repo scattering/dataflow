@@ -74,6 +74,7 @@ function updatePalette(e) {
   data[0] = DataSeries(data[0]);
 //  plot.series[0] = newData;
 //  plot.replot();
+  plot.series[0].dims = data[0].dims;
   var newData = renderData(data);
   test('mycanvas', data[0]);
   plot.replot();
