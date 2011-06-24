@@ -259,7 +259,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	 },
 
 // added 6/21/11, Tracer
-// sends current wiring diagram to server as POST, should get reduced data to display/plot as a response
+// sends current wiring diagram to server as POST, gets data to display/plot as a response
 	/**
 	* @method runReduction
 	*/
@@ -305,10 +305,6 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		this.alert("Unable to run the reduction: " + error)
 		},
 		
-
-
-
-
 
 	 /**
 	  * @method onNew

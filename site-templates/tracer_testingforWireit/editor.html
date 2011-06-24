@@ -254,6 +254,13 @@ YAHOO.util.Event.onDOMReady( function() {
 		// editor
 		editor = new WireIt.WiringEditor(testLanguage);
 
+		// imagecontainer initial height, width
+		WireIt.ImageContainer.prototype.height = 40;
+		WireIt.ImageContainer.prototype.width = 40;
+		WireIt.ImageContainer.prototype.onMouseDown = function() {
+			console.log(this.getConfig())
+			}
+
 		// setting up events for wires
 		WireIt.Wire.prototype.onWireIn = function(x,y) {
 			this.color = 'rgb(255,0,0)';
