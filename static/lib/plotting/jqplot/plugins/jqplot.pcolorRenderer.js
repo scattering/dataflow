@@ -145,6 +145,18 @@
         this.bubbleCanvases = [];
         this._type = 'bubble';
         this.dims = { xmin: null, xmax: null, dx: null, ymin: null, ymax: null, dy: null };
+        this.zformatString = '%.3f';
+        this.zformatter = function (format, val) {
+            if (typeof val == 'number') {
+                if (!format) {
+                    format = $.jqplot.config.defaultTickFormatString;
+                }
+                return $.jqplot.sprintf(format, val);
+            }
+            else {
+                return String(val);
+            }
+        }
         
         // if user has passed in highlightMouseDown option and not set highlightMouseOver, disable highlightMouseOver
         if (options.highlightMouseDown && options.highlightMouseOver == null) {
@@ -333,7 +345,7 @@
             c=ctx;
             console.log('c.drawImage(img,'+sx+','+sy+','+sw+','+sh+',0,0,'+dw+','+dh+');');
             // SUBRACTING ONE BECAUSE JAVASCRIPT HAS FLOATING POINT NUMBER ISSUES
-            img.onload = function() { console.log('ONLOAD'); ctx.drawImage(this, sx, sy, sw - 1, sh - 1, 0, 0, dw, dh); };
+            img.onload = function() { console.log('ONLOAD'); ctx.drawImage(this, sx + 1, sy + 1, sw - 1, sh - 1, 0, 0, dw, dh); };
         }
         else
             throw "No data within bounds";
@@ -588,6 +600,8 @@
     };
     
     function highlight (plot, sidx, pidx) {
+        return;
+        //----
         plot.plugins.pcolorRenderer.highlightLabelCanvas.empty();
         var s = plot.series[sidx];
         var canvas = plot.plugins.pcolorRenderer.highlightCanvas;

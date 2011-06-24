@@ -383,6 +383,7 @@
     $.jqplot.postDrawHooks.push($.jqplot.Cursor.postDraw);
     
     function updateTooltip(gridpos, datapos, plot) {
+    console.log(gridpos.x,gridpos.y,'    ',datapos.xaxis,datapos.yaxis);
         var c = plot.plugins.cursor;
         var s = '';
         var addbr = false;
@@ -423,6 +424,7 @@
                     var cellid = $.inArray(idx, ret.indices);
                     var sx = undefined;
                     var sy = undefined;
+                    var sz = undefined; //
                     if (cellid != -1) {
                         var data = ret.data[cellid].data;
                         if (c.useAxesFormatters) {
@@ -432,15 +434,27 @@
                             var yfstr = series[i]._yaxis._ticks[0].formatString;
                             sx = xf(xfstr, data[0]);
                             sy = yf(yfstr, data[1]);
+                            
+                            if (!isNaN(data[2])) {
+                              var zf = series[i].zformatter;
+                              var zfstr = series[i].zformatString;
+                              sz = zf(zfstr, data[2]); //
+                            }
                         }
                         else {
                             sx = data[0];
                             sy = data[1];
+                            
+                            if (!isNaN(data[2]))
+                              sz = data[2]; //
                         }
                         if (addbr) {
                             s += '<br />';
                         }
-                        s += $.jqplot.sprintf(c.tooltipFormatString, label, sx, sy);
+                        if (sz) //
+                          s += $.jqplot.sprintf(c.tooltipFormatString, label, sx, sy, sz); //
+                        else //
+                          s += $.jqplot.sprintf(c.tooltipFormatString, label, sx, sy);
                         addbr = true;
                     }
                 }
@@ -513,7 +527,7 @@
                     p = s.gridData[j];
                     // check vertical line
                     if (c.showVerticalLine) {
-                        if (Math.abs(x-p[0]) <= threshold) {
+                        if (Math.abs(x-p[0]) <= threshold && Math.abs(y-p[1]) <= threshold) {
                             ret.indices.push(i);
                             ret.data.push({seriesIndex: i, pointIndex:j, gridData:p, data:s.data[j]});
                         }
