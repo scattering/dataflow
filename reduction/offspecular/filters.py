@@ -1,4 +1,4 @@
-from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty
+from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize
 import os, simplejson, datetime, sys
 import types
 from copy import deepcopy
@@ -1007,12 +1007,15 @@ class CombinePolcorrect(Filter2D):
 
 # rowan tests
 if __name__ == '__main__':
-    data = LoadICPData('Isabc2003.cg1', '/home/brendan/dataflow/sampledata/ANDR/sabc/')
+    data1 = LoadICPData('Isabc2003.cg1', '/home/brendan/dataflow/sampledata/ANDR/sabc/')
+    data2 = LoadICPData('Isabc2004.cg1', '/home/brendan/dataflow/sampledata/ANDR/sabc/')
+    data = [data1, data2]
+    data = Combine().apply(data)
     data = data.filter('CoordinateOffset', offsets={'theta': 0.1})
     data = data.filter('WiggleCorrection')
+    print data
     #print data._info[-1]["CreationStory"]
     #print eval(data._info[-1]["CreationStory"])
     #print data
     assert data.all() == eval(data._info[-1]["CreationStory"]).all()
-
 

@@ -168,7 +168,7 @@ function matrixfy(d, func, format) {
 
 function renderData(data) {
   var series = [];
-  var options = { title: data[0].desc, series: [], axes: {}, cursor: { show: true, zoom: true } };
+  var options = { title: data[0].desc, series: [], axes: { xaxis: { tickOptions: { formatString: '%.2f' } }, yaxis: { tickOptions: { formatString: '%.2f' } } }, cursor: { show: true, zoom: true, showTooltipDataPosition: true, showVerticalLine: true, showHorizontalLine: true, tooltipFormatString:  '%s (%s, %s, %s)' } };
   
   for (index in data) {
 //    data[index].points = matrixfy(
@@ -199,7 +199,7 @@ function renderData(data) {
     series.push(s_);
     //options.axes = { xaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } } , yaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } }};
     options.series.push({ renderer: $.jqplot.pcolorRenderer, rendererOptions: { dims: data[index].dims, autoscaleBubbles: false, /*bodyWidth: 1, wickColor: 'red', openColor: 'yellow', closeColor: 'blue'*/ } });
-    renderColorbar('colorbar', palette, edges_, 25);
+    renderColorbar('colorbar', palette, edges_, 13);
   }
   console.log(series);
   //console.log(options);
@@ -241,16 +241,24 @@ function renderColorbar(canvasid, palette, edges, nlabels) {
 
   var cvs = document.getElementById(canvasid);
   var ctx = getContext(canvasid);
-  img2.onload = function() { ctx.clearRect(0, 0, cvs.width, cvs.height); ctx.drawImage(this, 0, 0, 1, palette.length, 48, 12, cvs.width, cvs.height - 24);
+  img2.onload = function() {
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+      ctx.drawImage(this, 0, 0, 1, palette.length, 48, 11.5, cvs.width, cvs.height - 23);
   
-  ctx.textBaseline = 'middle';
-  ctx.textAlign = 'right';
-  for (var i = 0; i <= nlabels - 1; i ++) {
-    var r = i / (nlabels - 1);
-    var val = types[edges.type].dist(r, edges.min, edges.max);
-    var h = types.lin.dist(1 - r, 12, cvs.height - 12);
-    ctx.fillText(val.toPrecision(3), 40, h);
-  }
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'right';
+      ctx.strokeStyle = '#666';
+      ctx.fillStyle = '#666';
+      ctx.beginPath();
+      for (var i = 0; i <= nlabels - 1; i ++) {
+        var r = i / (nlabels - 1);
+        var val = types[edges.type].dist(r, edges.min, edges.max);
+        var h = types.lin.dist(1 - r, 12, cvs.height - 12);
+        ctx.fillText(val.toPrecision(3), 40, h + 1);
+        ctx.moveTo(48, h + .5);
+        ctx.lineTo(44, h + .5);
+      }
+      ctx.stroke();
   };
 }
 function test(canvasid, series) {
@@ -267,6 +275,7 @@ function test(canvasid, series) {
   var imgd = ctx.createImageData(w,h);
   var pix = imgd.data;
   for (var i = 0; n = pix.length, i < n; i += 4) {
+  a=[i,n,w,h,dims];
     var rgba = series.points[i/4][4];
     pix[i] = rgba[0];
     pix[i+1] = rgba[1];
