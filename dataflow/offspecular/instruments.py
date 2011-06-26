@@ -161,7 +161,6 @@ if __name__ == '__main__':
         dict(source=[5, 'output'], target=[6, 'input']),
         dict(source=[6, 'output'], target=[7, 'input']),
         dict(source=[7, 'output'], target=[1, 'input']),
-
         ]
     config = [d['config'] for d in modules]
     template = Template(name='test ospec',
@@ -172,6 +171,6 @@ if __name__ == '__main__':
                         )
     result = run_template(template, config)
     pprint(result)
-    data = result[7]['output'][0] # output of the twotheta conversion
-    assert data.all() == eval(data.extrainfo["CreationStory"]).all()
+    data = result[7]['output'][0] # output of the qxqz conversion
+    assert data.all() == eval(data.extrainfo["CreationStory"]).all() # verify the creation story (will this have much use?)
 

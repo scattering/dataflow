@@ -1,7 +1,11 @@
 """
 1-D and 2-D rebinning code.
 """
-import numpy, _reduction
+import numpy, struct
+if struct.calcsize("P") * 8 == 64:
+    import _reduction
+else:
+    import _reduction32 # 32 bit
 
 def rebin(x, I, xo, Io=None, dtype=numpy.float64):
     """
