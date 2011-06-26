@@ -173,4 +173,3 @@ if __name__ == '__main__':
     pprint(result)
     data = result[7]['output'][0] # output of the qxqz conversion
     assert data.all() == eval(data.extrainfo["CreationStory"]).all() # verify the creation story (will this have much use?)
-
