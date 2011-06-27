@@ -3,6 +3,7 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
+from apps.tracks.forms import languageSelectForm 
 
 from dataflow import wireit
 from dataflow.calc import run_template
@@ -55,5 +56,22 @@ def runReduction(request):
 	c = {'reduction':'successful', 'data': data}
 	return HttpResponse(simplejson.dumps(a))
 
+########
+## Views for displaying a language selection form and for calling the editor template with the selected language.
+## The intermediate template 'editorRedirect.html' is used so that we can redirect to /editor/ while preserving 
+## the language selection.
+
 def displayEditor(request):
-	return render_to_response('tracer_testingforWireit/editor.html')
+	print request.POST.has_key('language')
+	if request.POST.has_key('language'):
+		return render_to_response('tracer_testingforWireit/editor.html', {'lang':request.POST['language']})
+	else:
+		return HttpResponseRedirect('/editor/langSelect/')
+
+def languageSelect(request):
+	if request.POST.has_key('instruments'):
+		return render_to_response('tracer_testingforWireit/editorRedirect.html', 
+							{'lang':request.POST['instruments']})
+	form = languageSelectForm()
+	return render_to_response('tracer_testingforWireit/languageSelect.html', {'form':form})
+	

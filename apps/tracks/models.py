@@ -33,11 +33,11 @@ class Metadata(models.Model):
 
 class Template(models.Model):
 	Title = models.CharField(max_length=50) # name of experiment associated with template
-	Representation = models.CharField(max_length= 5000) # can easily convert back and forth from strings to 							    # dicts with str(dict) and dict(str)
-							    # might want to encode these representations, as they're
-							    # pretty long
+	Representation = models.TextField() # can easily convert back and forth from strings to 							    # dicts with str(dict) and dict(str)
 	user = models.ForeignKey(User, unique=True, null=True)
 	permissions = models.ForeignKey(Permission, null=True)
+	def __unicode__(self):
+		return self.Title
 
 class Project(models.Model):
 	Title = models.CharField(max_length=50) 
@@ -46,12 +46,17 @@ class Project(models.Model):
 	experiments = models.ManyToManyField('Experiment', null=True)
 	templateInstances = models.ManyToManyField('Template', null=True) # are the templates here and  								          # under Instruments meant to be different
 
+	def __unicode__(self):
+		return self.Title
+
 class Experiment(models.Model):
 	ProposalNum = models.IntegerField(null=True) # IMS proposal/request number
 	Files = models.ForeignKey('File', null=True)
 	users = models.ForeignKey(User, null=True)
 	permissions = models.ForeignKey(Permission, null=True)
 	instrument = models.ForeignKey('Instrument', unique=True, null=True)
+	def __unicode__(self):
+		return self.ProposalNum
 
 class Instrument(models.Model):
 	Name = models.CharField(max_length=50) #e.g., TAS, bt7, SANS
@@ -60,7 +65,8 @@ class Instrument(models.Model):
 	Calibrations = models.CharField(max_length=100) # is this so that we can have different instances of an
 							# an instrument varying by calibration?
 	
-	
+	def __unicode__(self):
+		return self.Name
 	
 	
 	
