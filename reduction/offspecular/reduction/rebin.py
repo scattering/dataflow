@@ -4,8 +4,10 @@
 import numpy, struct
 if struct.calcsize("P") * 8 == 64:
     import _reduction
+    reductionpkg = _reduction
 else:
-    import _reduction32 # 32 bit
+    import reduction32bit._reduction # 32 bit
+    reductionpkg = reduction32bit._reduction
 
 def rebin(x, I, xo, Io=None, dtype=numpy.float64):
     """
@@ -46,7 +48,7 @@ def rebin(x, I, xo, Io=None, dtype=numpy.float64):
 
     # Call rebin on type if it is available
     try:
-        rebincore = getattr(_reduction, 'rebin_' + I.dtype.name)
+        rebincore = getattr(reductionpkg, 'rebin_' + I.dtype.name)
     except AttributeError:
         raise TypeError("rebin supports uint8 uint16 uint32 float32 float64, not "
                         + I.dtype.name)
@@ -108,7 +110,7 @@ def rebin2d(x, y, I, xo, yo, Io=None, dtype=None):
 
     # Call rebin on type if it is available
     try:
-        rebincore = getattr(_reduction, 'rebin2d_' + I.dtype.name)
+        rebincore = getattr(reductionpkg, 'rebin2d_' + I.dtype.name)
     except AttributeError:
         raise TypeError("rebin2d supports uint8 uint16 uint32 float32 float64, not "
                         + I.dtype.name)
