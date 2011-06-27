@@ -383,7 +383,7 @@
     $.jqplot.postDrawHooks.push($.jqplot.Cursor.postDraw);
     
     function updateTooltip(gridpos, datapos, plot) {
-    console.log(gridpos.x,gridpos.y,'    ',datapos.xaxis,datapos.yaxis);
+        //console.log(gridpos.x,gridpos.y,'    ',datapos.xaxis,datapos.yaxis);
         var c = plot.plugins.cursor;
         var s = '';
         var addbr = false;

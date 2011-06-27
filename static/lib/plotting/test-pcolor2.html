@@ -12,6 +12,7 @@
 <script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.cursor.js"></script>
 <!--<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.AxisTickRenderer.js"></script>-->
 <script language="javascript" type="text/javascript" src="palettes.js"></script>
+<script language="javascript" type="text/javascript" src="sansdata.js"></script>
 <link rel="stylesheet" type="text/css" href="jqplot/jquery.jqplot.css" />
 <style rel="stylesheet" type="text/css">
 .jqplot-target { font-family: helvetica; }
@@ -20,8 +21,19 @@ h3 { font-weight: normal; }
 .jqplot-bubble-point { border: 1px dashed orange; }
 </style>
 <script type="text/javascript">
+sansdata=$.map(sansdata, function(x){f= $.map(x, function(d){return d+400}); return [f];});
+var m = Matrix(sansdata);
 var data =
 [
+  DataSeries({
+    name: "Sans data",
+    func: m.at,
+    desc: 'sans data',
+    axis: "lin",
+    dims: m.autodims,
+    palette: "jet",
+    edges: 255,
+  }),/*
   DataSeries({
     name: "Test",
     func: noob,
@@ -30,7 +42,7 @@ var data =
     dims: { xmin: -3, xmax: 3, dx: .5*96/1024, ymin: -3, ymax: 3, dy: .5*96/1024 },
     palette: 'jet',
     edges: 255,
-  })
+  })*/
 ];
 var types = { lin: {
                 incr: function(i, step) { return i + step; },
@@ -136,6 +148,7 @@ function noob5(x,y) { return x*y*y*y-y*x*x*x; }
 function noob6(x,y) { return -x*y*Math.exp(-x*x-y*y); }
 
 var funcs = {
+  sans: { f: m.at, desc: 'asdf' },
   noob: { f: noob, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = (1 &minus; <i>x</i>/2 + <i>x</i><sup>5</sup> + <i>y</i><sup>3</sup>) * exp(&minus;<i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup>)</span>' },
   noob2: { f: noob2, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = sin(<i>x</i><sup>2</sup> + <i>y</i><sup>2</sup>)</span>' },
   noob3: { f: noob3, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = <i>x</i></span>' },
@@ -144,7 +157,14 @@ var funcs = {
   noob6: { f: noob6, desc: '<span class="m"><i>f</i>(<i>x</i>, <i>y</i>) = &minus;<i>x</i><i>y</i> * exp(&minus;<i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup>)</span></span>' },
 };
 
-
+function Matrix(m) {
+  m.at = function(x, y) { if (m[y] == undefined) console.log(y,x);return m[y][x]; };
+  m.cols = m[0].length;
+  m.rows = m.length;
+  m.autodims = { xmin: 0, xmax: m.cols, dx: 1, ymin: -1, ymax: m.rows - 1, dy: 1 };
+  m.matrixfy = function(format) { return matrixfy(m.autodims, m.at, format); };
+  return m;
+}
 function matrixfy(d, func, format) {
   var matrix = [];
   for (var y = d.ymax; y > d.ymin; y -= d.dy) {
@@ -178,7 +198,7 @@ function renderData(data) {
     data[index].edges_ = edges_;
     var palette = palettes[data[index].palette](n+1);
     data[index].palette_ = palette;
-    $('#palettes').val(data[index].func);
+    //$('#funcs').val(data[index].name);
     $('#palettes').val(data[index].palette);
     $('#numedges').val(data[index].edges);
     var resguess = Math.pow(2, Math.log((data[index].dims.xmax - data[index].dims.xmin) / data[index].dims.dx) / Math.log(2));
