@@ -19,9 +19,6 @@ from dataflow.modules.wiggle import wiggle_module
 from dataflow.modules.pixels_two_theta import pixels_two_theta_module
 from dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
 from reduction.offspecular.filters import *
-#from reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
-#from reduction.offspecular.reduction.formats import load as load_icp
-#import reduction.offspecular.reduction.rebin as reb
 
 
 # Datatype
