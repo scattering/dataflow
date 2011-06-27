@@ -1,16 +1,16 @@
 """
-Converts to Q
+Normalize Monitors (not blocked beam file)
 """
 
 from .. import config
 from ..core import Module
 
-def convertq_module(id=None, datatype=None, action=None,
+def monitor_normalize_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
-    """Converts to Q"""
+    """Normalize Monitors"""
 
     icon = {
-        'URI': config.IMAGES + "convertq.png",
+        'URI': config.IMAGES + "monitor_normalize.png",
         'terminals': {
             'input': (0, 10, -1, 0),
             'output': (20, 10, 1, 0),
@@ -28,13 +28,13 @@ def convertq_module(id=None, datatype=None, action=None,
         dict(id='output',
              datatype=datatype,
              use='out',
-             description='converted data',
+             description='monitor normalized',
              ),
     ]
 
     # Combine everything into a module.
     module = Module(id=id,
-                  name='Convertq',
+                  name='monitor_normalize',
                   version=version,
                   description=action.__doc__,
                   icon=icon,
@@ -44,3 +44,4 @@ def convertq_module(id=None, datatype=None, action=None,
                   )
 
     return module
+

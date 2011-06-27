@@ -1,16 +1,16 @@
 """
-Converts to Q
+Subtracts the Background from Sample (SAM-BGD)
 """
 
 from .. import config
 from ..core import Module
 
-def convertq_module(id=None, datatype=None, action=None,
+def correct_background_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
-    """Converts to Q"""
+    """SAM-BGD"""
 
     icon = {
-        'URI': config.IMAGES + "convertq.png",
+        'URI': config.IMAGES + "correct_background.png",
         'terminals': {
             'input': (0, 10, -1, 0),
             'output': (20, 10, 1, 0),
@@ -28,13 +28,13 @@ def convertq_module(id=None, datatype=None, action=None,
         dict(id='output',
              datatype=datatype,
              use='out',
-             description='converted data',
+             description='background correction',
              ),
     ]
 
     # Combine everything into a module.
     module = Module(id=id,
-                  name='Convertq',
+                  name='correct_background',
                   version=version,
                   description=action.__doc__,
                   icon=icon,
@@ -44,3 +44,4 @@ def convertq_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
