@@ -173,7 +173,7 @@ WireIt.BaseEditor.prototype = {
 	    saveButton.on("click", function() {this.onSave() }, this, true);
 
 	    var deleteButton = new widget.Button({ label:"Delete", id:"WiringEditor-deleteButton", container: toolbar });
-	    deleteButton.on("click", this.onDelete, this, true);
+	    deleteButton.on("click", function() {this.onDelete()}, this, true);
 
 	    var helpButton = new widget.Button({ label:"Help", id:"WiringEditor-helpButton", container: toolbar });
 	    helpButton.on("click", this.onHelp, this, true);

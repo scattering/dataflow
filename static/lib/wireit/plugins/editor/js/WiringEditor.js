@@ -222,14 +222,15 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
  	save: function() {
   
     	var value = this.getValue();
-    
-    	if(value.name === "") {
+    	var wirename = prompt('Please enter a name for this wiring template', value.name)
+    	if(wirename === "") {
        	this.alert("Please choose a name");
        	return;
     	}
 		// THIS IS WHERE THE MAGIC HAPPENS
 		// getValue returns the current wiring, and the tempSavedWiring parses all the relevant info
-		this.tempSavedWiring = {name: value.name, modules: value.working.modules, properties: value.working.properties, wires:value.working.wires, language: this.options.languageName };
+		this.tempSavedWiring = {name: wirename, modules: value.working.modules, properties: value.working.properties, wires:value.working.wires, language: this.options.languageName };
+	this.tempSavedWiring.properties.name = wirename
     	this.adapter.saveWiring(this.tempSavedWiring, {
        	success: this.saveModuleSuccess,
        	failure: this.saveModuleFailure,
@@ -333,7 +334,9 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	  */
 	 onDelete: function() {
 	    if( confirm("Are you sure you want to delete this wiring ?") ) {
-       
+		this.layer.clear()
+		console.log('DELETED')
+		/*       
 	      var value = this.getValue();
 	 		this.adapter.deleteWiring({name: value.name, language: this.options.languageName},{
 	 			success: function(result) {
@@ -345,7 +348,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 				},
 				scope: this
 	 		});
-       
+       		*/
 	    }
 	 },
 
