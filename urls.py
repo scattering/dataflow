@@ -13,9 +13,12 @@ urlpatterns = patterns(settings.REPO_ROOT + '.apps.tracks.views',
 		('^hello/$', 'xhr_test'),
 		('^test/$','mytest'),
 		('^listWirings/$', 'listWirings'),
+		
+		# Wiring editor display urls
 		('^editor/$', 'displayEditor'),
+		('^editor/langSelect/$', 'languageSelect'),
 
-		#Wiring editor adapter urls
+		# Wiring editor adapter urls
 		('^editor/listWirings/$', 'listWirings'),
 		('^editor/saveWiring/$', 'saveWiring'),
 		('^editor/runReduction/$', 'runReduction'),

@@ -3,6 +3,7 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
+from apps.tracks.forms import languageSelectForm 
 
 from dataflow import wireit
 from dataflow.calc import run_template
@@ -31,7 +32,7 @@ def home(request):
 	site_list = ['/hello/','/test/', '/editor/']
 	return render_to_response('tracer_testingforWireit/home.html', locals())
 
-a = [{"name":"TASWires","wires": [{"src": {"terminal": "output", "moduleId": 0}, "tgt": {"terminal": "input", "moduleId": 1}}, {"src": {"terminal": "output", "moduleId": 1}, "tgt": {"terminal": "input", "moduleId": 2}}, {"src": {"terminal": "output", "moduleId": 2}, "tgt": {"terminal": "input", "moduleId": 3}}], "modules": [{"terminals": "", "config": {"position": [5, 20], "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": {"input": [-15, 1, -1, 0], "output": [15, 1, 1, 0]}, "config": {"position": [160, 20], "xtype": "WireIt.ImageContainer"}, "name": "Join", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [280, 40], "xtype": "WireIt.ImageContainer"}, "name": "Scale", "value": {}}, {"terminals": "", "config": {"position": [340, 40], "xtype": "WireIt.Container"}, "name": "Save", "value": {}}], "properties": {"name": "test tas", "description": "example TAS diagram"}}]	
+a = [{"name":"test tas","wires": [{"src": {"terminal": "output", "moduleId": 0}, "tgt": {"terminal": "input", "moduleId": 1}}, {"src": {"terminal": "output", "moduleId": 1}, "tgt": {"terminal": "input", "moduleId": 2}}, {"src": {"terminal": "output", "moduleId": 2}, "tgt": {"terminal": "input", "moduleId": 3}}], "modules": [{"terminals": "", "config": {"position": [5, 20], "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": {"input": [-15, 1, -1, 0], "output": [15, 1, 1, 0]}, "config": {"position": [160, 20], "xtype": "WireIt.ImageContainer"}, "name": "Join", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [280, 40], "xtype": "WireIt.ImageContainer"}, "name": "Scale", "value": {}}, {"terminals": "", "config": {"position": [340, 40], "xtype": "WireIt.Container"}, "name": "Save", "value": {}}], "properties": {"name": "test tas", "description": "example TAS diagram"}}]	
 
 b = {'save':'successful'}
 
@@ -55,5 +56,22 @@ def runReduction(request):
 	c = {'reduction':'successful', 'data': data}
 	return HttpResponse(simplejson.dumps(a))
 
+########
+## Views for displaying a language selection form and for calling the editor template with the selected language.
+## The intermediate template 'editorRedirect.html' is used so that we can redirect to /editor/ while preserving 
+## the language selection.
+
 def displayEditor(request):
-	return render_to_response('tracer_testingforWireit/editor.html')
+	print request.POST.has_key('language')
+	if request.POST.has_key('language'):
+		return render_to_response('tracer_testingforWireit/editor.html', {'lang':request.POST['language']})
+	else:
+		return HttpResponseRedirect('/editor/langSelect/')
+
+def languageSelect(request):
+	if request.POST.has_key('instruments'):
+		return render_to_response('tracer_testingforWireit/editorRedirect.html', 
+							{'lang':request.POST['instruments']})
+	form = languageSelectForm()
+	return render_to_response('tracer_testingforWireit/languageSelect.html', {'form':form})
+	

@@ -222,8 +222,11 @@ div.Bubble div.body {
 <!-- <script type="text/javascript" src="../../static/lib/wireit/plugins/editor/js/adapters/json-rpc.js"></script> -->
 <script type="text/javascript" src="../../static/lib/tracks/test_adapter.js"></script>
 
-<!-- Language -->
+<!-- Languages -->
 <script type="text/javascript" src="../../static/wireit_test/language.js"></script>
+
+<!-- language dictionary -->
+<script type="text/javascript" src="../../static/wireit_test/lang_dict.js"></script>
 
 
 <style>
@@ -243,16 +246,16 @@ inputEx.spacerUrl = "/inputex/trunk/images/space.gif";
 
 YAHOO.util.Event.onDOMReady( function() {
 	try {	
-
+		var CHOSEN_LANG = languageDictionary["{{ lang }}"]
 
 		// setting up the WireEditor with the adapter 'tracks'
-		testLanguage['adapter'] = WireIt.WiringEditor.adapters.tracks;
+		CHOSEN_LANG['adapter'] = WireIt.WiringEditor.adapters.tracks;
 		
 		// initial settings
 		plotCreated = false;
 
 		// editor
-		editor = new WireIt.WiringEditor(testLanguage);
+		editor = new WireIt.WiringEditor(CHOSEN_LANG);
 
 		// imagecontainer initial height, width
 		WireIt.ImageContainer.prototype.height = 40;
