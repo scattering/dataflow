@@ -7,7 +7,7 @@ from ..core import Module
 
 def two_theta_qxqz_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
-    """Creates a module for converting to Qx and Qz"""
+    """Creates a module for converting theta and two theta to qx and qz"""
 
     icon = {
         'URI': config.IMAGES + "qxqz.png",
@@ -28,7 +28,7 @@ def two_theta_qxqz_module(id=None, datatype=None, action=None,
         dict(id='output',
              datatype=datatype,
              use='out',
-             description='scaled data',
+             description='data with qxqz',
              ),
     ]
 
