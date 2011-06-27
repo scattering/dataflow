@@ -1,6 +1,16 @@
 import Image, ImageDraw
 import numpy
 
+def rebin_factor_2d(a, factor):
+    shape = a.shape
+    return a.reshape(shape[0]/factor, factor, shape[1]/factor, factor).mean(1).mean(2)
+    evList = ['a.reshape('] + \
+             ['args[%d],factor[%d],'%(i,i) for i in range(lenShape)] + \
+             [')'] + ['.mean(%d)'%(i+1) for i in range(lenShape)]
+    print ''.join(evList)
+    return eval(''.join(evList))
+
+
 def annular_mask_antialiased(shape, center, inner_radius, outer_radius, background_value=0.0, mask_value=1.0, oversampling=8):
     """
     Takes shape tuple: (x,y) - this is the size of the output image 
@@ -45,7 +55,11 @@ def annular_mask_antialiased(shape, center, inner_radius, outer_radius, backgrou
     draw.ellipse(inner_bbox, fill = background_value)
     
     #now bring it back to size, with antialiasing
-    im.thumbnail(shape, Image.ANTIALIAS)
+    #im.thumbnail(shape, Image.ANTIALIAS)
+    # this produced artifacts - output.max() was > mask_value by 10% or more!
+    
+    # using numpy reshape instead (rebinning) - see Scipy cookbook
     
     output = numpy.asarray(im)
+    output = output.reshape(shape[0], oversampling, shape[1], oversampling).mean(1).mean(2)
     return output
