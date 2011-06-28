@@ -325,23 +325,34 @@ def annular_av(sansdata):
   
     q = sansdata.q
     qx=q*np.cos(alpha)
-    step = qx[1,0]-qx[0,0]
-    print "Step: ",step
+    print q
+    # calculate the change in q that corresponds to a change in pixel of 1
+    q_per_pixel = qx[1,0]-qx[0,0] / 1.0
+    # for now, we'll make the q-bins have the same width as a single pixel
+    step = q_per_pixel
+    #print "Step: ",step
     shape1 = (128,128)
     center = (sansdata.metadata['det.beamx'],sansdata.metadata['det.beamy'])
     Qmax = q.max()
     #print "QMax: ",Qmax
     Q = np.arange(0,Qmax,step)
+    #print "Q=",Q
     I = []
     for i in Q:
-        mask = annular_mask_antialiased(shape1,center,i*(1/step),i+step)
-    print "Mask: ",mask.data
-        #norm_integrated_intensity = sum(mask.data)
-        #if (norm_integrated_intensity !=  0.0):
-            #norm_integrated_intensity/=sum(mask)
-        #I.append(norm_integrated_intensity)
-    #print "Q is : ", Q
-    #print "I is : ", I
+        # inner radius is the q we're at right now, converted to pixel dimensions:
+        inner_r = i * (1.0/q_per_pixel)
+        # outer radius is the q of the next bin, also converted to pixel dimensions:
+        outer_r = (i + step) * (1.0/q_per_pixel)
+        mask = annular_mask_antialiased(shape1,center,inner_r,outer_r)
+        # my handwriting may have been illegible here:  I was trying to write the product of mask and data,
+        # not mask.data (sorry - Brian)
+        #print "Mask: ",mask
+        norm_integrated_intensity = np.sum(mask*sansdata.data.x)
+        if (norm_integrated_intensity !=  0.0):
+            norm_integrated_intensity/=np.sum(mask)
+        I.append(norm_integrated_intensity)
+    print "Q is : ", Q
+    print "I is : ", I
     
 def chain_corrections():
     """a sample chain of corrections"""
@@ -436,11 +447,14 @@ def chain_corrections():
     
     #Now converting to q
     CAL2 = convert_q(CAL1)
-    #Now performing solid angle correction on the 2D data
+    #Now performing solid angle correction on the 2D data    
     CAL = correct_solid_angle(CAL2)
     
-    CAL = convert_qxqy(CAL)
-    annular_av(CAL)
+    #CAL = convert_qxqy(CAL)
+    # convert_qxqy shouldn't be used as a filter that returns data... 
+    # it puts data into an output form different than sansdata
+    CAL = annular_av(CAL)
+
     #print "MaxQ: "
     file = open("/home/elakian/sansdata.dat","w")
     
