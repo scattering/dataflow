@@ -7,9 +7,9 @@ from django.conf.urls.defaults import patterns, include, url
 
 ## PULLS VIEWS FROM TRACKS/VIEWS
 ## WE WOULD LIKE IT TO PULL FROM APPS/TRACKS/VIEWS
-from django.conf import settings
+import ROOT_URL
 
-urlpatterns = patterns(settings.REPO_ROOT + '.apps.tracks.views', 
+urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views', 
 		('^hello/$', 'xhr_test'),
 		('^test/$','mytest'),
 		('^listWirings/$', 'listWirings'),
