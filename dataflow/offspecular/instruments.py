@@ -150,13 +150,13 @@ if __name__ == '__main__':
     modules = [
         dict(module="ospec.load", position=(50, 50),
              config={'files': files, 'intent': 'signal'}),
-        dict(module="ospec.save", position=(350, 350), config={'ext': 'dat'}),
+        dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
 #        dict(module="ospec.grid", position=(360 , 60), config={}),
-        dict(module="ospec.join", position=(100, 100), config={}),
-        dict(module="ospec.offset", position=(150, 150), config={'offsets':{'theta':0.1}}),
-        dict(module="ospec.wiggle", position=(200, 200), config={}),
-        dict(module="ospec.twotheta", position=(250, 250), config={}),
-        dict(module="ospec.qxqz", position=(300, 300), config={}),
+        dict(module="ospec.join", position=(150, 100), config={}),
+        dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':0.1}}),
+        dict(module="ospec.wiggle", position=(350, 200), config={}),
+        dict(module="ospec.twotheta", position=(450, 250), config={}),
+        dict(module="ospec.qxqz", position=(550, 300), config={}),
         ]
     wires = [
         dict(source=[0, 'output'], target=[2, 'input']),
