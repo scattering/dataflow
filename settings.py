@@ -126,7 +126,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     
     # I do not have this file
-#    'django.contrib.staticfiles',
+    'django.contrib.staticfiles',
 
     'apps.tracks',
     # Uncomment the next line to enable the admin:

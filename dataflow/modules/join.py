@@ -13,7 +13,7 @@ def join_module(id=None, datatype=None, action=None,
     """
 
     icon = {
-        'URI': config.MEDIA + '/sum.png',
+        'URI': config.IMAGES + 'sum.png',
         'terminals': {
             'input': (-15, 1, -1, 0),
             'output': (15, 1, 1, 0),

@@ -13,7 +13,7 @@ def autogrid_module(id=None, datatype=None, action=None,
     """
 
     icon = {
-        'URI': config.MEDIA + '/grid.png',
+        'URI': config.IMAGES + 'grid.png',
         'terminals': {
             'input': (-15, 1, -1, 0),
             'output': (15, 1, 1, 0),

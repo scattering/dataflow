@@ -1,7 +1,8 @@
 
 INSTRUMENTS = ['ncnr.tas.bt7']
 MEDIA = "/media/"
-IMAGES = MEDIA + "images/"  # URI to root of image directory
+#IMAGES = MEDIA + "images/"  # URI to root of image directory
+IMAGES = "../../static/img/rowantests/" # different location
 JSCRIPT = MEDIA + "scripts/"
 NCNR_DATA = "http://www.ncnr.nist.gov/data/"
 

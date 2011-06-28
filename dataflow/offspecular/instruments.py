@@ -8,6 +8,7 @@ from pprint import pprint
 
 from dataflow import config
 from dataflow.calc import run_template
+from dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
 from dataflow.core import Datatype, Instrument, Template, register_instrument
 from dataflow.modules.load import load_module
 from dataflow.modules.join import join_module
@@ -147,23 +148,23 @@ if __name__ == '__main__':
     path, ext = dir + '/sampledata/ANDR/sabc/Isabc20', '.cg1'
     files = [path + str(i + 1).zfill(2) + ext for i in range(1, 12)]
     modules = [
-        dict(module="ospec.load", position=(5, 20),
+        dict(module="ospec.load", position=(50, 50),
              config={'files': files, 'intent': 'signal'}),
-        dict(module="ospec.save", position=(280, 40), config={'ext': 'dat'}),
-        dict(module="ospec.grid", position=(360 , 60), config={}),
-        dict(module="ospec.join", position=(400 , 80), config={}),
-        dict(module="ospec.offset", position=(420 , 100), config={'offsets':{'theta':0.1}}),
-        dict(module="ospec.wiggle", position=(440 , 120), config={}),
-        dict(module="ospec.twotheta", position=(460 , 140), config={}),
-        dict(module="ospec.qxqz", position=(480 , 160), config={}),
+        dict(module="ospec.save", position=(350, 350), config={'ext': 'dat'}),
+#        dict(module="ospec.grid", position=(360 , 60), config={}),
+        dict(module="ospec.join", position=(100, 100), config={}),
+        dict(module="ospec.offset", position=(150, 150), config={'offsets':{'theta':0.1}}),
+        dict(module="ospec.wiggle", position=(200, 200), config={}),
+        dict(module="ospec.twotheta", position=(250, 250), config={}),
+        dict(module="ospec.qxqz", position=(300, 300), config={}),
         ]
     wires = [
-        dict(source=[0, 'output'], target=[3, 'input']),
+        dict(source=[0, 'output'], target=[2, 'input']),
+        dict(source=[2, 'output'], target=[3, 'input']),
         dict(source=[3, 'output'], target=[4, 'input']),
         dict(source=[4, 'output'], target=[5, 'input']),
         dict(source=[5, 'output'], target=[6, 'input']),
-        dict(source=[6, 'output'], target=[7, 'input']),
-        dict(source=[7, 'output'], target=[1, 'input']),
+        dict(source=[6, 'output'], target=[1, 'input']),
         ]
     config = [d['config'] for d in modules]
     template = Template(name='test ospec',
@@ -172,6 +173,10 @@ if __name__ == '__main__':
                         wires=wires,
                         instrument=ANDR.id,
                         )
+    import json
+    print json.dumps(instrument_to_wireit_language(ANDR))
+    print json.dumps(template_to_wireit_diagram(template)) # need name!
+    sys.exit()
     result = run_template(template, config)
     
     # output of the qxqz: result[7]['output'][0]
@@ -189,7 +194,6 @@ if __name__ == '__main__':
     print "Dimensions:", dimensions
     counts = data[0][:, 0].tolist()
     print "Intensities:", counts
-    import json
     print json.dumps(dict(intensity=intensity, qx=qx, qz=qz, dimensions=dimensions, counts=counts))
 #    print numpy.ravel(result[7]['output'][0])
 #    print result[7]['output'][0]._info
