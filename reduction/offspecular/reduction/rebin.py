@@ -8,7 +8,7 @@ if struct.calcsize("P") * 8 == 64:
 else:
     import reduction32bit._reduction # 32 bit
     reductionpkg = reduction32bit._reduction
-
+    
 def rebin(x, I, xo, Io=None, dtype=numpy.float64):
     """
     Rebin a vector.

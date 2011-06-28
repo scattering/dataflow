@@ -1,16 +1,16 @@
 """
-Converts to Q
+Uses transmission and blocked bean file 
 """
 
 from .. import config
 from ..core import Module
 
-def convertq_module(id=None, datatype=None, action=None,
+def correct_blocked_beam_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
-    """Converts to Q"""
+    """[Tsam/Temp](EMP - BGD)"""
 
     icon = {
-        'URI': config.IMAGES + "convertq.png",
+        'URI': config.IMAGES + "correct_blocked_beam.png",
         'terminals': {
             'input': (0, 10, -1, 0),
             'output': (20, 10, 1, 0),
@@ -28,13 +28,13 @@ def convertq_module(id=None, datatype=None, action=None,
         dict(id='output',
              datatype=datatype,
              use='out',
-             description='converted data',
+             description='blocked_beam correction',
              ),
     ]
 
     # Combine everything into a module.
     module = Module(id=id,
-                  name='Convertq',
+                  name='correct_blocked_beam',
                   version=version,
                   description=action.__doc__,
                   icon=icon,

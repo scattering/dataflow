@@ -38,7 +38,7 @@ def run_template(template, config):
         kwargs.update(node.get('config', {}))
         kwargs.update(config[nodenum])
         result = module.action(**kwargs)
-        print result
+#        print result
         all_results[nodenum] = result
         
     return all_results

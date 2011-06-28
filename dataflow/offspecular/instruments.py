@@ -1,7 +1,7 @@
 """
 Offspecular reflectometry reduction modules
 """
-import os, sys, math
+import os, sys, math, numpy
 dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(dir)
 from pprint import pprint
@@ -19,9 +19,6 @@ from dataflow.modules.wiggle import wiggle_module
 from dataflow.modules.pixels_two_theta import pixels_two_theta_module
 from dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
 from reduction.offspecular.filters import *
-#from reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
-#from reduction.offspecular.reduction.formats import load as load_icp
-#import reduction.offspecular.reduction.rebin as reb
 
 
 # Datatype
@@ -61,6 +58,7 @@ save = save_module(id='ospec.save', datatype=OSPEC_DATA,
 
 # Autogrid module
 def autogrid_action(input=None):
+    print "gridding"
     result = [_autogrid(bundle) for bundle in input]
     return dict(output=result)
 def _autogrid(input, extra_grid_point=True, min_step=1e-10):
@@ -71,6 +69,7 @@ autogrid = autogrid_module(id='ospec.grid', datatype=OSPEC_DATA,
 
 # Join module
 def join_action(input=None):
+    print "joining"
     result = [_join(bundle) for bundle in input]
     return dict(output=result)
 def _join(list_of_datasets, grid=None):
@@ -80,6 +79,7 @@ join = join_module(id='ospec.join', datatype=OSPEC_DATA, version='1.0', action=j
 
 # Offset module
 def offset_action(input=None, offsets={}):
+    print "offsetting"
     flat = []
     for bundle in input:
         flat.extend(bundle)
@@ -92,6 +92,7 @@ offset = offset_module(id='ospec.offset', datatype=OSPEC_DATA, version='1.0', ac
 
 # Wiggle module
 def wiggle_action(input=None, amp=0.14):
+    print "wiggling"
     flat = []
     for bundle in input:
         flat.extend(bundle)
@@ -104,6 +105,7 @@ wiggle = wiggle_module(id='ospec.wiggle', datatype=OSPEC_DATA, version='1.0', ac
 
 # Pixels to two theta module
 def pixels_two_theta_action(input=None):
+    print "converting pixels to two theta"
     flat = []
     for bundle in input:
         flat.extend(bundle)
@@ -116,6 +118,7 @@ pixels_two_theta = pixels_two_theta_module(id='ospec.twotheta', datatype=OSPEC_D
 
 # Two theta to qxqz module
 def two_theta_qxqz_action(input=None):
+    print "converting theta and two theta to qx and qz"
     flat = []
     for bundle in input:
         flat.extend(bundle)
@@ -170,6 +173,25 @@ if __name__ == '__main__':
                         instrument=ANDR.id,
                         )
     result = run_template(template, config)
-    pprint(result)
-    data = result[7]['output'][0] # output of the qxqz conversion
-    assert data.all() == eval(data.extrainfo["CreationStory"]).all() # verify the creation story (will this have much use?)
+    
+    # output of the qxqz: result[7]['output'][0]
+    data = result[7]['output'][0]
+    intensity = [numpy.amin(data[0], axis=0)[0], numpy.amax(data[0], axis=0)[0]]
+    print "Min intensity:", intensity[0]
+    print "Max intensity:", intensity[1]
+    qx = [numpy.amin(data._info[0]['values']), numpy.amax(data._info[0]['values'])]
+    print "Min qx:", qx[0]
+    print "Max qx:", qx[1]
+    qz = [numpy.amin(data._info[1]['values']), numpy.amax(data._info[1]['values'])]
+    print "Min qz:", qz[0]
+    print "Max qz:", qz[1]
+    dimensions = [len(data._info[0]['values']), len(data._info[1]['values'])]
+    print "Dimensions:", dimensions
+    counts = data[0][:, 0].tolist()
+    print "Intensities:", counts
+    import json
+    print json.dumps(dict(intensity=intensity, qx=qx, qz=qz, dimensions=dimensions, counts=counts))
+#    print numpy.ravel(result[7]['output'][0])
+#    print result[7]['output'][0]._info
+#    data = result[7]['output'][0] # output of the qxqz conversion
+#    assert data.all() == eval(data.extrainfo["CreationStory"]).all() # verify the creation story (will this have much use?)

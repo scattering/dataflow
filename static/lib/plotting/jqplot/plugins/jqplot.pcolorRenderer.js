@@ -345,7 +345,7 @@
             c=ctx;
             console.log('c.drawImage(img,'+sx+','+sy+','+sw+','+sh+',0,0,'+dw+','+dh+');');
             // SUBRACTING ONE BECAUSE JAVASCRIPT HAS FLOATING POINT NUMBER ISSUES
-            img.onload = function() { console.log('ONLOAD'); ctx.drawImage(this, sx + 1, sy + 1, sw - 1, sh - 1, 0, 0, dw, dh); };
+            img.onload = function() { console.log('ONLOAD'); ctx.drawImage(this, sx, sy, sw - 1, sh - 1, 0, 0, dw, dh); };
         }
         else
             throw "No data within bounds";
