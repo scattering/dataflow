@@ -1,7 +1,7 @@
 """
 Offspecular reflectometry reduction modules
 """
-import os, sys, math, numpy
+import os, sys, math, numpy, json
 dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(dir)
 from pprint import pprint
@@ -20,6 +20,7 @@ from dataflow.modules.wiggle import wiggle_module
 from dataflow.modules.pixels_two_theta import pixels_two_theta_module
 from dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
 from reduction.offspecular.filters import *
+from reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
 
 
 # Datatype
@@ -28,6 +29,37 @@ data2d = Datatype(id=OSPEC_DATA,
                   name='2-D Offspecular Data',
                   plot='ospecplot')
 
+# Helper methods
+
+def _get_result(result):
+    res = []
+    for metaarray in result:
+#        print _plot_format(metaarray)
+        res.append(_plot_format(metaarray))
+#    return dict(output=result)
+#    print "\n" * 10
+#    raw_input("I'm waiting...")
+    return dict(output=res)
+
+
+def _plot_format(data):
+    #[[[1,2,3,4],[5,6,7,8],[9,10,11,12]]]
+    #data[0] gives the data to work with
+    #data[:,0] is the counts
+    z = data[0][:, 0].tolist()
+    axis = [{'name':'x'}, {'name':'y'}]
+    dims = {}
+    for index, label in enumerate(axis):
+        dims[axis[index]['name'] + 'min'] = numpy.amin(data._info[index]['values'])
+        dims[axis[index]['name'] + 'max'] = numpy.amax(data._info[index]['values'])
+        dims[axis[index]['name'] + 'dim'] = len(data._info[index]['values'])
+    xlabel = data._info[0]['name']
+    ylabel = data._info[1]['name']
+    zlabel = data._info[2]['cols'][0]['name']
+    title = 'TITLE?'
+    dump = dict(z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
+#    print dump
+    return json.dumps(dump)
 
 # Load module
 def load_action(files=None, intent=None):
@@ -173,14 +205,19 @@ if __name__ == '__main__':
                         wires=wires,
                         instrument=ANDR.id,
                         )
-    import json
-    print json.dumps(instrument_to_wireit_language(ANDR))
-    print json.dumps(template_to_wireit_diagram(template)) # need name!
-    sys.exit()
+#    template and instrument tests
+#    print json.dumps(instrument_to_wireit_language(ANDR))
+#    print json.dumps(template_to_wireit_diagram(template)) # need name!
+#    sys.exit()
+
     result = run_template(template, config)
+    plot_result = [_get_result(value['output'])  if 'output' in value else [] for key, value in result.items()]
+    pprint(plot_result)
+    raw_input("Done looking at formatted output? ")
     
     # output of the qxqz: result[7]['output'][0]
-    data = result[7]['output'][0]
+    data = result[6]['output'][0]
+    print "\n" * 10, _plot_format(data), "\n" * 10
     intensity = [numpy.amin(data[0], axis=0)[0], numpy.amax(data[0], axis=0)[0]]
     print "Min intensity:", intensity[0]
     print "Max intensity:", intensity[1]
@@ -199,3 +236,22 @@ if __name__ == '__main__':
 #    print result[7]['output'][0]._info
 #    data = result[7]['output'][0] # output of the qxqz conversion
 #    assert data.all() == eval(data.extrainfo["CreationStory"]).all() # verify the creation story (will this have much use?)
+
+
+
+#plotting api
+#plottable_data = {
+#    'z':  [ [1, 2], [3, 4] ],
+#    'title': 'This is the title',
+#    'dims': {
+#      'xmax': 1.0,
+#      'xmin': 0.0, 
+#      'ymin': 0.0, 
+#      'ymax': 12.0,
+#      'xdim': 2,
+#      'ydim': 2,
+#    }
+#    'xlabel': 'This is my x-axis label',
+#    'ylabel': 'This is my y-axis label',
+#    'zlabel': 'This is my z-axis label',
+#};
