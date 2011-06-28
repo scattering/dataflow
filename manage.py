@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from django.core.management import execute_manager
-import imp
+import imp, sys, os
 try:
     imp.find_module('settings') # Assumed to be in the same directory.
 except ImportError:
@@ -9,6 +9,8 @@ except ImportError:
     sys.exit(1)
 
 import settings
+#sys.path.insert(0, os.path.dirname(settings.__file__))
+#sys.path.insert(0, os.path.dirname(os.path.dirname(settings.__file__)))
 
 if __name__ == "__main__":
     execute_manager(settings)

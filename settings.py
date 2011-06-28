@@ -1,11 +1,11 @@
 # Django settings for dataflow project.
 import os
-HOMEDIR=__file__[:-12]
+HOMEDIR = __file__[:-12]
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 
-template_dir = os.path.join(HOMEDIR,r'site-templates')
+template_dir = os.path.join(HOMEDIR, r'site-templates')
 static_dir = os.path.join(HOMEDIR, r'static')
 #print 'template', template_dir
 
@@ -109,7 +109,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 REPO_ROOT = HOMEDIR.split('/')[-2]
-ROOT_URLCONF = REPO_ROOT+'.urls'
+ROOT_URLCONF = REPO_ROOT + '.urls'
 print 'root', ROOT_URLCONF
 
 TEMPLATE_DIRS = (template_dir,
@@ -124,7 +124,10 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    
+    # I do not have this file
+#    'django.contrib.staticfiles',
+
     'apps.tracks',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
