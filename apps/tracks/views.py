@@ -5,11 +5,10 @@ from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
 from apps.tracks.forms import languageSelectForm 
 
-# needed to add "dataflow." to these
-from dataflow.dataflow import wireit
-from dataflow.dataflow.calc import run_template
-from dataflow.dataflow.core import register_instrument
-from dataflow.dataflow.tas.instruments import BT7
+from ...dataflow import wireit
+from ...dataflow.calc import run_template
+from ...dataflow.core import register_instrument
+from ...dataflow.tas.instruments import BT7
 
 import random
 
