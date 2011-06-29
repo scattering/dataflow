@@ -251,7 +251,7 @@ generate a q_map for sansdata. Each pixel will have 4 values: (qx,qy,q,theta)
     X = PIXEL_SIZE_X_CM*(x-x0)
     Y=PIXEL_SIZE_Y_CM*(y-y0)
     r=np.sqrt(X**2+Y**2)
-    theta=np.arctan2(r,L2)/2
+    theta=np.arctan2(r,L2*100)/2  #remember to convert L2 to cm from meters
     q=(4*np.pi/wavelength)*np.sin(theta)
     alpha=np.arctan2(Y,X)
     qx=q*np.cos(alpha)
@@ -302,15 +302,26 @@ def convert_qxqy(sansdata):
     'ylabel': 'y-axis',
     'zlabel': 'Intensity',
 };
+    #res=SansData()
+    #res.data=copy(sansdata.data)
+    #res.metadata=deepcopy(sansdata.metadata)
+    ##Adding res.q
+    #res.q = sansdata.q
+    #res.qx=json.dumps(plottable_x)
+    #res.qy=json.dumps(plottable_y)
+    #res.theta=sansdata.theta
+    #return res 
     res=SansData()
     res.data=copy(sansdata.data)
     res.metadata=deepcopy(sansdata.metadata)
     #Adding res.q
     res.q = sansdata.q
-    res.qx=json.dumps(plottable_x)
-    res.qy=json.dumps(plottable_y)
+    res.qx= sansdata.qx 
+    res.qy = sansdata.qy
     res.theta=sansdata.theta
-    return res 
+    x = json.dumps(plottable_x)
+    y = json.dumps(plottable_y)
+    return res,x,y
     
 def annular_av(sansdata):
     #annular_mask_antialiased(shape, center, inner_radius, outer_radius, background_value=0.0, mask_value=1.0, oversampling=8)    
@@ -328,8 +339,10 @@ def annular_av(sansdata):
     print q
     # calculate the change in q that corresponds to a change in pixel of 1
     q_per_pixel = qx[1,0]-qx[0,0] / 1.0
+   
     # for now, we'll make the q-bins have the same width as a single pixel
     step = q_per_pixel
+    print "Step: ", step 
     #print "Step: ",step
     shape1 = (128,128)
     center = (sansdata.metadata['det.beamx'],sansdata.metadata['det.beamy'])
@@ -344,16 +357,78 @@ def annular_av(sansdata):
         # outer radius is the q of the next bin, also converted to pixel dimensions:
         outer_r = (i + step) * (1.0/q_per_pixel)
         mask = annular_mask_antialiased(shape1,center,inner_r,outer_r)
-        # my handwriting may have been illegible here:  I was trying to write the product of mask and data,
-        # not mask.data (sorry - Brian)
         #print "Mask: ",mask
         norm_integrated_intensity = np.sum(mask*sansdata.data.x)
         if (norm_integrated_intensity !=  0.0):
             norm_integrated_intensity/=np.sum(mask)
-        I.append(norm_integrated_intensity)
+        I.append(norm_integrated_intensity*step)
+    Q = Q.tolist()
+    I = (np.array(I)).tolist()
     print "Q is : ", Q
     print "I is : ", I
+    Qlog = np.log10(Q).tolist()
+    Ilog = np.log10(I).tolist()
+    print "Qlog: ", Qlog
+    print "Ilog: ", Ilog
+    plottable_1D = {
+    'x': {'linear': {'data':Q, 'label':'q (A^-1))'}},
+    'y': [{
+        'linear': {'data': I, 'label':'Intensity-I(q)'},
+        'log10': {'data': Ilog, 'label':'Intensity-I(q)'},
+        }],
+    'title': '1D Sans Data',
+    'clear_existing': False,
+    'color': 'Red',
+    'style': 'line',
+    };
+    plottable_1D = json.dumps(plottable_1D)
+    plt.plot(Q,I,'ro')
+    plt.title('1D')
+    plt.xlabel('q(A^-1)')
+    plt.ylabel('I(q)')
+    plt.show()
+    #sys.exit()
+    return plottable_1D
+def absolute_scaling(sansdata,DIV):  #empty beam, div 
+   #Variable detCnt,countTime,attenTrans,monCnt,sdd,pixel
     
+    
+    detCnt = sansdata.metadata['run.detcnt']
+    countTime = sansdata.metadata['run.ctime']
+    monCnt = sansdata.metadata['run.moncnt']
+    sdd = sansdata.metadata['det.dis'] *100
+    pixel = PIXEL_SIZE_X_CM
+    lambd = sansdata.metadata['resolution.lmda']
+    attenNo = sansdata.metadata['run.atten']
+    print "Attetno: ",attenNo
+    print "Countime: ",countTime
+    print "monCnt: ", monCnt
+    print "sdd:", sdd
+    print "Lambda: ",lambd
+    print "detCount: ", detCnt
+    #Need attenTrans - AttenuationFactor - need to know whether NG3, NG5 or NG7 (acctStr)
+    
+    #-------------------------------------------------------------------------------------#
+    
+    #correct empty beam by the sensitivity
+    data = sansdata.__truediv__(DIV)
+    #Then take the sum in XY box
+    coord_left=(55,53)
+    coord_right=(74,72)
+    summ = 0
+    sumlist = []
+    #print range(coord_right[0]-coord_left[0])
+    for x in range(coord_right[0]-coord_left[0]):
+        for y in range(coord_right[1]-coord_left[1]):
+            summ+=data.data.x[x,y]
+            sumlist.append(data.data.x[x,y])
+    detCnt = summ
+    print "DETCNT: ",detCnt
+
+    print "att: ", attenuation
+    #------End Result-------#
+    #kappa = detCnt/countTime/attenTrans*1.0e8/(monCnt/countTime)*(pixel/sdd)**2
+   
 def chain_corrections():
     """a sample chain of corrections"""
     
@@ -402,6 +477,7 @@ def chain_corrections():
     #calculate transmission
     coord_left=(60,60)
     coord_right=(70,70)
+ 
     transmission_sample_cell_4m_rat=generate_transmission(transmission_sample_cell_4m_norm,empty_4m_norm,
                                                       coord_left,coord_right)
     transmission_empty_cell_4m_rat=generate_transmission(transmission_empty_cell_4m_norm,empty_4m_norm,
@@ -409,7 +485,7 @@ def chain_corrections():
     print 'Sample transmission= {0} (IGOR Value = 0.724): '.format(transmission_sample_cell_4m_rat) #works now
     print 'Empty Cell transmission= {0} (IGOR Value = 0.929): '.format(transmission_empty_cell_4m_rat)
     print 'hi'
-
+    
     
     #Initial Correction
     SAM = sample_4m_norm
@@ -450,11 +526,11 @@ def chain_corrections():
     #Now performing solid angle correction on the 2D data    
     CAL = correct_solid_angle(CAL2)
     
-    #CAL = convert_qxqy(CAL)
+    CAL,x,y = convert_qxqy(CAL)
     # convert_qxqy shouldn't be used as a filter that returns data... 
-    # it puts data into an output form different than sansdata
-    CAL = annular_av(CAL)
-
+    # it puts data into an output form different than sansdata (Changed I think)
+    #ar_av(CAL)
+    absolute_scaling(empty_4m_norm,sensitivity)
     #print "MaxQ: "
     file = open("/home/elakian/sansdata.dat","w")
     
@@ -512,7 +588,6 @@ def chain_corrections():
     # Equation : ABS = (1/Kappa*Dsam*Tsam)*CAL
     #kappa = detCnt/countTime/attenTrans*1.0e8/(monCnt/countTime)*(pixel/sdd)^2
     Dsam =  CAL.metadata['sample.thk']
-    #Problem, q is not zero anywhere
     print "CAL.q: "
     print data.trunc(CAL.metadata['det.beamx'])
     print data.trunc(CAL.metadata['det.beamy'])
@@ -562,7 +637,7 @@ if __name__ == '__main__':
         
       
         attenuation=metadata['run.atten 7.0']
-    
+        
     
     
     
