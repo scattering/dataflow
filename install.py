@@ -32,6 +32,7 @@ if __name__=="__main__":
     
     call('easy_install pip',shell=True)
     call('easy_install openopt', shell=True)
+    call('easy_install django', shell=True)
     #call('wget http://trac.openopt.org/openopt/changeset/latest/PythonPackages?old_path=%2F&format=zip',shell=True)
     call('svn co svn://openopt.org/PythonPackages OOSuite',shell=True)
     call('cd OOSuite; python install_all.py; cd ..',shell=True)
@@ -40,4 +41,3 @@ if __name__=="__main__":
 
 #NOTE: Also install matplotlib and download and install natgrid (https://github.com/matplotlib/natgrid)
 
-#PNOTE: Django is not getting updated from 1.2.5 to 1.3 when pip install -U Django is called from this install script. Typing the same command into the command line will update Django, however.
