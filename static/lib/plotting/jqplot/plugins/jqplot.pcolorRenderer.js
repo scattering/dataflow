@@ -81,6 +81,7 @@
     
     // called with scope of a series
     $.jqplot.pcolorRenderer.prototype.init = function(options, plot) {
+        /*
         // Group: Properties
         //
         // prop: varyBubbleColors
@@ -133,6 +134,7 @@
         // prop: showLabels
         // True to show labels on bubbles (if any), false to not show.
         this.showLabels = true;
+        */
         // array of [point index, radius] which will be sorted in descending order to plot 
         // largest points below smaller points.
         this.zs = [];
@@ -141,10 +143,12 @@
         // index of the currenty highlighted point, if any
         this._highlightedPoint = null;
         // array of jQuery labels.
+        /*
         this.labels = [];
+        */
         this.bubbleCanvases = [];
-        this._type = 'bubble';
-        this.dims = { xmin: null, xmax: null, dx: null, ymin: null, ymax: null, dy: null };
+        this._type = 'pcolor';
+        this.dims = { xmin: null, xmax: null, xdim: null, dx: null, ymin: null, ymax: null, ydim: null, dy: null };
         this.zformatString = '%.3f';
         this.zformatter = function (format, val) {
             if (typeof val == 'number') {
@@ -157,14 +161,25 @@
                 return String(val);
             }
         }
+        this.colors = [];
+        this.rgbs = [];
+        this.palette = 'jet';
+        this.edges = 255;
+        this.xlabel = null;
+        this.ylabel = null;
+        this.zlabel = null;
+        this.title = null;
         
+        
+        /*
         // if user has passed in highlightMouseDown option and not set highlightMouseOver, disable highlightMouseOver
         if (options.highlightMouseDown && options.highlightMouseOver == null) {
             options.highlightMouseOver = false;
         }
-        
+        */
         $.extend(true, this, options);
         
+        /*
         if (this.highlightAlpha == null) {
             this.highlightAlpha = this.bubbleAlpha;
             if (this.bubbleGradients) {
@@ -173,18 +188,22 @@
         }
         
         this.autoscaleMultiplier = this.autoscaleMultiplier * Math.pow(this.data.length, this.autoscalePointsFactor);
+        */
         
         // index of the currenty highlighted point, if any
         this._highlightedPoint = null;
+        
         
         // adjust the series colors for options colors passed in with data or for alpha.
         // note, this can leave undefined holes in the seriesColors array.
         var comps;
         for (var i=0; i<this.data.length; i++) {
-            var color = null;
+            //var color = null;
             var d = this.data[i];
             this.maxZ = Math.max(this.maxZ, d[2]);
             this.minZ = Math.min(this.minZ, d[2]);
+            
+            /*
             if (d[3]) {
                 if (typeof(d[3]) == 'object') {
                     color = d[3]['color'];
@@ -205,8 +224,10 @@
             if (color) {
                 this.seriesColors[i] = color;
             }
+            */
         }
         
+        /*
         if (!this.varyBubbleColors) {
             this.seriesColors = [this.color];
         }
@@ -233,6 +254,8 @@
         var sopts = {fill:true, isarc:true, angle:this.shadowAngle, alpha:this.shadowAlpha, closePath:true};
         
         this.renderer.shadowRenderer.init(sopts);
+        */
+        
         
         this.canvas = new $.jqplot.DivCanvas();
         this.canvas._plotDimensions = this._plotDimensions;
@@ -244,6 +267,42 @@
         plot.eventListenerHooks.addOnce('jqplotRightClick', handleRightClick);
         plot.postDrawHooks.addOnce(postPlotDraw);
         
+    };
+    
+    u = {
+        _types: { lin: {
+                    incr: function(i, step) { return i + step; },
+                    step: function(min,max,n) { return (max-min)/n; },
+                    index: function(value,min,step) { return Math.floor((value-min)/step); },
+                    dist: function(r,min,max) { return min + (max - min) * r; },
+                  },
+                  log: {
+                    incr: function(i, step) { return Math.exp(Math.log(i) + Math.log(step)); },
+                    step: function(min,max,n) { return Math.exp((Math.log(max)-Math.log(min))/n); },
+                    index: function(step,min,value) { return Math.floor(Math.log((value/min)/step)); },
+                    dist: function(r,min,max) { return Math.exp(Math.log(min) + Math.log(max / min) * r); },
+                  }
+                },
+                
+        _edges: function (data,type,n,min,max) {
+            if (min == undefined) min = arrayMin(data);
+            if (max == undefined) max = arrayMax(data);
+            if (min == max) max += 1;
+            var step = this._types[type].step(min,max,n);
+            return this._sortedindexify({ type: type, min: min, max: max, n: n, step: step }); //, edges_: edges_ };
+        },
+        _sortedindexify: function (o) {
+            var _sortedindex = this._sortedindex;
+            o.sortedindex = function(value) { _sortedindex(this, value); };
+            return o;
+        },
+        _sortedindex: function (edges_, value) {
+            var sortedindex = u._types[edges_.type].index(value, edges_.min, edges_.step);
+            // If data falls off the top or bottom of the scale (i.e., if value is infinite)
+            if (sortedindex >= edges_.n) return 1 * edges_.n;
+            if (isNaN(sortedindex) || sortedindex < 0) return 0;
+            return sortedindex;
+        }
     };
     
 
@@ -258,7 +317,7 @@
         this.gridData = [];
         var zs = [];
         this.zs = [];
-        var dim = Math.min(plot._height, plot._width);
+        //var dim = Math.min(plot._height, plot._width);
         for (var i=0; i<this.data.length; i++) {
             if (data[i] != null) {
                 this.gridData.push([xp.call(this._xaxis, data[i][0]), yp.call(this._yaxis, data[i][1]), data[i][2]]);
@@ -266,8 +325,8 @@
                 zs.push(data[i][2]);
             }
         }
-        var z, val, maxz = this.maxZ = arrayMax(zs);
-        var l = this.gridData.length;
+        //var z, val, maxz = this.maxZ = arrayMax(zs);
+        //var l = this.gridData.length;
         
         //this.zs.sort(function(a, b) { return b[1] - a[1]; });
     };
@@ -356,6 +415,7 @@
         
         
         // -------------
+        /*
         
         for (var i=0; i<this.zs.length; i++) {
             var idx = this.zs[i][0];
@@ -370,7 +430,7 @@
             }
             
             // color = (this.varyBubbleColors) ? this.colorGenerator.get(idx) : this.color;
-            color = this.colorGenerator.get(idx);
+            //color = this.colorGenerator.get(idx);
             
             // If we're drawing a shadow, expand the canvas dimensions to accomodate.
             var canvasRadius = gd[2];
@@ -384,6 +444,7 @@
 
             //this.bubbleCanvases[idx].draw(gd[2], color, this.bubbleGradients, this.shadowAngle/180*Math.PI);
         }
+        */
     };
 
     
@@ -472,6 +533,9 @@
     };
     
     $.jqplot.BubbleCanvas.prototype.draw = function(r, color, gradients, angle) {
+        return;
+        //-----
+        /*
         var ctx = this._ctx;
         // r = Math.floor(r*1.04);
         // var x = Math.round(ctx.canvas.width/2);
@@ -510,6 +574,7 @@
             ctx.fill();
         }
         ctx.restore();
+        */
     };
     
     $.jqplot.BubbleCanvas.prototype.setContext = function() {
@@ -535,9 +600,9 @@
             maxz = 0,
             minz = 0,
             minMaxZ = 0,
-            maxMaxZ = 0,
-            maxMult = 0,
-            minMult = 0;
+            maxMaxZ = 0;
+            maxMult = 1,//
+            minMult = 1;//
         // Go through all the series attached to this axis and find
         // the min/max bounds for this axis.
         for (var i=0; i<this._series.length; i++) {
@@ -552,7 +617,7 @@
                         minpidx=j;
                         minz = d[j][2];
                         minMaxZ = s.maxZ;
-                        minMult = s.autoscaleMultiplier;
+                        //minMult = s.autoscaleMultiplier;
                     }
                     if (d[j][0] > db.max || db.max == null) {
                         db.max = d[j][0];
@@ -560,7 +625,7 @@
                         maxpidx=j;
                         maxz = d[j][2];
                         maxMaxZ = s.maxZ;
-                        maxMult = s.autoscaleMultiplier;
+                        //maxMult = s.autoscaleMultiplier;
                     }
                 }              
                 else {
@@ -570,7 +635,7 @@
                         minpidx=j;
                         minz = d[j][2];
                         minMaxZ = s.maxZ;
-                        minMult = s.autoscaleMultiplier;
+                        //minMult = s.autoscaleMultiplier;
                     }
                     if (d[j][1] > db.max || db.max == null) {
                         db.max = d[j][1];
@@ -578,12 +643,12 @@
                         maxpidx=j;
                         maxz = d[j][2];
                         maxMaxZ = s.maxZ;
-                        maxMult = s.autoscaleMultiplier;
+                        //maxMult = s.autoscaleMultiplier;
                     }
                 }              
             }
         }
-        
+        /*
         var minRatio = minz/minMaxZ;
         var maxRatio = maxz/maxMaxZ;
         
@@ -596,12 +661,14 @@
         var maxfact = maxRatio * maxMult/3 * span;
         db.max += maxfact;
         db.min -= minfact;
-        console.log(minsidx,minpidx);
+        */
+        //console.log('r',span,minRatio,maxRatio, minsidx,minpidx, minfact,maxfact, db.max,db.min);
     };
     
     function highlight (plot, sidx, pidx) {
         return;
         //----
+        /*
         plot.plugins.pcolorRenderer.highlightLabelCanvas.empty();
         var s = plot.series[sidx];
         var canvas = plot.plugins.pcolorRenderer.highlightCanvas;
@@ -629,9 +696,13 @@
             plot.plugins.pcolorRenderer.highlightLabel.appendTo(plot.plugins.pcolorRenderer.highlightLabelCanvas);
             plot.plugins.pcolorRenderer.highlightLabel.addClass('jqplot-bubble-label-highlight');
         }
+        */
     }
     
     function unhighlight (plot) {
+        return;
+        //----
+        /*
         var canvas = plot.plugins.pcolorRenderer.highlightCanvas;
         var sidx = plot.plugins.pcolorRenderer.highlightedSeriesIndex;
         plot.plugins.pcolorRenderer.highlightLabelCanvas.empty();
@@ -641,6 +712,7 @@
         }
         plot.plugins.pcolorRenderer.highlightedSeriesIndex = null;
         plot.target.trigger('jqplotDataUnhighlight');
+        */
     }
     
  
