@@ -40,4 +40,5 @@ if __name__=="__main__":
         call('pip install %s'%(command,),shell=True)
 
 #NOTE: Also install matplotlib and download and install natgrid (https://github.com/matplotlib/natgrid)
+#PNOTE: psycopg2 might give you a bit of trouble
 
