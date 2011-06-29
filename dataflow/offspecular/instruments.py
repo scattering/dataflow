@@ -64,7 +64,6 @@ def _plot_format(data):
     #data[x][:,0] is the counts
     print "\tWorking on output"
     z = [arr[:,0].tolist() for arr in data]
-    print len(z)
     print "\t\tFinished z conversion"
     axis = ['x','y']
     dims = {}
