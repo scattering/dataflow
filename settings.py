@@ -88,7 +88,7 @@ STATICFILES_DIRS = (static_dir,
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -115,8 +115,8 @@ REPO_ROOT = HOMEDIR.split('/')[-2]
 ROOT_URLCONF = ROOT_URL.ROOT_URLCONF
 
 
-#print 'root', ROOT_URL.REPO_ROOT
-#print 'root', ROOT_URL.ROOT_URLCONF
+print 'root repo', ROOT_URL.REPO_ROOT
+print 'root url', ROOT_URL.ROOT_URLCONF
 
 TEMPLATE_DIRS = (template_dir,
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
