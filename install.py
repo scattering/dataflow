@@ -15,8 +15,10 @@ if __name__=="__main__":
                   'python-scipy',
                   'python-matplotlib',
                   'python-dev',
+		  'pyton-psycopg2',
                   'vim',
                   'subversion',
+		  #'postgresql',
                   ]
     easy_commands=['simplejson','stompservice','orbited']
     
