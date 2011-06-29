@@ -15,7 +15,7 @@ if __name__=="__main__":
                   'python-scipy',
                   'python-matplotlib',
                   'python-dev',
-		  'pyton-psycopg2',
+		  'python-psycopg2',
                   'vim',
                   'subversion',
 		  'apache2',
