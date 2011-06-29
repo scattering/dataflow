@@ -19,6 +19,7 @@ if __name__=="__main__":
                   'vim',
                   'subversion',
 		  'apache2',
+		  'libapache2-mod-wsgi',
 		  #'postgresql',
                   ]
     easy_commands=['simplejson','stompservice','orbited']
