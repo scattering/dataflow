@@ -222,7 +222,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
  	save: function() {
   
     	var value = this.getValue();
-    	var wirename = prompt('Please enter a name for this wiring template', value.name)
+    	var wirename = prompt("Please set the name for this wiring template (or hit cancel to leave the name unchanged)", value.name)
     	if(wirename === "") {
        	this.alert("Please choose a name");
        	return;
