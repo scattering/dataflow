@@ -18,6 +18,7 @@ if __name__=="__main__":
 		  'pyton-psycopg2',
                   'vim',
                   'subversion',
+		  'apache2',
 		  #'postgresql',
                   ]
     easy_commands=['simplejson','stompservice','orbited']
