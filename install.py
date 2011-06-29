@@ -22,14 +22,14 @@ if __name__=="__main__":
 		  'libapache2-mod-wsgi',
 		  #'postgresql',
                   ]
-    easy_commands=['simplejson','stompservice','orbited', '-U Django']
+    easy_commands=['simplejson','stompservice','orbited', '-U Django', '-U psycopg2']
     
     for command in apt_commands:
         s='apt-get -y install %s'%(command,)
         print s
         call(s,shell=True)
         #Popen(['apt-get','install','-y',command])
-    
+    call('apt-get build-dep python-psycopg2',shell=True)
     call('easy_install pip',shell=True)
     call('easy_install openopt', shell=True)
     call('easy_install django', shell=True)
