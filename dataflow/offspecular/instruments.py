@@ -1,32 +1,86 @@
 """
 Offspecular reflectometry reduction modules
 """
-import os, sys, math, numpy
-dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import os, sys, math, numpy, json
+dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.append(dir)
 from pprint import pprint
 
-from dataflow import config
-from dataflow.calc import run_template
-from dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
-from dataflow.core import Datatype, Instrument, Template, register_instrument
-from dataflow.modules.load import load_module
-from dataflow.modules.join import join_module
-from dataflow.modules.scale import scale_module
-from dataflow.modules.save import save_module
-from dataflow.modules.autogrid import autogrid_module
-from dataflow.modules.offset import offset_module
-from dataflow.modules.wiggle import wiggle_module
-from dataflow.modules.pixels_two_theta import pixels_two_theta_module
-from dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
-from reduction.offspecular.filters import *
+from dataflow.dataflow import config
+from dataflow.dataflow.calc import run_template
+from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
+from dataflow.dataflow.core import Datatype, Instrument, Template, register_instrument
+from dataflow.dataflow.modules.load import load_module
+from dataflow.dataflow.modules.join import join_module
+from dataflow.dataflow.modules.scale import scale_module
+from dataflow.dataflow.modules.save import save_module
+from dataflow.dataflow.modules.autogrid import autogrid_module
+from dataflow.dataflow.modules.offset import offset_module
+from dataflow.dataflow.modules.wiggle import wiggle_module
+from dataflow.dataflow.modules.pixels_two_theta import pixels_two_theta_module
+from dataflow.dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
+from dataflow.reduction.offspecular.filters import *
+from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
 
 
 # Datatype
-OSPEC_DATA = 'data1d.ospec'
+OSPEC_DATA = 'data2d.ospec'
 data2d = Datatype(id=OSPEC_DATA,
                   name='2-D Offspecular Data',
                   plot='ospecplot')
+
+# Convert FilterableMetaArrays to plotting specification
+# plottable_data = {
+#     'z':  [ [1, 2], [3, 4] ],
+#     'title': 'This is the title',
+#     'dims': {
+#       'xmax': 1.0,
+#       'xmin': 0.0, 
+#       'ymin': 0.0, 
+#       'ymax': 12.0,
+#       'xdim': 2,
+#       'ydim': 2,
+#     }
+#     'xlabel': 'This is my x-axis label',
+#     'ylabel': 'This is my y-axis label',
+#     'zlabel': 'This is my z-axis label',
+# };
+
+def convert_to_plottable(result):
+    print "Starting new converter"
+    res = []
+    for metaarray in result:
+        #print _plot_format(metaarray)
+        res.append(_plot_format(metaarray))
+    #return dict(output=result)
+    #print "\n" * 10
+    #raw_input("I'm waiting...")
+    print "Finished converting\n"
+    return dict(output=res)
+
+
+def _plot_format(data):
+    #[[[1,2,3,4],[5,6,7,8],[9,10,11,12]][[1,2,3,4],[3,4,2,4],[2,7,8,0]],...]
+    #data[x][:,0] is the counts
+    print "\tWorking on output"
+    z = [arr[:,0].tolist() for arr in data]
+    print len(z)
+    print "\t\tFinished z conversion"
+    axis = ['x','y']
+    dims = {}
+    for index, label in enumerate(axis):
+        dims[axis[index] + 'min'] = numpy.amin(data._info[index]['values'])
+        dims[axis[index] + 'max'] = numpy.amax(data._info[index]['values'])
+        dims[axis[index] + 'dim'] = len(data._info[index]['values'])
+    xlabel = data._info[0]['name']
+    ylabel = data._info[1]['name']
+    zlabel = data._info[2]['cols'][0]['name']
+    title = 'AND/R data' # That's creative enough, right?
+    dump = dict(z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
+#    print dump
+    return json.dumps(dump, sort_keys=True, indent=2)
+#    return json.dumps(dump)
+
 
 
 # Load module
@@ -145,7 +199,7 @@ instruments = [ANDR]
 if __name__ == '__main__':
     for instrument in instruments:
         register_instrument(instrument)
-    path, ext = dir + '/sampledata/ANDR/sabc/Isabc20', '.cg1'
+    path, ext = dir + '/dataflow/sampledata/ANDR/sabc/Isabc20', '.cg1'
     files = [path + str(i + 1).zfill(2) + ext for i in range(1, 12)]
     modules = [
         dict(module="ospec.load", position=(50, 50),
@@ -173,29 +227,42 @@ if __name__ == '__main__':
                         wires=wires,
                         instrument=ANDR.id,
                         )
-    import json
-    print json.dumps(instrument_to_wireit_language(ANDR))
-    print json.dumps(template_to_wireit_diagram(template)) # need name!
-    sys.exit()
+#    template and instrument tests
+#    print json.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
+#    print json.dumps(template_to_wireit_diagram(template)) # need name!
+#    sys.exit()
+
+
     result = run_template(template, config)
-    
-    # output of the qxqz: result[7]['output'][0]
-    data = result[7]['output'][0]
-    intensity = [numpy.amin(data[0], axis=0)[0], numpy.amax(data[0], axis=0)[0]]
-    print "Min intensity:", intensity[0]
-    print "Max intensity:", intensity[1]
-    qx = [numpy.amin(data._info[0]['values']), numpy.amax(data._info[0]['values'])]
-    print "Min qx:", qx[0]
-    print "Max qx:", qx[1]
-    qz = [numpy.amin(data._info[1]['values']), numpy.amax(data._info[1]['values'])]
-    print "Min qz:", qz[0]
-    print "Max qz:", qz[1]
-    dimensions = [len(data._info[0]['values']), len(data._info[1]['values'])]
-    print "Dimensions:", dimensions
-    counts = data[0][:, 0].tolist()
-    print "Intensities:", counts
-    print json.dumps(dict(intensity=intensity, qx=qx, qz=qz, dimensions=dimensions, counts=counts))
-#    print numpy.ravel(result[7]['output'][0])
-#    print result[7]['output'][0]._info
-#    data = result[7]['output'][0] # output of the qxqz conversion
-#    assert data.all() == eval(data.extrainfo["CreationStory"]).all() # verify the creation story (will this have much use?)
+#    plot_result = [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in result.items()]
+    print "WRITING TO FILE"
+    for index,plottable in enumerate(result):
+        with open('new_data' + str(index) + '.txt', 'w') as f:
+            for format in plottable.get('output',[]):
+                f.write(format + "\n")
+    print "DONE"
+    sys.exit()
+#    pprint(result)
+
+#raw_input("Done looking at formatted output? ")
+#output of the qxqz: result[7]['output'][0]
+#data = result[6]['output'][0]
+#print "\n" * 10, _plot_format(data), "\n" * 10
+#intensity = [numpy.amin(data[0], axis=0)[0], numpy.amax(data[0], axis=0)[0]]
+#print "Min intensity:", intensity[0]
+#print "Max intensity:", intensity[1]
+#qx = [numpy.amin(data._info[0]['values']), numpy.amax(data._info[0]['values'])]
+#print "Min qx:", qx[0]
+#print "Max qx:", qx[1]
+#qz = [numpy.amin(data._info[1]['values']), numpy.amax(data._info[1]['values'])]
+#print "Min qz:", qz[0]
+#print "Max qz:", qz[1]
+#dimensions = [len(data._info[0]['values']), len(data._info[1]['values'])]
+#print "Dimensions:", dimensions
+#counts = data[0][:, 0].tolist()
+#print "Intensities:", counts
+#print json.dumps(dict(intensity=intensity, qx=qx, qz=qz, dimensions=dimensions, counts=counts))
+#print numpy.ravel(result[7]['output'][0])
+#print result[7]['output'][0]._info
+#data = result[7]['output'][0] # output of the qxqz conversion
+#assert data.all() == eval(data.extrainfo["CreationStory"]).all() # verify the creation story (will this have much use?)

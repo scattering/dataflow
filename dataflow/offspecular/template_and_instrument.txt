@@ -1,0 +1,624 @@
+{"propertiesFields": [{"typeInvite": "Enter a title", "type": "string", "name": "name", "label": "Title"}, {"type": "text", "name": "description", "cols": 30, "label": "Description"}], "modules": [{"container": {"width": 120, "terminals": [{"direction": [1, 0], "multiple": true, "name": "output", "required": false, "alwaysSrc": true, "ddConfig": {"type": "data1d.ospec:out", "allowedTypes": ["data1d.ospec:in"]}, "offsetPosition": {"top": 1, "right": -16}}], "xtype": "WireIt.Container", "height": 16}, "name": "Load"}, {"container": {"width": 120, "terminals": [{"direction": [-1, 0], "multiple": false, "name": "input", "required": true, "alwaysSrc": false, "ddConfig": {"type": "data1d.ospec:in", "allowedTypes": ["data1d.ospec:out"]}, "offsetPosition": {"top": 1, "left": -16}}], "xtype": "WireIt.Container", "height": 16}, "name": "Save"}, {"container": {"terminals": [{"direction": [-1, 0], "multiple": true, "name": "input", "required": false, "alwaysSrc": false, "ddConfig": {"type": "data1d.ospec:in", "allowedTypes": ["data1d.ospec:out"]}, "offsetPosition": {"top": 1, "left": -15}}, {"direction": [1, 0], "multiple": true, "name": "output", "required": false, "alwaysSrc": true, "ddConfig": {"type": "data1d.ospec:out", "allowedTypes": ["data1d.ospec:in"]}, "offsetPosition": {"top": 1, "left": 15}}], "xtype": "WireIt.ImageContainer", "image": "../../static/img/rowantests/grid.png", "icon": "../../static/img/rowantests/grid.png"}, "name": "Autogrid"}, {"container": {"terminals": [{"direction": [-1, 0], "multiple": true, "name": "input", "required": false, "alwaysSrc": false, "ddConfig": {"type": "data1d.ospec:in", "allowedTypes": ["data1d.ospec:out"]}, "offsetPosition": {"top": 1, "left": -15}}, {"direction": [1, 0], "multiple": true, "name": "output", "required": false, "alwaysSrc": true, "ddConfig": {"type": "data1d.ospec:out", "allowedTypes": ["data1d.ospec:in"]}, "offsetPosition": {"top": 1, "left": 15}}], "xtype": "WireIt.ImageContainer", "image": "../../static/img/rowantests/sum.png", "icon": "../../static/img/rowantests/sum.png"}, "name": "Join"}, {"container": {"terminals": [{"direction": [-1, 0], "multiple": true, "name": "input", "required": false, "alwaysSrc": false, "ddConfig": {"type": "data1d.ospec:in", "allowedTypes": ["data1d.ospec:out"]}, "offsetPosition": {"top": 10, "left": 0}}, {"direction": [1, 0], "multiple": true, "name": "output", "required": false, "alwaysSrc": true, "ddConfig": {"type": "data1d.ospec:out", "allowedTypes": ["data1d.ospec:in"]}, "offsetPosition": {"top": 10, "left": 20}}], "xtype": "WireIt.ImageContainer", "image": "../../static/img/rowantests/offset.png", "icon": "../../static/img/rowantests/offset.png"}, "name": "Offset"}, {"container": {"terminals": [{"direction": [-1, 0], "multiple": true, "name": "input", "required": false, "alwaysSrc": false, "ddConfig": {"type": "data1d.ospec:in", "allowedTypes": ["data1d.ospec:out"]}, "offsetPosition": {"top": 10, "left": 0}}, {"direction": [1, 0], "multiple": true, "name": "output", "required": false, "alwaysSrc": true, "ddConfig": {"type": "data1d.ospec:out", "allowedTypes": ["data1d.ospec:in"]}, "offsetPosition": {"top": 10, "left": 20}}], "xtype": "WireIt.ImageContainer", "image": "../../static/img/rowantests/wiggle.png", "icon": "../../static/img/rowantests/wiggle.png"}, "name": "Wiggle"}, {"container": {"terminals": [{"direction": [-1, 0], "multiple": true, "name": "input", "required": false, "alwaysSrc": false, "ddConfig": {"type": "data1d.ospec:in", "allowedTypes": ["data1d.ospec:out"]}, "offsetPosition": {"top": 10, "left": 0}}, {"direction": [1, 0], "multiple": true, "name": "output", "required": false, "alwaysSrc": true, "ddConfig": {"type": "data1d.ospec:out", "allowedTypes": ["data1d.ospec:in"]}, "offsetPosition": {"top": 10, "left": 20}}], "xtype": "WireIt.ImageContainer", "image": "../../static/img/rowantests/twotheta.png", "icon": "../../static/img/rowantests/twotheta.png"}, "name": "Pixels to two theta"}, {"container": {"terminals": [{"direction": [-1, 0], "multiple": true, "name": "input", "required": false, "alwaysSrc": false, "ddConfig": {"type": "data1d.ospec:in", "allowedTypes": ["data1d.ospec:out"]}, "offsetPosition": {"top": 10, "left": 0}}, {"direction": [1, 0], "multiple": true, "name": "output", "required": false, "alwaysSrc": true, "ddConfig": {"type": "data1d.ospec:out", "allowedTypes": ["data1d.ospec:in"]}, "offsetPosition": {"top": 10, "left": 20}}], "xtype": "WireIt.ImageContainer", "image": "../../static/img/rowantests/qxqz.png", "icon": "../../static/img/rowantests/qxqz.png"}, "name": "Two theta to qxqz"}], "languageName": "NCNR ANDR"}
+{"wires": [{"src": {"terminal": "output", "moduleId": 0}, "tgt": {"terminal": "input", "moduleId": 2}}, {"src": {"terminal": "output", "moduleId": 2}, "tgt": {"terminal": "input", "moduleId": 3}}, {"src": {"terminal": "output", "moduleId": 3}, "tgt": {"terminal": "input", "moduleId": 4}}, {"src": {"terminal": "output", "moduleId": 4}, "tgt": {"terminal": "input", "moduleId": 5}}, {"src": {"terminal": "output", "moduleId": 5}, "tgt": {"terminal": "input", "moduleId": 6}}, {"src": {"terminal": "output", "moduleId": 6}, "tgt": {"terminal": "input", "moduleId": 1}}], "modules": [{"terminals": "", "config": {"files": ["/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2002.cg1", "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2003.cg1", "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2004.cg1", "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2005.cg1", "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2006.cg1", "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2007.cg1", "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2008.cg1", "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2009.cg1", "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2010.cg1", "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2011.cg1", "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2012.cg1"], "position": [50, 50], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"position": [650, 350], "ext": "dat", "xtype": "WireIt.Container"}, "name": "Save", "value": {}}, {"terminals": {"input": [-15, 1, -1, 0], "output": [15, 1, 1, 0]}, "config": {"position": [150, 100], "xtype": "WireIt.ImageContainer"}, "name": "Join", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [250, 150], "xtype": "WireIt.ImageContainer", "offsets": {"theta": 0.10000000000000001}}, "name": "Offset", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [350, 200], "xtype": "WireIt.ImageContainer"}, "name": "Wiggle", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [450, 250], "xtype": "WireIt.ImageContainer"}, "name": "Pixels to two theta", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [550, 300], "xtype": "WireIt.ImageContainer"}, "name": "Two theta to qxqz", "value": {}}], "properties": {"name": "test ospec", "description": "example ospec diagram"}}
+
+
+
+
+
+
+{
+  "languageName": "NCNR ANDR", 
+  "modules": [
+    {
+      "container": {
+        "height": 16, 
+        "terminals": [
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data1d.ospec:in"
+              ], 
+              "type": "data1d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "right": -16, 
+              "top": 1
+            }, 
+            "required": false
+          }
+        ], 
+        "width": 120, 
+        "xtype": "WireIt.Container"
+      }, 
+      "name": "Load"
+    }, 
+    {
+      "container": {
+        "height": 16, 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data1d.ospec:out"
+              ], 
+              "type": "data1d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": -16, 
+              "top": 1
+            }, 
+            "required": true
+          }
+        ], 
+        "width": 120, 
+        "xtype": "WireIt.Container"
+      }, 
+      "name": "Save"
+    }, 
+    {
+      "container": {
+        "icon": "../../static/img/rowantests/grid.png", 
+        "image": "../../static/img/rowantests/grid.png", 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data1d.ospec:out"
+              ], 
+              "type": "data1d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": -15, 
+              "top": 1
+            }, 
+            "required": false
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data1d.ospec:in"
+              ], 
+              "type": "data1d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "left": 15, 
+              "top": 1
+            }, 
+            "required": false
+          }
+        ], 
+        "xtype": "WireIt.ImageContainer"
+      }, 
+      "name": "Autogrid"
+    }, 
+    {
+      "container": {
+        "icon": "../../static/img/rowantests/sum.png", 
+        "image": "../../static/img/rowantests/sum.png", 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data1d.ospec:out"
+              ], 
+              "type": "data1d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": -15, 
+              "top": 1
+            }, 
+            "required": false
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data1d.ospec:in"
+              ], 
+              "type": "data1d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "left": 15, 
+              "top": 1
+            }, 
+            "required": false
+          }
+        ], 
+        "xtype": "WireIt.ImageContainer"
+      }, 
+      "name": "Join"
+    }, 
+    {
+      "container": {
+        "icon": "../../static/img/rowantests/offset.png", 
+        "image": "../../static/img/rowantests/offset.png", 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data1d.ospec:out"
+              ], 
+              "type": "data1d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": 0, 
+              "top": 10
+            }, 
+            "required": false
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data1d.ospec:in"
+              ], 
+              "type": "data1d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "left": 20, 
+              "top": 10
+            }, 
+            "required": false
+          }
+        ], 
+        "xtype": "WireIt.ImageContainer"
+      }, 
+      "name": "Offset"
+    }, 
+    {
+      "container": {
+        "icon": "../../static/img/rowantests/wiggle.png", 
+        "image": "../../static/img/rowantests/wiggle.png", 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data1d.ospec:out"
+              ], 
+              "type": "data1d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": 0, 
+              "top": 10
+            }, 
+            "required": false
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data1d.ospec:in"
+              ], 
+              "type": "data1d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "left": 20, 
+              "top": 10
+            }, 
+            "required": false
+          }
+        ], 
+        "xtype": "WireIt.ImageContainer"
+      }, 
+      "name": "Wiggle"
+    }, 
+    {
+      "container": {
+        "icon": "../../static/img/rowantests/twotheta.png", 
+        "image": "../../static/img/rowantests/twotheta.png", 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data1d.ospec:out"
+              ], 
+              "type": "data1d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": 0, 
+              "top": 10
+            }, 
+            "required": false
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data1d.ospec:in"
+              ], 
+              "type": "data1d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "left": 20, 
+              "top": 10
+            }, 
+            "required": false
+          }
+        ], 
+        "xtype": "WireIt.ImageContainer"
+      }, 
+      "name": "Pixels to two theta"
+    }, 
+    {
+      "container": {
+        "icon": "../../static/img/rowantests/qxqz.png", 
+        "image": "../../static/img/rowantests/qxqz.png", 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data1d.ospec:out"
+              ], 
+              "type": "data1d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": 0, 
+              "top": 10
+            }, 
+            "required": false
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data1d.ospec:in"
+              ], 
+              "type": "data1d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "left": 20, 
+              "top": 10
+            }, 
+            "required": false
+          }
+        ], 
+        "xtype": "WireIt.ImageContainer"
+      }, 
+      "name": "Two theta to qxqz"
+    }
+  ], 
+  "propertiesFields": [
+    {
+      "label": "Title", 
+      "name": "name", 
+      "type": "string", 
+      "typeInvite": "Enter a title"
+    }, 
+    {
+      "cols": 30, 
+      "label": "Description", 
+      "name": "description", 
+      "type": "text"
+    }
+  ]
+}
+{
+  "modules": [
+    {
+      "config": {
+        "files": [
+          "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2002.cg1", 
+          "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2003.cg1", 
+          "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2004.cg1", 
+          "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2005.cg1", 
+          "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2006.cg1", 
+          "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2007.cg1", 
+          "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2008.cg1", 
+          "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2009.cg1", 
+          "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2010.cg1", 
+          "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2011.cg1", 
+          "/home/brendan/dataflow/sampledata/ANDR/sabc/Isabc2012.cg1"
+        ], 
+        "intent": "signal", 
+        "position": [
+          50, 
+          50
+        ], 
+        "xtype": "WireIt.Container"
+      }, 
+      "name": "Load", 
+      "terminals": "", 
+      "value": {}
+    }, 
+    {
+      "config": {
+        "ext": "dat", 
+        "position": [
+          650, 
+          350
+        ], 
+        "xtype": "WireIt.Container"
+      }, 
+      "name": "Save", 
+      "terminals": "", 
+      "value": {}
+    }, 
+    {
+      "config": {
+        "position": [
+          150, 
+          100
+        ], 
+        "xtype": "WireIt.ImageContainer"
+      }, 
+      "name": "Join", 
+      "terminals": {
+        "input": [
+          -15, 
+          1, 
+          -1, 
+          0
+        ], 
+        "output": [
+          15, 
+          1, 
+          1, 
+          0
+        ]
+      }, 
+      "value": {}
+    }, 
+    {
+      "config": {
+        "offsets": {
+          "theta": 0.10000000000000001
+        }, 
+        "position": [
+          250, 
+          150
+        ], 
+        "xtype": "WireIt.ImageContainer"
+      }, 
+      "name": "Offset", 
+      "terminals": {
+        "input": [
+          0, 
+          10, 
+          -1, 
+          0
+        ], 
+        "output": [
+          20, 
+          10, 
+          1, 
+          0
+        ]
+      }, 
+      "value": {}
+    }, 
+    {
+      "config": {
+        "position": [
+          350, 
+          200
+        ], 
+        "xtype": "WireIt.ImageContainer"
+      }, 
+      "name": "Wiggle", 
+      "terminals": {
+        "input": [
+          0, 
+          10, 
+          -1, 
+          0
+        ], 
+        "output": [
+          20, 
+          10, 
+          1, 
+          0
+        ]
+      }, 
+      "value": {}
+    }, 
+    {
+      "config": {
+        "position": [
+          450, 
+          250
+        ], 
+        "xtype": "WireIt.ImageContainer"
+      }, 
+      "name": "Pixels to two theta", 
+      "terminals": {
+        "input": [
+          0, 
+          10, 
+          -1, 
+          0
+        ], 
+        "output": [
+          20, 
+          10, 
+          1, 
+          0
+        ]
+      }, 
+      "value": {}
+    }, 
+    {
+      "config": {
+        "position": [
+          550, 
+          300
+        ], 
+        "xtype": "WireIt.ImageContainer"
+      }, 
+      "name": "Two theta to qxqz", 
+      "terminals": {
+        "input": [
+          0, 
+          10, 
+          -1, 
+          0
+        ], 
+        "output": [
+          20, 
+          10, 
+          1, 
+          0
+        ]
+      }, 
+      "value": {}
+    }
+  ], 
+  "properties": {
+    "description": "example ospec diagram", 
+    "name": "test ospec"
+  }, 
+  "wires": [
+    {
+      "src": {
+        "moduleId": 0, 
+        "terminal": "output"
+      }, 
+      "tgt": {
+        "moduleId": 2, 
+        "terminal": "input"
+      }
+    }, 
+    {
+      "src": {
+        "moduleId": 2, 
+        "terminal": "output"
+      }, 
+      "tgt": {
+        "moduleId": 3, 
+        "terminal": "input"
+      }
+    }, 
+    {
+      "src": {
+        "moduleId": 3, 
+        "terminal": "output"
+      }, 
+      "tgt": {
+        "moduleId": 4, 
+        "terminal": "input"
+      }
+    }, 
+    {
+      "src": {
+        "moduleId": 4, 
+        "terminal": "output"
+      }, 
+      "tgt": {
+        "moduleId": 5, 
+        "terminal": "input"
+      }
+    }, 
+    {
+      "src": {
+        "moduleId": 5, 
+        "terminal": "output"
+      }, 
+      "tgt": {
+        "moduleId": 6, 
+        "terminal": "input"
+      }
+    }, 
+    {
+      "src": {
+        "moduleId": 6, 
+        "terminal": "output"
+      }, 
+      "tgt": {
+        "moduleId": 1, 
+        "terminal": "input"
+      }
+    }
+  ]
+}

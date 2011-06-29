@@ -23,7 +23,6 @@ def run_template(template, config):
     """
     all_results = {}
     for nodenum, wires in template:
-        
         # Find the modules
         node = template.modules[nodenum]
         module_id = node['module'] #template.modules[node]
@@ -40,8 +39,12 @@ def run_template(template, config):
         result = module.action(**kwargs)
 #        print result
         all_results[nodenum] = result
-        
-    return all_results
+    
+#    return all_results
+# FIXXXXXXXXXXXXXXXXXXXXXX ***********************
+    from .offspecular.instruments import convert_to_plottable
+    return [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in all_results.items()]
+
 
 def _lookup_results(result, s):
     # Hack to figure out if we have a bundle.  Fix this!
