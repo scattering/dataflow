@@ -39,3 +39,5 @@ if __name__=="__main__":
         call('pip install %s'%(command,),shell=True)
 
 #NOTE: Also install matplotlib and download and install natgrid (https://github.com/matplotlib/natgrid)
+
+#PNOTE: Django is not getting updated from 1.2.5 to 1.3 when pip install -U Django is called from this install script. Typing the same command into the command line will update Django, however.
