@@ -5,11 +5,11 @@ from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
 from apps.tracks.forms import languageSelectForm 
 
-from dataflow.dataflow import wireit
-from dataflow.dataflow.calc import run_template
-from dataflow.dataflow.core import register_instrument
-from dataflow.dataflow.tas.instruments import BT7
-from dataflow.dataflow.offspecular.instruments import ANDR
+from ...dataflow import wireit
+from ...dataflow.calc import run_template
+from ...dataflow.core import register_instrument
+from ...dataflow.tas.instruments import BT7
+from ...dataflow.offspecular.instruments import ANDR
 
 import random
 
