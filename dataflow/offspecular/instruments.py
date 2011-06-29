@@ -78,8 +78,8 @@ def _plot_format(data):
     title = 'AND/R data' # That's creative enough, right?
     dump = dict(z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
 #    print dump
-#    return json.dumps(dump, sort_keys=True, indent=2)
-    return json.dumps(dump)
+    return json.dumps(dump, sort_keys=True, indent=2)
+#    return json.dumps(dump)
 
 
 
