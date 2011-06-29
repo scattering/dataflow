@@ -9,7 +9,7 @@ if __name__=="__main__":
                   'git-doc',
                   'git-core',
                   'git-gui',
-                  'python-django',
+                  #'python-django',
                   'python-setuptools',
                   'python-numpy',
                   'python-scipy',
@@ -22,7 +22,7 @@ if __name__=="__main__":
 		  'libapache2-mod-wsgi',
 		  #'postgresql',
                   ]
-    easy_commands=['simplejson','stompservice','orbited']
+    easy_commands=['simplejson','stompservice','orbited', '-U Django']
     
     for command in apt_commands:
         s='apt-get -y install %s'%(command,)
