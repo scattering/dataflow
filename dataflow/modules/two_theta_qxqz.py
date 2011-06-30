@@ -32,6 +32,21 @@ def two_theta_qxqz_module(id=None, datatype=None, action=None,
              ),
     ]
 
+    # output_grid=None, wavelength=5.0
+    output_grid_field = {
+        "type":"MetaArray",
+        "label": "output_grid",
+        "name": "output grid",
+        "value": None,
+    }
+    
+    wavelength_field = {
+        "type":"float",
+        "label": "wavelength",
+        "name": "wavelength",
+        "value": 5.0,
+    }
+
     # Combine everything into a module.
     module = Module(id=id,
                   name='Two theta to qxqz',
@@ -39,7 +54,7 @@ def two_theta_qxqz_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=fields,
+                  fields=[output_grid_field, wavelength_field] + fields,
                   action=action,
                   )
 

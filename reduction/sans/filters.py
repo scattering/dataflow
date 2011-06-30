@@ -6,12 +6,14 @@ import vaxutils
 import data
 from copy import deepcopy,copy
 import numpy as np
+from numpy import array
 import math
 from matplotlib import pyplot as plt
 from uncertainty import Measurement
 import json
 from draw_annulus_aa import annular_mask_antialiased
-
+import datetime as date
+import time 
 #I will have a general philosophy that filters do not have side effects. That is,
 #they do not change the state of their inputs. So, we will always work on copies
 #internally
@@ -389,16 +391,14 @@ def annular_av(sansdata):
     plt.show()
     #sys.exit()
     return plottable_1D
-def absolute_scaling(sansdata,DIV):  #empty beam, div 
+def absolute_scaling(sansdata,DIV,instrument):  #empty beam, div, instrument(NG3.NG5,NG7)
    #Variable detCnt,countTime,attenTrans,monCnt,sdd,pixel
-    
-    
     detCnt = sansdata.metadata['run.detcnt']
     countTime = sansdata.metadata['run.ctime']
     monCnt = sansdata.metadata['run.moncnt']
     sdd = sansdata.metadata['det.dis'] *100
     pixel = PIXEL_SIZE_X_CM
-    lambd = sansdata.metadata['resolution.lmda']
+    lambd = wavelength  = sansdata.metadata['resolution.lmda']
     attenNo = sansdata.metadata['run.atten']
     print "Attetno: ",attenNo
     print "Countime: ",countTime
@@ -406,7 +406,40 @@ def absolute_scaling(sansdata,DIV):  #empty beam, div
     print "sdd:", sdd
     print "Lambda: ",lambd
     print "detCount: ", detCnt
+    
     #Need attenTrans - AttenuationFactor - need to know whether NG3, NG5 or NG7 (acctStr)
+    
+    
+    #-----------------Reading in array from NG7 and NG5 .dat files (can be changed to .txt) which contain attenuation factors----------
+    #file = open("NG7.txt", "w") #w = write
+    #file.write(repr(a))
+    #file.close()
+    
+    file = open("NG7.dat","r") # r = read
+    f = eval(file.read())
+    file.close()
+    NG7 = f
+    
+    
+    file = open("NG3.dat","r") # r = read
+    g = eval(file.read())
+    file.close()
+    NG3 = g
+   
+
+    #-----Creating Dictionary-----
+   
+    attenFact = {
+        
+        'NG7': NG7.copy(),
+        'NG5': NG7.copy(),
+        'NG3': NG3.copy(),
+        
+        }
+    #-----------------------------
+    attenTrans = attenFact[instrument][attenNo][wavelength]
+    print "attenFact: ", attenTrans
+    
     
     #-------------------------------------------------------------------------------------#
     
@@ -425,10 +458,15 @@ def absolute_scaling(sansdata,DIV):  #empty beam, div
     detCnt = summ
     print "DETCNT: ",detCnt
 
-    print "att: ", attenuation
-    #------End Result-------#
-    #kappa = detCnt/countTime/attenTrans*1.0e8/(monCnt/countTime)*(pixel/sdd)**2
    
+    #------End Result-------#
+    kappa = detCnt/countTime/attenTrans*1.0e8/(monCnt/countTime)*(pixel/sdd)**2
+    print "Kappa: ", kappa
+                                                 
+    utc_datetime = date.datetime.utcnow()
+    print utc_datetime.strftime("%Y-%m-%d %H:%M:%S")
+
+    
 def chain_corrections():
     """a sample chain of corrections"""
     
@@ -530,7 +568,7 @@ def chain_corrections():
     # convert_qxqy shouldn't be used as a filter that returns data... 
     # it puts data into an output form different than sansdata (Changed I think)
     #ar_av(CAL)
-    absolute_scaling(empty_4m_norm,sensitivity)
+    absolute_scaling(empty_4m_norm,sensitivity,'NG3')
     #print "MaxQ: "
     file = open("/home/elakian/sansdata.dat","w")
     

@@ -31,6 +31,28 @@ def pixels_two_theta_module(id=None, datatype=None, action=None,
              description='data with two theta',
              ),
     ]
+    
+    # pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6
+    pixs_per_degree_field = {
+        "type":"float",
+        "label": "pixels_per_degree",
+        "name": "pixels per degree",
+        "value": 80.0,
+    }
+    
+    qzero_pixel_field = {
+        "type":"int",
+        "label": "qzero_pixel",
+        "name": "qzero pixel",
+        "value": 309,
+    }
+    
+    resolution_field = {
+        "type":"float",
+        "label": "instr_resolution",
+        "name": "instrument resolution",
+        "value": 1e-6,
+    }
 
     # Combine everything into a module.
     module = Module(id=id,
@@ -39,7 +61,7 @@ def pixels_two_theta_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=fields,
+                  fields=[pixs_per_degree_field, qzero_pixel_field, resolution_field] + fields,
                   action=action,
                   )
 
