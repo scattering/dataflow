@@ -1,7 +1,13 @@
 import os, sys
 
-sys.path = ['var/www/DATAFLOW','var/www/DATAFLOW/dataflow', '/var/www/DATAFLOW/dataflow/apps/tracks'] + sys.path
+#having trouble with relative imports, so using this is as a fix
+PROJ_NAM =  __file__.split('/')[-3]
+DIR_PATH = __file__[:-27] #includes a final '/'
+#print 'proj', PROJ_NAM
+#print 'dir', DIR_PATH
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'dataflow.settings'
+sys.path = [DIR_PATH,DIR_PATH+PROJ_NAM, DIR_PATH+PROJ_NAM +'/apps/tracks'] + sys.path
+
+os.environ['DJANGO_SETTINGS_MODULE'] = PROJ_NAM + '.settings'
 import django.core.handlers.wsgi
 application = django.core.handlers.wsgi.WSGIHandler()
