@@ -23,7 +23,7 @@ if __name__=="__main__":
 		  'postgresql',
 		  'pgadmin3',
                   ]
-    easy_commands=['simplejson','stompservice','orbited', '-U Django', '-U psycopg2']
+    easy_commands=['simplejson','stompservice','orbited', '-U Django', '-U psycopg2', 'South']
     
     for command in apt_commands:
         s='apt-get -y install %s'%(command,)
