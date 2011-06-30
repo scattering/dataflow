@@ -9,37 +9,38 @@ from pprint import pprint
 # left here for testing purposes
 # python uses __name__ for relative imports so I cannot use
 # the ... in place of dataflow when testing
-#from dataflow.dataflow import config
-#from dataflow.dataflow.calc import run_template
-#from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
-#from dataflow.dataflow.core import Datatype, Instrument, Template, register_instrument
-#from dataflow.dataflow.modules.load import load_module
-#from dataflow.dataflow.modules.join import join_module
-#from dataflow.dataflow.modules.scale import scale_module
-#from dataflow.dataflow.modules.save import save_module
-#from dataflow.dataflow.modules.autogrid import autogrid_module
-#from dataflow.dataflow.modules.offset import offset_module
-#from dataflow.dataflow.modules.wiggle import wiggle_module
-#from dataflow.dataflow.modules.pixels_two_theta import pixels_two_theta_module
-#from dataflow.dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
-#from dataflow.reduction.offspecular.filters import *
-#from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
+from dataflow.dataflow import config
+from dataflow.dataflow.calc import run_template
+from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
+from dataflow.dataflow.core import Datatype, Instrument, Template, register_instrument
+from dataflow.dataflow.modules.load import load_module
+from dataflow.dataflow.modules.join import join_module
+from dataflow.dataflow.modules.scale import scale_module
+from dataflow.dataflow.modules.save import save_module
+from dataflow.dataflow.modules.autogrid import autogrid_module
+from dataflow.dataflow.modules.offset import offset_module
+from dataflow.dataflow.modules.wiggle import wiggle_module
+from dataflow.dataflow.modules.pixels_two_theta import pixels_two_theta_module
+from dataflow.dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
+from dataflow.reduction.offspecular.filters import *
+from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
 
-from ...dataflow import config
-from ...dataflow.calc import run_template
-from ...dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
-from ...dataflow.core import Datatype, Instrument, Template, register_instrument
-from ...dataflow.modules.load import load_module
-from ...dataflow.modules.join import join_module
-from ...dataflow.modules.scale import scale_module
-from ...dataflow.modules.save import save_module
-from ...dataflow.modules.autogrid import autogrid_module
-from ...dataflow.modules.offset import offset_module
-from ...dataflow.modules.wiggle import wiggle_module
-from ...dataflow.modules.pixels_two_theta import pixels_two_theta_module
-from ...dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
-from ...reduction.offspecular.filters import *
-from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
+
+#from ...dataflow import config
+#from ...dataflow.calc import run_template
+#from ...dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
+#from ...dataflow.core import Datatype, Instrument, Template, register_instrument
+#from ...dataflow.modules.load import load_module
+#from ...dataflow.modules.join import join_module
+#from ...dataflow.modules.scale import scale_module
+#from ...dataflow.modules.save import save_module
+#from ...dataflow.modules.autogrid import autogrid_module
+#from ...dataflow.modules.offset import offset_module
+#from ...dataflow.modules.wiggle import wiggle_module
+#from ...dataflow.modules.pixels_two_theta import pixels_two_theta_module
+#from ...dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
+#from ...reduction.offspecular.filters import *
+#from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
 
 
 # Datatype
@@ -223,11 +224,17 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                  requires=[config.JSCRIPT + '/ospecplot.js'],
                  datatypes=[data2d],
                  )
-instruments = [ANDR]
+instrmnts = [ANDR]
 
 # Testing
 if __name__ == '__main__':
-    for instrument in instruments:
+    # introspection
+    #from inspect import getsource
+    #from dataflow.dataflow.offspecular import instruments
+    #print getsource(instruments)
+    #print run_template.__code__
+    #sys.exit()
+    for instrument in instrmnts:
         register_instrument(instrument)
     path, ext = dir + '/dataflow/sampledata/ANDR/sabc/Isabc20', '.cg1'
     files = [path + str(i + 1).zfill(2) + ext for i in range(1, 12)]
@@ -235,7 +242,7 @@ if __name__ == '__main__':
         dict(module="ospec.load", position=(50, 50),
              config={'files': files, 'intent': 'signal'}),
         dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
-#        dict(module="ospec.grid", position=(360 , 60), config={}),
+        #dict(module="ospec.grid", position=(360 , 60), config={}),
         dict(module="ospec.join", position=(150, 100), config={}),
         dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':0.1}}),
         dict(module="ospec.wiggle", position=(350, 200), config={}),
@@ -257,14 +264,14 @@ if __name__ == '__main__':
                         wires=wires,
                         instrument=ANDR.id,
                         )
-#    template and instrument tests
-#    print json.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
-#    print json.dumps(template_to_wireit_diagram(template)) # need name!
-#    sys.exit()
+    #template and instrument tests
+    #print json.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
+    #print json.dumps(template_to_wireit_diagram(template)) # need name!
+    #sys.exit()
 
 
     result = run_template(template, config)
-#    plot_result = [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in result.items()]
+    #plot_result = [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in result.items()]
     print "WRITING TO FILE"
     for index, plottable in enumerate(result):
         with open('new_data' + str(index) + '.txt', 'w') as f:
@@ -272,27 +279,27 @@ if __name__ == '__main__':
                 f.write(format + "\n")
     print "DONE"
     sys.exit()
-#    pprint(result)
+    #pprint(result)
 
-#raw_input("Done looking at formatted output? ")
-#output of the qxqz: result[7]['output'][0]
-#data = result[6]['output'][0]
-#print "\n" * 10, _plot_format(data), "\n" * 10
-#intensity = [numpy.amin(data[0], axis=0)[0], numpy.amax(data[0], axis=0)[0]]
-#print "Min intensity:", intensity[0]
-#print "Max intensity:", intensity[1]
-#qx = [numpy.amin(data._info[0]['values']), numpy.amax(data._info[0]['values'])]
-#print "Min qx:", qx[0]
-#print "Max qx:", qx[1]
-#qz = [numpy.amin(data._info[1]['values']), numpy.amax(data._info[1]['values'])]
-#print "Min qz:", qz[0]
-#print "Max qz:", qz[1]
-#dimensions = [len(data._info[0]['values']), len(data._info[1]['values'])]
-#print "Dimensions:", dimensions
-#counts = data[0][:, 0].tolist()
-#print "Intensities:", counts
-#print json.dumps(dict(intensity=intensity, qx=qx, qz=qz, dimensions=dimensions, counts=counts))
-#print numpy.ravel(result[7]['output'][0])
-#print result[7]['output'][0]._info
-#data = result[7]['output'][0] # output of the qxqz conversion
-#assert data.all() == eval(data.extrainfo["CreationStory"]).all() # verify the creation story (will this have much use?)
+    #raw_input("Done looking at formatted output? ")
+    #output of the qxqz: result[7]['output'][0]
+    #data = result[6]['output'][0]
+    #print "\n" * 10, _plot_format(data), "\n" * 10
+    #intensity = [numpy.amin(data[0], axis=0)[0], numpy.amax(data[0], axis=0)[0]]
+    #print "Min intensity:", intensity[0]
+    #print "Max intensity:", intensity[1]
+    #qx = [numpy.amin(data._info[0]['values']), numpy.amax(data._info[0]['values'])]
+    #print "Min qx:", qx[0]
+    #print "Max qx:", qx[1]
+    #qz = [numpy.amin(data._info[1]['values']), numpy.amax(data._info[1]['values'])]
+    #print "Min qz:", qz[0]
+    #print "Max qz:", qz[1]
+    #dimensions = [len(data._info[0]['values']), len(data._info[1]['values'])]
+    #print "Dimensions:", dimensions
+    #counts = data[0][:, 0].tolist()
+    #print "Intensities:", counts
+    #print json.dumps(dict(intensity=intensity, qx=qx, qz=qz, dimensions=dimensions, counts=counts))
+    #print numpy.ravel(result[7]['output'][0])
+    #print result[7]['output'][0]._info
+    #data = result[7]['output'][0] # output of the qxqz conversion
+    #assert data.all() == eval(data.extrainfo["CreationStory"]).all() # verify the creation story (will this have much use?)
