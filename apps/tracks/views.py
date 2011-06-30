@@ -14,7 +14,6 @@ from ...dataflow.offspecular.instruments import ANDR
 import random
 
 def xhr_test(request):
-    print request
     if request.is_ajax():
         if request.method == 'GET':
                 message = "This is an XHR GET request"
@@ -24,6 +23,8 @@ def xhr_test(request):
             print request.POST
         else:
             message = "No XHR"
+    else:
+	message = "What is this, WSGI?"
     return HttpResponse(message)
 
 def mytest(request):
