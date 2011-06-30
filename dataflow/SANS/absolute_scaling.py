@@ -1,16 +1,16 @@
 """
-Return transmission based on bottom left and top right coordinates
+Absolute Scaling
 """
 
 from .. import config
 from ..core import Module
 
-def generate_transmission_module(id=None, datatype=None, action=None,
+def absolute_scaling_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
-    """Return transmission based on bottom left and top right coordinates"""
+    """Abs"""
 
     icon = {
-        'URI': config.IMAGES + "generate_transmission.png",
+        'URI': config.IMAGES + "absolute_scaling.png",
         'terminals': {
             'input': (0, 10, -1, 0),
             'output': (20, 10, 1, 0),
@@ -28,13 +28,13 @@ def generate_transmission_module(id=None, datatype=None, action=None,
         dict(id='output',
              datatype=datatype,
              use='out',
-             description='correct',
+             description='Absolute Scaling',
              ),
     ]
 
     # Combine everything into a module.
     module = Module(id=id,
-                  name='generate_transmission',
+                  name='absolute_scaling',
                   version=version,
                   description=action.__doc__,
                   icon=icon,
