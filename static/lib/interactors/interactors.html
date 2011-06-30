@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>jqPlot error bars</title>
+<script type="text/javascript" src="../prototype.js"></script>
+<script type="text/javascript" src="interactors.js"></script>
+<script type="text/javascript">
+var w;
+window.onload = function() {
+    console.log(document.getElementById('mycanvas'));
+    w = new RulerInteractor('mycanvas');
+    w.redraw();
+}
+</script>
+</head>
+<body>
+<canvas id="mycanvas" width="600" height="600" style="border: 1px solid;"></canvas>
+</body>
+</html>
