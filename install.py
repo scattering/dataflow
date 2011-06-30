@@ -20,7 +20,8 @@ if __name__=="__main__":
                   'subversion',
 		  'apache2',
 		  'libapache2-mod-wsgi',
-		  #'postgresql',
+		  'postgresql',
+		  'pgadmin3',
                   ]
     easy_commands=['simplejson','stompservice','orbited', '-U Django', '-U psycopg2']
     
