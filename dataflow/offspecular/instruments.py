@@ -9,37 +9,37 @@ from pprint import pprint
 # left here for testing purposes
 # python uses __name__ for relative imports so I cannot use
 # the ... in place of dataflow when testing
-from dataflow.dataflow import config
-from dataflow.dataflow.calc import run_template
-from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
-from dataflow.dataflow.core import Datatype, Instrument, Template, register_instrument
-from dataflow.dataflow.modules.load import load_module
-from dataflow.dataflow.modules.join import join_module
-from dataflow.dataflow.modules.scale import scale_module
-from dataflow.dataflow.modules.save import save_module
-from dataflow.dataflow.modules.autogrid import autogrid_module
-from dataflow.dataflow.modules.offset import offset_module
-from dataflow.dataflow.modules.wiggle import wiggle_module
-from dataflow.dataflow.modules.pixels_two_theta import pixels_two_theta_module
-from dataflow.dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
-from dataflow.reduction.offspecular.filters import *
-from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
+#from dataflow.dataflow import config
+#from dataflow.dataflow.calc import run_template
+#from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
+#from dataflow.dataflow.core import Datatype, Instrument, Template, register_instrument
+#from dataflow.dataflow.modules.load import load_module
+#from dataflow.dataflow.modules.join import join_module
+#from dataflow.dataflow.modules.scale import scale_module
+#from dataflow.dataflow.modules.save import save_module
+#from dataflow.dataflow.modules.autogrid import autogrid_module
+#from dataflow.dataflow.modules.offset import offset_module
+#from dataflow.dataflow.modules.wiggle import wiggle_module
+#from dataflow.dataflow.modules.pixels_two_theta import pixels_two_theta_module
+#from dataflow.dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
+#from dataflow.reduction.offspecular.filters import *
+#from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
 
-#from ...dataflow import config
-#from ...dataflow.calc import run_template
-#from ...dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
-#from ...dataflow.core import Datatype, Instrument, Template, register_instrument
-#from ...dataflow.modules.load import load_module
-#from ...dataflow.modules.join import join_module
-#from ...dataflow.modules.scale import scale_module
-#from ...dataflow.modules.save import save_module
-#from ...dataflow.modules.autogrid import autogrid_module
-#from ...dataflow.modules.offset import offset_module
-#from ...dataflow.modules.wiggle import wiggle_module
-#from ...dataflow.modules.pixels_two_theta import pixels_two_theta_module
-#from ...dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
-#from ...reduction.offspecular.filters import *
-#from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
+from ...dataflow import config
+from ...dataflow.calc import run_template
+from ...dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
+from ...dataflow.core import Datatype, Instrument, Template, register_instrument
+from ...dataflow.modules.load import load_module
+from ...dataflow.modules.join import join_module
+from ...dataflow.modules.scale import scale_module
+from ...dataflow.modules.save import save_module
+from ...dataflow.modules.autogrid import autogrid_module
+from ...dataflow.modules.offset import offset_module
+from ...dataflow.modules.wiggle import wiggle_module
+from ...dataflow.modules.pixels_two_theta import pixels_two_theta_module
+from ...dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
+from ...reduction.offspecular.filters import *
+from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
 
 
 # Datatype
