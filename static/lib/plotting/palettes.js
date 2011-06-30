@@ -6,10 +6,14 @@ var _f = function(k) {
 };
 var _mapify = function(rgbfunc) {
   return function(n) {
-    var map = [];
-    for (var i = 0; i < n; i ++)
-      map.push(scale_min_floor(rgbfunc(i / n), 255));
-    return map;
+    var arraymap = [], strmap = [];
+    for (var i = 0; i < n; i ++) {
+      var array = scale_min_floor(rgbfunc(i / n), 255);
+      var str = array_to_rgb(array);
+      arraymap.push(array);
+      strmap.push(str);
+    }
+    return { array: arraymap, str: strmap };
   };
 };
 var _h2rgb = function(h) {

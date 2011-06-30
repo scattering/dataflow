@@ -13,6 +13,7 @@
 <!--<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.AxisTickRenderer.js"></script>-->
 <script language="javascript" type="text/javascript" src="palettes.js"></script>
 <script language="javascript" type="text/javascript" src="sansdata.js"></script>
+<!--<script language="javascript" type="text/javascript" src="andrdata.js"></script>-->
 <link rel="stylesheet" type="text/css" href="jqplot/jquery.jqplot.css" />
 <style rel="stylesheet" type="text/css">
 .jqplot-target { font-family: helvetica; }
@@ -21,8 +22,9 @@ h3 { font-weight: normal; }
 .jqplot-bubble-point { border: 1px dashed orange; }
 </style>
 <script type="text/javascript">
-sansdata=$.map(sansdata, function(x){f= $.map(x, function(d){return d+400}); return [f];});
-var m = Matrix(sansdata);
+//sansdata=andrdata;
+sansdata.z=$.map(sansdata.z, function(x){f= $.map(x, function(d){return d+1}); return [f];});
+var m = Matrix(sansdata.z);
 var data =
 [
   DataSeries({
@@ -158,10 +160,10 @@ var funcs = {
 };
 
 function Matrix(m) {
-  m.at = function(x, y) { if (m[y] == undefined) console.log(y,x);return m[y][x]; };
   m.cols = m[0].length;
   m.rows = m.length;
   m.autodims = { xmin: 0, xmax: m.cols, dx: 1, ymin: -1, ymax: m.rows - 1, dy: 1 };
+  m.at = function(x, y) { return m[m.rows-y-1][x]; };
   m.matrixfy = function(format) { return matrixfy(m.autodims, m.at, format); };
   return m;
 }
@@ -204,7 +206,7 @@ function renderData(data) {
     var resguess = Math.pow(2, Math.log((data[index].dims.xmax - data[index].dims.xmin) / data[index].dims.dx) / Math.log(2));
     $('#res').val(resguess);
     //console.log(edges_.edges_);
-    console.log(palette.length);
+    console.log(palette.array.length);
     
     for (var i in s_) {
       //This is slow:
@@ -213,8 +215,8 @@ function renderData(data) {
       //To compare if we compute the same sortedindex using each method:
       //console.log(data[index].zs[i], sortedindex2);
       s_[i][2] = data[index].zs[i];
-      s_[i][3] = { color: array_to_rgb(palette[sortedindex2]) };
-      s_[i][4] = palette[sortedindex2];
+      s_[i][3] = { color: palette.str[sortedindex2] };
+      s_[i][4] = palette.array[sortedindex2];
     }
     series.push(s_);
     //options.axes = { xaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } } , yaxis: { renderer: $.jqplot.LogAxisRenderer, tickDistribution: 'power', tickOptions: { formatString: '%.0e' } }};
@@ -241,12 +243,12 @@ function renderData(data) {
 function colorbar(canvasid, palette) {
   var cvs = document.getElementById(canvasid);
   var ctx = getContext(canvasid);
-  cvs.height = palette.length;
+  cvs.height = palette.array.length;
   
-  var imgd = ctx.createImageData(1, palette.length);
+  var imgd = ctx.createImageData(1, palette.array.length);
   var pix = imgd.data;
   for (var i = 0; n = pix.length, i < n; i += 4) {
-    var rgba = palette[palette.length - 1 - i/4];
+    var rgba = palette.array[palette.array.length - 1 - i/4];
     pix[i] = rgba[0];
     pix[i+1] = rgba[1];
     pix[i+2] = rgba[2];
@@ -263,7 +265,7 @@ function renderColorbar(canvasid, palette, edges, nlabels) {
   var ctx = getContext(canvasid);
   img2.onload = function() {
       ctx.clearRect(0, 0, cvs.width, cvs.height);
-      ctx.drawImage(this, 0, 0, 1, palette.length, 48, 11.5, cvs.width, cvs.height - 23);
+      ctx.drawImage(this, 0, 0, 1, palette.array.length, 48, 11.5, cvs.width, cvs.height - 23);
   
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'right';

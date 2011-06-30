@@ -161,14 +161,20 @@
                 return String(val);
             }
         }
-        this.colors = [];
-        this.rgbs = [];
+        this.zaxis = 'lin';
         this.palette = 'jet';
         this.edges = 255;
         this.xlabel = null;
         this.ylabel = null;
         this.zlabel = null;
         this.title = null;
+        this._edges = [];
+        // Contains [r,g,b] arrays
+        this._palette = null;
+        // Contains rgb(r,g,b) strings
+        this._rgbs = [];
+        // Contains indices to this._palette
+        this.colors = [];
         
         
         /*
@@ -226,6 +232,10 @@
             }
             */
         }
+        console.log('init');
+        
+        this._edges = u.edges(this.zs, this.zaxis, this.edges, this.minZ, this.maxZ);
+        this._palette = palettes[this.palette](n+1);
         
         /*
         if (!this.varyBubbleColors) {
@@ -270,7 +280,7 @@
     };
     
     u = {
-        _types: { lin: {
+        types: { lin: {
                     incr: function(i, step) { return i + step; },
                     step: function(min,max,n) { return (max-min)/n; },
                     index: function(value,min,step) { return Math.floor((value-min)/step); },
@@ -284,20 +294,20 @@
                   }
                 },
                 
-        _edges: function (data,type,n,min,max) {
+        edges: function(data,type,n,min,max) {
             if (min == undefined) min = arrayMin(data);
             if (max == undefined) max = arrayMax(data);
             if (min == max) max += 1;
-            var step = this._types[type].step(min,max,n);
-            return this._sortedindexify({ type: type, min: min, max: max, n: n, step: step }); //, edges_: edges_ };
+            var step = this.types[type].step(min,max,n);
+            return this.sortedindexify({ type: type, min: min, max: max, n: n, step: step }); //, edges_: edges_ };
         },
-        _sortedindexify: function (o) {
-            var _sortedindex = this._sortedindex;
+        sortedindexify: function(o) {
+            var _sortedindex = this.sortedindex;
             o.sortedindex = function(value) { _sortedindex(this, value); };
             return o;
         },
-        _sortedindex: function (edges_, value) {
-            var sortedindex = u._types[edges_.type].index(value, edges_.min, edges_.step);
+        sortedindex: function(edges_, value) {
+            var sortedindex = u.types[edges_.type].index(value, edges_.min, edges_.step);
             // If data falls off the top or bottom of the scale (i.e., if value is infinite)
             if (sortedindex >= edges_.n) return 1 * edges_.n;
             if (isNaN(sortedindex) || sortedindex < 0) return 0;
@@ -317,14 +327,20 @@
         this.gridData = [];
         var zs = [];
         this.zs = [];
+
         //var dim = Math.min(plot._height, plot._width);
         for (var i=0; i<this.data.length; i++) {
             if (data[i] != null) {
-                this.gridData.push([xp.call(this._xaxis, data[i][0]), yp.call(this._yaxis, data[i][1]), data[i][2]]);
-                this.zs.push([i, data[i][2]]);
-                zs.push(data[i][2]);
+                var z = data[i][2];
+                
+                this.gridData.push([xp.call(this._xaxis, data[i][0]), yp.call(this._yaxis, data[i][1]), z]);
+                this.zs.push([i, z]);
+                zs.push(z);
+                
+
             }
         }
+        
         //var z, val, maxz = this.maxZ = arrayMax(zs);
         //var l = this.gridData.length;
         
