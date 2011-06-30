@@ -1,26 +1,45 @@
 """
 Offspecular reflectometry reduction modules
 """
-import os, sys, math, numpy, json
+import os, sys, math, numpy, simplejson, time, json
 dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.append(dir)
 from pprint import pprint
 
-from ...dataflow import config
-from ...dataflow.calc import run_template
-from ...dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
-from ...dataflow.core import Datatype, Instrument, Template, register_instrument
-from ...dataflow.modules.load import load_module
-from ...dataflow.modules.join import join_module
-from ...dataflow.modules.scale import scale_module
-from ...dataflow.modules.save import save_module
-from ...dataflow.modules.autogrid import autogrid_module
-from ...dataflow.modules.offset import offset_module
-from ...dataflow.modules.wiggle import wiggle_module
-from ...dataflow.modules.pixels_two_theta import pixels_two_theta_module
-from ...dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
-from ...reduction.offspecular.filters import *
-from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
+# left here for testing purposes
+# python uses __name__ for relative imports so I cannot use
+# the ... in place of dataflow when testing
+from dataflow.dataflow import config
+from dataflow.dataflow.calc import run_template
+from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
+from dataflow.dataflow.core import Datatype, Instrument, Template, register_instrument
+from dataflow.dataflow.modules.load import load_module
+from dataflow.dataflow.modules.join import join_module
+from dataflow.dataflow.modules.scale import scale_module
+from dataflow.dataflow.modules.save import save_module
+from dataflow.dataflow.modules.autogrid import autogrid_module
+from dataflow.dataflow.modules.offset import offset_module
+from dataflow.dataflow.modules.wiggle import wiggle_module
+from dataflow.dataflow.modules.pixels_two_theta import pixels_two_theta_module
+from dataflow.dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
+from dataflow.reduction.offspecular.filters import *
+from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
+
+#from ...dataflow import config
+#from ...dataflow.calc import run_template
+#from ...dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
+#from ...dataflow.core import Datatype, Instrument, Template, register_instrument
+#from ...dataflow.modules.load import load_module
+#from ...dataflow.modules.join import join_module
+#from ...dataflow.modules.scale import scale_module
+#from ...dataflow.modules.save import save_module
+#from ...dataflow.modules.autogrid import autogrid_module
+#from ...dataflow.modules.offset import offset_module
+#from ...dataflow.modules.wiggle import wiggle_module
+#from ...dataflow.modules.pixels_two_theta import pixels_two_theta_module
+#from ...dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
+#from ...reduction.offspecular.filters import *
+#from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
 
 
 # Datatype
@@ -63,24 +82,30 @@ def _plot_format(data):
     #[[[1,2,3,4],[5,6,7,8],[9,10,11,12]][[1,2,3,4],[3,4,2,4],[2,7,8,0]],...]
     #data[x][:,0] is the counts
     print "\tWorking on output"
-    z = [arr[:,0].tolist() for arr in data]
+    z = [arr[:, 0].tolist() for arr in data]
     print "\t\tFinished z conversion"
-    axis = ['x','y']
+    axis = ['x', 'y']
     dims = {}
     for index, label in enumerate(axis):
-        dims[axis[index] + 'min'] = numpy.amin(data._info[index]['values'])
-        dims[axis[index] + 'max'] = numpy.amax(data._info[index]['values'])
-        dims[axis[index] + 'dim'] = len(data._info[index]['values'])
+        arr = data._info[index]['values']
+        dims[axis[index] + 'min'] = numpy.amin(arr)
+        dims[axis[index] + 'max'] = numpy.amax(arr)
+        dims[axis[index] + 'dim'] = numpy.alen(arr)
     xlabel = data._info[0]['name']
     ylabel = data._info[1]['name']
     zlabel = data._info[2]['cols'][0]['name']
     title = 'AND/R data' # That's creative enough, right?
     dump = dict(z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
-#    print dump
-    return json.dumps(dump, sort_keys=True, indent=2)
+#    print "lulzz"
+#    timed = time.time()
+    res = simplejson.dumps(dump, sort_keys=True, indent=2)
+#    res = simplejson.dumps(dump)
+#    print time.time() - timed
+    return res
 #    return json.dumps(dump)
 
 
+# ========= Module definitions ===========
 
 # Load module
 def load_action(files=None, intent=None):
@@ -111,24 +136,30 @@ save = save_module(id='ospec.save', datatype=OSPEC_DATA,
 
 
 # Autogrid module
-def autogrid_action(input=None):
+def autogrid_action(input=None, extra_grid_point=True, min_step=1e-10):
     print "gridding"
-    result = [_autogrid(bundle) for bundle in input]
+    result = [_autogrid(bundle, extra_grid_point, min_step) for bundle in input]
     return dict(output=result)
-def _autogrid(input, extra_grid_point=True, min_step=1e-10):
+def _autogrid(input, extra_grid_point, min_step):
     return Autogrid().apply(input, extra_grid_point=extra_grid_point, min_step=min_step)
 autogrid = autogrid_module(id='ospec.grid', datatype=OSPEC_DATA,
                    version='1.0', action=autogrid_action)
 
 
 # Join module
-def join_action(input=None):
+def join_action(input=None, grid=None):
     print "joining"
-    result = [_join(bundle) for bundle in input]
+    result = [_join(bundle, grid) for bundle in input]
     return dict(output=result)
-def _join(list_of_datasets, grid=None):
+def _join(list_of_datasets, grid):
     return Combine().apply(list_of_datasets, grid=grid)
-join = join_module(id='ospec.join', datatype=OSPEC_DATA, version='1.0', action=join_action)
+grid_field = {
+        "type":"MetaArray",
+        "label": "grid",
+        "name": "grid",
+        "value": None,
+}
+join = join_module(id='ospec.join', datatype=OSPEC_DATA, version='1.0', action=join_action, fields=[grid_field])
 
 
 # Offset module
@@ -158,28 +189,28 @@ wiggle = wiggle_module(id='ospec.wiggle', datatype=OSPEC_DATA, version='1.0', ac
 
 
 # Pixels to two theta module
-def pixels_two_theta_action(input=None):
+def pixels_two_theta_action(input=None, pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6):
     print "converting pixels to two theta"
     flat = []
     for bundle in input:
         flat.extend(bundle)
-    result = [_pixels_two_theta(f) for f in flat]
+    result = [_pixels_two_theta(f, pixels_per_degree, qzero_pixel, instr_resolution) for f in flat]
     return dict(output=result)
-def _pixels_two_theta(data):
-    return PixelsToTwotheta().apply(data)
+def _pixels_two_theta(data, pixels_per_degree, qzero_pixel, instr_resolution):
+    return PixelsToTwotheta().apply(data, pixels_per_degree=pixels_per_degree, qzero_pixel=qzero_pixel, instr_resolution=instr_resolution)
 pixels_two_theta = pixels_two_theta_module(id='ospec.twotheta', datatype=OSPEC_DATA, version='1.0', action=pixels_two_theta_action)
 
 
 # Two theta to qxqz module
-def two_theta_qxqz_action(input=None):
+def two_theta_qxqz_action(input=None, output_grid=None, wavelength=5.0):
     print "converting theta and two theta to qx and qz"
     flat = []
     for bundle in input:
         flat.extend(bundle)
-    result = [_two_theta_qxqz(f) for f in flat]
+    result = [_two_theta_qxqz(f, output_grid, wavelength) for f in flat]
     return dict(output=result)
-def _two_theta_qxqz(data):
-    return ThetaTwothetaToQxQz().apply(data)
+def _two_theta_qxqz(data, output_grid, wavelength):
+    return ThetaTwothetaToQxQz().apply(data, output_grid=output_grid, wavelength=wavelength)
 two_theta_qxqz = two_theta_qxqz_module(id='ospec.qxqz', datatype=OSPEC_DATA, version='1.0', action=two_theta_qxqz_action)
 
 #Instrument definitions
@@ -235,9 +266,9 @@ if __name__ == '__main__':
     result = run_template(template, config)
 #    plot_result = [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in result.items()]
     print "WRITING TO FILE"
-    for index,plottable in enumerate(result):
+    for index, plottable in enumerate(result):
         with open('new_data' + str(index) + '.txt', 'w') as f:
-            for format in plottable.get('output',[]):
+            for format in plottable.get('output', []):
                 f.write(format + "\n")
     print "DONE"
     sys.exit()
