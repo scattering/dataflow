@@ -1,6 +1,6 @@
 import os, sys
 
-#having trouble with relative imports, so using this is as a fix
+#having trouble with relative imports, so using this is as a (temp) fix
 PROJ_NAM =  __file__.split('/')[-3]
 DIR_PATH = __file__[:-27] #includes a final '/'
 #print 'proj', PROJ_NAM
