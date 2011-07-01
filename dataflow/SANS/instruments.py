@@ -139,7 +139,7 @@ gen_trans = generate_transmission_module(id='sans.generate_transmission', dataty
 def initial_correction_action(input=None):
     #SAM,BGD,EMP,Trans
     global Tsam,Temp
-    BGD = read_sample("/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC007.SA3_SRK_S107")
+    BGD = read_sample(map_files('blocked_4m'))
     COR = initial_correction(input[0][0],BGD,input[0][1],Tsam/Temp)
     print COR.data.x
     result = [COR]
@@ -159,7 +159,7 @@ def correct_solid_angle_action(input=None):
 solid_angle = correct_solid_angle_module(id='sans.correct_solid_angle', datatype=SANS_DATA, version='1.0', action=correct_solid_angle_action)
 def correct_detector_efficiency_action(input=None):
     print "input: ",input
-    sensitivity = read_div("/home/elakian/dataflow/reduction/sans/ncnr_sample_data/PLEX_2NOV2007_NG3.DIV")
+    sensitivity = read_div(map_files('div'))
     DIV = correct_detector_efficiency(input[0][0],sensitivity)
     result = [DIV]
     return dict(output=result)
@@ -183,7 +183,7 @@ def absolute_scaling_action(input=None):
     #sample,empty,DIV,Tsam,instrument
     global fileList
     input = input[0]
-    sensitivity = read_div("/home/elakian/dataflow/reduction/sans/ncnr_sample_data/PLEX_2NOV2007_NG3.DIV")
+    sensitivity = read_div(map_files('div'))
     EMP = read_sample(fileList[2])
     ABS = absolute_scaling(input[0],EMP,sensitivity,Tsam,'NG3')
     result = [ABS]
