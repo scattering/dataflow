@@ -49,8 +49,11 @@ print 'home', ROOT_URL.HOMEDIR
 #Transmissions
 Tsam = 0
 Temp = 0
+#Qx,Qy
 qx = {}
 qy = {}
+#List of Files
+fileList = ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105"]
 
 # Datatype
 SANS_DATA = 'data1d.sans'
@@ -178,9 +181,10 @@ def annular_av_action(input=None):
 annul_av = annular_av_module(id='sans.annular_av', datatype=SANS_DATA, version='1.0', action=annular_av_action)
 def absolute_scaling_action(input=None):
     #sample,empty,DIV,Tsam,instrument
+    global fileList
     input = input[0]
     sensitivity = read_div("/home/elakian/dataflow/reduction/sans/ncnr_sample_data/PLEX_2NOV2007_NG3.DIV")
-    EMP = read_sample("/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102")
+    EMP = fileList[2]
     ABS = absolute_scaling(input[0],EMP,sensitivity,Tsam,'NG3')
     result = [ABS]
     print "abs: ",result
@@ -206,11 +210,12 @@ instruments = [SANS_INS]
 
 # Testing
 if __name__ == '__main__':
+    global fileList
     for instrument in instruments:
         register_instrument(instrument)
     modules = [
         dict(module="sans.load", position=(5, 20),
-             config={'files': ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105"], 'intent': 'signal'}),
+             config={'files': fileList, 'intent': 'signal'}),
         dict(module="sans.save", position=(280, 40), config={'ext': 'dat'}),
         dict(module="sans.monitor_normalize", position=(360 , 60), config={}),
         dict(module="sans.generate_transmission", position=(360 , 60), config={}),
