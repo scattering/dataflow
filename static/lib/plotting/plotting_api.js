@@ -125,7 +125,7 @@ function matrixfy(d, func, format) {
 
 
 
-function renderData(data) {
+function renderData(data, plotid) {
   var series = [];
   var options = { title: data[0].desc, series: [], axes: { xaxis: { tickOptions: { formatString: '%.2f' } }, yaxis: { tickOptions: { formatString: '%.2f' } } }, cursor: { show: true, zoom: true, showTooltipDataPosition: true, showVerticalLine: true, showHorizontalLine: true, tooltipFormatString:  '%s (%s, %s, %s)' } };
   
@@ -164,7 +164,7 @@ function renderData(data) {
   //console.log(options);
   console.log('stg',stage);
   if (stage == 1) {
-    plot = $.jqplot('chart1', series, options);
+    plot = $.jqplot(plotid, series, options);
     stage = 2;
   }
   else {
@@ -173,13 +173,14 @@ function renderData(data) {
     plot.options = options;
     plot.replot();
   }
-  //plot = $.jqplot('chart1', [[1,1]], {});
+  //plot = $.jqplot(plotid, [[1,1]], {});
   return series;
 
 }
 function colorbar(canvasid, palette) {
   var cvs = document.getElementById(canvasid);
   var ctx = getContext(canvasid);
+  console.log(canvasid,palette);
   cvs.height = palette.array.length;
   
   var imgd = ctx.createImageData(1, palette.array.length);
