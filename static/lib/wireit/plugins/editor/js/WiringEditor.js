@@ -282,14 +282,14 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
  	},
 
 	runModuleSuccess: function(display) {
-		var toPlot = display[this.wireClickSource].output[0], zipped = [];
+		console.log(display)
+		var toPlot = display[this.wireClickSource].output[0], zipped = []; 
 		if (toPlot.x.length != toPlot.y.length)
 			throw "Your data sucks";
 		for (i in toPlot.x)
 			if (!isNaN(toPlot.x[i]))
 				zipped.push([toPlot.x[i], toPlot.y[i]]);
-		//console.log(zipped);
-		
+
 
 		if (! plotCreated) {
 		  plot=$.jqplot('plot', [zipped]);

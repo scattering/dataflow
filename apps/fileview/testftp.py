@@ -14,5 +14,7 @@ ftp.cwd(ftp.nlst()[1]) # Looking at user1's files
 filey = ftp.nlst()[0]
 ftp.retrlines('LIST')
 
-ftp.retrlines('RETR' + filey, open(filey,'r'))
+def read_file():
 
+ftp.retrlines('RETR' + filey, read_file)
+#open(filey,'r')
