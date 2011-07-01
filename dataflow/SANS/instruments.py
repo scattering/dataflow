@@ -22,12 +22,13 @@ from dataflow.SANS.initial_correction import initial_correction_module
 from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
 from dataflow.SANS.convert_qxqy import convert_qxqy_module
 from dataflow.SANS.annular_av import annular_av_module
-
+from dataflow.SANS.absolute_scaling import absolute_scaling_module
 #Transmissions
 Tsam = 0
 Temp = 0
 qx = {}
 qy = {}
+
 # Datatype
 SANS_DATA = 'data1d.sans'
 data2d = Datatype(id=SANS_DATA,
@@ -104,7 +105,8 @@ def generate_transmission_action(input=None):
     Temp=generate_transmission(input[0][4],input[0][2],coord_left,coord_right)
     print 'Sample transmission= {0} (IGOR Value = 0.724): '.format(Tsam)
     print 'Empty Cell transmission= {0} (IGOR Value = 0.929): '.format(Temp)
-    return dict(output=input[0])
+    result = input[0]
+    return dict(output=result)
     #result = [generate_transmission(f) for f in flat]
     #return dict(output=result)
 gen_trans = generate_transmission_module(id='sans.generate_transmission', datatype=SANS_DATA, version='1.0', action=generate_transmission_action)
@@ -115,6 +117,7 @@ def initial_correction_action(input=None):
     COR = initial_correction(input[0][0],BGD,input[0][1],Tsam/Temp)
     print COR.data.x
     result = [COR]
+    print "result: ", result
     return dict(output=result)
 initial_corr = initial_correction_module(id='sans.initial_correction', datatype=SANS_DATA, version='1.0', action=initial_correction_action)
 
@@ -129,23 +132,37 @@ def correct_solid_angle_action(input=None):
     return dict(output=result)
 solid_angle = correct_solid_angle_module(id='sans.correct_solid_angle', datatype=SANS_DATA, version='1.0', action=correct_solid_angle_action)
 def correct_detector_efficiency_action(input=None):
+    print "input: ",input
     sensitivity = read_div("/home/elakian/dataflow/reduction/sans/ncnr_sample_data/PLEX_2NOV2007_NG3.DIV")
     DIV = correct_detector_efficiency(input[0][0],sensitivity)
     result = [DIV]
     return dict(output=result)
 correct_det_eff = correct_detector_efficiency_module(id='sans.correct_detector_efficiency', datatype=SANS_DATA, version='1.0', action=correct_detector_efficiency_action)
 def convert_qxqy_action(input=None):
+    print "input: ",input
     global qx,qy
     CON,qx,qy = convert_qxqy(input[0][0])
     result = [CON]
+    print "Convertqxqy: ", result
     return dict(output=result)
 qxqy = convert_qxqy_module(id='sans.convert_qxqy', datatype=SANS_DATA, version='1.0', action=convert_qxqy_action)
 def annular_av_action(input=None):
-   # input = input[0]
-    #AVG = annular_av(input[0])
-    #result = [AVG]
-    return ;#dict(output=result)
+    input = input[0]
+    AVG = annular_av(input[0])
+    result = [AVG]
+    print "AVG: ",result
+    return dict(output=result)
 annul_av = annular_av_module(id='sans.annular_av', datatype=SANS_DATA, version='1.0', action=annular_av_action)
+def absolute_scaling_action(input=None):
+    #sample,empty,DIV,Tsam,instrument
+    input = input[0]
+    sensitivity = read_div("/home/elakian/dataflow/reduction/sans/ncnr_sample_data/PLEX_2NOV2007_NG3.DIV")
+    EMP = read_sample("/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102")
+    ABS = absolute_scaling(input[0],EMP,sensitivity,Tsam,'NG3')
+    result = [ABS]
+    print "abs: ",result
+    return dict(output=result);
+absolute = absolute_scaling_module(id='sans.absolute_scaling', datatype=SANS_DATA, version='1.0', action=absolute_scaling_action)
 
 def correct_background_action(input=None):
     result = [correct_background(bundle[-1], bundle[0]) for bundle in input]
@@ -157,7 +174,7 @@ SANS_INS = Instrument(id='ncnr.sans.ins',
                  name='NCNR SANS INS',
                  archive=config.NCNR_DATA + '/sansins',
                  menu=[('Input', [load, save]),
-                       ('Reduction', [convq,correct_det_eff,mon_norm,correct_back,gen_trans,initial_corr,solid_angle,qxqy,annul_av])
+                       ('Reduction', [convq,correct_det_eff,mon_norm,correct_back,gen_trans,initial_corr,solid_angle,qxqy,annul_av,absolute])
                                               ],
                  requires=[config.JSCRIPT + '/sansplot.js'],
                  datatypes=[data2d],
@@ -179,8 +196,10 @@ if __name__ == '__main__':
         dict(module="sans.convertq", position=(360 , 60), config={}),
         dict(module="sans.correct_solid_angle", position=(360 , 60), config={}),
         dict(module="sans.convert_qxqy", position=(360 , 60), config={}),
+        dict(module="sans.absolute_scaling", position=(360 , 60), config={}),
         dict(module="sans.annular_av", position=(360 , 60), config={}),
-        dict(module="sans.correct_background", position=(360 , 60), config={}),
+        
+        #dict(module="sans.correct_background", position=(360 , 60), config={}),
         
         ]
     wires = [
@@ -192,7 +211,8 @@ if __name__ == '__main__':
         dict(source=[6, 'output'], target=[7, 'input']),
         dict(source=[7, 'output'], target=[8, 'input']),
         dict(source=[8, 'output'], target=[9, 'input']),
-        dict(source=[9, 'output'], target=[1, 'input']),
+        dict(source=[9, 'output'], target=[10, 'input']),
+        dict(source=[10, 'output'], target=[1, 'input']),
         ]
     config = [d['config'] for d in modules]
     template = Template(name='test sans',
@@ -218,3 +238,4 @@ if __name__ == '__main__':
               #'mask':os.path.join(datadir,'DEFAULT.MASK'),
               #'div':os.path.join(datadir,'PLEX_2NOV2007_NG3.DIV'),
               #}
+              
