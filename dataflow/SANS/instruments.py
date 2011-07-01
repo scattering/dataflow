@@ -7,44 +7,44 @@ dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir)
 from pprint import pprint
 
-from .. import config
-from ..calc import run_template
-from ..core import Datatype, Instrument, Template, register_instrument
-from ..modules.load import load_module
-from ..modules.save import save_module
-from ...reduction.sans.filters import *
-from ..SANS.convertq import convertq_module
-from ..SANS.correct_detector_efficiency import correct_detector_efficiency_module
-from ..SANS.monitor_normalize import monitor_normalize_module
-from ..SANS.correct_background import correct_background_module
-from ..SANS.generate_transmission import generate_transmission_module
-from ..SANS.initial_correction import initial_correction_module
-from ..SANS.correct_solid_angle import correct_solid_angle_module
-from ..SANS.convert_qxqy import convert_qxqy_module
-from ..SANS.annular_av import annular_av_module
-from ..SANS.absolute_scaling import absolute_scaling_module
+#from .. import config
+#from ..calc import run_template
+#from ..core import Datatype, Instrument, Template, register_instrument
+#from ..modules.load import load_module
+#from ..modules.save import save_module
+#from ...reduction.sans.filters import *
+#from ..SANS.convertq import convertq_module
+#from ..SANS.correct_detector_efficiency import correct_detector_efficiency_module
+#from ..SANS.monitor_normalize import monitor_normalize_module
+#from ..SANS.correct_background import correct_background_module
+#from ..SANS.generate_transmission import generate_transmission_module
+#from ..SANS.initial_correction import initial_correction_module
+#from ..SANS.correct_solid_angle import correct_solid_angle_module
+#from ..SANS.convert_qxqy import convert_qxqy_module
+#from ..SANS.annular_av import annular_av_module
+#from ..SANS.absolute_scaling import absolute_scaling_module
 
-from ... import ROOT_URL
+#from ... import ROOT_URL
 
-print 'repo', ROOT_URL.REPO_ROOT
-print 'home', ROOT_URL.HOMEDIR
+#print 'repo', ROOT_URL.REPO_ROOT
+#print 'home', ROOT_URL.HOMEDIR
 
-#from dataflow import config
-#from dataflow.calc import run_template
-#from dataflow.core import Datatype, Instrument, Template, register_instrument
-#from dataflow.modules.load import load_module
-#from dataflow.modules.save import save_module
-#from reduction.sans.filters import *
-#from dataflow.SANS.convertq import convertq_module
-#from dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
-#from dataflow.SANS.monitor_normalize import monitor_normalize_module
-#from dataflow.SANS.correct_background import correct_background_module
-#from dataflow.SANS.generate_transmission import generate_transmission_module
-#from dataflow.SANS.initial_correction import initial_correction_module
-#from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
-#from dataflow.SANS.convert_qxqy import convert_qxqy_module
-#from dataflow.SANS.annular_av import annular_av_module
-#from dataflow.SANS.absolute_scaling import absolute_scaling_module
+from dataflow import config
+from dataflow.calc import run_template
+from dataflow.core import Datatype, Instrument, Template, register_instrument
+from dataflow.modules.load import load_module
+from dataflow.modules.save import save_module
+from reduction.sans.filters import *
+from dataflow.SANS.convertq import convertq_module
+from dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
+from dataflow.SANS.monitor_normalize import monitor_normalize_module
+from dataflow.SANS.correct_background import correct_background_module
+from dataflow.SANS.generate_transmission import generate_transmission_module
+from dataflow.SANS.initial_correction import initial_correction_module
+from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
+from dataflow.SANS.convert_qxqy import convert_qxqy_module
+from dataflow.SANS.annular_av import annular_av_module
+from dataflow.SANS.absolute_scaling import absolute_scaling_module
 
 #Transmissions
 Tsam = 0
@@ -53,7 +53,7 @@ Temp = 0
 qx = {}
 qy = {}
 #List of Files
-fileList = ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105"]
+global fileList 
 
 # Datatype
 SANS_DATA = 'data1d.sans'
@@ -184,7 +184,7 @@ def absolute_scaling_action(input=None):
     global fileList
     input = input[0]
     sensitivity = read_div("/home/elakian/dataflow/reduction/sans/ncnr_sample_data/PLEX_2NOV2007_NG3.DIV")
-    EMP = fileList[2]
+    EMP = read_sample(fileList[2])
     ABS = absolute_scaling(input[0],EMP,sensitivity,Tsam,'NG3')
     result = [ABS]
     print "abs: ",result
@@ -210,7 +210,9 @@ instruments = [SANS_INS]
 
 # Testing
 if __name__ == '__main__':
-    global fileList
+    global fileList 
+    fileList = [map_files('sample_4m'),map_files('empty_cell_4m'),map_files('empty_4m'),map_files('trans_sample_4m'),map_files('trans_empty_cell_4m')] 
+    #fileList = ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105"]
     for instrument in instruments:
         register_instrument(instrument)
     modules = [
