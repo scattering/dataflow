@@ -285,21 +285,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		plotid = 'plot';
 
 		console.log(display)
-		//var toPlot = display[this.wireClickSource].output[0], zipped = [];
-		var toPlot = { z: [[1,2,3,4],[1,2,3,4]], title: "this sucks" };
-		
-		var m = Matrix(toPlot.z);
-		var data = [ DataSeries({
-			name: toPlot.title,
-			func: m.at,
-			axis: "lin",
-			dims: m.autodims,
-			palette: "jet",
-			edges: 255,
-		}) ];
-		renderData(data, plotid);
-
-		/* 
+		var toPlot = display[this.wireClickSource].output[0], zipped = [];
 		if (toPlot.x.length != toPlot.y.length)
 			throw "Your data sucks";
 		for (i in toPlot.x)
@@ -316,7 +302,6 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		  plot.series[0].data = zipped;
 		  plot.replot();
 		}
-		*/
 		},
 	
 	runModuleFailture: function(error) {

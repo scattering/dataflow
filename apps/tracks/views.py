@@ -55,7 +55,9 @@ def runReduction(request):
     print 'I am reducing'
 ####### SANS TESTING
     register_instrument(SANS_INS.SANS_INS)
-    return HttpResponse(a)
+    SANS_INS.TESTING()
+    a = run_template()
+    return HttpResponse(simplejson.dumps(a))
     
     #print FILES
 ###### BT7 TESTING
