@@ -9,6 +9,7 @@ from pprint import pprint
 
 from .. import config
 from ..calc import run_template
+from .. import wireit
 from ..core import Datatype, Instrument, Template, register_instrument
 from ..modules.load import load_module
 from ..modules.save import save_module
@@ -80,13 +81,14 @@ def load_action(files=None, intent=None):
       'xdim': 128,
       'ydim': 128,
     },
+    'type':'2d',
     'xlabel': 'X',
     'ylabel': 'Y',
     'zlabel': 'Intensity',
 };
 
     #plottable_2D = json.dumps(plottable_2D)
-    #return dict(output=plottable_2D)
+    return dict(output=plottable_2D)
 def _load_data(name):
     print name
     if os.path.splitext(name)[1] == ".DIV":
@@ -182,12 +184,13 @@ def initial_correction_action(input=None):
       'xdim': 128,
       'ydim': 128,
     },
+    'type':'2d',
     'xlabel': 'X',
     'ylabel': 'Y',
     'zlabel': 'Intensity',
 };
     #plottable_2D = json.dumps(plottable_2D)
-    #return dict(output=plottable_2D)
+    return dict(output=plottable_2D)
 initial_corr = initial_correction_module(id='sans.initial_correction', datatype=SANS_DATA, version='1.0', action=initial_correction_action)
 
 def convertq_action():
@@ -204,7 +207,7 @@ def correct_detector_efficiency_action(input=None):
     global fileList,correctVer
     print "input: ",input
     sensitivity = fileList[len(fileList)-1]
-    DIV = correct_detector_efficiency(fileList[0],sensitivity)
+    DIV = correct_detector_sensitivity(fileList[0],sensitivity)
     correctVer = DIV
     plottable_2D = {
     'z': correctVer.data.x.tolist(),
@@ -217,6 +220,7 @@ def correct_detector_efficiency_action(input=None):
       'xdim': 128,
       'ydim': 128,
     },
+    'type':'2d',
     'xlabel': 'X',
     'ylabel': 'Y',
     'zlabel': 'Intensity',
@@ -224,7 +228,7 @@ def correct_detector_efficiency_action(input=None):
     #plottable_2D = json.dumps(plottable_2D)
     
     result = plottable_2D
-   # return dict(output=result)
+    return dict(output=result)
 correct_det_eff = correct_detector_efficiency_module(id='sans.correct_detector_efficiency', datatype=SANS_DATA, version='1.0', action=correct_detector_efficiency_action)
 def convert_qxqy_action():
     global correctVer,qx,qy
@@ -259,12 +263,13 @@ def absolute_scaling_action(input=None):
       'xdim': 128,
       'ydim': 128,
     },
+    'type':'2d',
     'xlabel': 'X',
     'ylabel': 'Y',
     'zlabel': 'Intensity',
 };
     #plottable_2D = json.dumps(plottable_2D)
-   # return dict(output=plottable_2D);
+    return dict(output=plottable_2D);
 absolute = absolute_scaling_module(id='sans.absolute_scaling', datatype=SANS_DATA, version='1.0', action=absolute_scaling_action)
 
 def correct_background_action(input=None):
@@ -295,11 +300,11 @@ def TESTING():
     modules = [
         dict(module="sans.load", position=(5, 20),
              config={'files': fileList, 'intent': 'signal'}),
-        dict(module="sans.save", position=(280, 40), config={'ext': 'dat'}),
-        dict(module="sans.initial_correction", position=(360 , 60), config={}),
-        dict(module="sans.correct_detector_efficiency", position=(360 , 60), config={}),
-        dict(module="sans.absolute_scaling", position=(360 , 60), config={}),
-        dict(module="sans.annular_av", position=(360 , 60), config={}),
+        dict(module="sans.save", position=(500, 500), config={'ext': 'dat'}),
+        dict(module="sans.initial_correction", position=(360 , 100), config={}),
+        dict(module="sans.correct_detector_efficiency", position=(360 , 200), config={}),
+        dict(module="sans.absolute_scaling", position=(360 , 300), config={}),
+        dict(module="sans.annular_av", position=(360 , 400), config={}),
         
         #dict(module="sans.correct_background", position=(360 , 60), config={}),
         

@@ -470,6 +470,7 @@ def annular_av(sansdata):
         'linear': {'data': I, 'label':'Intensity-I(q)'},
         'log10': {'data': Ilog, 'label':'Intensity-I(q)'},
         }],
+    'type': '1d',
     'title': '1D Sans Data',
     'clear_existing': False,
     'color': 'Red',
