@@ -266,17 +266,72 @@ function canvas2img(canvasid) {
   return img;
 }
 
+
+plotdata1 = {
+    'type': '1d',
+    'x': {'linear': {'data':[1,2,3,4], 'label':'position (m)'}},
+    'y': [{
+        'linear': {'data': [1,10,100,1000], 'label':'TbFe Intensity (cps)'},
+        'log10': {'data': [0,1,2,3], 'label':'Log10 (TbFe Intensity (cps))'},
+        }],
+    'title': 'I am the title of the graph',
+    'clear_existing': false,
+    'color': 'Red',
+    'style': 'line',
+};
+plotdata2 = {
+    'type': '2d',
+    'z':  [ [1, 2], [3, 4] ],
+    'title': 'This is the title',
+    'dims': {
+      'xmax': 1.0,
+      'xmin': 0.0, 
+      'ymin': 0.0, 
+      'ymax': 12.0,
+      'xdim': 2,
+      'ydim': 2,
+    },
+    'xlabel': 'This is my x-axis label',
+    'ylabel': 'This is my y-axis label',
+    'zlabel': 'This is my z-axis label',
+};
+
 function plottingAPI(toPlot, plotid) {
-    var m = Matrix(toPlot.z);
-    data = [ DataSeries({
-        name: toPlot.title,
-        func: m.at,
-        axis: "lin",
-        dims: m.autodims,
-        palette: "jet",
-        edges: 255,
-    }) ];
-    renderData(data, plotid);
+    switch (toPlot.type) {
+        case '2d':
+            var m = Matrix(toPlot.z);
+            data = [ DataSeries({
+                name: toPlot.title,
+                func: m.at,
+                axis: "lin",
+                dims: m.autodims,
+                palette: "jet",
+                edges: 255,
+            }) ];
+            renderData(data, plotid);
+            break;
+            
+        case '1d':
+		    if (toPlot.x.length != toPlot.y.length)
+			    throw "Your data sucks";
+			zipped = [];
+		    for (i in toPlot.x)
+			    if (!isNaN(toPlot.x[i]))
+				    zipped.push([toPlot.x[i], toPlot.y[i]]);
+		    //console.log(zipped);
+
+
+		    if (! plotCreated) {
+		      plot=$.jqplot(plotid, [zipped]);
+		      plotCreated = true;
+			    }
+		    else {
+		      plot.resetAxesScale();
+		      plot.series[0].data = zipped;
+		      plot.replot();
+		    }
+		    break;
+    }
 
     /* 
     if (toPlot.x.length != toPlot.y.length)
