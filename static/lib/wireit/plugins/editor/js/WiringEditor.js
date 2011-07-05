@@ -284,40 +284,32 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	runModuleSuccess: function(display) {
 		plotid = 'plot';
 
-		console.log(display)
+		//console.log(display)
 		//var toPlot = display[this.wireClickSource].output[0], zipped = [];
-		var toPlot = { z: [[1,2,3,4],[1,2,3,4]], title: "this sucks" };
+		//var toPlot = { z: [[1,2,3,4],[1,2,3,4]], title: "this sucks" };
+		toPlot = display[this.wireClickSource].output
+		console.log(toPlot)
+		plottingAPI(toPlot, plotid)
 		
-		var m = Matrix(toPlot.z);
-		var data = [ DataSeries({
-			name: toPlot.title,
-			func: m.at,
-			axis: "lin",
-			dims: m.autodims,
-			palette: "jet",
-			edges: 255,
-		}) ];
-		renderData(data, plotid);
-
-		/* 
-		if (toPlot.x.length != toPlot.y.length)
-			throw "Your data sucks";
-		for (i in toPlot.x)
-			if (!isNaN(toPlot.x[i]))
-				zipped.push([toPlot.x[i], toPlot.y[i]]);
+/*
+if (toPlot.x.length != toPlot.y.length)
+throw "Your data sucks";
+for (i in toPlot.x)
+if (!isNaN(toPlot.x[i]))
+zipped.push([toPlot.x[i], toPlot.y[i]]);
 
 
-		if (! plotCreated) {
-		  plot=$.jqplot(plotid, [zipped]);
-		  plotCreated = true;
-			}
-		else {
-		  plot.resetAxesScale();
-		  plot.series[0].data = zipped;
-		  plot.replot();
-		}
-		*/
-		},
+if (! plotCreated) {
+plot=$.jqplot(plotid, [zipped]);
+plotCreated = true;
+}
+else {
+plot.resetAxesScale();
+plot.series[0].data = zipped;
+plot.replot();
+}
+*/
+},
 	
 	runModuleFailture: function(error) {
 		this.alert("Unable to run the reduction: " + error)

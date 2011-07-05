@@ -7,45 +7,45 @@ dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir)
 from pprint import pprint
 
-#from .. import config
-#from ..calc import run_template
-#from ..core import Datatype, Instrument, Template, register_instrument
-#from ..modules.load import load_module
-#from ..modules.save import save_module
-#from ...reduction.sans.filters import *
-#from ..SANS.convertq import convertq_module
-#from ..SANS.correct_detector_efficiency import correct_detector_efficiency_module
-#from ..SANS.monitor_normalize import monitor_normalize_module
-#from ..SANS.correct_background import correct_background_module
-#from ..SANS.generate_transmission import generate_transmission_module
-#from ..SANS.initial_correction import initial_correction_module
-#from ..SANS.correct_solid_angle import correct_solid_angle_module
-#from ..SANS.convert_qxqy import convert_qxqy_module
-#from ..SANS.annular_av import annular_av_module
-#from ..SANS.absolute_scaling import absolute_scaling_module
+from .. import config
+from ..calc import run_template
+from .. import wireit
+from ..core import Datatype, Instrument, Template, register_instrument
+from ..modules.load import load_module
+from ..modules.save import save_module
+from ...reduction.sans.filters import *
+from ..SANS.convertq import convertq_module
+from ..SANS.correct_detector_efficiency import correct_detector_efficiency_module
+from ..SANS.monitor_normalize import monitor_normalize_module
+from ..SANS.correct_background import correct_background_module
+from ..SANS.generate_transmission import generate_transmission_module
+from ..SANS.initial_correction import initial_correction_module
+from ..SANS.correct_solid_angle import correct_solid_angle_module
+from ..SANS.convert_qxqy import convert_qxqy_module
+from ..SANS.annular_av import annular_av_module
+from ..SANS.absolute_scaling import absolute_scaling_module
 
 #from ... import ROOT_URL
 
 #print 'repo', ROOT_URL.REPO_ROOT
 #print 'home', ROOT_URL.HOMEDIR
 
-from dataflow import config
-from dataflow.calc import run_template
-from dataflow.core import Datatype, Instrument, Template, register_instrument
-from dataflow.modules.load import load_module
-from dataflow.modules.save import save_module
-from reduction.sans.filters import *
-from dataflow.SANS.convertq import convertq_module
-from dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
-from dataflow.SANS.monitor_normalize import monitor_normalize_module
-from dataflow.SANS.correct_background import correct_background_module
-from dataflow.SANS.generate_transmission import generate_transmission_module
-from dataflow.SANS.initial_correction import initial_correction_module
-from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
-from dataflow.SANS.convert_qxqy import convert_qxqy_module
-from dataflow.SANS.annular_av import annular_av_module
-from dataflow.SANS.absolute_scaling import absolute_scaling_module
-import json
+#from dataflow import config
+#from dataflow.calc import run_template
+#from dataflow.core import Datatype, Instrument, Template, register_instrument
+#from dataflow.modules.load import load_module
+#from reduction.sans.filters import *
+#from dataflow.SANS.convertq import convertq_module
+#from dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
+#from dataflow.SANS.monitor_normalize import monitor_normalize_module
+#from dataflow.SANS.correct_background import correct_background_module
+#from dataflow.SANS.generate_transmission import generate_transmission_module
+#from dataflow.SANS.initial_correction import initial_correction_module
+#from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
+#from dataflow.SANS.convert_qxqy import convert_qxqy_module
+#from dataflow.SANS.annular_av import annular_av_module
+#from dataflow.SANS.absolute_scaling import absolute_scaling_module
+import json, simplejson
 #Transmissions
 Tsam = 0
 Temp = 0
@@ -54,7 +54,7 @@ qx = {}
 qy = {}
 correctVer = SansData()
 #List of Files
-global fileList 
+global fileList
  
 # Datatype
 SANS_DATA = 'data1d.sans'
@@ -67,7 +67,28 @@ data2d = Datatype(id=SANS_DATA,
 def load_action(files=None, intent=None):
     print "loading", files
     result = [_load_data(f) for f in files] # not bundles
-    return dict(output=result)
+
+    global fileList
+    fileList = result
+    plottable_2D = {
+    'z': fileList[0].data.x.tolist(),
+    'title': 'SAM',
+    'dims': {
+      'xmax': 128.0,
+      'xmin': 0.0,
+      'ymin': 0.0,
+      'ymax': 128.0,
+      'xdim': 128,
+      'ydim': 128,
+    },
+    'type':'2d',
+    'xlabel': 'X',
+    'ylabel': 'Y',
+    'zlabel': 'Intensity',
+};
+
+    #plottable_2D = json.dumps(plottable_2D)
+    return dict(output=plottable_2D)
 def _load_data(name):
     print name
     if os.path.splitext(name)[1] == ".DIV":
@@ -83,7 +104,7 @@ def save_action(input=None, ext=None):
     for f in input: _save_one(f, ext) # not bundles
     return {}
 def _save_one(input, ext):
-    outname = initname = "/home/elakian/sansdatafile.txt"
+    outname = initname = map_files('save')
     if ext is not None:
         outname = ".".join([os.path.splitext(outname)[0], ext])
     print "saving", initname, 'as', outname
@@ -134,9 +155,8 @@ def generate_transmission_action(input=None):
    
 def initial_correction_action(input=None):
     global fileList
-    fileList = input[0]
     lis = []
-    for i in input[0]:
+    for i in fileList:
             lis.append(i)
        
     print "Lis: ",lis
@@ -147,28 +167,29 @@ def initial_correction_action(input=None):
     #SAM,BGD,EMP,Trans
     global Tsam,Temp
     BGD = fileList[len(fileList)-2]
-    COR = initial_correction(input[0][0],BGD,input[0][1],Tsam/Temp)
+    COR = initial_correction(fileList[0],BGD,fileList[1],Tsam/Temp)
     print COR.data.x
-    global correctVer 
+    global correctVer
     correctVer = COR
     print "result: ", correctVer
 
     plottable_2D = {
-    'z':  COR.data.x.tolist(),
+    'z': COR.data.x.tolist(),
     'title': 'COR',
     'dims': {
       'xmax': 128.0,
-      'xmin': 0.0, 
-      'ymin': 0.0, 
+      'xmin': 0.0,
+      'ymin': 0.0,
       'ymax': 128.0,
       'xdim': 128,
       'ydim': 128,
     },
+    'type':'2d',
     'xlabel': 'X',
     'ylabel': 'Y',
     'zlabel': 'Intensity',
 };
-    plottable_2D = json.dumps(plottable_2D)
+    #plottable_2D = json.dumps(plottable_2D)
     return dict(output=plottable_2D)
 initial_corr = initial_correction_module(id='sans.initial_correction', datatype=SANS_DATA, version='1.0', action=initial_correction_action)
 
@@ -186,24 +207,25 @@ def correct_detector_efficiency_action(input=None):
     global fileList,correctVer
     print "input: ",input
     sensitivity = fileList[len(fileList)-1]
-    DIV = correct_detector_efficiency(fileList[0],sensitivity) 
+    DIV = correct_detector_sensitivity(fileList[0],sensitivity)
     correctVer = DIV
     plottable_2D = {
-    'z':  DIV.data.x.tolist(),
+    'z': correctVer.data.x.tolist(),
     'title': 'DIV',
     'dims': {
       'xmax': 128.0,
-      'xmin': 0.0, 
-      'ymin': 0.0, 
+      'xmin': 0.0,
+      'ymin': 0.0,
       'ymax': 128.0,
       'xdim': 128,
       'ydim': 128,
     },
+    'type':'2d',
     'xlabel': 'X',
     'ylabel': 'Y',
     'zlabel': 'Intensity',
 };
-    plottable_2D = json.dumps(plottable_2D)
+    #plottable_2D = json.dumps(plottable_2D)
     
     result = plottable_2D
     return dict(output=result)
@@ -223,7 +245,7 @@ def absolute_scaling_action(input=None):
     #sample,empty,DIV,Tsam,instrument
     global correctVer,fileList,Tsam,qx,qy
     correctVer = convertq_action()
-    correctVer  = correct_solid_angle_action()
+    correctVer = correct_solid_angle_action()
     convert_qxqy_action()
     sensitivity = fileList[len(fileList)-1]
     EMP = fileList[2]
@@ -231,23 +253,23 @@ def absolute_scaling_action(input=None):
     result = [ABS]
     print "abs: ",result
     plottable_2D = {
-    'z':  ABS.data.x.tolist(),
+    'z': ABS.data.x.tolist(),
     'title': 'COR',
     'dims': {
       'xmax': 128.0,
-      'xmin': 0.0, 
-      'ymin': 0.0, 
+      'xmin': 0.0,
+      'ymin': 0.0,
       'ymax': 128.0,
       'xdim': 128,
       'ydim': 128,
     },
+    'type':'2d',
     'xlabel': 'X',
     'ylabel': 'Y',
     'zlabel': 'Intensity',
 };
-    plottable_2D = json.dumps(plottable_2D)
-    plottable_2D = result
-    return dict(output=result);
+    #plottable_2D = json.dumps(plottable_2D)
+    return dict(output=plottable_2D);
 absolute = absolute_scaling_module(id='sans.absolute_scaling', datatype=SANS_DATA, version='1.0', action=absolute_scaling_action)
 
 def correct_background_action(input=None):
@@ -268,20 +290,21 @@ SANS_INS = Instrument(id='ncnr.sans.ins',
 instruments = [SANS_INS]
 
 # Testing
-if __name__ == '__main__':
-    global fileList 
-    fileList = [map_files('sample_4m'),map_files('empty_cell_4m'),map_files('empty_4m'),map_files('trans_sample_4m'),map_files('trans_empty_cell_4m'),map_files('blocked_4m'),map_files('div')] 
+#if __name__ == '__main__':
+def TESTING():
+    global fileList
+    fileList = [map_files('sample_4m'),map_files('empty_cell_4m'),map_files('empty_4m'),map_files('trans_sample_4m'),map_files('trans_empty_cell_4m'),map_files('blocked_4m'),map_files('div')]
     #fileList = ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105"]
     for instrument in instruments:
         register_instrument(instrument)
     modules = [
         dict(module="sans.load", position=(5, 20),
              config={'files': fileList, 'intent': 'signal'}),
-        dict(module="sans.save", position=(280, 40), config={'ext': 'dat'}),
-        dict(module="sans.initial_correction", position=(360 , 60), config={}),
-        dict(module="sans.correct_detector_efficiency", position=(360 , 60), config={}),
-        dict(module="sans.absolute_scaling", position=(360 , 60), config={}),
-        dict(module="sans.annular_av", position=(360 , 60), config={}),
+        dict(module="sans.save", position=(500, 500), config={'ext': 'dat'}),
+        dict(module="sans.initial_correction", position=(360 , 100), config={}),
+        dict(module="sans.correct_detector_efficiency", position=(360 , 200), config={}),
+        dict(module="sans.absolute_scaling", position=(360 , 300), config={}),
+        dict(module="sans.annular_av", position=(360 , 400), config={}),
         
         #dict(module="sans.correct_background", position=(360 , 60), config={}),
         
@@ -301,8 +324,7 @@ if __name__ == '__main__':
                         wires=wires,
                         instrument=SANS_INS.id,
                         )
-    result = run_template(template, config)
-    pprint(result)
+    return run_template(template, config)
         
     #datadir=os.path.join(os.path.dirname(__file__),'ncnr_sample_data')
     #filedict={'empty_1m':os.path.join(datadir,'SILIC001.SA3_SRK_S101'),

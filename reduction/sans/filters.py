@@ -109,7 +109,113 @@ Given a SansData object, normalize the data to the provided monitor
     res.theta=copy(sansdata.theta)
     return res
 
-def correct_detector_efficiency(sansdata,sensitivity):
+def correct_solid_angle(sansdata):
+    """
+given a SansData with q,qx,qy,and theta images defined,
+correct for the fact that the detector is flat and the eswald sphere is curved.
+"""
+    #need to calculate theta here...
+    L2=sansdata.metadata['det.dis']
+    x0=sansdata.metadata['det.beamx'] #should be close to 64
+    y0=sansdata.metadata['det.beamy'] #should be close to 64
+    wavelength=sansdata.metadata['resolution.lmda']
+    shape=sansdata.data.x.shape
+# theta=np.empty(shape,'Float64')
+# q=np.empty(shape,'Float64')
+    qx=np.empty(shape,'Float64')
+    qy=np.empty(shape,'Float64')
+    #vectorize this loop, it will be slow at 128x128
+    #test against this simpleminded implentation
+    
+    ### switching to vectorized form - bbm
+# for x in range(0,shape[0]):
+# for y in range(0,shape[1]):
+# X=PIXEL_SIZE_X_CM*(x-x0)
+# Y=PIXEL_SIZE_Y_CM*(y-y0)
+# r=np.sqrt(X**2+Y**2)
+# theta[x,y]=np.arctan2(r,L2)/2
+# q[x,y]=(4*np.pi/wavelength)*np.sin(theta[x,y])
+# alpha=np.arctan2(Y,X)
+# qx[x,y]=q[x,y]*np.cos(alpha)
+# qy[x,y]=q[x,y]*np.sin(alpha)
+    x,y = np.indices(shape)
+    X = PIXEL_SIZE_X_CM*(x-x0)
+    Y=PIXEL_SIZE_Y_CM*(y-y0)
+    r=np.sqrt(X**2+Y**2)
+    theta=np.arctan2(r,L2*100)/2  #remember to convert L2 to cm from meters
+ 
+    
+    result=sansdata.data*(np.cos(theta)**3)
+    res=SansData()
+    res.data=result
+    res.metadata=deepcopy(sansdata.metadata)
+    #adding res.q
+    res.q = copy(sansdata.q)
+    res.qx=copy(sansdata.qx)
+    res.qy=copy(sansdata.qy)
+    res.theta=theta
+    return res
+##Theta needs to be set, since now the q conversion is done at the end
+#def set_theta(sansdata):
+    #L2=sansdata.metadata['det.dis']
+    #x0=sansdata.metadata['det.beamx'] #should be close to 64
+    #y0=sansdata.metadata['det.beamy'] #should be close to 64
+    #wavelength=sansdata.metadata['resolution.lmda']
+    #shape=sansdata.data.x.shape
+    #x,y = np.indices(shape)
+    #X = PIXEL_SIZE_X_CM*(x-x0)
+    #Y=PIXEL_SIZE_Y_CM*(y-y0)
+    #r=np.sqrt(X**2+Y**2)
+    #theta=np.arctan2(r,L2)/2
+    #res=SansData()
+    #res.data=copy(sansdata.data)
+    #res.metadata=deepcopy(sansdata.metadata)
+    #res.theta=theta
+    #return res
+
+def correct_detector_efficiency(sansdata):
+    """
+    Given a SansData object, corrects for the efficiency of the detection process
+    """
+    L2=sansdata.metadata['det.dis']
+    lambd = sansdata.metadata["resolution.lmda"]
+    
+    shape=sansdata.data.x.shape
+    (x0,y0) = np.shape(sansdata.data)
+    x,y = np.indices(shape)
+    X = PIXEL_SIZE_X_CM*(x-x0/2)
+    Y = PIXEL_SIZE_Y_CM*(y-y0/2)
+    r=np.sqrt(X**2+Y**2)
+    theta=np.arctan2(r,L2*100)/2   
+    
+    stAl = 0.00967*lambd*0.8		#dimensionless, constants from JGB memo
+    stHe = 0.146*lambd*2.5
+    
+    ff = np.exp(-stAl/np.cos(theta))*(1-np.exp(-stHe/np.cos(theta))) / ( np.exp(-stAl)*(1-np.exp(-stHe)) )
+
+    res=SansData()
+    res.data=sansdata.data/ff
+    res.metadata=deepcopy(sansdata.metadata)
+    #added res.q
+    res.q = copy(sansdata.q)
+    res.qx=copy(sansdata.qx)
+    res.qy=copy(sansdata.qy)
+    #note that the theta calculated for this correction is based on the center of the 
+    #detector and NOT the center of the beam. Thus leave the q-relevant theta alone.
+    res.theta=copy(sansdata.theta)
+
+    return res
+
+def correct_large_angle_transmission(sansdata):
+    """
+    Correct for large angle transmission effects - Brulet et al
+    """
+    #Needs implementing
+    #Uses transmission from the data, so not sure how this can be done on load....
+    #AJJ - don't do this correction when calculating transmissions....
+    
+
+def correct_detector_sensitivity(sansdata,sensitivity):
     """"
 Given a SansData object and an sensitivity map generated from a div,
 correct for the efficiency of the detector. Recall that sensitivities are
@@ -151,9 +257,21 @@ blocked beam.
     res.qy=copy(sample.qy)
     res.theta=copy(sample.theta)
     return res
+
 #Correction needed eventually 
-def correct_dead_time(sansdata):
-    sansdata
+def correct_dead_time(sansdata,deadtime=3.4e-6):
+    
+    dscale = 1/(1-deadtime*(np.sum(sansdata.data)/sansdata.metadata["run.rtime"]))
+    
+    result = SansData()
+    result.data = sansdata.data*dscale
+    result.metadata=deepcopy(sansdata.metadata)
+    result.q = copy(sansdata.q)
+    result.qx = copy(sansdata.qx)
+    result.qy = copy(sansdata.qy)
+    result.theta = copy(sansdata.theta)
+    
+    return result
     
 def correct_background(sample,empty_cell):
     """"
@@ -169,17 +287,23 @@ To calculate the transmission, we integrate the intensity in a box for a measure
 with the substance in the beam and with the substance out of the beam and take their ratio.
 The box is definied by its bottom left and upper right corner. These are registered to pixel coordinates
 the coords are assumed to be tuple or a list in the order of (x,y). I start counting at (0,0).
+
+Coords are taken with reference to bottom left of the image.
 """
     I_in_beam=0.0
     I_empty_beam=0.0
+    (xmax,ymax) = np.shape(in_beam.data)
+    print xmax,ymax
     #Vectorize this loop, it's quick, but could be quicker
     #test against this simple minded implementation
+    print ymax-coords_bottom_left[1],ymax-coords_upper_right[1]
     for x in range(coords_bottom_left[0],coords_upper_right[0]):
-        for y in range(coords_bottom_left[0],coords_upper_right[0]):
+        for y in range(ymax-coords_upper_right[1],ymax-coords_bottom_left[1]):
             I_in_beam=I_in_beam+in_beam.data[x,y]
             I_empty_beam=I_empty_beam+empty_beam.data[x,y]
     result=I_in_beam/I_empty_beam
     return result
+
 def initial_correction(SAM,BGD,EMP,Trans):
     #SAM-BGD
     FIR = correct_background(SAM,BGD)
@@ -189,38 +313,7 @@ def initial_correction(SAM,BGD,EMP,Trans):
     return FINAL
     
     
-def correct_solid_angle(sansdata):
-    """
-given a SansData with q,qx,qy,and theta images defined,
-correct for the fact that the detector is flat and the eswald sphere is curved.
-"""
-    result=sansdata.data*(np.cos(sansdata.theta)**3)
-    res=SansData()
-    res.data=result
-    res.metadata=deepcopy(sansdata.metadata)
-    #adding res.q
-    res.q = copy(sansdata.q)
-    res.qx=copy(sansdata.qx)
-    res.qy=copy(sansdata.qy)
-    res.theta=copy(sansdata.theta)
-    return res
-##Theta needs to be set, since now the q conversion is done at the end
-#def set_theta(sansdata):
-    #L2=sansdata.metadata['det.dis']
-    #x0=sansdata.metadata['det.beamx'] #should be close to 64
-    #y0=sansdata.metadata['det.beamy'] #should be close to 64
-    #wavelength=sansdata.metadata['resolution.lmda']
-    #shape=sansdata.data.x.shape
-    #x,y = np.indices(shape)
-    #X = PIXEL_SIZE_X_CM*(x-x0)
-    #Y=PIXEL_SIZE_Y_CM*(y-y0)
-    #r=np.sqrt(X**2+Y**2)
-    #theta=np.arctan2(r,L2)/2
-    #res=SansData()
-    #res.data=copy(sansdata.data)
-    #res.metadata=deepcopy(sansdata.metadata)
-    #res.theta=theta
-    #return res
+
     
 def convert_q(sansdata):
     """
@@ -377,19 +470,21 @@ def annular_av(sansdata):
         'linear': {'data': I, 'label':'Intensity-I(q)'},
         'log10': {'data': Ilog, 'label':'Intensity-I(q)'},
         }],
+    'type': '1d',
     'title': '1D Sans Data',
     'clear_existing': False,
     'color': 'Red',
     'style': 'line',
     };
-    plottable_1D = json.dumps(plottable_1D)
-    plt.plot(Q,I,'ro')
-    plt.title('1D')
-    plt.xlabel('q(A^-1)')
-    plt.ylabel('I(q)')
-    plt.show()
+    #plottable_1D = json.dumps(plottable_1D)
+    #plt.plot(Q,I,'ro')
+    #plt.title('1D')
+    #plt.xlabel('q(A^-1)')
+    #plt.ylabel('I(q)')
+    #plt.show()
     #sys.exit()
     return plottable_1D
+    
 def absolute_scaling(sample,empty,DIV,Tsam,instrument):  #data (that is going through reduction),empty beam, div, Transmission of the sample,instrument(NG3.NG5,NG7)
    #Variable detCnt,countTime,attenTrans,monCnt,sdd,pixel
     detCnt = empty.metadata['run.detcnt']
@@ -414,13 +509,13 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument):  #data (that is going th
     #file.write(repr(a))
     #file.close()
     
-    file = open("NG7.dat","r") # r = read
+    file = open(map_files("NG7"),"r") # r = read
     f = eval(file.read())
     file.close()
     NG7 = f
     
     
-    file = open("NG3.dat","r") # r = read
+    file = open(map_files("NG3"),"r") # r = read
     g = eval(file.read())
     file.close()
     NG3 = g
@@ -436,7 +531,8 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument):  #data (that is going th
         
         }
     #-----------------------------
-    attenTrans = attenFact[instrument][attenNo][wavelength]
+    #AJJ - array indexing issue here. But this is a hack anyway - need to interpolate wavelength values
+    attenTrans = attenFact[instrument][attenNo][wavelength-1]
     print "attenFact: ", attenTrans
     
     
@@ -445,23 +541,26 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument):  #data (that is going th
     #correct empty beam by the sensitivity
     data = empty.__truediv__(DIV)
     #Then take the sum in XY box
-    coord_left=(55,53)
-    coord_right=(74,72)
-    coord_left=(60,60)
-    coord_right=(70,70)
+    coord_bottom_left=(62,60)
+    coord_top_right=(72,68)
     summ = 0
     sumlist = []
     #-----Something wrong Here------
     #print range(coord_right[0]-coord_left[0])
-    for x in range(coord_left[0],coord_right[0]+1):
-        for y in range(coord_left[1],coord_right[1]+1):
-            summ+=data.data.x[x,y]
-            sumlist.append(data.data.x[x,y])
+    
+    (xmax,ymax) = np.shape(data.data)
+    
+    for x in range(coord_bottom_left[0],coord_top_right[0]):
+        for y in range(ymax-coord_top_right[1],ymax-coord_bottom_left[1]):
+            summ = summ + data.data[x,y]
+            sumlist.append(data.data[x,y])
     detCnt = summ
     print "DETCNT: ",detCnt
 
    
     #------End Result-------#
+    #This assumes that the data has *not* been normalized at all.
+    #Thus either fix this or pass un-normalized data.
     kappa = detCnt/countTime/attenTrans*1.0e8/(monCnt/countTime)*(pixel/sdd)**2 #Correct Value: 6617.1
     print "Kappa: ", kappa
                                                  
@@ -470,9 +569,10 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument):  #data (that is going th
     
     #-----Using Kappa to Scale data-----#
     Dsam =  sample.metadata['sample.thk']
-    ABS = sample.__mul__(1/kappa*Dsam*Tsam)
+    ABS = sample.__mul__(1/(kappa*Dsam*Tsam))
     #------------------------------------
     return ABS
+
 def chain_corrections():
     """a sample chain of corrections"""
     
@@ -486,38 +586,31 @@ def chain_corrections():
     sensitivity=read_div(map_files('div'))
     #mask=read_sample(map_files('mask'))
     
-    #normalize the monitors
+    #correct solid angle
+    sample_4m_solid=correct_solid_angle(sample_4m)
+    empty_cell_4m_solid=correct_solid_angle(empty_cell_4m)
+    blocked_beam_4m_solid=correct_solid_angle(blocked_beam_4m)
+    empty_4m_solid=correct_solid_angle(empty_4m)
+ 
+    #correct for efficiency
+    sample_4m_eff=correct_detector_efficiency(sample_4m_solid)
+    empty_cell_4m_eff=correct_detector_efficiency(empty_cell_4m_solid)
+    blocked_beam_4m_eff=correct_detector_efficiency(blocked_beam_4m_solid)
+    empty_4m_eff=correct_detector_efficiency(empty_4m_solid)
+
+    #correct for deadtime
+    sample_4m_dtc=correct_dead_time(sample_4m_eff)
+    empty_cell_4m_dtc=correct_dead_time(empty_cell_4m_eff)
+    blocked_beam_4m_dtc=correct_dead_time(blocked_beam_4m_eff)
+    empty_4m_dtc=correct_dead_time(empty_4m_eff)
     
-    sample_4m_norm=monitor_normalize(sample_4m)
-    empty_cell_4m_norm=monitor_normalize(empty_cell_4m)
+    #normalize the monitors
+    sample_4m_norm=monitor_normalize(sample_4m_eff)
+    empty_cell_4m_norm=monitor_normalize(empty_cell_4m_eff)
     transmission_sample_cell_4m_norm=monitor_normalize(transmission_sample_cell_4m)
     transmission_empty_cell_4m_norm=monitor_normalize(transmission_empty_cell_4m)
-    empty_4m_norm=monitor_normalize(empty_4m)
-    #Don't normalized this by monitor - it is a blocked beam and so should be independent of monitor
-    #blocked_beam_4m_norm=monitor_normalize(blocked_beam_4m)
-        
-    #calculate q
-# Just do Q conversion at the end
-# sample_4m_norm_q=convert_q(sample_4m_norm)
-# empty_cell_4m_norm_q=convert_q(empty_cell_4m)
-# blocked_beam_4m_norm_q=convert_q(blocked_beam_4m_norm)
-# transmission_sample_cell_4m_norm_q=convert_q(transmission_sample_cell_4m_norm)
-# transmission_empty_cell_4m_norm_q=convert_q(transmission_empty_cell_4m_norm)
-# empty_4m_norm_q=convert_q(empty_4m_norm)
+    empty_4m_norm=monitor_normalize(empty_4m_eff)
 
-    
-    print 'converted'
-    #convert flatness
-    # Do this at the end
-# sample_4m_solid=correct_solid_angle(sample_4m_norm_q)
-# empty_cell_4m_solid=correct_solid_angle(empty_cell_4m_norm_q)
-# blocked_beam_4m_solid=correct_solid_angle(blocked_beam_4m_norm_q)
-    #Transmission runs don't need this
-    #transmission_sample_cell_4m_solid=correct_solid_angle(transmission_sample_cell_4m_norm_q)
-    #transmission_empty_cell_4m_solid=correct_solid_angle(transmission_empty_cell_4m_norm_q)
-# empty_4m_solid=correct_solid_angle(empty_4m_norm_q)
-
-    
     #calculate transmission
     coord_left=(60,60)
     coord_right=(70,70)
@@ -528,8 +621,6 @@ def chain_corrections():
                                                       coord_left,coord_right)
     print 'Sample transmission= {0} (IGOR Value = 0.724): '.format(transmission_sample_cell_4m_rat) #works now
     print 'Empty Cell transmission= {0} (IGOR Value = 0.929): '.format(transmission_empty_cell_4m_rat)
-    print 'hi'
-    
     
     #Initial Correction
     SAM = sample_4m_norm
@@ -559,63 +650,11 @@ def chain_corrections():
     #plt.show()
     #-------------Initial Correction Ends------------------------
     
-    ##Detector Efficiency Corrections (.DIV)
-    CAL1 = correct_detector_efficiency(COR,sensitivity) #Replaced With function instead of merely operations
+    ##Detector Sensitivity Corrections (.DIV)
+    CAL = correct_detector_sensitivity(COR,sensitivity) #Replaced With function instead of merely operations
     #CAL = COR
     #print "After DIV: "
     #print CAL.data.x
-    
-    #Now converting to q
-    CAL2 = convert_q(CAL1)
-    #Now performing solid angle correction on the 2D data    
-    CAL = correct_solid_angle(CAL2)
-    
-    CAL,x,y = convert_qxqy(CAL)
-    # convert_qxqy shouldn't be used as a filter that returns data... 
-    # it puts data into an output form different than sansdata (Changed I think)
-    #ar_av(CAL)
-    
-    #print "MaxQ: "
-   
-    
-    
-    #np.set_printoptions(edgeitems = 128)
-
-    
-    ##Test DIV
-    #fig = plt.figure()
-    #ax1 = fig.add_subplot(331, aspect='equal')
-    #plt.title("SAM")
-    #ax2 = fig.add_subplot(332, aspect='equal')
-    #plt.title("EMP")
-    #ax3 = fig.add_subplot(333, aspect='equal')
-    #plt.title("BGD")
-    #ax4 = fig.add_subplot(334, aspect='equal')
-    #plt.title("COR1")
-    #ax5 = fig.add_subplot(335, aspect='equal')
-    #plt.title("COR3")
-    #ax6 = fig.add_subplot(336, aspect='equal')
-    #plt.title("COR")
-    #ax7 = fig.add_subplot(337, aspect='equal')
-    #plt.title("CAL1")
-    #ax8 = fig.add_subplot(338, aspect='equal')
-    #plt.title("CAL2")
-    #ax9 = fig.add_subplot(339, aspect='equal')
-    #plt.title("CAL")
-
-    
-    #ax1.imshow(SAM.data.x)
-    #ax2.imshow(EMP.data.x)
-    #ax3.imshow(BGD.data.x)
-    #ax4.imshow(COR1.data.x)
-    #ax5.imshow(COR3.data.x)
-    #ax6.imshow(COR.data.x)
-    #ax7.imshow(CAL1.data.x)
-    #ax8.imshow(CAL2.data.x)
-    #ax9.imshow(CAL.data.x)
-    
-    #plt.show()
-    #-------------DIV Ends------------------------
     
     #-------------Absolute Scaling----------------
     
@@ -628,14 +667,13 @@ def chain_corrections():
     #-Dsam - sample thickness
     # Equation : ABS = (1/Kappa*Dsam*Tsam)*CAL
     #kappa = detCnt/countTime/attenTrans*1.0e8/(monCnt/countTime)*(pixel/sdd)^2
-    Dsam =  CAL.metadata['sample.thk']
-    ABS = absolute_scaling(CAL,empty_4m_norm,sensitivity,Tsam,'NG3')
+    #Dsam =  CAL.metadata['sample.thk']
+    
+    #Have to pass un-normalized, as loaded, data file here for empty.
+    ABS = absolute_scaling(CAL,empty_4m,sensitivity,Tsam,'NG3')
     print "ABS: "
- 
-  
     print ABS
- 
-
+    
     #x,y = q_is_zero_at(CAL)
     #IZERO = CAL.data.x[x,y]
     #print IZERO
@@ -643,7 +681,17 @@ def chain_corrections():
     #ABS = CAL.__mul__.(1/IZERO*Dsam*Tsam)
     
     #-------------END of Absolute Scaling-------------
+
+    #Now converting to q
+    ABSQ = convert_q(ABS)
+    
+    ABSQ,x,y = convert_qxqy(ABSQ)
+    # convert_qxqy shouldn't be used as a filter that returns data... 
+    # it puts data into an output form different than sansdata (Changed I think)
+    #ar_av(CAL)
+
     #-------------------Plot--------------------------
+
     #fig = plt.figure()
     #ax1 = fig.add_subplot(331, aspect='equal')
     #plt.title("SAM")
@@ -689,6 +737,9 @@ Generate the mapping between files and their roles
               'sample_4m':os.path.join(datadir,'SILIC010.SA3_SRK_S110'),
               'mask':os.path.join(datadir,'DEFAULT.MASK'),
               'div':os.path.join(datadir,'PLEX_2NOV2007_NG3.DIV'),
+              'NG7':os.path.join(datadir,'NG7.dat'),
+              'NG3':os.path.join(datadir,'NG3.dat'),
+              'save':os.path.join(datadir, 'sans_saved.txt'),
               }
     return filedict[key]
               

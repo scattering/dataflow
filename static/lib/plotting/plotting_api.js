@@ -265,3 +265,91 @@ function canvas2img(canvasid) {
   img.src = cvs.toDataURL('image/png');
   return img;
 }
+
+
+plotdata1 = {
+    'type': '1d',
+    'x': {'linear': {'data':[1,2,3,4], 'label':'position (m)'}},
+    'y': [{
+        'linear': {'data': [1,10,100,1000], 'label':'TbFe Intensity (cps)'},
+        'log10': {'data': [0,1,2,3], 'label':'Log10 (TbFe Intensity (cps))'},
+        }],
+    'title': 'I am the title of the graph',
+    'clear_existing': false,
+    'color': 'Red',
+    'style': 'line',
+};
+plotdata2 = {
+    'type': '2d',
+    'z':  [ [1, 2, 3, 4], [2, 3, 4, 1], [4, 1, 2, 3], [3, 4, 1, 2] ],
+    'title': 'This is the title',
+    'dims': {
+      'xmax': 1.0,
+      'xmin': 0.0, 
+      'ymin': 0.0, 
+      'ymax': 12.0,
+      'xdim': 4,
+      'ydim': 4,
+    },
+    'xlabel': 'This is my x-axis label',
+    'ylabel': 'This is my y-axis label',
+    'zlabel': 'This is my z-axis label',
+};
+
+function plottingAPI(toPlot, plotid) {
+    switch (toPlot.type) {
+        case '2d':
+            var m = Matrix(toPlot.z);
+            data = [ DataSeries({
+                name: toPlot.title,
+                func: m.at,
+                axis: "lin",
+                dims: m.autodims,
+                palette: "jet",
+                edges: 255,
+            }) ];
+            renderData(data, plotid);
+            break;
+            
+        case '1d':
+            var axis = "linear";
+		    if (toPlot.x[axis].data.length != toPlot.y[0][axis].data.length)
+			    throw "Your data sucks";
+			zipped = [];
+		    for (i in toPlot.x[axis].data)
+			    if (!isNaN(toPlot.x[axis].data[i]))
+				    zipped.push([toPlot.x[axis].data[i], toPlot.y[0][axis].data[i]]);
+		    console.log(zipped);
+
+
+		    if (! plotCreated) {
+		      plot=$.jqplot(plotid, [zipped]);
+		      plotCreated = true;
+			}
+		    else {
+		      plot.resetAxesScale();
+		      plot.series[0].data = zipped;
+		      plot.replot();
+		    }
+		    break;
+    }
+
+    /* 
+    if (toPlot.x.length != toPlot.y.length)
+      throw "Your data sucks";
+    for (i in toPlot.x)
+      if (!isNaN(toPlot.x[i]))
+        zipped.push([toPlot.x[i], toPlot.y[i]]);
+
+
+    if (! plotCreated) {
+      plot=$.jqplot(plotid, [zipped]);
+      plotCreated = true;
+      }
+    else {
+      plot.resetAxesScale();
+      plot.series[0].data = zipped;
+      plot.replot();
+    }
+    */
+}
