@@ -283,9 +283,9 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 
 	runModuleSuccess: function(display) {
 		plotid = 'plot';
-
-		console.log(display)
-		var toPlot = display[this.wireClickSource].output[0], zipped = [];
+		console.log((display))
+		var toPlot = display[this.wireClickSource], zipped = [];
+		console.log(toPlot)
 		if (toPlot.x.length != toPlot.y.length)
 			throw "Your data sucks";
 		for (i in toPlot.x)

@@ -382,7 +382,7 @@ def annular_av(sansdata):
     'color': 'Red',
     'style': 'line',
     };
-    plottable_1D = json.dumps(plottable_1D)
+    #plottable_1D = json.dumps(plottable_1D)
     #plt.plot(Q,I,'ro')
     #plt.title('1D')
     #plt.xlabel('q(A^-1)')

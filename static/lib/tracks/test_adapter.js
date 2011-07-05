@@ -74,8 +74,10 @@ WireIt.WiringEditor.adapters.tracks = {
 		}
 		YAHOO.util.Connect.asyncRequest(method, url, {
 			success: function(o) {
-				var s = o.responseText,
-					 r = YAHOO.lang.JSON.parse(s);
+				var s = o.responseText;
+				         // CHANGED (7/5/11), JSON parsing was not working
+					 //r = YAHOO.lang.JSON.parse(r)
+					 r = eval('(function() { return ' + s + '; })()');
 			 	callbacks.success.call(callbacks.scope, r);
 			},
 			failure: function(o) {
