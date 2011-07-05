@@ -67,7 +67,25 @@ data2d = Datatype(id=SANS_DATA,
 def load_action(files=None, intent=None):
     print "loading", files
     result = [_load_data(f) for f in files] # not bundles
-    return dict(output=result)
+    global fileList 
+    fileList = result
+    plottable_2D = {
+    'z':  fileList[0].data.x.tolist(),
+    'title': 'SAM',
+    'dims': {
+      'xmax': 128.0,
+      'xmin': 0.0, 
+      'ymin': 0.0, 
+      'ymax': 128.0,
+      'xdim': 128,
+      'ydim': 128,
+    },
+    'xlabel': 'X',
+    'ylabel': 'Y',
+    'zlabel': 'Intensity',
+};
+    plottable_2D = json.dumps(plottable_2D)
+    return dict(output=plottable_2D)
 def _load_data(name):
     print name
     if os.path.splitext(name)[1] == ".DIV":
@@ -134,9 +152,8 @@ def generate_transmission_action(input=None):
    
 def initial_correction_action(input=None):
     global fileList
-    fileList = input[0]
     lis = []
-    for i in input[0]:
+    for i in fileList:
             lis.append(i)
        
     print "Lis: ",lis
@@ -147,7 +164,7 @@ def initial_correction_action(input=None):
     #SAM,BGD,EMP,Trans
     global Tsam,Temp
     BGD = fileList[len(fileList)-2]
-    COR = initial_correction(input[0][0],BGD,input[0][1],Tsam/Temp)
+    COR = initial_correction(fileList[0],BGD,fileList[1],Tsam/Temp)
     print COR.data.x
     global correctVer 
     correctVer = COR
