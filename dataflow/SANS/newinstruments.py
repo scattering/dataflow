@@ -66,6 +66,7 @@ data2d = Datatype(id=SANS_DATA,
 def load_action(files=None, intent=None):
     print "loading", files
     result = [_load_data(f) for f in files] # not bundles
+
     global fileList
     fileList = result
     plottable_2D = {
@@ -83,6 +84,7 @@ def load_action(files=None, intent=None):
     'ylabel': 'Y',
     'zlabel': 'Intensity',
 };
+
     #plottable_2D = json.dumps(plottable_2D)
     #return dict(output=plottable_2D)
 def _load_data(name):
