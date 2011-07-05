@@ -265,3 +265,35 @@ function canvas2img(canvasid) {
   img.src = cvs.toDataURL('image/png');
   return img;
 }
+
+function plottingAPI(toPlot, plotid) {
+    var m = Matrix(toPlot.z);
+    data = [ DataSeries({
+        name: toPlot.title,
+        func: m.at,
+        axis: "lin",
+        dims: m.autodims,
+        palette: "jet",
+        edges: 255,
+    }) ];
+    renderData(data, plotid);
+
+    /* 
+    if (toPlot.x.length != toPlot.y.length)
+      throw "Your data sucks";
+    for (i in toPlot.x)
+      if (!isNaN(toPlot.x[i]))
+        zipped.push([toPlot.x[i], toPlot.y[i]]);
+
+
+    if (! plotCreated) {
+      plot=$.jqplot(plotid, [zipped]);
+      plotCreated = true;
+      }
+    else {
+      plot.resetAxesScale();
+      plot.series[0].data = zipped;
+      plot.replot();
+    }
+    */
+}
