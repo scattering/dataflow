@@ -100,7 +100,7 @@ class Component(object):
         def _get_variance(self): return self.measurement.variance
         def _set_variance(self,variance):
                 self.measurement.variance=variance
-        def _getdx(self): return numpy.sqrt(self.variance)
+        def _getdx(self): return N.sqrt(self.variance)
         def _setdx(self,dx):
                 # Direct operation
                 #    variance = dx**2
@@ -225,15 +225,15 @@ class Component(object):
         def __pos__(self):
                 return self
         def __abs__(self):
-                return Measurement(numpy.abs(self.x),self.variance)
+                return Measurement(N.abs(self.x),self.variance)
 
         def __str__(self):
-                #return str(self.x)+" +/- "+str(numpy.sqrt(self.variance))
-                if numpy.isscalar(self.x):
-                        return format_uncertainty(self.x,numpy.sqrt(self.variance))
+                #return str(self.x)+" +/- "+str(N.sqrt(self.variance))
+                if N.isscalar(self.x):
+                        return format_uncertainty(self.x,N.sqrt(self.variance))
                 else:
                         return [format_uncertainty(v,dv)
-                                for v,dv in zip(self.x,numpy.sqrt(self.variance))]
+                                for v,dv in zip(self.x,N.sqrt(self.variance))]
         def __repr__(self):
                 return "Measurement(%s,%s)"%(str(self.x),str(self.variance))
 
@@ -836,7 +836,64 @@ class TripleAxis(object):
                 
                
 
+        def harmonic_monitor_correction(data):
+            # Use for constant-Q scans with fixed scattering energy, Ef
+            # Multiplies the montior correction through all of the detectors in the Detector_Sets
+            
+                def establish_correction_coefficients(filename):
+                    "Obtains the instrument-dependent correction coefficients from a given file and \
+                     returns them in a dictionary, coefficients"
+                    datafile = open(filename)
+
+                    coefficients = {} # Dictionary of instrument name mapping to its array of M0 through M4
+                    while 1:
+                        line = datafile.readline().strip()
+                        if not line:
+                            break
+                        elif len(line) != 0:
+                            #if it's not an empty line, thus one with data
+                            if not line.startswith("#"):
+                                #if it's not a comment/headers, i.e. actual data
+                                linedata = line.split()
+                                instrument = linedata.pop(0)
+                                coefficients[instrument] = linedata
+
+                    return coefficients    
+
+
+            M = establish_correction_coefficients(monitor_correction_coordinates.txt)
+            for i in len(data.get(Ei)):
+                #Eii = data.get(Ei)[i]
+                #data.get('Detector')[i] *= (M[0] + M[1]*Eii + M[2]*Eii^2 + M[3]*Eii^3 + M[4]*Eii^4)
                 
+            
+
+
+
+        def normalize_monochromator(data, targetmonitor):
+            # 
+            pass
+
+
+        def resolution_volume_correction(data):
+            # Requires constant-Q scan with fixed incident energy, Ei
+            pass
+            #TODO - CHECK - taken from the IDL
+            # resCor = Norm/(cot(A6/2)*Ef^1.5)
+            # where Norm = Ei^1.5 * cot(asin(!pi/(0.69472*dA*sqrt(Ei))))
+            '''
+            for i in len(data.get(Ei))
+                thetaA = N.radians(data.get(a6)[i]/2.0)
+                arg = asin(N.pi/(0.69472*dA*sqrt(double(data.get(Ei)[i]))))
+                norm = (Ei^1.5) / tan(arg)
+                cotThetaA = 1/tan(thetaA)
+                resCor = norm/(cotThetaA * (Ef^1.5))
+            
+
+
+            N.exp((ki/kf) ** 3) * (1/N.tan(thetaM)) / (1/N.cot(thetaA))
+            '''
+      
                 
                 
                
