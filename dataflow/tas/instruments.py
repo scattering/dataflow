@@ -7,6 +7,14 @@ from pprint import pprint
 
 import numpy
 
+#from dataflow import config
+#from dataflow.core import Instrument, Datatype
+#from modules.load import load_module
+#from dataflow.modules.join import join_module
+#from dataflow.modules.scale import scale_module
+#from dataflow.modules.save import save_module
+
+
 from .. import config
 from ..core import Instrument, Datatype
 from ..modules.load import load_module
@@ -88,7 +96,7 @@ data1d = Datatype(id=TAS_DATA,
 
 # === Component binding ===
 
-def load_action(files=None, intent=None):
+def load_action(files=None, intent=None, position=None, xtype=None):
     print "loading", files
     result = [load_data(f) for f in files]
     #print "loaded"; pprint(result)
@@ -96,7 +104,7 @@ def load_action(files=None, intent=None):
 load = load_module(id='tas.load', datatype=TAS_DATA,
                    version='1.0', action=load_action)
 
-def save_action(input=None, ext=None):
+def save_action(input=None, ext=None,xtype=None, position=None):
     # Note that save does not accept inputs from multiple components, so
     # we only need to deal with the bundle, not the list of bundles.
     # This is specified by terminal['multiple'] = False in modules/save.py
@@ -120,7 +128,7 @@ save = save_module(id='tas.save', datatype=TAS_DATA,
                    fields=[save_ext])
 
 
-def join_action(input=None, align=None):
+def join_action(input=None, align=None, xtype=None, position=None):
     # This is confusing because load returns a bundle and join, which can
     # link to multiple loads, has a list of bundles.  So flatten this list.
     # The confusion between bundles and items will bother us continuously,
@@ -142,7 +150,7 @@ join = join_module(id='tas.join', datatype=TAS_DATA,
                    version='1.0', action=join_action,
                    fields=[align_field])
 
-def scale_action(input=None, scale=None):
+def scale_action(input=None, scale=None, xtype=None, position=None):
     # operate on a bundle; need to resolve confusion between bundles and
     # individual inputs
     print "scale by", scale

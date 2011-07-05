@@ -20,9 +20,11 @@ if __name__=="__main__":
                   'subversion',
 		  'apache2',
 		  'libapache2-mod-wsgi',
-		  #'postgresql',
+		  'postgresql',
+		  'pgadmin3',
+		  'python-paramiko',
                   ]
-    easy_commands=['simplejson','stompservice','orbited', '-U Django', '-U psycopg2']
+    easy_commands=['simplejson','stompservice','orbited', '-U Django', '-U psycopg2', 'South']
     
     for command in apt_commands:
         s='apt-get -y install %s'%(command,)

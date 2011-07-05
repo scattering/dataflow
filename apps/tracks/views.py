@@ -9,12 +9,13 @@ from ...dataflow import wireit
 from ...dataflow.calc import run_template
 from ...dataflow.core import register_instrument
 from ...dataflow.tas.instruments import BT7
-from ...dataflow.offspecular.instruments import ANDR
+#from ...dataflow.offspecular.instruments import ANDR
+from ...dataflow.tas import instruments
+from ...dataflow.SANS import instruments as SANS_INS
 
 import random
 
 def xhr_test(request):
-    print request
     if request.is_ajax():
         if request.method == 'GET':
                 message = "This is an XHR GET request"
@@ -24,6 +25,8 @@ def xhr_test(request):
             print request.POST
         else:
             message = "No XHR"
+    else:
+	message = "What is this, WSGI?"
     return HttpResponse(message)
 
 def mytest(request):
@@ -40,7 +43,7 @@ b = {'save':'successful'}
 
 def listWirings(request):
     print 'I am loading'
-    return HttpResponse(simplejson.dumps(offspec))
+    return HttpResponse(simplejson.dumps(offspec+a))
 
 #    return HttpResponse(simplejson.dumps(a)) #andr vs bt7 testing
 
@@ -50,23 +53,36 @@ def saveWiring(request):
 
 def runReduction(request):
     print 'I am reducing'
-    #init_data()
+####### SANS TESTING
+    register_instrument(SANS_INS.SANS_INS)
+    return HttpResponse(a)
+    
     #print FILES
+###### BT7 TESTING
 #    register_instrument(BT7)
+#    instruments.init_data()
 #    template = wireit.wireit_diagram_to_template(simplejson.loads(str(request.POST['data'])), BT7)
-#    a = run_template(template, [{'files': ['f1.bt7', 'f2.bt7']}, {'align': ['A3']}, {'scale': 2.5}, {'ext': 'dat'}])
-#    data = [[random.random(), random.random()] for i in range(10)]
-#    c = {'reduction':'successful', 'data': data}
-#    return HttpResponse(simplejson.dumps(a))
-    register_instrument(ANDR)
-    print "DONE REGISTERING"
+ #   a = run_template(template, [{'files': ['f1.bt7', 'f2.bt7']}, {'align': ['A3']}, {'scale': 2.5}, {'ext': 'dat'}])
+ #   print a    
+ #   data = [[random.random(), random.random()] for i in range(10)]
+ #   c = {'reduction':'successful', 'data': data}
+ #   return HttpResponse(simplejson.dumps(a))
+
+###### ANDR TESTING
+#    register_instrument(ANDR)
+#    print "DONE REGISTERING"
 #    template = wireit.wireit_diagram_to_template(simplejson.loads(str(request.POST['data'])), ANDR)
-    template = wireit.wireit_diagram_to_template(offspec[0], ANDR)
-    print "RUNNING"
-    a = run_template(template, [d['config'] for d in template.modules])
-    print "DONE RUNNING"
-    print a
-    return HttpResponse(simplejson.dumps(a))
+#    template = wireit.wireit_diagram_to_template(offspec[0], ANDR)
+#    print template
+#    print "RUNNING"
+#    a = run_template(template, [d['config'] for d in template.modules])
+#    print "DONE RUNNING"
+#    print a
+#    return HttpResponse(simplejson.dumps(a))
+
+
+
+
 ########
 ## Views for displaying a language selection form and for calling the editor template with the selected language.
 ## The intermediate template 'editorRedirect.html' is used so that we can redirect to /editor/ while preserving 

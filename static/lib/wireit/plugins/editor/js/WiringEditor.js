@@ -282,17 +282,33 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
  	},
 
 	runModuleSuccess: function(display) {
-		var toPlot = display[this.wireClickSource].output[0], zipped = [];
+		plotid = 'plot';
+
+		console.log(display)
+		//var toPlot = display[this.wireClickSource].output[0], zipped = [];
+		var toPlot = { z: [[1,2,3,4],[1,2,3,4]], title: "this sucks" };
+		
+		var m = Matrix(toPlot.z);
+		var data = [ DataSeries({
+			name: toPlot.title,
+			func: m.at,
+			axis: "lin",
+			dims: m.autodims,
+			palette: "jet",
+			edges: 255,
+		}) ];
+		renderData(data, plotid);
+
+		/* 
 		if (toPlot.x.length != toPlot.y.length)
 			throw "Your data sucks";
 		for (i in toPlot.x)
 			if (!isNaN(toPlot.x[i]))
 				zipped.push([toPlot.x[i], toPlot.y[i]]);
-		//console.log(zipped);
-		
+
 
 		if (! plotCreated) {
-		  plot=$.jqplot('plot', [zipped]);
+		  plot=$.jqplot(plotid, [zipped]);
 		  plotCreated = true;
 			}
 		else {
@@ -300,6 +316,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		  plot.series[0].data = zipped;
 		  plot.replot();
 		}
+		*/
 		},
 	
 	runModuleFailture: function(error) {

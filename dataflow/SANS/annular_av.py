@@ -1,16 +1,16 @@
 """
-Return transmission based on bottom left and top right coordinates
+Make 1D Data through Annular Average
 """
 
 from .. import config
 from ..core import Module
 
-def generate_transmission_module(id=None, datatype=None, action=None,
+def annular_av_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
-    """Return transmission based on bottom left and top right coordinates"""
+    """Using Annular averaging, make 1D sans data (Q vs I)"""
 
     icon = {
-        'URI': config.IMAGES + "generate_transmission.png",
+        'URI': config.IMAGES + "annular_av.png",
         'terminals': {
             'input': (0, 10, -1, 0),
             'output': (20, 10, 1, 0),
@@ -28,13 +28,13 @@ def generate_transmission_module(id=None, datatype=None, action=None,
         dict(id='output',
              datatype=datatype,
              use='out',
-             description='correct',
+             description='1D Average',
              ),
     ]
 
     # Combine everything into a module.
     module = Module(id=id,
-                  name='generate_transmission',
+                  name='annular_av',
                   version=version,
                   description=action.__doc__,
                   icon=icon,

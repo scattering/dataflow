@@ -40,10 +40,10 @@ def run_template(template, config):
 #        print result
         all_results[nodenum] = result
     
-#    return all_results
+    return all_results
 # FIXXXXXXXXXXXXXXXXXXXXXX ***********************
-    from .offspecular.instruments import convert_to_plottable
-    return [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in all_results.items()]
+ #   from .offspecular.instruments import convert_to_plottable
+ #   return [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in all_results.items()]
 
 
 def _lookup_results(result, s):

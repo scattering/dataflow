@@ -76,10 +76,10 @@ class SansData(object):
             return SansData(Measurement(*err1d.mul(self.data.x,self.data.variance,other.data.x,other.data.variance)).x,deepcopy(self.metadata),q=copy(self.qx),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
         else:
             return SansData(data = self.data.__mul__(other).x,metadata=deepcopy(self.metadata),q=copy(self.qx),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
-    def __str__(self):
-        return self.data.x.__str__()
-    def __repr__(self):
-        return self.__str__()
+    #def __str__(self):
+        #return self.data.x.__str__()
+    #def __repr__(self):
+        #return self.__str__()
         
 def read_sample(myfilestr="MAY06001.SA3_CM_D545"):
     """Reads in a raw SANS datafile and returns a SansData
@@ -328,28 +328,27 @@ def convert_qxqy(sansdata):
 def annular_av(sansdata):
     #annular_mask_antialiased(shape, center, inner_radius, outer_radius, background_value=0.0, mask_value=1.0, oversampling=8)    
     
-    x0=sansdata.metadata['det.beamx'] #should be close to 64
-    y0=sansdata.metadata['det.beamy'] #should be close to 64
-    shape=sansdata.data.x.shape
-    x,y = np.indices(shape)
-    X = PIXEL_SIZE_X_CM*(x-x0)
-    Y=PIXEL_SIZE_Y_CM*(y-y0)
-    alpha=np.arctan2(Y,X)
+    #x0=sansdata.metadata['det.beamx'] #should be close to 64
+    #y0=sansdata.metadata['det.beamy'] #should be close to 64
+    #shape=sansdata.data.x.shape
+    #x,y = np.indices(shape)
+    #X = PIXEL_SIZE_X_CM*(x-x0)
+    #Y=PIXEL_SIZE_Y_CM*(y-y0)
+    #alpha=np.arctan2(Y,X)
   
-    q = sansdata.q
-    qx=q*np.cos(alpha)
-    print q
+    #q = sansdata.q
+    #qx=q*np.cos(alpha)
+    print sansdata.q
     # calculate the change in q that corresponds to a change in pixel of 1
-    q_per_pixel = qx[1,0]-qx[0,0] / 1.0
+    q_per_pixel = sansdata.qx[1,0]-sansdata.qx[0,0] / 1.0
    
     # for now, we'll make the q-bins have the same width as a single pixel
     step = q_per_pixel
     print "Step: ", step 
-    #print "Step: ",step
     shape1 = (128,128)
     center = (sansdata.metadata['det.beamx'],sansdata.metadata['det.beamy'])
-    Qmax = q.max()
-    #print "QMax: ",Qmax
+    Qmax = sansdata.q.max()
+    print "QMax: ",Qmax
     Q = np.arange(0,Qmax,step)
     #print "Q=",Q
     I = []
@@ -391,15 +390,15 @@ def annular_av(sansdata):
     plt.show()
     #sys.exit()
     return plottable_1D
-def absolute_scaling(sansdata,DIV,instrument):  #empty beam, div, instrument(NG3.NG5,NG7)
+def absolute_scaling(sample,empty,DIV,Tsam,instrument):  #data (that is going through reduction),empty beam, div, Transmission of the sample,instrument(NG3.NG5,NG7)
    #Variable detCnt,countTime,attenTrans,monCnt,sdd,pixel
-    detCnt = sansdata.metadata['run.detcnt']
-    countTime = sansdata.metadata['run.ctime']
-    monCnt = sansdata.metadata['run.moncnt']
-    sdd = sansdata.metadata['det.dis'] *100
+    detCnt = empty.metadata['run.detcnt']
+    countTime = empty.metadata['run.ctime']
+    monCnt = empty.metadata['run.moncnt']
+    sdd = empty.metadata['det.dis'] *100
     pixel = PIXEL_SIZE_X_CM
-    lambd = wavelength  = sansdata.metadata['resolution.lmda']
-    attenNo = sansdata.metadata['run.atten']
+    lambd = wavelength  = empty.metadata['resolution.lmda']
+    attenNo = empty.metadata['run.atten']
     print "Attetno: ",attenNo
     print "Countime: ",countTime
     print "monCnt: ", monCnt
@@ -444,15 +443,18 @@ def absolute_scaling(sansdata,DIV,instrument):  #empty beam, div, instrument(NG3
     #-------------------------------------------------------------------------------------#
     
     #correct empty beam by the sensitivity
-    data = sansdata.__truediv__(DIV)
+    data = empty.__truediv__(DIV)
     #Then take the sum in XY box
     coord_left=(55,53)
     coord_right=(74,72)
+    coord_left=(60,60)
+    coord_right=(70,70)
     summ = 0
     sumlist = []
+    #-----Something wrong Here------
     #print range(coord_right[0]-coord_left[0])
-    for x in range(coord_right[0]-coord_left[0]):
-        for y in range(coord_right[1]-coord_left[1]):
+    for x in range(coord_left[0],coord_right[0]+1):
+        for y in range(coord_left[1],coord_right[1]+1):
             summ+=data.data.x[x,y]
             sumlist.append(data.data.x[x,y])
     detCnt = summ
@@ -460,13 +462,17 @@ def absolute_scaling(sansdata,DIV,instrument):  #empty beam, div, instrument(NG3
 
    
     #------End Result-------#
-    kappa = detCnt/countTime/attenTrans*1.0e8/(monCnt/countTime)*(pixel/sdd)**2
+    kappa = detCnt/countTime/attenTrans*1.0e8/(monCnt/countTime)*(pixel/sdd)**2 #Correct Value: 6617.1
     print "Kappa: ", kappa
                                                  
     utc_datetime = date.datetime.utcnow()
     print utc_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
     
+    #-----Using Kappa to Scale data-----#
+    Dsam =  sample.metadata['sample.thk']
+    ABS = sample.__mul__(1/kappa*Dsam*Tsam)
+    #------------------------------------
+    return ABS
 def chain_corrections():
     """a sample chain of corrections"""
     
@@ -568,50 +574,47 @@ def chain_corrections():
     # convert_qxqy shouldn't be used as a filter that returns data... 
     # it puts data into an output form different than sansdata (Changed I think)
     #ar_av(CAL)
-    absolute_scaling(empty_4m_norm,sensitivity,'NG3')
+    
     #print "MaxQ: "
-    file = open("/home/elakian/sansdata.dat","w")
+   
     
     
-    np.set_printoptions(edgeitems = 128)
-    x = np.array(CAL.data.x)
-    file.write(repr(x))
-    
-    file.close()
-    
-    ##Test DIV
-    fig = plt.figure()
-    ax1 = fig.add_subplot(331, aspect='equal')
-    plt.title("SAM")
-    ax2 = fig.add_subplot(332, aspect='equal')
-    plt.title("EMP")
-    ax3 = fig.add_subplot(333, aspect='equal')
-    plt.title("BGD")
-    ax4 = fig.add_subplot(334, aspect='equal')
-    plt.title("COR1")
-    ax5 = fig.add_subplot(335, aspect='equal')
-    plt.title("COR3")
-    ax6 = fig.add_subplot(336, aspect='equal')
-    plt.title("COR")
-    ax7 = fig.add_subplot(337, aspect='equal')
-    plt.title("CAL1")
-    ax8 = fig.add_subplot(338, aspect='equal')
-    plt.title("CAL2")
-    ax9 = fig.add_subplot(339, aspect='equal')
-    plt.title("CAL")
+    #np.set_printoptions(edgeitems = 128)
 
     
-    ax1.imshow(SAM.data.x)
-    ax2.imshow(EMP.data.x)
-    ax3.imshow(BGD.data.x)
-    ax4.imshow(COR1.data.x)
-    ax5.imshow(COR3.data.x)
-    ax6.imshow(COR.data.x)
-    ax7.imshow(CAL1.data.x)
-    ax8.imshow(CAL2.data.x)
-    ax9.imshow(CAL.data.x)
+    ##Test DIV
+    #fig = plt.figure()
+    #ax1 = fig.add_subplot(331, aspect='equal')
+    #plt.title("SAM")
+    #ax2 = fig.add_subplot(332, aspect='equal')
+    #plt.title("EMP")
+    #ax3 = fig.add_subplot(333, aspect='equal')
+    #plt.title("BGD")
+    #ax4 = fig.add_subplot(334, aspect='equal')
+    #plt.title("COR1")
+    #ax5 = fig.add_subplot(335, aspect='equal')
+    #plt.title("COR3")
+    #ax6 = fig.add_subplot(336, aspect='equal')
+    #plt.title("COR")
+    #ax7 = fig.add_subplot(337, aspect='equal')
+    #plt.title("CAL1")
+    #ax8 = fig.add_subplot(338, aspect='equal')
+    #plt.title("CAL2")
+    #ax9 = fig.add_subplot(339, aspect='equal')
+    #plt.title("CAL")
+
     
-    plt.show()
+    #ax1.imshow(SAM.data.x)
+    #ax2.imshow(EMP.data.x)
+    #ax3.imshow(BGD.data.x)
+    #ax4.imshow(COR1.data.x)
+    #ax5.imshow(COR3.data.x)
+    #ax6.imshow(COR.data.x)
+    #ax7.imshow(CAL1.data.x)
+    #ax8.imshow(CAL2.data.x)
+    #ax9.imshow(CAL.data.x)
+    
+    #plt.show()
     #-------------DIV Ends------------------------
     
     #-------------Absolute Scaling----------------
@@ -626,12 +629,13 @@ def chain_corrections():
     # Equation : ABS = (1/Kappa*Dsam*Tsam)*CAL
     #kappa = detCnt/countTime/attenTrans*1.0e8/(monCnt/countTime)*(pixel/sdd)^2
     Dsam =  CAL.metadata['sample.thk']
-    print "CAL.q: "
-    print data.trunc(CAL.metadata['det.beamx'])
-    print data.trunc(CAL.metadata['det.beamy'])
-    print CAL.data[data.trunc(CAL.metadata['det.beamx']),data.trunc(CAL.metadata['det.beamy'])]
-    print CAL.q
-    
+    ABS = absolute_scaling(CAL,empty_4m_norm,sensitivity,Tsam,'NG3')
+    print "ABS: "
+ 
+  
+    print ABS
+ 
+
     #x,y = q_is_zero_at(CAL)
     #IZERO = CAL.data.x[x,y]
     #print IZERO
@@ -639,6 +643,32 @@ def chain_corrections():
     #ABS = CAL.__mul__.(1/IZERO*Dsam*Tsam)
     
     #-------------END of Absolute Scaling-------------
+    #-------------------Plot--------------------------
+    #fig = plt.figure()
+    #ax1 = fig.add_subplot(331, aspect='equal')
+    #plt.title("SAM")
+    #ax2 = fig.add_subplot(332, aspect='equal')
+    #plt.title("EMP")
+    #ax3 = fig.add_subplot(333, aspect='equal')
+    #plt.title("BGD")
+    #ax4 = fig.add_subplot(334, aspect='equal')
+    #plt.title("COR")
+    #ax5 = fig.add_subplot(335, aspect='equal')
+    #plt.title("CAL")
+    #ax6 = fig.add_subplot(336, aspect='equal')
+    #plt.title("ABS")
+
+    #ax1.imshow(SAM.data.x)
+    #ax2.imshow(EMP.data.x)
+    #ax3.imshow(BGD.data.x)
+    #ax4.imshow(COR.data.x)
+    #ax5.imshow(CAL.data.x)
+    #ax6.imshow(ABS.data.x)
+    #plt.show()
+    
+    
+    AVG = annular_av(ABS)
+    print AVG
     
 
 def map_files(key):

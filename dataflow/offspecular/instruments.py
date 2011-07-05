@@ -109,7 +109,7 @@ def _plot_format(data):
 # ========= Module definitions ===========
 
 # Load module
-def load_action(files=None, intent=None):
+def load_action(files=None, intent=None, position=None):
     print "loading", files
     result = [_load_data(f) for f in files] # not bundles
     return dict(output=result)
