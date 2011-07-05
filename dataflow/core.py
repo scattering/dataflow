@@ -4,6 +4,7 @@ Core class definitions
 
 from . import config
 from .deps import processing_order
+from collections import deque
 
 _registry = {}
 def register_instrument(instrument):
@@ -372,3 +373,42 @@ class Data(object):
         self.__dict__ = state
 
 
+# ============= Parent traversal =============
+
+class Node(object):
+    """
+    Base node
+
+    A diagram is created by connecting nodes with wires.
+    
+    parents : [Node]
+    
+        List of parents that this node has
+    
+    params : dictionary
+    
+        Somehow matches a parameter to its current value,
+        which will be compared to the previous value as found
+        in the database.
+    """
+    def __init__(self, parents, params):
+        self.parents = parents
+        self.params = params
+        
+    def searchDirty(self):
+        queue = deque([self])
+        while queue:
+            node = queue.popleft()
+            if node.isDirty():
+                return True
+            for parent in node.parents:
+                deque.append(parent)
+        return False
+        
+    def isDirty(self):
+        # Use inspect or __code__ for introspection?
+        return self.params != _get_inputs()
+    
+    def _get_inputs(self):
+        # Get data from database
+        pass
