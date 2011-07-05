@@ -45,16 +45,17 @@ from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
 from dataflow.SANS.convert_qxqy import convert_qxqy_module
 from dataflow.SANS.annular_av import annular_av_module
 from dataflow.SANS.absolute_scaling import absolute_scaling_module
-
+import json
 #Transmissions
 Tsam = 0
 Temp = 0
 #Qx,Qy
 qx = {}
 qy = {}
+correctVer = SansData()
 #List of Files
 global fileList 
-global correctVer 
+ 
 # Datatype
 SANS_DATA = 'data1d.sans'
 data2d = Datatype(id=SANS_DATA,
@@ -66,7 +67,25 @@ data2d = Datatype(id=SANS_DATA,
 def load_action(files=None, intent=None):
     print "loading", files
     result = [_load_data(f) for f in files] # not bundles
-    return dict(output=result)
+    global fileList 
+    fileList = result
+    plottable_2D = {
+    'z':  fileList[0].data.x.tolist(),
+    'title': 'SAM',
+    'dims': {
+      'xmax': 128.0,
+      'xmin': 0.0, 
+      'ymin': 0.0, 
+      'ymax': 128.0,
+      'xdim': 128,
+      'ydim': 128,
+    },
+    'xlabel': 'X',
+    'ylabel': 'Y',
+    'zlabel': 'Intensity',
+};
+    plottable_2D = json.dumps(plottable_2D)
+    return dict(output=plottable_2D)
 def _load_data(name):
     print name
     if os.path.splitext(name)[1] == ".DIV":
@@ -94,7 +113,6 @@ save = save_module(id='sans.save', datatype=SANS_DATA,
 
 # Modules
 def monitor_normalize_action(input=None):
-    
     #np.set_printoptions(edgeitems = 128)
     #print "input",input
     ##flat = []
@@ -114,10 +132,9 @@ def monitor_normalize_action(input=None):
     #for f in input:
         #result= [monitor_normalize(input[0][x])]
         #x+=1
-    result = [monitor_normalize(f) for f in input[0]]
+    result = [monitor_normalize(f) for f in input]
     print "result: ", result
-    return dict(output=result)
-mon_norm = monitor_normalize_module(id='sans.monitor_normalize', datatype=SANS_DATA, version='1.0', action=monitor_normalize_action)
+    return result
 
 def generate_transmission_action(input=None):
     
@@ -126,67 +143,127 @@ def generate_transmission_action(input=None):
     global Tsam,Temp
     coord_left=(60,60)
     coord_right=(70,70)
-    Tsam=generate_transmission(input[0][3],input[0][2],coord_left,coord_right)
-    Temp=generate_transmission(input[0][4],input[0][2],coord_left,coord_right)
+    Tsam=generate_transmission(input[3],input[2],coord_left,coord_right)
+    Temp=generate_transmission(input[4],input[2],coord_left,coord_right)
     print 'Sample transmission= {0} (IGOR Value = 0.724): '.format(Tsam)
     print 'Empty Cell transmission= {0} (IGOR Value = 0.929): '.format(Temp)
-    result = input[0]
-    return dict(output=result)
-    #result = [generate_transmission(f) for f in flat]
-    #return dict(output=result)
-gen_trans = generate_transmission_module(id='sans.generate_transmission', datatype=SANS_DATA, version='1.0', action=generate_transmission_action)
+    
+    
+   
 def initial_correction_action(input=None):
+    global fileList
+    lis = []
+    for i in fileList:
+            lis.append(i)
+       
+    print "Lis: ",lis
+    lis = monitor_normalize_action(lis[0:6])
+    generate_transmission_action(lis)
+    
+    
     #SAM,BGD,EMP,Trans
     global Tsam,Temp
-    BGD = read_sample(map_files('blocked_4m'))
-    COR = initial_correction(input[0][0],BGD,input[0][1],Tsam/Temp)
+    BGD = fileList[len(fileList)-2]
+    COR = initial_correction(fileList[0],BGD,fileList[1],Tsam/Temp)
     print COR.data.x
-    result = [COR]
-    print "result: ", result
-    return dict(output=result)
+    global correctVer 
+    correctVer = COR
+    print "result: ", correctVer
+
+    plottable_2D = {
+    'z':  COR.data.x.tolist(),
+    'title': 'COR',
+    'dims': {
+      'xmax': 128.0,
+      'xmin': 0.0, 
+      'ymin': 0.0, 
+      'ymax': 128.0,
+      'xdim': 128,
+      'ydim': 128,
+    },
+    'xlabel': 'X',
+    'ylabel': 'Y',
+    'zlabel': 'Intensity',
+};
+    plottable_2D = json.dumps(plottable_2D)
+    return dict(output=plottable_2D)
 initial_corr = initial_correction_module(id='sans.initial_correction', datatype=SANS_DATA, version='1.0', action=initial_correction_action)
 
-def convertq_action(input=None):
-    result = [convert_q(input[0][0])]
-    return dict(output=result)
-convq = convertq_module(id='sans.convertq', datatype=SANS_DATA, version='1.0', action=convertq_action)
-def correct_solid_angle_action(input=None):
-    
-    print "input#########: ",input
-    result = [correct_solid_angle(input[0][0])]
-    return dict(output=result)
-solid_angle = correct_solid_angle_module(id='sans.correct_solid_angle', datatype=SANS_DATA, version='1.0', action=correct_solid_angle_action)
+def convertq_action():
+    global correctVer
+    result = convert_q(correctVer)
+    return result
+
+def correct_solid_angle_action():
+    global correctVer
+    result = correct_solid_angle(correctVer)
+    return result
+
 def correct_detector_efficiency_action(input=None):
+    global fileList,correctVer
     print "input: ",input
-    sensitivity = read_div(map_files('div'))
-    DIV = correct_detector_efficiency(input[0][0],sensitivity)
-    result = [DIV]
+    sensitivity = fileList[len(fileList)-1]
+    DIV = correct_detector_efficiency(fileList[0],sensitivity) 
+    correctVer = DIV
+    plottable_2D = {
+    'z':  DIV.data.x.tolist(),
+    'title': 'DIV',
+    'dims': {
+      'xmax': 128.0,
+      'xmin': 0.0, 
+      'ymin': 0.0, 
+      'ymax': 128.0,
+      'xdim': 128,
+      'ydim': 128,
+    },
+    'xlabel': 'X',
+    'ylabel': 'Y',
+    'zlabel': 'Intensity',
+};
+    plottable_2D = json.dumps(plottable_2D)
+    
+    result = plottable_2D
     return dict(output=result)
 correct_det_eff = correct_detector_efficiency_module(id='sans.correct_detector_efficiency', datatype=SANS_DATA, version='1.0', action=correct_detector_efficiency_action)
-def convert_qxqy_action(input=None):
-    print "input: ",input
-    global qx,qy
-    CON,qx,qy = convert_qxqy(input[0][0])
-    result = [CON]
-    print "Convertqxqy: ", result
-    return dict(output=result)
-qxqy = convert_qxqy_module(id='sans.convert_qxqy', datatype=SANS_DATA, version='1.0', action=convert_qxqy_action)
+def convert_qxqy_action():
+    global correctVer,qx,qy
+    correctVer,qx,qy = convert_qxqy(correctVer)
+    print "Convertqxqy"
 def annular_av_action(input=None):
-    input = input[0]
-    AVG = annular_av(input[0])
+    global correctVer,fileList
+    AVG = annular_av(correctVer)
     result = AVG
     print "AVG: ",result
     return dict(output=result)
 annul_av = annular_av_module(id='sans.annular_av', datatype=SANS_DATA, version='1.0', action=annular_av_action)
 def absolute_scaling_action(input=None):
     #sample,empty,DIV,Tsam,instrument
-    global fileList
-    input = input[0]
-    sensitivity = read_div(map_files('div'))
-    EMP = read_sample(fileList[2])
-    ABS = absolute_scaling(input[0],EMP,sensitivity,Tsam,'NG3')
+    global correctVer,fileList,Tsam,qx,qy
+    correctVer = convertq_action()
+    correctVer  = correct_solid_angle_action()
+    convert_qxqy_action()
+    sensitivity = fileList[len(fileList)-1]
+    EMP = fileList[2]
+    ABS = absolute_scaling(correctVer,EMP,sensitivity,Tsam,'NG3')
     result = [ABS]
     print "abs: ",result
+    plottable_2D = {
+    'z':  ABS.data.x.tolist(),
+    'title': 'COR',
+    'dims': {
+      'xmax': 128.0,
+      'xmin': 0.0, 
+      'ymin': 0.0, 
+      'ymax': 128.0,
+      'xdim': 128,
+      'ydim': 128,
+    },
+    'xlabel': 'X',
+    'ylabel': 'Y',
+    'zlabel': 'Intensity',
+};
+    plottable_2D = json.dumps(plottable_2D)
+    plottable_2D = result
     return dict(output=result);
 absolute = absolute_scaling_module(id='sans.absolute_scaling', datatype=SANS_DATA, version='1.0', action=absolute_scaling_action)
 
@@ -200,7 +277,7 @@ SANS_INS = Instrument(id='ncnr.sans.ins',
                  name='NCNR SANS INS',
                  archive=config.NCNR_DATA + '/sansins',
                  menu=[('Input', [load, save]),
-                       ('Reduction', [convq,correct_det_eff,mon_norm,correct_back,gen_trans,initial_corr,solid_angle,qxqy,annul_av,absolute])
+                       ('Reduction', [correct_det_eff,correct_back,initial_corr,annul_av,absolute])
                                               ],
                  requires=[config.JSCRIPT + '/sansplot.js'],
                  datatypes=[data2d],
@@ -210,7 +287,7 @@ instruments = [SANS_INS]
 # Testing
 if __name__ == '__main__':
     global fileList 
-    fileList = [map_files('sample_4m'),map_files('empty_cell_4m'),map_files('empty_4m'),map_files('trans_sample_4m'),map_files('trans_empty_cell_4m')] 
+    fileList = [map_files('sample_4m'),map_files('empty_cell_4m'),map_files('empty_4m'),map_files('trans_sample_4m'),map_files('trans_empty_cell_4m'),map_files('blocked_4m'),map_files('div')] 
     #fileList = ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105"]
     for instrument in instruments:
         register_instrument(instrument)
@@ -218,13 +295,8 @@ if __name__ == '__main__':
         dict(module="sans.load", position=(5, 20),
              config={'files': fileList, 'intent': 'signal'}),
         dict(module="sans.save", position=(280, 40), config={'ext': 'dat'}),
-        dict(module="sans.monitor_normalize", position=(360 , 60), config={}),
-        dict(module="sans.generate_transmission", position=(360 , 60), config={}),
         dict(module="sans.initial_correction", position=(360 , 60), config={}),
         dict(module="sans.correct_detector_efficiency", position=(360 , 60), config={}),
-        dict(module="sans.convertq", position=(360 , 60), config={}),
-        dict(module="sans.correct_solid_angle", position=(360 , 60), config={}),
-        dict(module="sans.convert_qxqy", position=(360 , 60), config={}),
         dict(module="sans.absolute_scaling", position=(360 , 60), config={}),
         dict(module="sans.annular_av", position=(360 , 60), config={}),
         
@@ -236,12 +308,8 @@ if __name__ == '__main__':
         dict(source=[2, 'output'], target=[3, 'input']),
         dict(source=[3, 'output'], target=[4, 'input']),
         dict(source=[4, 'output'], target=[5, 'input']),
-        dict(source=[5, 'output'], target=[6, 'input']),
-        dict(source=[6, 'output'], target=[7, 'input']),
-        dict(source=[7, 'output'], target=[8, 'input']),
-        dict(source=[8, 'output'], target=[9, 'input']),
-        dict(source=[9, 'output'], target=[10, 'input']),
-        dict(source=[10, 'output'], target=[1, 'input']),
+        dict(source=[5, 'output'], target=[1, 'input']),
+
         ]
     config = [d['config'] for d in modules]
     template = Template(name='test sans',
@@ -267,4 +335,3 @@ if __name__ == '__main__':
               #'mask':os.path.join(datadir,'DEFAULT.MASK'),
               #'div':os.path.join(datadir,'PLEX_2NOV2007_NG3.DIV'),
               #}
-              

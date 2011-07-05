@@ -421,28 +421,27 @@ def convert_qxqy(sansdata):
 def annular_av(sansdata):
     #annular_mask_antialiased(shape, center, inner_radius, outer_radius, background_value=0.0, mask_value=1.0, oversampling=8)    
     
-    x0=sansdata.metadata['det.beamx'] #should be close to 64
-    y0=sansdata.metadata['det.beamy'] #should be close to 64
-    shape=sansdata.data.x.shape
-    x,y = np.indices(shape)
-    X = PIXEL_SIZE_X_CM*(x-x0)
-    Y=PIXEL_SIZE_Y_CM*(y-y0)
-    alpha=np.arctan2(Y,X)
+    #x0=sansdata.metadata['det.beamx'] #should be close to 64
+    #y0=sansdata.metadata['det.beamy'] #should be close to 64
+    #shape=sansdata.data.x.shape
+    #x,y = np.indices(shape)
+    #X = PIXEL_SIZE_X_CM*(x-x0)
+    #Y=PIXEL_SIZE_Y_CM*(y-y0)
+    #alpha=np.arctan2(Y,X)
   
-    q = sansdata.q
-    qx=q*np.cos(alpha)
-    print q
+    #q = sansdata.q
+    #qx=q*np.cos(alpha)
+    print sansdata.q
     # calculate the change in q that corresponds to a change in pixel of 1
-    q_per_pixel = qx[1,0]-qx[0,0] / 1.0
+    q_per_pixel = sansdata.qx[1,0]-sansdata.qx[0,0] / 1.0
    
     # for now, we'll make the q-bins have the same width as a single pixel
     step = q_per_pixel
     print "Step: ", step 
-    #print "Step: ",step
     shape1 = (128,128)
     center = (sansdata.metadata['det.beamx'],sansdata.metadata['det.beamy'])
-    Qmax = q.max()
-    #print "QMax: ",Qmax
+    Qmax = sansdata.q.max()
+    print "QMax: ",Qmax
     Q = np.arange(0,Qmax,step)
     #print "Q=",Q
     I = []
@@ -691,27 +690,33 @@ def chain_corrections():
     #ar_av(CAL)
 
     #-------------------Plot--------------------------
-    fig = plt.figure()
-    ax1 = fig.add_subplot(231, aspect='equal')
-    plt.title("SAM")
-    ax2 = fig.add_subplot(232, aspect='equal')
-    plt.title("EMP")
-    ax3 = fig.add_subplot(233, aspect='equal')
-    plt.title("BGD")
-    ax4 = fig.add_subplot(234, aspect='equal')
-    plt.title("COR")
-    ax5 = fig.add_subplot(235, aspect='equal')
-    plt.title("CAL")
-    ax6 = fig.add_subplot(236, aspect='equal')
-    plt.title("ABS")
 
-    ax1.imshow(SAM.data.x)
-    ax2.imshow(EMP.data.x)
-    ax3.imshow(BGD.data.x)
-    ax4.imshow(COR.data.x)
-    ax5.imshow(CAL.data.x)
-    ax6.imshow(ABS.data.x)
-    plt.show()
+    #fig = plt.figure()
+    #ax1 = fig.add_subplot(331, aspect='equal')
+    #plt.title("SAM")
+    #ax2 = fig.add_subplot(332, aspect='equal')
+    #plt.title("EMP")
+    #ax3 = fig.add_subplot(333, aspect='equal')
+    #plt.title("BGD")
+    #ax4 = fig.add_subplot(334, aspect='equal')
+    #plt.title("COR")
+    #ax5 = fig.add_subplot(335, aspect='equal')
+    #plt.title("CAL")
+    #ax6 = fig.add_subplot(336, aspect='equal')
+    #plt.title("ABS")
+
+    #ax1.imshow(SAM.data.x)
+    #ax2.imshow(EMP.data.x)
+    #ax3.imshow(BGD.data.x)
+    #ax4.imshow(COR.data.x)
+    #ax5.imshow(CAL.data.x)
+    #ax6.imshow(ABS.data.x)
+    #plt.show()
+    
+    
+    AVG = annular_av(ABS)
+    print AVG
+    
 
 def map_files(key):
     """

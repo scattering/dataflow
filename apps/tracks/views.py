@@ -11,6 +11,7 @@ from ...dataflow.core import register_instrument
 from ...dataflow.tas.instruments import BT7
 #from ...dataflow.offspecular.instruments import ANDR
 from ...dataflow.tas import instruments
+from ...dataflow.SANS import instruments as SANS_INS
 
 import random
 
@@ -52,16 +53,20 @@ def saveWiring(request):
 
 def runReduction(request):
     print 'I am reducing'
-    instruments.init_data()
+####### SANS TESTING
+    register_instrument(SANS_INS.SANS_INS)
+    return HttpResponse(a)
+    
     #print FILES
 ###### BT7 TESTING
-    register_instrument(BT7)
-    template = wireit.wireit_diagram_to_template(simplejson.loads(str(request.POST['data'])), BT7)
-    a = run_template(template, [{'files': ['f1.bt7', 'f2.bt7']}, {'align': ['A3']}, {'scale': 2.5}, {'ext': 'dat'}])
-    print a    
-    data = [[random.random(), random.random()] for i in range(10)]
-    c = {'reduction':'successful', 'data': data}
-    return HttpResponse(simplejson.dumps(a))
+#    register_instrument(BT7)
+#    instruments.init_data()
+#    template = wireit.wireit_diagram_to_template(simplejson.loads(str(request.POST['data'])), BT7)
+ #   a = run_template(template, [{'files': ['f1.bt7', 'f2.bt7']}, {'align': ['A3']}, {'scale': 2.5}, {'ext': 'dat'}])
+ #   print a    
+ #   data = [[random.random(), random.random()] for i in range(10)]
+ #   c = {'reduction':'successful', 'data': data}
+ #   return HttpResponse(simplejson.dumps(a))
 
 ###### ANDR TESTING
 #    register_instrument(ANDR)
@@ -74,6 +79,8 @@ def runReduction(request):
 #    print "DONE RUNNING"
 #    print a
 #    return HttpResponse(simplejson.dumps(a))
+
+
 
 
 ########
