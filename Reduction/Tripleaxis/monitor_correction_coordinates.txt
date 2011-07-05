@@ -1,0 +1,5 @@
+# Text file to keep track of monitor correction coefficients for various instruments
+# Instrument            M0            M1          M2            M3          M4
+    BT7             6.1230       -5.9630e-1     2.6244e-2    -4.8430e-4     2.8810e-6
+    BT9             6.1230       -5.9630e-1     2.6244e-2    -4.8430e-4     2.8810e-6      
+    NG5             1.2776        7.8968e-2     9.9952e-3    -6.0495e-4     1.4203e-5
