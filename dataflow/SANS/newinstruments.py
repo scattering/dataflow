@@ -7,45 +7,46 @@ dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir)
 from pprint import pprint
 
-#from .. import config
-#from ..calc import run_template
-#from ..core import Datatype, Instrument, Template, register_instrument
-#from ..modules.load import load_module
-#from ..modules.save import save_module
-#from ...reduction.sans.filters import *
-#from ..SANS.convertq import convertq_module
-#from ..SANS.correct_detector_efficiency import correct_detector_efficiency_module
-#from ..SANS.monitor_normalize import monitor_normalize_module
-#from ..SANS.correct_background import correct_background_module
-#from ..SANS.generate_transmission import generate_transmission_module
-#from ..SANS.initial_correction import initial_correction_module
-#from ..SANS.correct_solid_angle import correct_solid_angle_module
-#from ..SANS.convert_qxqy import convert_qxqy_module
-#from ..SANS.annular_av import annular_av_module
-#from ..SANS.absolute_scaling import absolute_scaling_module
+from .. import config
+from .. import wireit
+from ..calc import run_template
+from ..core import Datatype, Instrument, Template, register_instrument
+from ..modules.load import load_module
+from ..modules.save import save_module
+from ...reduction.sans.filters import *
+from ..SANS.convertq import convertq_module
+from ..SANS.correct_detector_efficiency import correct_detector_efficiency_module
+from ..SANS.monitor_normalize import monitor_normalize_module
+from ..SANS.correct_background import correct_background_module
+from ..SANS.generate_transmission import generate_transmission_module
+from ..SANS.initial_correction import initial_correction_module
+from ..SANS.correct_solid_angle import correct_solid_angle_module
+from ..SANS.convert_qxqy import convert_qxqy_module
+from ..SANS.annular_av import annular_av_module
+from ..SANS.absolute_scaling import absolute_scaling_module
 
 #from ... import ROOT_URL
 
 #print 'repo', ROOT_URL.REPO_ROOT
 #print 'home', ROOT_URL.HOMEDIR
 
-from dataflow import config
-from dataflow.calc import run_template
-from dataflow.core import Datatype, Instrument, Template, register_instrument
-from dataflow.modules.load import load_module
-from dataflow.modules.save import save_module
-from reduction.sans.filters import *
-from dataflow.SANS.convertq import convertq_module
-from dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
-from dataflow.SANS.monitor_normalize import monitor_normalize_module
-from dataflow.SANS.correct_background import correct_background_module
-from dataflow.SANS.generate_transmission import generate_transmission_module
-from dataflow.SANS.initial_correction import initial_correction_module
-from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
-from dataflow.SANS.convert_qxqy import convert_qxqy_module
-from dataflow.SANS.annular_av import annular_av_module
-from dataflow.SANS.absolute_scaling import absolute_scaling_module
-import json
+#from dataflow import config
+#from dataflow.calc import run_template
+#from dataflow.core import Datatype, Instrument, Template, register_instrument
+#from dataflow.modules.load import load_module
+#from dataflow.modules.save import save_module
+#from reduction.sans.filters import *
+#from dataflow.SANS.convertq import convertq_module
+#from dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
+#from dataflow.SANS.monitor_normalize import monitor_normalize_module
+#from dataflow.SANS.correct_background import correct_background_module
+#from dataflow.SANS.generate_transmission import generate_transmission_module
+#from dataflow.SANS.initial_correction import initial_correction_module
+#from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
+#from dataflow.SANS.convert_qxqy import convert_qxqy_module
+#from dataflow.SANS.annular_av import annular_av_module
+#from dataflow.SANS.absolute_scaling import absolute_scaling_module
+import json, simplejson
 #Transmissions
 Tsam = 0
 Temp = 0
@@ -83,7 +84,7 @@ def save_action(input=None, ext=None):
     for f in input: _save_one(f, ext) # not bundles
     return {}
 def _save_one(input, ext):
-    outname = initname = "/home/elakian/sansdatafile.txt"
+    outname = initname = map_files('save')
     if ext is not None:
         outname = ".".join([os.path.splitext(outname)[0], ext])
     print "saving", initname, 'as', outname
@@ -268,7 +269,8 @@ SANS_INS = Instrument(id='ncnr.sans.ins',
 instruments = [SANS_INS]
 
 # Testing
-if __name__ == '__main__':
+#if __name__ == '__main__':
+def TESTING():
     global fileList 
     fileList = [map_files('sample_4m'),map_files('empty_cell_4m'),map_files('empty_4m'),map_files('trans_sample_4m'),map_files('trans_empty_cell_4m'),map_files('blocked_4m'),map_files('div')] 
     #fileList = ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105"]
@@ -301,8 +303,12 @@ if __name__ == '__main__':
                         wires=wires,
                         instrument=SANS_INS.id,
                         )
+    #result = run_template(template, config)
+    #print simplejson.dumps(wireit.template_to_wireit_diagram(template))
+    #print simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))
     result = run_template(template, config)
-    pprint(result)
+    #print result
+    return result
         
     #datadir=os.path.join(os.path.dirname(__file__),'ncnr_sample_data')
     #filedict={'empty_1m':os.path.join(datadir,'SILIC001.SA3_SRK_S101'),

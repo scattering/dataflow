@@ -383,11 +383,11 @@ def annular_av(sansdata):
     'style': 'line',
     };
     plottable_1D = json.dumps(plottable_1D)
-    plt.plot(Q,I,'ro')
-    plt.title('1D')
-    plt.xlabel('q(A^-1)')
-    plt.ylabel('I(q)')
-    plt.show()
+    #plt.plot(Q,I,'ro')
+    #plt.title('1D')
+    #plt.xlabel('q(A^-1)')
+    #plt.ylabel('I(q)')
+    #plt.show()
     #sys.exit()
     return plottable_1D
 def absolute_scaling(sample,empty,DIV,Tsam,instrument):  #data (that is going through reduction),empty beam, div, Transmission of the sample,instrument(NG3.NG5,NG7)
@@ -414,13 +414,13 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument):  #data (that is going th
     #file.write(repr(a))
     #file.close()
     
-    file = open("NG7.dat","r") # r = read
+    file = open(map_files("NG7"),"r") # r = read
     f = eval(file.read())
     file.close()
     NG7 = f
     
     
-    file = open("NG3.dat","r") # r = read
+    file = open(map_files("NG3"),"r") # r = read
     g = eval(file.read())
     file.close()
     NG3 = g
@@ -689,6 +689,9 @@ Generate the mapping between files and their roles
               'sample_4m':os.path.join(datadir,'SILIC010.SA3_SRK_S110'),
               'mask':os.path.join(datadir,'DEFAULT.MASK'),
               'div':os.path.join(datadir,'PLEX_2NOV2007_NG3.DIV'),
+              'NG7':os.path.join(datadir,'NG7.dat'),
+              'NG3':os.path.join(datadir,'NG3.dat'),
+              'save':os.path.join(datadir, 'sans_saved.txt'),
               }
     return filedict[key]
               
