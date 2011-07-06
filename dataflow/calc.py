@@ -5,10 +5,11 @@ The function run_template
 """
 
 from pprint import pprint
-
+from inspect import getsource
 from .core import lookup_module
+import hashlib
 
-
+TEMP_DATABASE = {} # Fake database
 def run_template(template, config):
     """
     Evaluate the template using the configured values.
@@ -22,13 +23,13 @@ def run_template(template, config):
     large data sets.
     """
     all_results = {}
+    fingerprints = {}
     for nodenum, wires in template:
         # Find the modules
         node = template.modules[nodenum]
         module_id = node['module'] #template.modules[node]
         module = lookup_module(module_id)
         inputs = _map_inputs(module, wires)
-        
         # substitute values for inputs
         kwargs = dict((k, _lookup_results(all_results, v)) 
                       for k, v in inputs.items())
@@ -36,10 +37,26 @@ def run_template(template, config):
         # Include configuration information
         kwargs.update(node.get('config', {}))
         kwargs.update(config[nodenum])
-        result = module.action(**kwargs)
-#        print result
+        
+        # ===== Fingerprinting ======
+        fp = finger_print(module, kwargs.copy(), nodenum, inputs.get('input', []), fingerprints)
+        print "Fingerprint:", fp
+        fingerprints[nodenum] = fp
+        # Primary    test (hash of save module): 27382ab541bb982f763f05c7fc96056bf93acce7 initial test
+        # Secondary  test (hash of save module): 27382ab541bb982f763f05c7fc96056bf93acce7 correct; identical
+        # Tertiary   test (hash of save module): 838b609198c1183aefa05fdb359abea8faad08f2 correct; offset was changed from 0.1 to 0.2
+        # Quaternary test (hash of save module): 838b609198c1183aefa05fdb359abea8faad08f2 correct; identical
+        # ======= End fingerprinting =========
+        
+        if TEMP_DATABASE.get(nodenum, "") == fp:
+            result = TEMP_DATABASE[fp]
+        else:
+            result = module.action(**kwargs)
+        TEMP_DATABASE[nodenum] = fp
+        TEMP_DATABASE[fp] = result
+
+        #print result
         all_results[nodenum] = result
-    
     return all_results
 # FIXXXXXXXXXXXXXXXXXXXXXX ***********************
  #   from .offspecular.instruments import convert_to_plottable
@@ -94,3 +111,25 @@ def _map_inputs(module, wires):
             kwargs[terminal['id']] = collect[0]
     return kwargs
 
+
+def finger_print(module, args, nodenum, input_arr, fingerprints):
+    d = module.__dict__.copy() # get all attributes
+    d['action'] = getsource(d['action']) # because it is a python module (must convert it)
+    fp = str(d) # source code (not 100% due to helper methods)
+    # if load module or not is needed
+    #fp += "\nLoad module" if len(module.terminals) == 1 and module.terminals[0]['id'] != 'input' else "Not a load module"
+    if 'input' in args:
+        del args['input'] # holds the MetaArray (don't want all that data)
+    fp += str(args) # shortened arguments
+    fp += str(nodenum) # node number
+    if len(input_arr) > 0: # bundle correction
+        if type(input_arr[0]) == type([]):
+            fp += str([fingerprints[input[0]] for input in input_arr if 'output' == input[1]])
+        elif type(input_arr[0]) == type(0) and input_arr[1] == 'output':
+            fp += str([fingerprints[input_arr[0]]]) # might as well keep the list format
+        else:
+            raise TypeError("Input array should either be a bundle of modules or just one module")
+    else:
+        fp += str(input_arr) # '[]'
+    fp = hashlib.sha1(fp).hexdigest()
+    return fp
