@@ -1,7 +1,6 @@
 import numpy as N
 from matplotlib.mlab import griddata
 import matplotlib.pyplot as plt
-import numpy.ma as ma
 from numpy.random import uniform
 
 def regularlyGrid(xarr, yarr, zarr, xstart, xfinal, xstep, ystart, yfinal, ystep):
@@ -36,7 +35,7 @@ def regularlyGrid(xarr, yarr, zarr, xstart, xfinal, xstep, ystart, yfinal, ystep
 def regularlyGridRandom():
 	"Makes a contour and contourf plot of randomly generated data pts."
 	# make up some randomly distributed data
-	npts = 100
+	npts = 1000
 	x = uniform(-3,3,npts)
 	y = uniform(-3,3,npts)
 	z = x*N.exp(-x**2-y**2)
@@ -54,12 +53,15 @@ def regularlyGridRandom():
 	plt.colorbar() # draw colorbar
 
 	# plot data points.
-	plt.scatter(x,y,marker='o',c='b',s=5)
+	plt.scatter(x,y,marker='o', c='b', s=5)
 	plt.xlim(-3,3)
 	plt.ylim(-3,3)
 	plt.title('griddata test (%d points)' % npts)
 	plt.show()
 
+	#returning data
+	#results = [xi, yi, zi]
+	#return results
 
 def pcolorRandom():
 	"Makes a pcolormesh plot of randomly generated data pts."

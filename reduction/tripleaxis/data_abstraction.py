@@ -1,6 +1,7 @@
-import numpy as N
+import numpy as np
 import uncertainty
-import readice
+#import readice
+import readncnr4 as readncnr
 import copy
 eps=1e-8
 
@@ -100,7 +101,7 @@ class Component(object):
         def _get_variance(self): return self.measurement.variance
         def _set_variance(self,variance):
                 self.measurement.variance=variance
-        def _getdx(self): return numpy.sqrt(self.variance)
+        def _getdx(self): return np.sqrt(self.variance)
         def _setdx(self,dx):
                 # Direct operation
                 #    variance = dx**2
@@ -121,7 +122,7 @@ class Component(object):
                 #self.values=data
                 #self.err=err
                 self.measurement=uncertainty.Measurement(values,err**2)
-        # Numpy array slicing operations
+        # np array slicing operations
         def __len__(self):
                 return len(self.x)
         def __getitem__(self,key):
@@ -225,15 +226,15 @@ class Component(object):
         def __pos__(self):
                 return self
         def __abs__(self):
-                return Measurement(numpy.abs(self.x),self.variance)
+                return Measurement(np.abs(self.x),self.variance)
 
         def __str__(self):
-                #return str(self.x)+" +/- "+str(numpy.sqrt(self.variance))
-                if numpy.isscalar(self.x):
-                        return format_uncertainty(self.x,numpy.sqrt(self.variance))
+                #return str(self.x)+" +/- "+str(np.sqrt(self.variance))
+                if np.isscalar(self.x):
+                        return format_uncertainty(self.x,np.sqrt(self.variance))
                 else:
                         return [format_uncertainty(v,dv)
-                                for v,dv in zip(self.x,numpy.sqrt(self.variance))]
+                                for v,dv in zip(self.x,np.sqrt(self.variance))]
         def __repr__(self):
                 return "Measurement(%s,%s)"%(str(self.x),str(self.variance))
 
@@ -374,13 +375,30 @@ class Detector(Component):
         def correct_offsets(self, offsets):
                 """This function will transform from a central a4, to the actual a4 """
                 pass
+        def sum(self,axis=0):
+                """This function will find the total counts on the detector along a given axis, similar to np.sum(axis=1).  This should be for Measurement objects, so we can propagate errors as well.
+                """
+                pass
 
-class DetectorSet(object):
-        def __init__(self):
-                self.name=name
-        def __getitem__(self, key): return self.__dict__[key]
-        def __setitem__(self, key, item): self.__dict__[key] = item
+#class DetectorSet(object):
+#        def __init__(self):
+#                self.name=name
+#        def __getitem__(self, key): return self.__dict__[key]
+#        def __setitem__(self, key, item): self.__dict__[key] = item
  
+class DetectorSet(object):
+        """This defines a group of detectors"""
+        def __init__(self):
+                self.primary_detector=Detector('primary_detector',dimension=None,values=None,err=None,units='counts', 
+                     aliases=None,friends=None, isInterpolatable=True)
+                self.detector_mode=None
+                        
+        def __iter__(self):
+                for key,value in self.__dict__:
+                        return value
+        def next(self):
+                for key, value in self.__dict__:
+                        yield value
                 
 
 
@@ -532,14 +550,16 @@ class Physical_Motors(object):
                              isInterpolatable=True)
                 self.e=Motor('e',values=None,err=None,units='meV',isDistinct=True,
                              isInterpolatable=True)
-                self.qx=Motor('qx',values=None,err=None,units='rlu',isDistinct=True,
-                              isInterpolatable=True)
-                self.qy=Motor('qy',values=None,err=None,units='rlu',isDistinct=True,
-                              isInterpolatable=True)
-                self.qz=Motor('qz',values=None,err=None,units='rlu',isDistinct=True,
-                              isInterpolatable=True)
-                self.hkl=Motor('hkl',values=None,err=None,units='rlu',isDistinct=True,
-                               isInterpolatable=True) #is this a tuple???
+                self.q=Motor('q',values=None,err=None,units='angstrom_inverse',isDistinct=True,
+                             isInterpolatable=True)
+                #self.qx=Motor('qx',values=None,err=None,units='rlu',isDistinct=True,
+                #              isInterpolatable=True)
+                #self.qy=Motor('qy',values=None,err=None,units='rlu',isDistinct=True,
+                #              isInterpolatable=True)
+                #self.qz=Motor('qz',values=None,err=None,units='rlu',isDistinct=True,
+                #              isInterpolatable=True)
+                #self.hkl=Motor('hkl',values=None,err=None,units='rlu',isDistinct=True,
+                #               isInterpolatable=True) #is this a tuple???
 
 class Collimators(object):
         """Our collimators:  
@@ -595,19 +615,6 @@ class Slits(object):
                                            , isInterpolatable=True) 
                 
 
-class DetectorSet(object):
-        """This defines a group of detectors"""
-        def __init__(self):
-                self.primary_detector=Detector('primary_detector',dimension=None,values=None,err=None,units='counts', 
-                     aliases=None,friends=None, isInterpolatable=True)
-                self.detector_mode=None
-                        
-        def __iter__(self):
-                for key,value in self.__dict__:
-                        return value
-        def next(self):
-                for key, value in self.__dict__:
-                        yield value
 
 
 class TripleAxis(object):
@@ -632,209 +639,402 @@ class TripleAxis(object):
                 
                 
                 
-        def translate(self,dataset):
-                self.translate_monochromator(dataset)
-        
-        def translate_monochromator(self,dataset):
-                self.monochromator.focus_cu=dataset.data.focuscu
-                self.monochromator.focus_pg=dataset.data.focuspg
-                self.monochromator.horizontal_focus=dataset.metadata.monohorizfocus
-                self.monochromator.vertical_focus=dataset.metadata.monovertifocus
-                self.monochromator.translation=dataset.data.monotrans
-                self.monochromator.elevation=dataset.data.monoelev
-                self.monochromator.dspacing=dataset.metadata.monochromator_dspacing
-                monochromator_blades=Blades(title='monochromator',nblades=10)
-                monochromator_blades.blades[0]=dataset.data.monoblade01
-                monochromator_blades.blades[1]=dataset.data.monoblade02
-                monochromator_blades.blades[2]=dataset.data.monoblade03
-                monochromator_blades.blades[3]=dataset.data.monoblade04
-                monochromator_blades.blades[4]=dataset.data.monoblade05
-                monochromator_blades.blades[5]=dataset.data.monoblade06
-                monochromator_blades.blades[6]=dataset.data.monoblade07
-                monochromator_blades.blades[7]=dataset.data.monoblade08
-                monochromator_blades.blades[8]=dataset.data.monoblade09
-                monochromator_blades.blades[9]=dataset.data.monoblade10
-                self.monochromator.blades=monochromator_blades
-               
-                
-                
-        def translate_analyzer(self,dataset):
-                self.analyzer.dspacing=dataset.metadata.analyzer_dspacing
-                self.analyzer.focus_mode=dataset.metadata.analyzerfocusmode
-                analyzer_blades=Blades(title='analyzer',nblades=13)
-                analyzer_blades[0]=dataset.data.analyzerblade01
-                analyzer_blades[1]=dataset.data.analyzerblade02
-                analyzer_blades[2]=dataset.data.analyzerblade03
-                analyzer_blades[3]=dataset.data.analyzerblade04
-                analyzer_blades[4]=dataset.data.analyzerblade05
-                analyzer_blades[5]=dataset.data.analyzerblade06
-                analyzer_blades[6]=dataset.data.analyzerblade07
-                analyzer_blades[7]=dataset.data.analyzerblade08
-                analyzer_blades[8]=dataset.data.analyzerblade09
-                analyzer_blades[9]=dataset.data.analyzerblade10
-                analyzer_blades[10]=dataset.data.analyzerblade11
-                analyzer_blades[11]=dataset.data.analyzerblade12
-                analyzer_blades[12]=dataset.data.analyzerblade13
-                self.analyzer.blades=analyzer_blades
-                
+def translate(bt7,dataset):
+        translate_monochromator(bt7,dataset)
+        translate_analyzer(bt7,dataset)
+        translate_collimator(bt7,dataset)
+        translate_primary_motors(bt7,dataset)
+        translate_physical_motors(bt7,dataset)
+        translate_filters(bt7,dataset)
+        translate_apertures(bt7,dataset)
+        #translate_polarized_beam(bt7,dataset)
+        translate_slits(bt7,dataset)
+        translate_temperature(bt7,dataset)
+        translate_timestamp(bt7,dataset)
+        #translate_sample(bt7,dataset)
+        #translate_metadata(bt7,dataset)
+        translate_detectors(bt7,dataset)
 
-              
-        def translate_collimator(self,dataset):
-                self.collimators.pre_analyzer_collimator=dataset.preanacoll
-                self.collimators.post_analyzer_collimator=datset.postanacoll
-                self.collimators.post_monochromator_collimator =dataset.postmonocoll
-                self.collimators.pre_monochromator_collimator=dataset.data.premonocoll
-                self.collimators.radial_collimator=dataset.data.rc
-                self.collimators.soller_collimator=dataset.data.sc
-                
-        def translate_apertures(self,dataset):
-                self.apertures.aperture_horizontal=dataset.aperthori
-                self.apertures.aperture_vertical=dataset.apertvert
-                
-        def translate_polarized_beam(self,dataset):
-                self.polarized_beam.ei_flip=dataset.eiflip
-                self.polarized_beam.ef_flip=dataset.efflip
-                self.polarized_beam.ei_guide=dataset.eiguide
-                self.polarized_beam.ef_cancel=dataset.efcancel
-                self.polarized_beam.sample_guide_field_rotatation=dataset.smplgfrot
-                self.polarized_beam.flipper_state=dataset.flip
-                self.polarized_beam.hsample=dataset.hsample
-                self.polarized_beam.vsample=dataset.vsample
-                self.polarized_beam.ef_guide=dataset.efguide
-                self.polarized_beam.ei_cancel=dataset.data.eicancel
-         
-        def translate_primary_motors(self,dataset):
-                self.primary_motors.sample_upper_tilt=dataset.data.smplutilt
-                self.primary_motors.sample_lower_tilt=dataset.data.smplltilt
-                self.primary_motors.sample_elevator=dataset.data.smplelev
-                self.primary_motors.sample_upper_translation=dataset.data.smplutrn
-                self.primary_motors.sample_lower_translation=dataset.data.smplltrn
-                self.primary_motors.a1=dataset.data.a1
-                self.primary_motors.a2=dataset.data.a2
-                self.primary_motors.a3=dataset.data.a3
-                self.primary_motors.a4=dataset.data.a4
-                self.primary_motors.a5=dataset.data.a5
-                self.primary_motors.a6=dataset.data.a6
-                self.primary_motors.dfm=dataset.data.dfm
-                self.primary_motors.analyzer_rotation=dataset.data.analyzerrotation
-                self.primary_motors.dfm_rotation=dataset.data.dfmrot
-                
-                
-        def translate_physical_motors(self,dataset):
-                self.physical_motors.h=dataset.data.h
-                self.physical_motors.k=dataset.data.k
-                self.physical_motors.l=dataset.data.l
-                self.physical_motors.hkl=dataset.data.hkl
-                self.physical_motors.qx=dataset.data.qx
-                self.physical_motors.qy=dataset.data.qy
-                self.physical_motors.qz=dataset.data.qz
-                self.physical_motors.e=dataset.data.e
-                
-        def translate_filters(self,dataset):
-                self.filters.filter_tilt=dataset.filtilt
-                self.filters.filter_translation=dataset.filtran
-                self.filters.filter_rotation=dataset.filrot
-
-        def translate_timestamp(self,dataset):
-                self.time.timestamp=dataset.timestamp
-                self.time.duration=dataset.data.time
-                
-
-        def translate_temperature(self,dataset):
-                self.temperature.temperature=dataset.temp
-                self.temperature.temperature.units=dataset.metadata.temperature_units
-                self.temperature.temperaturesensor1=dataset.temperaturesensor1
-                self.temperature.temperaturesensor2=dataset.temperaturesensor2
-                self.temperature.temperaturesensor3=dataset.temperaturesensor3
-                self.temperature.temperature_heater_power=dataset.temperatureheaterpower
-                self.temperature.temperature_control_reading =dataset.temperaturecontrolreading
-                self.temperature.temperature_setpoint =dataset.temperaturesetpoint
+def translate_monochromator(bt7,dataset):
+        translate_dict={}
+        #key--> on bt7
+        #value -> input, i.e. the field in dataset.data or dataset.metadata
+        translate_dict['focus_cu']='focuscu'
+        translate_dict['focus_pg']='focuspg'
+        translate_dict['horizontal_focus']='monohorizfocus'
+        translate_dict['vertical_focus']='monovertifocus'
+        translate_dict['translation']='monotrans'
+        translate_dict['elevation']='monoelev'
+        translate_dict['dspacing']='monochromator_dspacing'
+        map_motors(translate_dict, bt7.monochromator, dataset)
         
-        def translate_slits(self,dataset):
-                self.slits.back_slit_width =dataset.data.bksltwdth
-                self.slits.back_slit_height =dataset.data.bkslthght
+        #for key,value in translate_dict.iteritems():
+        #        if dataset.data.has_key(value):
+        #                setattr(bt7.monochromator,key,dataset.data[value])
+        #        if dataset.metadata.has_key(value):
+        #                setattr(bt7.monochromator,key,dataset.metadata[value])
                 
+        #bt7.monochromator.focus_cu=dataset.data['focuscu']
+        #bt7.monochromator.focus_pg=dataset.data['focuspg']
+        #bt7.monochromator.horizontal_focus=dataset.metadata['monohorizfocus']
+        #bt7.monochromator.vertical_focus=dataset.metadata['monovertifocus']
+        #bt7.monochromator.translation=dataset.data['monotrans']
+        #bt7.monochromator.elevation=dataset.data.monoelev
+        #bt7.monochromator.dspacing=dataset.metadata.monochromator_dspacing
+        monochromator_blades=Blades(title='monochromator',nblades=10)
+        for i in range(10):
+                if i<9:
+                        key='monoblade0'+str(i+1)
+                else:
+                        key='monoblade'+str(i+1)
+                if dataset.data.has_key(key):
+                        monochromator_blades.blades[i]=dataset.data[key]
+        #monochromator_blades.blades[0]=dataset.data['monoblade01
+        #monochromator_blades.blades[1]=dataset.data['monoblade02
+        #monochromator_blades.blades[2]=dataset.data['monoblade03
+        #monochromator_blades.blades[3]=dataset.data['monoblade04
+        #monochromator_blades.blades[4]=dataset.data['monoblade05
+        #monochromator_blades.blades[5]=dataset.data['monoblade06
+        #monochromator_blades.blades[6]=dataset.data.monoblade07
+        #monochromator_blades.blades[7]=dataset.data.monoblade08
+        #monochromator_blades.blades[8]=dataset.data.monoblade09
+        #monochromator_blades.blades[9]=dataset.data.monoblade10
+        bt7.monochromator.blades=monochromator_blades
+       
+        
+        
+def translate_analyzer(bt7,dataset):
+        bt7.analyzer.dspacing=dataset.metadata['analyzer_dspacing']
+        if dataset.metadata.has_key('analyzerfocusmode'):
+                bt7.analyzer.focus_mode=dataset.metadata['analyzerfocusmode']
+        analyzer_blades=Blades(title='analyzer',nblades=13)
+        for i in range(13):
+                if i<9:
+                        key='analyzerblade0'+str(i+1)
+                else:
+                        key='analyzerblade'+str(i+1)
+                if dataset.data.has_key(key):
+                        analyzer_blades.blades[i]=dataset.data[key]
+        #analyzer_blades.blades[0]=dataset.data.analyzerblade01
+        #analyzer_blades.blades[1]=dataset.data.analyzerblade02
+        #analyzer_blades.blades[2]=dataset.data.analyzerblade03
+        #analyzer_blades.blades[3]=dataset.data.analyzerblade04
+        #analyzer_blades.blades[4]=dataset.data.analyzerblade05
+        #analyzer_blades.blades[5]=dataset.data.analyzerblade06
+        #analyzer_blades.blades[6]=dataset.data.analyzerblade07
+        #analyzer_blades.blades[7]=dataset.data.analyzerblade08
+        #analyzer_blades.blades[8]=dataset.data.analyzerblade09
+        #analyzer_blades.blades[9]=dataset.data.analyzerblade10
+        #analyzer_blades.blades[10]=dataset.data.analyzerblade11
+        #analyzer_blades.blades[11]=dataset.data.analyzerblade12
+        #analyzer_blades.blades[12]=dataset.data.analyzerblade13
+        bt7.analyzer.blades=analyzer_blades
+        
+
+      
+def translate_collimator(bt7,dataset):
+        bt7.collimators.pre_monochromator_collimator=dataset.data['premonocoll']
+        bt7.collimators.post_monochromator_collimator =dataset.data['postmonocoll']
+        bt7.collimators.pre_analyzer_collimator=dataset.data['preanacoll']
+        bt7.collimators.post_analyzer_collimator=dataset.data['postanacoll']
+        
+        if dataset.data.has_key('rc'):
+                bt7.collimators.radial_collimator=dataset.data['rc']
+        if dataset.data.has_key('sc'):
+                bt7.collimators.soller_collimator=dataset.data['sc']
+        
+def translate_apertures(bt7,dataset):
+        translate_dict={}
+        translate_dict['aperture_horizontal']='aperthori'
+        translate_dict['aperture_vertical']='apertvert'
+        map_motors(translate_dict, bt7.apertures, dataset)
+
+        #bt7.apertures.aperture_horizontal=dataset.aperthori
+        #bt7.apertures.aperture_vertical=dataset.apertvert
+            
+def translate_polarized_beam(bt7,dataset):
+        translate_dict={}
+        translate_dict['ei_flip']='eiflip'
+        translate_dict['ef_flip']='efflip'
+        translate_dict['ei_guide']='eiguide'
+        translate_dict['ef_guide']='efguide'
+        translate_dict['ei_cancel']='eicancel'
+        translate_dict['ef_cancel']='efcancel'
+        translate_dict['sample_guide_field_rotatation']='smplgfrot'
+        translate_dict['flipper_state']='flip'
+        translate_dict['hsample']='hsample'
+        translate_dict['vsample']='vsample'
+
+        map_motors(translate_dict, bt7.polarized_beam, dataset)
+
+        #bt7.polarized_beam.ei_flip=dataset.eiflip
+        #bt7.polarized_beam.ef_flip=dataset.efflip
+        #bt7.polarized_beam.ei_guide=dataset.eiguide
+        #bt7.polarized_beam.ef_cancel=dataset.efcancel
+        #bt7.polarized_beam.sample_guide_field_rotatation=dataset.smplgfrot
+        #bt7.polarized_beam.flipper_state=dataset.flip
+        #bt7.polarized_beam.hsample=dataset.hsample
+        #bt7.polarized_beam.vsample=dataset.vsample
+        #bt7.polarized_beam.ef_guide=dataset.efguide
+        #bt7.polarized_beam.ei_cancel=dataset.data.eicancel
+ 
+def translate_primary_motors(bt7,dataset):
+        translate_dict={}
+        translate_dict['sample_upper_tilt']='smplutilt'
+        translate_dict['sample_lower_tilt']='smplltilt'
+        translate_dict['sample_elevator']='smplelev'
+        translate_dict['sample_upper_translation']='smplutrn'
+        translate_dict['sample_lower_translation']='smplltrn'
+        translate_dict['monochromator_theta']='a1'
+        translate_dict['monochromator_two_theta']='a2'
+        translate_dict['sample_theta']='a3'
+        translate_dict['sample_two_theta']='a4'
+        translate_dict['analyzer_theta']='a5'
+        translate_dict['analyzer_two_theta']='a6'
+        translate_dict['analyzer_rotation']='analyzerrotation'
+        translate_dict['dfm_rotation']='dfmrot'
+        translate_dict['dfm']='dfm'
+        
+        map_motors(translate_dict, bt7.primary_motors,dataset)
+        
+        #for key,value in translate_dict.iteritems():
+        #        if dataset.data.has_key(value):
+        #                setattr(bt7.primary_motors,key,dataset.data[value])
+        #        if dataset.metadata.has_key(value):
+        #                setattr(bt7.primary_motors,key,dataset.metadata[value])
+        #self.primary_motors.sample_upper_tilt=dataset.data.smplutilt
+        #self.primary_motors.sample_lower_tilt=dataset.data.smplltilt
+        #self.primary_motors.sample_elevator=dataset.data.smplelev
+        #self.primary_motors.sample_upper_translation=dataset.data.smplutrn
+        #self.primary_motors.sample_lower_translation=dataset.data.smplltrn
+        #self.primary_motors.a1=dataset.data.a1
+        #self.primary_motors.a2=dataset.data.a2
+        #self.primary_motors.a3=dataset.data.a3
+        #self.primary_motors.a4=dataset.data.a4
+        #self.primary_motors.a5=dataset.data.a5
+        #self.primary_motors.a6=dataset.data.a6
+        #self.primary_motors.dfm=dataset.data.dfm
+        #self.primary_motors.analyzer_rotation=dataset.data.analyzerrotation
+        #self.primary_motors.dfm_rotation=dataset.data.dfmrot
+        
+      
+def map_motors(translate_dict,target_field,dataset):
+        #key --> on bt7
+        #value --> input, i.e. the field in dataset.data or dataset.metadata
+        for key,value in translate_dict.iteritems():
+                if dataset.data.has_key(value):
+                        setattr(target_field,key,dataset.data[value])
+                if dataset.metadata.has_key(value):
+                        setattr(target_field,key,dataset.metadata[value])
+
+def translate_physical_motors(bt7,dataset):
+        translate_dict={}
+        #key--> on bt7
+        #value -> input, i.e. the field in dataset.data or dataset.metadata
+        #translate_dict['hkl']='hkl'
+        #In older versions, we cannot trust h,k,l, hkl, etc. because we don't know if we went where we wanted. 
+        #Should translate to magnitude of q before hand
+        translate_dict['h']='qx'
+        translate_dict['k']='qy'
+        translate_dict['l']='qz'
+        translate_dict['e']='e'
+        translate_dict['q']='q'  #need to implement this
+        #translate_dict['h']='h'
+        #translate_dict['k']='k'
+        #translate_dict['l']='l'
+        #self.physical_motors.hkl=dataset.data.hkl
+        #self.physical_motors.qx=dataset.data.qx
+        #self.physical_motors.qy=dataset.data.qy
+        #self.physical_motors.qz=dataset.data.qz
+        #self.physical_motors.e=dataset.data.e
+        map_motors(translate_dict,bt7.physical_motors,dataset)
+        
+def translate_filters(bt7,dataset):
+        translate_dict={}
+        #key--> on bt7
+        #value -> input, i.e. the field in dataset.data or dataset.metadata
+        #translate_dict['hkl']='hkl'
+        #In older versions, we cannot trust h,k,l, hkl, etc. because we don't know if we went where we wanted. 
+        #Should translate to magnitude of q before hand
+        translate_dict['filter_tilt']='temp'
+        translate_dict['filter_translation']='temperaturesensor1'
+        translate_dict['filter_rotation']='temperaturesensor2'
+        map_motors(translate_dict,bt7.filters,dataset)
+        #self.filters.filter_tilt=dataset.filtilt
+        #self.filters.filter_translation=dataset.filtran
+        #self.filters.filter_rotation=dataset.filrot
+
+def translate_timestamp(bt7,dataset):
+        translate_dict={}
+        translate_dict['month']='month'
+        translate_dict['day']='day'
+        translate_dict['year']='year'
+        translate_dict['start_time']='start_time'
+        translate_dict['epoch']='epoch'
+        translate_dict['duration']='time'
+        map_motors(translate_dict,bt7.time,dataset)
+        #self.time.timestamp=dataset.timestamp
+        #self.time.duration=dataset.data.time
+        
+
+def translate_temperature(bt7,dataset):
+        translate_dict={}
+        #key--> on bt7
+        #value -> input, i.e. the field in dataset.data or dataset.metadata
+        #translate_dict['hkl']='hkl'
+        #In older versions, we cannot trust h,k,l, hkl, etc. because we don't know if we went where we wanted. 
+        #Should translate to magnitude of q before hand
+        translate_dict['temperature']='temp'
+        translate_dict['temperature_sensor1']='temperaturesensor1'
+        translate_dict['tempetature_sensor2']='temperaturesensor2'
+        translate_dict['temperature_sensor3']='temperaturesensor3'
+        translate_dict['temperature_heater_power']='temperatureheatorpower'
+        translate_dict['temperature_control_reading']='temperaturecontrolreading'
+        translate_dict['temperature_setpoint']='temperaturesetpoint'
+        map_motors(translate_dict,bt7.temperature,dataset)
+        if dataset.metadata.has_key('temperature_units'):
+                bt7.temperature.temperature.units=dataset.metadata['temperature_units']
+        #self.temperature.temperature=dataset.temp
+        #self.temperature.temperature.units=dataset.metadata.temperature_units
+        #self.temperature.temperaturesensor1=dataset.temperaturesensor1
+        #self.temperature.temperaturesensor2=dataset.temperaturesensor2
+        #self.temperature.temperaturesensor3=dataset.temperaturesensor3
+        #self.temperature.temperature_heater_power=dataset.temperatureheaterpower
+        #self.temperature.temperature_control_reading =dataset.temperaturecontrolreading
+        #self.temperature.temperature_setpoint =dataset.temperaturesetpoint
+
+
+def translate_slits(bt7,dataset):
+        translate_dict={}
+        #key--> on bt7
+        #value -> input, i.e. the field in dataset.data or dataset.metadata
+        #translate_dict['hkl']='hkl'
+        #In older versions, we cannot trust h,k,l, hkl, etc. because we don't know if we went where we wanted. 
+        #Should translate to magnitude of q before hand
+        translate_dict['back_slit_width']='bksltwdth'
+        translate_dict['back_slit_height']='bkslthght'
+        map_motors(translate_dict,bt7.slits,dataset)
+        #self.slits.back_slit_width =dataset.data.bksltwdth
+        #self.slits.back_slit_height =dataset.data.bkslthght
+        
+        
+        
+def translate_sample(bt7,dataset):
+        translate_dict = {}
+        translate_dict['orientation']='orientation'
+        translate_dict['lattice']='lattice'
+        map_motors(translate_dict,bt7.sample,dataset)
+        
+        #bt7.sample.orientation =dataset.metadata.orientation
+        #bt7.sample.mosaic=dataset.metadata.?
+        #bt7.sample.lattice=dataset.metadata.lattice
+        
+        
+        
+def translate_metadata(bt7,dataset):
+        translate_dict = {}
+        translate_dict['epoch']='epoch'
+        translate_dict['counting_standard']='count_type'
+        translate_dict['filename']='filename'
+        translate_dict['fixed_eief']='efixed'
+        translate_dict['fixed_energy']='ef'
+        translate_dict['experiment_comment']='exptcomment'
+        translate_dict['comment']='comment'
+        translate_dict['experiment_id']='experiment_id'
+        translate_dict['fixed_devices']='fixed_devices'
+        translate_dict['scanned_variables']='varying'
+        translate_dict['ice_version']='ice'
+        translate_dict['instrument_name']='instrument'
+        translate_dict['filebase']='filebase'
+        translate_dict['fileseq_number']='fileseq_number'
+        translate_dict['experiment_name']='exptname'
+        translate_dict['experiment_participants']='exptparticipants'
+        translate_dict['experiment_details']='exptdetails'
+        translate_dict['desired_detector']='signal'
+        translate_dict['ranges']='ranges'
+        translate_dict['user']='user'
+        translate_dict['scan_description']='scan_description'
+        translate_dict['desired_npoints']='npoints'
+
+        map_motors(translate_dict,bt7.meta_data,dataset)
+
+        #self.meta_data.epoch=dataset.metadata.epoch
+        #self.meta_data.counting_standard=dataset.metadata.count_type
+        #self.meta_data.filename=dataset.metadata.filename
+        #self.meta_data.fixed_eief=dataset.metadata.efixed
+        #self.meta_data.fixed_energy=dataset.metadata.ef
+        #self.meta_data.experiment_comment=dataset.metadata.exptcomment
+        #self.meta_data.comment=dataset.metadata.comment
+        #self.meta_data.date=dataset.metadata.?
+        #self.meta_data.experiment_id=dataset.metadata.experiment_id
+        #self.meta_data.fixed_devices=dataset.metadata.fixed_devices
+        #self.meta_data.scanned_variables=dataset.metadata.varying
+        #self.meta_data.ice_version=dataset.metadata.ice
+        #self.meta_data.ice_repository_info=dataset.metadata.?
+        #self.meta_data.instrument_name=dataset.metadata.instrument
+        #self.meta_data.filebase =dataset.metadata.filebase
+        #self.meta_data.fileseq_number=dataset.metadata.fileseq_number
+        #self.meta_data.experiment_name=dataset.metadata.exptname
+        #self.meta_data.experiment_participants=dataset.metadata.exptparticipants
+        #self.meta_data.experiment_details=dataset.metadata.exptdetails
+        #self.meta_data.desired_detector=dataset.metadata.signal
+        #self.meta_data.ranges=dataset.metadata.ranges
+        #self.meta_data.user=dataset.metadata.user
+        #self.meta_data.scan_description=dataset.metadata.scan_description
+        #self.meta_data.desired_npoints=dataset.metadata.npoints
+        
+def translate_detectors(bt7,dataset):
+        bt7.detectors.primary_detector=dataset.data['detector']
+        bt7.detectors.detector_mode=dataset.metadata['analyzerdetectormode']
+        #later, I should do something clever to determine how many detectors are in the file,
+        #or better yet, lobby to have the information in the ice file
+        #but for now, let's just get something that works
+        
         
                 
+        if dataset.metadata.has_key('analyzersdgroup'):
+                set_detector(bt7,dataset,'single_detector','analyzersdgroup')
+                bt7.detectors.single_detector.summed_counts=dataset.data['singledet']
                 
-        def translate_sample(self,dataset):
-                self.sample.orientation =dataset.metadata.orientation
-               #self.sample.mosaic=dataset.metadata.?
-                self.sample.lattice=dataset.metadata.lattice
+        if dataset.metadata.has_key('analyzerdoordetectorgroup'):
+                set_detector(bt7,dataset,'door_detector','analyzerdoordetectorgroup')
+                bt7.detectors.single_detector.summed_counts=bt7.detectors.door_detector.x.sum(axis=1)#None #dataset.data['doordet']  #Not sure why this one doesn't show up???
                 
+        if dataset.metadata.has_key('analyzerddgroup'):
+                set_detector(bt7,dataset,'diffraction_detector','analyzerddgroup')
+                bt7.detectors.diffraction_detector.summed_counts=dataset.data['diffdet']
                 
-                
-        def translate_metadata(self,dataset):
-                self.meta_data.epoch=dataset.metadata.epoch
-                self.meta_data.counting_standard=dataset.metadata.count_type
-                self.meta_data.filename=dataset.metadata.filename
-                self.meta_data.fixed_eief=dataset.metadata.efixed
-                self.meta_data.fixed_energy=dataset.metadata.ef
-                self.meta_data.experiment_comment=dataset.metadata.exptcomment
-                self.meta_data.comment=dataset.metadata.comment
-                #self.meta_data.date=dataset.metadata.
-                self.meta_data.experiment_id=dataset.metadata.experiment_id
-                self.meta_data.fixed_devices=dataset.metadata.fixed_devices
-                self.meta_data.scanned_variables=dataset.metadata.varying
-                self.meta_data.ice_version=dataset.metadata.ice
-                #self.meta_data.ice_repository_info=dataset.metadata.?
-                self.meta_data.instrument_name=dataset.metadata.instrument
-                self.meta_data.filebase =dataset.metadata.filebase
-                self.meta_data.fileseq_number=dataset.metadata.fileseq_number
-                self.meta_data.experiment_name=dataset.metadata.exptname
-                self.meta_data.experiment_participants=dataset.metadata.exptparticipants
-                self.meta_data.experiment_details=dataset.metadata.exptdetails
-                self.meta_data.desired_detector=dataset.metadata.signal
-                self.meta_data.ranges=dataset.metadata.ranges
-                self.meta_data.user=dataset.metadata.user
-                self.meta_data.scan_description=dataset.metadata.scan_description
-                self.meta_data.desired_npoints=dataset.metadata.npoints
-                
-        def translate_detectors(self,dataset):
-                self.detectors.primary_detector=dataset.data.detector
-                self.detectors.detector_mode=dataset.metadata.analyzerdetectormode
-                #later, I should do something clever to determine how many detectors are in the file,
-                #or better yet, lobby to have the information in the ice file
-                #but for now, let's just get something that works
+        if dataset.metadata.has_key('analyzerpsdgroup'):
+                set_detector(bt7,dataset,'position_sensitive_detector','analyzerpsdgroup')
+                if hasattr(bt7.detectors,'position_sensitive_detector'):
+                        bt7.detectors.position_sensitive_detector.summed_counts=dataset.data['psdet']
                 
                 
                         
-                if hasattr(dataset.metadata,'analyzersdgroup'):
-                        self.set_detector(dataset,'single_detector','analyzersdgroup')
-                        self.detectors.single_detector.summed_counts=dataset.data.singledet
                         
-                if hasattr(dataset.metadata,'analyzerdoordetectorgroup'):
-                        self.set_detector(dataset,'door_detector','analyzerdoordetectorgroup')
-                        self.detectors.single_detector.summed_counts=dataset.data.singledet
-                        
-                if hasattr(dataset.metadata,'analyzerddgroup'):
-                        self.set_detector(dataset,'diffraction_detector','analyzerddgroup')
-                        self.detectors.single_detector.summed_counts=dataset.data.diffdet
-                        
-                if hasattr(dataset.metadata,'analyzerpsdgroup'):
-                        self.set_detector(dataset,'position_sensitive_detector','analyzerpsdgroup')
-                        self.detectors.single_detector.summed_counts=dataset.data.psdet
-                        
+def set_detector(bt7,dataset,detector_name,data_name):                        
+        analyzergroup=dataset.metadata[data_name]
+        setattr(bt7.detectors,detector_name,Detector(detector_name))
+        
+        setattr(getattr(bt7.detectors,detector_name),'dimension',[len(dataset.metadata['analyzersdgroup']),1])
+        Nx=getattr(getattr(bt7.detectors,detector_name),'dimension')[0]
+        Ny=getattr(getattr(bt7.detectors,detector_name),'dimension')[1]
+        npts=len(dataset.data[dataset.metadata['analyzersdgroup'][0]])  #I choose this one because the sd group SHOULD always be present.
+        data=np.empty((npts,Nx,Ny),'Float64')
+        #put all the data in data array which is npts x Nx x Ny, in this case, Ny=1 since our detectors are 1D
+        #We have to do some defensive programming here.  It turns out that even though the metadata states that the PSD may be present,
+        #There may be no data associated with it.....
+        if dataset.data.has_key(dataset.metadata[data_name][0]):
+                for nx in range(Nx):
+                        curr_detector=dataset.metadata[data_name][nx]
+                        data[:,nx,0]=dataset.data[curr_detector]
                 
-                        
-                        
-                def set_detector(self,dataset,detector_name,data_name):                        
-                        analyzergroup=getattr(data.metadata,data_name)
-                        setattr(self.detectors,detector_name,Detector(detector_name))
-                        setattr(self.detectors,detector_name,'dimension=',[len(dataset.metadata.analyzersdgroup),1])
-                        Nx=getattr(self.detectors,detector_name,dimension[0])
-                        Ny=getattr(self.detectors,detector_name,dimension[1])
-                        npts=len(getattr(dataset.data,dataset.metadata.analyzersdgroup[0]))
-                        data=N.empty((npts,Nx,Ny),'Float64')
-                        #put all the data in data array which is npts x Nx x Ny, in this case, Ny=1 since our detectors are 1D
-                        for nx in range(Nx):
-                                curr_detector=getattr(dataset.metadata,data_name)[nx]
-                                data[:,nx,1]=getattr(dataset.data,curr_detector)
-                                
-                        setattr(getattr(self.detectors,detector_name),'x',N.copy.deepcopy(data))
-                        setattr(getattr(self.detectors,detector_name),'variance',N.copy.deepcopy(data))
-                
-               
+                setattr(getattr(bt7.detectors,detector_name),'x',np.copy(data))
+                setattr(getattr(bt7.detectors,detector_name),'variance',np.copy(data))
+        else:
+                delattr(bt7.detectors,detector_name)  #We were lied to by ICE and this detector isn't really present...
+
+
 
                 
                 
@@ -852,13 +1052,14 @@ class TripleAxis(object):
 
 if __name__=="__main__":
         myfilestr=r'c:\bifeo3xtal\jan8_2008\9175\mesh53439.bt7'
+        myfilestr=r'EscanQQ7HorNSF91831.bt7'
         print 'hi'
-        mydatareader=readice.datareader()
+        mydatareader=readncnr.datareader()
         mydata=mydatareader.readbuffer(myfilestr)
-        print mydata.metadata.varying
+        #print mydata.metadata.varying
         bt7=TripleAxis()
-        bt7.translate(mydata)
-        print 'hi'
+        translate(bt7,mydata)
+        print 'bye'
         
 
 
