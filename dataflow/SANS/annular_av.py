@@ -4,13 +4,13 @@ Make 1D Data through Annular Average
 
 from .. import config
 from ..core import Module
-
+from ..SANS.map_pics import map_pics
 def annular_av_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
     """Using Annular averaging, make 1D sans data (Q vs I)"""
 
     icon = {
-        'URI': config.IMAGES + "annular_av.png",
+        'URI': config.IMAGES + map_pics('ann2'),
         'terminals': {
             'input': (0, 10, -1, 0),
             'output': (20, 10, 1, 0),

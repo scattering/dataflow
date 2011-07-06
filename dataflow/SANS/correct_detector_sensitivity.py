@@ -1,16 +1,16 @@
 """
-Does initial correction
+Correct Detector Sensitivity With .DIV file
 """
 
 from .. import config
 from ..core import Module
 from ..SANS.map_pics import map_pics
-def initial_correction_module(id=None, datatype=None, action=None,
+def correct_detector_sensitivity_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
-    """(SAM-BGD)-[tsam/temp](EMP-BGD)"""
+    """Uses .DIV to peform division in reduction steps"""
 
     icon = {
-        'URI': config.IMAGES + map_pics('initial'),
+        'URI': config.IMAGES + map_pics('div'),
         'terminals': {
             'input': (0, 10, -1, 0),
             'output': (20, 10, 1, 0),
@@ -34,7 +34,7 @@ def initial_correction_module(id=None, datatype=None, action=None,
 
     # Combine everything into a module.
     module = Module(id=id,
-                  name='initial_correction',
+                  name='Correct Detector Sensitivity',
                   version=version,
                   description=action.__doc__,
                   icon=icon,
