@@ -9,38 +9,38 @@ from pprint import pprint
 # left here for testing purposes
 # python uses __name__ for relative imports so I cannot use
 # the ... in place of dataflow when testing
-from dataflow.dataflow import config
-from dataflow.dataflow.calc import run_template
-from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
-from dataflow.dataflow.core import Datatype, Instrument, Template, register_instrument
-from dataflow.dataflow.modules.load import load_module
-from dataflow.dataflow.modules.join import join_module
-from dataflow.dataflow.modules.scale import scale_module
-from dataflow.dataflow.modules.save import save_module
-from dataflow.dataflow.modules.autogrid import autogrid_module
-from dataflow.dataflow.modules.offset import offset_module
-from dataflow.dataflow.modules.wiggle import wiggle_module
-from dataflow.dataflow.modules.pixels_two_theta import pixels_two_theta_module
-from dataflow.dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
-from dataflow.reduction.offspecular.filters import *
-from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
+#from dataflow.dataflow import config
+#from dataflow.dataflow.calc import run_template
+#from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
+#from dataflow.dataflow.core import Datatype, Instrument, Template, register_instrument
+#from dataflow.dataflow.modules.load import load_module
+#from dataflow.dataflow.modules.join import join_module
+#from dataflow.dataflow.modules.scale import scale_module
+#from dataflow.dataflow.modules.save import save_module
+#from dataflow.dataflow.modules.autogrid import autogrid_module
+#from dataflow.dataflow.modules.offset import offset_module
+#from dataflow.dataflow.modules.wiggle import wiggle_module
+#from dataflow.dataflow.modules.pixels_two_theta import pixels_two_theta_module
+#from dataflow.dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
+#from dataflow.reduction.offspecular.filters import *
+#from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
 
 
-#from ...dataflow import config
-#from ...dataflow.calc import run_template
-#from ...dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
-#from ...dataflow.core import Datatype, Instrument, Template, register_instrument
-#from ...dataflow.modules.load import load_module
-#from ...dataflow.modules.join import join_module
-#from ...dataflow.modules.scale import scale_module
-#from ...dataflow.modules.save import save_module
-#from ...dataflow.modules.autogrid import autogrid_module
-#from ...dataflow.modules.offset import offset_module
-#from ...dataflow.modules.wiggle import wiggle_module
-#from ...dataflow.modules.pixels_two_theta import pixels_two_theta_module
-#from ...dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
-#from ...reduction.offspecular.filters import *
-#from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
+from ...dataflow import config
+from ...dataflow.calc import run_template
+from ...dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
+from ...dataflow.core import Datatype, Instrument, Template, register_instrument
+from ...dataflow.modules.load import load_module
+from ...dataflow.modules.join import join_module
+from ...dataflow.modules.scale import scale_module
+from ...dataflow.modules.save import save_module
+from ...dataflow.modules.autogrid import autogrid_module
+from ...dataflow.modules.offset import offset_module
+from ...dataflow.modules.wiggle import wiggle_module
+from ...dataflow.modules.pixels_two_theta import pixels_two_theta_module
+from ...dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
+from ...reduction.offspecular.filters import *
+from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
 
 
 # Datatype
@@ -219,7 +219,7 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                  name='NCNR ANDR',
                  archive=config.NCNR_DATA + '/andr',
                  menu=[('Input', [load, save]),
-                       ('Reduction', [autogrid, join, offset, wiggle, pixels_two_theta, two_theta_qxqz])
+                       ('Reduction', [autogrid, join, offset, wiggle, pixels_two_theta, two_theta_qxqz]),
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],
                  datatypes=[data2d],
@@ -244,7 +244,7 @@ if __name__ == '__main__':
         dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
         #dict(module="ospec.grid", position=(360 , 60), config={}),
         dict(module="ospec.join", position=(150, 100), config={}),
-        dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':0.1}}),
+        dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':0.2}}),
         dict(module="ospec.wiggle", position=(350, 200), config={}),
         dict(module="ospec.twotheta", position=(450, 250), config={}),
         dict(module="ospec.qxqz", position=(550, 300), config={}),
@@ -271,16 +271,17 @@ if __name__ == '__main__':
 
 
     result = run_template(template, config)
-    #plot_result = [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in result.items()]
-    print "WRITING TO FILE"
-    for index, plottable in enumerate(result):
-        with open('new_data' + str(index) + '.txt', 'w') as f:
-            for format in plottable.get('output', []):
-                f.write(format + "\n")
-    print "DONE"
-    sys.exit()
+    print "\nStarting again. This time should be A LOT quicker.\n"
+    result2 = run_template(template, config)
+    assert(result == result2)
+    #result = [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in result.items()]
+    #print "WRITING TO FILE"
+    #for index, plottable in enumerate(result):
+    #    with open('new_data' + str(index) + '.txt', 'w') as f:
+    #        for format in plottable.get('output', []):
+    #            f.write(format + "\n")
+    #print "DONE"
     #pprint(result)
-
     #raw_input("Done looking at formatted output? ")
     #output of the qxqz: result[7]['output'][0]
     #data = result[6]['output'][0]

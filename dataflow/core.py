@@ -1,9 +1,14 @@
 """
 Core class definitions
 """
-
+#import os, sys
+#dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#sys.path.append(dir)
+#from dataflow import config
+#from dataflow.deps import processing_order
 from . import config
 from .deps import processing_order
+
 from collections import deque
 
 _registry = {}
@@ -402,13 +407,32 @@ class Node(object):
             if node.isDirty():
                 return True
             for parent in node.parents:
-                deque.append(parent)
+                queue.append(parent)
         return False
         
     def isDirty(self):
         # Use inspect or __code__ for introspection?
-        return self.params != _get_inputs()
+        return self.params != self._get_inputs()
     
     def _get_inputs(self):
         # Get data from database
-        pass
+        #pass
+        data = {'maternal grandpa':{'id':'maternal grandpa'},
+                'maternal grandma':{'id':'maternal grandma'},
+                'mom':{'id':'mom'},
+                'paternal grandpa':{'id':'paternal grandpa'},
+                'paternal grandma':{'id':'paternal grandma'},
+                'dad':{'id':'dad'},
+                'son':{'id':'son'}, }
+        return data.get(self.params['id'], {})
+    
+if __name__ == '__main__':
+    head = Node([Node([Node([], {'id':'maternal grandpa'}),
+                       Node([], {'id':'maternal grandma'})],
+                      {'id':'mom'}),
+                 Node([Node([], {'id':'paternal grandpa'}),
+                       Node([], {'id':'paternal grandma'})],
+                      {'id':'dad'})],
+                {'id':'son'})
+    print "Dirty" if head.searchDirty() else "Clean"
+
