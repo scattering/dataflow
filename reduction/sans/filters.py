@@ -8,7 +8,7 @@ from copy import deepcopy,copy
 import numpy as np
 from numpy import array
 import math
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 from uncertainty import Measurement
 import json
 from draw_annulus_aa import annular_mask_antialiased
