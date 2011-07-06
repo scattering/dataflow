@@ -106,7 +106,7 @@ load = load_module(id='sans.load', datatype=SANS_DATA,version='1.0', action=load
 
 # Save module
 def save_action(input=None, ext=None):
-    for f in input: _save_one(f, ext) # not bundles
+    #for f in input: _save_one(f, ext) # not bundles
     return {}
 def _save_one(input, ext):
     outname = initname = map_files('save')
