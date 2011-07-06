@@ -5,7 +5,7 @@ import sys
 import vaxutils
 import numpy
 import math
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 
 def readNCNRSensitivity(inputfile):
     
@@ -234,7 +234,7 @@ if __name__ == '__main__':
     sensitivity = readNCNRSensitivity("test.div")
     #print sensitivity
     detdata,metadata=readNCNRData("MAY06001.SA3_CM_D545")
-    plt.figure()
-    plt.imshow(detdata)
-    plt.show()
+    #plt.figure()
+    #plt.imshow(detdata)
+    #plt.show()
     
