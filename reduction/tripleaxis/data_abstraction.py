@@ -127,7 +127,7 @@ class Component(object):
         def __len__(self):
                 return len(self.x)
         def __getitem__(self,key):
-                return Measurement(self.x[key],self.variance[key])
+                return uncertainty.Measurement(self.x[key],self.variance[key])
         def __setitem__(self,key,value):
                 self.x[key] = value.x
                 self.variance[key] = value.variance
@@ -138,61 +138,61 @@ class Component(object):
 
         # Normal operations: may be of mixed type
         def __add__(self, other):
-                if isinstance(other,Measurement):
-                        return Measurement(*err1d.add(self.x,self.variance,other.x,other.variance))
+                if isinstance(other,uncertainty.Measurement):
+                        return uncertainty.Measurement(*err1d.add(self.x,self.variance,other.x,other.variance))
                 else:
-                        return Measurement(self.x+other, self.variance+0) # Force copy
+                        return uncertainty.Measurement(self.x+other, self.variance+0) # Force copy
         def __sub__(self, other):
-                if isinstance(other,Measurement):
-                        return Measurement(*err1d.sub(self.x,self.variance,other.x,other.variance))
+                if isinstance(other,uncertainty.Measurement):
+                        return uncertainty.Measurement(*err1d.sub(self.x,self.variance,other.x,other.variance))
                 else:
-                        return Measurement(self.x-other, self.variance+0) # Force copy
+                        return uncertainty.Measurement(self.x-other, self.variance+0) # Force copy
         def __mul__(self, other):
-                if isinstance(other,Measurement):
-                        return Measurement(*err1d.mul(self.x,self.variance,other.x,other.variance))
+                if isinstance(other,uncertainty.Measurement):
+                        return uncertainty.Measurement(*err1d.mul(self.x,self.variance,other.x,other.variance))
                 else:
-                        return Measurement(self.x*other, self.variance*other**2)
+                        return uncertainty.Measurement(self.x*other, self.variance*other**2)
         def __truediv__(self, other):
-                if isinstance(other,Measurement):
-                        return Measurement(*err1d.div(self.x,self.variance,other.x,other.variance))
+                if isinstance(other,uncertainty.Measurement):
+                        return uncertainty.Measurement(*err1d.div(self.x,self.variance,other.x,other.variance))
                 else:
-                        return Measurement(self.x/other, self.variance/other**2)
+                        return uncertainty.Measurement(self.x/other, self.variance/other**2)
         def __pow__(self, other):
-                if isinstance(other,Measurement):
+                if isinstance(other,uncertainty.Measurement):
                         # Haven't calcuated variance in (a+/-da) ** (b+/-db)
                         return NotImplemented
                 else:
-                        return Measurement(*err1d.pow(self.x,self.variance,other))
+                        return uncertainty.Measurement(*err1d.pow(self.x,self.variance,other))
 
         # Reverse operations
         def __radd__(self, other):
-                return Measurement(self.x+other, self.variance+0) # Force copy
+                return uncertainty.Measurement(self.x+other, self.variance+0) # Force copy
         def __rsub__(self, other):
-                return Measurement(other-self.x, self.variance+0)
+                return uncertainty.Measurement(other-self.x, self.variance+0)
         def __rmul__(self, other):
-                return Measurement(self.x*other, self.variance*other**2)
+                return uncertainty.Measurement(self.x*other, self.variance*other**2)
         def __rtruediv__(self, other):
                 x,variance = err1d.pow(self.x,self.variance,-1)
-                return Measurement(x*other,variance*other**2)
+                return uncertainty.Measurement(x*other,variance*other**2)
         def __rpow__(self, other): return NotImplemented
 
         # In-place operations: may be of mixed type
         def __iadd__(self, other):
-                if isinstance(other,Measurement):
+                if isinstance(other,uncertainty.Measurement):
                         self.x,self.variance \
                             = err1d.add_inplace(self.x,self.variance,other.x,other.variance)
                 else:
                         self.x+=other
                 return self
         def __isub__(self, other):
-                if isinstance(other,Measurement):
+                if isinstance(other,uncertainty.Measurement):
                         self.x,self.variance \
                             = err1d.sub_inplace(self.x,self.variance,other.x,other.variance)
                 else:
                         self.x-=other
                 return self
         def __imul__(self, other):
-                if isinstance(other,Measurement):
+                if isinstance(other,uncertainty.Measurement):
                         self.x, self.variance \
                             = err1d.mul_inplace(self.x,self.variance,other.x,other.variance)
                 else:
@@ -200,7 +200,7 @@ class Component(object):
                         self.variance *= other**2
                 return self
         def __itruediv__(self, other):
-                if isinstance(other,Measurement):
+                if isinstance(other,uncertainty.Measurement):
                         self.x,self.variance \
                             = err1d.div_inplace(self.x,self.variance,other.x,other.variance)
                 else:
@@ -208,7 +208,7 @@ class Component(object):
                         self.variance /= other**2
                 return self
         def __ipow__(self, other):
-                if isinstance(other,Measurement):
+                if isinstance(other,uncertainty.Measurement):
                         # Haven't calcuated variance in (a+/-da) ** (b+/-db)
                         return NotImplemented
                 else:
@@ -223,11 +223,11 @@ class Component(object):
 
         # Unary ops
         def __neg__(self):
-                return Measurement(-self.x,self.variance)
+                return uncertainty.Measurement(-self.x,self.variance)
         def __pos__(self):
                 return self
         def __abs__(self):
-                return Measurement(np.abs(self.x),self.variance)
+                return uncertainty.Measurement(np.abs(self.x),self.variance)
 
         def __str__(self):
                 #return str(self.x)+" +/- "+str(np.sqrt(self.variance))
@@ -286,10 +286,10 @@ class Component(object):
         def __coerce__(self): return NotImplmented
 
         def log(self):
-                return Measurement(*err1d.log(self.x,self.variance))
+                return uncertainty.Measurement(*err1d.log(self.x,self.variance))
 
         def exp(self):
-                return Measurement(*err1d.exp(self.x,self.variance))
+                return uncertainty.Measurement(*err1d.exp(self.x,self.variance))
 
         def log(val): return self.log()
         def exp(val): return self.exp()
@@ -653,10 +653,15 @@ class TripleAxis(object):
                         detector=detector*np.exp(-beta*E/2)
                 return
         def normalize_monitor(self,monitor):
+                #mon0=self.time.monitor[0] #TODO CHECK THIS - all values always the same?
+                #for detector in self.detectors:
+                #        detector=detector*mon0/monitor                
                 mon0=self.time.monitor #TODO CHECK THIS
                 for detector in self.detectors:
-                        detector=detector*mon0/monitor
-                
+                        for i in range(0,len(detector)):
+                                print 'before'
+                                detector[i]=detector[i]*mon0[i]/monitor
+                                print 'after'
                 
 # ****************************************************************************************************************************************************
 # ***************************************************************** TRANSLATION METHODS **************************************************************
@@ -1095,23 +1100,13 @@ def harmonic_monitor_correction(bt7):
 # Multiplies the montior correction through all of the detectors in the Detector_Sets
             
 
-        #M = establish_correction_coefficients('monitor_correction_coordinates.txt')
-        print bt7.detectors
-        print bt7.detectors.primary_detector
-        for d in bt7.detectors:
-                print d
-                #Eii = data.get(Ei)[i]
+        M = establish_correction_coefficients('monitor_correction_coordinates.txt')
+        for detector in bt7.detectors:
+                pass #TODO!
+                #Eii = bt7
                 #data.get('Detector')[i] *= (M[0] + M[1]*Eii + M[2]*Eii^2 + M[3]*Eii^3 + M[4]*Eii^4)
         
     
-
-
-
-def normalize_monochromator(data, targetmonitor):
-        #
-        #for d in bt7.detectors:
-                
-        pass
 
 def resolution_volume_correction(data):
         # Requires constant-Q scan with fixed incident energy, Ei
