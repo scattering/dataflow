@@ -7,3 +7,6 @@
 .project
 .pydevproject
 .wpr
+.wpu
+*.wpr
+*.wpu

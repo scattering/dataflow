@@ -816,10 +816,12 @@ if __name__=='__main__':
                 #myfilestr=r'c:\bifeo3xtal\jan8_2008\9175\fpx53418.bt7'
                 #myfilestr=r'c:\13165\13165\data\MagHigh56784.bt7'
                 myfilestr=r'c:\13176\data\CeOFeAs57255.bt7.out'
+                myfilestr=r'EscanQQ7HorNSF91831.bt7'
                 mydatareader=datareader()
                 #mydata=mydatareader.readbuffer(myfilestr,lines=91)
                 mydata=mydatareader.readbuffer(myfilestr)
-                myoutfilestr=r'c:\bifeo3xtal\jan8_2008\9175\meshbefieldneg1p3plusminus53470.bt7.out'
+                
+                #myoutfilestr=r'c:\bifeo3xtal\jan8_2008\9175\meshbefieldneg1p3plusminus53470.bt7.out'
                 #mywriter=writebt7.datawriter()
                 #mywriter.write(myoutfilestr=myoutfilestr,mydata=mydata)
                 print mydata.data['timestamp']
