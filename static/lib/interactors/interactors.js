@@ -6,6 +6,8 @@ var Interactor = Class.create({
         
         this.canvas = document.getElementById(canvasid);
         this.context = getContext(canvasid);
+        this.context.globalAlpha = 0.6;
+        this.context.lineJoin = 'round'
         this.grobs = [];
         this.mousedown = false;
         this.curgrob = null;
@@ -36,9 +38,11 @@ var Interactor = Class.create({
 
     
     onMouseOver: function(e) {
+        this.canvas.style.cursor = 'move';
         this.color = this.color2;
     },
     onMouseOut: function(e) {
+        this.canvas.style.cursor = 'auto';
         this.color = this.color1;
     },
     onMouseMove: function(e) {
@@ -103,9 +107,9 @@ var Interactor = Class.create({
     
     },
 });
-var RulerInteractor = new Class.create(Interactor, {
+var SegmentInteractor = new Class.create(Interactor, {
     initialize: function($super, canvasid) {
-        $super('Ruler', 'ruler.png', 0, canvasid);
+        $super('Segment', 'segment.png', 0, canvasid);
         
         var p1 = new Point(this, 100, 150);
         var p2 = new Point(this, 200, 150);
@@ -136,7 +140,7 @@ var QuadInteractor = new Class.create(Interactor, {
         this.redraw();
     },
 });
-var CircInteractor = new Class.create(Interactor, {
+var CircleInteractor = new Class.create(Interactor, {
     initialize: function($super, canvasid) {
         $super('Circ', 'circ.png', 0, canvasid);
         
@@ -165,7 +169,7 @@ var AnnulusInteractor = new Class.create(Interactor, {
 
 
 function getMouse(e) {
-	var t = e.srcElement;
+	var t = e.target;
 	var x = e.clientX + (window.pageXOffset || 0);
 	var y = e.clientY + (window.pageYOffset || 0);
 	do
@@ -183,9 +187,11 @@ var Grob = Class.create({
 
         this.inside = false;
         this.translatable = true;
+        this.prevpos = null;
+        this.dpos = null;
 
-        this.color1 = '#559';
-        this.color2 = '#88e';
+        this.color1 = '#963';
+        this.color2 = '#e96';
         this.color = this.color1;
     },
     
@@ -199,8 +205,21 @@ var Grob = Class.create({
     },
     render: function(ctx) {},
     
-    onDrag: function(e, pos) {},
-    onDrop: function(e, pos) {},
+    onDrag: function(e, pos) {
+        if (!this.prevpos)
+            this.prevpos = this.parent.prevpos;
+        var dx = pos.x - this.prevpos.x,
+            dy = pos.y - this.prevpos.y;
+        this.dpos = { x: dx, y: dy };
+        if (this.translatable)
+            this.translateBy(this.dpos);
+            
+        this.prevpos = pos;
+    },
+    onDrop: function(e, pos) {
+        this.prevpos = null;
+        this.dpos = null;
+    },
     onMouseOver: function(e) { this.inside = true;  this.color = this.color2; },
     onMouseOut: function(e)  { this.inside = false; this.color = this.color1; },
 });
@@ -237,8 +256,6 @@ var Point = Class.create(Grob, {
     },
     onDrag: function($super, e, pos) {
         $super(e, pos);
-        this.pos.x = pos.x;
-        this.pos.y = pos.y;
     },
 });
 var Circle = Class.create(Grob, {
@@ -255,28 +272,26 @@ var Circle = Class.create(Grob, {
     
     render: function(ctx) {
         ctx.strokeStyle = this.color;
+        ctx.fillStyle = this.color;
         ctx.lineWidth = this.width;
         ctx.beginPath();
         ctx.arc(this.c.pos.x, this.c.pos.y, dist(this.c.pos, this.p1.pos), 0, 2 * Math.PI, true);
         ctx.closePath();
         ctx.stroke();
+        ctx.globalAlpha = 0.15;
+        ctx.fill();
+        ctx.globalAlpha = 0.6;
     },
     
     isInside: function(pos) {
-        return Math.abs(dist(this.c.pos, pos) - dist(this.c.pos, this.p1.pos)) <= this.width + 1;
+        return /*Math.abs*/(dist(this.c.pos, pos) - dist(this.c.pos, this.p1.pos)) <= this.width + 1;
     },
     onDrag: function($super, e, pos) {
         $super(e, pos);
-        if (!this.prevpos)
-            this.prevpos = this.parent.prevpos;
-        var dx = pos.x - this.prevpos.x,
-            dy = pos.y - this.prevpos.y;
-        console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ')', dx, dy);
-        this.p1.pos.x += dx;
-        this.c.pos.x += dx;
-        this.p1.pos.y += dy;
-        this.c.pos.y += dy;
-        this.prevpos = pos;
+        
+        console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ')', this.dpos.dx, this.dpos.dy);
+        this.p1.translateBy(this.dpos);
+        this.c.translateBy(this.dpos);
     },
     onDrop: function($super, e, pos) {
         $super(e, pos);
@@ -294,18 +309,11 @@ var AnnulusCenter = Class.create(Point, {
 
     onDrag: function($super, e, pos) {
         $super(e, pos);
-        if (!this.prevpos)
-            this.prevpos = this.parent.prevpos;
-        var dx = pos.x - this.prevpos.x,
-            dy = pos.y - this.prevpos.y;
-        console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ')', dx, dy, dist(this.parent.p1.pos, this.pos), dist(this.parent.p2.pos, this.pos));
-        this.parent.translateBy({ x: dx, y: dy });
-        this.prevpos = pos;
+        
+        //console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ')', this.dpos.dx, this.dpos.dy, dist(this.parent.p1.pos, this.pos), dist(this.parent.p2.pos, this.pos));
+        this.parent.translateBy(this.dpos);
+        this.translateBy(this.dpos);
     },
-    onDrop: function($super, e, pos) {
-        $super(e, pos);
-        this.prevpos = null;
-    }
 });
 var Arc = Class.create(Grob, {
     initialize: function($super, parent, p1, p2, c, width) {
@@ -329,21 +337,12 @@ var Arc = Class.create(Grob, {
     },
     onDrag: function($super, e, pos) {
         $super(e, pos);
-        if (!this.prevpos)
-            this.prevpos = this.parent.prevpos;
-        var dx = pos.x - this.prevpos.x,
-            dy = pos.y - this.prevpos.y;
         console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ')', dx, dy);
         this.p1.pos.x += dx;
         this.c.pos.x += dx;
         this.p1.pos.y += dy;
         this.c.pos.y += dy;
-        this.prevpos = pos;
     },
-    onDrop: function($super, e, pos) {
-        $super(e, pos);
-        this.prevpos = null;
-    }
 });
 var Segment = Class.create(Grob, {
     initialize: function($super, parent, p1, p2, width) {
@@ -398,21 +397,10 @@ var Segment = Class.create(Grob, {
     },
     onDrag: function($super, e, pos) {
         $super(e, pos);
-        if (!this.prevpos)
-            this.prevpos = this.parent.prevpos;
-        var dx = pos.x - this.prevpos.x,
-            dy = pos.y - this.prevpos.y;
-        console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ')', dx, dy);
-        this.p1.pos.x += dx;
-        this.p2.pos.x += dx;
-        this.p1.pos.y += dy;
-        this.p2.pos.y += dy;
-        this.prevpos = pos;
+        
+        this.p1.translateBy(this.dpos);
+        this.p2.translateBy(this.dpos);
     },
-    onDrop: function($super, e, pos) {
-        $super(e, pos);
-        this.prevpos = null;
-    }
 });
 
 function getContext(id) {

@@ -8,21 +8,24 @@
 </style>
 <script type="text/javascript" src="../prototype.js"></script>
 <script type="text/javascript" src="interactors.js"></script>
+<script type="text/javascript" src="../plotting/plotting_api.js"></script>
+<script type="text/javascript" src="../plotting/palettes.js"></script>
+<script type="text/javascript" src="../plotting/sansdata.js"></script>
 <script type="text/javascript">
 var c1,c2,c3,c4;
 window.onload = function() {
-    c1 = new RulerInteractor('c1');
+    c1 = new SegmentInteractor('c1');
     c2 = new QuadInteractor('c2');
-    c3 = new CircInteractor('c3');
+    c3 = new CircleInteractor('c3');
     c4 = new AnnulusInteractor('c4');
     
 }
 </script>
 </head>
 <body>
-<label for="c1">RulerInteractor</label>
+<label for="c1">SegmentInteractor</label>
 <label for="c2">QuadInteractor</label>
-<label for="c3">CircInteractor</label>
+<label for="c3">CircleInteractor</label>
 <label for="c4">AnnulusInteractor</label>
 <br />
 <canvas id="c1" width="300" height="300" style="border: 2px solid;"></canvas>
