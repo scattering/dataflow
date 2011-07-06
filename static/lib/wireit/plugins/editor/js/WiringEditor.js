@@ -43,7 +43,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	       this.modulesByName[m.name] = m;
 	    }
 
-		 this.adapter = options.adapter || WireIt.WiringEditor.adapters.JsonRpc;
+		this.adapter = options.adapter || WireIt.WiringEditor.adapters.JsonRpc;
      
 	    this.options.languageName = options.languageName || 'anonymousLanguage';
      
@@ -89,17 +89,17 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	 */
   	render: function() {
 
-		 WireIt.WiringEditor.superclass.render.call(this);
+		WireIt.WiringEditor.superclass.render.call(this);
 	
 	    /**
 	     * @property layer
 	     * @type {WireIt.Layer}
 	     */
 	    this.layer = new WireIt.Layer(this.options.layerOptions);
-		 this.layer.eventChanged.subscribe(this.onLayerChanged, this, true);
+		this.layer.eventChanged.subscribe(this.onLayerChanged, this, true);
 
-		 // Left Accordion
-		 this.renderModulesAccordion();
+		// Left Accordion
+		this.renderModulesAccordion();
 
 	    // Render module list
 	    this.buildModulesList();
@@ -266,19 +266,25 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	*/
 
 	runReduction: function() {
-	var value = this.getValue()
-	//console.log(value)
+	    var value = this.getValue()
+	    //console.log(value)
 
-	if(value.name === "") {
+	    if(value.name === "") {
        		this.alert("Please choose a name");
-       	return;
-    	}
-	this.toReduce = {name: value.name, modules: value.working.modules, properties: 			value.working.properties, wires:value.working.wires, language: this.options.languageName };
-	this.adapter.runReduction(this.toReduce, {
-       	success: this.runModuleSuccess,
-       	failure: this.runModuleFailure,
-       	scope: this
-    	});
+           	return;
+	    }
+	    this.toReduce = {
+	        name: value.name,
+	        modules: value.working.modules,
+	        properties: value.working.properties,
+	        wires: value.working.wires,
+	        language: this.options.languageName,
+        };
+	    this.adapter.runReduction(this.toReduce, {
+           	success: this.runModuleSuccess,
+           	failure: this.runModuleFailure,
+           	scope: this,
+	    });	    
  	},
 
 	runModuleSuccess: function(display) {
@@ -291,35 +297,17 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		console.log(toPlot)
 		plottingAPI(toPlot, plotid)
 		
-/*
-if (toPlot.x.length != toPlot.y.length)
-throw "Your data sucks";
-for (i in toPlot.x)
-if (!isNaN(toPlot.x[i]))
-zipped.push([toPlot.x[i], toPlot.y[i]]);
-
-
-if (! plotCreated) {
-plot=$.jqplot(plotid, [zipped]);
-plotCreated = true;
-}
-else {
-plot.resetAxesScale();
-plot.series[0].data = zipped;
-plot.replot();
-}
-*/
-},
+	},
 	
 	runModuleFailture: function(error) {
 		this.alert("Unable to run the reduction: " + error)
-		},
+	},
 		
 
 	 /**
 	  * @method onNew
 	  */
-	 onNew: function() {
+	onNew: function() {
 	
 		if(!this.isSaved()) {
 			if( !confirm("Warning: Your work is not saved yet ! Press ok to continue anyway.") ) {
@@ -329,19 +317,19 @@ plot.replot();
 	
 		this.preventLayerChangedEvent = true;
 	
-	   this.layer.clear(); 
+	    this.layer.clear(); 
 
-	   this.propertiesForm.clear(false); // false to tell inputEx to NOT send the updatedEvt
+	    this.propertiesForm.clear(false); // false to tell inputEx to NOT send the updatedEvt
 
 		this.markSaved();
 
 		this.preventLayerChangedEvent = false;
-	 },
+	},
 
 	 /**
 	  * @method onDelete
 	  */
-	 onDelete: function() {
+	onDelete: function() {
 	    if( confirm("Are you sure you want to delete this wiring ?") ) {
 		this.layer.clear()
 		console.log('DELETED')
@@ -359,23 +347,23 @@ plot.replot();
 	 		});
        		*/
 	    }
-	 },
+	},
 
 	 /**
 	  * @method renderLoadPanel
 	  */
-	 renderLoadPanel: function() {
+	renderLoadPanel: function() {
 	    if( !this.loadPanel) {
-	       this.loadPanel = new widget.Panel('WiringEditor-loadPanel', {
+	        this.loadPanel = new widget.Panel('WiringEditor-loadPanel', {
 	          fixedcenter: true,
 	          draggable: true,
 	          width: '500px',
 	          visible: false,
 	          modal: true
-	       });
-	       this.loadPanel.setHeader("Select the wiring to load");
-	       this.loadPanel.setBody("Filter: <input type='text' id='loadFilter' /><div id='loadPanelBody'></div>");
-	       this.loadPanel.render(document.body);
+	        });
+	        this.loadPanel.setHeader("Select the wiring to load");
+	        this.loadPanel.setBody("Filter: <input type='text' id='loadFilter' /><div id='loadPanelBody'></div>");
+	        this.loadPanel.render(document.body);
 
 			// Listen the keyup event to filter the module list
 			Event.onAvailable('loadFilter', function() {
@@ -404,18 +392,18 @@ plot.replot();
 	 /**
 	  * @method updateLoadPanelList
 	  */
-	 updateLoadPanelList: function(filter) {
+	updateLoadPanelList: function(filter) {
 	
-		 this.renderLoadPanel();
+		this.renderLoadPanel();
 	
 	    var list = WireIt.cn("ul");
 	    if(lang.isArray(this.pipes)) {
-	       for(var i = 0 ; i < this.pipes.length ; i++) {
-	          var pipe = this.pipes[i];
-	          if(!filter || filter === "" || pipe.name.match(new RegExp(filter,"i")) ) {
-		          list.appendChild( WireIt.cn('li',null,{cursor: 'pointer'},pipe.name) );
+	        for(var i = 0 ; i < this.pipes.length ; i++) {
+	            var pipe = this.pipes[i];
+	            if(!filter || filter === "" || pipe.name.match(new RegExp(filter,"i")) ) {
+		            list.appendChild( WireIt.cn('li',null,{cursor: 'pointer'},pipe.name) );
 				}
-	       }
+	        }
 	    }
 	    var panelBody = Dom.get('loadPanelBody');
 	
@@ -429,14 +417,14 @@ plot.replot();
 	    	this.loadPipe(Event.getTarget(e).innerHTML);
 	    }, this, true);
 
-	 },
+	},
 
 	 /**
 	  * Start the loading of the pipes using the adapter
 	  * @method load
 	  */
-	 load: function() {
-    	    console.log('LOADING') //debugging
+	load: function() {
+    	console.log('LOADING') //debugging
 	    this.adapter.listWirings({language: this.options.languageName},{
 			success: function(result) {
 				this.onLoadSuccess(result);
@@ -447,31 +435,31 @@ plot.replot();
 			scope: this
 		});
 
-	 },
+	},
 
 	 /**
 	  * @method onLoadSuccess
 	  */
-	 onLoadSuccess: function(wirings) {
-			
-			// Reset the internal structure
-			this.pipes = wirings;
-			console.log('wiring length: ' + this.pipes.length)
-			this.pipesByName = {};
+	onLoadSuccess: function(wirings) {
 		
-			// Build the "pipesByName" index
-			for(var i = 0 ; i < this.pipes.length ; i++) {
-	          this.pipesByName[ this.pipes[i].name] = this.pipes[i];
-		  console.log('adding ' + this.pipes[i].name + ' to pipesByName')
-			}
-		
-	    	this.updateLoadPanelList();
+		// Reset the internal structure
+		this.pipes = wirings;
+		console.log('wiring length: ' + this.pipes.length)
+		this.pipesByName = {};
+	
+		// Build the "pipesByName" index
+		for(var i = 0 ; i < this.pipes.length ; i++) {
+            this.pipesByName[ this.pipes[i].name] = this.pipes[i];
+	        console.log('adding ' + this.pipes[i].name + ' to pipesByName')
+		}
+	
+    	this.updateLoadPanelList();
 
-			// Check for autoload param and display the loadPanel otherwise
-			if(!this.checkAutoLoad()) { 
-	    		this.loadPanel.show();
-			}	
-	 },
+		// Check for autoload param and display the loadPanel otherwise
+		if(!this.checkAutoLoad()) { 
+    		this.loadPanel.show();
+		}	
+	},
 		
 	/**
 	 * checkAutoLoad looks for the "autoload" URL parameter and open the pipe.
