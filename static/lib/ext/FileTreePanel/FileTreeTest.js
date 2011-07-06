@@ -15,7 +15,7 @@ Ext.onReady(function() {
 			type: 'json',
 			root: {
 				text: 'pub',
-				id: 0,
+				},
 				
 			},
 		url: 'getNCNRdirs/',
