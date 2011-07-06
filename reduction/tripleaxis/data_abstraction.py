@@ -1,7 +1,8 @@
 import numpy as np
-import uncertainty
+import uncertainty, err1d
 #import readice
 import readncnr4 as readncnr
+from formatnum import format_uncertainty
 import copy
 eps=1e-8
 
@@ -233,8 +234,13 @@ class Component(object):
                 if np.isscalar(self.x):
                         return format_uncertainty(self.x,np.sqrt(self.variance))
                 else:
-                        return [format_uncertainty(v,dv)
-                                for v,dv in zip(self.x,np.sqrt(self.variance))]
+                        Nx=self.x.shape[1]
+                        Ny=self.x.shape[2]
+                        res=[]
+                        for ny in range(Ny):
+                                for nx in range(Nx):
+                                        res.append([format_uncertainty(v,dv) for v,dv in zip(self.x[:,nx,ny],np.sqrt(self.variance[:,nx,ny]))])
+                        return np.array(res).T.__repr__()
         def __repr__(self):
                 return "Measurement(%s,%s)"%(str(self.x),str(self.variance))
 
@@ -394,11 +400,14 @@ class DetectorSet(object):
                 self.detector_mode=None
                         
         def __iter__(self):
-                for key,value in self.__dict__:
-                        return value
-        def next(self):
-                for key, value in self.__dict__:
+                temp_dict=copy.deepcopy(self.__dict__)
+                temp_dict.__delitem__('detector_mode')
+                #temp_dict.__delitem__('primary_detector')
+                for key,value in temp_dict.iteritems():
                         yield value
+        #def next(self):
+        #        for key, value in self.__dict__.iteritems():
+        #                yield value
                 
 
 
@@ -636,9 +645,22 @@ class TripleAxis(object):
                 self.temperature=Temperature()
                 
                 self.analyzer_blades=Blades(title='analyzer',nblades=8)
+        def detailed_balance(self):
+                beta_times_temp = 11.6
+                beta = beta_times_temp /self.temperature.temperature
+                E=self.physical_motors.e
+                for detector in self.detectors:
+                        detector=detector*np.exp(-beta*E/2)
+                return
+        def normalize_monitor(self,monitor):
+                mon0=self.time.monitor #TODO CHECK THIS
+                for detector in self.detectors:
+                        detector=detector*mon0/monitor
                 
                 
-                
+# ****************************************************************************************************************************************************
+# ***************************************************************** TRANSLATION METHODS **************************************************************
+# ****************************************************************************************************************************************************
 def translate(bt7,dataset):
         translate_monochromator(bt7,dataset)
         translate_analyzer(bt7,dataset)
@@ -650,10 +672,11 @@ def translate(bt7,dataset):
         #translate_polarized_beam(bt7,dataset)
         translate_slits(bt7,dataset)
         translate_temperature(bt7,dataset)
-        translate_timestamp(bt7,dataset)
+        translate_time(bt7,dataset)
         #translate_sample(bt7,dataset)
         #translate_metadata(bt7,dataset)
         translate_detectors(bt7,dataset)
+
 
 def translate_monochromator(bt7,dataset):
         translate_dict={}
@@ -822,10 +845,10 @@ def map_motors(translate_dict,target_field,dataset):
         #key --> on bt7
         #value --> input, i.e. the field in dataset.data or dataset.metadata
         for key,value in translate_dict.iteritems():
-                if dataset.data.has_key(value):
-                        setattr(target_field,key,dataset.data[value])
                 if dataset.metadata.has_key(value):
                         setattr(target_field,key,dataset.metadata[value])
+                if dataset.data.has_key(value):
+                        setattr(target_field,key,dataset.data[value])
 
 def translate_physical_motors(bt7,dataset):
         translate_dict={}
@@ -864,7 +887,8 @@ def translate_filters(bt7,dataset):
         #self.filters.filter_translation=dataset.filtran
         #self.filters.filter_rotation=dataset.filrot
 
-def translate_timestamp(bt7,dataset):
+
+def translate_time(bt7, dataset):
         translate_dict={}
         translate_dict['month']='month'
         translate_dict['day']='day'
@@ -872,10 +896,14 @@ def translate_timestamp(bt7,dataset):
         translate_dict['start_time']='start_time'
         translate_dict['epoch']='epoch'
         translate_dict['duration']='time'
+        translate_dict['monitor']='monitor'
+        translate_dict['monitor2']='monitor2'
         map_motors(translate_dict,bt7.time,dataset)
+        print bt7.time.monitor
         #self.time.timestamp=dataset.timestamp
         #self.time.duration=dataset.data.time
-        
+        #self.time.monitor=dataset.data.monitor
+        #self.time.monitor2=dataset.data.monitor2
 
 def translate_temperature(bt7,dataset):
         translate_dict={}
@@ -1038,9 +1066,71 @@ def set_detector(bt7,dataset,detector_name,data_name):
 
                 
                 
+# ****************************************************************************************************************************************************
+# ***************************************************************** REDUCTION FUNCTIONS **************************************************************
+# ****************************************************************************************************************************************************
+def establish_correction_coefficients(filename):
+        "Obtains the instrument-dependent correction coefficients from a given file and \
+         returns them in the dictionary called coefficients"
+        datafile = open(filename)
+
+        coefficients = {} # Dictionary of instrument name mapping to its array of M0 through M4
+        while 1:
+                line = datafile.readline().strip()
+                if not line:
+                        break
+                elif len(line) != 0:
+                        #if it's not an empty line, thus one with data
+                        if not line.startswith("#"):
+                                #if it's not a comment/headers, i.e. actual data
+                                linedata = line.split()
+                                instrument = linedata.pop(0)
+                                coefficients[instrument] = linedata
+
+        return coefficients   
+
+
+def harmonic_monitor_correction(bt7):
+# Use for constant-Q scans with fixed scattering energy, Ef
+# Multiplies the montior correction through all of the detectors in the Detector_Sets
+            
+
+        #M = establish_correction_coefficients('monitor_correction_coordinates.txt')
+        print bt7.detectors
+        print bt7.detectors.primary_detector
+        for d in bt7.detectors:
+                print d
+                #Eii = data.get(Ei)[i]
+                #data.get('Detector')[i] *= (M[0] + M[1]*Eii + M[2]*Eii^2 + M[3]*Eii^3 + M[4]*Eii^4)
+        
+    
+
+
+
+def normalize_monochromator(data, targetmonitor):
+        #
+        #for d in bt7.detectors:
                 
-               
-                
+        pass
+
+def resolution_volume_correction(data):
+        # Requires constant-Q scan with fixed incident energy, Ei
+        pass
+        #TODO - CHECK - taken from the IDL
+        # resCor = Norm/(cot(A6/2)*Ef^1.5)
+        # where Norm = Ei^1.5 * cot(asin(!pi/(0.69472*dA*sqrt(Ei))))
+        '''
+        for i in len(data.get(Ei))
+            thetaA = N.radians(data.get(a6)[i]/2.0)
+            arg = asin(N.pi/(0.69472*dA*sqrt(double(data.get(Ei)[i]))))
+            norm = (Ei^1.5) / tan(arg)
+            cotThetaA = 1/tan(thetaA)
+            resCor = norm/(cotThetaA * (Ef^1.5))
+        
+
+
+        N.exp((ki/kf) ** 3) * (1/N.tan(thetaM)) / (1/N.cot(thetaA))
+        '''     
                 
 
 
@@ -1059,6 +1149,10 @@ if __name__=="__main__":
         #print mydata.metadata.varying
         bt7=TripleAxis()
         translate(bt7,mydata)
+        print 'translations done'
+        bt7.normalize_monitor(90000)
+        print 'detailed balance done'
+        #harmonic_monitor_correction(bt7)
         print 'bye'
         
 
