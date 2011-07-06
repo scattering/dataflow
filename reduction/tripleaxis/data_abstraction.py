@@ -375,13 +375,30 @@ class Detector(Component):
         def correct_offsets(self, offsets):
                 """This function will transform from a central a4, to the actual a4 """
                 pass
+        def sum(self,axis=0):
+                """This function will find the total counts on the detector along a given axis, similar to np.sum(axis=1).  This should be for Measurement objects, so we can propagate errors as well.
+                """
+                pass
 
-class DetectorSet(object):
-        def __init__(self):
-                self.name=name
-        def __getitem__(self, key): return self.__dict__[key]
-        def __setitem__(self, key, item): self.__dict__[key] = item
+#class DetectorSet(object):
+#        def __init__(self):
+#                self.name=name
+#        def __getitem__(self, key): return self.__dict__[key]
+#        def __setitem__(self, key, item): self.__dict__[key] = item
  
+class DetectorSet(object):
+        """This defines a group of detectors"""
+        def __init__(self):
+                self.primary_detector=Detector('primary_detector',dimension=None,values=None,err=None,units='counts', 
+                     aliases=None,friends=None, isInterpolatable=True)
+                self.detector_mode=None
+                        
+        def __iter__(self):
+                for key,value in self.__dict__:
+                        return value
+        def next(self):
+                for key, value in self.__dict__:
+                        yield value
                 
 
 
@@ -533,14 +550,16 @@ class Physical_Motors(object):
                              isInterpolatable=True)
                 self.e=Motor('e',values=None,err=None,units='meV',isDistinct=True,
                              isInterpolatable=True)
-                self.qx=Motor('qx',values=None,err=None,units='rlu',isDistinct=True,
-                              isInterpolatable=True)
-                self.qy=Motor('qy',values=None,err=None,units='rlu',isDistinct=True,
-                              isInterpolatable=True)
-                self.qz=Motor('qz',values=None,err=None,units='rlu',isDistinct=True,
-                              isInterpolatable=True)
-                self.hkl=Motor('hkl',values=None,err=None,units='rlu',isDistinct=True,
-                               isInterpolatable=True) #is this a tuple???
+                self.q=Motor('q',values=None,err=None,units='angstrom_inverse',isDistinct=True,
+                             isInterpolatable=True)
+                #self.qx=Motor('qx',values=None,err=None,units='rlu',isDistinct=True,
+                #              isInterpolatable=True)
+                #self.qy=Motor('qy',values=None,err=None,units='rlu',isDistinct=True,
+                #              isInterpolatable=True)
+                #self.qz=Motor('qz',values=None,err=None,units='rlu',isDistinct=True,
+                #              isInterpolatable=True)
+                #self.hkl=Motor('hkl',values=None,err=None,units='rlu',isDistinct=True,
+                #               isInterpolatable=True) #is this a tuple???
 
 class Collimators(object):
         """Our collimators:  
@@ -596,19 +615,6 @@ class Slits(object):
                                            , isInterpolatable=True) 
                 
 
-class DetectorSet(object):
-        """This defines a group of detectors"""
-        def __init__(self):
-                self.primary_detector=Detector('primary_detector',dimension=None,values=None,err=None,units='counts', 
-                     aliases=None,friends=None, isInterpolatable=True)
-                self.detector_mode=None
-                        
-        def __iter__(self):
-                for key,value in self.__dict__:
-                        return value
-        def next(self):
-                for key, value in self.__dict__:
-                        yield value
 
 
 class TripleAxis(object):
@@ -640,7 +646,7 @@ def translate(bt7,dataset):
         translate_primary_motors(bt7,dataset)
         translate_physical_motors(bt7,dataset)
         translate_filters(bt7,dataset)
-        #translate_apertures(bt7,dataset)
+        translate_apertures(bt7,dataset)
         #translate_polarized_beam(bt7,dataset)
         translate_slits(bt7,dataset)
         translate_temperature(bt7,dataset)
@@ -992,15 +998,16 @@ def translate_detectors(bt7,dataset):
                 
         if dataset.metadata.has_key('analyzerdoordetectorgroup'):
                 set_detector(bt7,dataset,'door_detector','analyzerdoordetectorgroup')
-                bt7.detectors.single_detector.summed_counts=dataset.data['doordet']  #Not sure why this one doesn't show up???
+                bt7.detectors.single_detector.summed_counts=bt7.detectors.door_detector.x.sum(axis=1)#None #dataset.data['doordet']  #Not sure why this one doesn't show up???
                 
         if dataset.metadata.has_key('analyzerddgroup'):
                 set_detector(bt7,dataset,'diffraction_detector','analyzerddgroup')
-                bt7.detectors.single_detector.summed_counts=dataset.data['diffdet']
+                bt7.detectors.diffraction_detector.summed_counts=dataset.data['diffdet']
                 
         if dataset.metadata.has_key('analyzerpsdgroup'):
                 set_detector(bt7,dataset,'position_sensitive_detector','analyzerpsdgroup')
-                bt7.detectors.single_detector.summed_counts=dataset.data['psdet']
+                if hasattr(bt7.detectors,'position_sensitive_detector'):
+                        bt7.detectors.position_sensitive_detector.summed_counts=dataset.data['psdet']
                 
                 
                         
@@ -1008,18 +1015,24 @@ def translate_detectors(bt7,dataset):
 def set_detector(bt7,dataset,detector_name,data_name):                        
         analyzergroup=dataset.metadata[data_name]
         setattr(bt7.detectors,detector_name,Detector(detector_name))
-        setattr(bt7.detectors,detector_name+'dimension',[len(dataset.metadata['analyzersdgroup']),1])
-        Nx=getattr(bt7.detectors,detector_name,dimension[0])
-        Ny=getattr(bt7.detectors,detector_name,dimension[1])
-        npts=len(dataset.data[dataset.metadata.analyzersdgroup[0]])
+        
+        setattr(getattr(bt7.detectors,detector_name),'dimension',[len(dataset.metadata['analyzersdgroup']),1])
+        Nx=getattr(getattr(bt7.detectors,detector_name),'dimension')[0]
+        Ny=getattr(getattr(bt7.detectors,detector_name),'dimension')[1]
+        npts=len(dataset.data[dataset.metadata['analyzersdgroup'][0]])  #I choose this one because the sd group SHOULD always be present.
         data=np.empty((npts,Nx,Ny),'Float64')
         #put all the data in data array which is npts x Nx x Ny, in this case, Ny=1 since our detectors are 1D
-        for nx in range(Nx):
-                curr_detector=dataset.metadata[data_name][nx]
-                data[:,nx,1]=dataset.data[curr_detector]
+        #We have to do some defensive programming here.  It turns out that even though the metadata states that the PSD may be present,
+        #There may be no data associated with it.....
+        if dataset.data.has_key(dataset.metadata[data_name][0]):
+                for nx in range(Nx):
+                        curr_detector=dataset.metadata[data_name][nx]
+                        data[:,nx,0]=dataset.data[curr_detector]
                 
-        setattr(getattr(bt7.detectors,detector_name),'x',np.copy.deepcopy(data))
-        setattr(getattr(bt7detectors,detector_name),'variance',np.copy.deepcopy(data))
+                setattr(getattr(bt7.detectors,detector_name),'x',np.copy(data))
+                setattr(getattr(bt7.detectors,detector_name),'variance',np.copy(data))
+        else:
+                delattr(bt7.detectors,detector_name)  #We were lied to by ICE and this detector isn't really present...
 
 
 
