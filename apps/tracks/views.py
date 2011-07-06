@@ -40,21 +40,18 @@ def home(request):
 #### file loading testing
 
 store = [{
-	 "text":"pub",
-	 "children":
-	[{
-        
+        "id": 0,
         "text": "A leaf Node",
         "leaf": True
     },{
-        
+        "id": 1,
         "text": "A folder Node",
         "children": [{
-            
+            "id": 2,
             "text": "A child Node",
-            "leaf": True
+            "leaf": True,
+            "children":[{}],
         }]
-   }]
    }]
 
 def getNCNRdirectories(request):

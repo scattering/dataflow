@@ -13,10 +13,7 @@ Ext.onReady(function() {
 		actionMethods:'GET',
 		reader: {
 			type: 'json',
-			root: {
-				text: 'pub',
-				},
-				
+			//root: 'pub'
 			},
 		url: 'getNCNRdirs/',
 	},
@@ -31,6 +28,7 @@ Ext.onReady(function() {
         width: 400,
         renderTo: 'tree-example',
         collapsible: true,
+        rootVisible: false,
         
         //store: 'Ext.data.TreeStore',
         //initComponent: function(){
