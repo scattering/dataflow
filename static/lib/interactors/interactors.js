@@ -244,8 +244,8 @@ var GaussianInteractor = new Class.create(Interactor, {
     initialize: function($super, canvasid) {
         $super('Gaussian', 'gaussian.png', 0, canvasid);
         
-        var pk = new Point(this, 200, 150);
-        var pw = new Point(this, 150, 100);
+        var pw = new Point(this, 200, 150);
+        var pk = new Point(this, 150, 100);
         var gaussian = new Gaussian(this, pk, pw, 4);
         this.grobs.push(gaussian, pk, pw);
         
@@ -485,7 +485,16 @@ var Arc = Class.create(GrobConnector, {
         return d;
     },
 });
-var Gaussian = Class.create(GrobConnector, {
+var FunctionConnector = Class.create(GrobConnector, {
+    initialize: function($super, parent, width) {
+        $super(parent, width);
+        
+        this.function = null;
+    },
+    
+});
+    
+var Gaussian = Class.create(FunctionConnector, {
     initialize: function($super, parent, pk, pw, width) {
         $super(parent, width);
         /*
@@ -494,6 +503,7 @@ var Gaussian = Class.create(GrobConnector, {
         };*/
         
         this.name = 'gaussian';
+        this.function = this.gaussian;
         this.points = { pk: pk, pw: pw };
         this.pk = pk;
         this.pw = pw;
@@ -521,8 +531,8 @@ var Gaussian = Class.create(GrobConnector, {
         return bkgdY + (peakY - bkgdY) * Math.exp(- Math.pow((x - peakX), 2) / 2 / Math.pow(stdDev, 2));
     },
     distanceTo: function(pos) {
-        var d = this.gaussian(pos.x) - pos.y;
-        
+        var d = Math.abs((this.pw.pos.y - this.gaussian(pos.x)) - pos.y);
+        console.log(d);
         return d;
     },
 });
