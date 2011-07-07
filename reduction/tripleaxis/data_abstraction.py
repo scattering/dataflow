@@ -93,7 +93,7 @@ class Component(object):
         """This is the Component class.  A Component must have a name, for example, 'a1'
         Furthermore, it is given a set of values and stderr for initialization.
         units are optional.  Internally, we store a "measurement".  This can be
-        accesed from measurement.x, measurement.dx
+        accessed from measurement.x, measurement.dx
         """
 
         def _getx(self): return self.measurement.x
@@ -559,6 +559,10 @@ class Physical_Motors(object):
                              isInterpolatable=True)
                 self.e=Motor('e',values=None,err=None,units='meV',isDistinct=True,
                              isInterpolatable=True)
+                self.ei=Motor('ei',values=None,err=None,units='meV',isDistinct=True,
+                             isInterpolatable=True)
+                self.ef=Motor('ef',values=None,err=None,units='meV',isDistinct=True,
+                             isInterpolatable=True)
                 self.q=Motor('q',values=None,err=None,units='angstrom_inverse',isDistinct=True,
                              isInterpolatable=True)
                 #self.qx=Motor('qx',values=None,err=None,units='rlu',isDistinct=True,
@@ -650,19 +654,25 @@ class TripleAxis(object):
                 beta = beta_times_temp /self.temperature.temperature
                 E=self.physical_motors.e
                 for detector in self.detectors:
-                        detector=detector*np.exp(-beta*E/2)
+                        detector.measurement=detector.measurement*np.exp(-beta*E/2)
                 return
-        def normalize_monitor(self,monitor):
-                #mon0=self.time.monitor[0] #TODO CHECK THIS - all values always the same?
-                #for detector in self.detectors:
-                #        detector=detector*mon0/monitor                
+        def normalize_monitor(self,monitor):              
                 mon0=self.time.monitor #TODO CHECK THIS
                 for detector in self.detectors:
-                        for i in range(0,len(detector)):
-                                print 'before'
-                                detector[i]=detector[i]*mon0[i]/monitor
-                                print 'after'
-                
+                        for i in range(0,len(detector.measurement.x)):
+                                detector.measurement[i]=detector.measurement[i]*mon0[i]/monitor
+                return
+        def harmonic_monitor_correction(self):
+                "Multiplies the montior correction through all of the detectors in the Detector_Sets."
+                #Use for constant-Q scans with fixed scattering energy, Ef.
+                #CURRENTLY: Assumes Ef is fixed under constant-Q scan; could implement check later
+        
+                M = establish_correction_coefficients('monitor_correction_coordinates.txt')
+                for detector in bt7.detectors:
+                        Eii=self.physical_motors.ei
+                        detector.measurement=detector.measurement*(M[0] + M[1]*Eii + M[2]*Eii^2 + M[3]*Eii^3 + M[4]*Eii^4)
+                        #TODO CHECK THIS METHOD -> might need nested for loop
+                        
 # ****************************************************************************************************************************************************
 # ***************************************************************** TRANSLATION METHODS **************************************************************
 # ****************************************************************************************************************************************************
@@ -844,17 +854,9 @@ def translate_primary_motors(bt7,dataset):
         #self.primary_motors.dfm=dataset.data.dfm
         #self.primary_motors.analyzer_rotation=dataset.data.analyzerrotation
         #self.primary_motors.dfm_rotation=dataset.data.dfmrot
-        
-      
-def map_motors(translate_dict,target_field,dataset):
-        #key --> on bt7
-        #value --> input, i.e. the field in dataset.data or dataset.metadata
-        for key,value in translate_dict.iteritems():
-                if dataset.metadata.has_key(value):
-                        setattr(target_field,key,dataset.metadata[value])
-                if dataset.data.has_key(value):
-                        setattr(target_field,key,dataset.data[value])
 
+
+                                
 def translate_physical_motors(bt7,dataset):
         translate_dict={}
         #key--> on bt7
@@ -866,7 +868,20 @@ def translate_physical_motors(bt7,dataset):
         translate_dict['k']='qy'
         translate_dict['l']='qz'
         translate_dict['e']='e'
-        translate_dict['q']='q'  #need to implement this
+        #translate_dict['q']='q'  #need to implement this
+        #self.meta_data.fixed_eief=dataset.metadata.efixed
+        #self.meta_data.fixed_energy=dataset.metadata.ef
+        map_motors(translate_dict,bt7.physical_motors,dataset)
+        if dataset.metadata['efixed']=='ei':
+                bt7.physical_motors.ei.measurement.x=np.ones(np.array(dataset.data['e']).shape)*dataset.metadata['ei']
+                bt7.physical_motors.ei.measurement.variance=np.ones(np.array(dataset.data['e']).shape)*dataset.metadata['ei']
+                bt7.physical_motors.ef=bt7.physical_motors.ei-bt7.physical_motors.e
+                #our convention is that Ei=Ef+delta_E (aka omega)
+        else:
+                bt7.physical_motors.ef.measurement.x=np.ones(np.array(dataset.data['e']).shape)*dataset.metadata['ef']
+                bt7.physical_motors.ef.measurement.variance=np.ones(np.array(dataset.data['e']).shape)*dataset.metadata['ef']
+                bt7.physical_motors.ei=bt7.physical_motors.ef+bt7.physical_motors.e
+        
         #translate_dict['h']='h'
         #translate_dict['k']='k'
         #translate_dict['l']='l'
@@ -875,7 +890,7 @@ def translate_physical_motors(bt7,dataset):
         #self.physical_motors.qy=dataset.data.qy
         #self.physical_motors.qz=dataset.data.qz
         #self.physical_motors.e=dataset.data.e
-        map_motors(translate_dict,bt7.physical_motors,dataset)
+        
         
 def translate_filters(bt7,dataset):
         translate_dict={}
@@ -1062,17 +1077,48 @@ def set_detector(bt7,dataset,detector_name,data_name):
                         curr_detector=dataset.metadata[data_name][nx]
                         data[:,nx,0]=dataset.data[curr_detector]
                 
-                setattr(getattr(bt7.detectors,detector_name),'x',np.copy(data))
-                setattr(getattr(bt7.detectors,detector_name),'variance',np.copy(data))
+                setattr(getattr(bt7.detectors,detector_name).measurement,'x',np.copy(data))
+                setattr(getattr(bt7.detectors,detector_name).measurement,'variance',np.copy(data))
         else:
                 delattr(bt7.detectors,detector_name)  #We were lied to by ICE and this detector isn't really present...
 
 
+'''
+def map_data(translate_dict,target_field,dataset):
+        #key --> on bt7
+        #value --> input, i.e. the field in dataset.data or dataset.metadata
+        for key,value in translate_dict.iteritems():
+                if dataset.metadata.has_key(value):
+                        setattr(target_field,key,dataset.metadata[value])
+                if dataset.data.has_key(value):
+                        setattr(target_field,key,dataset.data[value])
+'''
 
+def map_motors(translate_dict,target_field,dataset):
+        #key --> on bt7
+        #value --> input, i.e. the field in dataset.data or dataset.metadata
+        for key,value in translate_dict.iteritems():
+                '''
+                afield = None
+                try:
+                        afield = getattr(target_field, key)
+                except:
+                        pass
+                '''
+                if dataset.metadata.has_key(value):
+                        if hasattr(target_field, key) and getattr(target_field, key) is Motor:
+                                setattr(getattr(target_field,'measurement'),key,dataset.metadata[value])
+                        else:
+                                setattr(target_field,key,dataset.metadata[value])
+                if dataset.data.has_key(value):
+                        if hasattr(target_field, key) and getattr(target_field, key) is Motor:
+                                setattr(getattr(target_field,'measurement'),key,dataset.data[value])
+                        else:
+                                setattr(target_field,key,dataset.data[value])
                 
                 
 # ****************************************************************************************************************************************************
-# ***************************************************************** REDUCTION FUNCTIONS **************************************************************
+# ****************************************************** REDUCTION FUNCTIONS - to be moved! **************************************************************
 # ****************************************************************************************************************************************************
 def establish_correction_coefficients(filename):
         "Obtains the instrument-dependent correction coefficients from a given file and \
@@ -1095,17 +1141,7 @@ def establish_correction_coefficients(filename):
         return coefficients   
 
 
-def harmonic_monitor_correction(bt7):
-# Use for constant-Q scans with fixed scattering energy, Ef
-# Multiplies the montior correction through all of the detectors in the Detector_Sets
-            
-
-        M = establish_correction_coefficients('monitor_correction_coordinates.txt')
-        for detector in bt7.detectors:
-                pass #TODO!
-                #Eii = bt7
-                #data.get('Detector')[i] *= (M[0] + M[1]*Eii + M[2]*Eii^2 + M[3]*Eii^3 + M[4]*Eii^4)
-        
+       
     
 
 def resolution_volume_correction(data):
