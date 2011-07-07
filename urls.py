@@ -5,8 +5,6 @@ from django.conf.urls.defaults import patterns, include, url
 # from django.contrib import admin
 # admin.autodiscover()
 
-## PULLS VIEWS FROM TRACKS/VIEWS
-## WE WOULD LIKE IT TO PULL FROM APPS/TRACKS/VIEWS
 import ROOT_URL
 
 urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views', 
@@ -23,6 +21,10 @@ urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views',
 		('^editor/saveWiring/$', 'saveWiring'),
 		('^editor/runReduction/$', 'runReduction'),
 
+		# File loader display urls (testing, 7/6)
+		('^loadFiles/$', 'displayFileLoad'),
+		('^loadFiles/getNCNRdirs/', 'getNCNRdirectories'),
+	
 		('', 'home'),
     # Examples:
     # url(r'^$', 'dataflow.views.home', name='home'),

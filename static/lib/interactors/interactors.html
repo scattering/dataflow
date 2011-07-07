@@ -3,18 +3,34 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Interactor test</title>
+<style type="text/css">
+  label { display: inline-block; font-family: monospace; width: 300px; text-align: center; padding: 2px; }
+</style>
 <script type="text/javascript" src="../prototype.js"></script>
 <script type="text/javascript" src="interactors.js"></script>
+<script type="text/javascript" src="../plotting/plotting_api.js"></script>
+<script type="text/javascript" src="../plotting/palettes.js"></script>
+<script type="text/javascript" src="../plotting/sansdata.js"></script>
 <script type="text/javascript">
-var w;
+var c1,c2,c3,c4;
 window.onload = function() {
-    console.log(document.getElementById('mycanvas'));
-    w = new RulerInteractor('mycanvas');
-    w.redraw();
+    c1 = new SegmentInteractor('c1');
+    c2 = new QuadInteractor('c2');
+    c3 = new CircleInteractor('c3');
+    c4 = new AnnulusInteractor('c4');
+    
 }
 </script>
 </head>
 <body>
-<canvas id="mycanvas" width="600" height="600" style="border: 100px solid;"></canvas>
+<label for="c1">SegmentInteractor</label>
+<label for="c2">QuadInteractor</label>
+<label for="c3">CircleInteractor</label>
+<label for="c4">AnnulusInteractor</label>
+<br />
+<canvas id="c1" width="300" height="300" style="border: 2px solid;"></canvas>
+<canvas id="c2" width="300" height="300" style="border: 2px solid;"></canvas>
+<canvas id="c3" width="300" height="300" style="border: 2px solid;"></canvas>
+<canvas id="c4" width="300" height="300" style="border: 2px solid;"></canvas>
 </body>
 </html>

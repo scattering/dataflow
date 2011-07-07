@@ -3,17 +3,23 @@ var Interactor = Class.create({
         this.name = name;
         this.icon = icon;
         this.state = state;
-        console.log(canvasid);
+        
         this.canvas = document.getElementById(canvasid);
         this.context = getContext(canvasid);
+        this.context.globalAlpha = 0.6;
+        this.context.lineJoin = 'round'
         this.grobs = [];
         this.mousedown = false;
         this.curgrob = null;
         
-        this.canvas.onmouseover = this.onMouseOver;
+        this.color1 = '#69f';
+        this.color2 = '#f69';
+        this.color = this.color1;
+        
+        //this.canvas.onmouseover = this.onMouseOver.bind(this);
         this.canvas.onmousemove = this.onMouseMove.bind(this);
-        this.canvas.onmousedown = this.onMouseDown;
-        this.canvas.onmouseup   = this.onMouseUp;
+        this.canvas.onmousedown = this.onMouseDown.bind(this);
+        this.canvas.onmouseup   = this.onMouseUp.bind(this);
     },
     redraw: function() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -22,79 +28,148 @@ var Interactor = Class.create({
             grob.render(this.context);
         }
     },
-    onMouseOver: function(e) {
-        //console.log('mouseover');
-    },
-    onMouseOut:  function(e) {
     
+    translateBy: function(dpos) {
+        for (var i = 0; i < this.grobs.length; i ++) {
+            if (this.grobs[i].translatable)
+                this.grobs[i].translateBy(dpos);
+        }
+    },
+
+    
+    onMouseOver: function(e) {
+        this.canvas.style.cursor = 'move';
+        this.color = this.color2;
+    },
+    onMouseOut: function(e) {
+        this.canvas.style.cursor = 'auto';
+        this.color = this.color1;
     },
     onMouseMove: function(e) {
         //console.log('mousemove');
         var pos = getMouse(e);
         //console.log('move', this.grobs, pos.x, pos.y, this.mousedown);
-        for (var i = 0; i < this.grobs.length; i ++) {
+        var i = 0, inside = false;
+        while (i < this.grobs.length) {
             var g = this.grobs[i];
-            var inside = g.isInside(pos);
-            console.log(i, g, 'pos', pos, inside, g.inside);
-            if (inside) {
-              g.onMouseOver(e);
-              this.onMouseOver(e);
+            inside = g.isInside(pos);
+            //if (inside)
+            //console.log(i, g, 'pos', pos, inside, g.inside);
+            
+            if (this.mousedown && i == this.curgrob) {
+                g.onDrag(e, pos);
+                this.onDrag(e, pos);
             }
-            else if (!inside && g.inside) {
-                g.onMouseOut(e);
-                this.onMouseOut(e);
+            else {
+                if (inside) {
+                    g.onMouseOver(e);
+                    this.onMouseOver(e);
+                }
+                else if (!inside && g.inside) {
+                    g.onMouseOut(e);
+                    this.onMouseOut(e);
+                }
             }
+            i ++;
         }
         this.redraw();
     },
     onMouseDown: function(e) {
         this.mousedown = true;
         var pos = getMouse(e);
-        this.prevpos = pos;
+        for (var i = 0; i < this.grobs.length; i ++) {
+            var g = this.grobs[i];
+            var inside = g.isInside(pos);
+            
+            if (inside) {
+                this.prevpos = pos;
+                this.curgrob = i;
+            }
+        }
         console.log('down', this.grobs, pos.x, pos.y, this.mousedown);
     },
     onMouseUp:   function(e) {
         this.mousedown = false;
         var pos = getMouse(e);
         this.prevpos = null;
+        if (this.curgrob != null) {
+            this.grobs[this.curgrob].onDrop(e, pos);
+            this.onDrop(e, pos);
+        }
+        this.curgrob = null;
         console.log('up  ', this.grobs, pos.x, pos.y, this.mousedown);
+        this.redraw();
+    },
+    onDrag: function(e, pos) {
+    
+    },
+    onDrop: function(e, pos) {
+    
     },
 });
-var RulerInteractor = new Class.create(Interactor, {
+var SegmentInteractor = new Class.create(Interactor, {
     initialize: function($super, canvasid) {
-        $super('Ruler', 'ruler.png', 0, canvasid);
+        $super('Segment', 'segment.png', 0, canvasid);
         
-        var c1 = new ControlPoint(50, 50);
-        var c2 = new ControlPoint(100, 50);
-        this.color1 = '#f96';
-        this.color2 = '#96f';
-        this.color = this.color1;
-        this.grobs.push(c1, c2);
+        var p1 = new Point(this, 100, 150);
+        var p2 = new Point(this, 200, 150);
+        var l = new Segment(this, p1, p2, 4);
+        this.grobs.push(l, p1, p2);
+        
+        this.redraw();
     },
     
     redraw: function($super) {
         $super();
+    },
+});
+var QuadInteractor = new Class.create(Interactor, {
+    initialize: function($super, canvasid) {
+        $super('Quad', 'quad.png', 0, canvasid);
         
-        this.context.strokeStyle = this.color;
-        this.context.beginPath();
-        this.context.moveTo(this.grobs[0].x, this.grobs[0].y);
-        this.context.lineTo(this.grobs[1].x, this.grobs[1].y);
-        this.context.closePath();
-        this.context.stroke();
+        var p1 = new Point(this, 100, 100);
+        var p2 = new Point(this, 200, 150);
+        var p3 = new Point(this, 200, 200);
+        var p4 = new Point(this, 100, 200);
+        var l1 = new Segment(this, p1, p2, 4);
+        var l2 = new Segment(this, p2, p3, 4);
+        var l3 = new Segment(this, p3, p4, 4);
+        var l4 = new Segment(this, p4, p1, 4);
+        this.grobs.push(l1, l2, l3, l4, p1, p2, p3, p4);
+        
+        this.redraw();
     },
-    
-    onMouseOver: function($super, e) {
-        $super(e);
-        this.color = this.color2;
+});
+var CircleInteractor = new Class.create(Interactor, {
+    initialize: function($super, canvasid) {
+        $super('Circ', 'circ.png', 0, canvasid);
+        
+        var c = new Point(this, 150, 150);
+        var p1 = new Point(this, 200, 150);
+        var circ = new Circle(this, c, p1, 4);
+        this.grobs.push(circ, c, p1);
+        
+        this.redraw();
     },
-    onMouseOut: function($super, e) {
-        $super(e);
-        this.color = this.color1;
+});
+var AnnulusInteractor = new Class.create(Interactor, {
+    initialize: function($super, canvasid) {
+        $super('Circ', 'circ.png', 0, canvasid);
+        
+        this.c = new AnnulusCenter(this, 150, 150);
+        this.p1 = new Point(this, 200, 150);
+        this.p2 = new Point(this, 250, 100);
+        var circ1 = new Circle(this, this.c, this.p1, 4);
+        var circ2 = new Circle(this, this.c, this.p2, 4);
+        this.grobs.push(circ1, circ2, this.c, this.p1, this.p2);
+        
+        this.redraw();
     },
 });
 
+
 function getMouse(e) {
-	var t = e.srcElement;
+	var t = e.target;
 	var x = e.clientX + (window.pageXOffset || 0);
 	var y = e.clientY + (window.pageYOffset || 0);
 	do
@@ -106,37 +181,55 @@ function getMouse(e) {
 }
 
 var Grob = Class.create({
-    initialize: function(x, y, w, h) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
+    initialize: function(parent, x, y) {
+        this.parent = parent;
+        this.pos = { x: x, y: y };
 
         this.inside = false;
+        this.translatable = true;
+        this.prevpos = null;
+        this.dpos = null;
+
+        this.color1 = '#963';
+        this.color2 = '#e96';
+        this.color = this.color1;
     },
     
     isInside: function(pos) {},
     distanceTo: function(pos) {
-        return Math.sqrt(Math.pow(this.x - pos.x, 2) + Math.pow(this.y - pos.y, 2));
+        return dist(this.pos, pos);
+    },
+    translateBy: function(dpos) {
+        this.pos.x += dpos.x;
+        this.pos.y += dpos.y;
     },
     render: function(ctx) {},
     
-    onDrag: function(e) {},
-    onDrop: function(e) {},
-    onMouseOver: function(e) { this.inside = true;  },
-    onMouseOut: function(e)  { this.inside = false; },
+    onDrag: function(e, pos) {
+        if (!this.prevpos)
+            this.prevpos = this.parent.prevpos;
+        var dx = pos.x - this.prevpos.x,
+            dy = pos.y - this.prevpos.y;
+        this.dpos = { x: dx, y: dy };
+        if (this.translatable)
+            this.translateBy(this.dpos);
+            
+        this.prevpos = pos;
+    },
+    onDrop: function(e, pos) {
+        this.prevpos = null;
+        this.dpos = null;
+    },
+    onMouseOver: function(e) { this.inside = true;  this.color = this.color2; },
+    onMouseOut: function(e)  { this.inside = false; this.color = this.color1; },
 });
 
-var ControlPoint = Class.create(Grob, {
-    initialize: function($super, x, y) {
-        $super(x, y);
-        this.w = 6;
-        this.h = 6;
-        this.r = 6;
-
-        this.color1 = '#69f';
-        this.color2 = '#f69';
-        this.color = this.color1;
+var Point = Class.create(Grob, {
+    initialize: function($super, parent, x, y, r) {
+        $super(parent, x, y);
+        
+        this.name = 'point';
+        this.r = r || 6;
     },
     
     render: function(ctx) {
@@ -144,8 +237,8 @@ var ControlPoint = Class.create(Grob, {
 	    ctx.strokeStyle = 'transparent';
         ctx.beginPath();
 	    //ctx.moveTo(this.x, this.y);
-        ctx.fillText(this.x + ', ' + this.y, this.x, this.y - 6);
-	    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2, true);
+        ctx.fillText('(' + this.pos.x + ', ' + this.pos.y + ')', this.pos.x, this.pos.y - 5);
+	    ctx.arc(this.pos.x, this.pos.y, this.r, 0, Math.PI * 2, true);
 	    ctx.closePath();
 	    ctx.stroke();
 	    ctx.fill();
@@ -154,13 +247,159 @@ var ControlPoint = Class.create(Grob, {
     isInside: function(pos) {
         return this.distanceTo(pos) <= this.r;
     },
+    
     onMouseOver: function($super, e) {
         $super(e);
-        this.color = this.color2;
     },
     onMouseOut: function($super, e) {
         $super(e);
-        this.color = this.color1;
+    },
+    onDrag: function($super, e, pos) {
+        $super(e, pos);
+    },
+});
+var Circle = Class.create(Grob, {
+    initialize: function($super, parent, c, p1, width) {
+        $super(parent);
+        
+        this.name = 'circle';
+        this.translatable = false;
+        this.p1 = p1;
+        this.c = c;
+        this.width = width;
+        this.prevpos = null;
+    },
+    
+    render: function(ctx) {
+        ctx.strokeStyle = this.color;
+        ctx.fillStyle = this.color;
+        ctx.lineWidth = this.width;
+        ctx.beginPath();
+        ctx.arc(this.c.pos.x, this.c.pos.y, dist(this.c.pos, this.p1.pos), 0, 2 * Math.PI, true);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.globalAlpha = 0.15;
+        ctx.fill();
+        ctx.globalAlpha = 0.6;
+    },
+    
+    isInside: function(pos) {
+        return /*Math.abs*/(dist(this.c.pos, pos) - dist(this.c.pos, this.p1.pos)) <= this.width + 1;
+    },
+    onDrag: function($super, e, pos) {
+        $super(e, pos);
+        
+        console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ')', this.dpos.dx, this.dpos.dy);
+        this.p1.translateBy(this.dpos);
+        this.c.translateBy(this.dpos);
+    },
+    onDrop: function($super, e, pos) {
+        $super(e, pos);
+        this.prevpos = null;
+    }
+});
+var AnnulusCenter = Class.create(Point, {
+    initialize: function($super, parent, x, y, r) {
+        $super(parent, x, y, r);
+        
+        this.name = 'annuluscenter';
+        this.translatable = false;
+        this.prevpos = null;
+    },
+
+    onDrag: function($super, e, pos) {
+        $super(e, pos);
+        
+        //console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ')', this.dpos.dx, this.dpos.dy, dist(this.parent.p1.pos, this.pos), dist(this.parent.p2.pos, this.pos));
+        this.parent.translateBy(this.dpos);
+        this.translateBy(this.dpos);
+    },
+});
+var Arc = Class.create(Grob, {
+    initialize: function($super, parent, p1, p2, c, width) {
+        $super(parent);
+        
+        this.name = 'arc';
+        this.p1 = p1;
+        this.p2 = p2;
+        this.c = c;
+        this.width = width;
+        this.prevpos = null;
+    },
+    render: function(ctx) {
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.width;
+        ctx.beginPath();
+        ctx.moveTo(this.p1.pos.x, this.p1.pos.y);
+        ctx.arcTo(this.p2.pos.x, this.p2.pos.y, dist(c.pos, p1.pos));
+        ctx.closePath();
+        ctx.stroke();
+    },
+    onDrag: function($super, e, pos) {
+        $super(e, pos);
+        console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ')', dx, dy);
+        this.p1.pos.x += dx;
+        this.c.pos.x += dx;
+        this.p1.pos.y += dy;
+        this.c.pos.y += dy;
+    },
+});
+var Segment = Class.create(Grob, {
+    initialize: function($super, parent, p1, p2, width) {
+        $super(parent);
+        
+        this.name = 'segment';
+        this.p1 = p1;
+        this.p2 = p2;
+        this.width = width;
+        this.prevpos = null;
+    },
+    
+    render: function(ctx) {
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.width;
+        ctx.beginPath();
+        ctx.moveTo(this.p1.pos.x, this.p1.pos.y);
+        ctx.lineTo(this.p2.pos.x, this.p2.pos.y);
+        ctx.closePath();
+        ctx.stroke();
+    },
+    
+    isInside: function(pos) {
+        return this.distanceTo(pos) <= this.width + 1;
+    },
+    cross: function(c) {
+        return (this.p2.pos.x - this.p1.pos.x) * (c.y - this.p1.pos.y) - (this.p2.pos.y - this.p1.pos.y) * (c.x - this.p1.pos.x);
+    },
+    dot: function(c) {
+        return (this.p2.pos.x - this.p1.pos.x) * (c.x - this.p1.pos.x) + (this.p2.pos.y - this.p1.pos.y) * (c.y - this.p1.pos.y);
+    },
+    distanceTo: function(c) {
+        var d = 0,
+            v1 = this.dot(c),
+            v2 = this.dot(this.p2.pos);
+            
+        if (v1 < 0)
+            d = dist(this.p1.pos, c);
+        else if (v1 > v2)
+            d = dist(this.p2.pos, c);
+        else
+            d = Math.abs(this.cross(c) / dist(this.p1.pos, this.p2.pos));
+        
+        return d;
+    },
+    
+    onMouseOver: function($super, e) {
+        $super(e);
+    },
+    onMouseOut: function($super, e) {
+        $super(e);
+    },
+    onDrag: function($super, e, pos) {
+        $super(e, pos);
+        
+        this.p1.translateBy(this.dpos);
+        this.p2.translateBy(this.dpos);
     },
 });
 
@@ -176,4 +415,7 @@ function getContext(id) {
     return;
   }
   return context;
+}
+function dist(a, b) {
+    return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 }

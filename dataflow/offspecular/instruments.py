@@ -75,16 +75,16 @@ def convert_to_plottable(result):
     #return dict(output=result)
     #print "\n" * 10
     #raw_input("I'm waiting...")
-    print "Finished converting\n"
+    #print "Finished converting\n"
     return dict(output=res)
 
 
 def _plot_format(data):
     #[[[1,2,3,4],[5,6,7,8],[9,10,11,12]][[1,2,3,4],[3,4,2,4],[2,7,8,0]],...]
     #data[x][:,0] is the counts
-    print "\tWorking on output"
+    #print "\tWorking on output"
     z = [arr[:, 0].tolist() for arr in data]
-    print "\t\tFinished z conversion"
+    #print "\t\tFinished z conversion"
     axis = ['x', 'y']
     dims = {}
     for index, label in enumerate(axis):
@@ -127,7 +127,7 @@ def save_action(input=None, ext=None):
 def _save_one(input, ext):
     default_filename = "default.cg1"
     # modules like autogrid return MetaArrays that don't have filenames
-    outname = initname = input.extrainfo["path"] + "/" + input.extrainfo.get("filename", default_filename)
+    outname = initname = input._info[-1]["path"] + "/" + input._info[-1].get("filename", default_filename)
     if ext is not None:
         outname = ".".join([os.path.splitext(outname)[0], ext])
     print "saving", initname, 'as', outname
@@ -219,7 +219,7 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                  name='NCNR ANDR',
                  archive=config.NCNR_DATA + '/andr',
                  menu=[('Input', [load, save]),
-                       ('Reduction', [autogrid, join, offset, wiggle, pixels_two_theta, two_theta_qxqz])
+                       ('Reduction', [autogrid, join, offset, wiggle, pixels_two_theta, two_theta_qxqz]),
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],
                  datatypes=[data2d],
@@ -244,7 +244,7 @@ if __name__ == '__main__':
         dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
         #dict(module="ospec.grid", position=(360 , 60), config={}),
         dict(module="ospec.join", position=(150, 100), config={}),
-        dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':0.1}}),
+        dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':0.2}}),
         dict(module="ospec.wiggle", position=(350, 200), config={}),
         dict(module="ospec.twotheta", position=(450, 250), config={}),
         dict(module="ospec.qxqz", position=(550, 300), config={}),
@@ -271,16 +271,20 @@ if __name__ == '__main__':
 
 
     result = run_template(template, config)
-    #plot_result = [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in result.items()]
+    print "\nStarting again. This time should be A LOT quicker.\n"
+    result2 = run_template(template, config)
+    result = [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in result.items()]
+    #assert result[6]['output'][0].all() == result2[6]['output'][0].all()
+    #print result2[6]
+    #result = [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in result.items()]
     print "WRITING TO FILE"
     for index, plottable in enumerate(result):
         with open('new_data' + str(index) + '.txt', 'w') as f:
             for format in plottable.get('output', []):
                 f.write(format + "\n")
     print "DONE"
-    sys.exit()
-    #pprint(result)
 
+    #pprint(result)
     #raw_input("Done looking at formatted output? ")
     #output of the qxqz: result[7]['output'][0]
     #data = result[6]['output'][0]
@@ -302,4 +306,4 @@ if __name__ == '__main__':
     #print numpy.ravel(result[7]['output'][0])
     #print result[7]['output'][0]._info
     #data = result[7]['output'][0] # output of the qxqz conversion
-    #assert data.all() == eval(data.extrainfo["CreationStory"]).all() # verify the creation story (will this have much use?)
+    #assert data.all() == eval(data._info[-1]["CreationStory"]).all() # verify the creation story (will this have much use?)
