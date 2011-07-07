@@ -137,7 +137,9 @@ def runReduction(request):
 #    return HttpResponse(simplejson.dumps(a))
 
 
-
+######## 
+## Views for displaying a language selection form and for calling the file association table with the selected language.
+## scheme is the same as for the editor
 
 ########
 ## Views for displaying a language selection form and for calling the editor template with the selected language.

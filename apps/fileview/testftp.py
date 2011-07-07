@@ -1,4 +1,5 @@
 from ftplib import FTP
+from FTPfileclass import FTPfile
 import sys
 
 
@@ -7,20 +8,34 @@ import sys
 ## make a json like string
 ftp=FTP('ftp.ncnr.nist.gov')
 ftp.login()
-directory_structure = '['
-def getChildren(curr_dir): 
-	ftp.cwd(curr_dir)
-	for i in ftp.dir():
-		ftp.cwd(i)
-		if ftp.dir():
-			directory_structure += '{"text":"%(nam)s","id":"%(path)s","children":['
-		else:
-			directory_structure += '
-			
-	
-	
-print ftp.pwd()
-ftp.cwd('pub')
+ftp.cwd('pub')		
+
+id_counter=0;
+
+def getChildren(directory):
+	global id_counter
+	ftp.cwd(directory)
+	childList=[]
+	for i in ftp.nlst():
+		id_counter+=1
+		childList.append(FTPfile(id_counter, directory+i,[], False))
+	return childList
+
+
+## trying without an actual list of files first (just using references)
+
+root = FTPfile(id_counter,ftp.pwd(),[],False)
+children=getChildren(root.path)
+if children:
+	root.setChildren(children)
+else:
+	root.isLeaf()
+#print root
+for i in root.children:
+	print i.id, i
+#print root.children
+#print ftp.nlst()
+
 
 ftp.cwd('ncnrdata')
 ftp.cwd('bt7')
