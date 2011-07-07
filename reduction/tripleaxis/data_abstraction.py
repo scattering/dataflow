@@ -662,16 +662,20 @@ class TripleAxis(object):
                         for i in range(0,len(detector.measurement.x)):
                                 detector.measurement[i]=detector.measurement[i]*mon0[i]/monitor
                 return
-        def harmonic_monitor_correction(self):
+        def harmonic_monitor_correction(self, instrument_name):
                 "Multiplies the montior correction through all of the detectors in the Detector_Sets."
                 #Use for constant-Q scans with fixed scattering energy, Ef.
                 #CURRENTLY: Assumes Ef is fixed under constant-Q scan; could implement check later
         
-                M = establish_correction_coefficients('monitor_correction_coordinates.txt')
+                coefficients = establish_correction_coefficients('monitor_correction_coordinates.txt')
+                M = coefficients[instrument_name]
+                for i in range(0, len(M)):
+                        M[i]=float(M[i])
+                #TODO - Throw error if there's an improper instrument_name given
                 for detector in bt7.detectors:
                         Eii=self.physical_motors.ei
-                        detector.measurement=detector.measurement*(M[0] + M[1]*Eii + M[2]*Eii^2 + M[3]*Eii^3 + M[4]*Eii^4)
-                        #TODO CHECK THIS METHOD -> might need nested for loop
+                        detector.measurement=detector.measurement*(M[0] + M[1]*Eii + M[2]*Eii**2 + M[3]*Eii**3 + M[4]*Eii**4)
+                        #TODO the primary detector is a single array... doesn't have a '.measurement' -> FIX!
                         
 # ****************************************************************************************************************************************************
 # ***************************************************************** TRANSLATION METHODS **************************************************************
@@ -1032,31 +1036,36 @@ def translate_metadata(bt7,dataset):
         #self.meta_data.desired_npoints=dataset.metadata.npoints
         
 def translate_detectors(bt7,dataset):
-        bt7.detectors.primary_detector=dataset.data['detector']
+        bt7.detectors.primary_detector.measurement.x=dataset.data['detector']
+        bt7.detectors.primary_detector.measurement.variance=dataset.data['detector']
         bt7.detectors.detector_mode=dataset.metadata['analyzerdetectormode']
         #later, I should do something clever to determine how many detectors are in the file,
         #or better yet, lobby to have the information in the ice file
         #but for now, let's just get something that works
         
         
-                
+        #detectors do NOT have a 'summed_counts' attribute currently.
         if dataset.metadata.has_key('analyzersdgroup'):
                 set_detector(bt7,dataset,'single_detector','analyzersdgroup')
-                bt7.detectors.single_detector.summed_counts=dataset.data['singledet']
+                #bt7.detectors.single_detector.summed_counts.measurement.x=dataset.data['singledet']
+                #bt7.detectors.single_detector.summed_counts.measurement.variance=dataset.data['singledet']
                 
         if dataset.metadata.has_key('analyzerdoordetectorgroup'):
                 set_detector(bt7,dataset,'door_detector','analyzerdoordetectorgroup')
-                bt7.detectors.single_detector.summed_counts=bt7.detectors.door_detector.x.sum(axis=1)#None #dataset.data['doordet']  #Not sure why this one doesn't show up???
-                
+                #bt7.detectors.single_detector.summed_counts.measurement.x=bt7.detectors.door_detector.x.sum(axis=1)#None #dataset.data['doordet']  #Not sure why this one doesn't show up???
+                #bt7.detectors.single_detector.summed_counts.measurement.variance=bt7.detectors.door_detector.x.sum(axis=1)#None #dataset.data['doordet']  #Not sure why this one doesn't show up???
+              
         if dataset.metadata.has_key('analyzerddgroup'):
                 set_detector(bt7,dataset,'diffraction_detector','analyzerddgroup')
-                bt7.detectors.diffraction_detector.summed_counts=dataset.data['diffdet']
-                
+                #bt7.detectors.diffraction_detector.summed_counts.measurement.x=dataset.data['diffdet']
+                #bt7.detectors.diffraction_detector.summed_counts.measurement.variance=dataset.data['diffdet']
+          
         if dataset.metadata.has_key('analyzerpsdgroup'):
                 set_detector(bt7,dataset,'position_sensitive_detector','analyzerpsdgroup')
                 if hasattr(bt7.detectors,'position_sensitive_detector'):
-                        bt7.detectors.position_sensitive_detector.summed_counts=dataset.data['psdet']
-                
+                        #bt7.detectors.position_sensitive_detector.summed_counts.measurement.x=dataset.data['psdet']
+                        #bt7.detectors.position_sensitive_detector.summed_counts.measurement.variance=dataset.data['psdet']
+               
                 
                         
                         
@@ -1181,9 +1190,9 @@ if __name__=="__main__":
         bt7=TripleAxis()
         translate(bt7,mydata)
         print 'translations done'
-        bt7.normalize_monitor(90000)
-        print 'detailed balance done'
-        #harmonic_monitor_correction(bt7)
+        #bt7.normalize_monitor(90000)
+        #print 'detailed balance done'
+        bt7.harmonic_monitor_correction('BT7')
         print 'bye'
         
 
