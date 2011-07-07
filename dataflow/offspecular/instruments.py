@@ -9,38 +9,38 @@ from pprint import pprint
 # left here for testing purposes
 # python uses __name__ for relative imports so I cannot use
 # the ... in place of dataflow when testing
-#from dataflow.dataflow import config
-#from dataflow.dataflow.calc import run_template
-#from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
-#from dataflow.dataflow.core import Datatype, Instrument, Template, register_instrument
-#from dataflow.dataflow.modules.load import load_module
-#from dataflow.dataflow.modules.join import join_module
-#from dataflow.dataflow.modules.scale import scale_module
-#from dataflow.dataflow.modules.save import save_module
-#from dataflow.dataflow.modules.autogrid import autogrid_module
-#from dataflow.dataflow.modules.offset import offset_module
-#from dataflow.dataflow.modules.wiggle import wiggle_module
-#from dataflow.dataflow.modules.pixels_two_theta import pixels_two_theta_module
-#from dataflow.dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
-#from dataflow.reduction.offspecular.filters import *
-#from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
+from dataflow.dataflow import config
+from dataflow.dataflow.calc import run_template
+from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
+from dataflow.dataflow.core import Datatype, Instrument, Template, register_instrument
+from dataflow.dataflow.modules.load import load_module
+from dataflow.dataflow.modules.join import join_module
+from dataflow.dataflow.modules.scale import scale_module
+from dataflow.dataflow.modules.save import save_module
+from dataflow.dataflow.modules.autogrid import autogrid_module
+from dataflow.dataflow.modules.offset import offset_module
+from dataflow.dataflow.modules.wiggle import wiggle_module
+from dataflow.dataflow.modules.pixels_two_theta import pixels_two_theta_module
+from dataflow.dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
+from dataflow.reduction.offspecular.filters import *
+from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
 
 
-from ...dataflow import config
-from ...dataflow.calc import run_template
-from ...dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
-from ...dataflow.core import Datatype, Instrument, Template, register_instrument
-from ...dataflow.modules.load import load_module
-from ...dataflow.modules.join import join_module
-from ...dataflow.modules.scale import scale_module
-from ...dataflow.modules.save import save_module
-from ...dataflow.modules.autogrid import autogrid_module
-from ...dataflow.modules.offset import offset_module
-from ...dataflow.modules.wiggle import wiggle_module
-from ...dataflow.modules.pixels_two_theta import pixels_two_theta_module
-from ...dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
-from ...reduction.offspecular.filters import *
-from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
+#from ...dataflow import config
+#from ...dataflow.calc import run_template
+#from ...dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
+#from ...dataflow.core import Datatype, Instrument, Template, register_instrument
+#from ...dataflow.modules.load import load_module
+#from ...dataflow.modules.join import join_module
+#from ...dataflow.modules.scale import scale_module
+#from ...dataflow.modules.save import save_module
+#from ...dataflow.modules.autogrid import autogrid_module
+#from ...dataflow.modules.offset import offset_module
+#from ...dataflow.modules.wiggle import wiggle_module
+#from ...dataflow.modules.pixels_two_theta import pixels_two_theta_module
+#from ...dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
+#from ...reduction.offspecular.filters import *
+#from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
 
 
 # Datatype
@@ -75,16 +75,16 @@ def convert_to_plottable(result):
     #return dict(output=result)
     #print "\n" * 10
     #raw_input("I'm waiting...")
-    print "Finished converting\n"
+    #print "Finished converting\n"
     return dict(output=res)
 
 
 def _plot_format(data):
     #[[[1,2,3,4],[5,6,7,8],[9,10,11,12]][[1,2,3,4],[3,4,2,4],[2,7,8,0]],...]
     #data[x][:,0] is the counts
-    print "\tWorking on output"
+    #print "\tWorking on output"
     z = [arr[:, 0].tolist() for arr in data]
-    print "\t\tFinished z conversion"
+    #print "\t\tFinished z conversion"
     axis = ['x', 'y']
     dims = {}
     for index, label in enumerate(axis):
@@ -127,7 +127,7 @@ def save_action(input=None, ext=None):
 def _save_one(input, ext):
     default_filename = "default.cg1"
     # modules like autogrid return MetaArrays that don't have filenames
-    outname = initname = input.extrainfo["path"] + "/" + input.extrainfo.get("filename", default_filename)
+    outname = initname = input._info[-1]["path"] + "/" + input._info[-1].get("filename", default_filename)
     if ext is not None:
         outname = ".".join([os.path.splitext(outname)[0], ext])
     print "saving", initname, 'as', outname
@@ -273,14 +273,17 @@ if __name__ == '__main__':
     result = run_template(template, config)
     print "\nStarting again. This time should be A LOT quicker.\n"
     result2 = run_template(template, config)
-    assert(result == result2)
+    result = [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in result.items()]
+    #assert result[6]['output'][0].all() == result2[6]['output'][0].all()
+    #print result2[6]
     #result = [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in result.items()]
-    #print "WRITING TO FILE"
-    #for index, plottable in enumerate(result):
-    #    with open('new_data' + str(index) + '.txt', 'w') as f:
-    #        for format in plottable.get('output', []):
-    #            f.write(format + "\n")
-    #print "DONE"
+    print "WRITING TO FILE"
+    for index, plottable in enumerate(result):
+        with open('new_data' + str(index) + '.txt', 'w') as f:
+            for format in plottable.get('output', []):
+                f.write(format + "\n")
+    print "DONE"
+
     #pprint(result)
     #raw_input("Done looking at formatted output? ")
     #output of the qxqz: result[7]['output'][0]
@@ -303,4 +306,4 @@ if __name__ == '__main__':
     #print numpy.ravel(result[7]['output'][0])
     #print result[7]['output'][0]._info
     #data = result[7]['output'][0] # output of the qxqz conversion
-    #assert data.all() == eval(data.extrainfo["CreationStory"]).all() # verify the creation story (will this have much use?)
+    #assert data.all() == eval(data._info[-1]["CreationStory"]).all() # verify the creation story (will this have much use?)

@@ -554,9 +554,10 @@ class InsertTimestamps(Filter2D):
     @updateCreationStory
     def apply(self, data, timestamp_file='end_times.json', regenerate_end_times=False, override_existing=False):
         # first of all, if there is already a timestamp, skip!
-        if data.extrainfo.has_key('end_datetime') and not override_existing:
+        #extra info changed
+        if data._info[-1].has_key('end_datetime') and not override_existing:
             return data
-        path = data.extrainfo['path']
+        path = data._info[-1]['path']
         fn = os.path.join(path, timestamp_file)
         if regenerate_end_times:
             timestamps = get_timestamps.load_timestamps()
@@ -595,7 +596,8 @@ class AppendPolarizationMatrix(Filter2D):
         #cell = self.supervisor.He3_cells[str(inData.cell_id)] # link to the cell object
         if he3cell == None:
             print "where is the He cell?"
-            he3cell = He3AnalyzerCollection(path=data.extrainfo['path'])
+            # extra info changed
+            he3cell = He3AnalyzerCollection(path=data._info[-1]['path'])
         new_info = data.infoCopy()
         if not new_info[-1]['PolState'] in  ["--", "+-", "-+", "++"]:
             print "polarization state not defined: can't get correction matrix"
@@ -669,13 +671,14 @@ class Combine(Filter2D):
         for dataset in list_of_datasets:
             grid = self.add_to_grid(dataset, grid)
         
-        old_creation_stories = "[" + "".join([data.extrainfo['CreationStory'] + ", " for data in list_of_datasets]) + "]"
+        # extra info changed
+        old_creation_stories = "[" + "".join([data._info[-1]['CreationStory'] + ", " for data in list_of_datasets]) + "]"
         name = self.__class__.__name__
         new_creation_story = "{fname}().apply({oldcs})".format(fname=name, oldcs=old_creation_stories)
-        grid.extrainfo['CreationStory'] = new_creation_story
+        grid._info[-1]['CreationStory'] = new_creation_story
         # strip info that is meaningless in combined dataset: (filename, start_time, end_time)
         for key in ['filename', 'start_datetime', 'end_datetime']:
-            if grid.extrainfo.has_key(key): grid.extrainfo.pop(key)
+            if grid._info[-1].has_key(key): grid._info[-1].pop(key)
         return grid
         
     def add_to_grid(self, dataset, grid):
@@ -722,7 +725,8 @@ class CombinePolarized(Filter2D):
         and groups them into a labeled list of lists (dictionary!)"""
         pol_datasets = {}
         for dataset in list_of_datasets:
-            PolState = dataset.extrainfo.get('PolState', '')
+            # extra info changed
+            PolState = dataset._info[-1].get('PolState', '')
             if not PolState in pol_datasets.keys():
                 pol_datasets[PolState] = []
             pol_datasets[PolState].append(dataset)
@@ -756,7 +760,8 @@ class CombinePolarized(Filter2D):
             # combined single polarization:
             csingle = Combine().apply(pol_datasets[PolState], deepcopy(grid))
             #print type(pol_datasets[PolState])
-            csingle.extrainfo['PolState'] = PolState
+            #extra info changed
+            csingle._info[-1]['PolState'] = PolState
             combined_datasets[PolState] = csingle
         # we end up with a dictionary set of datasets (e.g. {"++": data1, "--": data2} )
         
@@ -807,12 +812,12 @@ class ThetaTwothetaToQxQz(Filter2D):
             
         trimmed_array = framed_array[1:-1, 1:-1]
         output_grid[:, :] = trimmed_array
-        
-        creation_story = data.extrainfo['CreationStory']
-        new_creation_story = creation_story + ".filter('{0}', {1})".format(self.__class__.__name__, output_grid.extrainfo['CreationStory'])
+        #extra info changed
+        creation_story = data._info[-1]['CreationStory']
+        new_creation_story = creation_story + ".filter('{0}', {1})".format(self.__class__.__name__, output_grid._info[-1]['CreationStory'])
         #print new_creation_story
-        output_grid.extrainfo = data.extrainfo.copy()
-        output_grid.extrainfo['CreationStory'] = new_creation_story
+        output_grid._info[-1] = data._info[-1].copy()
+        output_grid._info[-1]['CreationStory'] = new_creation_story
         return output_grid
 
 class PolarizationCorrect(Filter2D):
