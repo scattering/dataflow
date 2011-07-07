@@ -8,7 +8,7 @@ from copy import deepcopy,copy
 import numpy as np
 from numpy import array
 import math
-#from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 from uncertainty import Measurement
 import json
 from draw_annulus_aa import annular_mask_antialiased
@@ -258,7 +258,6 @@ blocked beam.
     res.theta=copy(sample.theta)
     return res
 
-#Correction needed eventually
 def correct_dead_time(sansdata,deadtime=3.4e-6):
     
     dscale = 1/(1-deadtime*(np.sum(sansdata.data)/sansdata.metadata["run.rtime"]))
@@ -297,8 +296,8 @@ Coords are taken with reference to bottom left of the image.
     #Vectorize this loop, it's quick, but could be quicker
     #test against this simple minded implementation
     print ymax-coords_bottom_left[1],ymax-coords_upper_right[1]
-    for x in range(coords_bottom_left[0],coords_upper_right[0]):
-        for y in range(ymax-coords_upper_right[1],ymax-coords_bottom_left[1]):
+    for x in range(coords_bottom_left[0],coords_upper_right[0]+1):
+        for y in range(ymax-coords_upper_right[1],ymax-coords_bottom_left[1]+1):
             I_in_beam=I_in_beam+in_beam.data[x,y]
             I_empty_beam=I_empty_beam+empty_beam.data[x,y]
     result=I_in_beam/I_empty_beam
@@ -455,7 +454,7 @@ def annular_av(sansdata):
         norm_integrated_intensity = np.sum(mask*sansdata.data.x)
         if (norm_integrated_intensity != 0.0):
             norm_integrated_intensity/=np.sum(mask)
-        I.append(norm_integrated_intensity*step)
+        I.append(norm_integrated_intensity)#not multiplying by step anymore
     Q = Q.tolist()
     I = (np.array(I)).tolist()
     print "Q is : ", Q
@@ -477,11 +476,11 @@ def annular_av(sansdata):
     'style': 'line',
     };
     #plottable_1D = json.dumps(plottable_1D)
-    #plt.plot(Q,I,'ro')
-    #plt.title('1D')
-    #plt.xlabel('q(A^-1)')
-    #plt.ylabel('I(q)')
-    #plt.show()
+    plt.plot(Q,I,'ro')
+    plt.title('1D')
+    plt.xlabel('q(A^-1)')
+    plt.ylabel('I(q)')
+    plt.show()
     #sys.exit()
     return plottable_1D
     
@@ -491,9 +490,12 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument): #data (that is going thr
     countTime = empty.metadata['run.ctime']
     monCnt = empty.metadata['run.moncnt']
     sdd = empty.metadata['det.dis'] *100
-    pixel = PIXEL_SIZE_X_CM
+    pixel = empty.metadata['det.calx1']
+    if pixel>=1.0:
+        pixel/=10
     lambd = wavelength = empty.metadata['resolution.lmda']
     attenNo = empty.metadata['run.atten']
+    print "Pixel: ",pixel
     print "Attetno: ",attenNo
     print "Countime: ",countTime
     print "monCnt: ", monCnt
@@ -541,8 +543,12 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument): #data (that is going thr
     #correct empty beam by the sensitivity
     data = empty.__truediv__(DIV)
     #Then take the sum in XY box
-    coord_bottom_left=(62,60)
-    coord_top_right=(72,68)
+    #---------------------------|
+    coord_bottom_left=(62,60)  #|   
+    coord_top_right=(72,68)    #|   These coordinates do not work well
+    #---------------------------|
+    coord_bottom_left=(55,53)
+    coord_top_right=(74,72)
     summ = 0
     sumlist = []
     #-----Something wrong Here------
@@ -614,7 +620,8 @@ def chain_corrections():
     #calculate transmission
     coord_left=(60,60)
     coord_right=(70,70)
- 
+    coord_left=(55,53)
+    coord_right=(74,72)
     transmission_sample_cell_4m_rat=generate_transmission(transmission_sample_cell_4m_norm,empty_4m_norm,
                                                       coord_left,coord_right)
     transmission_empty_cell_4m_rat=generate_transmission(transmission_empty_cell_4m_norm,empty_4m_norm,
@@ -715,7 +722,7 @@ def chain_corrections():
     #plt.show()
     
     
-    AVG = annular_av(ABS)
+    AVG = annular_av(ABSQ)
     print AVG
     
 

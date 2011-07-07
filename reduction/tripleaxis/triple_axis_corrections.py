@@ -1,4 +1,4 @@
-#Translation triple_axis_corrections_idl.txt into python
+# TEST CLASS --> NOT IN USE (7/7/2011)
 
 
 import data_abstraction as D
@@ -37,14 +37,14 @@ def setup_data_structure(mydata):
 
     #mylattice = D.Lattice(a=d.get('a'), b=d.get('b'), c=d.get('c'), alpha=d.get('alpha'), beta=d.get('beta'), gamma=d.get('gamma'))
 
-'''
+
 def harmonic_monitor_correction(data):
     # Use for constant-Q scans with fixed scattering energy, Ef
     # Multiplies the montior correction through all of the detectors in the Detector_Sets
     
         def establish_correction_coefficients(filename):
             "Obtains the instrument-dependent correction coefficients from a given file and \
-             returns them in a dictionary, coefficients"
+             returns them in the dictionary called coefficients"
             datafile = open(filename)
 
             coefficients = {} # Dictionary of instrument name mapping to its array of M0 through M4
@@ -95,7 +95,7 @@ def resolution_volume_correction(data):
 
     N.exp((ki/kf) ** 3) * (1/N.tan(thetaM)) / (1/N.cot(thetaA))
     ''
-'''
+
 
 if __name__=="__main__":
     #Currently for testing purposes only

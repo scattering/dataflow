@@ -7,24 +7,24 @@ import numpy as np
 dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(dir)
 from pprint import pprint
-
-from .. import config
-from ..calc import run_template
-from .. import wireit
-from ..core import Datatype, Instrument, Template, register_instrument
-from ..modules.load import load_module
-from ..modules.save import save_module
-from ...reduction.sans.filters import *
-from ..SANS.convertq import convertq_module
-from ..SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
-from ..SANS.monitor_normalize import monitor_normalize_module
-from ..SANS.correct_background import correct_background_module
-from ..SANS.generate_transmission import generate_transmission_module
-from ..SANS.initial_correction import initial_correction_module
-from ..SANS.correct_solid_angle import correct_solid_angle_module
-from ..SANS.convert_qxqy import convert_qxqy_module
-from ..SANS.annular_av import annular_av_module
-from ..SANS.absolute_scaling import absolute_scaling_module
+from dataflow import wireit
+#from .. import config
+#from ..calc import run_template
+#from .. import wireit
+#from ..core import Datatype, Instrument, Template, register_instrument
+#from ..modules.load import load_module
+#from ..modules.save import save_module
+#from ...reduction.sans.filters import *
+#from ..SANS.convertq import convertq_module
+#from ..SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
+#from ..SANS.monitor_normalize import monitor_normalize_module
+#from ..SANS.correct_background import correct_background_module
+#from ..SANS.generate_transmission import generate_transmission_module
+#from ..SANS.initial_correction import initial_correction_module
+#from ..SANS.correct_solid_angle import correct_solid_angle_module
+#from ..SANS.convert_qxqy import convert_qxqy_module
+#from ..SANS.annular_av import annular_av_module
+#from ..SANS.absolute_scaling import absolute_scaling_module
 
 from django.utils import simplejson
 
@@ -33,23 +33,23 @@ from django.utils import simplejson
 #print 'repo', ROOT_URL.REPO_ROOT
 #print 'home', ROOT_URL.HOMEDIR
 
-#from dataflow import config
-#from dataflow.calc import run_template
-#from dataflow.core import Datatype, Instrument, Template, register_instrument
-#from dataflow.modules.load import load_module
-#from dataflow.modules.save import save_module
-#from reduction.sans.filters import *
-#from dataflow.SANS.convertq import convertq_module
-#from dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
-#from dataflow.SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
-#from dataflow.SANS.monitor_normalize import monitor_normalize_module
-#from dataflow.SANS.correct_background import correct_background_module
-#from dataflow.SANS.generate_transmission import generate_transmission_module
-#from dataflow.SANS.initial_correction import initial_correction_module
-#from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
-#from dataflow.SANS.convert_qxqy import convert_qxqy_module
-#from dataflow.SANS.annular_av import annular_av_module
-#from dataflow.SANS.absolute_scaling import absolute_scaling_module
+from dataflow import config
+from dataflow.calc import run_template
+from dataflow.core import Datatype, Instrument, Template, register_instrument
+from dataflow.modules.load import load_module
+from dataflow.modules.save import save_module
+from reduction.sans.filters import *
+from dataflow.SANS.convertq import convertq_module
+from dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
+from dataflow.SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
+from dataflow.SANS.monitor_normalize import monitor_normalize_module
+from dataflow.SANS.correct_background import correct_background_module
+from dataflow.SANS.generate_transmission import generate_transmission_module
+from dataflow.SANS.initial_correction import initial_correction_module
+from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
+from dataflow.SANS.convert_qxqy import convert_qxqy_module
+from dataflow.SANS.annular_av import annular_av_module
+from dataflow.SANS.absolute_scaling import absolute_scaling_module
 
 #Transmissions
 Tsam = 0
@@ -59,7 +59,7 @@ qx = {}
 qy = {}
 correctVer = SansData()
 #List of Files
-global fileList
+fileList = []
  
 # Datatype
 SANS_DATA = 'data1d.sans'
@@ -121,27 +121,13 @@ save = save_module(id='sans.save', datatype=SANS_DATA,
 
 # Modules
 def monitor_normalize_action(input=None):
-    #np.set_printoptions(edgeitems = 128)
-    #print "input",input
-    ##flat = []
-        
-    #file = open("/home/elakian/sansdata2.dat","w")
-    
-    #x = monitor_normalize(input[0][0])
-    #file.write(repr(x.data.x))
-    
-    #file.close()
-    
-    #for bundle in input:
-        #flat.extend(bundle)
-    x = 0
-    #print "size: ", len(input[0])
-    #result = []
-    #for f in input:
-        #result= [monitor_normalize(input[0][x])]
-        #x+=1
+ 
     result = [monitor_normalize(f) for f in input]
     print "result: ", result
+    return result
+def correct_solid_angle_action(input = None):
+   
+    result = [correct_solid_angle(f) for f in input]
     return result
 
 def generate_transmission_action(input=None):
@@ -149,15 +135,20 @@ def generate_transmission_action(input=None):
     print "input: ",input
     
     global Tsam,Temp
-    coord_left=(60,60)
-    coord_right=(70,70)
+    coord_left=(55,53)
+    coord_right=(74,72)
     Tsam=generate_transmission(input[3],input[2],coord_left,coord_right)
     Temp=generate_transmission(input[4],input[2],coord_left,coord_right)
     print 'Sample transmission= {0} (IGOR Value = 0.724): '.format(Tsam)
     print 'Empty Cell transmission= {0} (IGOR Value = 0.929): '.format(Temp)
     
+def correct_detector_eff(input = None):
+    result = [correct_detector_efficiency(f) for f in input]
+    return result
+def deadtm(input= None):
+    result = [correct_dead_time(f) for f in input]
+    return result
     
-   
 def initial_correction_action(input=None):
     global fileList
     lis = []
@@ -165,15 +156,31 @@ def initial_correction_action(input=None):
             lis.append(i)
        
     print "Lis: ",lis
-    lis = monitor_normalize_action(lis[0:5])
+    #For solid angle, detector eff, and deadtime corrections (all using helper functions)
+    liss = lis[0:3]
+    liss.append(lis[5])
+    lis = liss
+    print "Lis: ",lis
+    
+    lis = correct_solid_angle_action(lis)
+    lis = correct_detector_eff(lis)
+    lis = deadtm(lis)
+    blocked = lis[-1]
+    lis.remove(blocked)
+    lis.append(fileList[3])
+    lis.append(fileList[4])
+    lis = monitor_normalize_action(lis)
+    lis.append(blocked)
+    lis.append(fileList[-1])
+    print "Lis: ",lis 
     generate_transmission_action(lis)
     
     
     #SAM,BGD,EMP,Trans
     global Tsam,Temp
-    BGD = fileList[len(fileList)-2]
-    COR = initial_correction(fileList[0],BGD,fileList[1],Tsam/Temp)
-    print COR.data.x
+    BGD = blocked
+    COR = initial_correction(lis[0],BGD,lis[1],Tsam/Temp)
+    print "COR: ",COR.data.x
     global correctVer
     correctVer = COR
     print "result: ", correctVer
@@ -201,11 +208,6 @@ initial_corr = initial_correction_module(id='sans.initial_correction', datatype=
 def convertq_action():
     global correctVer
     result = convert_q(correctVer)
-    return result
-
-def correct_solid_angle_action():
-    global correctVer
-    result = correct_solid_angle(correctVer)
     return result
 
 def correct_detector_sensitivity_action(input=None):
@@ -249,16 +251,16 @@ annul_av = annular_av_module(id='sans.annular_av', datatype=SANS_DATA, version='
 def absolute_scaling_action(input=None):
     #sample,empty,DIV,Tsam,instrument
     global correctVer,fileList,Tsam,qx,qy
-    correctVer = convertq_action()
-    correctVer = correct_solid_angle_action()
-    convert_qxqy_action()
     sensitivity = fileList[len(fileList)-1]
     EMP = fileList[2]
     ABS = absolute_scaling(correctVer,EMP,sensitivity,Tsam,'NG3')
+    correctVer = ABS
+    correctVer = convertq_action()
+    convert_qxqy_action()
     result = [ABS]
     print "abs: ",result
     plottable_2D = {
-    'z': ABS.data.x.tolist(),
+    'z': correctVer.data.x.tolist(),
     'title': 'COR',
     'dims': {
       'xmax': 128.0,
@@ -287,7 +289,7 @@ SANS_INS = Instrument(id='ncnr.sans.ins',
                  name='NCNR SANS INS',
                  archive=config.NCNR_DATA + '/sansins',
                  menu=[('Input', [load, save]),
-                       ('Reduction', [correct_det_sens,correct_back,initial_corr,annul_av,absolute])
+                       ('Reduction', [correct_det_sens,initial_corr,annul_av,absolute])
                                               ],
                  requires=[config.JSCRIPT + '/sansplot.js'],
                  datatypes=[data2d],
@@ -295,8 +297,8 @@ SANS_INS = Instrument(id='ncnr.sans.ins',
 instruments = [SANS_INS]
 
 # Testing
-#if __name__ == '__main__':
-def TESTING():
+if __name__ == '__main__':
+#def TESTING():
     global fileList
     fileList = [map_files('sample_4m'),map_files('empty_cell_4m'),map_files('empty_4m'),map_files('trans_sample_4m'),map_files('trans_empty_cell_4m'),map_files('blocked_4m'),map_files('div')]
     #fileList = ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105"]
@@ -329,9 +331,16 @@ def TESTING():
                         wires=wires,
                         instrument=SANS_INS.id,
                         )
+    f = open("/home/elakian/tem.txt","w")
+    f.write("Template: ")
+    f.write( simplejson.dumps(wireit.template_to_wireit_diagram(template)))
+    f.write("\n")
+    f.write("Lang: ")
+    f.write(simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))) 
+    f.close()
     #print 'TEMPLATE', simplejson.dumps(wireit.template_to_wireit_diagram(template))
     #print 'LANGUAGE', simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))                
-    return run_template(template, config)
+    run_template(template, config)
         
     #datadir=os.path.join(os.path.dirname(__file__),'ncnr_sample_data')
     #filedict={'empty_1m':os.path.join(datadir,'SILIC001.SA3_SRK_S101'),

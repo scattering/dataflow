@@ -5,7 +5,8 @@ import copy
 class FilterableMetaArray(MetaArray):
     def __new__(*args, **kwargs):
         subarr = MetaArray.__new__(*args, **kwargs)
-        subarr.extrainfo = subarr._info[-1]
+        # causing problems with parsing
+        #subarr.extrainfo = subarr._info[-1]
         return subarr
     
     def filter(self, filtername, *args, **kwargs):
