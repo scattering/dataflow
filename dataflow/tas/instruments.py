@@ -4,7 +4,8 @@ Triple Axis Spectrometer reduction and analysis modules
 import math
 import os
 from pprint import pprint
-
+from ...reduction.tripleaxis.data_abstraction import TripleAxis
+from ..calc import run_template
 import numpy
 
 #from dataflow import config
@@ -162,8 +163,19 @@ def scale_action(input=None, scale=None, xtype=None, position=None):
 scale = scale_module(id='tas.scale', datatype=TAS_DATA,
                      version='1.0', action=scale_action)
 
+def detatiled_balance_action(input=None):
+    input.detailed_balance()
+    return dict(output=input)
 
+def normalize_monitor_action(input=None):
+    input.normalize_monitor()
+    return dict(output=input)
 
+normalizemonitor = normalize_monitor_module(id='tas.normalize_monitor', datatype=TAS_DATA,
+                                            version='1.0', action=normalize_monitor_action)
+
+detailedbalance = detailed_balance_module(id='tas.detailed_balance', datatype=TAS_DATA,
+                                          version='1.0', action=detailed_balance_action)
 
 
 # ==== Instrument definitions ====
@@ -171,13 +183,37 @@ BT7 = Instrument(id='ncnr.tas.bt7',
                  name='NCNR BT7',
                  archive=config.NCNR_DATA + '/bt7',
                  menu=[('Input', [load, save]),
-                       ('Reduction', [join, scale])
+                       ('Reduction', [join, scale, normalizemonitor, detailedbalance])
                        ],
                  requires=[config.JSCRIPT + '/tasplot.js'],
                  datatypes=[data1d],
                  )
 
+
 # Return a list of triple axis instruments
 init_data()
 instruments = [BT7]
 
+'''
+modules = [
+    dict(module="tas.normalize_monitor"),
+    dict(module="tas.detailed_balance"),
+    ]
+wires = [
+    dict(source=[0, 'output'], target=[1, 'input']),
+    dict(source=[1, 'output'], target=[2, 'input']),
+    ]
+config = [
+    {},
+    {},
+    {},
+    ]
+template = Template(name='test reduction',
+                    description='example reduction diagram',
+                    modules=modules,
+                    wires=wires,
+                    instrument=BT7.id,
+                    )
+# the actual call to perform the reduction
+result = run_template(template, config)
+'''

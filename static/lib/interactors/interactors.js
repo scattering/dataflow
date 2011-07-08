@@ -29,6 +29,18 @@ var Interactor = Class.create({
         }
     },
     
+    points: function() {
+        var points = [];
+        for (var i = 0; i < this.grobs.length; i ++)
+            if (this.grobs[i] instanceof Point && !(this.grobs[i] instanceof Center))
+                points.push(this.grobs[i]);
+        return points;
+    },
+    center: function() {
+        if (this.c)
+            return this.c.pos;
+        return { x: null, y: null };
+    },
     translateBy: function(dpos) {
         for (var i = 0; i < this.grobs.length; i ++) {
             if (this.grobs[i].translatable)
@@ -100,14 +112,37 @@ var Interactor = Class.create({
         console.log('up  ', this.grobs, pos.x, pos.y, this.mousedown);
         this.redraw();
     },
-    onDrag: function(e, pos) {
-    
+    onDrag: function(pos) {
+        if (this.c)
+            this.c.pos = this.center();
     },
     onDrop: function(e, pos) {
     
     },
 });
-var SegmentInteractor = new Class.create(Interactor, {
+var PolygonInteractor = new Class.create(Interactor, {
+    initialize: function($super, name, icon, state, canvasid) {
+        $super(name, icon, state, canvasid);
+    },
+    center: function() {
+        var area = 0;
+        var points = this.points();
+        var j = points.length - 1;
+        var x = 0, y = 0, d;
+        
+        for (var i = 0; i < points.length; j = i ++) {
+            d = (points[i].pos.x * points[j].pos.y) - (points[i].pos.y * points[j].pos.x);
+            area += d;
+            x += (points[i].pos.x + points[j].pos.x) * d;
+            y += (points[i].pos.y + points[j].pos.y) * d;
+        }
+        
+        area /= 2;
+        d = area * 6;
+        return { x: x / d, y: y / d };
+    },
+});
+var SegmentInteractor = new Class.create(PolygonInteractor, {
     initialize: function($super, canvasid) {
         $super('Segment', 'segment.png', 0, canvasid);
         
@@ -123,7 +158,7 @@ var SegmentInteractor = new Class.create(Interactor, {
         $super();
     },
 });
-var QuadInteractor = new Class.create(Interactor, {
+var QuadInteractor = new Class.create(PolygonInteractor, {
     initialize: function($super, canvasid) {
         $super('Quad', 'quad.png', 0, canvasid);
         
@@ -136,6 +171,28 @@ var QuadInteractor = new Class.create(Interactor, {
         var l3 = new Segment(this, p3, p4, 4);
         var l4 = new Segment(this, p4, p1, 4);
         this.grobs.push(l1, l2, l3, l4, p1, p2, p3, p4);
+        var c = new Center(this, 144 + 4/9, 161 + 1/9);
+        this.grobs.push(c);
+        this.c = c;
+        
+        this.redraw();
+    },
+});
+var ParallelogramInteractor = new Class.create(PolygonInteractor, {
+    initialize: function($super, canvasid) {
+        $super('Parallelogram', 'pgram.png', 0, canvasid);
+        
+        var p1 = new Point(this, 100, 100);
+        var p2 = new Point(this, 200, 100);
+        var p3 = new Point(this, 200, 200);
+        var p4 = new Point(this, 100, 200);
+        var c = new Center(this, 150, 150);
+        var l1 = new Segment(this, p1, p2, 4);
+        var l2 = new Segment(this, p2, p3, 4);
+        var l3 = new Segment(this, p3, p4, 4);
+        var l4 = new Segment(this, p4, p1, 4);
+        this.grobs.push(l1, l2, l3, l4, c, p1, p2, p3, p4);
+        this.c = c;
         
         this.redraw();
     },
@@ -144,7 +201,7 @@ var CircleInteractor = new Class.create(Interactor, {
     initialize: function($super, canvasid) {
         $super('Circ', 'circ.png', 0, canvasid);
         
-        var c = new Point(this, 150, 150);
+        var c = new Center(this, 150, 150);
         var p1 = new Point(this, 200, 150);
         var circ = new Circle(this, c, p1, 4);
         this.grobs.push(circ, c, p1);
@@ -156,12 +213,41 @@ var AnnulusInteractor = new Class.create(Interactor, {
     initialize: function($super, canvasid) {
         $super('Circ', 'circ.png', 0, canvasid);
         
-        this.c = new AnnulusCenter(this, 150, 150);
+        this.c = new Center(this, 150, 150);
         this.p1 = new Point(this, 200, 150);
         this.p2 = new Point(this, 250, 100);
         var circ1 = new Circle(this, this.c, this.p1, 4);
         var circ2 = new Circle(this, this.c, this.p2, 4);
         this.grobs.push(circ1, circ2, this.c, this.p1, this.p2);
+        
+        this.redraw();
+    },
+});
+var ArcInteractor = new Class.create(Interactor, {
+    initialize: function($super, canvasid) {
+        $super('Arc', 'arc.png', 0, canvasid);
+        
+        var c = new Center(this, 150, 150);
+        var p1 = new Point(this, 200, 150);
+        var p2 = new Point(this, 150, 100);
+        var arc = new Arc(this, c, p1, p2, 4);
+        this.grobs.push(arc, c, p1, p2);
+        this.c = c;
+        this.p1 = p1;
+        this.p2 = p2;
+        this.arc = arc;
+        
+        this.redraw();
+    },
+});
+var GaussianInteractor = new Class.create(Interactor, {
+    initialize: function($super, canvasid) {
+        $super('Gaussian', 'gaussian.png', 0, canvasid);
+        
+        var pw = new Point(this, 200, 150);
+        var pk = new Point(this, 150, 100);
+        var gaussian = new Gaussian(this, pk, pw, 4);
+        this.grobs.push(gaussian, pk, pw);
         
         this.redraw();
     },
@@ -177,7 +263,7 @@ function getMouse(e) {
 		y -= t.offsetTop  + parseInt(t.style.borderTopWidth  || 0);
 	while (t = t.offsetParent);
 	
-	return {x: x, y: y};
+	return { x: x, y: y };
 }
 
 var Grob = Class.create({
@@ -190,8 +276,8 @@ var Grob = Class.create({
         this.prevpos = null;
         this.dpos = null;
 
-        this.color1 = '#963';
-        this.color2 = '#e96';
+        this.color1 = '#2C8139';
+        this.color2 = '#4CCC60';
         this.color = this.color1;
     },
     
@@ -237,7 +323,7 @@ var Point = Class.create(Grob, {
 	    ctx.strokeStyle = 'transparent';
         ctx.beginPath();
 	    //ctx.moveTo(this.x, this.y);
-        ctx.fillText('(' + this.pos.x + ', ' + this.pos.y + ')', this.pos.x, this.pos.y - 5);
+        ctx.fillText('(' + this.pos.x.toFixed(0) + ', ' + this.pos.y.toFixed(0) + ')', this.pos.x, this.pos.y - 5);
 	    ctx.arc(this.pos.x, this.pos.y, this.r, 0, Math.PI * 2, true);
 	    ctx.closePath();
 	    ctx.stroke();
@@ -258,22 +344,45 @@ var Point = Class.create(Grob, {
         $super(e, pos);
     },
 });
-var Circle = Class.create(Grob, {
-    initialize: function($super, parent, c, p1, width) {
-        $super(parent);
+var GrobConnector = Class.create(Grob, {
+    initialize: function($super, parent, width) {
+        $super(parent, null, null);
         
-        this.name = 'circle';
+        this.name = 'grobconnector';
         this.translatable = false;
-        this.p1 = p1;
-        this.c = c;
+        this.points = {};
         this.width = width;
-        this.prevpos = null;
     },
-    
     render: function(ctx) {
         ctx.strokeStyle = this.color;
         ctx.fillStyle = this.color;
         ctx.lineWidth = this.width;
+    },
+    
+    isInside: function(pos) {
+        return this.distanceTo(pos) <= this.width + 1;
+    },
+    onDrag: function($super, e, pos) {
+        $super(e, pos);
+        
+        console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ')', this.dpos.x, this.dpos.y);
+        for (var p in this.points)
+            this.points[p].translateBy(this.dpos);
+    },
+});
+var Circle = Class.create(GrobConnector, {
+    initialize: function($super, parent, c, p1, width) {
+        $super(parent, width);
+        
+        this.name = 'circle';
+        this.points = { p1: p1, c: c };
+        this.p1 = p1;
+        this.c = c;
+    },
+    
+    render: function($super, ctx) {
+        $super(ctx);
+        
         ctx.beginPath();
         ctx.arc(this.c.pos.x, this.c.pos.y, dist(this.c.pos, this.p1.pos), 0, 2 * Math.PI, true);
         ctx.closePath();
@@ -286,25 +395,28 @@ var Circle = Class.create(Grob, {
     isInside: function(pos) {
         return /*Math.abs*/(dist(this.c.pos, pos) - dist(this.c.pos, this.p1.pos)) <= this.width + 1;
     },
-    onDrag: function($super, e, pos) {
-        $super(e, pos);
-        
-        console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ')', this.dpos.dx, this.dpos.dy);
-        this.p1.translateBy(this.dpos);
-        this.c.translateBy(this.dpos);
-    },
-    onDrop: function($super, e, pos) {
-        $super(e, pos);
-        this.prevpos = null;
-    }
 });
-var AnnulusCenter = Class.create(Point, {
+var Center = Class.create(Point, {
     initialize: function($super, parent, x, y, r) {
-        $super(parent, x, y, r);
+        $super(parent, x, y, r || 6);
         
-        this.name = 'annuluscenter';
+        this.name = 'center';
         this.translatable = false;
-        this.prevpos = null;
+    },
+    
+    render: function($super, ctx) {
+	    ctx.fillStyle = this.color;
+	    ctx.strokeStyle = 'transparent';
+        ctx.beginPath();
+	    //ctx.moveTo(this.x, this.y);
+        ctx.fillText('(' + this.pos.x.toFixed(0) + ', ' + this.pos.y.toFixed(0) + ')', this.pos.x, this.pos.y - 5);
+	    ctx.moveTo(this.pos.x + this.r, this.pos.y);
+	    ctx.lineTo(this.pos.x, this.pos.y + this.r);
+	    ctx.lineTo(this.pos.x - this.r, this.pos.y);
+	    ctx.lineTo(this.pos.x, this.pos.y - this.r);
+	    ctx.closePath();
+	    ctx.stroke();
+	    ctx.fill();
     },
 
     onDrag: function($super, e, pos) {
@@ -315,49 +427,128 @@ var AnnulusCenter = Class.create(Point, {
         this.translateBy(this.dpos);
     },
 });
-var Arc = Class.create(Grob, {
-    initialize: function($super, parent, p1, p2, c, width) {
-        $super(parent);
+var Arc = Class.create(GrobConnector, {
+    initialize: function($super, parent, c, p1, p2, width) {
+        $super(parent, width);
+        /*
+        p1.onDrag = function(e, pos) {
+            this.parent.arc.angleToXaxis(this.parent.p2);
+        };*/
         
         this.name = 'arc';
+        this.points = { c: c, p1: p1, p2: p2 };
         this.p1 = p1;
         this.p2 = p2;
         this.c = c;
-        this.width = width;
-        this.prevpos = null;
     },
-    render: function(ctx) {
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = this.width;
-        ctx.beginPath();
-        ctx.moveTo(this.p1.pos.x, this.p1.pos.y);
-        ctx.arcTo(this.p2.pos.x, this.p2.pos.y, dist(c.pos, p1.pos));
-        ctx.closePath();
-        ctx.stroke();
-    },
-    onDrag: function($super, e, pos) {
-        $super(e, pos);
-        console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ')', dx, dy);
-        this.p1.pos.x += dx;
-        this.c.pos.x += dx;
-        this.p1.pos.y += dy;
-        this.c.pos.y += dy;
-    },
-});
-var Segment = Class.create(Grob, {
-    initialize: function($super, parent, p1, p2, width) {
-        $super(parent);
+    render: function($super, ctx) {
+        $super(ctx);
         
-        this.name = 'segment';
-        this.p1 = p1;
-        this.p2 = p2;
-        this.width = width;
-        this.prevpos = null;
+        ctx.beginPath();
+        var t_1 = this.angleToXaxis(this.p1.pos),
+            t_2 = this.angleToXaxis(this.p2.pos);
+        //console.log(t_1, t_2);
+        //ctx.moveTo(this.c.pos.x, this.c.pos.y);
+        ctx.arc(this.c.pos.x, this.c.pos.y, dist(this.c.pos, this.p1.pos), t_1, t_2, true);
+        //ctx.closePath();
+        ctx.stroke();
+        //ctx.globalAlpha = 0.15;
+        //ctx.fill();
+        //ctx.globalAlpha = 0.6;
     },
     
-    render: function(ctx) {
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = this.width;
+    angleToXaxis: function(p) {
+        return Math.atan2(p.y - this.c.pos.y, p.x - this.c.pos.x);
+    },
+    angleBetweenAngles: function(n, a, b) {
+        n = (360 + (n % 360)) % 360;
+        a = (3600000 + a) % 360;
+        b = (3600000 + b) % 360;
+
+        if (a < b)
+            return a <= n && n <= b;
+        return 0 <= n && n <= b || a <= n && n < 360;
+    },
+    distanceTo: function(pos) {
+        var d = 0,
+            t_1 = this.angleToXaxis(this.p1.pos),
+            t_2 = this.angleToXaxis(this.p2.pos),
+            t_  = this.angleToXaxis(pos);
+        var between = this.angleBetweenAngles(t_, t_2, t_1);
+        //console.log(t_, t_1, t_2, between);
+            
+        if (between)
+            d = Math.abs(dist(this.c.pos, pos) - dist(this.c.pos, this.p1.pos));
+        else
+            d = Math.min(dist(this.p1.pos, pos), dist(this.p2.pos, pos));
+        
+        return d;
+    },
+});
+var FunctionConnector = Class.create(GrobConnector, {
+    initialize: function($super, parent, width) {
+        $super(parent, width);
+        
+        this.function = null;
+    },
+    
+});
+    
+var Gaussian = Class.create(FunctionConnector, {
+    initialize: function($super, parent, pk, pw, width) {
+        $super(parent, width);
+        /*
+        p1.onDrag = function(e, pos) {
+            this.parent.arc.angleToXaxis(this.parent.p2);
+        };*/
+        
+        this.name = 'gaussian';
+        this.function = this.gaussian;
+        this.points = { pk: pk, pw: pw };
+        this.pk = pk;
+        this.pw = pw;
+    },
+    render: function($super, ctx) {
+        $super(ctx);
+        
+        //ctx.beginPath();
+        //console.log(t_1, t_2);
+        //ctx.moveTo(this.c.pos.x, this.c.pos.y);
+        drawEq(ctx, this.gaussian.bind(this), 0, this.pw.pos.y, 0, 300);
+        //ctx.closePath();
+        //ctx.stroke();
+        //ctx.globalAlpha = 0.15;
+        //ctx.fill();
+        //ctx.globalAlpha = 0.6;
+    },
+    
+    gaussian: function(x) {
+        var peakX = this.pk.pos.x,
+            peakY = this.pw.pos.y - this.pk.pos.y,
+            FWHM = Math.abs(this.pw.pos.x - peakX),
+            bkgdY = 0;
+        var stdDev = FWHM / 2 / Math.sqrt(2 * Math.log(2));
+        return bkgdY + (peakY - bkgdY) * Math.exp(- Math.pow((x - peakX), 2) / 2 / Math.pow(stdDev, 2));
+    },
+    distanceTo: function(pos) {
+        var d = Math.abs((this.pw.pos.y - this.gaussian(pos.x)) - pos.y);
+        console.log(d);
+        return d;
+    },
+});
+var Segment = Class.create(GrobConnector, {
+    initialize: function($super, parent, p1, p2, width) {
+        $super(parent, width);
+        
+        this.name = 'segment';
+        this.points = { p1: p1, p2: p2 };
+        this.p1 = p1;
+        this.p2 = p2;
+    },
+    
+    render: function($super, ctx) {
+        $super(ctx);
+
         ctx.beginPath();
         ctx.moveTo(this.p1.pos.x, this.p1.pos.y);
         ctx.lineTo(this.p2.pos.x, this.p2.pos.y);
@@ -365,9 +556,6 @@ var Segment = Class.create(Grob, {
         ctx.stroke();
     },
     
-    isInside: function(pos) {
-        return this.distanceTo(pos) <= this.width + 1;
-    },
     cross: function(c) {
         return (this.p2.pos.x - this.p1.pos.x) * (c.y - this.p1.pos.y) - (this.p2.pos.y - this.p1.pos.y) * (c.x - this.p1.pos.x);
     },
@@ -395,12 +583,6 @@ var Segment = Class.create(Grob, {
     onMouseOut: function($super, e) {
         $super(e);
     },
-    onDrag: function($super, e, pos) {
-        $super(e, pos);
-        
-        this.p1.translateBy(this.dpos);
-        this.p2.translateBy(this.dpos);
-    },
 });
 
 function getContext(id) {
@@ -418,4 +600,13 @@ function getContext(id) {
 }
 function dist(a, b) {
     return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+}
+function drawEq(ctx, eq, x0, y0, xmin, xmax) {
+	ctx.beginPath();
+	ctx.moveTo(x0, y0);
+	for( i = xmin; i <= xmax; i++ ) {
+		ctx.lineTo(i, y0 - eq(i));
+	}
+ 
+	ctx.stroke();
 }

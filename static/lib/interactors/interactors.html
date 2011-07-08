@@ -12,12 +12,15 @@
 <script type="text/javascript" src="../plotting/palettes.js"></script>
 <script type="text/javascript" src="../plotting/sansdata.js"></script>
 <script type="text/javascript">
-var c1,c2,c3,c4;
+var c1,c2,c3,c4,c5,c6,c7;
 window.onload = function() {
     c1 = new SegmentInteractor('c1');
     c2 = new QuadInteractor('c2');
     c3 = new CircleInteractor('c3');
     c4 = new AnnulusInteractor('c4');
+    c5 = new ArcInteractor('c5');
+    c6 = new ParallelogramInteractor('c6');
+    c7 = new GaussianInteractor('c7');
     
 }
 </script>
@@ -32,5 +35,13 @@ window.onload = function() {
 <canvas id="c2" width="300" height="300" style="border: 2px solid;"></canvas>
 <canvas id="c3" width="300" height="300" style="border: 2px solid;"></canvas>
 <canvas id="c4" width="300" height="300" style="border: 2px solid;"></canvas>
+<br />
+<label for="c5">ArcInteractor</label>
+<label for="c6">ParallelogramInteractor</label>
+<label for="c7">GaussianInteractor</label>
+<br />
+<canvas id="c5" width="300" height="300" style="border: 2px solid;"></canvas>
+<canvas id="c6" width="300" height="300" style="border: 2px solid;"></canvas>
+<canvas id="c7" width="300" height="300" style="border: 2px solid;"></canvas>
 </body>
 </html>
