@@ -5,12 +5,14 @@ from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
 from apps.tracks.forms import languageSelectForm 
 
+from ...apps.fileview import testftp
+
 from ...dataflow import wireit
 from ...dataflow.calc import run_template
 from ...dataflow.core import register_instrument
-from ...dataflow.tas.instruments import BT7
+#from ...dataflow.tas.instruments import BT7
 #from ...dataflow.offspecular.instruments import ANDR
-from ...dataflow.tas import instruments
+#from ...dataflow.tas import instruments
 from ...dataflow.SANS import newinstruments as SANS_INS
 
 import random
@@ -49,13 +51,12 @@ store = [{
         "children": [{
             "id": 2,
             "text": "A child Node",
-            "leaf": True,
-            "children":[{}],
+            "leaf": True
+            #"children":[{}],
         }]
    }]
-
 def getNCNRdirectories(request):
-	return HttpResponse(simplejson.dumps(store))
+	return HttpResponse(simplejson.dumps(testftp.runMe()))  #testftp.runMe()
     
 def displayFileLoad(request):
 	return render_to_response('FileUpload/FileTreeTest.html', locals())

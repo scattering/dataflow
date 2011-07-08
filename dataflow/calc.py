@@ -7,16 +7,15 @@ The function run_template
 from pprint import pprint
 from inspect import getsource
 from .core import lookup_module
-#import hashlib, redis
+import hashlib, redis
 
 
 # temp
 from ..reduction.offspecular.FilterableMetaArray import FilterableMetaArray
 
-import hashlib
 
 TEMP_DATABASE = {} # Fake database
-#server = redis.Redis("localhost")
+server = redis.Redis("localhost")
 def run_template(template, config):
     """
     Evaluate the template using the configured values.
@@ -54,9 +53,6 @@ def run_template(template, config):
         # Tertiary   test (hash of save module): 838b609198c1183aefa05fdb359abea8faad08f2 correct; offset was changed from 0.1 to 0.2
         # Quaternary test (hash of save module): 838b609198c1183aefa05fdb359abea8faad08f2 correct; identical
         # ======= End fingerprinting =========
-        #if kwargs.get('input', []) != []:
-        #    print kwargs['input'][0][0].__str__() + "\n" * 10
-        #    print parse_meta_arr(meta_arr_to_string(kwargs['input'][0][0])).__str__() + "\n" * 10
         use_redis = False
         if use_redis:
             # Overwrite even if there was already the same reduction?

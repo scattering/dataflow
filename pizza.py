@@ -82,6 +82,17 @@ pizza_prefs = {
             "tomatoes",
         ],
     },
+    "alex":{
+        "likes": [
+            "pizza",
+         ],
+         "dislikes": [
+            "no pizza",
+         ],
+         "topping_preferences": [
+            "all are acceptable",
+         ],
+    },
 }
 
 

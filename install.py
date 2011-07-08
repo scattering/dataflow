@@ -11,6 +11,7 @@ if __name__=="__main__":
                   'git-gui',
                   #'python-django',
                   'python-setuptools',
+                  'python-redis',
                   'python-numpy',
                   'python-scipy',
                   'python-matplotlib',
