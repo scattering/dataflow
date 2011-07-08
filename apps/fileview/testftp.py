@@ -15,10 +15,10 @@ ftp.cwd('pub')
 id_counter=0;
 
 finalString = '['
-error_log = open('errorLog.txt','w')
+#error_log = open('errorLog.txt','w')
 def getChildren(directory):
 	global id_counter;
-	error_log.write(directory)
+	#error_log.write(directory)
 	try: 
 		ftp.cwd(directory)
 	except Exception:
