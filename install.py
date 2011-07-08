@@ -11,6 +11,7 @@ if __name__=="__main__":
                   'git-gui',
                   #'python-django',
                   'python-setuptools',
+                  'python-redis',
                   'python-numpy',
                   'python-scipy',
                   'python-matplotlib',
@@ -35,7 +36,6 @@ if __name__=="__main__":
     call('easy_install pip',shell=True)
     call('easy_install openopt', shell=True)
     call('easy_install django', shell=True)
-    call('easy_install redis', shell=True)
     #call('wget http://trac.openopt.org/openopt/changeset/latest/PythonPackages?old_path=%2F&format=zip',shell=True)
     call('svn co svn://openopt.org/PythonPackages OOSuite',shell=True)
     call('cd OOSuite; python install_all.py; cd ..',shell=True)

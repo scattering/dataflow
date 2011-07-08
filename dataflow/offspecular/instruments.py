@@ -66,44 +66,44 @@ data2d = Datatype(id=OSPEC_DATA,
 #     'zlabel': 'This is my z-axis label',
 # };
 
-def convert_to_plottable(result):
-    print "Starting new converter"
-    res = []
-    for metaarray in result:
-        #print _plot_format(metaarray)
-        res.append(_plot_format(metaarray))
-    #return dict(output=result)
-    #print "\n" * 10
-    #raw_input("I'm waiting...")
-    #print "Finished converting\n"
-    return dict(output=res)
+#def convert_to_plottable(result):
+#    print "Starting new converter"
+#    res = []
+#    for data in result:
+#        #print _plot_format(metaarray)
+#        res.append(data.get_plottable())
+#    #return dict(output=result)
+#    #print "\n" * 10
+#    #raw_input("I'm waiting...")
+#    #print "Finished converting\n"
+#    return dict(output=res)
 
 
-def _plot_format(data):
-    #[[[1,2,3,4],[5,6,7,8],[9,10,11,12]][[1,2,3,4],[3,4,2,4],[2,7,8,0]],...]
-    #data[x][:,0] is the counts
-    #print "\tWorking on output"
-    z = [arr[:, 0].tolist() for arr in data]
-    #print "\t\tFinished z conversion"
-    axis = ['x', 'y']
-    dims = {}
-    for index, label in enumerate(axis):
-        arr = data._info[index]['values']
-        dims[axis[index] + 'min'] = numpy.amin(arr)
-        dims[axis[index] + 'max'] = numpy.amax(arr)
-        dims[axis[index] + 'dim'] = numpy.alen(arr)
-    xlabel = data._info[0]['name']
-    ylabel = data._info[1]['name']
-    zlabel = data._info[2]['cols'][0]['name']
-    title = 'AND/R data' # That's creative enough, right?
-    dump = dict(z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
-#    print "lulzz"
-#    timed = time.time()
-    res = simplejson.dumps(dump, sort_keys=True, indent=2)
-#    res = simplejson.dumps(dump)
-#    print time.time() - timed
-    return res
-#    return json.dumps(dump)
+#def _plot_format(data):
+#    #[[[1,2,3,4],[5,6,7,8],[9,10,11,12]][[1,2,3,4],[3,4,2,4],[2,7,8,0]],...]
+#    #data[x][:,0] is the counts
+#    #print "\tWorking on output"
+#    z = [arr[:, 0].tolist() for arr in data]
+#    #print "\t\tFinished z conversion"
+#    axis = ['x', 'y']
+#    dims = {}
+#    for index, label in enumerate(axis):
+#        arr = data._info[index]['values']
+#        dims[axis[index] + 'min'] = numpy.amin(arr)
+#        dims[axis[index] + 'max'] = numpy.amax(arr)
+#        dims[axis[index] + 'dim'] = numpy.alen(arr)
+#    xlabel = data._info[0]['name']
+#    ylabel = data._info[1]['name']
+#    zlabel = data._info[2]['cols'][0]['name']
+#    title = 'AND/R data' # That's creative enough, right?
+#    dump = dict(z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
+##    print "lulzz"
+##    timed = time.time()
+#    res = simplejson.dumps(dump, sort_keys=True, indent=2)
+##    res = simplejson.dumps(dump)
+##    print time.time() - timed
+#    return res
+##    return json.dumps(dump)
 
 
 # ========= Module definitions ===========
@@ -244,7 +244,7 @@ if __name__ == '__main__':
         dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
         #dict(module="ospec.grid", position=(360 , 60), config={}),
         dict(module="ospec.join", position=(150, 100), config={}),
-        dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':0.2}}),
+        dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':1}}),
         dict(module="ospec.wiggle", position=(350, 200), config={}),
         dict(module="ospec.twotheta", position=(450, 250), config={}),
         dict(module="ospec.qxqz", position=(550, 300), config={}),
@@ -271,9 +271,9 @@ if __name__ == '__main__':
 
 
     result = run_template(template, config)
-    print "\nStarting again. This time should be A LOT quicker.\n"
+    print "Starting again. This time should be A LOT quicker."
     result2 = run_template(template, config)
-    result = [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in result.items()]
+    #result = [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in result.items()]
     #assert result[6]['output'][0].all() == result2[6]['output'][0].all()
     #print result2[6]
     #result = [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in result.items()]

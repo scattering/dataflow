@@ -10,6 +10,7 @@ from . import config
 from .deps import processing_order
 
 from collections import deque
+import simplejson
 
 _registry = {}
 def register_instrument(instrument):
@@ -371,11 +372,22 @@ class Data(object):
 
     """
     
-    def __getstate__(self):
-        return "1.0", __dict__
-    def __setstate__(self, state):
-        version, state = state
-        self.__dict__ = state
+#    def __getstate__(self):
+#        return "1.0", __dict__
+#    
+#    def __setstate__(self, state):
+#        version, state = state
+#        self.__dict__ = state
+        
+    def get_plottable(self):
+        return dict(output=simplejson.dumps({}))
+    
+    def dumps(self):
+        return ""
+    
+    @classmethod
+    def loads(cls, str):
+        return Data()
 
 
 # ============= Parent traversal =============

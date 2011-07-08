@@ -7,12 +7,11 @@ The function run_template
 from pprint import pprint
 from inspect import getsource
 from .core import lookup_module
-import hashlib, redis
+import hashlib, redis, pickle
 
 # temp
 from ..reduction.offspecular.FilterableMetaArray import FilterableMetaArray
 
-TEMP_DATABASE = {} # Fake database
 server = redis.Redis("localhost")
 def run_template(template, config):
     """
@@ -51,31 +50,18 @@ def run_template(template, config):
         # Tertiary   test (hash of save module): 838b609198c1183aefa05fdb359abea8faad08f2 correct; offset was changed from 0.1 to 0.2
         # Quaternary test (hash of save module): 838b609198c1183aefa05fdb359abea8faad08f2 correct; identical
         # ======= End fingerprinting =========
-        if kwargs.get('input', []) != []:
-            print kwargs['input'][0][0].__str__() + "\n" * 10
-            print parse_meta_arr(meta_arr_to_string(kwargs['input'][0][0])).__str__() + "\n" * 10
-        use_redis = False
-        if use_redis:
-            # Overwrite even if there was already the same reduction?
-            if server.exists(fp):# or module.name == 'Save': 
-                result = dict(output=[parse_meta_arr(str) for str in server.lrange(fp, 0, -1)])
-            else:
-                result = module.action(**kwargs)
-                server.delete(fp)
-                for arr in result.get('output', []):
-                    server.rpush(fp, meta_arr_to_string(arr))
+        # Overwrite even if there was already the same reduction?
+        if server.exists(fp):# or module.name == 'Save': 
+#            result = dict(output=[FilterableMetaArray.loads(str) for str in server.lrange(fp, 0, -1)])
+            result = dict(output=[pickle.loads(str) for str in server.lrange(fp, 0, -1)])
         else:
-            if TEMP_DATABASE.get(nodenum, "") == fp:
-                result = TEMP_DATABASE[fp]
-            else:
-                result = module.action(**kwargs)
-            TEMP_DATABASE[nodenum] = fp
-            TEMP_DATABASE[fp] = result
+            result = module.action(**kwargs)
+            server.delete(fp)
+            for arr in result.get('output', []):
+#                server.rpush(fp, arr.dumps())
+                server.rpush(fp, pickle.dumps(arr))
         all_results[nodenum] = result
-    return all_results
-# FIXXXXXXXXXXXXXXXXXXXXXX ***********************
- #   from .offspecular.instruments import convert_to_plottable
-#    return [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in all_results.items()]
+    return [convert_to_plottable(value['output'])  if 'output' in value else {} for key, value in all_results.items()]
 
 
 def _lookup_results(result, s):
@@ -148,48 +134,51 @@ def finger_print(module, args, nodenum, input_arr, fingerprints):
     fp = hashlib.sha1(fp).hexdigest()
     return fp
 
+def convert_to_plottable(result):
+    print "Starting new converter"
+    return dict(output=[data.get_plottable() for data in result])
 
 # Temporary; some general conversion should be used instead of these string conversions
-from cStringIO import StringIO
-def meta_arr_to_string(data):
-    meta = { 'shape': data.shape, 'type': str(data.dtype), 'info': data.infoCopy()}
-    axstrs = []
-    for ax in meta['info']:
-      if ax.has_key('values'):
-        axstrs.append(ax['values'].tostring())
-        ax['values_len'] = len(axstrs[-1])
-        ax['values_type'] = str(ax['values'].dtype)
-        del ax['values']
-    fd = StringIO()
-    fd.write(str(meta) + '\n\n')
-    for ax in axstrs:
-      fd.write(ax)
-    fd.write(data.tostring())
-    ans = fd.getvalue()
-    fd.close()
-    return ans
-
-from numpy import fromstring, array
-import datetime
-def parse_meta_arr(str):
-    fd = StringIO(str)
-    meta = ''
-    while True:
-      line = fd.readline().strip()
-      if line == '':
-        break
-      meta += line
-    meta = eval(meta)
-    
-    ## read in axis values
-    for ax in meta['info']:
-      if ax.has_key('values_len'):
-        ax['values'] = fromstring(fd.read(ax['values_len']), dtype=ax['values_type'])
-        del ax['values_len']
-        del ax['values_type']
-    
-    subarr = fromstring(fd.read(), dtype=meta['type'])
-    subarr = subarr.view(FilterableMetaArray)
-    subarr.shape = meta['shape']
-    subarr._info = meta['info']
-    return subarr
+#from cStringIO import StringIO
+#def meta_arr_to_string(data):
+#    meta = { 'shape': data.shape, 'type': str(data.dtype), 'info': data.infoCopy()}
+#    axstrs = []
+#    for ax in meta['info']:
+#      if ax.has_key('values'):
+#        axstrs.append(ax['values'].tostring())
+#        ax['values_len'] = len(axstrs[-1])
+#        ax['values_type'] = str(ax['values'].dtype)
+#        del ax['values']
+#    fd = StringIO()
+#    fd.write(str(meta) + '\n\n')
+#    for ax in axstrs:
+#      fd.write(ax)
+#    fd.write(data.tostring())
+#    ans = fd.getvalue()
+#    fd.close()
+#    return ans
+#
+#from numpy import fromstring, array
+#import datetime
+#def parse_meta_arr(str):
+#    fd = StringIO(str)
+#    meta = ''
+#    while True:
+#      line = fd.readline().strip()
+#      if line == '':
+#        break
+#      meta += line
+#    meta = eval(meta)
+#    
+#    ## read in axis values
+#    for ax in meta['info']:
+#      if ax.has_key('values_len'):
+#        ax['values'] = fromstring(fd.read(ax['values_len']), dtype=ax['values_type'])
+#        del ax['values_len']
+#        del ax['values_type']
+#    
+#    subarr = fromstring(fd.read(), dtype=meta['type'])
+#    subarr = subarr.view(FilterableMetaArray)
+#    subarr.shape = meta['shape']
+#    subarr._info = meta['info']
+#    return subarr
