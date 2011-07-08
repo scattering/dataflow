@@ -7,7 +7,7 @@ Ext.onReady(function() {
 
     // create the store. Sends a request to 'getNCNRdirectories', that will be handled
     // by django.
-     var treeStore = Ext.create('Ext.data.TreeStore', {
+     treeStore = Ext.create('Ext.data.TreeStore', {
         proxy: {
 		type: 'ajax',
 		actionMethods:'GET',
@@ -41,4 +41,5 @@ Ext.onReady(function() {
     });
     
     treeStore.load()
+    treeStore.refresh()
 });
