@@ -127,7 +127,11 @@ class Component(object):
         def __len__(self):
                 return len(self.x)
         def __getitem__(self,key):
-                return uncertainty.Measurement(self.x[key],self.variance[key])
+                if self.variance:
+                        return uncertainty.Measurement(self.x[key],self.variance[key])
+                else:
+                        return uncertainty.Measurement(self.x[key],None)
+                        
         def __setitem__(self,key,value):
                 self.x[key] = value.x
                 self.variance[key] = value.variance
@@ -149,20 +153,36 @@ class Component(object):
                         return uncertainty.Measurement(self.x-other, self.variance+0) # Force copy
         def __mul__(self, other):
                 if isinstance(other,uncertainty.Measurement):
-                        return uncertainty.Measurement(*err1d.mul(self.x,self.variance,other.x,other.variance))
+                        if (not self.variance is None) and not (other.variance is None):
+                                return uncertainty.Measurement(*err1d.mul(self.x,self.variance,other.x,other.variance))
+                        else:
+                                return uncertainty.Measurement(self.x*other.x,None)
                 else:
-                        return uncertainty.Measurement(self.x*other, self.variance*other**2)
+                        if (not self.variance is None) and not (other.variance is None):
+                                return uncertainty.Measurement(self.x*other, self.variance*other**2)
+                        else:
+                                return uncertainty.Measurement(self.x*other.x,None)
         def __truediv__(self, other):
                 if isinstance(other,uncertainty.Measurement):
-                        return uncertainty.Measurement(*err1d.div(self.x,self.variance,other.x,other.variance))
+                        if (not self.variance is None) and not (other.variance is None):
+                                return uncertainty.Measurement(*err1d.div(self.x,self.variance,other.x,other.variance))
+                        else:
+                                return uncertainty.Measurement(self.x/other.x,None)
                 else:
-                        return uncertainty.Measurement(self.x/other, self.variance/other**2)
+                        if (not self.variance is None) and not (other.variance is None):
+                                return uncertainty.Measurement(self.x/other, self.variance/other**2)
+                        else:
+                                return uncertainty.Measurement(self.x/other, None)
+                                
         def __pow__(self, other):
                 if isinstance(other,uncertainty.Measurement):
                         # Haven't calcuated variance in (a+/-da) ** (b+/-db)
                         return NotImplemented
                 else:
-                        return uncertainty.Measurement(*err1d.pow(self.x,self.variance,other))
+                        if (not self.variance is None) and not (other.variance is None):
+                                return uncertainty.Measurement(*err1d.pow(self.x,self.variance,other))
+                        else:
+                                return uncertainty.Measurement(self.x**other,None)
 
         # Reverse operations
         def __radd__(self, other):
@@ -170,7 +190,10 @@ class Component(object):
         def __rsub__(self, other):
                 return uncertainty.Measurement(other-self.x, self.variance+0)
         def __rmul__(self, other):
-                return uncertainty.Measurement(self.x*other, self.variance*other**2)
+                if (not self.variance is None) and not (other.variance is None):
+                        return uncertainty.Measurement(self.x*other, self.variance*other**2)
+                else:
+                        return uncertainty.Measurement(self.x*other, None)
         def __rtruediv__(self, other):
                 x,variance = err1d.pow(self.x,self.variance,-1)
                 return uncertainty.Measurement(x*other,variance*other**2)
@@ -234,12 +257,24 @@ class Component(object):
                 if np.isscalar(self.x):
                         return format_uncertainty(self.x,np.sqrt(self.variance))
                 else:
-                        Nx=self.x.shape[1]
-                        Ny=self.x.shape[2]
+                        Nx=self.x.shape[0]
+                        try:
+                                Ny=self.x.shape[1]
+                        except IndexError:
+                                Ny=1
                         res=[]
-                        for ny in range(Ny):
+                        if len(self.x.shape)==3:
+                                for ny in range(Ny):
+                                        for nx in range(Nx):
+                                                res.append([format_uncertainty(v,dv) for v,dv in zip(self.x[:,nx,ny],np.sqrt(self.variance[:,nx,ny]))])
+                        else:
                                 for nx in range(Nx):
-                                        res.append([format_uncertainty(v,dv) for v,dv in zip(self.x[:,nx,ny],np.sqrt(self.variance[:,nx,ny]))])
+                                        if not self.variance is None:
+                                                res.append([format_uncertainty(v,dv) for v,dv in zip(self.x,None)])
+                                        else:
+                                                for nx in range(Nx):
+                                                        res.append(format_uncertainty(self.x[nx],None))                                                
+                                                
                         return np.array(res).T.__repr__()
         def __repr__(self):
                 return "Measurement(%s,%s)"%(str(self.x),str(self.variance))
@@ -402,9 +437,11 @@ class DetectorSet(object):
         def __iter__(self):
                 temp_dict=copy.deepcopy(self.__dict__)
                 temp_dict.__delitem__('detector_mode')
+                
                 #temp_dict.__delitem__('primary_detector')
                 for key,value in temp_dict.iteritems():
                         yield value
+
         #def next(self):
         #        for key, value in self.__dict__.iteritems():
         #                yield value
@@ -656,14 +693,19 @@ class TripleAxis(object):
                 for detector in self.detectors:
                         detector.measurement=detector.measurement*np.exp(-beta*E/2)
                 return
-        def normalize_monitor(self,monitor):              
-                mon0=self.time.monitor #TODO CHECK THIS
+        def normalize_monitor(self,monitor):
+                # Turns out iterating through self.detectors makes detector a copy,
+                # and doesn't actually modify self.detectors -> could be the 'yield'
+                # statement producing a generator...
+                mon0=self.time.monitor 
                 for detector in self.detectors:
-                        for i in range(0,len(detector.measurement.x)):
-                                detector.measurement[i]=detector.measurement[i]*mon0[i]/monitor
+                        detector=detector*(mon0/monitor)
+
+                        #for i in range(0,len(detector.measurement.x)):
+                        #        detector.measurement[i]=detector.measurement[i]*mon0[i]/monitor
                 return
         def harmonic_monitor_correction(self, instrument_name):
-                "Multiplies the montior correction through all of the detectors in the Detector_Sets."
+                """Multiplies the monitor correction through all of the detectors in the Detector_Sets."""
                 #Use for constant-Q scans with fixed scattering energy, Ef.
                 #CURRENTLY: Assumes Ef is fixed under constant-Q scan; could implement check later
         
@@ -672,10 +714,30 @@ class TripleAxis(object):
                 for i in range(0, len(M)):
                         M[i]=float(M[i])
                 #TODO - Throw error if there's an improper instrument_name given
-                for detector in bt7.detectors:
+                for detector in self.detectors:
                         Eii=self.physical_motors.ei
                         detector.measurement=detector.measurement*(M[0] + M[1]*Eii + M[2]*Eii**2 + M[3]*Eii**3 + M[4]*Eii**4)
-                        #TODO the primary detector is a single array... doesn't have a '.measurement' -> FIX!
+                return
+                        
+        def resolution_volume_correction(self):
+                """Correct constant Q-scans with fixed incident energy, Ei, for the fact that the resolution volume changes
+                as Ef changes"""
+                # Requires constant-Q scan with fixed incident energy, Ei
+                #pass
+                #TODO - CHECK - taken from the IDL
+                # resCor = Norm/(cot(A6/2)*Ef^1.5)
+                # where Norm = Ei^1.5 * cot(asin(!pi/(0.69472*dA*sqrt(Ei))))
+                wavelength_analyzer=np.sqrt(81.80425/self.physical_motors.ef.measurement) #determine the wavelength based on the analyzer
+                theta_analyzer=np.arcsin(wavelength_analyzer/2/self.analyzer.dspacing)  #This is what things should be 
+                #alternatively, we could do theta_analyzer=np.radians(self.primary_motors.a6.measurement/2)
+                argument=np.arcsin(np.pi/(.69472*self.analyzer.dspacing*np.sqrt(self.physical_motors.ei.measurement)))
+                norm=(self.physical_motors.ei.measurement**1.5)/np.tan(argument)
+                rescor=norm*np.tan(theta_analyzer)/self.physical_motors.ef.measurement**1.5
+                for detector in bt7.detectors:
+                        detector.measurement=detector.measurement*rescor
+                return
+                
+               
                         
 # ****************************************************************************************************************************************************
 # ***************************************************************** TRANSLATION METHODS **************************************************************
@@ -878,13 +940,13 @@ def translate_physical_motors(bt7,dataset):
         map_motors(translate_dict,bt7.physical_motors,dataset)
         if dataset.metadata['efixed']=='ei':
                 bt7.physical_motors.ei.measurement.x=np.ones(np.array(dataset.data['e']).shape)*dataset.metadata['ei']
-                bt7.physical_motors.ei.measurement.variance=np.ones(np.array(dataset.data['e']).shape)*dataset.metadata['ei']
-                bt7.physical_motors.ef=bt7.physical_motors.ei-bt7.physical_motors.e
+                bt7.physical_motors.ei.measurement.variance=None
+                bt7.physical_motors.ef=bt7.physical_motors.ei.measurement-bt7.physical_motors.e.measurement
                 #our convention is that Ei=Ef+delta_E (aka omega)
         else:
                 bt7.physical_motors.ef.measurement.x=np.ones(np.array(dataset.data['e']).shape)*dataset.metadata['ef']
-                bt7.physical_motors.ef.measurement.variance=np.ones(np.array(dataset.data['e']).shape)*dataset.metadata['ef']
-                bt7.physical_motors.ei=bt7.physical_motors.ef+bt7.physical_motors.e
+                bt7.physical_motors.ef.measurement.variance=None
+                bt7.physical_motors.ei.measurement.x=bt7.physical_motors.ef.measurement.x+bt7.physical_motors.e.measurement.x  #punt for now, later should figure out what to do if variance is None
         
         #translate_dict['h']='h'
         #translate_dict['k']='k'
@@ -1036,8 +1098,8 @@ def translate_metadata(bt7,dataset):
         #self.meta_data.desired_npoints=dataset.metadata.npoints
         
 def translate_detectors(bt7,dataset):
-        bt7.detectors.primary_detector.measurement.x=dataset.data['detector']
-        bt7.detectors.primary_detector.measurement.variance=dataset.data['detector']
+        bt7.detectors.primary_detector.measurement.x=np.array(dataset.data['detector'],'Float64')
+        bt7.detectors.primary_detector.measurement.variance=np.array(dataset.data['detector'],'Float64')
         bt7.detectors.detector_mode=dataset.metadata['analyzerdetectormode']
         #later, I should do something clever to determine how many detectors are in the file,
         #or better yet, lobby to have the information in the ice file
@@ -1062,7 +1124,7 @@ def translate_detectors(bt7,dataset):
           
         if dataset.metadata.has_key('analyzerpsdgroup'):
                 set_detector(bt7,dataset,'position_sensitive_detector','analyzerpsdgroup')
-                if hasattr(bt7.detectors,'position_sensitive_detector'):
+                #if hasattr(bt7.detectors,'position_sensitive_detector'):
                         #bt7.detectors.position_sensitive_detector.summed_counts.measurement.x=dataset.data['psdet']
                         #bt7.detectors.position_sensitive_detector.summed_counts.measurement.variance=dataset.data['psdet']
                
@@ -1084,7 +1146,7 @@ def set_detector(bt7,dataset,detector_name,data_name):
         if dataset.data.has_key(dataset.metadata[data_name][0]):
                 for nx in range(Nx):
                         curr_detector=dataset.metadata[data_name][nx]
-                        data[:,nx,0]=dataset.data[curr_detector]
+                        data[:,nx,0]=np.array(dataset.data[curr_detector],'Float64')
                 
                 setattr(getattr(bt7.detectors,detector_name).measurement,'x',np.copy(data))
                 setattr(getattr(bt7.detectors,detector_name).measurement,'variance',np.copy(data))
@@ -1115,20 +1177,38 @@ def map_motors(translate_dict,target_field,dataset):
                         pass
                 '''
                 if dataset.metadata.has_key(value):
-                        if hasattr(target_field, key) and getattr(target_field, key) is Motor:
-                                setattr(getattr(target_field,'measurement'),key,dataset.metadata[value])
+                        if hasattr(target_field, key) and isinstance(getattr(target_field, key),Motor):
+                                getattr(target_field,key).measurement.x=dataset.metadata[value] #do we need try escape logic here?
+                                getattr(target_field,key).measurement.variance=None
                         else:
                                 setattr(target_field,key,dataset.metadata[value])
                 if dataset.data.has_key(value):
-                        if hasattr(target_field, key) and getattr(target_field, key) is Motor:
-                                setattr(getattr(target_field,'measurement'),key,dataset.data[value])
+                        if hasattr(target_field, key) and isinstance(getattr(target_field, key),Motor):
+                                try:
+                                        getattr(target_field,key).measurement.x=np.array(dataset.data[value],'Float64')
+                                        getattr(target_field,key).measurement.variance=None
+                                except:
+                                        getattr(target_field,key).measurement.x=np.array(dataset.data[value])  #These may be "IN", or "OUT", or "N/A"
+                                        getattr(target_field,key).measurement.variance=None
                         else:
-                                setattr(target_field,key,dataset.data[value])
+                                try:
+                                        setattr(target_field,key,Motor(key,values=np.array(dataset.data[value],'Float64'),
+                                                                       err=None,
+                                                                       units=None,
+                                                                       isDistinct=True,
+                                                                       isInterpolatable=True))
+                                                                       #Not sure how I should really be handling this--> this is for the case where the field doesn't already exist
+                                except:
+                                        setattr(target_field,key,Motor(key,values=dataset.data[value],
+                                                                       err=None,
+                                                                       units=None,
+                                                                       isDistinct=True,
+                                                                       isInterpolatable=True))
                 
-                
-# ****************************************************************************************************************************************************
-# ****************************************************** REDUCTION FUNCTIONS - to be moved! **************************************************************
-# ****************************************************************************************************************************************************
+                #self.h=Motor('h',values=None,err=None,units='rlu',isDistinct=True,
+                #             isInterpolatable=True)
+
+
 def establish_correction_coefficients(filename):
         "Obtains the instrument-dependent correction coefficients from a given file and \
          returns them in the dictionary called coefficients"
@@ -1151,48 +1231,36 @@ def establish_correction_coefficients(filename):
 
 
        
-    
-
-def resolution_volume_correction(data):
-        # Requires constant-Q scan with fixed incident energy, Ei
-        pass
-        #TODO - CHECK - taken from the IDL
-        # resCor = Norm/(cot(A6/2)*Ef^1.5)
-        # where Norm = Ei^1.5 * cot(asin(!pi/(0.69472*dA*sqrt(Ei))))
-        '''
-        for i in len(data.get(Ei))
-            thetaA = N.radians(data.get(a6)[i]/2.0)
-            arg = asin(N.pi/(0.69472*dA*sqrt(double(data.get(Ei)[i]))))
-            norm = (Ei^1.5) / tan(arg)
-            cotThetaA = 1/tan(thetaA)
-            resCor = norm/(cotThetaA * (Ef^1.5))
-        
-
-
-        N.exp((ki/kf) ** 3) * (1/N.tan(thetaM)) / (1/N.cot(thetaA))
-        '''     
-                
 
 
  
 
 
-
-
+def filereader(filename):
+        filestr=filename
+        mydatareader=readncnr.datareader()
+        mydata=mydatareader.readbuffer(filestr)
+        instrument = TripleAxis()
+        translate(instrument, mydata)
+        return instrument
 
 if __name__=="__main__":
-        myfilestr=r'c:\bifeo3xtal\jan8_2008\9175\mesh53439.bt7'
-        myfilestr=r'EscanQQ7HorNSF91831.bt7'
-        print 'hi'
-        mydatareader=readncnr.datareader()
-        mydata=mydatareader.readbuffer(myfilestr)
+        #myfilestr=r'c:\bifeo3xtal\jan8_2008\9175\mesh53439.bt7'
+        #myfilestr=r'EscanQQ7HorNSF91831.bt7'
+        #print 'hi'
+        #mydatareader=readncnr.datareader()
+        #mydata=mydatareader.readbuffer(myfilestr)
         #print mydata.metadata.varying
-        bt7=TripleAxis()
-        translate(bt7,mydata)
+        #mydata = filereader('EscanQQ7HorNSF91831.bt7') #NOTE: include the r in the beginning!
+        #bt7=TripleAxis()
+        #translate(bt7,mydata)
+        
+        bt7 = filereader('EscanQQ7HorNSF91831.bt7')
         print 'translations done'
-        #bt7.normalize_monitor(90000)
+        bt7.normalize_monitor(90000)
         #print 'detailed balance done'
         bt7.harmonic_monitor_correction('BT7')
+        bt7.resolution_volume_correction()
         print 'bye'
         
 

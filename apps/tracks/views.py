@@ -5,12 +5,14 @@ from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
 from apps.tracks.forms import languageSelectForm 
 
+from ...apps.fileview import testftp
+
 from ...dataflow import wireit
 from ...dataflow.calc import run_template
 from ...dataflow.core import register_instrument
-from ...dataflow.tas.instruments import BT7
+#from ...dataflow.tas.instruments import BT7
 #from ...dataflow.offspecular.instruments import ANDR
-from ...dataflow.tas import instruments
+#from ...dataflow.tas import instruments
 from ...dataflow.SANS import newinstruments as SANS_INS
 
 import random
@@ -40,25 +42,21 @@ def home(request):
 #### file loading testing
 
 store = [{
-	 "text":"pub",
-	 "children":
-	[{
-        
+        "id": 0,
         "text": "A leaf Node",
         "leaf": True
     },{
-        
+        "id": 1,
         "text": "A folder Node",
         "children": [{
-            
+            "id": 2,
             "text": "A child Node",
             "leaf": True
+            #"children":[{}],
         }]
    }]
-   }]
-
 def getNCNRdirectories(request):
-	return HttpResponse(simplejson.dumps(store))
+	return HttpResponse(simplejson.dumps(testftp.runMe()))  #testftp.runMe()
     
 def displayFileLoad(request):
 	return render_to_response('FileUpload/FileTreeTest.html', locals())
@@ -140,7 +138,9 @@ def runReduction(request):
 #    return HttpResponse(simplejson.dumps(a))
 
 
-
+######## 
+## Views for displaying a language selection form and for calling the file association table with the selected language.
+## scheme is the same as for the editor
 
 ########
 ## Views for displaying a language selection form and for calling the editor template with the selected language.
