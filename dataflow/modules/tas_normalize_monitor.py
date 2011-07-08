@@ -1,19 +1,19 @@
 """
-Join data sets
+For TripleAxis, normalize monitor
 """
 
 from dataflow import config
 from dataflow.core import Module
 
-def join_module(id=None, datatype=None, action=None,
-                version='0.0', fields=[],
-                description="Combine multiple datasets"):
+def normalize_monitor_module(id=None, datatype=None, action=None,
+                             version='0.0', fields=[],
+                             description="normalize TripleAxis monitor"):
     """
-    Return a module for combining multiple datasets
+    Return a module for normalizing a TripleAxis monitor
     """
 
     icon = {
-        'URI': config.IMAGES + 'sum.png',
+        'URI': config.IMAGES + 'sum.png', #GET ICON IMAGE --> replace 'sum.png'
         'terminals': {
             'input': (-15, 1, -1, 0),
             'output': (15, 1, 1, 0),

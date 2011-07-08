@@ -6,8 +6,8 @@ Core class definitions
 #sys.path.append(dir)
 #from dataflow import config
 #from dataflow.deps import processing_order
-from . import config
-from .deps import processing_order
+import config
+from deps import processing_order
 
 from collections import deque
 

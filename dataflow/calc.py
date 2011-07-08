@@ -6,14 +6,16 @@ The function run_template
 
 from pprint import pprint
 from inspect import getsource
-from .core import lookup_module
-import hashlib, redis
+from core import lookup_module
+#import hashlib, redis
+import hashlib
 
 # temp
-from ..reduction.offspecular.FilterableMetaArray import FilterableMetaArray
+
+from reduction.offspecular.FilterableMetaArray import FilterableMetaArray
 
 TEMP_DATABASE = {} # Fake database
-server = redis.Redis("localhost")
+#server = redis.Redis("localhost")
 def run_template(template, config):
     """
     Evaluate the template using the configured values.
