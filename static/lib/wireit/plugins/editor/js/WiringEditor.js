@@ -49,7 +49,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
      
 	    this.options.layerOptions = {};
 	    var layerOptions = options.layerOptions || {};
-	
+
 
 	    this.options.layerOptions.parentEl = layerOptions.parentEl ? layerOptions.parentEl : Dom.get('center');
 	    this.options.layerOptions.layerMap = YAHOO.lang.isUndefined(layerOptions.layerMap) ? true : layerOptions.layerMap;
@@ -64,7 +64,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 														animate: true, 
 														effect: YAHOO.util.Easing.easeBothStrong
 													},options.modulesAccordionViewParams || {});
-													
+
 		 // Grouping options
 	    var temp = this;
 	    var baseConfigFunction = function(name)  { 
@@ -80,7 +80,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		};
 
 	    this.options.layerOptions.grouper = {"baseConfigFunction": baseConfigFunction };
-	
+
 	 },
 
 
@@ -90,7 +90,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
   	render: function() {
 
 		WireIt.WiringEditor.superclass.render.call(this);
-	
+
 	    /**
 	     * @property layer
 	     * @type {WireIt.Layer}
@@ -109,7 +109,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	 * render the modules accordion in the left panel
 	 */
 	renderModulesAccordion: function() {
-		
+
 		// Create the modules accordion DOM if not found
 		if(!Dom.get('modulesAccordionView')) {
 			Dom.get('left').appendChild( WireIt.cn('ul', {id: 'modulesAccordionView'}) );
@@ -120,15 +120,15 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			li.appendChild(d);
 			Dom.get('modulesAccordionView').appendChild(li);
 		}
-		
+
 		this.modulesAccordionView = new YAHOO.widget.AccordionView('modulesAccordionView', this.options.modulesAccordionViewParams);
-		
+
 		// Open all panels
 		for(var l = 1, n = this.modulesAccordionView.getPanels().length; l < n ; l++) {
 			this.modulesAccordionView.openPanel(l);
 		}
 	},
-	
+
  
  	/**
   	 * Build the left menu on the left
@@ -154,11 +154,11 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
  	addModuleToList: function(module) {
 	try {
 		var div = WireIt.cn('div', {className: "WiringEditor-module"});
-		
+
 		if(module.description) {
 			div.title = module.description;
 		}
-		
+
       if(module.container.icon) {
          div.appendChild( WireIt.cn('img',{src: module.container.icon}) );
       }
@@ -178,7 +178,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			this.modulesAccordionView.openPanel(this.modulesAccordionView._panels.length-1);
 			el = Dom.get("module-category-"+category);
 		}
-		
+
 		el.appendChild(div);
 	}catch(ex){ console.log(ex);}
  	},
@@ -199,14 +199,14 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	       var temp = this;
 	       containerConfig.getGrouper = function() { return temp.getCurrentGrouper(temp); };
 	       var container = this.layer.addContainer(containerConfig);
-	
+
 			 // Adding the category CSS class name
 			 var category = module.category || "main";
 			 Dom.addClass(container.el, "WiringEditor-module-category-"+category.replace(/ /g,'-'));
-			
+
 			 // Adding the module CSS class name
 	       Dom.addClass(container.el, "WiringEditor-module-"+module.name.replace(/ /g,'-'));
-	
+
 	    }
 	    catch(ex) {
 	       this.alert("Error Layer.addContainer: "+ ex.message);
@@ -296,27 +296,27 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		toPlot = display[this.wireClickSource].output
 		console.log(toPlot)
 		plottingAPI(toPlot, plotid)
-		
+
 	},
-	
+
 	runModuleFailture: function(error) {
 		this.alert("Unable to run the reduction: " + error)
 	},
-		
+
 
 	 /**
 	  * @method onNew
 	  */
 	onNew: function() {
-	
+
 		if(!this.isSaved()) {
 			if( !confirm("Warning: Your work is not saved yet ! Press ok to continue anyway.") ) {
 				return;
 			}
 		}
-	
+
 		this.preventLayerChangedEvent = true;
-	
+
 	    this.layer.clear(); 
 
 	    this.propertiesForm.clear(false); // false to tell inputEx to NOT send the updatedEvt
@@ -393,9 +393,9 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	  * @method updateLoadPanelList
 	  */
 	updateLoadPanelList: function(filter) {
-	
+
 		this.renderLoadPanel();
-	
+
 	    var list = WireIt.cn("ul");
 	    if(lang.isArray(this.pipes)) {
 	        for(var i = 0 ; i < this.pipes.length ; i++) {
@@ -406,7 +406,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	        }
 	    }
 	    var panelBody = Dom.get('loadPanelBody');
-	
+
 		 // Purge element (remove listeners on panelBody and childNodes recursively)
 	    YAHOO.util.Event.purgeElement(panelBody, true);
 
@@ -441,18 +441,18 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	  * @method onLoadSuccess
 	  */
 	onLoadSuccess: function(wirings) {
-		
+
 		// Reset the internal structure
 		this.pipes = wirings;
 		console.log('wiring length: ' + this.pipes.length)
 		this.pipesByName = {};
-	
+
 		// Build the "pipesByName" index
 		for(var i = 0 ; i < this.pipes.length ; i++) {
             this.pipesByName[ this.pipes[i].name] = this.pipes[i];
 	        console.log('adding ' + this.pipes[i].name + ' to pipesByName')
 		}
-	
+
     	this.updateLoadPanelList();
 
 		// Check for autoload param and display the loadPanel otherwise
@@ -460,7 +460,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
     		this.loadPanel.show();
 		}	
 	},
-		
+
 	/**
 	 * checkAutoLoad looks for the "autoload" URL parameter and open the pipe.
 	 * returns true if it loads a Pipe
@@ -492,7 +492,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	   var n = this.pipes.length,ret;
 	   for(var i = 0 ; i < n ; i++) {
 	      if(this.pipes[i].name == name) {
-			return this.pipes[i] //.working;
+			return this.pipes[i] //.working; Changed as part of changes to listWirings
 	      }
 	   }
 	   return null;
@@ -559,8 +559,10 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		  }
   
 		  this.markSaved();
-		
+
 		  this.preventLayerChangedEvent = false;
+		  makeFileTable(this.getFATHeaders())
+		  console.log(this.getFATHeaders())
 
  		}
  		catch(ex) {
@@ -606,7 +608,32 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	     name: obj.properties.name,
 	     working: obj
 	  };
-	}
+	},
+
+	/**
+	* This method returns a list of strings for the column headers in the FAT.
+	* Currently, it simply runs through all existing wires and adds source and target (checking by uniqueID)
+	* module name to the list
+	* 7/8
+	**/
+	getFATHeaders: function() {
+		var wiringDiagram = this.getValue().working
+		var wireList = wiringDiagram.wires
+		var moduleList = wiringDiagram.modules
+		var hitModules = [] // at some point to check which modules have already been touched
+		var headersList = [] // actual list of headers
+		for (var i in wireList) {
+			headersList.push(moduleList[wireList[i].tgt.moduleId].name + ' ' + wireList[i].tgt.terminal)
+			}
+		return headersList;	
+		},
+	/**
+	* This method calls the getFATheaders method to generate the FAT column headers, and then displays
+	* the FAT with those headers passed in
+	* 7/8
+	**/
+
+
 
 
 });
@@ -620,3 +647,4 @@ WireIt.WiringEditor.adapters = {};
 
 
 })();
+

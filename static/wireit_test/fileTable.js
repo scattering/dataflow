@@ -1,106 +1,132 @@
-Ext.onReady(function() {
+function makeFileTable(headerList) {
 /* FILE ASSOCIATIONS TABLE, Andrew Tracer, 6/8/2011
 
 Field:
-	-filename, the name of the file
-		- accepts any string
-	-filetype, the type of file (e.g., measurement or background)
-		- combobox options MEA or BAC
-	-group, associating a bunch of files (e.g.,  measurement and 
-		background from one experiment)
-		- accepts lone integers and comma separated integers
+-filename, the name of the file
+- accepts any string
+-filetype, the type of file (e.g., measurement or background)
+- combobox options MEA or BAC
+-group, associating a bunch of files (e.g., measurement and
+background from one experiment)
+- accepts lone integers and comma separated integers
 
 Editing:
-	-Double-click on a cell to edit an individual record's field values.
-	-Shift + right-click will allow you to edit the filetype and group of all selected rows.		
-	-the group field will accept a single integer or a list of integers.
-		The latter option is to allow association of a single file 
-		with multiple groups
+-Double-click on a cell to edit an individual record's field values.
+-Shift + right-click will allow you to edit the filetype and group of all selected rows.
+-the group field will accept a single integer or a list of integers.
+The latter option is to allow association of a single file
+with multiple groups
 
 */
 
+// list for holding the stores for each file type
+storeList = []
+gridList = []
+
 // defines data model 'Data'
    Ext.define('Data', {
-	extend: 'Ext.data.Model',
-	   fields: [
-		{name: 'filename', type: 'string'},
-		{name: 'filetype'},
-		{name: 'group', type: 'string'},
-		]
-	});
+extend: 'Ext.data.Model',
+fields: [
+{name: 'filename', type: 'string'},
+{name: 'filetype'},
+{name: 'group', type: 'string'},
+]
+});
 
 // set the field value of a group of records
    function setRecords(record_list, field, value) {
-	for (ind in record_list) {
-		record_list[ind].set(field, value)
-		}
-	}
+for (ind in record_list) {
+record_list[ind].set(field, value)
+}
+}
 
-// updates the stores of the target grids (measurement/background) 
+// updates the stores of the target grids (measurement/background)
 // based on filetype values and refreshes all grid views
    function UpdateAll() {
-	measureStore.removeAll()
-	backStore.removeAll()
-	myGrid.getView().refresh()
-	for (var i = 0; i < myGrid.getStore().count(); i++) {
+    for (var i in headerList) {
+    storeList[i].removeAll()
+    }
+//measureStore.removeAll()
+//backStore.removeAll()
+myGrid.getView().refresh()
+for (var i = 0; i < myGrid.getStore().count(); i++) {
            rec = myGrid.getStore().getAt(i)
-	   if (rec.get('filetype') == 'MEA') {
-		for (var j in rec.get('group').split(',')) {
-			var newFile = Ext.ModelManager.create({
-			   filename: rec.get('filename'),
-			   filetype: rec.get('filetype'),
-			   group: rec.get('group').split(',')[j]},
-			   'Data')
-			measureStore.insert(0,newFile)
-			}
-		}
-	   if (rec.get('filetype') == 'BAC') {
-		for (var k in rec.get('group').split(',')) {
-			var newFile = Ext.ModelManager.create({
-			   filename: rec.get('filename'),
-			   filetype: rec.get('filetype'),
-			   group: rec.get('group').split(',')[k]},
-			   'Data')
-			backStore.insert(0,newFile)
-			}
-		}	
-		}
-	measureStore.sort()
-	backStore.sort()
-	measureGrid.getView().refresh()
-	backGrid.getView().refresh()
+           for (var k in headerList) {
+            if (rec.get('filetype') == headerList[k]) {
+            for (var j in rec.get('group').split(',')) {
+            var newFile = Ext.ModelManager.create({
+filename: rec.get('filename'),
+filetype: rec.get('filetype'),
+group: rec.get('group').split(',')[j]},
+'Data')
+storeList[k].insert(0,newFile)
+}
+}
+}
+
+/**
+if (rec.get('filetype') == 'MEA') {
+for (var j in rec.get('group').split(',')) {
+var newFile = Ext.ModelManager.create({
+filename: rec.get('filename'),
+filetype: rec.get('filetype'),
+group: rec.get('group').split(',')[j]},
+'Data')
+measureStore.insert(0,newFile)
+}
+}
+if (rec.get('filetype') == 'BAC') {
+for (var k in rec.get('group').split(',')) {
+var newFile = Ext.ModelManager.create({
+filename: rec.get('filename'),
+filetype: rec.get('filetype'),
+group: rec.get('group').split(',')[k]},
+'Data')
+backStore.insert(0,newFile)
+}
+}
+**/
+}
+//measureStore.sort()
+//backStore.sort()
+//measureGrid.getView().refresh()
+//backGrid.getView().refresh()
+for (var i in headerList) {
+storeList[i].sort()
+gridList[i].getView().refresh()
+}
 };
 
 
 // stores previous selection in order to (try to) deal with contextmenu issue
-	// not working
+// not working
    var prev_sel = [];
 
 // configuring selection Model
    var rowSelecting = Ext.create('Ext.selection.RowModel', {
-	allowDeselect: false,
-	});
+allowDeselect: false,
+});
 
 // regular expression for group testing
-	// group field accepts only comma separated integers as entries
+// group field accepts only comma separated integers as entries
    var acceptable_entry = /^[0-9]+(, ?[0-9]+)*,?$/
 
 
 // configuring cell editing
    var cellEdit = Ext.create('Ext.grid.plugin.CellEditing', {
-	clicksToEdit: 2,
-	listeners: {
-	   edit: function(cellEdit, e) {
-		if (e.field == 'group') {
-			if (! acceptable_entry.test(e.value)){
-				e.record.set(e.field, e.originalValue)
-				console.log("Invalid entry for field 'group'. Please enter comma separated integers.")
-				}
+clicksToEdit: 2,
+listeners: {
+edit: function(cellEdit, e) {
+if (e.field == 'group') {
+if (! acceptable_entry.test(e.value)){
+e.record.set(e.field, e.originalValue)
+console.log("Invalid entry for field 'group'. Please enter comma separated integers.")
 }
-	UpdateAll()
-},	
-	},
-});	   
+}
+UpdateAll()
+},
+},
+});
 
 
 // create the main data Store
@@ -110,7 +136,7 @@ Editing:
         model: 'Data',
         proxy: {
             type: 'rest',
-	    url: '/files',
+url: '/files',
             reader: {
                 type: 'json',
                 // records will have a 'Data' tag
@@ -125,14 +151,19 @@ Editing:
 
 // insert 20 records into the store to play around with
 for (var i = 0; i < 20; i ++) {
-	fname = 'new_file' + i
-	var newFile = Ext.ModelManager.create({
-		filename: fname,
-		filetype: 'N',}, 
-		'Data');
-		store.insert(0, newFile);
-	}
-	
+fname = 'new_file' + i
+var newFile = Ext.ModelManager.create({
+filename: fname,
+filetype: 'N',},
+'Data');
+store.insert(0, newFile);
+}
+
+// combobox options for file type editing
+combo = []
+for (var i in headerList) {
+combo.push([headerList[i],headerList[i]])
+}
 
 // create the grid
 var myGrid = Ext.create('Ext.grid.Panel', {
@@ -140,64 +171,61 @@ var myGrid = Ext.create('Ext.grid.Panel', {
    store: store,
    sm: rowSelecting,
    columns: [
-	{
-	   header: 'Files', 
-	   dataIndex: 'filename', 
-	   flex: 1,
-	   field: {
-		xtype: 'textfield',
-		allowBlank: false
-	},
+{
+header: 'Files',
+dataIndex: 'filename',
+flex: 1,
+field: {
+xtype: 'textfield',
+allowBlank: false
+},
 },
 {
-	   header: 'Type', 
-	   dataIndex: 'filetype', 
-	   flex: 1,
+header: 'Type',
+dataIndex: 'filetype',
+flex: 1,
            field: {
                 xtype: 'combobox',
                 typeAhead: true,
                 triggerAction: 'all',
                 selectOnTab: true,
-                store: [
-                    ['MEA','MEA'],
-                    ['BAC','BAC'],
-                ],
+                store: combo,
                 lazyRender: true,
                 listClass: 'x-combo-list-small'
             }
 },
-	{
-	   header: 'Group', 
-	   dataIndex: 'group', 
-	   flex: 1,
-	   field: {
-		xtype: 'textfield',
-		allowBlank: false
-	},
+{
+header: 'Group',
+dataIndex: 'group',
+flex: 1,
+field: {
+xtype: 'textfield',
+allowBlank: false
+},
 },
      ],
   
 // selection-related events and configs
    listeners: {
-		render: function() {
+render: function() {
                        //disable the default browser context menu
                        Ext.getBody().on("contextmenu", Ext.emptyFn, null, {preventDefault: true});
                },
-		select: function() {
-			//console.log('select')
-			},
-		selectionchange: function() {
-			//console.log('change')
-			},
-		beforeselect: function() {
-			//console.log('beforeselection')
-			},
-		beforedeselect: function() {
-			//console.log('beforedeselect')
+select: function() {
+//console.log('select')
 },
-		itemcontextmenu: function(a,b,c,d,e) {
-			contextMenu.showAt(e.getXY())
-		},
+selectionchange: function() {
+//console.log('change')
+},
+beforeselect: function() {
+//console.log('beforeselection')
+},
+beforedeselect: function() {
+//console.log('beforedeselect')
+},
+itemcontextmenu: function(a,b,c,d,e) {
+contextMenu.showAt(e.getXY())
+},
 },
    trackMouseOver: true,
    plugins: [cellEdit],
@@ -208,147 +236,206 @@ var myGrid = Ext.create('Ext.grid.Panel', {
 
 
 
-// Setting up grids and stores for drop targets
+// Setting up grids and stores for all file types
 
-    //measurement store
-    var measureStore = Ext.create('Ext.data.Store', {
-        autoDestroy: true,
-        model: 'Data',
-	groupField: 'group',
-        proxy: {
-            type: 'rest',
-	    url: '/files',
-            reader: {
-                type: 'json',
-                // records will have a 'Data' tag
-                record: 'measureData'
-            }
-        },
-        sorters: [{
-            property: 'group',
-            direction:'ASC'
-        }]
-    });
-
-    // background store
-    var backStore = Ext.create('Ext.data.Store', {
-        autoDestroy: true,
-        model: 'Data',
-	groupField: 'group',
-        proxy: {
-            type: 'rest',
-	    url: '/files',
-            reader: {
-                type: 'json',
-                // records will have a 'Data' tag
-                record: 'backData'
-            }
-        },
-        sorters: [{
-            property: 'group',
-            direction:'ASC'
-        }]
-    });
-
-   // measurement Grid
-   var measureGrid = Ext.create('Ext.grid.Panel', {
-	title: 'Measurement Files',
-	store: measureStore,	
-	features: [{ftype: 'grouping'}],
-	columns: [
-	{
-	   header: 'Files', 
-	   dataIndex: 'filename', 
-	   flex: 1,
-	   field: {
-		xtype: 'textfield',
-		allowBlank: false
-	},
+for (var i in headerList) {
+storeList.push(Ext.create('Ext.data.Store', {
+autoDestroy: true,
+model: 'Data',
+groupField: 'group',
+proxy: {
+type: 'rest',
+urls: '/files',
+reader: {
+type: 'json',
+record: headerList[i],
 }
-	],
-	height: 250,
-	width: 250,
+},
+sorters: [{
+property: 'group',
+direction: 'ASC',
+}]
+})
+)
+    }
+/**
+//measurement store
+var measureStore = Ext.create('Ext.data.Store', {
+autoDestroy: true,
+model: 'Data',
+groupField: 'group',
+proxy: {
+type: 'rest',
+url: '/files',
+reader: {
+type: 'json',
+// records will have a 'Data' tag
+record: 'measureData'
+}
+},
+sorters: [{
+property: 'group',
+direction:'ASC'
+}]
 });
 
-   // background grid
-   var backGrid = Ext.create('Ext.grid.Panel', {
-	title: 'Background Files',
-	store: backStore,
-	features: [{ftype: 'grouping'}],
-	columns: [
-	{
-	   header: 'Files', 
-	   dataIndex: 'filename', 
-	   flex: 1,
-	   field: {
-		xtype: 'textfield',
-		allowBlank: false
-	},
+// background store
+var backStore = Ext.create('Ext.data.Store', {
+autoDestroy: true,
+model: 'Data',
+groupField: 'group',
+proxy: {
+type: 'rest',
+url: '/files',
+reader: {
+type: 'json',
+// records will have a 'Data' tag
+record: 'backData'
 }
-	],
-	height: 250,
-	width: 250,
+},
+sorters: [{
+property: 'group',
+direction:'ASC'
+}]
 });
-	
+**/
+
+for (var i in headerList) {
+gridList.push( Ext.create('Ext.grid.Panel', {
+title: headerList[i],
+store: storeList[i],
+features: [{ftype: 'grouping'}],
+columns: [
+{
+header: 'Files',
+dataIndex: 'filename',
+flex: 1,
+field: {
+xtype: 'textfield',
+allowBlank: false
+},
+}
+],
+height: 250,
+width: 200,
+})
+)
+    }
+/**
+// measurement Grid
+var measureGrid = Ext.create('Ext.grid.Panel', {
+title: 'Measurement Files',
+store: measureStore,
+features: [{ftype: 'grouping'}],
+columns: [
+{
+header: 'Files',
+dataIndex: 'filename',
+flex: 1,
+field: {
+xtype: 'textfield',
+allowBlank: false
+},
+}
+],
+height: 250,
+width: 250,
+});
+
+// background grid
+var backGrid = Ext.create('Ext.grid.Panel', {
+title: 'Background Files',
+store: backStore,
+features: [{ftype: 'grouping'}],
+columns: [
+{
+header: 'Files',
+dataIndex: 'filename',
+flex: 1,
+field: {
+xtype: 'textfield',
+allowBlank: false
+},
+}
+],
+height: 250,
+width: 250,
+});
+**/
+
+//console.log(headerList)
+//console.log(storeList)
+//console.log(gridList)
+
+  // setting up grid array to give panel
+panelItems = [myGrid].concat(gridList) //gridList]
+console.log(panelItems)
+
     // overall display
     var displayPanel = Ext.create('Ext.Panel', {
-        width    : 762,
-        height   : 500,
+        width : (headerList.length)*200+12+250,
+        height : 500,
         layout: {
-		type: 'hbox',
-		align: 'stretch',
-		},
+type: 'hbox',
+align: 'stretch',
+},
         bodyPadding: '5',
-	renderTo: 'FAT',
-        items    : [
-            myGrid,
-	    measureGrid,
-	    backGrid,
-        ],
+renderTo: 'FAT',
+        items : panelItems //+ gridList
     });
+
+// setting up menu items for context menu
+setTypeMenu = []
+
+function return_handler(text) {
+return function() {
+setRecords(myGrid.getSelectionModel().getSelection(),
+'filetype', text);
+UpdateAll();
+};
+}
+
+for (var i in headerList) {
+entry = {
+text: headerList[i],
+handler: return_handler(headerList[i]),
+}
+setTypeMenu.push(entry)
+}
+console.log(setTypeMenu)
 
    // context menu for group/type editing
    contextMenu = new Ext.menu.Menu({
-	items: [{ 
-	text: 'Set Type',
-	menu: [{
-		text: 'MEA',
-		handler: function() {
-		   	setRecords(myGrid.getSelectionModel().getSelection(), 'filetype', 'MEA')
-			UpdateAll()
-			}
-		},
-		{
-		text: 'BAC',
-		handler: function() {
-			setRecords(myGrid.getSelectionModel().getSelection(),'filetype','BAC')	
-			UpdateAll()		
-		}
-	}
-	],
-
+items: [{
+text: 'Set Type',
+menu: setTypeMenu,
+},
+{ text: 'Clear Type',
+handler: function() {
+setRecords(myGrid.getSelectionModel().getSelection(), 'filetype', 'N')
+UpdateAll()
+},
 },
 {
-	text: 'Set Group',
-	handler: function() {
-	 	Ext.Msg.prompt('Set Group?', 'Please enter the group value:', function(btn, grpnm) {
-		if (btn == 'ok' && acceptable_entry.test(grpnm)){
-			setRecords(myGrid.getSelectionModel().getSelection(), 'group', grpnm)
-			UpdateAll()
-		} 	
-		else if (btn == 'ok') {
-			console.log("Invalid entry for field 'group'. Please enter comma separated integers.")}
-	    }
-	)}
+text: 'Set Group',
+handler: function() {
+Ext.Msg.prompt('Set Group?', 'Please enter the group value:', function(btn, grpnm) {
+if (btn == 'ok' && acceptable_entry.test(grpnm)){
+setRecords(myGrid.getSelectionModel().getSelection(), 'group', grpnm)
+UpdateAll()
+}
+else if (btn == 'ok') {
+console.log("Invalid entry for field 'group'. Please enter comma separated integers.")}
+}
+)}
 }, {
-	text: 'Clear Group',
-	handler: function() {
-		setRecords(myGrid.getSelectionModel().getSelection(), 'group', '')
-		UpdateAll()	
-	}
+text: 'Clear Group',
+handler: function() {
+setRecords(myGrid.getSelectionModel().getSelection(), 'group', '')
+UpdateAll()
+}
 }],
 });
+}
 
 
-
-});
