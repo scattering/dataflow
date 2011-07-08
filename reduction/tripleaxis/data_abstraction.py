@@ -437,9 +437,11 @@ class DetectorSet(object):
         def __iter__(self):
                 temp_dict=copy.deepcopy(self.__dict__)
                 temp_dict.__delitem__('detector_mode')
+                
                 #temp_dict.__delitem__('primary_detector')
                 for key,value in temp_dict.iteritems():
                         yield value
+
         #def next(self):
         #        for key, value in self.__dict__.iteritems():
         #                yield value
@@ -691,11 +693,14 @@ class TripleAxis(object):
                 for detector in self.detectors:
                         detector.measurement=detector.measurement*np.exp(-beta*E/2)
                 return
-        def normalize_monitor(self,monitor):              
-                mon0=self.time.monitor #TODO CHECK THIS
+        def normalize_monitor(self,monitor):
+                # Turns out iterating through self.detectors makes detector a copy,
+                # and doesn't actually modify self.detectors -> could be the 'yield'
+                # statement producing a generator...
+                mon0=self.time.monitor 
                 for detector in self.detectors:
                         detector=detector*(mon0/monitor)
-                        
+
                         #for i in range(0,len(detector.measurement.x)):
                         #        detector.measurement[i]=detector.measurement[i]*mon0[i]/monitor
                 return
@@ -1235,7 +1240,9 @@ def filereader(filename):
         filestr=filename
         mydatareader=readncnr.datareader()
         mydata=mydatareader.readbuffer(filestr)
-        return mydata
+        instrument = TripleAxis()
+        translate(instrument, mydata)
+        return instrument
 
 if __name__=="__main__":
         #myfilestr=r'c:\bifeo3xtal\jan8_2008\9175\mesh53439.bt7'
@@ -1244,9 +1251,11 @@ if __name__=="__main__":
         #mydatareader=readncnr.datareader()
         #mydata=mydatareader.readbuffer(myfilestr)
         #print mydata.metadata.varying
-        mydata = filereader(r'EscanQQ7HorNSF91831.bt7') #NOTE: include the r in the beginning!
-        bt7=TripleAxis()
-        translate(bt7,mydata)
+        #mydata = filereader('EscanQQ7HorNSF91831.bt7') #NOTE: include the r in the beginning!
+        #bt7=TripleAxis()
+        #translate(bt7,mydata)
+        
+        bt7 = filereader('EscanQQ7HorNSF91831.bt7')
         print 'translations done'
         bt7.normalize_monitor(90000)
         #print 'detailed balance done'

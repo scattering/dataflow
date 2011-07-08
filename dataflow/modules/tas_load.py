@@ -1,5 +1,5 @@
 """
-Load data sets.
+Load a TripleAxis object from a datafile.
 """
 
 from .. import config
@@ -7,7 +7,7 @@ from ..core import Module
 
 def load_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[]):
-    """Module for loading a dataset"""
+    """Module for loading a TripleAxis object"""
 
     icon = {
         'URI': config.IMAGES + "load.png",
@@ -20,7 +20,7 @@ def load_module(id=None, datatype=None, action=None,
         dict(id='output',
              datatype=datatype,
              use='out',
-             description='data',
+             description='TripleAxis Object',
              ),
     ]
 
@@ -30,21 +30,15 @@ def load_module(id=None, datatype=None, action=None,
         "name": "files",
         "value": '',
     }
-    intent_field = {
-        "type":"string",
-        "label":"Intent",
-        "name": "intent",
-        "value": '',
-    }
     
     # Combine everything into a module.
     module = Module(id=id,
-                  name='Load',
+                  name='TripleAxis Load',
                   version=version,
                   description=action.__doc__,
                   #icon=icon,
                   terminals=terminals,
-                  fields=[files_field, intent_field] + fields,
+                  fields=[files_field] + fields,
                   action=action,
                   )
 

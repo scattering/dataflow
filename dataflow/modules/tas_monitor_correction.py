@@ -1,15 +1,15 @@
 """
-For TripleAxis, normalize monitor
+For TripleAxis, monitor correction
 """
 
 from .. import config
 from ..core import Module
 
-def normalize_monitor_module(id=None, datatype=None, action=None,
+def monitor_correction_module(id=None, datatype=None, action=None,
                              version='0.0', fields=[],
-                             description="apply TripleAxis monitor normalization"):
+                             description="apply TripleAxis monitor correction"):
     """
-    Return a module for normalizing a TripleAxis monitor
+    Return a module for correcting a TripleAxis monitor
     """
 
     icon = {
@@ -25,32 +25,32 @@ def normalize_monitor_module(id=None, datatype=None, action=None,
         dict(id='input',
              datatype=datatype,
              use='in',
-             description='TripleAxis object and target monitor input',
+             description='TripleAxis object and instrument name',
              required=True,
              multiple=False,
              ),
         dict(id='output',
              datatype=datatype,
              use='out',
-             description='TripleAxis object with normalized monitor',
+             description='TripleAxis object with corrected monitor',
              ),
     ]
     
-    targetmonitor_field = {
-        "type":"float",
-        "label": "Target monitor",
-        "name": "target_monitor",
+    instrumentname_field = {
+        "type":"String",
+        "label": "Instrument name",
+        "name": "instrument_name",
         "value": 1.0,
     }
     
     # Combine everything into a module.
     module = Module(id=id,
-                  name='Normalize Monitor',
+                  name='Monitor Correction',
                   version=version,
                   description=description,
                   icon=icon,
                   terminals=terminals,
-                  fields=[targetmonitor_field] + fields,
+                  fields=[instrumentname_field] + fields,
                   action=action,
                   )
 
