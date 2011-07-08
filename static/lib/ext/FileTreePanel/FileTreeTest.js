@@ -38,8 +38,20 @@ Ext.onReady(function() {
         	//	});
         	//},
         store: treeStore,
+        listeners: {
+        	beforeexpand: function() {
+        		console.log('PANEL HAS BEEN EXPANDED')
+        		},
+        	beforecontainermouseover: function() {
+        		console.log('MOUSEOVER!')
+        		},
+        	beforeitemexpand: function() {
+        		console.log('TREE ITEM HAS BEEN EXPANDED')
+        		},
+        		
+        	},
+        
     });
     
     treeStore.load()
-    treeStore.refresh()
 });

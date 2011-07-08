@@ -56,7 +56,7 @@ store = [{
         }]
    }]
 def getNCNRdirectories(request):
-	return HttpResponse(simplejson.dumps(testftp.runMe()))
+	return HttpResponse(simplejson.dumps(testftp.runMe()))  #testftp.runMe()
     
 def displayFileLoad(request):
 	return render_to_response('FileUpload/FileTreeTest.html', locals())
