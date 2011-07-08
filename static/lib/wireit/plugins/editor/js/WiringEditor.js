@@ -492,7 +492,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	   var n = this.pipes.length,ret;
 	   for(var i = 0 ; i < n ; i++) {
 	      if(this.pipes[i].name == name) {
-			return this.pipes[i] //.working;
+			return this.pipes[i] //.working; Changed as part of changes to listWirings
 	      }
 	   }
 	   return null;
@@ -561,6 +561,8 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		  this.markSaved();
 		
 		  this.preventLayerChangedEvent = false;
+		  makeFileTable(this.getFATHeaders())
+		  console.log(this.getFATHeaders())
 
  		}
  		catch(ex) {
@@ -606,7 +608,32 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	     name: obj.properties.name,
 	     working: obj
 	  };
-	}
+	},
+	
+	/**
+	* This method returns a list of strings for the column headers in the FAT.
+	* Currently, it simply runs through all existing wires and adds source and target (checking by uniqueID)
+	* module name to the list
+	* 7/8
+	**/
+	getFATHeaders: function() {
+		var wiringDiagram = this.getValue().working
+		var wireList = wiringDiagram.wires
+		var moduleList = wiringDiagram.modules
+		var hitModules = [] // at some point to check which modules have already been touched
+		var headersList = [] // actual list of headers
+		for (var i in wireList) {
+			headersList.push(moduleList[wireList[i].tgt.moduleId].name + ' ' + wireList[i].tgt.terminal)
+			}
+		return headersList;	
+		},
+	/**
+	* This method calls the getFATheaders method to generate the FAT column headers, and then displays
+	* the FAT with those headers passed in
+	* 7/8
+	**/
+	
+
 
 
 });
