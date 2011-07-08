@@ -4,7 +4,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Interactor test</title>
 <style type="text/css">
-  label { display: inline-block; font-family: monospace; width: 300px; text-align: center; padding: 2px; }
+  label { display: block; font-family: monospace; text-align: center; }
+  canvas { border: 2px solid; }
+  .bk { float: left; margin-right: 4px; }
 </style>
 <script type="text/javascript" src="../prototype.js"></script>
 <script type="text/javascript" src="interactors.js"></script>
@@ -12,36 +14,44 @@
 <script type="text/javascript" src="../plotting/palettes.js"></script>
 <script type="text/javascript" src="../plotting/sansdata.js"></script>
 <script type="text/javascript">
-var c1,c2,c3,c4,c5,c6,c7;
+var c = [], interactors;
 window.onload = function() {
-    c1 = new SegmentInteractor('c1');
-    c2 = new QuadInteractor('c2');
-    c3 = new CircleInteractor('c3');
-    c4 = new AnnulusInteractor('c4');
-    c5 = new ArcInteractor('c5');
-    c6 = new ParallelogramInteractor('c6');
-    c7 = new GaussianInteractor('c7');
+    interactors = [
+        SegmentInteractor,
+        QuadInteractor,
+        CircleInteractor,
+        AnnulusInteractor,
+        ArcInteractor,
+        ParallelogramInteractor,
+        [GaussianInteractor, 600, 300],
+        [QuadraticInteractor, 600, 300],
+    ];
+    for (var i  = 0; i < interactors.length; i ++) {
+        var id = 'c' + (i + 1);
+        if (interactors[i].length)
+            var inst = interactors[i][0], width = interactors[i][1], height = interactors[i][2];
+        else
+            var inst = interactors[i], width = 300, height = 300;
+        
+        var lb = document.createElement('label');
+        lb.setAttribute('for', id);
+        var cv = document.createElement('canvas');
+        cv.setAttribute('id', id);
+        cv.setAttribute('width', width);
+        cv.setAttribute('height', height);
+        var dv = document.createElement('div');
+        dv.setAttribute('class', 'bk');
+        dv.appendChild(lb);
+        dv.appendChild(cv);
+        document.body.appendChild(dv);
+        
+        c[i + 1] = new inst(id);
+        lb.appendChild(document.createTextNode(c[i + 1].name + 'Interactor'));
+    }
     
 }
 </script>
 </head>
 <body>
-<label for="c1">SegmentInteractor</label>
-<label for="c2">QuadInteractor</label>
-<label for="c3">CircleInteractor</label>
-<label for="c4">AnnulusInteractor</label>
-<br />
-<canvas id="c1" width="300" height="300" style="border: 2px solid;"></canvas>
-<canvas id="c2" width="300" height="300" style="border: 2px solid;"></canvas>
-<canvas id="c3" width="300" height="300" style="border: 2px solid;"></canvas>
-<canvas id="c4" width="300" height="300" style="border: 2px solid;"></canvas>
-<br />
-<label for="c5">ArcInteractor</label>
-<label for="c6">ParallelogramInteractor</label>
-<label for="c7">GaussianInteractor</label>
-<br />
-<canvas id="c5" width="300" height="300" style="border: 2px solid;"></canvas>
-<canvas id="c6" width="300" height="300" style="border: 2px solid;"></canvas>
-<canvas id="c7" width="300" height="300" style="border: 2px solid;"></canvas>
 </body>
 </html>
