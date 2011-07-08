@@ -437,9 +437,11 @@ class DetectorSet(object):
         def __iter__(self):
                 temp_dict=copy.deepcopy(self.__dict__)
                 temp_dict.__delitem__('detector_mode')
+                
                 #temp_dict.__delitem__('primary_detector')
                 for key,value in temp_dict.iteritems():
                         yield value
+
         #def next(self):
         #        for key, value in self.__dict__.iteritems():
         #                yield value
@@ -691,10 +693,14 @@ class TripleAxis(object):
                 for detector in self.detectors:
                         detector.measurement=detector.measurement*np.exp(-beta*E/2)
                 return
-        def normalize_monitor(self,monitor):              
-                mon0=self.time.monitor #TODO CHECK THIS
+        def normalize_monitor(self,monitor):
+                # Turns out iterating through self.detectors makes detector a copy,
+                # and doesn't actually modify self.detectors -> could be the 'yield'
+                # statement producing a generator...
+                mon0=self.time.monitor 
                 for detector in self.detectors:
                         detector=detector*(mon0/monitor)
+
                         #for i in range(0,len(detector.measurement.x)):
                         #        detector.measurement[i]=detector.measurement[i]*mon0[i]/monitor
                 return
@@ -711,11 +717,10 @@ class TripleAxis(object):
                 for detector in self.detectors:
                         Eii=self.physical_motors.ei
                         detector.measurement=detector.measurement*(M[0] + M[1]*Eii + M[2]*Eii**2 + M[3]*Eii**3 + M[4]*Eii**4)
-                        #TODO the primary detector is a single array... doesn't have a '.measurement' -> FIX!
                 return
                         
         def resolution_volume_correction(self):
-                """Correct constant Q-scans with fixed incident energy, Ei for the fact that the resolution volume changes
+                """Correct constant Q-scans with fixed incident energy, Ei, for the fact that the resolution volume changes
                 as Ef changes"""
                 # Requires constant-Q scan with fixed incident energy, Ei
                 #pass
@@ -1202,9 +1207,8 @@ def map_motors(translate_dict,target_field,dataset):
                 
                 #self.h=Motor('h',values=None,err=None,units='rlu',isDistinct=True,
                 #             isInterpolatable=True)
-# ****************************************************************************************************************************************************
-# ****************************************************** REDUCTION FUNCTIONS - to be moved! **************************************************************
-# ****************************************************************************************************************************************************
+
+
 def establish_correction_coefficients(filename):
         "Obtains the instrument-dependent correction coefficients from a given file and \
          returns them in the dictionary called coefficients"
@@ -1227,44 +1231,31 @@ def establish_correction_coefficients(filename):
 
 
        
-    
-
-def resolution_volume_correction(data):
-        # Requires constant-Q scan with fixed incident energy, Ei
-        pass
-        #TODO - CHECK - taken from the IDL
-        # resCor = Norm/(cot(A6/2)*Ef^1.5)
-        # where Norm = Ei^1.5 * cot(asin(!pi/(0.69472*dA*sqrt(Ei))))
-        '''
-        for i in len(data.get(Ei))
-            thetaA = N.radians(data.get(a6)[i]/2.0)
-            arg = asin(N.pi/(0.69472*dA*sqrt(double(data.get(Ei)[i]))))
-            norm = (Ei^1.5) / tan(arg)
-            cotThetaA = 1/tan(thetaA)
-            resCor = norm/(cotThetaA * (Ef^1.5))
-        
-
-
-        N.exp((ki/kf) ** 3) * (1/N.tan(thetaM)) / (1/N.cot(thetaA))
-        '''     
-                
 
 
  
 
 
-
-
+def filereader(filename):
+        filestr=filename
+        mydatareader=readncnr.datareader()
+        mydata=mydatareader.readbuffer(filestr)
+        instrument = TripleAxis()
+        translate(instrument, mydata)
+        return instrument
 
 if __name__=="__main__":
-        myfilestr=r'c:\bifeo3xtal\jan8_2008\9175\mesh53439.bt7'
-        myfilestr=r'EscanQQ7HorNSF91831.bt7'
-        print 'hi'
-        mydatareader=readncnr.datareader()
-        mydata=mydatareader.readbuffer(myfilestr)
+        #myfilestr=r'c:\bifeo3xtal\jan8_2008\9175\mesh53439.bt7'
+        #myfilestr=r'EscanQQ7HorNSF91831.bt7'
+        #print 'hi'
+        #mydatareader=readncnr.datareader()
+        #mydata=mydatareader.readbuffer(myfilestr)
         #print mydata.metadata.varying
-        bt7=TripleAxis()
-        translate(bt7,mydata)
+        #mydata = filereader('EscanQQ7HorNSF91831.bt7') #NOTE: include the r in the beginning!
+        #bt7=TripleAxis()
+        #translate(bt7,mydata)
+        
+        bt7 = filereader('EscanQQ7HorNSF91831.bt7')
         print 'translations done'
         bt7.normalize_monitor(90000)
         #print 'detailed balance done'

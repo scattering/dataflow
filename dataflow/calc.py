@@ -9,8 +9,10 @@ from inspect import getsource
 from .core import lookup_module
 import hashlib, redis
 
+
 # temp
 from ..reduction.offspecular.FilterableMetaArray import FilterableMetaArray
+
 
 TEMP_DATABASE = {} # Fake database
 server = redis.Redis("localhost")
