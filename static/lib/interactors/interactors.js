@@ -98,7 +98,7 @@ var Interactor = Class.create({
                 this.curgrob = i;
             }
         }
-        console.log('down', this.grobs, pos.x, pos.y, this.mousedown);
+        console.log('down', /*this.grobs,*/ pos.x, pos.y, 'mousedown=',this.mousedown);
     },
     onMouseUp:   function(e) {
         this.mousedown = false;
@@ -109,7 +109,7 @@ var Interactor = Class.create({
             this.onDrop(e, pos);
         }
         this.curgrob = null;
-        console.log('up  ', this.grobs, pos.x, pos.y, this.mousedown);
+        console.log('up  ', /*this.grobs,*/ pos.x, pos.y, 'mousedown=',this.mousedown);
         this.redraw();
     },
     onDrag: function(pos) {
@@ -154,9 +154,9 @@ var SegmentInteractor = new Class.create(PolygonInteractor, {
         this.redraw();
     },
 });
-var QuadInteractor = new Class.create(PolygonInteractor, {
+var QuadrangleInteractor = new Class.create(PolygonInteractor, {
     initialize: function($super, canvasid) {
-        $super('Quad', 'quad.png', 0, canvasid);
+        $super('Quadrangle', 'quad.png', 0, canvasid);
         
         var p1 = new Point(this, 100, 100);
         var p2 = new Point(this, 200, 150);
@@ -260,7 +260,7 @@ var GaussianInteractor = new Class.create(Interactor, {
     initialize: function($super, canvasid) {
         $super('Gaussian', 'gaussian.png', 0, canvasid);
         
-        var pw = new Point(this, 200, 150);
+        var pw = new Point(this, 200, 200);
         var pk = new Point(this, 150, 100);
         var gaussian = new Gaussian(this, pk, pw, 4);
         this.grobs.push(gaussian, pk, pw);
@@ -299,8 +299,9 @@ var Grob = Class.create({
         this.prevpos = null;
         this.dpos = null;
 
-        this.color1 = '#2C8139';
-        this.color2 = '#4CCC60';
+        var h = Math.random() * 60;
+        this.color1 = 'hsl('+h+',100%,50%)'; //'#2C8139';
+        this.color2 = 'hsl('+h+',100%,70%)'; //'#4CCC60';
         this.color = this.color1;
     },
     
@@ -388,7 +389,7 @@ var GrobConnector = Class.create(Grob, {
     onDrag: function($super, e, pos) {
         $super(e, pos);
         
-        console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ')', this.dpos.x, this.dpos.y);
+        console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ') dpos (', this.dpos.x, this.dpos.y, ')');
         for (var p in this.points)
             this.points[p].translateBy(this.dpos);
     },
@@ -519,16 +520,68 @@ var FunctionConnector = Class.create(GrobConnector, {
         var f = (function(x) { return dist(pos, { x: x, y: this.c.pos.y - this.f(x) }); }).bind(this),
             df = nDeriv(f),
             d2f = nDeriv(df),
-            x0 = pos.x;
-        var x = minimize(df, d2f, x0);
-        var fpos = { x: x, y: this.c.pos.y - this.f(x) };
+            x0 = pos.x,
+            prevxs = [],
+            min = [],
+            minx = null;
         
-        this.parent.context.strokeStyle = 'black';
-        this.parent.context.moveTo(pos.x, pos.y);
+        /*
+        for (x0 = 0; x0 < this.parent.canvas.width; x0 += 1) {
+          if (!min.length || f(x0) < f(min[0]))
+            min[0] = x0;
+        }
+        x = min[0];
+        */
+        for (x0 = 0; x0 < this.parent.canvas.width; x0 += 1)
+          if (minx == null || f(x0) < f(minx))
+            minx = x0;
+        min = root_bisect(df, minx - 4, minx + 4, 0.1);
+        
+        /*
+        //console.log(min[0], f(min[0]));
+        min = root_bisect(df, 0, this.parent.canvas.width);
+        min = root_newtons(df, d2f, min[0]);*/
+        var x = min[0], prevxs = min[1];
+        
+        var fpos = { x: x, y: this.c.pos.y - this.f(x) };
+        /*
+        var tmp = this.parent.context.strokeStyle;
+        this.parent.context.strokeStyle = '#999';
+        this.parent.context.lineWidth = 2;
+        this.parent.context.moveTo(pos.x,this.c.pos.y+300);
+        this.parent.context.lineTo(pos.x, pos.y);
         this.parent.context.lineTo(fpos.x, fpos.y);
+        this.parent.context.lineTo(x,this.c.pos.y+300);
         this.parent.context.stroke();
-        console.log('pos=',pos.x, pos.y,'fpos=',fpos.x, fpos.y);
+        this.parent.context.moveTo(0,this.c.pos.y+200);
+        this.parent.context.lineTo(this.parent.canvas.width,this.c.pos.y+200);
+        this.parent.context.moveTo(0,this.c.pos.y+300);
+        this.parent.context.lineTo(this.parent.canvas.width,this.c.pos.y+300);
+        this.parent.context.fillText('y=0', 2, this.c.pos.y+198);
+        this.parent.context.fillText('y=0', 2, this.c.pos.y+298);
+        this.parent.context.fillText(x.toPrecision(4), x, this.c.pos.y+311);
+        this.parent.context.fillText(f(x).toPrecision(4), x, this.c.pos.y-f(x)/10+298);
+        this.parent.context.strokeText('d \' ( x )', 2, this.c.pos.y+213);
+        this.parent.context.strokeText('d ( x )', 2, this.c.pos.y+313);
+        this.parent.context.stroke();
+        if (prevxs.length) {
+          this.parent.context.strokeStyle = '#ccc';
+          this.parent.context.beginPath();
+          this.parent.context.moveTo(x0, this.c.pos.y+200);
+          for (var i = 0; i < prevxs.length - 1; i ++) {
+            this.parent.context.lineTo(prevxs[i], this.c.pos.y-df(prevxs[i])*20+200);
+            this.parent.context.lineTo(prevxs[i+1], this.c.pos.y+200);
+            this.parent.context.fillText(i, prevxs[i] + 2, this.c.pos.y+194-3*i);
+          }
+          this.parent.context.stroke();
+        }
+        
+        drawEq(this.parent.context, function(x){ return df(x) * 20; }, this.c.pos.x, this.c.pos.y + 200, 0, this.parent.canvas.width, true);
+        drawEq(this.parent.context, function(x){ return f(x) / 10; }, this.c.pos.x, this.c.pos.y + 300, 0, this.parent.canvas.width);
+        this.parent.context.strokeStyle = tmp;
+        this.parent.context.lineWidth = this.width;*/
         var d = dist(pos, fpos);
+        //console.log('pos (',pos.x, pos.y,') fpos (',fpos.x.toFixed(2), fpos.y.toFixed(2), ') x =',x ,'d =', d);
         return d;
     },
     
@@ -552,7 +605,7 @@ var Quadratic = Class.create(FunctionConnector, {
         //ctx.beginPath();
         //console.log(t_1, t_2);
         //ctx.moveTo(this.c.pos.x, this.c.pos.y);
-        drawEq(ctx, this.f.bind(this), 0, this.p1.pos.y, 0, 300);
+        drawEq(ctx, this.f.bind(this), 0, this.p1.pos.y, 0, this.parent.canvas.width);
         //drawEq(ctx, nDeriv(this.gaussian.bind(this)), 0, this.pw.pos.y, 0, 300);
         //ctx.closePath();
         //ctx.stroke();
@@ -573,7 +626,7 @@ var Quadratic = Class.create(FunctionConnector, {
     distanceTo: function($super, pos) {
         var d = $super(pos);
         //var d = Math.abs((this.pw.pos.y - this.gaussian(pos.x)) - pos.y);
-        console.log(d);
+        //console.log(d);
         return d;
     },
 });
@@ -599,7 +652,7 @@ var Gaussian = Class.create(FunctionConnector, {
         //ctx.beginPath();
         //console.log(t_1, t_2);
         //ctx.moveTo(this.c.pos.x, this.c.pos.y);
-        drawEq(ctx, this.gaussian.bind(this), 0, this.pw.pos.y, 0, 300);
+        drawEq(ctx, this.f.bind(this), 0, this.pw.pos.y, 0, this.parent.canvas.width);
         //drawEq(ctx, nDeriv(this.gaussian.bind(this)), 0, this.pw.pos.y, 0, 300);
         //ctx.closePath();
         //ctx.stroke();
@@ -620,7 +673,7 @@ var Gaussian = Class.create(FunctionConnector, {
     distanceTo: function($super, pos) {
         var d = $super(pos);
         //var d = Math.abs((this.pw.pos.y - this.gaussian(pos.x)) - pos.y);
-        console.log(d);
+        //console.log(d);
         return d;
     },
 });
@@ -693,32 +746,74 @@ function d_dist_f(pos, x, f) {
     var y = f(x);
     return ((nDeriv(f))(x) * (y - pos.y) + (x - pos.x)) / dist(pos, { x: x, y: y });
 }
-function drawEq(ctx, eq, x0, y0, xmin, xmax) {
-    ctx.strokeStyle = 'black';
+function drawEq(ctx, eq, x0, y0, xmin, xmax, pm) {
+  var tmp = ctx.strokeStyle;
+  var prevcolor = newcolor = null;
 	ctx.beginPath();
-	for( var i = xmin; i <= xmax; i ++) {
-		ctx.lineTo(i, y0 - eq(i));
+	for (var i = xmin - 1; i <= xmax + 1; i ++) {
+    var y = eq(i);
+    if (pm) {
+      prevcolor = newcolor;
+      newcolor = (y >= 0) ? 'red' : 'blue';
+      if (prevcolor != null && prevcolor != newcolor) {
+        var h = i - 1 + y / (eq(i - 1) - y);
+        //ctx.lineTo(h, y0);
+        ctx.lineTo(i, y0 - 1);
+        ctx.strokeStyle = prevcolor;
+        ctx.stroke();
+        ctx.beginPath();
+        //ctx.moveTo(h, y0);
+        ctx.moveTo(i - 1, y0 - eq(i - 1));
+        ctx.lineTo(i, y0 - y);
+      }
+      else
+        ctx.lineTo(i, y0 - y);
+    }
+    else
+      ctx.lineTo(i, y0 - y);
 	}
-	ctx.stroke();
+	if (pm)
+    ctx.strokeStyle = prevcolor;
+  ctx.stroke();
+	ctx.strokeStyle = tmp;
 }
 function nDeriv(f) {
-    var h = 1e-6;
+    var h = 1e-3;
     var df = function(x) { return (f(x + h) - f(x - h)) / 2 / h; };
     df.f = f;
     return df;
 }
-function minimize(f, df, x0) {
-    var maxiters = 40, tol = 1e-8, v;
-    var x = x0, prevx = null;
+function root_bisect(f, a, b, tol) {
+    var maxiters = 20, tol = tol || 0.5, x, prevxs = [];
+    var iter = 0;
+    while (Math.abs(b - a) > tol && iter < maxiters) {
+      x = (a + b) / 2;
+      prevxs.push(x);
+      if (f(x) == 0)
+        break;
+      else if ((f(a) * f(x)) < 0)
+        b = x;
+      else
+        a = x;
+      iter ++;
+    }
+    //console.log(iter, x, f(x));
+    return [x, prevxs];
+}
+function root_newtons(f, df, x0) {
+    var maxiters = 40, tol = 1, v;
+    var x = x0, prevx = null, prevxs = [];
     var g = function(x) { newx = x - f(x) / df(x); /*f1=f;df1=df;console.log('x=',x, 'f(x)=',f(x), 'f\'(x)=',df(x), 'newx=',newx);*/ return newx; };
     
-    console.log('start minimize');
-    var iter = 1;
+    //console.log('start minimize');
+    var iter = 0;
     while (prevx == null || Math.abs(x - prevx) > tol && iter < maxiters) {
         prevx = x;
+        prevxs.push(prevx);
         x = g(x);
         iter ++;
     }
-    console.log('end minimize');
-    return x;
+    //console.log(prevxs);
+    //console.log('end minimize');
+    return [x, prevxs];
 }
