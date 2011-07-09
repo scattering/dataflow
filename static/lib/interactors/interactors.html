@@ -4,27 +4,24 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Interactor test</title>
 <style type="text/css">
-  label { display: block; font-family: monospace; text-align: center; }
-  canvas { border: 2px solid; }
+  label { display: block; font-family: consolas, monospace; text-align: center; }
+  canvas { border: 1px dotted #888; }
   .bk { float: left; margin-right: 4px; }
 </style>
-<script type="text/javascript" src="../prototype.js"></script>
+<script type="text/javascript" src="prototype.js"></script>
 <script type="text/javascript" src="interactors.js"></script>
-<script type="text/javascript" src="../plotting/plotting_api.js"></script>
-<script type="text/javascript" src="../plotting/palettes.js"></script>
-<script type="text/javascript" src="../plotting/sansdata.js"></script>
 <script type="text/javascript">
 var c = [], interactors;
 window.onload = function() {
     interactors = [
         SegmentInteractor,
-        QuadInteractor,
+        QuadrangleInteractor,
         CircleInteractor,
         AnnulusInteractor,
         ArcInteractor,
         ParallelogramInteractor,
-        [GaussianInteractor, 600, 300],
-        [QuadraticInteractor, 600, 300],
+        [GaussianInteractor, 300, 300],
+        [QuadraticInteractor, 300, 300],
     ];
     for (var i  = 0; i < interactors.length; i ++) {
         var id = 'c' + (i + 1);
