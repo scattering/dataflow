@@ -232,7 +232,8 @@
             }
             */
         }
-        console.log('init');
+        if (debug)
+            console.log('init');
         
         this._edges = u.edges(this.zs, this.zaxis, this.edges, this.minZ, this.maxZ);
         this._palette = palettes[this.palette](n+1);
@@ -388,17 +389,21 @@
         
         var xmin = Math.max(this._xaxis.min, this.dims.xmin), xmax = Math.min(this._xaxis.max, this.dims.xmax);
         var ymin = Math.max(this._yaxis.min, this.dims.ymin), ymax = Math.min(this._yaxis.max, this.dims.ymax);
-        console.log('x', xmin,xmax, 'y', ymin,ymax, 'w', (xmax-xmin), 'h', (ymax-ymin));
-        console.log('dims', this.dims);
+        if (debug) {
+            console.log('x', xmin,xmax, 'y', ymin,ymax, 'w', (xmax-xmin), 'h', (ymax-ymin));
+            console.log('dims', this.dims);
+        }
         
         var sx  = (xmin - this.dims.xmin)/this.dims.dx, sy  = (this.dims.ymax - ymax)/this.dims.dy,
             sx2 = (xmax - this.dims.xmin)/this.dims.dx, sy2 = (this.dims.ymax - ymin)/this.dims.dy,
             sw = sx2 - sx, sh = sy2 - sy;
-        console.log('sx', sx, 'sy', sy, 'sw', sw, 'sh', sh, '   sx2 ', sx2, 'sy2 ', sy2);
+        if (debug)
+            console.log('sx', sx, 'sy', sy, 'sw', sw, 'sh', sh, '   sx2 ', sx2, 'sy2 ', sy2);
         
         var dx = xp.call(this._xaxis, xmin), dy = yp.call(this._yaxis, ymax),
             dw = xp.call(this._xaxis, xmax) - xp.call(this._xaxis, xmin), dh = yp.call(this._yaxis, ymin) - yp.call(this._yaxis, ymax);
-        console.log('dx', dx, 'dy', dy, 'dw', dw, 'dh', dh);
+        if (debug)
+            console.log('dx', dx, 'dy', dy, 'dw', dw, 'dh', dh);
         
         if (sw > 0 && sh > 0) {
             //test('mycanvas', this);
@@ -411,21 +416,25 @@
             this.canvas._elem.append(this.bubbleCanvases[idx].createElement(gd[0], gd[1], dw, dh, dx, dy));
             this.bubbleCanvases[idx].setContext();
             
-            console.log('ctx', ctx);
+            if (debug)
+                console.log('ctx', ctx);
             var ctx = this.bubbleCanvases[idx]._ctx;
             var x = ctx.canvas.width/2;
             var y = ctx.canvas.height/2;
 
             
             c=ctx;
-            console.log('c.drawImage(img,'+sx+','+sy+','+sw+','+sh+',0,0,'+dw+','+dh+');');
+            if (debug)
+                console.log('c.drawImage(img,'+sx+','+sy+','+sw+','+sh+',0,0,'+dw+','+dh+');');
             // SUBRACTING ONE BECAUSE JAVASCRIPT HAS FLOATING POINT NUMBER ISSUES
-            img.onload = function() { console.log('ONLOAD'); ctx.drawImage(this, sx, sy, sw - 1, sh - 1, 0, 0, dw, dh); };
+            img.onload = function() { if (debug) console.log('ONLOAD'); ctx.drawImage(this, sx, sy, sw - 1, sh - 1, 0, 0, dw, dh); };
         }
         else
-            throw "No data within bounds";
-        console.log('_xaxis', this._xaxis);
-        console.log('# x', this._xaxis.min, this._xaxis.max, '; y', this._yaxis.min, this._yaxis.max);
+            throw "No data within bounds!";
+        if (debug) {
+            console.log('_xaxis', this._xaxis);
+            console.log('# x', this._xaxis.min, this._xaxis.max, '; y', this._yaxis.min, this._yaxis.max);
+        }
         
         return;
         

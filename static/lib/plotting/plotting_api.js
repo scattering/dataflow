@@ -1,4 +1,4 @@
-
+var debug = false;
 var types = { lin: {
                 incr: function(i, step) { return i + step; },
                 step: function(min,max,n) { return (max-min)/n; },
@@ -143,7 +143,8 @@ function renderData(data, plotid) {
     var resguess = Math.pow(2, Math.log((data[index].dims.xmax - data[index].dims.xmin) / data[index].dims.dx) / Math.log(2));
     $('#res').val(resguess);
     //console.log(edges_.edges_);
-    console.log(palette.array.length);
+    if (debug)
+        console.log('palette.array.length: ', palette.array.length);
     
     for (var i in s_) {
       //This is slow:
@@ -160,16 +161,18 @@ function renderData(data, plotid) {
     options.series.push({ renderer: $.jqplot.pcolorRenderer, rendererOptions: { dims: data[index].dims, autoscaleBubbles: false, /*bodyWidth: 1, wickColor: 'red', openColor: 'yellow', closeColor: 'blue'*/ } });
     renderColorbar('colorbar', palette, edges_, 13);
   }
-  console.log(series);
-  //console.log(options);
-  console.log('stg',stage);
+  if (debug) {
+      console.log('series: ', series);
+      //console.log(options);
+      console.log('stage: ', stage);
+  }
   if (stage == 1) {
     plot = $.jqplot(plotid, series, options);
     stage = 2;
   }
   else {
     for (i in series)
-     plot.series[i].data = series[i];
+      plot.series[i].data = series[i];
     plot.options = options;
     plot.replot();
   }
@@ -180,7 +183,10 @@ function renderData(data, plotid) {
 function colorbar(canvasid, palette) {
   var cvs = document.getElementById(canvasid);
   var ctx = getContext(canvasid);
-  console.log(canvasid,palette);
+  if (debug) {
+      console.log('canvasid: ', canvasid);
+      console.log('palette: ', palette);
+  }
   cvs.height = palette.array.length;
   
   var imgd = ctx.createImageData(1, palette.array.length);
@@ -297,6 +303,10 @@ plotdata2 = {
 };
 
 function plottingAPI(toPlot, plotid) {
+    if (toPlot.constructor == Array)
+        toPlot = toPlot[0];
+        // throw "Unsupported data format! Data must be a single series.";
+        
     switch (toPlot.type) {
         case '2d':
             var m = Matrix(toPlot.z);
@@ -313,25 +323,29 @@ function plottingAPI(toPlot, plotid) {
             
         case '1d':
             var axis = "linear";
-		    if (toPlot.x[axis].data.length != toPlot.y[0][axis].data.length)
-			    throw "Your data sucks";
-			zipped = [];
-		    for (i in toPlot.x[axis].data)
-			    if (!isNaN(toPlot.x[axis].data[i]))
-				    zipped.push([toPlot.x[axis].data[i], toPlot.y[0][axis].data[i]]);
-		    console.log(zipped);
+            if (toPlot.x[axis].data.length != toPlot.y[0][axis].data.length)
+                throw "Your data sucks";
+            zipped = [];
+            for (i in toPlot.x[axis].data)
+                if (!isNaN(toPlot.x[axis].data[i]))
+                    zipped.push([toPlot.x[axis].data[i], toPlot.y[0][axis].data[i]]);
+            if (debug)
+                console.log('zipped: ', zipped);
 
 
-		    if (! plotCreated) {
-		      plot=$.jqplot(plotid, [zipped]);
-		      plotCreated = true;
-			}
-		    else {
-		      plot.resetAxesScale();
-		      plot.series[0].data = zipped;
-		      plot.replot();
-		    }
-		    break;
+            if (! plotCreated) {
+              plot = $.jqplot(plotid, [zipped]);
+              plotCreated = true;
+            }
+            else {
+              plot.resetAxesScale();
+              plot.series[0].data = zipped;
+              plot.replot();
+            }
+            break;
+            
+        default:
+            throw "Unsupported plot type! Please specify the type as '1d' or '2d'.";
     }
 
     /* 
