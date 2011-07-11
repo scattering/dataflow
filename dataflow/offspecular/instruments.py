@@ -1,17 +1,16 @@
 """
 Offspecular reflectometry reduction modules
 """
-import os, sys, math, numpy, simplejson, time, json
+import os, sys
 dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.append(dir)
-from pprint import pprint
 
 # left here for testing purposes
 # python uses __name__ for relative imports so I cannot use
 # the ... in place of dataflow when testing
 from dataflow.dataflow import config
 from dataflow.dataflow.calc import run_template
-from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
+from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language, wireit_diagram_to_template
 from dataflow.dataflow.core import Datatype, Instrument, Template, register_instrument
 from dataflow.dataflow.modules.load import load_module
 from dataflow.dataflow.modules.join import join_module
@@ -23,8 +22,7 @@ from dataflow.dataflow.modules.wiggle import wiggle_module
 from dataflow.dataflow.modules.pixels_two_theta import pixels_two_theta_module
 from dataflow.dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
 from dataflow.reduction.offspecular.filters import *
-from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
-
+from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
 
 #from ...dataflow import config
 #from ...dataflow.calc import run_template
@@ -40,7 +38,7 @@ from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArr
 #from ...dataflow.modules.pixels_two_theta import pixels_two_theta_module
 #from ...dataflow.modules.two_theta_qxqz import two_theta_qxqz_module
 #from ...reduction.offspecular.filters import *
-#from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
+#from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray
 
 
 # Datatype
@@ -48,62 +46,6 @@ OSPEC_DATA = 'data2d.ospec'
 data2d = Datatype(id=OSPEC_DATA,
                   name='2-D Offspecular Data',
                   plot='ospecplot')
-
-# Convert FilterableMetaArrays to plotting specification
-# plottable_data = {
-#     'z':  [ [1, 2], [3, 4] ],
-#     'title': 'This is the title',
-#     'dims': {
-#       'xmax': 1.0,
-#       'xmin': 0.0, 
-#       'ymin': 0.0, 
-#       'ymax': 12.0,
-#       'xdim': 2,
-#       'ydim': 2,
-#     }
-#     'xlabel': 'This is my x-axis label',
-#     'ylabel': 'This is my y-axis label',
-#     'zlabel': 'This is my z-axis label',
-# };
-
-#def convert_to_plottable(result):
-#    print "Starting new converter"
-#    res = []
-#    for data in result:
-#        #print _plot_format(metaarray)
-#        res.append(data.get_plottable())
-#    #return dict(output=result)
-#    #print "\n" * 10
-#    #raw_input("I'm waiting...")
-#    #print "Finished converting\n"
-#    return dict(output=res)
-
-
-#def _plot_format(data):
-#    #[[[1,2,3,4],[5,6,7,8],[9,10,11,12]][[1,2,3,4],[3,4,2,4],[2,7,8,0]],...]
-#    #data[x][:,0] is the counts
-#    #print "\tWorking on output"
-#    z = [arr[:, 0].tolist() for arr in data]
-#    #print "\t\tFinished z conversion"
-#    axis = ['x', 'y']
-#    dims = {}
-#    for index, label in enumerate(axis):
-#        arr = data._info[index]['values']
-#        dims[axis[index] + 'min'] = numpy.amin(arr)
-#        dims[axis[index] + 'max'] = numpy.amax(arr)
-#        dims[axis[index] + 'dim'] = numpy.alen(arr)
-#    xlabel = data._info[0]['name']
-#    ylabel = data._info[1]['name']
-#    zlabel = data._info[2]['cols'][0]['name']
-#    title = 'AND/R data' # That's creative enough, right?
-#    dump = dict(z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
-##    print "lulzz"
-##    timed = time.time()
-#    res = simplejson.dumps(dump, sort_keys=True, indent=2)
-##    res = simplejson.dumps(dump)
-##    print time.time() - timed
-#    return res
-##    return json.dumps(dump)
 
 
 # ========= Module definitions ===========
@@ -155,7 +97,7 @@ def join_action(input=None, grid=None):
 def _join(list_of_datasets, grid):
     return Combine().apply(list_of_datasets, grid=grid)
 grid_field = {
-        "type":"MetaArray",
+        "type":"FilterableMetaArray",
         "label": "grid",
         "name": "grid",
         "value": None,
@@ -169,10 +111,8 @@ def offset_action(input=None, offsets={}):
     flat = []
     for bundle in input:
         flat.extend(bundle)
-    result = [_offset(f, offsets) for f in flat]
+    result = [CoordinateOffset().apply(f, offsets=offsets) for f in flat]
     return dict(output=result)
-def _offset(data, offsets):
-    return CoordinateOffset().apply(data, offsets=offsets)
 offset = offset_module(id='ospec.offset', datatype=OSPEC_DATA, version='1.0', action=offset_action)
 
 
@@ -244,7 +184,7 @@ if __name__ == '__main__':
         dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
         #dict(module="ospec.grid", position=(360 , 60), config={}),
         dict(module="ospec.join", position=(150, 100), config={}),
-        dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':1}}),
+        dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':1.2}}),
         dict(module="ospec.wiggle", position=(350, 200), config={}),
         dict(module="ospec.twotheta", position=(450, 250), config={}),
         dict(module="ospec.qxqz", position=(550, 300), config={}),
@@ -265,11 +205,11 @@ if __name__ == '__main__':
                         instrument=ANDR.id,
                         )
     #template and instrument tests
-    #print json.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
-    #print json.dumps(template_to_wireit_diagram(template)) # need name!
+    #import json
+    #dump = json.dumps(template_to_wireit_diagram(template))
+    #print dump # need name!
+    #print wireit_diagram_to_template(json.loads(dump), ANDR)
     #sys.exit()
-
-
     result = run_template(template, config)
     print "Starting again. This time should be A LOT quicker."
     result2 = run_template(template, config)
@@ -283,7 +223,6 @@ if __name__ == '__main__':
             for format in plottable.get('output', []):
                 f.write(format + "\n")
     print "DONE"
-
     #pprint(result)
     #raw_input("Done looking at formatted output? ")
     #output of the qxqz: result[7]['output'][0]

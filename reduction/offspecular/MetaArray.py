@@ -140,12 +140,12 @@ class MetaArray(ndarray):
     return subarr
 
 
-#  def __array_finalize__(self, obj):
-#    # We use the getattr method to set a default if 'obj' doesn't have the 'info' attribute
-##    self._info = getattr(obj, 'info', [{}]*(obj.ndim + 1))
-#    self._infoOwned = False  ## Do not make changes to _info until it is copied at least once
-#      
-#    # We could have checked first whether self._info was already defined:
+  def __array_finalize__(self, obj):
+    # We use the getattr method to set a default if 'obj' doesn't have the 'info' attribute
+    self._info = getattr(obj, 'info', [{}]*(obj.ndim + 1))
+    self._infoOwned = False  ## Do not make changes to _info until it is copied at least once
+      
+    # We could have checked first whether self._info was already defined:
 #    if not hasattr(self, 'info'):
 #        self._info = getattr(obj, 'info', {})
     

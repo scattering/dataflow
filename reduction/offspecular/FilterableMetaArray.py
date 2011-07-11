@@ -64,7 +64,6 @@ class FilterableMetaArray(MetaArray, Data):
 
     def get_plottable(self):
         z = [arr[:, 0].tolist() for arr in self]
-        #print "\t\tFinished z conversion"
         axis = ['x', 'y']
         dims = {}
         for index, label in enumerate(axis):
@@ -77,9 +76,5 @@ class FilterableMetaArray(MetaArray, Data):
         zlabel = self._info[2]['cols'][0]['name']
         title = 'AND/R data' # That's creative enough, right?
         dump = dict(z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
-    #    print "lulzz"
-    #    timed = time.time()
         res = simplejson.dumps(dump, sort_keys=True, indent=2)
-    #    res = simplejson.dumps(dump)
-    #    print time.time() - timed
         return res
