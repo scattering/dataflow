@@ -265,7 +265,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	* @method runReduction
 	*/
 
-	runReduction: function() {
+	runReduction: function(FILES) {
 	    var value = this.getValue()
 	    //console.log(value)
 
@@ -293,8 +293,13 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		//console.log(display)
 		//var toPlot = display[this.wireClickSource].output[0], zipped = [];
 		//var toPlot = { z: [[1,2,3,4],[1,2,3,4]], title: "this sucks" };
-		toPlot = display[this.wireClickSource].output
-		console.log(toPlot)
+		if (this.wireClickSource) {
+			toPlot = display[this.wireClickSource].output
+			}
+		else {
+			toPlot = display[display.length -1].output
+		}
+		//console.log(toPlot)
 		plottingAPI(toPlot, plotid)
 
 	},
@@ -560,9 +565,11 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
   
 		  this.markSaved();
 
+		  
 		  this.preventLayerChangedEvent = false;
+		  // Call the File Association Table with appropriate headers
 		  makeFileTable(this.getFATHeaders())
-		  console.log(this.getFATHeaders())
+		  ///console.log(this.getFATHeaders())
 
  		}
  		catch(ex) {
@@ -627,12 +634,6 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			}
 		return headersList;	
 		},
-	/**
-	* This method calls the getFATheaders method to generate the FAT column headers, and then displays
-	* the FAT with those headers passed in
-	* 7/8
-	**/
-
 
 
 

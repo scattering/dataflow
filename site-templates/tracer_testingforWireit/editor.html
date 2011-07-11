@@ -75,6 +75,13 @@ div.Bubble div.body {
 	-moz-box-sizing: border-box;
 }
 
+.x-btn-inner {
+    border-color:#EE0000;
+    font-size: 24px !important;
+    font-weight: bold !important;
+    font-family: 'Arial' !important;
+}
+
 .x-menu-item-link * {
 	text align: left;
 	}
@@ -315,7 +322,8 @@ YAHOO.util.Event.onDOMReady( function() {
 			editor.runReduction()
 			}
 		// Open the infos panel
-		editor.accordionView.openPanel(1);
+		editor.accordionView.openPanel(2);
+		editor.accordionView.closePanel(0);
 	}
 	catch(ex) { 
                 alert('exception');
