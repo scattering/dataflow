@@ -1,3 +1,7 @@
+// ###############
+// # INTERACTORS #
+// ###############
+
 var Interactor = Class.create({
     initialize: function(name, icon, state, canvasid) {
         this.name = name;
@@ -15,6 +19,8 @@ var Interactor = Class.create({
         this.color1 = '#69f';
         this.color2 = '#f69';
         this.color = this.color1;
+        
+        this.rc = Math.random();
         
         //this.canvas.onmouseover = this.onMouseOver.bind(this);
         this.canvas.onmousemove = this.onMouseMove.bind(this);
@@ -98,7 +104,7 @@ var Interactor = Class.create({
                 this.curgrob = i;
             }
         }
-        console.log('down', /*this.grobs,*/ pos.x, pos.y, 'mousedown=',this.mousedown);
+        //console.log('down', /*this.grobs,*/ pos.x, pos.y, 'mousedown=',this.mousedown);
     },
     onMouseUp:   function(e) {
         this.mousedown = false;
@@ -109,7 +115,7 @@ var Interactor = Class.create({
             this.onDrop(e, pos);
         }
         this.curgrob = null;
-        console.log('up  ', /*this.grobs,*/ pos.x, pos.y, 'mousedown=',this.mousedown);
+        //console.log('up  ', /*this.grobs,*/ pos.x, pos.y, 'mousedown=',this.mousedown);
         this.redraw();
     },
     onDrag: function(pos) {
@@ -212,9 +218,26 @@ var AnnulusInteractor = new Class.create(Interactor, {
         this.c = new Center(this, 150, 150);
         this.p1 = new Point(this, 200, 150);
         this.p2 = new Point(this, 250, 100);
-        var circ1 = new Circle(this, this.c, this.p1, 4);
-        var circ2 = new Circle(this, this.c, this.p2, 4);
-        this.grobs.push(circ1, circ2, this.c, this.p1, this.p2);
+        this.circ1 = new Circle(this, this.c, this.p1, 4);
+        this.circ2 = new Circle(this, this.c, this.p2, 4);
+        this.grobs.push(this.circ1, this.circ2, this.c, this.p1, this.p2);
+        
+        this.p1.onDrag = this.p1.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            var r = dist(this.parent.p2.pos, this.parent.c.pos),
+                t_ = this.parent.circ1.angleToXaxis(pos);
+            this.parent.p2.pos.x = this.parent.c.pos.x + Math.cos(t_) * r;
+            this.parent.p2.pos.y = this.parent.c.pos.y + Math.sin(t_) * r;
+        });
+        this.p2.onDrag = this.p2.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            var r = dist(this.parent.p1.pos, this.parent.c.pos),
+                t_ = this.parent.circ1.angleToXaxis(pos);
+            this.parent.p1.pos.x = this.parent.c.pos.x + Math.cos(t_) * r;
+            this.parent.p1.pos.y = this.parent.c.pos.y + Math.sin(t_) * r;
+        });
         
         this.redraw();
     },
@@ -289,6 +312,10 @@ function getMouse(e) {
 	return { x: x, y: y };
 }
 
+// #########
+// # GROBS #
+// #########
+
 var Grob = Class.create({
     initialize: function(parent, x, y) {
         this.parent = parent;
@@ -298,10 +325,10 @@ var Grob = Class.create({
         this.translatable = true;
         this.prevpos = null;
         this.dpos = null;
-
-        var h = Math.random() * 60;
-        this.color1 = 'hsl('+h+',100%,50%)'; //'#2C8139';
-        this.color2 = 'hsl('+h+',100%,70%)'; //'#4CCC60';
+        
+        var h = this.parent.rc * 360;
+        this.color1 = 'hsl('+h+',100%,40%)'; //'#2C8139';
+        this.color2 = 'hsl('+h+',100%,60%)'; //'#4CCC60';
         this.color = this.color1;
     },
     
@@ -389,7 +416,7 @@ var GrobConnector = Class.create(Grob, {
     onDrag: function($super, e, pos) {
         $super(e, pos);
         
-        console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ') dpos (', this.dpos.x, this.dpos.y, ')');
+        //console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ') dpos (', this.dpos.x, this.dpos.y, ')');
         for (var p in this.points)
             this.points[p].translateBy(this.dpos);
     },
@@ -416,6 +443,9 @@ var Circle = Class.create(GrobConnector, {
         ctx.globalAlpha = 0.6;
     },
     
+    angleToXaxis: function(p) {
+        return Math.atan2(p.y - this.c.pos.y, p.x - this.c.pos.x);
+    },
     isInside: function(pos) {
         return /*Math.abs*/(dist(this.c.pos, pos) - dist(this.c.pos, this.p1.pos)) <= this.width + 1;
     },
@@ -454,10 +484,23 @@ var Center = Class.create(Point, {
 var Arc = Class.create(GrobConnector, {
     initialize: function($super, parent, c, p1, p2, width) {
         $super(parent, width);
-        /*
-        p1.onDrag = function(e, pos) {
-            this.parent.arc.angleToXaxis(this.parent.p2);
-        };*/
+        
+        p1.onDrag = p1.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            var r = dist(pos, this.parent.c.pos),
+                t_ = this.parent.arc.angleToXaxis(this.parent.p2.pos);
+            this.parent.p2.pos.x = this.parent.c.pos.x + Math.cos(t_) * r;
+            this.parent.p2.pos.y = this.parent.c.pos.y + Math.sin(t_) * r;
+        });
+        p2.onDrag = p2.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            var r = dist(pos, this.parent.c.pos),
+                t_ = this.parent.arc.angleToXaxis(this.parent.p1.pos);
+            this.parent.p1.pos.x = this.parent.c.pos.x + Math.cos(t_) * r;
+            this.parent.p1.pos.y = this.parent.c.pos.y + Math.sin(t_) * r;
+        });
         
         this.name = 'arc';
         this.points = { c: c, p1: p1, p2: p2 };
@@ -725,6 +768,11 @@ var Segment = Class.create(GrobConnector, {
         $super(e);
     },
 });
+
+
+// ########
+// # MISC #
+// ########
 
 function getContext(id) {
   var elem = document.getElementById(id);
