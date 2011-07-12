@@ -1,4 +1,5 @@
 var debug = false;
+var prevType;
 var types = { lin: {
                 incr: function(i, step) { return i + step; },
                 step: function(min,max,n) { return (max-min)/n; },
@@ -306,7 +307,7 @@ function plottingAPI(toPlot, plotid) {
     if (toPlot.constructor == Array)
         toPlot = toPlot[0];
         // throw "Unsupported data format! Data must be a single series.";
-        
+    
     switch (toPlot.type) {
         case '2d':
             var m = Matrix(toPlot.z);
@@ -333,7 +334,7 @@ function plottingAPI(toPlot, plotid) {
                 console.log('zipped: ', zipped);
 
 
-            if (! plotCreated) {
+            if (! plotCreated || prevtype != '1d') {
               plot = $.jqplot(plotid, [zipped]);
               plotCreated = true;
             }
@@ -347,6 +348,8 @@ function plottingAPI(toPlot, plotid) {
         default:
             throw "Unsupported plot type! Please specify the type as '1d' or '2d'.";
     }
+    
+    prevtype = toPlot.type;
 
     /* 
     if (toPlot.x.length != toPlot.y.length)

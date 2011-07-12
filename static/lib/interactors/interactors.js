@@ -191,11 +191,11 @@ var ParallelogramInteractor = new Class.create(PolygonInteractor, {
     initialize: function($super, canvasid) {
         $super('Parallelogram', 'pgram.png', 0, canvasid);
         
-        this.p1 = new Point(this, 100, 100);
-        this.p2 = new Point(this, 200, 100);
+        this.p1 = new Point(this, 120, 100);
+        this.p2 = new Point(this, 220, 100);
         this.p3 = new Point(this, 200, 200);
         this.p4 = new Point(this, 100, 200);
-        this.c = new Center(this, 150, 150);
+        this.c = new Center(this, 160, 150);
         this.l1 = new Segment(this, this.p1, this.p2, 4);
         this.l2 = new Segment(this, this.p2, this.p3, 4);
         this.l3 = new Segment(this, this.p3, this.p4, 4);
@@ -965,8 +965,9 @@ function drawEq(ctx, eq, x0, y0, xmin, xmax, pm) {
       ctx.lineTo(i, y0 - y);
 	}
 	if (pm)
-    ctx.strokeStyle = prevcolor;
-  ctx.stroke();
+        ctx.strokeStyle = prevcolor;
+    ctx.stroke();
+    //ctx.lineWidth = 1; ctx.moveTo(0,y0); ctx.lineTo(ctx.canvas.width,y0); ctx.stroke();
 	ctx.strokeStyle = tmp;
 }
 function nDeriv(f) {
