@@ -86,12 +86,9 @@ STATICFILES_DIRS = (static_dir,
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
-    #'django.contrib.staticfiles.finders.FileSystemFinder',
-    #'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    #'django.contrib.staticfiles.finders.DefaultStorageFinder',
-    'staticfiles.finders.FileSystemFinder',
-    'staticfiles.finders.AppDirectoriesFinder',
-    'staticfiles.finders.DefaultStorageFinder',
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -135,9 +132,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     
     # I do not have this file
-    #'django.contrib.staticfiles',
-    'staticfiles',
-    
+    'django.contrib.staticfiles',
+
     'apps.tracks',
     'south',
     # Uncomment the next line to enable the admin:
