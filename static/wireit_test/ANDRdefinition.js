@@ -79,8 +79,8 @@ var andrlang = {
                             ]
                         }, 
                         "offsetPosition": {
-                            "top": 1, 
-                            "left": -15
+                            "top": 16, 
+                            "left": -12
                         }
                     }, 
                     {
@@ -99,14 +99,15 @@ var andrlang = {
                             ]
                         }, 
                         "offsetPosition": {
-                            "top": 1, 
-                            "left": 15
+                            "top": 16, 
+                            "left": 48
                         }
                     }
                 ], 
-                "xtype": "WireIt.ImageContainer", 
-                "image": "../../static/img/rowantests/grid.png", 
-                "icon": "../../static/img/rowantests/grid.png"
+                "xtype": "WireIt.ImageContainer",
+                "width": "auto",
+                "image": "../../static/img/rowantests/autogrid_image.png", 
+                "icon": "../../static/img/rowantests/autogrid.png"
             }, 
             "name": "Autogrid"
         }, 
@@ -119,7 +120,7 @@ var andrlang = {
                             0
                         ], 
                         "multiple": true, 
-                        "name": "input", 
+                        "name": "input_data", 
                         "required": false, 
                         "alwaysSrc": false, 
                         "ddConfig": {
@@ -129,8 +130,28 @@ var andrlang = {
                             ]
                         }, 
                         "offsetPosition": {
-                            "top": 1, 
-                            "left": -15
+                            "top": 4, 
+                            "left": -12
+                        }
+                    }, 
+                    {
+                        "direction": [
+                            -1, 
+                            0
+                        ], 
+                        "multiple": true, 
+                        "name": "input_grid", 
+                        "required": false, 
+                        "alwaysSrc": false, 
+                        "ddConfig": {
+                            "type": "data1d.ospec:in", 
+                            "allowedTypes": [
+                                "data1d.ospec:out"
+                            ]
+                        }, 
+                        "offsetPosition": {
+                            "top": 40, 
+                            "left": -12
                         }
                     }, 
                     {
@@ -149,15 +170,18 @@ var andrlang = {
                             ]
                         }, 
                         "offsetPosition": {
-                            "top": 1, 
-                            "left": 15
+                            "top": 16, 
+                            "left": 48
                         }
                     }
                 ], 
                 "xtype": "WireIt.ImageContainer", 
-                "image": "../../static/img/rowantests/sum.png", 
+                "width": "auto",
+                "resizable": true,
+                "image": "../../static/img/rowantests/sum_image.png", 
                 "icon": "../../static/img/rowantests/sum.png"
             }, 
+            "width": "64px",
             "name": "Join"
         }, 
         {
@@ -179,8 +203,8 @@ var andrlang = {
                             ]
                         }, 
                         "offsetPosition": {
-                            "top": 10, 
-                            "left": 0
+                            "top": 16, 
+                            "left": -12
                         }
                     }, 
                     {
@@ -199,13 +223,14 @@ var andrlang = {
                             ]
                         }, 
                         "offsetPosition": {
-                            "top": 10, 
-                            "left": 20
+                            "top": 16, 
+                            "left": 48
                         }
                     }
                 ], 
                 "xtype": "WireIt.ImageContainer", 
-                "image": "../../static/img/rowantests/offset.png", 
+                "width": "auto",
+                "image": "../../static/img/rowantests/offset_image.png", 
                 "icon": "../../static/img/rowantests/offset.png"
             }, 
             "name": "Offset"
@@ -229,8 +254,8 @@ var andrlang = {
                             ]
                         }, 
                         "offsetPosition": {
-                            "top": 10, 
-                            "left": 0
+                            "top": 16, 
+                            "left": -12
                         }
                     }, 
                     {
@@ -249,13 +274,14 @@ var andrlang = {
                             ]
                         }, 
                         "offsetPosition": {
-                            "top": 10, 
-                            "left": 20
+                            "top": 16, 
+                            "left": 48
                         }
                     }
                 ], 
                 "xtype": "WireIt.ImageContainer", 
-                "image": "../../static/img/rowantests/wiggle.png", 
+                "width": "auto",
+                "image": "../../static/img/rowantests/wiggle_image.png", 
                 "icon": "../../static/img/rowantests/wiggle.png"
             }, 
             "name": "Wiggle"
@@ -279,8 +305,8 @@ var andrlang = {
                             ]
                         }, 
                         "offsetPosition": {
-                            "top": 10, 
-                            "left": 0
+                            "top": 16, 
+                            "left": -12
                         }
                     }, 
                     {
@@ -299,13 +325,14 @@ var andrlang = {
                             ]
                         }, 
                         "offsetPosition": {
-                            "top": 10, 
-                            "left": 20
+                            "top": 16, 
+                            "left": 48
                         }
                     }
                 ], 
                 "xtype": "WireIt.ImageContainer", 
-                "image": "../../static/img/rowantests/twotheta.png", 
+                "width": "auto",
+                "image": "../../static/img/rowantests/twotheta_image.png", 
                 "icon": "../../static/img/rowantests/twotheta.png"
             }, 
             "name": "Pixels to two theta"
@@ -329,8 +356,8 @@ var andrlang = {
                             ]
                         }, 
                         "offsetPosition": {
-                            "top": 10, 
-                            "left": 0
+                            "top": 16, 
+                            "left": -12
                         }
                     }, 
                     {
@@ -349,13 +376,14 @@ var andrlang = {
                             ]
                         }, 
                         "offsetPosition": {
-                            "top": 10, 
-                            "left": 20
+                            "top": 16, 
+                            "left": 48
                         }
                     }
                 ], 
                 "xtype": "WireIt.ImageContainer", 
-                "image": "../../static/img/rowantests/qxqz.png", 
+                "width": "auto",
+                "image": "../../static/img/rowantests/qxqz_image.png", 
                 "icon": "../../static/img/rowantests/qxqz.png"
             }, 
             "name": "Two theta to qxqz"

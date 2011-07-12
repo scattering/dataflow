@@ -134,18 +134,25 @@ var PolygonInteractor = new Class.create(Interactor, {
         var area = 0;
         var points = this.points();
         var j = points.length - 1;
-        var x = 0, y = 0, d;
+        var x = 0, y = 0, d, xavg = 0, yavg = 0;
         
         for (var i = 0; i < points.length; j = i ++) {
             d = (points[i].pos.x * points[j].pos.y) - (points[i].pos.y * points[j].pos.x);
             area += d;
             x += (points[i].pos.x + points[j].pos.x) * d;
             y += (points[i].pos.y + points[j].pos.y) * d;
+            xavg += points[i].pos.x;
+            yavg += points[i].pos.y;
         }
         
-        area /= 2;
-        d = area * 6;
-        return { x: x / d, y: y / d };
+        if (area != 0) {
+            area /= 2;
+            d = area * 6;
+            return { x: x / d, y: y / d };
+        }
+        else {
+            return { x: xavg / points.length, y: yavg / points.length };
+        }
     },
 });
 var SegmentInteractor = new Class.create(PolygonInteractor, {
@@ -184,17 +191,112 @@ var ParallelogramInteractor = new Class.create(PolygonInteractor, {
     initialize: function($super, canvasid) {
         $super('Parallelogram', 'pgram.png', 0, canvasid);
         
-        var p1 = new Point(this, 100, 100);
-        var p2 = new Point(this, 200, 100);
-        var p3 = new Point(this, 200, 200);
-        var p4 = new Point(this, 100, 200);
-        var c = new Center(this, 150, 150);
-        var l1 = new Segment(this, p1, p2, 4);
-        var l2 = new Segment(this, p2, p3, 4);
-        var l3 = new Segment(this, p3, p4, 4);
-        var l4 = new Segment(this, p4, p1, 4);
-        this.grobs.push(l1, l2, l3, l4, c, p1, p2, p3, p4);
-        this.c = c;
+        this.p1 = new Point(this, 100, 100);
+        this.p2 = new Point(this, 200, 100);
+        this.p3 = new Point(this, 200, 200);
+        this.p4 = new Point(this, 100, 200);
+        this.c = new Center(this, 150, 150);
+        this.l1 = new Segment(this, this.p1, this.p2, 4);
+        this.l2 = new Segment(this, this.p2, this.p3, 4);
+        this.l3 = new Segment(this, this.p3, this.p4, 4);
+        this.l4 = new Segment(this, this.p4, this.p1, 4);
+        this.grobs.push(this.l1, this.l2, this.l3, this.l4, this.c, this.p1, this.p2, this.p3, this.p4);
+        
+        this.p1.onDrag = this.p1.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p3.pos.x -= this.dpos.x;
+            this.parent.p3.pos.y -= this.dpos.y;
+        });
+        this.p2.onDrag = this.p2.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p4.pos.x -= this.dpos.x;
+            this.parent.p4.pos.y -= this.dpos.y;
+        });
+        this.p3.onDrag = this.p3.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p1.pos.x -= this.dpos.x;
+            this.parent.p1.pos.y -= this.dpos.y;
+        });
+        this.p4.onDrag = this.p4.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p2.pos.x -= this.dpos.x;
+            this.parent.p2.pos.y -= this.dpos.y;
+        });
+        
+        this.redraw();
+    },
+});
+var RectangleInteractor = new Class.create(PolygonInteractor, {
+    initialize: function($super, canvasid) {
+        $super('Rectangle', 'rect.png', 0, canvasid);
+        
+        this.p1 = new Point(this, 100, 100);
+        this.p2 = new Point(this, 200, 100);
+        this.p3 = new Point(this, 200, 200);
+        this.p4 = new Point(this, 100, 200);
+        this.c = new Center(this, 150, 150);
+        this.l1 = new Segment(this, this.p1, this.p2, 4);
+        this.l2 = new Segment(this, this.p2, this.p3, 4);
+        this.l3 = new Segment(this, this.p3, this.p4, 4);
+        this.l4 = new Segment(this, this.p4, this.p1, 4);
+        this.grobs.push(this.l1, this.l2, this.l3, this.l4, this.c, this.p1, this.p2, this.p3, this.p4);
+        
+        this.p1.onDrag = this.p1.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p4.pos.x += this.dpos.x;
+            this.parent.p2.pos.y += this.dpos.y;
+        });
+        this.p2.onDrag = this.p2.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p3.pos.x += this.dpos.x;
+            this.parent.p1.pos.y += this.dpos.y;
+        });
+        this.p3.onDrag = this.p3.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p2.pos.x += this.dpos.x;
+            this.parent.p4.pos.y += this.dpos.y;
+        });
+        this.p4.onDrag = this.p4.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p1.pos.x += this.dpos.x;
+            this.parent.p3.pos.y += this.dpos.y;
+        });
+        this.l1.connectortranslatable = false;
+        this.l1.onDrag = this.l1.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.dpos.x = 0;
+            this.translateBy(this.dpos);
+        });
+        this.l2.connectortranslatable = false;
+        this.l2.onDrag = this.l2.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.dpos.y = 0;
+            this.translateBy(this.dpos);
+        });
+        this.l3.connectortranslatable = false;
+        this.l3.onDrag = this.l3.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.dpos.x = 0;
+            this.translateBy(this.dpos);
+        });
+        this.l4.connectortranslatable = false;
+        this.l4.onDrag = this.l4.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.dpos.y = 0;
+            this.translateBy(this.dpos);
+        });
         
         this.redraw();
     },
@@ -217,7 +319,7 @@ var AnnulusInteractor = new Class.create(Interactor, {
         
         this.c = new Center(this, 150, 150);
         this.p1 = new Point(this, 200, 150);
-        this.p2 = new Point(this, 250, 100);
+        this.p2 = new Point(this, 250, 150);
         this.circ1 = new Circle(this, this.c, this.p1, 4);
         this.circ2 = new Circle(this, this.c, this.p2, 4);
         this.grobs.push(this.circ1, this.circ2, this.c, this.p1, this.p2);
@@ -237,6 +339,22 @@ var AnnulusInteractor = new Class.create(Interactor, {
                 t_ = this.parent.circ1.angleToXaxis(pos);
             this.parent.p1.pos.x = this.parent.c.pos.x + Math.cos(t_) * r;
             this.parent.p1.pos.y = this.parent.c.pos.y + Math.sin(t_) * r;
+        });
+        this.circ1.filled = false;
+        this.circ1.connectortranslatable = false;
+        this.circ1.onDrag = this.circ1.onDrag.wrap(function (callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.translateBy(this.dpos);
+            this.c.translateBy(this.dpos);
+        });
+        this.circ2.filled = false;
+        this.circ2.connectortranslatable = false;
+        this.circ2.onDrag = this.circ2.onDrag.wrap(function (callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.translateBy(this.dpos);
+            this.c.translateBy(this.dpos);
         });
         
         this.redraw();
@@ -259,6 +377,18 @@ var ArcInteractor = new Class.create(Interactor, {
         this.redraw();
     },
 });
+var LinearInteractor = new Class.create(Interactor, {
+    initialize: function($super, canvasid) {
+        $super('Linear', 'linear.png', 0, canvasid);
+        
+        var p1 = new Point(this, 200, 150);
+        var p2 = new Point(this, 100, 100);
+        this.linear = new Linear(this, p1, p2, 4);
+        this.grobs.push(this.linear, p1, p2);
+        
+        this.redraw();
+    },
+});
 var QuadraticInteractor = new Class.create(Interactor, {
     initialize: function($super, canvasid) {
         $super('Quadratic', 'quadratic.png', 0, canvasid);
@@ -266,17 +396,10 @@ var QuadraticInteractor = new Class.create(Interactor, {
         var p1 = new Point(this, 200, 150);
         var p2 = new Point(this, 150, 100);
         var p3 = new Point(this, 100, 150);
-        var quadratic = new Quadratic(this, p1, p2, p3, 4);
-        this.grobs.push(quadratic, p1, p2, p3);
-        this.quadratic = quadratic;
+        this.quadratic = new Quadratic(this, p1, p2, p3, 4);
+        this.grobs.push(this.quadratic, p1, p2, p3);
         
         this.redraw();
-    },
-    
-    onMouseMove: function($super, e) {
-        $super(e);
-        pos = getMouse(e);
-        this.quadratic.distanceTo(pos);
     },
 });
 var GaussianInteractor = new Class.create(Interactor, {
@@ -291,12 +414,12 @@ var GaussianInteractor = new Class.create(Interactor, {
         
         this.redraw();
     },
-    
+    /*
     onMouseMove: function($super, e) {
         $super(e);
         pos = getMouse(e);
         this.gaussian.distanceTo(pos);
-    },
+    },*/
 });
 
 
@@ -401,6 +524,7 @@ var GrobConnector = Class.create(Grob, {
         
         this.name = 'grobconnector';
         this.translatable = false;
+        this.connectortranslatable = true;
         this.points = {};
         this.width = width;
     },
@@ -413,12 +537,16 @@ var GrobConnector = Class.create(Grob, {
     isInside: function(pos) {
         return this.distanceTo(pos) <= this.width + 1;
     },
+    translateBy: function(dpos) {
+        for (var p in this.points)
+            this.points[p].translateBy(dpos);
+    },
     onDrag: function($super, e, pos) {
         $super(e, pos);
         
         //console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ') dpos (', this.dpos.x, this.dpos.y, ')');
-        for (var p in this.points)
-            this.points[p].translateBy(this.dpos);
+        if (this.connectortranslatable)
+            this.translateBy(this.dpos);
     },
 });
 var Circle = Class.create(GrobConnector, {
@@ -429,6 +557,7 @@ var Circle = Class.create(GrobConnector, {
         this.points = { p1: p1, c: c };
         this.p1 = p1;
         this.c = c;
+        this.filled = true;
     },
     
     render: function($super, ctx) {
@@ -438,16 +567,21 @@ var Circle = Class.create(GrobConnector, {
         ctx.arc(this.c.pos.x, this.c.pos.y, dist(this.c.pos, this.p1.pos), 0, 2 * Math.PI, true);
         ctx.closePath();
         ctx.stroke();
-        ctx.globalAlpha = 0.15;
-        ctx.fill();
-        ctx.globalAlpha = 0.6;
+        if (this.filled) {
+            ctx.globalAlpha = 0.15;
+            ctx.fill();
+            ctx.globalAlpha = 0.6;
+        }
     },
     
     angleToXaxis: function(p) {
         return Math.atan2(p.y - this.c.pos.y, p.x - this.c.pos.x);
     },
     isInside: function(pos) {
-        return /*Math.abs*/(dist(this.c.pos, pos) - dist(this.c.pos, this.p1.pos)) <= this.width + 1;
+        var dd = dist(this.c.pos, pos) - dist(this.c.pos, this.p1.pos);
+        if (!this.filled)
+            dd = Math.abs(dd);
+        return dd <= this.width + 1;
     },
 });
 var Center = Class.create(Point, {
@@ -488,7 +622,7 @@ var Arc = Class.create(GrobConnector, {
         p1.onDrag = p1.onDrag.wrap(function(callOriginal, e, pos) {
             callOriginal(e, pos);
             
-            var r = dist(pos, this.parent.c.pos),
+            var r = dist(this.pos, this.parent.c.pos),
                 t_ = this.parent.arc.angleToXaxis(this.parent.p2.pos);
             this.parent.p2.pos.x = this.parent.c.pos.x + Math.cos(t_) * r;
             this.parent.p2.pos.y = this.parent.c.pos.y + Math.sin(t_) * r;
@@ -496,7 +630,7 @@ var Arc = Class.create(GrobConnector, {
         p2.onDrag = p2.onDrag.wrap(function(callOriginal, e, pos) {
             callOriginal(e, pos);
             
-            var r = dist(pos, this.parent.c.pos),
+            var r = dist(this.pos, this.parent.c.pos),
                 t_ = this.parent.arc.angleToXaxis(this.parent.p1.pos);
             this.parent.p1.pos.x = this.parent.c.pos.x + Math.cos(t_) * r;
             this.parent.p1.pos.y = this.parent.c.pos.y + Math.sin(t_) * r;
@@ -630,6 +764,50 @@ var FunctionConnector = Class.create(GrobConnector, {
     
 });
 
+var Linear = Class.create(FunctionConnector, {
+    initialize: function($super, parent, p1, p2, width) {
+        $super(parent, width);
+
+        this.name = 'Linear';
+        this.f = this.linear;
+        this.points = { p1: p1, p2: p2 };
+        this.p1 = p1;
+        this.p2 = p2;
+        this.c = p1;
+    },
+    render: function($super, ctx) {
+        $super(ctx);
+        
+        // Vertical lines
+        if (this.p1.pos.x == this.p2.pos.x) {
+            ctx.beginPath();
+            ctx.moveTo(this.p1.pos.x, 0);
+            ctx.lineTo(this.p2.pos.x, this.parent.canvas.height);
+            ctx.closePath();
+            ctx.stroke();
+        }
+        else
+            drawEq(ctx, this.f.bind(this), 0, this.c.pos.y, 0, this.parent.canvas.width);
+    },
+    
+    linear: function(x) {
+        var X1 = this.p1.pos.x, X2 = this.p2.pos.x,
+            Y1 = this.c.pos.y - this.p1.pos.y, Y2 = this.c.pos.y - this.p2.pos.y;
+        var a = (Y2-Y1) / (X2-X1),
+            b = Y1 - a*X1;
+            
+        return a*x+b;
+    },
+    // Overriding super because the computation here is much simpler
+    distanceTo: function(pos) {
+        var X1 = this.p1.pos.x, X2 = this.p2.pos.x,
+            Y1 = this.c.pos.y - this.p1.pos.y, Y2 = this.c.pos.y - this.p2.pos.y;
+        var a = (Y2-Y1) / (X2-X1),
+            b = Y1 - a*X1;
+        
+        return Math.abs(-a * pos.x + this.c.pos.y - pos.y - b) / Math.sqrt(a * a);
+    },
+});
 var Quadratic = Class.create(FunctionConnector, {
     initialize: function($super, parent, p1, p2, p3, width) {
         $super(parent, width);
@@ -645,16 +823,7 @@ var Quadratic = Class.create(FunctionConnector, {
     render: function($super, ctx) {
         $super(ctx);
         
-        //ctx.beginPath();
-        //console.log(t_1, t_2);
-        //ctx.moveTo(this.c.pos.x, this.c.pos.y);
-        drawEq(ctx, this.f.bind(this), 0, this.p1.pos.y, 0, this.parent.canvas.width);
-        //drawEq(ctx, nDeriv(this.gaussian.bind(this)), 0, this.pw.pos.y, 0, 300);
-        //ctx.closePath();
-        //ctx.stroke();
-        //ctx.globalAlpha = 0.15;
-        //ctx.fill();
-        //ctx.globalAlpha = 0.6;
+        drawEq(ctx, this.f.bind(this), 0, this.c.pos.y, 0, this.parent.canvas.width);
     },
     
     quadratic: function(x) {
@@ -666,21 +835,11 @@ var Quadratic = Class.create(FunctionConnector, {
             
         return a*x*x+b*x+c;
     },
-    distanceTo: function($super, pos) {
-        var d = $super(pos);
-        //var d = Math.abs((this.pw.pos.y - this.gaussian(pos.x)) - pos.y);
-        //console.log(d);
-        return d;
-    },
 });
     
 var Gaussian = Class.create(FunctionConnector, {
     initialize: function($super, parent, pk, pw, width) {
         $super(parent, width);
-        /*
-        p1.onDrag = function(e, pos) {
-            this.parent.arc.angleToXaxis(this.parent.p2);
-        };*/
         
         this.name = 'gaussian';
         this.f = this.gaussian;
@@ -692,32 +851,17 @@ var Gaussian = Class.create(FunctionConnector, {
     render: function($super, ctx) {
         $super(ctx);
         
-        //ctx.beginPath();
-        //console.log(t_1, t_2);
-        //ctx.moveTo(this.c.pos.x, this.c.pos.y);
-        drawEq(ctx, this.f.bind(this), 0, this.pw.pos.y, 0, this.parent.canvas.width);
-        //drawEq(ctx, nDeriv(this.gaussian.bind(this)), 0, this.pw.pos.y, 0, 300);
-        //ctx.closePath();
-        //ctx.stroke();
-        //ctx.globalAlpha = 0.15;
-        //ctx.fill();
-        //ctx.globalAlpha = 0.6;
+        drawEq(ctx, this.f.bind(this), 0, this.c.pos.y, 0, this.parent.canvas.width);
     },
     
     gaussian: function(x) {
         var peakX = this.pk.pos.x,
-            peakY = this.pw.pos.y - this.pk.pos.y,
-            FWHM = Math.abs(this.pw.pos.x - peakX),
+            peakY = this.c.pos.y - this.pk.pos.y,
+            FWHM = Math.abs(this.c.pos.x - peakX),
             bkgdY = 0;
         var stdDev = FWHM / 2 / Math.sqrt(2 * Math.log(2));
         //return - peakY + Math.pow(x - 150, 2) / 100;
         return bkgdY + (peakY - bkgdY) * Math.exp(- Math.pow((x - peakX), 2) / 2 / Math.pow(stdDev, 2));
-    },
-    distanceTo: function($super, pos) {
-        var d = $super(pos);
-        //var d = Math.abs((this.pw.pos.y - this.gaussian(pos.x)) - pos.y);
-        //console.log(d);
-        return d;
     },
 });
 var Segment = Class.create(GrobConnector, {
