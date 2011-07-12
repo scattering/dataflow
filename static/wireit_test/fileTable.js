@@ -445,6 +445,8 @@ function handleResult(identifier, result) {
 		
 	
 // run reduction handler
+// perhaps change it to run reduction for all groups. And the run reduction on the WE will run the current group 
+// selection
 function run_reduction() {
 	Ext.Msg.prompt('Choose Group?', 'Please enter the groups to be run through reduction:', function(btn, grps) {
 		if (btn == 'ok' && acceptable_entry.test(grps)){
