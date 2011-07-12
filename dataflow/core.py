@@ -16,6 +16,8 @@ def register_instrument(instrument):
     config.INSTRUMENTS.append(instrument.id)
     for m in instrument.modules:
         register_module(m)
+    for d in instrument.datatypes:
+        register_datatype(d)
 def register_module(module):
     """
     Register a new calculation module.
@@ -300,33 +302,6 @@ class Instrument(object):
         for m in self.modules:
             if m.name == name: return m.id
         raise KeyError(name + ' does not exist in instrument ' + self.name)
-
-#class Datatype(object):
-#    """
-#    A datatype
-#
-#    Attributes
-#    ----------
-#
-#    id : string
-#
-#        simple name for the data type
-#        
-#    name : string
-#
-#        display name for the data type
-#
-#    plot : string
-#
-#        javascript code to set up a plot of the data, or empty if
-#        data is not plottable
-#    
-#    
-#    """
-#    def __init__(self, id, name=None, plot=None):
-#        self.id = id
-#        self.name = name if name is not None else id.capitalize()
-#        self.plot = plot
         
 class Data(object):
     """
@@ -372,6 +347,11 @@ class Data(object):
         dataid : string
 
     """
+    def __new__(subtype, id, cls):
+        obj = object.__new__(subtype)
+        obj.id = id
+        obj.cls = cls
+        return obj
     
     def __getstate__(self):
         return "1.0", __dict__
@@ -392,7 +372,6 @@ class Data(object):
 
 
 # ============= Parent traversal =============
-
 class Node(object):
     """
     Base node

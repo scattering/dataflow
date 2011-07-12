@@ -4,17 +4,14 @@ import copy, simplejson, datetime
 from ...dataflow.core import Data
 from cStringIO import StringIO
 
-class FilterableMetaArray(MetaArray, Data):
+class FilterableMetaArray(Data, MetaArray):
     def __new__(*args, **kwargs):
         subarr = MetaArray.__new__(*args, **kwargs)
-        # causing problems with parsing
-        #subarr.extrainfo = subarr._info[-1]
         return subarr
     
     def filter(self, filtername, *args, **kwargs):
         import filters
         return filters.__getattribute__(filtername)().apply(self, *args, **kwargs)
-        #return filters.__getattribute__(filtername)(*args, **kwargs).apply(self)
 
     
     def __deepcopy__(self, memo):
@@ -22,6 +19,7 @@ class FilterableMetaArray(MetaArray, Data):
 
     def dumps(self):
         meta = { 'shape': self.shape, 'type': str(self.dtype), 'info': self.infoCopy()}
+        assert isinstance(meta['info'], list)
         axstrs = []
         for ax in meta['info']:
             if ax.has_key('values'):

@@ -2,8 +2,8 @@
 Shift data sets
 """
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
 
 def offset_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
@@ -23,7 +23,7 @@ def offset_module(id=None, datatype=None, action=None,
              use='in',
              description='data',
              required=False,
-             multiple=True,
+             multiple=False,
              ),
         dict(id='output',
              datatype=datatype,

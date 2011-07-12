@@ -6,8 +6,8 @@ The function run_template
 
 from pprint import pprint
 from inspect import getsource
-from .core import lookup_module
-import hashlib, redis, pickle
+from .core import lookup_module, lookup_datatype
+import hashlib, redis
 
 # temp
 from ..reduction.offspecular.FilterableMetaArray import FilterableMetaArray
@@ -48,7 +48,14 @@ def run_template(template, config):
         
         # Overwrite even if there was already the same reduction?
         if server.exists(fp):# or module.name == 'Save': 
-            result = dict(output=[FilterableMetaArray.loads(str) for str in server.lrange(fp, 0, -1)])
+            datatype = None
+            for terminal in module.terminals:
+                if terminal['id'] == 'output':
+                    datatype = terminal['datatype']
+                    break
+            cls = lookup_datatype(datatype).cls
+            result = dict(output=[cls.loads(str) for str in server.lrange(fp, 0, -1)])
+            #result = dict(output=[FilterableMetaArray.loads(str) for str in server.lrange(fp, 0, -1)])
         else:
             result = module.action(**kwargs)
             for arr in result.get('output', []):
@@ -69,7 +76,6 @@ def run_template(template, config):
                     server.rpush(fp, str)
         ans.append(plottable)
     return ans
-#    return [convert_to_plottable(result['output'])  if 'output' in result else {} for nodenum, result in all_results.items()]
 
 
 def _lookup_results(result, s):

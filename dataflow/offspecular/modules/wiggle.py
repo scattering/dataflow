@@ -1,16 +1,16 @@
 """
-Module to convert two theta to QxQz
+Wiggle correction
 """
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
 
-def two_theta_qxqz_module(id=None, datatype=None, action=None,
+def wiggle_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
-    """Creates a module for converting theta and two theta to qx and qz"""
+    """Module for wiggle correction"""
 
     icon = {
-        'URI': config.IMAGES + "qxqz.png",
+        'URI': config.IMAGES + "wiggle.png",
         'terminals': {
             'input': (0, 10, -1, 0),
             'output': (20, 10, 1, 0),
@@ -23,38 +23,30 @@ def two_theta_qxqz_module(id=None, datatype=None, action=None,
              use='in',
              description='data',
              required=False,
-             multiple=True,
+             multiple=False,
              ),
         dict(id='output',
              datatype=datatype,
              use='out',
-             description='data with qxqz',
+             description='corrected data',
              ),
     ]
 
-    # output_grid=None, wavelength=5.0
-    output_grid_field = {
-        "type":"MetaArray",
-        "label": "output_grid",
-        "name": "output grid",
-        "value": None,
-    }
-    
-    wavelength_field = {
+    amp_field = {
         "type":"float",
-        "label": "wavelength",
-        "name": "wavelength",
-        "value": 5.0,
+        "label": "amplitude",
+        "name": "scale",
+        "value": 0.14,
     }
 
     # Combine everything into a module.
     module = Module(id=id,
-                  name='Two theta to qxqz',
+                  name='Wiggle',
                   version=version,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[output_grid_field, wavelength_field] + fields,
+                  fields=[amp_field] + fields,
                   action=action,
                   )
 

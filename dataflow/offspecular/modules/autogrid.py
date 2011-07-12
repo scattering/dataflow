@@ -1,9 +1,9 @@
 """
-Join data sets
+Grid data sets
 """
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
 
 def autogrid_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[],
@@ -27,7 +27,7 @@ def autogrid_module(id=None, datatype=None, action=None,
              use='in',
              description='Data parts',
              required=False,
-             multiple=True,
+             multiple=False,
              ),
         dict(id='output',
              datatype=datatype,
