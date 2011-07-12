@@ -312,7 +312,7 @@ var AnnulusInteractor = new Class.create(Interactor, {
         
         this.c = new Center(this, 150, 150);
         this.p1 = new Point(this, 200, 150);
-        this.p2 = new Point(this, 250, 100);
+        this.p2 = new Point(this, 250, 150);
         this.circ1 = new Circle(this, this.c, this.p1, 4);
         this.circ2 = new Circle(this, this.c, this.p2, 4);
         this.grobs.push(this.circ1, this.circ2, this.c, this.p1, this.p2);
@@ -332,6 +332,22 @@ var AnnulusInteractor = new Class.create(Interactor, {
                 t_ = this.parent.circ1.angleToXaxis(pos);
             this.parent.p1.pos.x = this.parent.c.pos.x + Math.cos(t_) * r;
             this.parent.p1.pos.y = this.parent.c.pos.y + Math.sin(t_) * r;
+        });
+        this.circ1.filled = false;
+        this.circ1.connectortranslatable = false;
+        this.circ1.onDrag = this.circ1.onDrag.wrap(function (callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.translateBy(this.dpos);
+            this.c.translateBy(this.dpos);
+        });
+        this.circ2.filled = false;
+        this.circ2.connectortranslatable = false;
+        this.circ2.onDrag = this.circ2.onDrag.wrap(function (callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.translateBy(this.dpos);
+            this.c.translateBy(this.dpos);
         });
         
         this.redraw();
@@ -529,6 +545,7 @@ var Circle = Class.create(GrobConnector, {
         this.points = { p1: p1, c: c };
         this.p1 = p1;
         this.c = c;
+        this.filled = true;
     },
     
     render: function($super, ctx) {
@@ -538,16 +555,21 @@ var Circle = Class.create(GrobConnector, {
         ctx.arc(this.c.pos.x, this.c.pos.y, dist(this.c.pos, this.p1.pos), 0, 2 * Math.PI, true);
         ctx.closePath();
         ctx.stroke();
-        ctx.globalAlpha = 0.15;
-        ctx.fill();
-        ctx.globalAlpha = 0.6;
+        if (this.filled) {
+            ctx.globalAlpha = 0.15;
+            ctx.fill();
+            ctx.globalAlpha = 0.6;
+        }
     },
     
     angleToXaxis: function(p) {
         return Math.atan2(p.y - this.c.pos.y, p.x - this.c.pos.x);
     },
     isInside: function(pos) {
-        return /*Math.abs*/(dist(this.c.pos, pos) - dist(this.c.pos, this.p1.pos)) <= this.width + 1;
+        var dd = dist(this.c.pos, pos) - dist(this.c.pos, this.p1.pos);
+        if (!this.filled)
+            dd = Math.abs(dd);
+        return dd <= this.width + 1;
     },
 });
 var Center = Class.create(Point, {
@@ -588,7 +610,7 @@ var Arc = Class.create(GrobConnector, {
         p1.onDrag = p1.onDrag.wrap(function(callOriginal, e, pos) {
             callOriginal(e, pos);
             
-            var r = dist(pos, this.parent.c.pos),
+            var r = dist(this.pos, this.parent.c.pos),
                 t_ = this.parent.arc.angleToXaxis(this.parent.p2.pos);
             this.parent.p2.pos.x = this.parent.c.pos.x + Math.cos(t_) * r;
             this.parent.p2.pos.y = this.parent.c.pos.y + Math.sin(t_) * r;
@@ -596,7 +618,7 @@ var Arc = Class.create(GrobConnector, {
         p2.onDrag = p2.onDrag.wrap(function(callOriginal, e, pos) {
             callOriginal(e, pos);
             
-            var r = dist(pos, this.parent.c.pos),
+            var r = dist(this.pos, this.parent.c.pos),
                 t_ = this.parent.arc.angleToXaxis(this.parent.p1.pos);
             this.parent.p1.pos.x = this.parent.c.pos.x + Math.cos(t_) * r;
             this.parent.p1.pos.y = this.parent.c.pos.y + Math.sin(t_) * r;
