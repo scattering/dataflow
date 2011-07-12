@@ -379,11 +379,13 @@ Ext.onReady(function() {
                                 <h2>Plotting!</h2>
 
                                 <div>
-                                        <div id="plot" style=
-                                        "display: block; border:1px solid; width:500px; height: 500px; float: left;">
-                                        </div><br style="clear: left;" />
+                                        <div id="plot" style="display: block; border:1px solid; width:500px; height: 500px; float: left;"></div>
+                                        <canvas id="colorbar" width="60" height="500" style="float: left;"></canvas><br style="clear: left;" />
 
-                                        <div style="display: none;"></div>
+                                        <div style="display: none;">
+                                            <canvas id="invis" width="1024" height="1024"></canvas>
+                                            <canvas id="invis2" width="1" height="1024"></canvas>
+                                        </div>
                                 </div>
                         </li>
 
