@@ -47,8 +47,8 @@ div.inputEx-Group div.inputEx-label {
 }
 
 div.WireIt-ImageContainer {
-	width: 120px;
-	height: 80px;
+	width: 64px;
+	height: 64px;
 }
 
 div.Bubble div.body {
@@ -119,7 +119,7 @@ div.Bubble div.body {
 <!-- <script type="text/javascript" src="../../../../build/wireit-inputex-editor-min.js"></script>  -->
 <script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor.js"></script>
 <script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-composable.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-editor-grouping.js"></script>
+<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-grouping.js"></script>
 <script type="text/javascript" src="../../static/lib/wireit/js/WireIt.js"></script>
 
 
@@ -283,7 +283,7 @@ div.WireIt-Container.WiringEditor-module-comment div.body textarea { background-
 // InputEx needs a correct path to this image
 inputEx.spacerUrl = "/inputex/trunk/images/space.gif";
 
-
+var holder = '';
 
 YAHOO.util.Event.onDOMReady( function() {
 	try {	
@@ -303,7 +303,8 @@ YAHOO.util.Event.onDOMReady( function() {
 		WireIt.ImageContainer.prototype.height = 40;
 		WireIt.ImageContainer.prototype.width = 40;
 		WireIt.ImageContainer.prototype.onMouseDown = function() {
-			console.log(this.getConfig())
+			console.log(this.getConfig());
+			holder = this;
 			}
 
 		// setting up events for wires
