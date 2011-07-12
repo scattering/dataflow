@@ -634,6 +634,30 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			}
 		return headersList;	
 		},
+		
+	/**
+	* These following methods are for paging through the reduction template instances
+	*
+	* prevReductionInstance and nextReductionInstance update the button display, set the value editor.reductionInstance and call displayCurrentReduction()
+	**/	
+	prevReductionInstance: function() {
+		if (this.reductionInstance) {
+			this.reductionInstance -= 1
+			YAHOO.util.Dom.get('reductionInstance').innerHTML = String(this.reductionInstance)
+			}
+	
+	},
+		
+		
+	nextReductionInstance: function() {
+		this.reductionInstance += 1
+		YAHOO.util.Dom.get('reductionInstance').innerHTML = this.reductionInstance
+	
+	},
+	
+	displayCurrentReduction: function() {
+	
+	},
 
 
 
