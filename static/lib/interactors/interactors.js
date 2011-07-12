@@ -184,17 +184,112 @@ var ParallelogramInteractor = new Class.create(PolygonInteractor, {
     initialize: function($super, canvasid) {
         $super('Parallelogram', 'pgram.png', 0, canvasid);
         
-        var p1 = new Point(this, 100, 100);
-        var p2 = new Point(this, 200, 100);
-        var p3 = new Point(this, 200, 200);
-        var p4 = new Point(this, 100, 200);
-        var c = new Center(this, 150, 150);
-        var l1 = new Segment(this, p1, p2, 4);
-        var l2 = new Segment(this, p2, p3, 4);
-        var l3 = new Segment(this, p3, p4, 4);
-        var l4 = new Segment(this, p4, p1, 4);
-        this.grobs.push(l1, l2, l3, l4, c, p1, p2, p3, p4);
-        this.c = c;
+        this.p1 = new Point(this, 100, 100);
+        this.p2 = new Point(this, 200, 100);
+        this.p3 = new Point(this, 200, 200);
+        this.p4 = new Point(this, 100, 200);
+        this.c = new Center(this, 150, 150);
+        this.l1 = new Segment(this, this.p1, this.p2, 4);
+        this.l2 = new Segment(this, this.p2, this.p3, 4);
+        this.l3 = new Segment(this, this.p3, this.p4, 4);
+        this.l4 = new Segment(this, this.p4, this.p1, 4);
+        this.grobs.push(this.l1, this.l2, this.l3, this.l4, this.c, this.p1, this.p2, this.p3, this.p4);
+        
+        this.p1.onDrag = this.p1.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p3.pos.x -= this.dpos.x;
+            this.parent.p3.pos.y -= this.dpos.y;
+        });
+        this.p2.onDrag = this.p2.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p4.pos.x -= this.dpos.x;
+            this.parent.p4.pos.y -= this.dpos.y;
+        });
+        this.p3.onDrag = this.p3.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p1.pos.x -= this.dpos.x;
+            this.parent.p1.pos.y -= this.dpos.y;
+        });
+        this.p4.onDrag = this.p4.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p2.pos.x -= this.dpos.x;
+            this.parent.p2.pos.y -= this.dpos.y;
+        });
+        
+        this.redraw();
+    },
+});
+var RectangleInteractor = new Class.create(PolygonInteractor, {
+    initialize: function($super, canvasid) {
+        $super('Rectangle', 'rect.png', 0, canvasid);
+        
+        this.p1 = new Point(this, 100, 100);
+        this.p2 = new Point(this, 200, 100);
+        this.p3 = new Point(this, 200, 200);
+        this.p4 = new Point(this, 100, 200);
+        this.c = new Center(this, 150, 150);
+        this.l1 = new Segment(this, this.p1, this.p2, 4);
+        this.l2 = new Segment(this, this.p2, this.p3, 4);
+        this.l3 = new Segment(this, this.p3, this.p4, 4);
+        this.l4 = new Segment(this, this.p4, this.p1, 4);
+        this.grobs.push(this.l1, this.l2, this.l3, this.l4, this.c, this.p1, this.p2, this.p3, this.p4);
+        
+        this.p1.onDrag = this.p1.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p4.pos.x += this.dpos.x;
+            this.parent.p2.pos.y += this.dpos.y;
+        });
+        this.p2.onDrag = this.p2.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p3.pos.x += this.dpos.x;
+            this.parent.p1.pos.y += this.dpos.y;
+        });
+        this.p3.onDrag = this.p3.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p2.pos.x += this.dpos.x;
+            this.parent.p4.pos.y += this.dpos.y;
+        });
+        this.p4.onDrag = this.p4.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.parent.p1.pos.x += this.dpos.x;
+            this.parent.p3.pos.y += this.dpos.y;
+        });
+        this.l1.connectortranslatable = false;
+        this.l1.onDrag = this.l1.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.dpos.x = 0;
+            this.translateBy(this.dpos);
+        });
+        this.l2.connectortranslatable = false;
+        this.l2.onDrag = this.l2.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.dpos.y = 0;
+            this.translateBy(this.dpos);
+        });
+        this.l3.connectortranslatable = false;
+        this.l3.onDrag = this.l3.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.dpos.x = 0;
+            this.translateBy(this.dpos);
+        });
+        this.l4.connectortranslatable = false;
+        this.l4.onDrag = this.l4.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);
+            
+            this.dpos.y = 0;
+            this.translateBy(this.dpos);
+        });
         
         this.redraw();
     },
@@ -401,6 +496,7 @@ var GrobConnector = Class.create(Grob, {
         
         this.name = 'grobconnector';
         this.translatable = false;
+        this.connectortranslatable = true;
         this.points = {};
         this.width = width;
     },
@@ -413,12 +509,16 @@ var GrobConnector = Class.create(Grob, {
     isInside: function(pos) {
         return this.distanceTo(pos) <= this.width + 1;
     },
+    translateBy: function(dpos) {
+        for (var p in this.points)
+            this.points[p].translateBy(dpos);
+    },
     onDrag: function($super, e, pos) {
         $super(e, pos);
         
         //console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ') dpos (', this.dpos.x, this.dpos.y, ')');
-        for (var p in this.points)
-            this.points[p].translateBy(this.dpos);
+        if (this.connectortranslatable)
+            this.translateBy(this.dpos);
     },
 });
 var Circle = Class.create(GrobConnector, {
