@@ -79,9 +79,55 @@ data1d = Datatype(id=TAS_DATA,
 # === Component binding ===
 
 def load_action(files=None, intent=None, position=None, xtype=None):
-    print "loading", files
-    result = [filereader(f) for f in files]
+    """Currently set up to load ONLY 1 file"""
+    #print "loading", files
+    tasobjects = [filereader(f) for f in files]
+    tasobject = tasobjects[0]
+    result = []
+    for detector in tasobject.detectors:
+        plottable_2D = {
+            'z': detector,
+            'title': 'Loaded Data',
+            'dims': {
+                'xmax': 128.0,
+                'xmin': 0.0,
+                'ymin': 0.0,
+                'ymax': 128.0,
+                'xdim': 128,
+                'ydim': 128,
+            },
+            'type':'2d',
+            'xlabel': 'X',
+            'ylabel': 'Y',
+            'zlabel': 'Intensity',
+        }
+        result.append(plottable_2D)
+
+    '''
+    for tasobject in tasobjects:
+        temparr = []
+        for detector in tasobject.detectors:
+            plottable_2D = {
+                'z': detector,
+                'title': 'Loaded Data',
+                'dims': {
+                    'xmax': 128.0,
+                    'xmin': 0.0,
+                    'ymin': 0.0,
+                    'ymax': 128.0,
+                    'xdim': 128,
+                    'ydim': 128,
+                },
+                'type':'2d',
+                'xlabel': 'X',
+                'ylabel': 'Y',
+                'zlabel': 'Intensity',
+            }
+            temparr.append(plottable_2D)
+        result.append(temparr)
+    '''
     return dict(output=result)
+    
 load = load_module(id='tas.load', datatype=TAS_DATA,
                    version='1.0', action=load_action)
 
@@ -145,6 +191,7 @@ scale = scale_module(id='tas.scale', datatype=TAS_DATA,
 
 #All TripleAxis reductions below require that:
 #  'input' be a TripleAxis object (see data_abstraction.py)
+'''
 def detailed_balance_action(input):
     for tasinstrument in input:
         tasinstrument.detailed_balance()
@@ -155,6 +202,30 @@ def normalize_monitor_action(input, target_monitor):
     for tasinstrument in input:
         tasinstrument.normalize_monitor(target_monitor)
     return dict(output=input)
+
+def monitor_correction_action(input, instrument_name):
+    #Requires instrument name, e.g. 'BT7'.  
+    #Check monitor_correction_coordinates.txt for available instruments
+    for tasinstrument in input:
+        tasinstrument.harmonic_monitor_correction()
+    return dict(ouput=input)
+    
+def volume_correction_action(input):
+    for tasinstrument in input:
+        tasinstrument.resolution_volume_correction()
+    return dict(output=input)
+'''
+def detailed_balance_action(input):
+    for tasinstrument in input:
+        tasinstrument.detailed_balance()
+    return dict(output=input)
+
+def normalize_monitor_action(input, target_monitor):
+    #Requires the target monitor value
+    for tasinstrument in input:
+        tasinstrument.normalize_monitor(target_monitor)
+    result=input.get_plotable()
+    return dict(output=result)
 
 def monitor_correction_action(input, instrument_name):
     #Requires instrument name, e.g. 'BT7'.  
@@ -223,9 +294,11 @@ template = Template(name='test reduction',
                     wires=wires,
                     instrument=BT7.id,
                     )
+
+
 # the actual call to perform the reduction
 result = run_template(template, config)
-print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
-print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
-print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
+#print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
+#print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
+#print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
 print "done"
