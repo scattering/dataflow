@@ -282,6 +282,7 @@ div.Bubble div.body {
 <script type="text/javascript" src="../../static/wireit_test/language.js"></script>
 <script type="text/javascript" src="../../static/wireit_test/ANDRdefinition.js"></script>
 <script type="text/javascript" src="../../static/wireit_test/SANSdefinition.js"></script>
+<script type="text/javascript" src="../../static/wireit_test/TASlang.js"></script>
 
 <!-- language dictionary -->
 <script type="text/javascript" src="../../static/wireit_test/lang_dict.js"></script>
@@ -317,7 +318,7 @@ YAHOO.util.Event.onDOMReady( function() {
 		// editor
 		editor = new WireIt.WiringEditor(CHOSEN_LANG);
 			// initial setting: for paging through multiple instances of the same reduction template
-		editor.reductionInstance = 0; 
+		editor.reductionInstance = 1; 
 		
 		// more initial settings
 		
@@ -420,9 +421,18 @@ Ext.onReady(function() {
                                 	<div id="FAT" style='position: relative;' class="x-reset"></div>
                         	</div>
                         </li>
+                        
+                        <li>
+                                <h2>Instance Info</h2>
+
+                                <div>
+                                        <div style="padding: 10px;">
+                                        </div>
+                                </div>
+                        </li>
 
                         <li>
-                                <h2>Info</h2>
+                                <h2>General Info</h2>
 
                                 <div>
                                         <div style="padding: 10px;">

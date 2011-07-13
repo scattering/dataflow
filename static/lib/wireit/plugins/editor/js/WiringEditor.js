@@ -636,12 +636,23 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		},
 		
 	/**
+	* This method gets called every time there is an updateAll() call on the FAT. 
+	* Currently, it updates the number of reduction instances and the display for 
+	* Instance Info
+	**/
+	
+	FATupdate: function() {
+	
+	},
+	
+		
+	/**
 	* These following methods are for paging through the reduction template instances
 	*
 	* prevReductionInstance and nextReductionInstance update the button display, set the value editor.reductionInstance and call displayCurrentReduction()
 	**/	
 	prevReductionInstance: function() {
-		if (this.reductionInstance) {
+		if (this.reductionInstance>1) {
 			this.reductionInstance -= 1
 			YAHOO.util.Dom.get('reductionInstance').innerHTML = String(this.reductionInstance)
 			}

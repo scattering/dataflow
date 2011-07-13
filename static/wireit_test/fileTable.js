@@ -96,6 +96,7 @@ backStore.insert(0,newFile)
 		storeList[i].sort()
 		gridList[i].getView().refresh()
 	}
+	generate_FileGroups()
 };
 
 
@@ -423,6 +424,7 @@ var panelTwo = Ext.create('Ext.Panel', {
 //      one idea: check to see the result of send_to_Wireit, and disallow NOFILE
 
 send_to_Wireit = {}
+template_configs = {}
 
 // cleans up the store.getGroups objects into a list of strings
 function handleResult(identifier, result) {
@@ -447,6 +449,24 @@ function handleResult(identifier, result) {
 // run reduction handler
 // perhaps change it to run reduction for all groups. And the run reduction on the WE will run the current group 
 // selection
+function generate_FileGroups() {
+	groups_to_run = []
+	for (var k in storeList) {
+		groups_to_run.concat(storeList[k].getGroups())
+		}
+	console.log(groups_to_run)
+	for (var i in groups_to_run) {
+		send_to_Wireit = {}
+		for (var j in storeList) {
+			console.log(groups_to_run[i],headerList[j])
+			var result = storeList[j].getGroups(groups_to_run[i])
+			handleResult(headerList[j], result)
+			// pick out the files in store j that are
+			// in group i
+			}
+		}
+    }
+
 function run_reduction() {
 	Ext.Msg.prompt('Choose Group?', 'Please enter the groups to be run through reduction:', function(btn, grps) {
 		if (btn == 'ok' && acceptable_entry.test(grps)){
