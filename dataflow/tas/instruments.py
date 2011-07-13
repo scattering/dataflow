@@ -3,20 +3,14 @@ Triple Axis Spectrometer reduction and analysis modules
 """
 import math, os, sys
 
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
-
-#from pprint import pprint
-
+#Relative imports for use in the larger project
+'''
 from ...reduction.tripleaxis.data_abstraction import TripleAxis, filereader
 from ..calc import run_template
 from .. import wireit
-from .. import ROOT_URL
+from ... import ROOT_URL
 from django.utils import simplejson
 import numpy
-
-#Running this as __name__="__main__" will require direct instead of relative imports
-#TODO - change to relative imports when this code is incorporated in project
 
 from .. import config
 from ..core import Instrument, Datatype, Template, register_instrument
@@ -30,6 +24,27 @@ from ..modules.tas_detailed_balance import detailed_balance_module
 from ..modules.tas_monitor_correction import monitor_correction_module
 from ..modules.tas_volume_correction import volume_correction_module
 from ..modules.tas_load import load_module
+'''
+#direct imports for use individually (ie running this file)
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+from dataflow.reduction.tripleaxis.data_abstraction import TripleAxis, filereader
+from dataflow.dataflow.calc import run_template
+from dataflow.dataflow import wireit
+from dataflow import ROOT_URL
+from django.utils import simplejson
+
+import numpy
+from dataflow.dataflow import config
+from dataflow.dataflow.core import Instrument, Datatype, Template, register_instrument
+#from dataflow.dataflow.modules.load import load_module
+from dataflow.dataflow.modules.join import join_module
+from dataflow.dataflow.modules.scale import scale_module
+from dataflow.dataflow.modules.save import save_module
+from dataflow.dataflow.modules.tas_normalize_monitor import normalize_monitor_module
+from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
+from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
+from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
+from dataflow.dataflow.modules.tas_load import load_module
 
 TAS_DATA = 'data1d.tas'
 
@@ -82,51 +97,7 @@ data1d = Datatype(id=TAS_DATA,
 def load_action(files=None, intent=None, position=None, xtype=None):
     """Currently set up to load ONLY 1 file"""
     #print "loading", files
-    tasobjects = [filereader(f) for f in files]
-    tasobject = tasobjects[0]
-    result = []
-    for detector in tasobject.detectors:
-        plottable_2D = {
-            'z': detector,
-            'title': 'Loaded Data',
-            'dims': {
-                'xmax': 128.0,
-                'xmin': 0.0,
-                'ymin': 0.0,
-                'ymax': 128.0,
-                'xdim': 128,
-                'ydim': 128,
-            },
-            'type':'2d',
-            'xlabel': 'X',
-            'ylabel': 'Y',
-            'zlabel': 'Intensity',
-        }
-        result.append(plottable_2D)
-
-    '''
-    for tasobject in tasobjects:
-        temparr = []
-        for detector in tasobject.detectors:
-            plottable_2D = {
-                'z': detector,
-                'title': 'Loaded Data',
-                'dims': {
-                    'xmax': 128.0,
-                    'xmin': 0.0,
-                    'ymin': 0.0,
-                    'ymax': 128.0,
-                    'xdim': 128,
-                    'ydim': 128,
-                },
-                'type':'2d',
-                'xlabel': 'X',
-                'ylabel': 'Y',
-                'zlabel': 'Intensity',
-            }
-            temparr.append(plottable_2D)
-        result.append(temparr)
-    '''
+    result = [filereader(f) for f in files]
     return dict(output=result)
     
 load = load_module(id='tas.load', datatype=TAS_DATA,
@@ -192,7 +163,7 @@ scale = scale_module(id='tas.scale', datatype=TAS_DATA,
 
 #All TripleAxis reductions below require that:
 #  'input' be a TripleAxis object (see data_abstraction.py)
-'''
+
 def detailed_balance_action(input):
     for tasinstrument in input:
         tasinstrument.detailed_balance()
@@ -202,31 +173,8 @@ def normalize_monitor_action(input, target_monitor):
     #Requires the target monitor value
     for tasinstrument in input:
         tasinstrument.normalize_monitor(target_monitor)
+    #result=input[0].get_plottable()
     return dict(output=input)
-
-def monitor_correction_action(input, instrument_name):
-    #Requires instrument name, e.g. 'BT7'.  
-    #Check monitor_correction_coordinates.txt for available instruments
-    for tasinstrument in input:
-        tasinstrument.harmonic_monitor_correction()
-    return dict(ouput=input)
-    
-def volume_correction_action(input):
-    for tasinstrument in input:
-        tasinstrument.resolution_volume_correction()
-    return dict(output=input)
-'''
-def detailed_balance_action(input):
-    for tasinstrument in input:
-        tasinstrument.detailed_balance()
-    return dict(output=input)
-
-def normalize_monitor_action(input, target_monitor):
-    #Requires the target monitor value
-    for tasinstrument in input:
-        tasinstrument.normalize_monitor(target_monitor)
-    result=input.get_plotable()
-    return dict(output=result)
 
 def monitor_correction_action(input, instrument_name):
     #Requires instrument name, e.g. 'BT7'.  
@@ -298,7 +246,11 @@ template = Template(name='test reduction',
 
 
 # the actual call to perform the reduction
-result = run_template(template, config)
+def TAS_RUN():
+    result = run_template(template, config)
+    for key, value in result.iteritems():
+        value['output'] = [obj.get_plottable() for obj in value['output']]
+    return result
 #print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
 #print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
 #print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))

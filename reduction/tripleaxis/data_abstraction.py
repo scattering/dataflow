@@ -103,7 +103,10 @@ class Component(object):
         def _get_variance(self): return self.measurement.variance
         def _set_variance(self,variance):
                 self.measurement.variance=variance
-        def _getdx(self): return np.sqrt(self.variance)
+        def _getdx(self): 
+                if self.variance==None:
+                        return self.variance
+                return np.sqrt(self.variance)                
         def _setdx(self,dx):
                 # Direct operation
                 #    variance = dx**2
@@ -737,11 +740,11 @@ class TripleAxis(object):
                 for detector in bt7.detectors:
                         detector.measurement=detector.measurement*rescor
                 return
-        def get_plotable(self):
+        def get_plottable(self):
                 plottable_data = {
                         'type': 'nd',
                         'title': 'Triple Axis Plot',
-                        'clear_existing': false,
+                        'clear_existing': False,
                         'orderx': ['h', 'k', 'l'],
                         'ordery': ['primary_detector'],
                         'series': [{
