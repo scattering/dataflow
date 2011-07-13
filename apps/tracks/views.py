@@ -89,7 +89,7 @@ sample_data = {
     'xlabel': 'This is my x-axis label',
     'ylabel': 'This is my y-axis label',
     'zlabel': 'This is my z-axis label',
-};
+}
 
 b = {'save':'successful'}
 
