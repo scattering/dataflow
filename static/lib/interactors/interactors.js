@@ -802,10 +802,18 @@ var Linear = Class.create(FunctionConnector, {
     distanceTo: function(pos) {
         var X1 = this.p1.pos.x, X2 = this.p2.pos.x,
             Y1 = this.c.pos.y - this.p1.pos.y, Y2 = this.c.pos.y - this.p2.pos.y;
-        var a = (Y2-Y1) / (X2-X1),
-            b = Y1 - a*X1;
         
-        return Math.abs(-a * pos.x + this.c.pos.y - pos.y - b) / Math.sqrt(a * a);
+        var d = 0;
+        // Vertical lines
+        if (X1 == X2)
+            d = Math.abs(pos.x - X1);
+        else {
+            var a = (Y2-Y1) / (X2-X1),
+                b = Y1 - a*X1;
+            
+            d = Math.abs(-a * pos.x + this.c.pos.y - pos.y - b) / Math.sqrt(a * a);
+        }
+        return d;
     },
 });
 var Quadratic = Class.create(FunctionConnector, {

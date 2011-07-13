@@ -4,7 +4,8 @@ language_choices = (
 			('bt7', 'bt7'),
 			('sans', 'sans'),
 			('refl', 'refl'),
-			('andr', 'andr')
+			('andr', 'andr'),
+			('tas', 'tas'),
 )
 
 class languageSelectForm(forms.Form):
