@@ -9,6 +9,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
 from pprint import pprint
 from dataflow.reduction.tripleaxis.data_abstraction import TripleAxis, filereader
 from dataflow.dataflow.calc import run_template
+from dataflow.dataflow import wireit
+from dataflow import ROOT_URL
+from django.utils import simplejson
 import numpy
 
 #Running this as __name__="__main__" will require direct instead of relative imports
@@ -186,7 +189,7 @@ BT7 = Instrument(id='ncnr.tas.bt7',
                        ('Reduction', [join, scale, normalizemonitor, detailedbalance, 
                                       monitorcorrection, volumecorrection])
                        ],
-                 requires=[config.JSCRIPT + '/tasplot.js'],
+                 #requires=[config.JSCRIPT + '/tasplot.js'],
                  datatypes=[data1d],
                  )
 
@@ -197,8 +200,8 @@ for instrument in instruments:
     register_instrument(instrument)
 
 modules = [
-    dict(module="tas.load"),
-    dict(module="tas.normalize_monitor"),
+    dict(module="tas.load", position=(10, 20), config={'files':[ROOT_URL.HOMEDIR[:-12]+ 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
+    dict(module="tas.normalize_monitor", position=(30, 20), config={'target_monitor': 900000}),
     #dict(module="tas.detailed_balance"),
     #dict(module="tas.monitor_correction"),
     #dict(module="tas.volume_correction"),
@@ -208,8 +211,8 @@ wires = [
     #dict(source=[1, 'output'], target=[2, 'input']),
     ]
 config = [
-    {'files':['/home/alex/Desktop/dataflow/reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']},
-    {'target_monitor': 900000},
+    {},
+    {},
     #{},
     #{'instrument_name': 'BT7'},
     #{}
@@ -222,4 +225,7 @@ template = Template(name='test reduction',
                     )
 # the actual call to perform the reduction
 result = run_template(template, config)
+print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
+print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
+print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
 print "done"

@@ -4,6 +4,7 @@ import uncertainty, err1d
 import readncnr4 as readncnr
 from formatnum import format_uncertainty
 import copy
+#from ...dataflow import wireit
 eps=1e-8
 
 """
@@ -436,6 +437,7 @@ class DetectorSet(object):
                         
         def __iter__(self):
                 temp_dict=copy.deepcopy(self.__dict__)
+                temp_dict = self.__dict__
                 temp_dict.__delitem__('detector_mode')
                 
                 #temp_dict.__delitem__('primary_detector')
@@ -723,10 +725,8 @@ class TripleAxis(object):
                 """Correct constant Q-scans with fixed incident energy, Ei, for the fact that the resolution volume changes
                 as Ef changes"""
                 # Requires constant-Q scan with fixed incident energy, Ei
-                #pass
-                #TODO - CHECK - taken from the IDL
-                # resCor = Norm/(cot(A6/2)*Ef^1.5)
-                # where Norm = Ei^1.5 * cot(asin(!pi/(0.69472*dA*sqrt(Ei))))
+                # theta_analyzer is occasionally producing a Measurement of Nan's only because
+                #    it is taking the arcsin of a value > 1
                 wavelength_analyzer=np.sqrt(81.80425/self.physical_motors.ef.measurement) #determine the wavelength based on the analyzer
                 theta_analyzer=np.arcsin(wavelength_analyzer/2/self.analyzer.dspacing)  #This is what things should be 
                 #alternatively, we could do theta_analyzer=np.radians(self.primary_motors.a6.measurement/2)
@@ -736,9 +736,27 @@ class TripleAxis(object):
                 for detector in bt7.detectors:
                         detector.measurement=detector.measurement*rescor
                 return
-                
-               
-                        
+        def to_plotable(self):
+                z = [arr[:, 0].tolist() for arr in self]
+                axis = ['x', 'y']
+                dims = {}
+                for index, label in enumerate(axis):
+                    arr = self._info[index]['values']
+                    dims[axis[index] + 'min'] = amin(arr)
+                    dims[axis[index] + 'max'] = amax(arr)
+                    dims[axis[index] + 'dim'] = alen(arr)
+                xlabel = self._info[0]['name']
+                ylabel = self._info[1]['name']
+                zlabel = self._info[2]['cols'][0]['name']
+                title = 'AND/R data' # That's creative enough, right?
+                dump = dict(z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
+                res = simplejson.dumps(dump, sort_keys=True, indent=2)
+                return res 
+
+        def printout(self):
+                print wireit.instrument_to_wireit_language(self)
+
+
 # ****************************************************************************************************************************************************
 # ***************************************************************** TRANSLATION METHODS **************************************************************
 # ****************************************************************************************************************************************************
@@ -1257,6 +1275,7 @@ if __name__=="__main__":
         
         bt7 = filereader('EscanQQ7HorNSF91831.bt7')
         print 'translations done'
+        bt7.printout()
         bt7.normalize_monitor(90000)
         #print 'detailed balance done'
         bt7.harmonic_monitor_correction('BT7')
