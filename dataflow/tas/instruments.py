@@ -6,29 +6,30 @@ import math, os, sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
-from pprint import pprint
-from dataflow.reduction.tripleaxis.data_abstraction import TripleAxis, filereader
-from dataflow.dataflow.calc import run_template
-from dataflow.dataflow import wireit
-from dataflow import ROOT_URL
+#from pprint import pprint
+
+from ...reduction.tripleaxis.data_abstraction import TripleAxis, filereader
+from ..calc import run_template
+from .. import wireit
+from .. import ROOT_URL
 from django.utils import simplejson
 import numpy
 
 #Running this as __name__="__main__" will require direct instead of relative imports
 #TODO - change to relative imports when this code is incorporated in project
 
-from dataflow.dataflow import config
-from dataflow.dataflow.core import Instrument, Datatype, Template, register_instrument
+from .. import config
+from ..core import Instrument, Datatype, Template, register_instrument
 
 #from dataflow.dataflow.modules.load import load_module
-from dataflow.dataflow.modules.join import join_module
-from dataflow.dataflow.modules.scale import scale_module
-from dataflow.dataflow.modules.save import save_module
-from dataflow.dataflow.modules.tas_normalize_monitor import normalize_monitor_module
-from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
-from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
-from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
-from dataflow.dataflow.modules.tas_load import load_module
+from ..modules.join import join_module
+from ..modules.scale import scale_module
+from ..modules.save import save_module
+from ..modules.tas_normalize_monitor import normalize_monitor_module
+from ..modules.tas_detailed_balance import detailed_balance_module
+from ..modules.tas_monitor_correction import monitor_correction_module
+from ..modules.tas_volume_correction import volume_correction_module
+from ..modules.tas_load import load_module
 
 TAS_DATA = 'data1d.tas'
 
