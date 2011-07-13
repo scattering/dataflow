@@ -148,9 +148,9 @@ autogrid = autogrid_module(id='ospec.grid', datatype=OSPEC_DATA,
 
 
 # Join module
-def join_action(input=None, grid=None):
+def join_action(input_data=None, input_grid=None):
     print "joining"
-    result = [_join(bundle, grid) for bundle in input]
+    result = [_join(bundle, input_grid) for bundle in input_data]
     return dict(output=result)
 def _join(list_of_datasets, grid):
     return Combine().apply(list_of_datasets, grid=grid)
