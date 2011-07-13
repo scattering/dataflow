@@ -103,6 +103,14 @@ div.Bubble div.body {
 
         background: url(../../static/img/silk/next.png) center center no-repeat;;
     }
+    
+.instance-info-display dt {
+	font-weight: bold;
+	}
+.instance-info-display dd {
+	margin-left: 1em;
+	margin-bottom: 4px;
+	}
 
 </style>
 
@@ -117,6 +125,13 @@ div.Bubble div.body {
 <script type="text/javascript" src="../../static/lib/plotting/palettes.js"></script>
 <script type="text/javascript" src="../../static/lib/plotting/plotting_api.js"></script>
 <script type="text/javascript" src="../../static/lib/plotting/sansdata.js"></script>
+
+<!-- Prototype lib 
+<script type="text/javascript" src="../../static/lib/prototype.js"></script>
+-->
+
+<!-- Uniq Array -->
+<script type="text/javascript" src="../../static/lib/UniqArray.js"></script>
 
 <!-- YUI -->
 <script type="text/javascript" src="../../static/lib/yui/yahoo/yahoo.js"></script>
@@ -283,6 +298,8 @@ div.Bubble div.body {
 <script type="text/javascript" src="../../static/wireit_test/ANDRdefinition.js"></script>
 <script type="text/javascript" src="../../static/wireit_test/SANSdefinition.js"></script>
 <script type="text/javascript" src="../../static/wireit_test/TASlang.js"></script>
+
+
 <!-- language dictionary -->
 <script type="text/javascript" src="../../static/wireit_test/lang_dict.js"></script>
 
@@ -317,7 +334,8 @@ YAHOO.util.Event.onDOMReady( function() {
 		// editor
 		editor = new WireIt.WiringEditor(CHOSEN_LANG);
 			// initial setting: for paging through multiple instances of the same reduction template
-		editor.reductionInstance = 0; 
+		editor.reductionInstance = 1;
+		editor.maxReduction = 1; 
 		
 		// more initial settings
 		
@@ -420,9 +438,18 @@ Ext.onReady(function() {
                                 	<div id="FAT" style='position: relative;' class="x-reset"></div>
                         	</div>
                         </li>
+                        
+                        <li>
+                                <h2>Instance Info</h2>
+
+                                <div>
+                                        <div id ="instance-info" style="padding: 10px;">
+                                        </div>
+                                </div>
+                        </li>
 
                         <li>
-                                <h2>Info</h2>
+                                <h2>General Info</h2>
 
                                 <div>
                                         <div style="padding: 10px;">

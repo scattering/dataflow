@@ -103,7 +103,10 @@ class Component(object):
         def _get_variance(self): return self.measurement.variance
         def _set_variance(self,variance):
                 self.measurement.variance=variance
-        def _getdx(self): return np.sqrt(self.variance)
+        def _getdx(self): 
+                if self.variance==None:
+                        return self.variance
+                return np.sqrt(self.variance)                
         def _setdx(self,dx):
                 # Direct operation
                 #    variance = dx**2
@@ -436,13 +439,14 @@ class DetectorSet(object):
                 self.detector_mode=None
                         
         def __iter__(self):
-                temp_dict=copy.deepcopy(self.__dict__)
-                temp_dict = self.__dict__
-                temp_dict.__delitem__('detector_mode')
+                #temp_dict=copy.deepcopy(self.__dict__)
+                #temp_dict.__delitem__('detector_mode')
                 
                 #temp_dict.__delitem__('primary_detector')
-                for key,value in temp_dict.iteritems():
-                        yield value
+                #for key,value in temp_dict.iteritems():
+                for key,value in self.__dict__.iteritems():
+                        if not key=='detector_mode':
+                                yield value
 
         #def next(self):
         #        for key, value in self.__dict__.iteritems():
@@ -702,7 +706,7 @@ class TripleAxis(object):
                 mon0=self.time.monitor 
                 for detector in self.detectors:
                         detector=detector*(mon0/monitor)
-
+                        print 'hi'
                         #for i in range(0,len(detector.measurement.x)):
                         #        detector.measurement[i]=detector.measurement[i]*mon0[i]/monitor
                 return
@@ -736,25 +740,45 @@ class TripleAxis(object):
                 for detector in bt7.detectors:
                         detector.measurement=detector.measurement*rescor
                 return
-        def to_plotable(self):
-                z = [arr[:, 0].tolist() for arr in self]
-                axis = ['x', 'y']
-                dims = {}
-                for index, label in enumerate(axis):
-                    arr = self._info[index]['values']
-                    dims[axis[index] + 'min'] = amin(arr)
-                    dims[axis[index] + 'max'] = amax(arr)
-                    dims[axis[index] + 'dim'] = alen(arr)
-                xlabel = self._info[0]['name']
-                ylabel = self._info[1]['name']
-                zlabel = self._info[2]['cols'][0]['name']
-                title = 'AND/R data' # That's creative enough, right?
-                dump = dict(z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
-                res = simplejson.dumps(dump, sort_keys=True, indent=2)
-                return res 
-
-        def printout(self):
-                print wireit.instrument_to_wireit_language(self)
+        def get_plottable(self):
+        	#if self.detectors.primary_detector.dx==None:
+			
+                plottable_data = {
+                        'type': 'nd',
+                        'title': 'Triple Axis Plot',
+                        'clear_existing': False,
+                        'orderx': ['h', 'k', 'l'],
+                        'ordery': ['primary_detector'],
+                        'series': [{
+                                'label': 'File 1',
+                                'data': {
+                                        'h': {
+                                                'label': 'h',
+                                                'values': self.physical_motors.h.x.tolist(),
+                                                'errors': None,
+                                                },
+                                        'k': {
+                                                'label': 'k',
+                                                'values': self.physical_motors.k.x.tolist(),
+                                                'errors': None,
+                                                },
+                                        'l': {
+                                                'label': 'l',
+                                                'values': self.physical_motors.l.x.tolist(),
+                                                'errors': None,
+                                                },
+                                        'primary_detector': {
+                                                'label': 'Primary Detector',
+                                                'values': self.detectors.primary_detector.x.tolist(),
+                                                'errors': None,
+                                                },
+                                        },
+                                'color': 'Red',
+                                'style': 'line',
+                                },
+                        ],
+                }
+                return plottable_data
 
 
 # ****************************************************************************************************************************************************
@@ -1275,7 +1299,6 @@ if __name__=="__main__":
         
         bt7 = filereader('EscanQQ7HorNSF91831.bt7')
         print 'translations done'
-        bt7.printout()
         bt7.normalize_monitor(90000)
         #print 'detailed balance done'
         bt7.harmonic_monitor_correction('BT7')

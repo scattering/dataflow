@@ -182,7 +182,7 @@ WireIt.BaseEditor.prototype = {
 	    forwardButton.addClass('yui-button-right');
 	    forwardButton.on("click", function() {this.nextReductionInstance()}, this, true);
 	    
-	    var reductionDisplayButton = new widget.Button({label: 'Reduction Instance: <span id="reductionInstance"> 0 </span>', id: "WiringEditor-redDisp", container: toolbar, disabled: true, });
+	    var reductionDisplayButton = new widget.Button({label: 'Reduction Instance: <span id="reductionInstance"> 1 </span>', id: "WiringEditor-redDisp", container: toolbar, disabled: true, });
 	    reductionDisplayButton.addClass('yui-button-right');
 	    reductionDisplayButton.addClass('yui-button-removePadding')
 	    

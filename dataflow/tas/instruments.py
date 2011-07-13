@@ -3,23 +3,39 @@ Triple Axis Spectrometer reduction and analysis modules
 """
 import math, os, sys
 
+#Relative imports for use in the larger project
 
+from ...reduction.tripleaxis.data_abstraction import TripleAxis, filereader
+from ..calc import run_template
+from .. import wireit
+from ... import ROOT_URL
+from django.utils import simplejson
+import numpy
+
+from .. import config
+from ..core import Instrument, Datatype, Template, register_instrument
+
+#from dataflow.dataflow.modules.load import load_module
+from ..modules.join import join_module
+from ..modules.scale import scale_module
+from ..modules.save import save_module
+from ..modules.tas_normalize_monitor import normalize_monitor_module
+from ..modules.tas_detailed_balance import detailed_balance_module
+from ..modules.tas_monitor_correction import monitor_correction_module
+from ..modules.tas_volume_correction import volume_correction_module
+from ..modules.tas_load import load_module
+'''
+#direct imports for use individually (ie running this file)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
-
-from pprint import pprint
 from dataflow.reduction.tripleaxis.data_abstraction import TripleAxis, filereader
 from dataflow.dataflow.calc import run_template
 from dataflow.dataflow import wireit
 from dataflow import ROOT_URL
 from django.utils import simplejson
+
 import numpy
-
-#Running this as __name__="__main__" will require direct instead of relative imports
-#TODO - change to relative imports when this code is incorporated in project
-
 from dataflow.dataflow import config
 from dataflow.dataflow.core import Instrument, Datatype, Template, register_instrument
-
 #from dataflow.dataflow.modules.load import load_module
 from dataflow.dataflow.modules.join import join_module
 from dataflow.dataflow.modules.scale import scale_module
@@ -29,7 +45,7 @@ from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_modu
 from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
 from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
 from dataflow.dataflow.modules.tas_load import load_module
-
+'''
 TAS_DATA = 'data1d.tas'
 
 # Reduction operations may refer to data from other objects, but may not
@@ -79,9 +95,11 @@ data1d = Datatype(id=TAS_DATA,
 # === Component binding ===
 
 def load_action(files=None, intent=None, position=None, xtype=None):
-    print "loading", files
+    """Currently set up to load ONLY 1 file"""
+    #print "loading", files
     result = [filereader(f) for f in files]
     return dict(output=result)
+    
 load = load_module(id='tas.load', datatype=TAS_DATA,
                    version='1.0', action=load_action)
 
@@ -145,6 +163,7 @@ scale = scale_module(id='tas.scale', datatype=TAS_DATA,
 
 #All TripleAxis reductions below require that:
 #  'input' be a TripleAxis object (see data_abstraction.py)
+
 def detailed_balance_action(input):
     for tasinstrument in input:
         tasinstrument.detailed_balance()
@@ -154,6 +173,7 @@ def normalize_monitor_action(input, target_monitor):
     #Requires the target monitor value
     for tasinstrument in input:
         tasinstrument.normalize_monitor(target_monitor)
+    #result=input[0].get_plottable()
     return dict(output=input)
 
 def monitor_correction_action(input, instrument_name):
@@ -223,9 +243,18 @@ template = Template(name='test reduction',
                     wires=wires,
                     instrument=BT7.id,
                     )
+
+
 # the actual call to perform the reduction
-result = run_template(template, config)
-print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
-print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
-print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
+def TAS_RUN():
+    result = run_template(template, config)
+    print 'in TAS'
+    for key, value in result.iteritems():
+	for i in range(len(value['output'])):
+		if not type(value['output'][i])==type({}):
+        		value['output'][i] = value['output'][i].get_plottable()
+    return result
+#print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
+#print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
+#print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
 print "done"
