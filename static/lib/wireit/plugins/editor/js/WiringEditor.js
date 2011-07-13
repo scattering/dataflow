@@ -641,7 +641,10 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	* Instance Info
 	**/
 	
-	FATupdate: function() {
+	FATupdate: function(templateConfig) {
+		this.maxReduction = templateConfig.length;
+		this.templateConfig = templateConfig;
+		this.displayCurrentReduction();
 	
 	},
 	
@@ -661,9 +664,10 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		
 		
 	nextReductionInstance: function() {
-		this.reductionInstance += 1
-		YAHOO.util.Dom.get('reductionInstance').innerHTML = this.reductionInstance
-	
+		if (this.reductionInstance < this.maxReduction) {
+			this.reductionInstance += 1
+			YAHOO.util.Dom.get('reductionInstance').innerHTML = this.reductionInstance
+			}
 	},
 	
 	displayCurrentReduction: function() {

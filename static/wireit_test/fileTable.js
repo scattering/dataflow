@@ -97,6 +97,7 @@ backStore.insert(0,newFile)
 		gridList[i].getView().refresh()
 	}
 	generate_FileGroups()
+	editor.FATupdate(template_configs)
 };
 
 
@@ -151,14 +152,17 @@ url: '/files',
         }]
     });
 
-// insert 20 records into the store to play around with
-for (var i = 0; i < 50; i ++) {
-	fname = 'new_file' + i
-	var newFile = Ext.ModelManager.create({
-		filename: fname,
-		filetype: 'N',},
-'Data');
-		store.insert(0, newFile);
+// insert records into the store to play around with
+for (var j = 0; j < 3; j++) {
+	for (var i = 0; i < 20; i ++) {
+		fname = 'new_file' + i
+		var newFile = Ext.ModelManager.create({
+			filename: fname,
+			filetype: 'N',
+			group: j,},
+	'Data');
+			store.insert(0, newFile);
+	}
 }
 
 // combobox options for file type editing
@@ -432,7 +436,7 @@ function handleResult(identifier, result) {
 		for (var i in result.children) {
 			//console.log(send_to_Wireit[identifier])
 			if (!send_to_Wireit[identifier]) {
-				console.log("IN UNDEFINED")
+				//console.log("IN UNDEFINED")
 				send_to_Wireit[identifier] = [result.children[i].data.filename]
 				}
 			else {
@@ -451,20 +455,30 @@ function handleResult(identifier, result) {
 // selection
 function generate_FileGroups() {
 	groups_to_run = []
+	template_configs = {}
 	for (var k in storeList) {
-		groups_to_run.concat(storeList[k].getGroups())
+		for (var j in storeList[k].getGroups()){
+			groups_to_run = groups_to_run.concat(storeList[k].getGroups()[j].name)
+			}
+		}
+	groups_to_run = makeUnique(groups_to_run) // makes the array unique
+	index = groups_to_run.indexOf('') // removes the default group ' '
+	if (index != -1) {
+		groups_to_run.splice(groups_to_run.indexOf(''),1)
 		}
 	console.log(groups_to_run)
 	for (var i in groups_to_run) {
 		send_to_Wireit = {}
 		for (var j in storeList) {
-			console.log(groups_to_run[i],headerList[j])
+			//console.log(groups_to_run[i],headerList[j])
 			var result = storeList[j].getGroups(groups_to_run[i])
 			handleResult(headerList[j], result)
 			// pick out the files in store j that are
 			// in group i
+			template_configs[groups_to_run[i]] = send_to_Wireit
 			}
 		}
+		
     }
 
 function run_reduction() {
@@ -474,7 +488,7 @@ function run_reduction() {
 			for (var i in groups_to_run) {
 				send_to_Wireit = {}
 				for (var j in storeList) {
-					console.log(groups_to_run[i],headerList[j])
+					//console.log(groups_to_run[i],headerList[j])
 					var result = storeList[j].getGroups(groups_to_run[i])
 					handleResult(headerList[j], result)
 					// pick out the files in store j that are

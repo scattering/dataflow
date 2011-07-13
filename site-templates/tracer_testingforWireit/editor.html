@@ -118,6 +118,13 @@ div.Bubble div.body {
 <script type="text/javascript" src="../../static/lib/plotting/plotting_api.js"></script>
 <script type="text/javascript" src="../../static/lib/plotting/sansdata.js"></script>
 
+<!-- Prototype lib 
+<script type="text/javascript" src="../../static/lib/prototype.js"></script>
+-->
+
+<!-- Uniq Array -->
+<script type="text/javascript" src="../../static/lib/UniqArray.js"></script>
+
 <!-- YUI -->
 <script type="text/javascript" src="../../static/lib/yui/yahoo/yahoo.js"></script>
 <script type="text/javascript" src="../../static/lib/yui/yahoo/yahoo-debug.js"></script>
@@ -318,7 +325,8 @@ YAHOO.util.Event.onDOMReady( function() {
 		// editor
 		editor = new WireIt.WiringEditor(CHOSEN_LANG);
 			// initial setting: for paging through multiple instances of the same reduction template
-		editor.reductionInstance = 1; 
+		editor.reductionInstance = 1;
+		editor.maxReduction = 1; 
 		
 		// more initial settings
 		
@@ -426,7 +434,7 @@ Ext.onReady(function() {
                                 <h2>Instance Info</h2>
 
                                 <div>
-                                        <div style="padding: 10px;">
+                                        <div id ="instance-info" style="padding: 10px;">
                                         </div>
                                 </div>
                         </li>
