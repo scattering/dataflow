@@ -246,7 +246,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 
 		this.markSaved();
 
-	   this.alert("Saved !");
+	   this.alert("Saved !\n source code follows:\n" + JSON.stringify(this.tempSavedWiring));
 
 		// TODO: call a saveModuleSuccess callback...
 	 },
