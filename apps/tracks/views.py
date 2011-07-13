@@ -14,6 +14,7 @@ from ...dataflow.core import register_instrument
 #from ...dataflow.offspecular.instruments import ANDR
 #from ...dataflow.tas import instruments
 from ...dataflow.SANS import newinstruments as SANS_INS
+from ...dataflow.tas import instruments as TAS_INS
 
 import random
 
@@ -107,7 +108,8 @@ def saveWiring(request):
 def runReduction(request):
     print 'I am reducing'
 ####### SANS TESTING
-    result = SANS_INS.TESTING()
+    result = TAS_INS.TAS_RUN()
+    print "RESULT", result
     #print result
     #for i in range(6):
    #	name = 'checkingSANSresults' + str(i) + '.txt'

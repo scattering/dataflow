@@ -4,7 +4,7 @@ Triple Axis Spectrometer reduction and analysis modules
 import math, os, sys
 
 #Relative imports for use in the larger project
-'''
+
 from ...reduction.tripleaxis.data_abstraction import TripleAxis, filereader
 from ..calc import run_template
 from .. import wireit
@@ -45,7 +45,7 @@ from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_modu
 from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
 from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
 from dataflow.dataflow.modules.tas_load import load_module
-
+'''
 TAS_DATA = 'data1d.tas'
 
 # Reduction operations may refer to data from other objects, but may not
@@ -248,8 +248,11 @@ template = Template(name='test reduction',
 # the actual call to perform the reduction
 def TAS_RUN():
     result = run_template(template, config)
+    print 'in TAS'
     for key, value in result.iteritems():
-        value['output'] = [obj.get_plottable() for obj in value['output']]
+	for i in range(len(value['output'])):
+		if not type(value['output'][i])==type({}):
+        		value['output'][i] = value['output'][i].get_plottable()
     return result
 #print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
 #print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR

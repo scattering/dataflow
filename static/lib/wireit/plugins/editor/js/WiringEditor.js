@@ -642,7 +642,12 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	**/
 	
 	FATupdate: function(templateConfig) {
-		this.maxReduction = templateConfig.length;
+		console.log('in Editor', templateConfig)
+		setMax = 0;
+		for (i in templateConfig) {
+			setMax += 1
+			}
+		this.maxReduction = setMax;
 		this.templateConfig = templateConfig;
 		this.displayCurrentReduction();
 	
@@ -658,6 +663,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		if (this.reductionInstance>1) {
 			this.reductionInstance -= 1
 			YAHOO.util.Dom.get('reductionInstance').innerHTML = String(this.reductionInstance)
+			this.displayCurrentReduction()
 			}
 	
 	},
@@ -667,11 +673,18 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		if (this.reductionInstance < this.maxReduction) {
 			this.reductionInstance += 1
 			YAHOO.util.Dom.get('reductionInstance').innerHTML = this.reductionInstance
+			this.displayCurrentReduction()
 			}
 	},
 	
 	displayCurrentReduction: function() {
-	
+		//console.log('In DISPLAY')
+		HTML = '<dl class ="instance-info-display">'
+		for (var i in this.templateConfig[this.reductionInstance]) {
+			HTML += '<dt>' + i + "</dt><dd>" + this.templateConfig[this.reductionInstance][i] + '</dd>'
+			}
+		HTML += "</dl>";
+		YAHOO.util.Dom.get('instance-info').innerHTML = HTML
 	},
 
 

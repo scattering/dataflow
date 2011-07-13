@@ -741,6 +741,8 @@ class TripleAxis(object):
                         detector.measurement=detector.measurement*rescor
                 return
         def get_plottable(self):
+        	#if self.detectors.primary_detector.dx==None:
+			
                 plottable_data = {
                         'type': 'nd',
                         'title': 'Triple Axis Plot',
@@ -752,23 +754,23 @@ class TripleAxis(object):
                                 'data': {
                                         'h': {
                                                 'label': 'h',
-                                                'values': self.physical_motors.h.x,
-                                                'errors': self.physical_motors.h.dx,
+                                                'values': self.physical_motors.h.x.tolist(),
+                                                'errors': None,
                                                 },
                                         'k': {
                                                 'label': 'k',
-                                                'values': self.physical_motors.k.x,
-                                                'errors': self.physical_motors.k.dx,
+                                                'values': self.physical_motors.k.x.tolist(),
+                                                'errors': None,
                                                 },
                                         'l': {
                                                 'label': 'l',
-                                                'values': self.physical_motors.l.x,
-                                                'errors': self.physical_motors.l.dx,
+                                                'values': self.physical_motors.l.x.tolist(),
+                                                'errors': None,
                                                 },
                                         'primary_detector': {
                                                 'label': 'Primary Detector',
-                                                'values': self.detectors.primary_detector.x,
-                                                'errors': self.detectors.primary_detector.dx,
+                                                'values': self.detectors.primary_detector.x.tolist(),
+                                                'errors': None,
                                                 },
                                         },
                                 'color': 'Red',
