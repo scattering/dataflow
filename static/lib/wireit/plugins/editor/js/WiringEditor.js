@@ -246,7 +246,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 
 		this.markSaved();
 
-	   this.alert("Saved !");
+	   this.alert("Saved !\n source code follows:\n" + JSON.stringify(this.tempSavedWiring));
 
 		// TODO: call a saveModuleSuccess callback...
 	 },
@@ -462,8 +462,9 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 
 		// Check for autoload param and display the loadPanel otherwise
 		if(!this.checkAutoLoad()) { 
-    		this.loadPanel.show();
-		}	
+    			this.loadPanel.show();
+		}
+		
 	},
 
 	/**
@@ -567,6 +568,11 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 
 		  
 		  this.preventLayerChangedEvent = false;
+		  // removes existing FAT
+		  console.log('REPLACING FAT')
+		  while (YAHOO.util.Dom.get('FAT').hasChildNodes()) {
+    			YAHOO.util.Dom.get('FAT').removeChild(YAHOO.util.Dom.get('FAT').lastChild);
+			}
 		  // Call the File Association Table with appropriate headers
 		  makeFileTable(this.getFATHeaders())
 		  ///console.log(this.getFATHeaders())

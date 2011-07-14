@@ -10,6 +10,7 @@ import ROOT_URL
 urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views', 
 		('^hello/$', 'xhr_test'),
 		('^test/$','mytest'),
+		('^login/$', 'django.contrib.auth.views.login'),
 		('^listWirings/$', 'listWirings'),
 		
 		# Wiring editor display urls
