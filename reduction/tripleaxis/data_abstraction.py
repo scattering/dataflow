@@ -145,116 +145,116 @@ class Component(object):
         #def __iter__(self): pass # Not sure we need iter
 
         # Normal operations: may be of mixed type
-        def __add__(self, other):
-                if isinstance(other,uncertainty.Measurement):
-                        return uncertainty.Measurement(*err1d.add(self.x,self.variance,other.x,other.variance))
-                else:
-                        return uncertainty.Measurement(self.x+other, self.variance+0) # Force copy
-        def __sub__(self, other):
-                if isinstance(other,uncertainty.Measurement):
-                        return uncertainty.Measurement(*err1d.sub(self.x,self.variance,other.x,other.variance))
-                else:
-                        return uncertainty.Measurement(self.x-other, self.variance+0) # Force copy
-        def __mul__(self, other):
-                if isinstance(other,uncertainty.Measurement):
-                        if (not self.variance is None) and not (other.variance is None):
-                                return uncertainty.Measurement(*err1d.mul(self.x,self.variance,other.x,other.variance))
-                        else:
-                                return uncertainty.Measurement(self.x*other.x,None)
-                else:
-                        if (not self.variance is None) and not (other.variance is None):
-                                return uncertainty.Measurement(self.x*other, self.variance*other**2)
-                        else:
-                                return uncertainty.Measurement(self.x*other.x,None)
-        def __truediv__(self, other):
-                if isinstance(other,uncertainty.Measurement):
-                        if (not self.variance is None) and not (other.variance is None):
-                                return uncertainty.Measurement(*err1d.div(self.x,self.variance,other.x,other.variance))
-                        else:
-                                return uncertainty.Measurement(self.x/other.x,None)
-                else:
-                        if (not self.variance is None) and not (other.variance is None):
-                                return uncertainty.Measurement(self.x/other, self.variance/other**2)
-                        else:
-                                return uncertainty.Measurement(self.x/other, None)
+        #def __add__(self, other):
+                #if isinstance(other,uncertainty.Measurement):
+                        #return uncertainty.Measurement(*err1d.add(self.x,self.variance,other.x,other.variance))
+                #else:
+                        #return uncertainty.Measurement(self.x+other, self.variance+0) # Force copy
+        #def __sub__(self, other):
+                #if isinstance(other,uncertainty.Measurement):
+                        #return uncertainty.Measurement(*err1d.sub(self.x,self.variance,other.x,other.variance))
+                #else:
+                        #return uncertainty.Measurement(self.x-other, self.variance+0) # Force copy
+        #def __mul__(self, other):
+                #if isinstance(other,uncertainty.Measurement):
+                        #if (not self.variance is None) and not (other.variance is None):
+                                #return uncertainty.Measurement(*err1d.mul(self.x,self.variance,other.x,other.variance))
+                        #else:
+                                #return uncertainty.Measurement(self.x*other.x,None)
+                #else:
+                        #if (not self.variance is None) and not (other.variance is None):
+                                #return uncertainty.Measurement(self.x*other, self.variance*other**2)
+                        #else:
+                                #return uncertainty.Measurement(self.x*other.x,None)
+        #def __truediv__(self, other):
+                #if isinstance(other,uncertainty.Measurement):
+                        #if (not self.variance is None) and not (other.variance is None):
+                                #return uncertainty.Measurement(*err1d.div(self.x,self.variance,other.x,other.variance))
+                        #else:
+                                #return uncertainty.Measurement(self.x/other.x,None)
+                #else:
+                        #if (not self.variance is None) and not (other.variance is None):
+                                #return uncertainty.Measurement(self.x/other, self.variance/other**2)
+                        #else:
+                                #return uncertainty.Measurement(self.x/other, None)
                                 
-        def __pow__(self, other):
-                if isinstance(other,uncertainty.Measurement):
-                        # Haven't calcuated variance in (a+/-da) ** (b+/-db)
-                        return NotImplemented
-                else:
-                        if (not self.variance is None) and not (other.variance is None):
-                                return uncertainty.Measurement(*err1d.pow(self.x,self.variance,other))
-                        else:
-                                return uncertainty.Measurement(self.x**other,None)
+        #def __pow__(self, other):
+                #if isinstance(other,uncertainty.Measurement):
+                        ## Haven't calcuated variance in (a+/-da) ** (b+/-db)
+                        #return NotImplemented
+                #else:
+                        #if (not self.variance is None) and not (other.variance is None):
+                                #return uncertainty.Measurement(*err1d.pow(self.x,self.variance,other))
+                        #else:
+                                #return uncertainty.Measurement(self.x**other,None)
 
-        # Reverse operations
-        def __radd__(self, other):
-                return uncertainty.Measurement(self.x+other, self.variance+0) # Force copy
-        def __rsub__(self, other):
-                return uncertainty.Measurement(other-self.x, self.variance+0)
-        def __rmul__(self, other):
-                if (not self.variance is None) and not (other.variance is None):
-                        return uncertainty.Measurement(self.x*other, self.variance*other**2)
-                else:
-                        return uncertainty.Measurement(self.x*other, None)
-        def __rtruediv__(self, other):
-                x,variance = err1d.pow(self.x,self.variance,-1)
-                return uncertainty.Measurement(x*other,variance*other**2)
-        def __rpow__(self, other): return NotImplemented
+        ## Reverse operations
+        #def __radd__(self, other):
+                #return uncertainty.Measurement(self.x+other, self.variance+0) # Force copy
+        #def __rsub__(self, other):
+                #return uncertainty.Measurement(other-self.x, self.variance+0)
+        #def __rmul__(self, other):
+                #if (not self.variance is None) and not (other.variance is None):
+                        #return uncertainty.Measurement(self.x*other, self.variance*other**2)
+                #else:
+                        #return uncertainty.Measurement(self.x*other, None)
+        #def __rtruediv__(self, other):
+                #x,variance = err1d.pow(self.x,self.variance,-1)
+                #return uncertainty.Measurement(x*other,variance*other**2)
+        #def __rpow__(self, other): return NotImplemented
 
-        # In-place operations: may be of mixed type
-        def __iadd__(self, other):
-                if isinstance(other,uncertainty.Measurement):
-                        self.x,self.variance \
-                            = err1d.add_inplace(self.x,self.variance,other.x,other.variance)
-                else:
-                        self.x+=other
-                return self
-        def __isub__(self, other):
-                if isinstance(other,uncertainty.Measurement):
-                        self.x,self.variance \
-                            = err1d.sub_inplace(self.x,self.variance,other.x,other.variance)
-                else:
-                        self.x-=other
-                return self
-        def __imul__(self, other):
-                if isinstance(other,uncertainty.Measurement):
-                        self.x, self.variance \
-                            = err1d.mul_inplace(self.x,self.variance,other.x,other.variance)
-                else:
-                        self.x *= other
-                        self.variance *= other**2
-                return self
-        def __itruediv__(self, other):
-                if isinstance(other,uncertainty.Measurement):
-                        self.x,self.variance \
-                            = err1d.div_inplace(self.x,self.variance,other.x,other.variance)
-                else:
-                        self.x /= other
-                        self.variance /= other**2
-                return self
-        def __ipow__(self, other):
-                if isinstance(other,uncertainty.Measurement):
-                        # Haven't calcuated variance in (a+/-da) ** (b+/-db)
-                        return NotImplemented
-                else:
-                        self.x,self.variance = err1d.pow_inplace(self.x, self.variance, other)
-                return self
+        ## In-place operations: may be of mixed type
+        #def __iadd__(self, other):
+                #if isinstance(other,uncertainty.Measurement):
+                        #self.x,self.variance \
+                            #= err1d.add_inplace(self.x,self.variance,other.x,other.variance)
+                #else:
+                        #self.x+=other
+                #return self
+        #def __isub__(self, other):
+                #if isinstance(other,uncertainty.Measurement):
+                        #self.x,self.variance \
+                            #= err1d.sub_inplace(self.x,self.variance,other.x,other.variance)
+                #else:
+                        #self.x-=other
+                #return self
+        #def __imul__(self, other):
+                #if isinstance(other,uncertainty.Measurement):
+                        #self.x, self.variance \
+                            #= err1d.mul_inplace(self.x,self.variance,other.x,other.variance)
+                #else:
+                        #self.x *= other
+                        #self.variance *= other**2
+                #return self
+        #def __itruediv__(self, other):
+                #if isinstance(other,uncertainty.Measurement):
+                        #self.x,self.variance \
+                            #= err1d.div_inplace(self.x,self.variance,other.x,other.variance)
+                #else:
+                        #self.x /= other
+                        #self.variance /= other**2
+                #return self
+        #def __ipow__(self, other):
+                #if isinstance(other,uncertainty.Measurement):
+                        ## Haven't calcuated variance in (a+/-da) ** (b+/-db)
+                        #return NotImplemented
+                #else:
+                        #self.x,self.variance = err1d.pow_inplace(self.x, self.variance, other)
+                #return self
 
-        # Use true division instead of integer division
-        def __div__(self, other): return self.__truediv__(other)
-        def __rdiv__(self, other): return self.__rtruediv__(other)
-        def __idiv__(self, other): return self.__itruediv__(other)
+        ## Use true division instead of integer division
+        #def __div__(self, other): return self.__truediv__(other)
+        #def __rdiv__(self, other): return self.__rtruediv__(other)
+        #def __idiv__(self, other): return self.__itruediv__(other)
 
 
-        # Unary ops
-        def __neg__(self):
-                return uncertainty.Measurement(-self.x,self.variance)
-        def __pos__(self):
-                return self
-        def __abs__(self):
-                return uncertainty.Measurement(np.abs(self.x),self.variance)
+        ## Unary ops
+        #def __neg__(self):
+                #return uncertainty.Measurement(-self.x,self.variance)
+        #def __pos__(self):
+                #return self
+        #def __abs__(self):
+                #return uncertainty.Measurement(np.abs(self.x),self.variance)
 
         def __str__(self):
                 #return str(self.x)+" +/- "+str(np.sqrt(self.variance))
@@ -703,9 +703,9 @@ class TripleAxis(object):
                 # Turns out iterating through self.detectors makes detector a copy,
                 # and doesn't actually modify self.detectors -> could be the 'yield'
                 # statement producing a generator...
-                mon0=self.time.monitor 
+                mon0=self.time.monitor.measurement 
                 for detector in self.detectors:
-                        detector=detector*(mon0/monitor)
+                        detector.measurement=detector.measurement*(mon0/monitor)
                         print 'hi'
                         #for i in range(0,len(detector.measurement.x)):
                         #        detector.measurement[i]=detector.measurement[i]*mon0[i]/monitor
@@ -721,7 +721,7 @@ class TripleAxis(object):
                         M[i]=float(M[i])
                 #TODO - Throw error if there's an improper instrument_name given
                 for detector in self.detectors:
-                        Eii=self.physical_motors.ei
+                        Eii=self.physical_motors.ei.measurement
                         detector.measurement=detector.measurement*(M[0] + M[1]*Eii + M[2]*Eii**2 + M[3]*Eii**3 + M[4]*Eii**4)
                 return
                         

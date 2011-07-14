@@ -12,8 +12,8 @@ def correct_background_module(id=None, datatype=None, action=None,
     icon = {
         'URI': config.IMAGES + "correct_background.png",
         'terminals': {
-            'input': (0, 10, -1, 0),
-            'output': (20, 10, 1, 0),
+            'input': (16, -16, -1, 0),
+            'output': (16, 48, 1, 0),
         }
     }
     
