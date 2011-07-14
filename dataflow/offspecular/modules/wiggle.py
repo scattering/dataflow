@@ -2,8 +2,8 @@
 Wiggle correction
 """
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
 
 def wiggle_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
@@ -22,8 +22,8 @@ def wiggle_module(id=None, datatype=None, action=None,
              datatype=datatype,
              use='in',
              description='data',
-             required=False,
-             multiple=True,
+             required=True,
+             multiple=False,
              ),
         dict(id='output',
              datatype=datatype,

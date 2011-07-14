@@ -9,7 +9,6 @@ from numpy import ndarray, array, empty, fromstring, arange
 import datetime
 import types, copy
 
-
 def axis(name=None, cols=None, values=None, units=None):
   """Convenience function for generating axis descriptions when defining MetaArrays
   
@@ -137,7 +136,6 @@ class MetaArray(ndarray):
       subarr = subarr.view(subtype)
       subarr.shape = meta['shape']
       subarr._info = meta['info']
-
     # Finally, we must return the newly created object:
     return subarr
 
@@ -148,8 +146,8 @@ class MetaArray(ndarray):
     self._infoOwned = False  ## Do not make changes to _info until it is copied at least once
       
     # We could have checked first whether self._info was already defined:
-    #if not hasattr(self, 'info'):
-    #    self._info = getattr(obj, 'info', {})
+#    if not hasattr(self, 'info'):
+#        self._info = getattr(obj, 'info', {})
     
   
   def __getitem__(self, ind):
@@ -235,7 +233,6 @@ class MetaArray(ndarray):
   def infoCopy(self):
     """Return a deep copy of the axis meta info for this object"""
     return copy.deepcopy(self._info)
-  
   
   def write(self, fileName):
     """Write this object to a file. The object can be restored by calling MetaArray(file=fileName)"""
@@ -334,10 +331,10 @@ class MetaArray(ndarray):
     else:
       ax = self._info[i]
     return ax
-  
-  def __repr__(self):
-    return "%s\n  axis info: %s" % (ndarray.__repr__(self), str(self._info))
+    
+    def __repr__(self):
+        return "%s\n    axis info: %s" % (ndarray.__repr__(self), str(self._info))
 
-  def __str__(self):
-    return self.__repr__()
+    def __str__(self):
+        return self.__repr__()
 
