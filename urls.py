@@ -41,6 +41,7 @@ urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views',
 urlpatterns+=patterns('',
 		      url(r'^admin/', include(admin.site.urls)),
 		      (r'', include('registration.backends.default.urls')),
+		      (r'^profiles/', include('profiles.urls')),
 		      (r'^$', ROOT_URL.REPO_ROOT + '.apps.tracks.views.home'),
 		      
 		      
