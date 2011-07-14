@@ -23,7 +23,7 @@ if __name__=="__main__":
 		  'libapache2-mod-wsgi',
 		  'postgresql',
 		  'pgadmin3',
-		  'python-paramiko',
+		  'mercurial',
                   ]
     easy_commands=['simplejson','stompservice','orbited', '-U Django', '-U psycopg2', 'South']
     
