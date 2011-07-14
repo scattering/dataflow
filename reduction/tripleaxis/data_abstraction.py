@@ -788,7 +788,7 @@ def translate(bt7,dataset):
         translate_monochromator(bt7,dataset)
         translate_analyzer(bt7,dataset)
         translate_collimator(bt7,dataset)
-        translate_primary_motors(bt7,dataset)
+        translate_primary_motors(bt7,dataset) #primary motors must be done before physical motors for Q calc.
         translate_physical_motors(bt7,dataset)
         translate_filters(bt7,dataset)
         translate_apertures(bt7,dataset)
@@ -990,6 +990,12 @@ def translate_physical_motors(bt7,dataset):
                 bt7.physical_motors.ef.measurement.variance=None
                 bt7.physical_motors.ei.measurement.x=bt7.physical_motors.ef.measurement.x+bt7.physical_motors.e.measurement.x  #punt for now, later should figure out what to do if variance is None
         
+	Ei = bt7.physical_motors.ei.measurement
+	Ef = bt7.physical_motors.ef.measurement
+	A4 = bt7.primary_motors.sample_two_theta.measurement.x
+        Qsquared = (Ei**2 + Ef**2 - 2*Ei*Ef*np.cos(A4/2))/2.072
+	Q = np.sqrt(Qsquared)
+	bt7.physical_motors.q.measurement=Q
         #translate_dict['h']='h'
         #translate_dict['k']='k'
         #translate_dict['l']='l'
