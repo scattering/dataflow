@@ -3,7 +3,8 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
-from apps.tracks.forms import languageSelectForm 
+from apps.tracks.forms import languageSelectForm
+from django.contrib.auth.decorators import login_required 
 
 from ...apps.fileview import testftp
 
