@@ -9,10 +9,8 @@ from inspect import getsource
 from .core import lookup_module, lookup_datatype
 import hashlib, redis
 
-# temp
-from ..reduction.offspecular.FilterableMetaArray import FilterableMetaArray
-
 server = redis.Redis("localhost")
+
 def run_template(template, config):
     """
     Evaluate the template using the configured values.
@@ -30,51 +28,57 @@ def run_template(template, config):
     for nodenum, wires in template:
         # Find the modules
         node = template.modules[nodenum]
-        module_id = node['module'] #template.modules[node]
+        module_id = node['module'] # template.modules[node]
         module = lookup_module(module_id)
         inputs = _map_inputs(module, wires)
+        
         # substitute values for inputs
         kwargs = dict((k, _lookup_results(all_results, v)) 
                       for k, v in inputs.items())
         
         # Include configuration information
-        kwargs.update(node.get('config', {}))
-        kwargs.update(config[nodenum])
+        configuration = {}
+        configuration.update(node.get('config', {}))
+        configuration.update(config[nodenum])
+        kwargs.update(configuration)
         
-        fp = finger_print(module, kwargs.copy(), nodenum, inputs.get('input', []), fingerprints)
+        # Fingerprinting
+        fp = finger_print(module, configuration, nodenum, inputs, fingerprints) # terminals included
         fingerprints[nodenum] = fp
         fp = name_fingerprint(fp)
         print fp
         
         # Overwrite even if there was already the same reduction?
         if server.exists(fp):# or module.name == 'Save': 
-            datatype = None
+            result = {}
             for terminal in module.terminals:
-                if terminal['id'] == 'output':
-                    datatype = terminal['datatype']
-                    break
-            cls = lookup_datatype(datatype).cls
-            result = dict(output=[cls.loads(str) for str in server.lrange(fp, 0, -1)])
-            #result = dict(output=[FilterableMetaArray.loads(str) for str in server.lrange(fp, 0, -1)])
+                if terminal['use'] == 'out':
+                    cls = lookup_datatype(terminal['datatype']).cls
+                    terminal_fp = name_terminal(fp, terminal['id'])
+                    result[terminal['id']] = [cls.loads(str) for str in server.lrange(terminal_fp, 0, -1)]
         else:
             result = module.action(**kwargs)
-            for arr in result.get('output', []):
-                server.rpush(fp, arr.dumps())
+            for terminal_id, arr in result.items():
+                terminal_fp = name_terminal(fp, terminal_id)
+                for data in arr:
+                    server.rpush(terminal_fp, data.dumps())
+            server.set(fp, fp) # used for checking if the calculation exists; could wrap this whole thing with loop of output terminals
         all_results[nodenum] = result
     
     # retrieve plottable results
-    ans = []
+    ans = {}
     for nodenum, result in all_results.items():
         fp = name_plottable(fingerprints[nodenum])
         plottable = {}
-        if 'output' in result:
-            if server.exists(fp):
-                plottable = dict(output=server.lrange(fp, 0, -1))
+        for terminal_id, arr in result.items():
+            terminal_fp = name_terminal(fp, terminal_id)
+            if server.exists(terminal_fp):
+                plottable[terminal_id] = server.lrange(terminal_fp, 0, -1)
             else:
-                plottable = convert_to_plottable(result['output'])
-                for str in plottable['output']:
-                    server.rpush(fp, str)
-        ans.append(plottable)
+                plottable[terminal_id] = convert_to_plottable(arr)
+                for str in plottable[terminal_id]:
+                    server.rpush(terminal_fp, str)
+        ans[nodenum] = plottable
     return ans
 
 
@@ -126,33 +130,36 @@ def _map_inputs(module, wires):
             kwargs[terminal['id']] = collect[0]
     return kwargs
 
-def finger_print(module, args, nodenum, input_arr, fingerprints):
+def finger_print(module, args, nodenum, inputs, fingerprints):
+    """
+    Create a unique sha1 hash for a module based on its attributes and inputs.
+    """
     d = module.__dict__.copy() # get all attributes
     # need access to Combine() and CoordinateOffset() source (e.g.)
     d['action'] = getsource(d['action']) # because it is a python method object (must convert it)
     fp = str(d) # source code (not 100% due to helper methods)
-    # if load module or not is needed
-    #fp += "\nLoad module" if len(module.terminals) == 1 and module.terminals[0]['id'] != 'input' else "Not a load module"
-    if 'input' in args:
-        del args['input'] # holds the MetaArray (don't want all that data)
-    fp += str(args) # shortened arguments
+    fp += str(args) # all arguments for the given module
     fp += str(nodenum) # node number
-    if len(input_arr) > 0: # bundle correction
-        if type(input_arr[0]) == type([]):
-            fp += str([fingerprints[input[0]] for input in input_arr if 'output' == input[1]])
-        elif type(input_arr[0]) == type(0) and input_arr[1] == 'output':
-            fp += str([fingerprints[input_arr[0]]]) # might as well keep the list format
+    for terminal_id, input_arr in inputs.items():
+        fp += terminal_id
+        if input_arr != None and isinstance(input_arr, list) and len(input_arr) > 0: # default value checking for non-required terminals
+            if isinstance(input_arr[0], list): # Multiple = True; bundle
+                fp += str([fingerprints[input[0]] for input in input_arr])
+            elif isinstance(input_arr[0], int):  # Multiple = False; single input
+                fp += str(fingerprints[input_arr[0]])
+            else:
+                raise TypeError("Input array should either be a bundle of inputs or just one input")
         else:
-            raise TypeError("Input array should either be a bundle of modules or just one module")
-    else:
-        fp += str(input_arr) # '[]'
+            fp += str(input_arr) # whatever the default value was
     fp = hashlib.sha1(fp).hexdigest()
     return fp
 
 def convert_to_plottable(result):
     print "Starting new converter"
-    return dict(output=[data.get_plottable() for data in result])
+    return [data.get_plottable() for data in result]
 def name_fingerprint(fp):
     return "Fingerprint:" + fp
 def name_plottable(fp):
     return "Plottable:" + fp
+def name_terminal(fp, terminal_id):
+    return fp + ":" + terminal_id

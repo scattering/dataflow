@@ -26,7 +26,7 @@ OSPEC_DATA = 'data2d.ospec'
 data2d = Data(OSPEC_DATA, FilterableMetaArray)
 
 # Load module
-def load_action(files=None, intent=None, position=None):
+def load_action(files=None, intent=None):
     print "loading", files
     result = [_load_data(f) for f in files] # not bundles
     return dict(output=result)
@@ -115,11 +115,11 @@ if __name__ == '__main__':
              config={'files': files, 'intent': 'signal'}),
         dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
         dict(module="ospec.combine", position=(150, 100), config={}),
-        dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':1.2}}),
+        dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':0}}),
         dict(module="ospec.wiggle", position=(350, 200), config={}),
         dict(module="ospec.twotheta", position=(450, 250), config={}),
         dict(module="ospec.qxqz", position=(550, 300), config={}),
-        ]
+    ]
     wires = [
         dict(source=[0, 'output'], target=[2, 'input']),
         dict(source=[2, 'output'], target=[3, 'input']),
@@ -127,7 +127,7 @@ if __name__ == '__main__':
         dict(source=[4, 'output'], target=[5, 'input']),
         dict(source=[5, 'output'], target=[6, 'input']),
         dict(source=[6, 'output'], target=[1, 'input']),
-        ]
+    ]
     config = [d['config'] for d in modules]
     template = Template(name='test ospec',
                         description='example ospec diagram',
@@ -136,11 +136,12 @@ if __name__ == '__main__':
                         instrument=ANDR.id,
                         )
     result = run_template(template, config)
-    print "Starting again. This time should be A LOT quicker."
+    print "Starting again. This time should be A LOT quicker (if the server was empty at runtime)."
     result2 = run_template(template, config)
-    print "WRITING TO FILE"
-    for index, plottable in enumerate(result):
-        with open('new_data' + str(index) + '.txt', 'w') as f:
-            for format in plottable.get('output', []):
-                f.write(format + "\n")
-    print "DONE"
+    print "Writing to files"
+    for nodenum, plottable in result.items():
+        for terminal_id, plot in plottable.items():
+            with open(terminal_id + "_" + str(nodenum) + ".txt", "w") as f:
+                for format in plot:
+                    f.write(format + "\n")
+    print "Done"
