@@ -1,17 +1,14 @@
 """
 Core class definitions
 """
-#import os, sys
-#dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-#sys.path.append(dir)
-#from dataflow import config
-#from dataflow.deps import processing_order
 from . import config
 from .deps import processing_order
 
 from collections import deque
+import simplejson
 
 _registry = {}
+_registry_data = {}
 def register_instrument(instrument):
     """
 Add a new instrument to the server.
@@ -19,19 +16,26 @@ Add a new instrument to the server.
     config.INSTRUMENTS.append(instrument.id)
     for m in instrument.modules:
         register_module(m)
+    for d in instrument.datatypes:
+        register_datatype(d)
 def register_module(module):
     """
 Register a new calculation module.
 """
     if module.id in _registry and module != _registry[module.id]:
-        raise ValueError("Module already registered")
+        raise TypeError("Module already registered")
     _registry[module.id] = module
 def lookup_module(id):
     """
 Lookup a module in the registry.
 """
     return _registry[id]
-
+def register_datatype(datatype):
+    if datatype.id in _registry_data and datatype != _registry_data[datatype.id]:
+        raise TypeError("Datatype already registered")
+    _registry_data[datatype.id] = datatype
+def lookup_datatype(id):
+    return _registry_data[id]
 
 class Module(object):
     """
@@ -265,31 +269,6 @@ retrieved for a particular instrument/experiment.
         for m in self.modules:
             if m.name == name: return m.id
         raise KeyError(name + ' does not exist in instrument ' + self.name)
-
-class Datatype(object):
-    """
-A datatype
-
-Attributes
-----------
-
-id : string
-
-simple name for the data type
-
-name : string
-
-display name for the data type
-
-plot : string
-
-javascript code to set up a plot of the data, or empty if
-data is not plottable
-"""
-    def __init__(self, id, name=None, plot=None):
-        self.id = id
-        self.name = name if name is not None else id.capitalize()
-        self.plot = plot
         
 class Data(object):
     """
@@ -327,18 +306,32 @@ inputs : { <input terminal name> : [(<hist iindex>, <output terminal>), ...] }
 
 config : { <field name> : value, ... }
 dataid : string
-
 """
+    def __new__(subtype, id, cls):
+        obj = object.__new__(subtype)
+        obj.id = id
+        obj.cls = cls
+        return obj
     
     def __getstate__(self):
         return "1.0", __dict__
+    
     def __setstate__(self, state):
         version, state = state
         self.__dict__ = state
+        
+    def get_plottable(self):
+        return dict(output=simplejson.dumps({}))
+    
+    def dumps(self):
+        return ""
+    
+    @classmethod
+    def loads(cls, str):
+        return Data()
 
 
 # ============= Parent traversal =============
-
 class Node(object):
     """
 Base node
