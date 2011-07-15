@@ -25,6 +25,12 @@ urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views',
 		# File loader display urls (testing, 7/6)
 		('^loadFiles/$', 'displayFileLoad'),
 		('^loadFiles/getNCNRdirs/', 'getNCNRdirectories'),
+		
+		# user projects/experiments/instruments/files interactions
+		('^myProjects/$', 'myProjects'),
+		('^myProjects/editProject/(?P<project_id>\d+)/$', 'editProject'),
+		('^myProjects/editProject/\d+/editExperiment/(?P<experiment_id>\d+)', 'editExperiment'),
+		('^editProject/editExperiment/$', 'editExperiment'),
 	
 		
     # Examples:
@@ -42,7 +48,7 @@ urlpatterns+=patterns('',
 		      url(r'^admin/', include(admin.site.urls)),
 		      (r'', include('registration.backends.default.urls')),
 		      (r'^profiles/', include('profiles.urls')),
-		      (r'^$', ROOT_URL.REPO_ROOT + '.apps.tracks.views.home'),
+		      (r'', ROOT_URL.REPO_ROOT + '.apps.tracks.views.home'),
 		      
 		      
 		      )

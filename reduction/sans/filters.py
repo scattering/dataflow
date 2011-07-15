@@ -14,6 +14,12 @@ import json
 from draw_annulus_aa import annular_mask_antialiased
 import datetime as date
 import time
+#from numpy import ndarray, amin, amax, alen, array, fromstring
+import simplejson, datetime
+from dataflow.core import Data
+from cStringIO import StringIO
+import pickle
+
 #I will have a general philosophy that filters do not have side effects. That is,
 #they do not change the state of their inputs. So, we will always work on copies
 #internally
@@ -76,16 +82,45 @@ class SansData(object):
             return SansData(Measurement(*err1d.mul(self.data.x,self.data.variance,other.data.x,other.data.variance)).x,deepcopy(self.metadata),q=copy(self.qx),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
         else:
             return SansData(data = self.data.__mul__(other).x,metadata=deepcopy(self.metadata),q=copy(self.qx),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+        
     #def __str__(self):
         #return self.data.x.__str__()
     #def __repr__(self):
         #return self.__str__()
-        
+    def get_plottable(self): 
+        data = self.data.x.tolist()
+        plottable_data = {
+            'type': '2d',
+            'z':  data,
+            'title': '2D Sans Data',
+            'dims': {
+                'xmax': 128,
+                'xmin': 0.0, 
+                'ymin': 0.0, 
+                'ymax': 128,
+                'xdim': 128,
+                'ydim': 128,
+                },
+            'xlabel': 'X',
+            'ylabel': 'Y',
+            'zlabel': 'Intensity (I)',
+            };
+        out = simplejson.dumps(plottable_data,sort_keys=True, indent=2)
+        return out
+    
+    def dumps(self):
+        return pickle.dumps(self)
+    @classmethod
+    def loads(cls, str): 
+        return pickle.loads(str)
+class Transmission(object,):
+    def __init__(self,Temp = 0, Tsam = 0):
+        self.Temp = Temp
+        self.Tsam = Tsam
 def read_sample(myfilestr="MAY06001.SA3_CM_D545"):
     """Reads in a raw SANS datafile and returns a SansData
 """
     detdata,meta=data.readNCNRData(myfilestr) #note that it should be None for the default
-
     return SansData(data = detdata, metadata = meta)
 
 def read_div(myfilestr="test.div"):
@@ -98,9 +133,9 @@ Given a SansData object, normalize the data to the provided monitor
 """
     
     monitor=sansdata.metadata['run.moncnt']
-    result=sansdata.data*mon0/monitor
+    result=sansdata.data.x*mon0/monitor
     res=SansData()
-    res.data=result
+    res.data.x=result
     res.metadata=deepcopy(sansdata.metadata)
     #added res.q
     res.q=copy(sansdata.q)
@@ -120,6 +155,7 @@ correct for the fact that the detector is flat and the eswald sphere is curved.
     y0=sansdata.metadata['det.beamy'] #should be close to 64
     wavelength=sansdata.metadata['resolution.lmda']
     shape=sansdata.data.x.shape
+    print shape
 # theta=np.empty(shape,'Float64')
 # q=np.empty(shape,'Float64')
     qx=np.empty(shape,'Float64')
@@ -145,14 +181,14 @@ correct for the fact that the detector is flat and the eswald sphere is curved.
     theta=np.arctan2(r,L2*100)/2 #remember to convert L2 to cm from meters
  
     
-    result=sansdata.data*(np.cos(theta)**3)
+    result=sansdata.data.x*(np.cos(theta)**3)
     res=SansData()
-    res.data=result
+    res.data.x=result
     res.metadata=deepcopy(sansdata.metadata)
     #adding res.q
-    res.q = copy(sansdata.q)
-    res.qx=copy(sansdata.qx)
-    res.qy=copy(sansdata.qy)
+    #res.q=copy(sansdata.q)
+    #res.qx=copy(sansdata.qx)
+    #res.qy=copy(sansdata.qy)
     res.theta=theta
     return res
 ##Theta needs to be set, since now the q conversion is done at the end
@@ -179,9 +215,8 @@ Given a SansData object, corrects for the efficiency of the detection process
 """
     L2=sansdata.metadata['det.dis']
     lambd = sansdata.metadata["resolution.lmda"]
-    
     shape=sansdata.data.x.shape
-    (x0,y0) = np.shape(sansdata.data)
+    (x0,y0) = np.shape(sansdata.data.x)
     x,y = np.indices(shape)
     X = PIXEL_SIZE_X_CM*(x-x0/2)
     Y = PIXEL_SIZE_Y_CM*(y-y0/2)
@@ -194,9 +229,11 @@ Given a SansData object, corrects for the efficiency of the detection process
     ff = np.exp(-stAl/np.cos(theta))*(1-np.exp(-stHe/np.cos(theta))) / ( np.exp(-stAl)*(1-np.exp(-stHe)) )
 
     res=SansData()
-    res.data=sansdata.data/ff
+    res.data.x=sansdata.data.x/ff
+    #if not sansdata.data.variance==None:
+            #res.data.variance=sansdata.data.variance/ff
+
     res.metadata=deepcopy(sansdata.metadata)
-    #added res.q
     res.q = copy(sansdata.q)
     res.qx=copy(sansdata.qx)
     res.qy=copy(sansdata.qy)
@@ -260,10 +297,10 @@ blocked beam.
 
 def correct_dead_time(sansdata,deadtime=3.4e-6):
     
-    dscale = 1/(1-deadtime*(np.sum(sansdata.data)/sansdata.metadata["run.rtime"]))
+    dscale = 1/(1-deadtime*(np.sum(sansdata.data.x)/sansdata.metadata["run.rtime"]))
     
     result = SansData()
-    result.data = sansdata.data*dscale
+    result.data.x = sansdata.data.x*dscale
     result.metadata=deepcopy(sansdata.metadata)
     result.q = copy(sansdata.q)
     result.qx = copy(sansdata.qx)
@@ -291,15 +328,15 @@ Coords are taken with reference to bottom left of the image.
 """
     I_in_beam=0.0
     I_empty_beam=0.0
-    (xmax,ymax) = np.shape(in_beam.data)
+    (xmax,ymax) = np.shape(in_beam.data.x)
     print xmax,ymax
     #Vectorize this loop, it's quick, but could be quicker
     #test against this simple minded implementation
     print ymax-coords_bottom_left[1],ymax-coords_upper_right[1]
     for x in range(coords_bottom_left[0],coords_upper_right[0]+1):
         for y in range(ymax-coords_upper_right[1],ymax-coords_bottom_left[1]+1):
-            I_in_beam=I_in_beam+in_beam.data[x,y]
-            I_empty_beam=I_empty_beam+empty_beam.data[x,y]
+            I_in_beam=I_in_beam+in_beam.data.x[x,y]
+            I_empty_beam=I_empty_beam+empty_beam.data.x[x,y]
     result=I_in_beam/I_empty_beam
     return result
 
@@ -475,6 +512,32 @@ def annular_av(sansdata):
     'color': 'Red',
     'style': 'line',
     };
+    
+    plottable_data = {
+        'type': 'nd',
+        'title': '1D Sans-Data',
+        'clear_existing': 1==3,
+        'orderx': [{'key': 'Q', 'label': 'Q'}, {'key': 'h', 'label': 'h'}, {'key': 'k', 'label': 'k'} ],
+        'ordery': [{'key': 'I', 'label': 'Intensity'}, {'key': 'SD', 'label': 'Single Detector'}],
+        'series': [
+            {
+                'label': '1D Data',
+                'data': {
+                    'Q': {
+                        'values': Q,
+                        'errors': [1, 2, 3, 4],
+                        },
+                    'I': {
+                        'values': I,
+                        'errors': [1, 2, 3, 4],
+                        },
+                    },
+                'color': 'Red',
+                'style': 'line',
+                },
+        ]
+        };
+    
     #plottable_1D = json.dumps(plottable_1D)
     #plt.plot(Q,I,'ro')
     #plt.title('1D')
@@ -723,6 +786,7 @@ def chain_corrections():
     
     
     AVG = annular_av(ABSQ)
+    
     print AVG
     
 

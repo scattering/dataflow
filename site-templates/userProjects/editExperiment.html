@@ -1,16 +1,20 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html lang="en">
 <head>
-    <title>Language Seletion for Wiring Editor</title>
+    <title>Edit Experiment</title>
 </head>
 <body>
-    <h2>Please select an instrument. </h2>
+    <div id="content-1" style="float:left;">
+    <h2>EXPERIMENT </h2>
     <form action="." method="POST">
     {% csrf_token %}
         <table>
             {{ form.as_table }}
         </table>
-        <p><input type="submit" value="Submit"></p>
+        <p><input type="submit" value="Save changes"></p>
     </form>
+    </div>
+
 </body>
+
 </html>

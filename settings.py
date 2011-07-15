@@ -18,16 +18,29 @@ MANAGERS = ADMINS
 
 AUTH_PROFILE_MODULE = 'tracks.Userprofile'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'firstdb',                      # Or path to database file if using sqlite3.
-        'USER': 'postgres',                      # Not used with sqlite3.
-        'PASSWORD': 'bob',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-    }
-}
+if 0:
+	DATABASES = {
+	    'default': {
+		'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+		'NAME': 'firstdb',                      # Or path to database file if using sqlite3.
+		'USER': 'postgres',                      # Not used with sqlite3.
+		'PASSWORD': 'bob',                  # Not used with sqlite3.
+		'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+		'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+	    }
+	}
+	
+if 1:
+	DATABASES = {
+	    'default': {
+		'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+		'NAME': r'/tmp/testdb6',                      # Or path to database file if using sqlite3.
+		'USER': '',                      # Not used with sqlite3.
+		'PASSWORD': '',                  # Not used with sqlite3.
+		'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+		'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+	    }
+	}
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -176,5 +189,5 @@ LOGGING = {
 ACCOUNT_ACTIVATION_DAYS = 2
 EMAIL_HOST = 'localhost'
 DEFAULT_FROM_EMAIL = 'webmaster@localhost'
-LOGIN_REDIRECT_URL = 'editor/langSelect/'
+LOGIN_REDIRECT_URL = '../myProjects/'
 
