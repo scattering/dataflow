@@ -16,6 +16,7 @@ def combine_module(id=None, datatype=None, action=None,
         'URI': config.IMAGES + 'sum.png',
         'terminals': {
             'input': (-15, 1, -1, 0),
+            'grid': (-10, 1, -1, 0),
             'output': (15, 1, 1, 0),
         }
     }

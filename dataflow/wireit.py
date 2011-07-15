@@ -192,19 +192,18 @@ def _emit_module_position(module):
     else:
         xtype = 'WireIt.Container'
     position = module['position']
-#    return dict(config={'position': position, 'xtype': xtype},
-#                name=underlying_module.name,
-#                value={},
-#        terminals=terms)
-#CHANGED **************
-# GET CONFIG FROM TEMPLATE?
+    #return dict(config={'position': position, 'xtype': xtype},
+    #            name=underlying_module.name,
+    #            value={},
+    #            terminals=terms)
+    
+    # getting configuration from template
     config = dict(position=position, xtype=xtype)
     config.update(module['config'])
-#    print "Config:", config
     return dict(config=config,
                 name=underlying_module.name,
                 value={},
-        terminals=terms)
+                terminals=terms)
 
 def wireit_diagram_to_template(diagram, instrument):
     """
