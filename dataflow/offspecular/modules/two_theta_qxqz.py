@@ -2,8 +2,8 @@
 Module to convert two theta to QxQz
 """
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
 
 def two_theta_qxqz_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
@@ -22,8 +22,15 @@ def two_theta_qxqz_module(id=None, datatype=None, action=None,
              datatype=datatype,
              use='in',
              description='data',
+             required=True,
+             multiple=False,
+             ),
+        dict(id='output_grid',
+             datatype=datatype,
+             use='in',
+             description='output grid',
              required=False,
-             multiple=True,
+             multiple=False,
              ),
         dict(id='output',
              datatype=datatype,

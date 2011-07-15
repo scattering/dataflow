@@ -1,0 +1,16 @@
+<html>
+<head>
+<title>My Projects</title>
+
+</head>
+<body>
+	<h2>My Projects </h2>
+	
+	<ul>
+	{% for i in projects %}
+    	<li>{{ i }}</li>
+	{% endfor %}
+	<li><a href="../addProject"> Add new project! </a></li>
+	</ul>
+</body>
+</html>
