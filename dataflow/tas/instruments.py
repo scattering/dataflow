@@ -1,53 +1,53 @@
 """
 Triple Axis Spectrometer reduction and analysis modules
 """
-import math
-import os
-from pprint import pprint
+import math, os, sys
 
+#Relative imports for use in the larger project
+
+from ...reduction.tripleaxis.data_abstraction import TripleAxis, filereader
+from ..calc import run_template
+from .. import wireit
+from ... import ROOT_URL
+from django.utils import simplejson
 import numpy
 
-#from dataflow import config
-#from dataflow.core import Instrument, Datatype
-#from modules.load import load_module
-#from dataflow.modules.join import join_module
-#from dataflow.modules.scale import scale_module
-#from dataflow.modules.save import save_module
-
-
 from .. import config
-from ..core import Instrument, Datatype
-from ..modules.load import load_module
+from ..core import Instrument, Datatype, Template, register_instrument
+
+#from dataflow.dataflow.modules.load import load_module
 from ..modules.join import join_module
 from ..modules.scale import scale_module
 from ..modules.save import save_module
+from ..modules.tas_normalize_monitor import normalize_monitor_module
+from ..modules.tas_detailed_balance import detailed_balance_module
+from ..modules.tas_monitor_correction import monitor_correction_module
+from ..modules.tas_volume_correction import volume_correction_module
+from ..modules.tas_load import load_module
+'''
+#direct imports for use individually (ie running this file)
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+from dataflow.reduction.tripleaxis.data_abstraction import TripleAxis, filereader
+from dataflow.dataflow.calc import run_template
+from dataflow.dataflow import wireit
+from dataflow import ROOT_URL
+from django.utils import simplejson
 
+import numpy
+from dataflow.dataflow import config
+from dataflow.dataflow.core import Instrument, Datatype, Template, register_instrument
+#from dataflow.dataflow.modules.load import load_module
+from dataflow.dataflow.modules.join import join_module
+from dataflow.dataflow.modules.scale import scale_module
+from dataflow.dataflow.modules.save import save_module
+from dataflow.dataflow.modules.tas_normalize_monitor import normalize_monitor_module
+from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
+from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
+from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
+from dataflow.dataflow.modules.tas_load import load_module
+'''
 TAS_DATA = 'data1d.tas'
 
-# ==== Fake data store ===
-FILES = {}
-def init_data():
-    global FILES
-    f1 = {'name': 'f1.bt7',
-          'x': [1, 2, 3, 4, 5., 6, 7, 8],
-          'y': [20, 40, 60, 80, 60, 40, 20, 6],
-          'monitor': [100] * 8,
-          }
-    f2 = {'name': 'f2.bt7',
-          'x': [4, 5, 6, 7, 8, 9],
-          'y': [37, 31, 18, 11, 2, 1],
-          'monitor': [50] * 6,
-          }
-    f1['dy'] = [math.sqrt(v) for v in f1['y']]
-    f2['dy'] = [math.sqrt(v) for v in f2['y']]
-    for f in f1, f2: FILES[f['name']] = f
-def save_data(data, name):
-    FILES[name] = data
-def load_data(name):
-    return FILES.get(name, None)
-
-# === Fake reduction package ===
-#
 # Reduction operations may refer to data from other objects, but may not
 # modify it.  Instead of modifying, first copy the data and then work on
 # the copy.
@@ -84,8 +84,6 @@ def data_scale(data, scale):
     result = {'name': outname, 'x': x, 'y': y, 'dy': dy, 'monitor': mon}
     return result
 
-
-
 # ==== Data types ====
 
 data1d = Datatype(id=TAS_DATA,
@@ -97,10 +95,11 @@ data1d = Datatype(id=TAS_DATA,
 # === Component binding ===
 
 def load_action(files=None, intent=None, position=None, xtype=None):
-    print "loading", files
-    result = [load_data(f) for f in files]
-    #print "loaded"; pprint(result)
+    """Currently set up to load ONLY 1 file"""
+    #print "loading", files
+    result = [filereader(f) for f in files]
     return dict(output=result)
+    
 load = load_module(id='tas.load', datatype=TAS_DATA,
                    version='1.0', action=load_action)
 
@@ -162,8 +161,44 @@ def scale_action(input=None, scale=None, xtype=None, position=None):
 scale = scale_module(id='tas.scale', datatype=TAS_DATA,
                      version='1.0', action=scale_action)
 
+#All TripleAxis reductions below require that:
+#  'input' be a TripleAxis object (see data_abstraction.py)
 
+def detailed_balance_action(input):
+    for tasinstrument in input:
+        tasinstrument.detailed_balance()
+    return dict(output=input)
 
+def normalize_monitor_action(input, target_monitor):
+    #Requires the target monitor value
+    for tasinstrument in input:
+        tasinstrument.normalize_monitor(target_monitor)
+    #result=input[0].get_plottable()
+    return dict(output=input)
+
+def monitor_correction_action(input, instrument_name):
+    #Requires instrument name, e.g. 'BT7'.  
+    #Check monitor_correction_coordinates.txt for available instruments
+    for tasinstrument in input:
+        tasinstrument.harmonic_monitor_correction()
+    return dict(ouput=input)
+    
+def volume_correction_action(input):
+    for tasinstrument in input:
+        tasinstrument.resolution_volume_correction()
+    return dict(output=input)
+
+normalizemonitor = normalize_monitor_module(id='tas.normalize_monitor', datatype=TAS_DATA,
+                                            version='1.0', action=normalize_monitor_action)
+
+detailedbalance = detailed_balance_module(id='tas.detailed_balance', datatype=TAS_DATA,
+                                          version='1.0', action=detailed_balance_action)
+
+monitorcorrection = monitor_correction_module(id='tas.monitor_correction', datatype=TAS_DATA,
+                                          version='1.0', action=monitor_correction_action)
+
+volumecorrection = volume_correction_module(id='tas.volume_correction', datatype=TAS_DATA,
+                                          version='1.0', action=volume_correction_action)
 
 
 # ==== Instrument definitions ====
@@ -171,13 +206,55 @@ BT7 = Instrument(id='ncnr.tas.bt7',
                  name='NCNR BT7',
                  archive=config.NCNR_DATA + '/bt7',
                  menu=[('Input', [load, save]),
-                       ('Reduction', [join, scale])
+                       ('Reduction', [join, scale, normalizemonitor, detailedbalance, 
+                                      monitorcorrection, volumecorrection])
                        ],
-                 requires=[config.JSCRIPT + '/tasplot.js'],
+                 #requires=[config.JSCRIPT + '/tasplot.js'],
                  datatypes=[data1d],
                  )
 
-# Return a list of triple axis instruments
-init_data()
-instruments = [BT7]
 
+# Return a list of triple axis instruments
+instruments = [BT7]
+for instrument in instruments:
+    register_instrument(instrument)
+
+modules = [
+    dict(module="tas.load", position=(10, 20), config={'files':[ROOT_URL.HOMEDIR[:-12]+ 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
+    dict(module="tas.normalize_monitor", position=(30, 20), config={'target_monitor': 900000}),
+    #dict(module="tas.detailed_balance"),
+    #dict(module="tas.monitor_correction"),
+    #dict(module="tas.volume_correction"),
+    ]
+wires = [
+    dict(source=[0, 'output'], target=[1, 'input']),
+    #dict(source=[1, 'output'], target=[2, 'input']),
+    ]
+config = [
+    {},
+    {},
+    #{},
+    #{'instrument_name': 'BT7'},
+    #{}
+    ]
+template = Template(name='test reduction',
+                    description='example reduction diagram',
+                    modules=modules,
+                    wires=wires,
+                    instrument=BT7.id,
+                    )
+
+
+# the actual call to perform the reduction
+def TAS_RUN():
+    result = run_template(template, config)
+    print 'in TAS'
+    for key, value in result.iteritems():
+	for i in range(len(value['output'])):
+		if not type(value['output'][i])==type({}):
+        		value['output'][i] = value['output'][i].get_plottable()
+    return result
+#print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
+#print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
+#print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
+print "done"

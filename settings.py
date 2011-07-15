@@ -16,7 +16,7 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-AUTH_PROFILE_MODULE = 'apps.tracks.Userprofile'
+AUTH_PROFILE_MODULE = 'tracks.Userprofile'
 
 DATABASES = {
     'default': {
@@ -101,10 +101,14 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
+
+## for django.contrib.auth
+#LOGIN_URL = '/login/'
+
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     #'django.contrib.messages.middleware.MessageMiddleware',
 )
@@ -125,6 +129,7 @@ TEMPLATE_DIRS = (template_dir,
 )
 
 INSTALLED_APPS = (
+    'apps.monkeypatch',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -137,7 +142,9 @@ INSTALLED_APPS = (
     'apps.tracks',
     'south',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
+    'registration',
+    'profiles',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
@@ -164,3 +171,10 @@ LOGGING = {
         },
     }
 }
+
+
+ACCOUNT_ACTIVATION_DAYS = 2
+EMAIL_HOST = 'localhost'
+DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+LOGIN_REDIRECT_URL = 'editor/langSelect/'
+

@@ -66,6 +66,28 @@ def log(X,varX):
     varZ = varX / X**2
     return Z,varZ
 
+def sqrt(X,varX):
+    """Sqrt with error propagation"""
+    return pow(X,varX,0.5)
+
+def arcsin(X,varX):
+    """arcsin with error propagation"""
+    Z=numpy.arcsin(X)
+    varZ=varX/(1-varX)  #recall that the variance is squared  #oddly, this one can diverge!!!
+    return Z,varZ
+
+def arctan(X,varX):
+    """arctan with error propagation"""
+    Z=numpy.arctan(X)
+    varZ=varX/(1+varX)**2  #recall that the variance is squared 
+    return Z,varZ
+
+def tan(X,varX):
+    """tan with error propagation"""
+    Z=numpy.tan(X)
+    varZ=varX/numpy.cos(numpy.sqrt(varX))**4
+    return Z,varZ
+
 # Confirm this formula before using it
 # def pow(X,varX, Y,varY):
 #    Z = X**Y

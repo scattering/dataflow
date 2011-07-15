@@ -8,7 +8,7 @@ from copy import deepcopy,copy
 import numpy as np
 from numpy import array
 import math
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 from uncertainty import Measurement
 import json
 from draw_annulus_aa import annular_mask_antialiased
@@ -476,11 +476,11 @@ def annular_av(sansdata):
     'style': 'line',
     };
     #plottable_1D = json.dumps(plottable_1D)
-    plt.plot(Q,I,'ro')
-    plt.title('1D')
-    plt.xlabel('q(A^-1)')
-    plt.ylabel('I(q)')
-    plt.show()
+    #plt.plot(Q,I,'ro')
+    #plt.title('1D')
+    #plt.xlabel('q(A^-1)')
+    #plt.ylabel('I(q)')
+    #plt.show()
     #sys.exit()
     return plottable_1D
     

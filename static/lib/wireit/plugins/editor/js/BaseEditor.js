@@ -177,6 +177,19 @@ WireIt.BaseEditor.prototype = {
 
 	    var helpButton = new widget.Button({ label:"Help", id:"WiringEditor-helpButton", container: toolbar });
 	    helpButton.on("click", this.onHelp, this, true);
+	   
+	    var forwardButton = new widget.Button({label:"", id:"WiringEditor-forwButton", container: toolbar });
+	    forwardButton.addClass('yui-button-right');
+	    forwardButton.on("click", function() {this.nextReductionInstance()}, this, true);
+	    
+	    var reductionDisplayButton = new widget.Button({label: 'Reduction Instance: <span id="reductionInstance"> 1 </span>', id: "WiringEditor-redDisp", container: toolbar, disabled: true, });
+	    reductionDisplayButton.addClass('yui-button-right');
+	    reductionDisplayButton.addClass('yui-button-removePadding')
+	    
+	    var backButton = new widget.Button({ label:"", id:"WiringEditor-prevButton", container: toolbar });
+	    backButton.addClass('yui-button-right');
+	    backButton.on("click", function() {this.prevReductionInstance()}, this, true);
+	    
 	 },
 
 

@@ -56,41 +56,80 @@ class Measurement(object):
     # Normal operations: may be of mixed type
     def __add__(self, other):
         if isinstance(other,Measurement):
-            return Measurement(*err1d.add(self.x,self.variance,other.x,other.variance))
+            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+                return Measurement(*err1d.add(self.x,self.variance,other.x,other.variance))
+            else:
+                return Measurement(self.x+other.x,None)
         else:
-            return Measurement(self.x+other, self.variance+0) # Force copy
+            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+                return Measurement(self.x+other, self.variance+0) # Force copy
+            else:
+                return Measurement(self.x+other,None)
     def __sub__(self, other):
         if isinstance(other,Measurement):
-            return Measurement(*err1d.sub(self.x,self.variance,other.x,other.variance))
+            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+                return Measurement(*err1d.sub(self.x,self.variance,other.x,other.variance))
+            else:
+                return Measurement(self.x-other.x,None)
         else:
-            return Measurement(self.x-other, self.variance+0) # Force copy
+            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+                return Measurement(self.x-other.x, self.variance+0) # Force copy
+            else:
+                return Measurement(self.x-other, None)
     def __mul__(self, other):
         if isinstance(other,Measurement):
-            return Measurement(*err1d.mul(self.x,self.variance,other.x,other.variance))
+            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+                return Measurement(*err1d.mul(self.x,self.variance,other.x,other.variance))
+            else:
+                return Measurement(self.x*other.x,None)
         else:
-            return Measurement(self.x*other, self.variance*other**2)
+            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+                return Measurement(self.x*other, self.variance*other**2)
+            else:
+                return Measurement(self.x*other, None)
     def __truediv__(self, other):
         if isinstance(other,Measurement):
-            return Measurement(*err1d.div(self.x,self.variance,other.x,other.variance))
+            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+                return Measurement(*err1d.div(self.x,self.variance,other.x,other.variance))
+            else:
+                return Measurement(self.x/other.x, None)
         else:
-            return Measurement(self.x/other, self.variance/other**2)
+            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+                return Measurement(self.x/other, self.variance/other**2)
+            else:
+                return Measurement(self.x/other,None)
     def __pow__(self, other):
         if isinstance(other,Measurement):
             # Haven't calcuated variance in (a+/-da) ** (b+/-db)
             return NotImplemented
         else:
-            return Measurement(*err1d.pow(self.x,self.variance,other))
+            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+                return Measurement(*err1d.pow(self.x,self.variance,other))
+            else:
+                return Measurement(pow(self.x,other),None)
 
     # Reverse operations
     def __radd__(self, other):
-        return Measurement(self.x+other, self.variance+0) # Force copy
+        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+            return Measurement(self.x+other, self.variance+0) # Force copy
+        else:
+            return Measurement(self.x+other,None)
     def __rsub__(self, other):
-        return Measurement(other-self.x, self.variance+0)
+        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+            return Measurement(other-self.x, self.variance+0)
+        else:
+            return Measurement(other-self.x,None)
     def __rmul__(self, other):
-        return Measurement(self.x*other, self.variance*other**2)
+        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+            return Measurement(self.x*other, self.variance*other**2)
+        else:
+            return Measurement(self.x*other, None)
     def __rtruediv__(self, other):
-        x,variance = err1d.pow(self.x,self.variance,-1)
-        return Measurement(x*other,variance*other**2)
+        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+            x,variance = err1d.pow(self.x,self.variance,-1)
+            return Measurement(other/self.x,variance*other**2)
+        else:
+            return Measurement(other/self.x,None)
     def __rpow__(self, other): return NotImplemented
 
     # In-place operations: may be of mixed type
@@ -199,9 +238,35 @@ class Measurement(object):
 
     def log(self):
         return Measurement(*err1d.log(self.x,self.variance))
+    
+    def sqrt(self):
+        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+            return Measurement(*err1d.sqrt(self.x,self.variance))
+        else:
+            return Measurement(numpy.sqrt(self.x),None)
 
     def exp(self):
-        return Measurement(*err1d.exp(self.x,self.variance))
+        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+            return Measurement(*err1d.exp(self.x,self.variance))
+        else:
+            return Measurement(numpy.exp(self.x),None)
+    
+    def arcsin(self):
+        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+            return Measurement(*err1d.arcsin(self.x,self.variance))
+        else:
+            return Measurement(numpy.arcsin(self.x),None)
+        
+    def arctan(self):
+        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+            return Measurement(*err1d.arctan(self.x,self.variance))
+        else:
+            return Measurement(numpy.arctan(self.x),None)
+    def tan(self):
+        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+            return Measurement(*err1d.tan(self.x,self.variance))
+        else:
+            return Measurement(numpy.tan(self.x),None)
 
 def log(val): return self.log()
 def exp(val): return self.exp()

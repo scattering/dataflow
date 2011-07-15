@@ -11,6 +11,7 @@ if __name__=="__main__":
                   'git-gui',
                   #'python-django',
                   'python-setuptools',
+                  'python-redis',
                   'python-numpy',
                   'python-scipy',
                   'python-matplotlib',
@@ -22,9 +23,10 @@ if __name__=="__main__":
 		  'libapache2-mod-wsgi',
 		  'postgresql',
 		  'pgadmin3',
-		  'python-paramiko',
+		  'mercurial',
                   ]
-    easy_commands=['simplejson','stompservice','orbited', '-U Django', '-U psycopg2', 'South']
+    easy_commands=['simplejson','stompservice','orbited', '-U Django', '-U psycopg2', 'South', 'django-registration', 'django-profiles']
+    merc_commands=['https://bitbucket.org/ubernostrum/django-registration', 'https://bitbucket.org/ubernostrum/django-profiles']
     
     for command in apt_commands:
         s='apt-get -y install %s'%(command,)
@@ -38,6 +40,8 @@ if __name__=="__main__":
     #call('wget http://trac.openopt.org/openopt/changeset/latest/PythonPackages?old_path=%2F&format=zip',shell=True)
     call('svn co svn://openopt.org/PythonPackages OOSuite',shell=True)
     call('cd OOSuite; python install_all.py; cd ..',shell=True)
+    for command in merc_commands:
+    	call('hg clone %s'%(command,), shell=True)
     for command in easy_commands:
         call('pip install %s'%(command,),shell=True)
 

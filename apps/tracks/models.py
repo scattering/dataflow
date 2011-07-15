@@ -12,6 +12,7 @@ class Test(models.Model):
 # class User     is provided by contrib.auth
 
 class Userprofile(models.Model):
+	user = models.ForeignKey(User, null=True)
 	userdisplay = models.CharField(max_length=300)
 
 # class Permission     is provided by contrib.auth
@@ -67,6 +68,10 @@ class Instrument(models.Model):
 	
 	def __unicode__(self):
 		return self.Name
+		
+class Facility(models.Model):
+	Name = models.CharField(max_length=50) #e.g., NCNR, HFIR, 
+	instruments = models.ForeignKey('Instrument')
 	
 	
 	

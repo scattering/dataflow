@@ -17,6 +17,12 @@
 <link rel="stylesheet" type="text/css" href="../../static/lib/wireit/assets/WireIt.css" />
 <link rel="stylesheet" type="text/css" href="../../static/lib/wireit/plugins/editor/assets/WireItEditor.css" />
 
+<!-- ExtJS CSS -->
+<link rel="stylesheet" type="text/css" href="../../static/lib/ext/resources/css/ext-all.css" />
+<!--<link rel="stylesheet" type="text/css" href="../../static/lib/ext/examples/shared/example.css" />-->
+<link rel="stylesheet" type="text/css" href="../../static/lib/ext/examples/ux/css/CheckHeader.css" />
+<!--<link rel="stylesheet" type="text/css" href="../../static/lib/ext/examples/button/button.css" />-->
+
 <style>
 div.WireIt-Container {
 	width: 350px; /* Prevent the modules from scratching on the right */
@@ -41,8 +47,8 @@ div.inputEx-Group div.inputEx-label {
 }
 
 div.WireIt-ImageContainer {
-	width: 120px;
-	height: 80px;
+	width: 64px;
+	height: 64px;
 }
 
 div.Bubble div.body {
@@ -57,8 +63,59 @@ div.Bubble div.body {
 	top: -3px;
 }
 
+.x-border-box .x-reset, .x-border-box .x-reset * {
+	box-sizing: content-box;
+	-webkit-box-sizing: content-box;
+	-moz-box-sizing: content-box;
+}
+
+.x-border-box .x-reset .x-panel *, .x-border-box .x-reset .x-layout * {
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+}
+
+.x-btn-inner {
+    border-color:#EE0000;
+    font-size: 24px !important;
+    font-weight: bold !important;
+    font-family: 'Arial' !important;
+}
+
+.x-menu-item-link * {
+	text align: left;
+	}
+
+.yui-button.yui-button-right {
+	float: right;
+}
+
+.yui-button.yui-button-removePadding button {
+	padding-left: 1em !important;
+	}
+
+.yui-button#WiringEditor-prevButton button {
+
+        background: url(../../static/img/silk/previous.png) center center no-repeat;;
+    }
+    
+.yui-button#WiringEditor-forwButton button {
+
+        background: url(../../static/img/silk/next.png) center center no-repeat;;
+    }
+    
+.instance-info-display dt {
+	font-weight: bold;
+	}
+.instance-info-display dd {
+	margin-left: 1em;
+	margin-bottom: 4px;
+	}
+
 </style>
 
+<!-- ExtJS -->
+<script type="text/javascript" src="../../static/lib/ext/ext-all.js"></script>
 
 <!-- JQPLOT -->
 <script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
@@ -68,6 +125,13 @@ div.Bubble div.body {
 <script type="text/javascript" src="../../static/lib/plotting/palettes.js"></script>
 <script type="text/javascript" src="../../static/lib/plotting/plotting_api.js"></script>
 <script type="text/javascript" src="../../static/lib/plotting/sansdata.js"></script>
+
+<!-- Prototype lib 
+<script type="text/javascript" src="../../static/lib/prototype.js"></script>
+-->
+
+<!-- Uniq Array -->
+<script type="text/javascript" src="../../static/lib/UniqArray.js"></script>
 
 <!-- YUI -->
 <script type="text/javascript" src="../../static/lib/yui/yahoo/yahoo.js"></script>
@@ -87,7 +151,7 @@ div.Bubble div.body {
 <!-- <script type="text/javascript" src="../../../../build/wireit-inputex-editor-min.js"></script>  -->
 <script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor.js"></script>
 <script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-composable.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-editor-grouping.js"></script>
+<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-grouping.js"></script>
 <script type="text/javascript" src="../../static/lib/wireit/js/WireIt.js"></script>
 
 
@@ -217,6 +281,8 @@ div.Bubble div.body {
 <script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-editor-grouping.js"></script>
 
 
+<!-- File Associations Table -->
+<script type="text/javascript" src="../../static/wireit_test/fileTable.js"></script>
 
 <!-- editor -->
 <script type="text/javascript" src="../../static/lib/wireit/plugins/editor/js/BaseEditor.js"></script>
@@ -231,6 +297,8 @@ div.Bubble div.body {
 <script type="text/javascript" src="../../static/wireit_test/language.js"></script>
 <script type="text/javascript" src="../../static/wireit_test/ANDRdefinition.js"></script>
 <script type="text/javascript" src="../../static/wireit_test/SANSdefinition.js"></script>
+<script type="text/javascript" src="../../static/wireit_test/TASlang.js"></script>
+
 
 <!-- language dictionary -->
 <script type="text/javascript" src="../../static/wireit_test/lang_dict.js"></script>
@@ -249,28 +317,38 @@ div.WireIt-Container.WiringEditor-module-comment div.body textarea { background-
 // InputEx needs a correct path to this image
 inputEx.spacerUrl = "/inputex/trunk/images/space.gif";
 
-
+var holder = '';
 
 YAHOO.util.Event.onDOMReady( function() {
 	try {	
+
 		CHOSEN_LANG = languageDictionary["{{ lang }}"]
 
 		// setting up the WireEditor with the adapter 'tracks'
 		CHOSEN_LANG['adapter'] = WireIt.WiringEditor.adapters.tracks;
+		
 		
 		// initial settings
 		plotCreated = false;
 
 		// editor
 		editor = new WireIt.WiringEditor(CHOSEN_LANG);
+			// initial setting: for paging through multiple instances of the same reduction template
+		editor.reductionInstance = 1;
+		editor.maxReduction = 1; 
+		
+		// more initial settings
+		
 
 		// imagecontainer initial height, width
 		WireIt.ImageContainer.prototype.height = 40;
 		WireIt.ImageContainer.prototype.width = 40;
 		WireIt.ImageContainer.prototype.onMouseDown = function() {
-			console.log(this.getConfig())
+			console.log(this.getConfig());
+			holder = this;
 			}
 
+	
 		// setting up events for wires
 		WireIt.Wire.prototype.onWireIn = function(x,y) {
 			this.color = 'rgb(255,0,0)';
@@ -287,7 +365,8 @@ YAHOO.util.Event.onDOMReady( function() {
 			editor.runReduction()
 			}
 		// Open the infos panel
-		editor.accordionView.openPanel(1);
+		editor.accordionView.openPanel(2);
+		editor.accordionView.closePanel(0);
 	}
 	catch(ex) { 
                 alert('exception');
@@ -295,12 +374,15 @@ YAHOO.util.Event.onDOMReady( function() {
 	}
 });
 
+Ext.onReady(function() {
+		//$('html').removeClass('x-border-box');
+		//$('body').removeClass('x-reset');
+});
 </script>
 
 </head>
 
-<body class="yui-skin-sam">
-
+<body id="woot" class="yui-skin-sam">
 
 	<div id="top">
 		<div class="logo">Dataflow / Tracks</a></div>
@@ -312,7 +394,7 @@ YAHOO.util.Event.onDOMReady( function() {
 
 
 	<div id="left">
-		
+
 		 <ul id="modulesAccordionView">
 			<li>
 				<h2>Main</h2>
@@ -320,55 +402,82 @@ YAHOO.util.Event.onDOMReady( function() {
 					<div id='module-category-main'></div>
 				</div>
 			</li>
-			
-		</ul>
-		
-	</div>
-	
-	<div id="right">
-	  <ul id="accordionView">
-		<li>
-			<h2>Minimap</h2>
-			<div style='position: relative;'>
-				<div id="layerMap"></div>
-			</div>
-		</li>
-		<li>
-		<h2> Plotting! </h2>
-		<div>
-		<div id="plot" style="display: block; border:1px solid; width:500px; height: 500px; float: left;"></div>
-		<canvas id="colorbar" width="60" height="500" style="float: left;"></canvas><br style="clear: left;" />
-		<div style="display: none;">
-			<canvas id="invis" width="1024" height="1024"></canvas>
-			<canvas id="invis2" width="1" height="1024"></canvas>
-		</div>
-		</div>
-		</li>
 
-		<li>
-			<h2>Info</h2>
-			<div>
-				<div style="padding: 10px;">
-					<p>Functional WireIt editor using BT7 language generated from Paul's code.</p>
-					<br />
-					<p><b>Drag and drop modules from the Module list</b> on the left to the working layer in the middle.</p>
-					<br />
-					<p><a href="language.js" target="_new">Click here to view the language definition for this editor.</a></p>
-				</div>
-			</div>
-		</li>
-		
-	  </ul>
+		</ul>
+
 	</div>
+
+        <div id="right">
+                <ul id="accordionView">
+                        <li>
+                                <h2>Minimap</h2>
+
+                                <div style='position: relative;'>
+                                        <div id="layerMap"></div>
+                                </div>
+                        </li>
+
+                        <li>
+                                <h2>Plotting!</h2>
+
+                                <div>
+                                        <div id="plot" style="display: block; border:1px solid; width:500px; height: 500px; float: left;"></div>
+                                        <canvas id="colorbar" width="60" height="500" style="float: left;"></canvas><br style="clear: left;" />
+
+                                        <div style="display: none;">
+                                            <canvas id="invis" width="1024" height="1024"></canvas>
+                                            <canvas id="invis2" width="1" height="1024"></canvas>
+                                        </div>
+                                </div>
+                        </li>
+
+                        <li>
+                                <h2>File Associations Table</h2>
+
+                                <div class="x-border-box">
+                                	<div id="FAT" style='position: relative;' class="x-reset"></div>
+                        	</div>
+                        </li>
+                        
+                        <li>
+                                <h2>Instance Info</h2>
+
+                                <div>
+                                        <div id ="instance-info" style="padding: 10px;">
+                                        </div>
+                                </div>
+                        </li>
+
+                        <li>
+                                <h2>General Info</h2>
+
+                                <div>
+                                        <div style="padding: 10px;">
+                                                <p>Functional WireIt editor using BT7
+                                                language generated from Paul's
+                                                code.</p><br />
+
+                                                <p><b>Drag and drop modules from the
+                                                Module list</b> on the left to the
+                                                working layer in the middle.</p><br />
+
+                                                <p><a href="language.js" target=
+                                                "_new">Click here to view the language
+                                                definition for this editor.</a></p>
+                                        </div>
+                                </div>
+                        </li>
+                </ul>
+        </div>
+
 
 	<div id="center">
 	</div>
-	
-	
+
 	<div id="helpPanel">
 	    <div class="hd">Welcome to the WiringEditor demonstration</div>
 	    <div class="bd" style="text-align: left;">
-					
+
 <p>Functional WireIt editor using BT7 language generated from Paul's code.</p>
 					<br />
 					<p><b>Drag and drop modules from the Module list</b> on the left to the working layer in the middle.</p>
@@ -376,6 +485,5 @@ YAHOO.util.Event.onDOMReady( function() {
 					<p><a href="language.js" target="_new">Click here to view the language definition for this editor.</a></p>
 	    </div>
 	</div>
-
 </body>
 </html>
