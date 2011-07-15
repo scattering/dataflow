@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User, Permission
+from django.contrib.auth.models import User #, Permission
 
 # Create your models here.
 
@@ -12,13 +12,13 @@ class Test(models.Model):
 # class User     is provided by contrib.auth
 
 class Userprofile(models.Model):
-	user = models.ForeignKey(User, null=True)
+	user = models.ForeignKey(User)
 	userdisplay = models.CharField(max_length=300)
 
 # class Permission     is provided by contrib.auth
 
 class File(models.Model):
-	permissions = models.ForeignKey(Permission, null=True) # or should this be a string of permission names
+	#permissions = models.ForeignKey(Permission, null=True) # or should this be a string of permission names
 	name = models.CharField(max_length=160, primary_key=True) # what format are we storing the contents in?
 	location = models.CharField(max_length=300) #location of file on disc
 	metadata = models.ManyToManyField('Metadata', null=True)
@@ -26,7 +26,7 @@ class File(models.Model):
 		return self.location.split('/')[-1]
 	
 class Metadata(models.Model):
-	Myfile = models.ForeignKey('File',unique=True, related_name="file", null=True)
+	Myfile = models.ForeignKey('File', related_name="file")
 	Key = models.CharField(max_length=30)	
 	Value = models.CharField(max_length=300)
 	def __unicode__(self):
@@ -35,15 +35,15 @@ class Metadata(models.Model):
 class Template(models.Model):
 	Title = models.CharField(max_length=50) # name of experiment associated with template
 	Representation = models.TextField() # can easily convert back and forth from strings to 							    # dicts with str(dict) and dict(str)
-	user = models.ForeignKey(User, unique=True, null=True)
-	permissions = models.ForeignKey(Permission, null=True)
+	user = models.ForeignKey(User)
+	#permissions = models.ForeignKey(Permission, null=True)
 	def __unicode__(self):
 		return self.Title
 
 class Project(models.Model):
 	Title = models.CharField(max_length=50) 
-	user = models.ForeignKey(User, unique=True, null=True)
-	permissions = models.ForeignKey(Permission, null=True)
+	user = models.ForeignKey(User)
+	#permissions = models.ForeignKey(Permission, null=True)
 	experiments = models.ManyToManyField('Experiment', null=True)
 	templateInstances = models.ManyToManyField('Template', null=True) # are the templates here and  								          # under Instruments meant to be different
 
@@ -51,18 +51,20 @@ class Project(models.Model):
 		return self.Title
 
 class Experiment(models.Model):
-	ProposalNum = models.IntegerField(null=True) # IMS proposal/request number
+	ProposalNum = models.CharField(max_length=100) # IMS proposal/request number
 	Files = models.ForeignKey('File', null=True)
-	users = models.ForeignKey(User, null=True)
-	permissions = models.ForeignKey(Permission, null=True)
-	instrument = models.ForeignKey('Instrument', unique=True, null=True)
+	facility = models.ForeignKey('Facility', null=True)
+	users = models.ForeignKey(User)
+	#permissions = models.ForeignKey(Permission, null=True)
+	instrument = models.ForeignKey('Instrument', null=True)
 	def __unicode__(self):
 		return self.ProposalNum
 
 class Instrument(models.Model):
-	Name = models.CharField(max_length=50) #e.g., TAS, bt7, SANS
-	Templates = models.ForeignKey('Template', null=True)
-	metadata = models.ForeignKey('Metadata', null=True)
+	Name = models.CharField(max_length=50) #e.g. bt7 
+	Templates = models.ForeignKey('Template')
+	metadata = models.ForeignKey('Metadata')
+	instrument_class = models.CharField(max_length=50)
 	Calibrations = models.CharField(max_length=100) # is this so that we can have different instances of an
 							# an instrument varying by calibration?
 	

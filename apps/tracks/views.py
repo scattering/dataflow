@@ -3,24 +3,27 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
-from apps.tracks.forms import languageSelectForm
+from apps.tracks.forms import languageSelectForm, titleOnlyForm, experimentForm, titleOnlyFormExperiment
+from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger #paging for lists
+from django.core.exceptions import ObjectDoesNotExist
 
 ## models
 from django.contrib.auth.models import User 
-from models import *
+from models import * #add models by name
 
 
 from ...apps.fileview import testftp
 
-from ...dataflow import wireit
-from ...dataflow.calc import run_template
-from ...dataflow.core import register_instrument
+#from ...dataflow import wireit
+#from ...dataflow.calc import run_template
+#from ...dataflow.core import register_instrument
 #from ...dataflow.tas.instruments import BT7
 #from ...dataflow.offspecular.instruments import ANDR
 #from ...dataflow.tas import instruments
-from ...dataflow.SANS import newinstruments as SANS_INS
-from ...dataflow.tas import instruments as TAS_INS
+#from ...dataflow.SANS import newinstruments as SANS_INS
+#from ...dataflow.tas import instruments as TAS_INS
 
 import random
 
@@ -42,8 +45,9 @@ def mytest(request):
    return render_to_response('tracer_testingforWireit/xhr_temp.html')
 
 def home(request):
+    context=RequestContext(request)
     site_list = ['/hello/', '/test/', '/editor/', '/loadFiles/']
-    return render_to_response('tracer_testingforWireit/home.html', locals())
+    return render_to_response('tracer_testingforWireit/home.html', locals(), context_instance=context)
     
 ##################
 #### file loading testing
@@ -107,20 +111,23 @@ b = {'save':'successful'}
 wirings_list = offspec+a+SANS+SANS_2
 
 def listWirings(request):
+    context=RequestContext(request)
     print 'I am loading'
-    return HttpResponse(simplejson.dumps(wirings_list))
+    return HttpResponse(simplejson.dumps(wirings_list), context_instance=context)
 
 #    return HttpResponse(simplejson.dumps(a)) #andr vs bt7 testing
 
 def saveWiring(request):
+    context=RequestContext(request)
     print 'I am saving'
     new_wiring = simplejson.loads(request.POST['data'])
     # this stores the wires in a simple list, in memory on the django server.
     # replace this with a call to storing the wiring in a real database.
     wirings_list.append(new_wiring)
-    return HttpResponse(simplejson.dumps(b))
+    return HttpResponse(simplejson.dumps(b), context_instance=context)
 
 def runReduction(request):
+    context=RequestContext(request)
     print 'I am reducing'
 ####### SANS TESTING
     result = TAS_INS.TAS_RUN()
@@ -133,7 +140,7 @@ def runReduction(request):
    # 	openFile.close()
     #result = SANS_INS.TESTING()
     #print simplejson.dumps(result)
-    return HttpResponse(simplejson.dumps(result))
+    return HttpResponse(simplejson.dumps(result), context_instance=context)
     
     #print FILES
 ###### BT7 TESTING
@@ -169,24 +176,69 @@ def runReduction(request):
 ## the language selection.
 
 def displayEditor(request):
+    context=RequestContext(request)
     print request.POST.has_key('language')
     if request.POST.has_key('language'):
-        return render_to_response('tracer_testingforWireit/editor.html', {'lang':request.POST['language']})
+        return render_to_response('tracer_testingforWireit/editor.html', {'lang':request.POST['language']}, context=RequestContext(request))
     else:
         return HttpResponseRedirect('/editor/langSelect/')
 
 def languageSelect(request):
+    context=RequestContext(request)
     if request.POST.has_key('instruments'):
         return render_to_response('tracer_testingforWireit/editorRedirect.html',
                             {'lang':request.POST['instruments']})
     form = languageSelectForm()
-    return render_to_response('tracer_testingforWireit/languageSelect.html', {'form':form})
+    return render_to_response('tracer_testingforWireit/languageSelect.html', {'form':form}, context_instance=context)
     
     
 ###########
 ## Views for users, redirects to MyProjects page from login. Then continues logically from there.
 @login_required
 def myProjects(request):
-	projects = request.user.projects
-	return render_to_response('userProjects/displayProjects.html', {'projects',projects})
+	context=RequestContext(request)
+	if request.POST.has_key('new_project'):
+		Project.objects.create(Title=request.POST['new_project'], user = request.user)
+	project_list = Project.objects.filter(user = request.user)
+	paginator = Paginator(project_list, 10) #10 projects per pages
+	page = request.GET.get('page')
+	if page == None:
+		page = 1
+	try:
+		projects = paginator.page(page)
+	except PageNotAnInteger:
+		projects = paginator.page(1)
+	except EmptyPage:
+		projects = paginator.page(paginator.num_pages)
+	form = titleOnlyForm()
+	return render_to_response('userProjects/displayProjects.html', {'projects':projects, 'form':form}, context_instance=context)
+	
+@login_required
+def editProject(request, project_id):
+	if request.POST.has_key('new_experiment'):
+		new_exp =Experiment.objects.create(ProposalNum=request.POST['new_experiment'], users=request.user)
+		new_exp.save()
+		Project.objects.get(id=project_id).experiments.add(new_exp) 
+	context=RequestContext(request)
+	project = Project.objects.get(id=project_id)
+	experiment_list = project.experiments.all()
+	paginator = Paginator(experiment_list, 10)
+	page = request.GET.get('page')
+	if page == None:
+		page = 1
+	try:
+		experiments = paginator.page(page)
+	except PageNotAnInteger:
+		experiments = paginator.page(1)
+	except EmptyPage:
+		experiments = paginator.page(paginator.num_pages)
+	form = titleOnlyFormExperiment()
+	return render_to_response('userProjects/editProject.html', {'project':project,'form':form,'experiments':experiments}, context_instance=context)
+
+@login_required #may want a separate form for files so that you can add multiple files w/out changing facility, etc...
+def editExperiment(request, experiment_id):
+	context=RequestContext(request)
+	experiment = Experiment.objects.get(id=experiment_id)
+	form = experimentForm()
+	return render_to_response('userProjects/editExperiment.html', {'form':form, 'experiment':experiment,}, context_instance = context)
     
