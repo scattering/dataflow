@@ -61,7 +61,7 @@ autogrid = autogrid_module(id='ospec.grid', datatype=OSPEC_DATA,
 # Combine module
 def combine_action(input=None, grid=None):
     print "joining"
-    return dict(output=[Combine().apply(input, grid=grid)])
+    return dict(output=[Combine().apply(input, grid=grid[0])]) # should be only one grid
 combine = combine_module(id='ospec.combine', datatype=OSPEC_DATA, version='1.0', action=combine_action)
 
 # Offset module
@@ -110,6 +110,7 @@ for instrument in instrmnts:
 if __name__ == '__main__':
     path, ext = dir + '/dataflow/sampledata/ANDR/sabc/Isabc20', '.cg1'
     files = [path + str(i + 1).zfill(2) + ext for i in range(1, 12)]
+    print files
     modules = [
         dict(module="ospec.load", position=(50, 50),
              config={'files': files, 'intent': 'signal'}),
@@ -119,13 +120,16 @@ if __name__ == '__main__':
         dict(module="ospec.wiggle", position=(350, 200), config={}),
         dict(module="ospec.twotheta", position=(450, 250), config={}),
         dict(module="ospec.qxqz", position=(550, 300), config={}),
+        dict(module="ospec.grid", position=(600, 350), config={}),
     ]
     wires = [
-        dict(source=[0, 'output'], target=[2, 'input']),
-        dict(source=[2, 'output'], target=[3, 'input']),
-        dict(source=[3, 'output'], target=[4, 'input']),
-        dict(source=[4, 'output'], target=[5, 'input']),
-        dict(source=[5, 'output'], target=[6, 'input']),
+        dict(source=[0, 'output'], target=[4, 'input']),
+        dict(source=[4, 'output'], target=[3, 'input']),
+        dict(source=[3, 'output'], target=[5, 'input']),
+        dict(source=[5, 'output'], target=[2, 'input']),
+        dict(source=[5, 'output'], target=[7, 'input']),
+        dict(source=[7, 'output'], target=[2, 'grid']),
+        dict(source=[2, 'output'], target=[6, 'input']),
         dict(source=[6, 'output'], target=[1, 'input']),
     ]
     config = [d['config'] for d in modules]

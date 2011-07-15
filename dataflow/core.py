@@ -321,7 +321,7 @@ dataid : string
         self.__dict__ = state
         
     def get_plottable(self):
-        return dict(output=simplejson.dumps({}))
+        return simplejson.dumps({})
     
     def dumps(self):
         return ""

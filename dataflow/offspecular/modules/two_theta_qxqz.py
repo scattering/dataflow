@@ -13,6 +13,7 @@ def two_theta_qxqz_module(id=None, datatype=None, action=None,
         'URI': config.IMAGES + "qxqz.png",
         'terminals': {
             'input': (0, 10, -1, 0),
+            'output_grid': (10, 10, -1, 0),
             'output': (20, 10, 1, 0),
         }
     }
