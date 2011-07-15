@@ -35,7 +35,7 @@ from django.utils import simplejson
 
 from dataflow import config
 from dataflow.calc import run_template
-from dataflow.core import Datatype, Instrument, Template, register_instrument
+from dataflow.core import Data, Instrument, Template, register_instrument
 from dataflow.modules.load import load_module
 from dataflow.modules.save import save_module
 from reduction.sans.filters import *
@@ -50,6 +50,8 @@ from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
 from dataflow.SANS.convert_qxqy import convert_qxqy_module
 from dataflow.SANS.annular_av import annular_av_module
 from dataflow.SANS.absolute_scaling import absolute_scaling_module
+from dataflow.SANS.correct_dead_time import correct_dead_time_module
+from reduction.sans.filters import SansData
 
 #Transmissions
 Tsam = 0
@@ -62,38 +64,21 @@ correctVer = SansData()
 fileList = []
  
 # Datatype
-SANS_DATA = 'data1d.sans'
-data2d = Datatype(id=SANS_DATA,
-                  name='SANS Data',
-                  plot='sansplot')
-
+SANS_DATA = 'data2d.sans'
+data2d = Data(SANS_DATA, SansData)
+#Datatype(id=SANS_DATA,
+                  #name='SANS Data',
+                  #plot='sansplot')
+#dictionary = Datatype(id='dictionary', 
+                        #name = 'dictionary',
+                        #plot = None)
  
 # Load module
 def load_action(files=None, intent=None):
     print "loading", files
     result = [_load_data(f) for f in files] # not bundles
 
-    global fileList
-    fileList = result
-    plottable_2D = {
-    'z': fileList[0].data.x.tolist(),
-    'title': 'SAM',
-    'dims': {
-      'xmax': 128.0,
-      'xmin': 0.0,
-      'ymin': 0.0,
-      'ymax': 128.0,
-      'xdim': 128,
-      'ydim': 128,
-    },
-    'type':'2d',
-    'xlabel': 'X',
-    'ylabel': 'Y',
-    'zlabel': 'Intensity',
-};
-
-    #plottable_2D = json.dumps(plottable_2D)
-    return dict(output=plottable_2D)
+    return dict(output=result)
 def _load_data(name):
     print name
     if os.path.splitext(name)[1] == ".DIV":
@@ -120,14 +105,16 @@ save = save_module(id='sans.save', datatype=SANS_DATA,
 
 
 # Modules
+def correct_dead_time_action(input=None):
+    print "INPUT: ", input
+    solidangle = correct_solid_angle(input[0])
+    det_eff = correct_detector_efficiency(input[0])
+    return correct_dead_time(det_eff)
+deadtime = correct_dead_time_module(id='sans.correct_dead_time', datatype=SANS_DATA, version='1.0', action=correct_dead_time_action)
 def monitor_normalize_action(input=None):
  
     result = [monitor_normalize(f) for f in input]
     print "result: ", result
-    return result
-def correct_solid_angle_action(input = None):
-   
-    result = [correct_solid_angle(f) for f in input]
     return result
 
 def generate_transmission_action(input=None):
@@ -141,14 +128,7 @@ def generate_transmission_action(input=None):
     Temp=generate_transmission(input[4],input[2],coord_left,coord_right)
     print 'Sample transmission= {0} (IGOR Value = 0.724): '.format(Tsam)
     print 'Empty Cell transmission= {0} (IGOR Value = 0.929): '.format(Temp)
-    
-def correct_detector_eff(input = None):
-    result = [correct_detector_efficiency(f) for f in input]
-    return result
-def deadtm(input= None):
-    result = [correct_dead_time(f) for f in input]
-    return result
-    
+        
 def initial_correction_action(input=None):
     global fileList
     lis = []
@@ -289,7 +269,7 @@ SANS_INS = Instrument(id='ncnr.sans.ins',
                  name='NCNR SANS INS',
                  archive=config.NCNR_DATA + '/sansins',
                  menu=[('Input', [load, save]),
-                       ('Reduction', [correct_det_sens,initial_corr,annul_av,absolute])
+                       ('Reduction', [deadtime,correct_det_sens,initial_corr,annul_av,absolute]),
                                               ],
                  requires=[config.JSCRIPT + '/sansplot.js'],
                  datatypes=[data2d],
@@ -305,8 +285,22 @@ if __name__ == '__main__':
     for instrument in instruments:
         register_instrument(instrument)
     modules = [
+        #Sample
+           #files hard coded for now
         dict(module="sans.load", position=(5, 20),
-             config={'files': fileList, 'intent': 'signal'}),
+             config={'files': fileList[0], 'intent': 'signal'}),
+        #Empty Cell
+        dict(module="sans.load", position=(5, 30),
+             config={'files': fileList[1], 'intent': 'signal'}),
+        #Empty
+        dict(module="sans.load", position=(5, 30),
+             config={'files': fileList[2], 'intent': 'signal'}),
+        #Blocked
+        dict(module="sans.load", position=(5, 30),
+             config={'files': fileList[5], 'intent': 'signal'}),
+        
+        dict(module="sans.correct_dead_time", position=(360 , 50), config={}),
+        
         dict(module="sans.save", position=(500, 500), config={'ext': 'dat'}),
         dict(module="sans.initial_correction", position=(360 , 100), config={}),
         dict(module="sans.correct_detector_sensitivity", position=(360 , 200), config={}),
@@ -317,11 +311,18 @@ if __name__ == '__main__':
         
         ]
     wires = [
-        dict(source=[0, 'output'], target=[2, 'input']),
-        dict(source=[2, 'output'], target=[3, 'input']),
-        dict(source=[3, 'output'], target=[4, 'input']),
-        dict(source=[4, 'output'], target=[5, 'input']),
-        dict(source=[5, 'output'], target=[1, 'input']),
+        #Deadtime
+        dict(source=[0, 'output'], target=[4, 'Sample']),
+        dict(source=[1, 'output'], target=[4, 'Empty Cell']),
+        dict(source=[2, 'output'], target=[4, 'Empty']),
+        dict(source=[3, 'output'], target=[4, 'Blocked']),
+        
+        
+        
+        #dict(source=[2, 'output'], target=[3, 'input']),
+        #dict(source=[3, 'output'], target=[4, 'input']),
+        #dict(source=[4, 'output'], target=[5, 'input']),
+        #dict(source=[5, 'output'], target=[1, 'input']),
 
         ]
     config = [d['config'] for d in modules]
@@ -331,13 +332,13 @@ if __name__ == '__main__':
                         wires=wires,
                         instrument=SANS_INS.id,
                         )
-    f = open("/home/elakian/tem.txt","w")
-    f.write("Template: ")
-    f.write( simplejson.dumps(wireit.template_to_wireit_diagram(template)))
-    f.write("\n")
-    f.write("Lang: ")
-    f.write(simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))) 
-    f.close()
+    #f = open("/home/elakian/tem.txt","w")
+    #f.write("Template: ")
+    #f.write( simplejson.dumps(wireit.template_to_wireit_diagram(template)))
+    #f.write("\n")
+    #f.write("Lang: ")
+    #f.write(simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))) 
+    #f.close()
     #print 'TEMPLATE', simplejson.dumps(wireit.template_to_wireit_diagram(template))
     #print 'LANGUAGE', simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))                
     run_template(template, config)
