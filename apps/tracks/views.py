@@ -3,15 +3,24 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
-from apps.tracks.forms import languageSelectForm 
+from apps.tracks.forms import languageSelectForm
+from django.contrib.auth.decorators import login_required
+
+## models
+from django.contrib.auth.models import User 
+from models import *
+
+
+from ...apps.fileview import testftp
 
 from ...dataflow import wireit
 from ...dataflow.calc import run_template
 from ...dataflow.core import register_instrument
-from ...dataflow.tas.instruments import BT7
+#from ...dataflow.tas.instruments import BT7
 #from ...dataflow.offspecular.instruments import ANDR
-from ...dataflow.tas import instruments
+#from ...dataflow.tas import instruments
 from ...dataflow.SANS import newinstruments as SANS_INS
+from ...dataflow.tas import instruments as TAS_INS
 
 import random
 
@@ -40,25 +49,21 @@ def home(request):
 #### file loading testing
 
 store = [{
-	 "text":"pub",
-	 "children":
-	[{
-        
+        "id": 0,
         "text": "A leaf Node",
         "leaf": True
     },{
-        
+        "id": 1,
         "text": "A folder Node",
         "children": [{
-            
+            "id": 2,
             "text": "A child Node",
             "leaf": True
+            #"children":[{}],
         }]
    }]
-   }]
-
 def getNCNRdirectories(request):
-	return HttpResponse(simplejson.dumps(store))
+	return HttpResponse(simplejson.dumps(testftp.runMe()))  #testftp.runMe()
     
 def displayFileLoad(request):
 	return render_to_response('FileUpload/FileTreeTest.html', locals())
@@ -66,11 +71,16 @@ def displayFileLoad(request):
 ###################
 #### TRACKS testing
 
+#### template list
+
 a = [{"name":"test tas", "wires": [{"src": {"terminal": "output", "moduleId": 0}, "tgt": {"terminal": "input", "moduleId": 1}}, {"src": {"terminal": "output", "moduleId": 1}, "tgt": {"terminal": "input", "moduleId": 2}}, {"src": {"terminal": "output", "moduleId": 2}, "tgt": {"terminal": "input", "moduleId": 3}}], "modules": [{"terminals": "", "config": {"position": [5, 20], "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": {"input": [-15, 1, -1, 0], "output": [15, 1, 1, 0]}, "config": {"position": [160, 20], "xtype": "WireIt.ImageContainer"}, "name": "Join", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [280, 40], "xtype": "WireIt.ImageContainer"}, "name": "Scale", "value": {}}, {"terminals": "", "config": {"position": [340, 40], "xtype": "WireIt.Container"}, "name": "Save", "value": {}}], "properties": {"name": "test tas", "description": "example TAS diagram"}}]    
-offspec = [{"name":"andr test","wires": [{"src": {"terminal": "output", "moduleId": 0}, "tgt": {"terminal": "input", "moduleId": 2}}, {"src": {"terminal": "output", "moduleId": 2}, "tgt": {"terminal": "input", "moduleId": 3}}, {"src": {"terminal": "output", "moduleId": 3}, "tgt": {"terminal": "input", "moduleId": 4}}, {"src": {"terminal": "output", "moduleId": 4}, "tgt": {"terminal": "input", "moduleId": 5}}, {"src": {"terminal": "output", "moduleId": 5}, "tgt": {"terminal": "input", "moduleId": 6}}, {"src": {"terminal": "output", "moduleId": 6}, "tgt": {"terminal": "input", "moduleId": 1}}], "modules": [{"terminals": "", "config": {"files": ["/home/brendan/sampledata/ANDR/sabc/Isabc2002.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2003.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2004.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2005.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2006.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2007.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2008.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2009.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2010.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2011.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2012.cg1"], "position": [50, 50], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"position": [650, 350], "ext": "dat", "xtype": "WireIt.Container"}, "name": "Save", "value": {}}, {"terminals": {"input": [-15, 1, -1, 0], "output": [15, 1, 1, 0]}, "config": {"position": [150, 100], "xtype": "WireIt.ImageContainer"}, "name": "Join", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [250, 150], "xtype": "WireIt.ImageContainer", "offsets": {"theta": 0.10000000000000001}}, "name": "Offset", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [350, 200], "xtype": "WireIt.ImageContainer"}, "name": "Wiggle", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [450, 250], "xtype": "WireIt.ImageContainer"}, "name": "Pixels to two theta", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [550, 300], "xtype": "WireIt.ImageContainer"}, "name": "Two theta to qxqz", "value": {}}], "properties": {"name": "test ospec", "description": "example ospec diagram"}}]
+offspec = [{"name":"andr test","wires": [{"src": {"terminal": "output", "moduleId": 0}, "tgt": {"terminal": "input_data", "moduleId": 2}}, {"src": {"terminal": "output", "moduleId": 2}, "tgt": {"terminal": "input", "moduleId": 3}}, {"src": {"terminal": "output", "moduleId": 3}, "tgt": {"terminal": "input", "moduleId": 4}}, {"src": {"terminal": "output", "moduleId": 4}, "tgt": {"terminal": "input", "moduleId": 5}}, {"src": {"terminal": "output", "moduleId": 5}, "tgt": {"terminal": "input", "moduleId": 6}}, {"src": {"terminal": "output", "moduleId": 6}, "tgt": {"terminal": "input", "moduleId": 1}}], "modules": [{"terminals": "", "config": {"files": ["/home/brendan/sampledata/ANDR/sabc/Isabc2002.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2003.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2004.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2005.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2006.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2007.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2008.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2009.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2010.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2011.cg1", "/home/brendan/sampledata/ANDR/sabc/Isabc2012.cg1"], "position": [50, 50], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"position": [650, 350], "ext": "dat", "xtype": "WireIt.Container"}, "name": "Save", "value": {}}, {"terminals": {"input_data": [-16, 1, -1, 0], "input_grid":[-16,16,-1,0], "output": [15, 1, 1, 0]}, "config": {"position": [150, 100], "xtype": "WireIt.ImageContainer"}, "name": "Join", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [250, 150], "xtype": "WireIt.ImageContainer", "offsets": {"theta": 0.10000000000000001}}, "name": "Offset", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [350, 200], "xtype": "WireIt.ImageContainer"}, "name": "Wiggle", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [450, 250], "xtype": "WireIt.ImageContainer"}, "name": "Pixels to two theta", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [550, 300], "xtype": "WireIt.ImageContainer"}, "name": "Two theta to qxqz", "value": {}}], "properties": {"name": "test ospec", "description": "example ospec diagram"}}, 
+{"name":"test ospec","modules":[{"name":"Load","value":{},"config":{"position":[50,50],"xtype":"WireIt.Container"}},{"name":"Save","value":{},"config":{"position":[650,350],"xtype":"WireIt.Container"}},{"name":"Offset","value":{},"config":{"position":[204,92],"xtype":"WireIt.ImageContainer"}},{"name":"Wiggle","value":{},"config":{"position":[321,171],"xtype":"WireIt.ImageContainer"}},{"name":"Pixels to two theta","value":{},"config":{"position":[450,250],"xtype":"WireIt.ImageContainer"}},{"name":"Two theta to qxqz","value":{},"config":{"position":[560,392],"xtype":"WireIt.ImageContainer"}},{"name":"Join","value":{},"config":{"position":[452,390],"xtype":"WireIt.ImageContainer"}}],"properties":{"name":"test ospec","description":"example ospec diagram"},"wires":[{"xtype":"WireIt.BezierWire","src":{"moduleId":2,"terminal":"output"},"tgt":{"moduleId":3,"terminal":"input"}},{"xtype":"WireIt.BezierWire","src":{"moduleId":3,"terminal":"output"},"tgt":{"moduleId":4,"terminal":"input"}},{"xtype":"WireIt.BezierWire","src":{"moduleId":5,"terminal":"output"},"tgt":{"moduleId":1,"terminal":"input"}},{"xtype":"WireIt.BezierWire","src":{"moduleId":0,"terminal":"output"},"tgt":{"moduleId":2,"terminal":"input"}},{"xtype":"WireIt.BezierWire","src":{"moduleId":4,"terminal":"output"},"tgt":{"moduleId":6,"terminal":"input_data"}},{"xtype":"WireIt.BezierWire","src":{"moduleId":6,"terminal":"output"},"tgt":{"moduleId":5,"terminal":"input"}}],"language":"NCNR ANDR"}]
 SANS = [{"name":"sans test","wires": [{"src": {"terminal": "output", "moduleId": 0}, "tgt": {"terminal": "input", "moduleId": 2}}, {"src": {"terminal": "output", "moduleId": 2}, "tgt": {"terminal": "input", "moduleId": 3}}, {"src": {"terminal": "output", "moduleId": 3}, "tgt": {"terminal": "input", "moduleId": 4}}, {"src": {"terminal": "output", "moduleId": 4}, "tgt": {"terminal": "input", "moduleId": 5}}, {"src": {"terminal": "output", "moduleId": 5}, "tgt": {"terminal": "input", "moduleId": 1}}], "modules": [{"terminals": "", "config": {"files": ["/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110", "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108", "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102", "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106", "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105", "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC007.SA3_SRK_S107", "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/PLEX_2NOV2007_NG3.DIV"], "position": [5, 20], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"position": [500, 500], "ext": "dat", "xtype": "WireIt.Container"}, "name": "Save", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [360, 100], "xtype": "WireIt.ImageContainer"}, "name": "initial_correction", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [360, 200], "xtype": "WireIt.ImageContainer"}, "name": "correct_detector_efficiency", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [360, 300], "xtype": "WireIt.ImageContainer"}, "name": "absolute_scaling", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [360, 400], "xtype": "WireIt.ImageContainer"}, "name": "annular_av", "value": {}}], "properties": {"name": "test sans", "description": "example sans data"}}]
 
 SANS_2 = [{"name":"SANS 2","wires": [{"src": {"terminal": "output", "moduleId": 0}, "tgt": {"terminal": "input", "moduleId": 2}}, {"src": {"terminal": "output", "moduleId": 2}, "tgt": {"terminal": "input", "moduleId": 3}}, {"src": {"terminal": "output", "moduleId": 3}, "tgt": {"terminal": "input", "moduleId": 4}}, {"src": {"terminal": "output", "moduleId": 4}, "tgt": {"terminal": "input", "moduleId": 5}}, {"src": {"terminal": "output", "moduleId": 5}, "tgt": {"terminal": "input", "moduleId": 1}}], "modules": [{"terminals": "", "config": {"files": ["/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110", "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108", "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102", "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106", "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105", "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC007.SA3_SRK_S107", "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/PLEX_2NOV2007_NG3.DIV"], "position": [5, 20], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"position": [500, 500], "ext": "dat", "xtype": "WireIt.Container"}, "name": "Save", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [360, 100], "xtype": "WireIt.ImageContainer"}, "name": "initial_correction", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [360, 200], "xtype": "WireIt.ImageContainer"}, "name": "Correct Detector Sensitivity", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [360, 300], "xtype": "WireIt.ImageContainer"}, "name": "absolute_scaling", "value": {}}, {"terminals": {"input": [0, 10, -1, 0], "output": [20, 10, 1, 0]}, "config": {"position": [360, 400], "xtype": "WireIt.ImageContainer"}, "name": "annular_av", "value": {}}], "properties": {"name": "test sans", "description": "example sans data"}}]
+
+TAS_2= [{"name":"real TAS","wires": [{"src": {"terminal": "output", "moduleId": 0}, "tgt": {"terminal": "input", "moduleId": 1}}], "modules": [{"terminals": "input", "config": {"files": ["/home/alex/Desktop/dataflow/reduction/tripleaxis/EscanQQ7HorNSF91831.bt7"], "position": [50, 50], "xtype": "WireIt.Container"}, "name": "TripleAxis Load", "value": {}}, {"terminals": {"input": [-15, 1, -1, 0], "output": [15, 1, 1, 0]}, "config": {"position": [250, 400], "target_monitor": 900000, "xtype": "WireIt.ImageContainer"}, "name": "Normalize Monitor", "value": {}}], "properties": {"name": "test reduction", "description": "example reduction diagram"}}]
 
 sample_data = {
     'type': '2d',
@@ -87,25 +97,34 @@ sample_data = {
     'xlabel': 'This is my x-axis label',
     'ylabel': 'This is my y-axis label',
     'zlabel': 'This is my z-axis label',
-};
+}
 
 b = {'save':'successful'}
 
 
+# this is a temporary option until wirings are stored in the database:
+# they can be stored in a local list:
+wirings_list = offspec+a+SANS+SANS_2
+
 def listWirings(request):
     print 'I am loading'
-    return HttpResponse(simplejson.dumps(offspec+a+SANS+SANS_2))
+    return HttpResponse(simplejson.dumps(wirings_list))
 
 #    return HttpResponse(simplejson.dumps(a)) #andr vs bt7 testing
 
 def saveWiring(request):
     print 'I am saving'
+    new_wiring = simplejson.loads(request.POST['data'])
+    # this stores the wires in a simple list, in memory on the django server.
+    # replace this with a call to storing the wiring in a real database.
+    wirings_list.append(new_wiring)
     return HttpResponse(simplejson.dumps(b))
 
 def runReduction(request):
     print 'I am reducing'
 ####### SANS TESTING
-    result = SANS_INS.TESTING()
+    result = TAS_INS.TAS_RUN()
+    print "RESULT", result
     #print result
     #for i in range(6):
    #	name = 'checkingSANSresults' + str(i) + '.txt'
@@ -140,7 +159,9 @@ def runReduction(request):
 #    return HttpResponse(simplejson.dumps(a))
 
 
-
+######## 
+## Views for displaying a language selection form and for calling the file association table with the selected language.
+## scheme is the same as for the editor
 
 ########
 ## Views for displaying a language selection form and for calling the editor template with the selected language.
@@ -160,4 +181,12 @@ def languageSelect(request):
                             {'lang':request.POST['instruments']})
     form = languageSelectForm()
     return render_to_response('tracer_testingforWireit/languageSelect.html', {'form':form})
+    
+    
+###########
+## Views for users, redirects to MyProjects page from login. Then continues logically from there.
+@login_required
+def myProjects(request):
+	projects = request.user.projects
+	return render_to_response('userProjects/displayProjects.html', {'projects',projects})
     
