@@ -464,7 +464,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		if(!this.checkAutoLoad()) { 
     			this.loadPanel.show();
 		}
-		
+
 	},
 
 	/**
@@ -566,7 +566,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
   
 		  this.markSaved();
 
-		  
+
 		  this.preventLayerChangedEvent = false;
 		  // removes existing FAT
 		  console.log('REPLACING FAT')
@@ -640,13 +640,13 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			}
 		return headersList;	
 		},
-		
+
 	/**
 	* This method gets called every time there is an updateAll() call on the FAT. 
 	* Currently, it updates the number of reduction instances and the display for 
 	* Instance Info
 	**/
-	
+
 	FATupdate: function(templateConfig) {
 		console.log('in Editor', templateConfig)
 		setMax = 0;
@@ -656,10 +656,10 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		this.maxReduction = setMax;
 		this.templateConfig = templateConfig;
 		this.displayCurrentReduction();
-	
+
 	},
-	
-		
+
+
 	/**
 	* These following methods are for paging through the reduction template instances
 	*
@@ -671,10 +671,10 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			YAHOO.util.Dom.get('reductionInstance').innerHTML = String(this.reductionInstance)
 			this.displayCurrentReduction()
 			}
-	
+
 	},
-		
-		
+
+
 	nextReductionInstance: function() {
 		if (this.reductionInstance < this.maxReduction) {
 			this.reductionInstance += 1
@@ -682,7 +682,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			this.displayCurrentReduction()
 			}
 	},
-	
+
 	displayCurrentReduction: function() {
 		//console.log('In DISPLAY')
 		HTML = '<dl class ="instance-info-display">'
@@ -705,5 +705,4 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 WireIt.WiringEditor.adapters = {};
 
 
-})();
-
+})()
