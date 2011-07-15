@@ -4,6 +4,7 @@ import uncertainty, err1d
 import readncnr4 as readncnr
 from formatnum import format_uncertainty
 import copy
+from mpfit import mpfit
 #from ...dataflow import wireit
 eps=1e-8
 
@@ -400,7 +401,7 @@ class Detector(Component):
 
 
         def __init__(self,name,dimension=None,values=None,err=None,units='counts', 
-                     aliases=None,friends=None, isInterpolatable=True,isDistinct=None):
+                     aliases=None,friends=None, isInterpolatable=True,isDistinct=None, efficiencies=None):
                 self.name=name
                 self.units=units
                 self.measurement=err_check(values,err)
@@ -408,6 +409,7 @@ class Detector(Component):
                 self.isDistinct=isDistinct
                 self.isInterpolatable=isInterpolatable
                 self.friends=friends  
+		self.efficiencies=efficiencies
                 #If I am updated, then my friends might need to be updated
                 self.dimension=dimension
                 #Internally, I imagine that we should internally store the detector a multidimensional array.
@@ -608,6 +610,12 @@ class Physical_Motors(object):
                              isInterpolatable=True)
                 self.q=Motor('q',values=None,err=None,units='angstrom_inverse',isDistinct=True,
                              isInterpolatable=True)
+		self.orient1=Motor('orient1',values=None,err=None,units='rlu',isDistinct=True,
+                             isInterpolatable=True)
+		self.orient2=Motor('orient2',values=None,err=None,units='rlu',isDistinct=True,
+                             isInterpolatable=True)
+		self.orient3=Motor('orient3',values=None,err=None,units='rlu',isDistinct=True,
+                             isInterpolatable=True)
                 #self.qx=Motor('qx',values=None,err=None,units='rlu',isDistinct=True,
                 #              isInterpolatable=True)
                 #self.qy=Motor('qy',values=None,err=None,units='rlu',isDistinct=True,
@@ -675,6 +683,7 @@ class Slits(object):
 
 class TripleAxis(object):
         def __init__(self):
+		self.data=[] #large nd array of all data columns
                 self.monochromator=Monochromator()
                 self.analyzer=Analyzer()
                 self.sample=Sample()
@@ -740,6 +749,58 @@ class TripleAxis(object):
                 for detector in bt7.detectors:
                         detector.measurement=detector.measurement*rescor
                 return
+	
+	#def calc_plane(self, h, k, l):
+
+		##o1=np.array([1,-1,0])
+		##o2=np.array([1,1,-2])
+		#o1,o2,o3=self.calc_basis()
+		#A=np.array([o1,o2,o3]).T #now o1, o2, o3 form an orthonormal basis
+		
+		#a_arr=[]
+		#b_arr=[]
+		#c_arr=[]
+		#h=self.physical_motors.h.measurement.x
+		#k=self.physical_motors.k.measurement.x
+		#l=self.physical_motors.l.measurement.x
+		#res=0
+		
+		#for i in range(len(h)):
+			#hkl=np.array([h[i],k[i],l[i]])
+			#sol=np.linalg.solve(A,hkl)
+			#a=sol[0]
+			#b=sol[1]
+			#c=sol[2]
+			#a_arr.append(a)
+			#b_arr.append(b)
+			#c_arr.append(c)
+		#return a_arr,b_arr,c_arr
+	
+	#def calc_basis(self, orient1, orient2):
+		#"""Constructs the orothonormal bases for a TripleAxis object that has
+		#two orientation vectors, orient1 and orient2."""
+		#orient3 = np.cross(orient1,orient2)
+		#A = np.array([orient1,orient2,orient3]).T
+		#a_arr = []
+		#b_arr = []
+		#c_arr = []
+
+		##Now, let's remap h,k,l into a linear combination of o1,o2,o3 s.t. for any point (h,k,l)
+		##(h,k,l)=a*o1+b*o2+c*o3
+		#for i in range(len(h)):
+			#hkl=np.array([h[i],k[i],l[i]])
+			#sol=np.linalg.solve(A,hkl);
+			#[a,b,c]=sol
+			##we use a solver because it is more numerically stable than simply taking the inverse
+			#a_arr.append(a)
+			#b_arr.append(b)
+			#c_arr.append(c)		
+		
+		##need to use setattr?
+		#self.physical_motors.orient1=a_rr
+		#self.physical_motors.orient2=b_rr
+		#self.physical_motors.orient3=c_rr
+		
         def get_plottable(self):
         	#if self.detectors.primary_detector.dx==None:
 			
@@ -788,6 +849,7 @@ def translate(bt7,dataset):
         translate_monochromator(bt7,dataset)
         translate_analyzer(bt7,dataset)
         translate_collimator(bt7,dataset)
+	translate_sample(bt7,dataset) #sample must be done before physical motors to calculate orient1,2,3 from dataset
         translate_primary_motors(bt7,dataset) #primary motors must be done before physical motors for Q calc.
         translate_physical_motors(bt7,dataset)
         translate_filters(bt7,dataset)
@@ -796,12 +858,13 @@ def translate(bt7,dataset):
         translate_slits(bt7,dataset)
         translate_temperature(bt7,dataset)
         translate_time(bt7,dataset)
-        #translate_sample(bt7,dataset)
-        #translate_metadata(bt7,dataset)
+        translate_metadata(bt7,dataset)
         translate_detectors(bt7,dataset)
 
 
 def translate_monochromator(bt7,dataset):
+	#TODO:
+	#append data from dataset to bt7.data (nd list) then set bt7.monochromator.field=bt7[val]
         translate_dict={}
         #key--> on bt7
         #value -> input, i.e. the field in dataset.data or dataset.metadata
@@ -992,10 +1055,30 @@ def translate_physical_motors(bt7,dataset):
         
 	Ei = bt7.physical_motors.ei.measurement
 	Ef = bt7.physical_motors.ef.measurement
-	A4 = bt7.primary_motors.sample_two_theta.measurement.x
-        Qsquared = (Ei**2 + Ef**2 - 2*Ei*Ef*np.cos(A4/2))/2.072
+	A4 = bt7.primary_motors.sample_two_theta.measurement
+        Qsquared = (Ei + Ef - 2*np.sqrt(Ei*Ef)*np.cos(A4/2))/2.072
 	Q = np.sqrt(Qsquared)
 	bt7.physical_motors.q.measurement=Q
+	
+	try:
+		o1temp=bt7.sample.orientation.orient1
+		o2temp=bt7.sample.orientation.orient2
+		o1=np.array([o1temp['h'], o1temp['k'], o1temp['l']])
+		o2=np.array([o2temp['h'], o2temp['k'], o2temp['l']])
+		
+		o1=o1/np.linalg.norm(o1) #normalize o1
+		o2=o2/np.linalg.norm(o2) #normalize o2, not necessary?
+		o3=np.cross(o1,o2)       #construct o3
+		o3=o3/np.linalg.norm(o3) #normalize o3, though should already be normalized
+		o2=np.cross(o3,o1)       #conctruct unit vector o2
+		
+		setattr(bt7.physical_motors.orient1, 'value', o1)
+		setattr(bt7.physical_motors.orient2, 'value', o2)
+		setattr(bt7.physical_motors.orient3, 'value', o3)
+		#TODO - make 'fancy' names for these?
+		#setattr(bt7.physical_motors.orient3, 'name', '110')
+	except:
+		pass
         #translate_dict['h']='h'
         #translate_dict['k']='k'
         #translate_dict['l']='l'
@@ -1033,7 +1116,7 @@ def translate_time(bt7, dataset):
         translate_dict['monitor']='monitor'
         translate_dict['monitor2']='monitor2'
         map_motors(translate_dict,bt7.time,dataset)
-        print bt7.time.monitor
+
         #self.time.timestamp=dataset.timestamp
         #self.time.duration=dataset.data.time
         #self.time.monitor=dataset.data.monitor
@@ -1087,6 +1170,12 @@ def translate_sample(bt7,dataset):
         translate_dict['lattice']='lattice'
         map_motors(translate_dict,bt7.sample,dataset)
         
+	if bt7.sample.orientation.orient1==None:
+		#if the dataset has labels 'orient1' and 'orient2' but not 'orientation'
+		translate_dict = {}
+		translate_dict['orient1']='orient1'
+		translate_dict['orient2']='orient2'
+		map_motors(translate_dict, bt7.sample.orientation,dataset)
         #bt7.sample.orientation =dataset.metadata.orientation
         #bt7.sample.mosaic=dataset.metadata.?
         #bt7.sample.lattice=dataset.metadata.lattice
@@ -1202,35 +1291,54 @@ def set_detector(bt7,dataset,detector_name,data_name):
                 delattr(bt7.detectors,detector_name)  #We were lied to by ICE and this detector isn't really present...
 
 
-'''
-def map_data(translate_dict,target_field,dataset):
-        #key --> on bt7
-        #value --> input, i.e. the field in dataset.data or dataset.metadata
-        for key,value in translate_dict.iteritems():
-                if dataset.metadata.has_key(value):
-                        setattr(target_field,key,dataset.metadata[value])
-                if dataset.data.has_key(value):
-                        setattr(target_field,key,dataset.data[value])
-'''
+		
+#Originally working map_motors:
+#def map_motors(translate_dict,target_field,dataset):
+        ##key --> on bt7
+        ##value --> input, i.e. the field in dataset.data or dataset.metadata
+        #for key,value in translate_dict.iteritems():
+                #'''
+                #afield = None
+                #try:
+                        #afield = getattr(target_field, key)
+                #except:
+                        #pass
+                #'''
+                #if dataset.metadata.has_key(value):
+                        #if hasattr(target_field, key) and isinstance(getattr(target_field, key),Motor):
+                                #getattr(target_field,key).measurement.x=dataset.metadata[value] #do we need try escape logic here?
+                                #getattr(target_field,key).measurement.variance=None
+                        #else:
+                                #setattr(target_field,key,dataset.metadata[value])
+                #if dataset.data.has_key(value):
+                        #if hasattr(target_field, key) and isinstance(getattr(target_field, key),Motor):
+                                #try:
+                                        #getattr(target_field,key).measurement.x=np.array(dataset.data[value],'Float64')
+                                        #getattr(target_field,key).measurement.variance=None
+                                #except:
+                                        #getattr(target_field,key).measurement.x=np.array(dataset.data[value])  #These may be "IN", or "OUT", or "N/A"
+                                        #getattr(target_field,key).measurement.variance=None
+                        #else:
+                                #try:
+                                        #setattr(target_field,key,Motor(key,values=np.array(dataset.data[value],'Float64'),
+                                                                       #err=None,
+                                                                       #units=None,
+                                                                       #isDistinct=True,
+                                                                       #isInterpolatable=True))
+                                                                       ##Not sure how I should really be handling this--> this is for the case where the field doesn't already exist
+                                #except:
+                                        #setattr(target_field,key,Motor(key,values=dataset.data[value],
+                                                                       #err=None,
+                                                                       #units=None,
+                                                                       #isDistinct=True,
+                                                                       #isInterpolatable=True))
 
-def map_motors(translate_dict,target_field,dataset):
+
+def map_motors(translate_dict,tas,target_field,dataset):
         #key --> on bt7
         #value --> input, i.e. the field in dataset.data or dataset.metadata
         for key,value in translate_dict.iteritems():
-                '''
-                afield = None
-                try:
-                        afield = getattr(target_field, key)
-                except:
-                        pass
-                '''
-                if dataset.metadata.has_key(value):
-                        if hasattr(target_field, key) and isinstance(getattr(target_field, key),Motor):
-                                getattr(target_field,key).measurement.x=dataset.metadata[value] #do we need try escape logic here?
-                                getattr(target_field,key).measurement.variance=None
-                        else:
-                                setattr(target_field,key,dataset.metadata[value])
-                if dataset.data.has_key(value):
+		if dataset.data.has_key(value):
                         if hasattr(target_field, key) and isinstance(getattr(target_field, key),Motor):
                                 try:
                                         getattr(target_field,key).measurement.x=np.array(dataset.data[value],'Float64')
@@ -1252,9 +1360,15 @@ def map_motors(translate_dict,target_field,dataset):
                                                                        units=None,
                                                                        isDistinct=True,
                                                                        isInterpolatable=True))
+                elif dataset.metadata.has_key(value):
+                        if hasattr(target_field, key) and isinstance(getattr(target_field, key),Motor):
+                                getattr(target_field,key).measurement.x=dataset.metadata[value] #do we need try escape logic here?
+                                getattr(target_field,key).measurement.variance=None
+				tas.data.append(getattr(target_field,key))
+                        else:
+                                setattr(target_field,key,dataset.metadata[value])
                 
-                #self.h=Motor('h',values=None,err=None,units='rlu',isDistinct=True,
-                #             isInterpolatable=True)
+                
 
 
 def establish_correction_coefficients(filename):
@@ -1278,10 +1392,95 @@ def establish_correction_coefficients(filename):
         return coefficients   
 
 
-       
+def make_orthonormal(o1,o2):
+	"""Given two vectors, creates an orthonormal set of three vectors. 
+	Maintains the direction of o1 and the coplanarity of o1 and o2"""
+	o1=o1/N.linalg.norm(o1)
+	o2=o2/N.linalg.norm(o2)
+	o3=N.cross(o1,o2)
+	o3=o3/N.linalg.norm(o3)
+	o2=N.cross(o3,o1)
+	return o1,o2,o3
 
+def calc_plane(p,h,k,l,normalize=True):
+	o1=N.array([p[0],p[1],p[2]])
+	o2=N.array([p[3],p[4],p[5]])
+	if normalize:
+		o1,o2,o3=make_orthonormal(o1,o2)
+	else:
+		o3 = np.cross(o1,o2)
+	A=N.array([o1,o2,o3]).T
+	a_arr=[]
+	b_arr=[]
+	c_arr=[]
+
+	for i in range(len(h)):
+		hkl=N.array([h[i],k[i],l[i]])
+		sol=N.linalg.solve(A,hkl)
+		a=sol[0]
+		b=sol[1]
+		c=sol[2]
+		a_arr.append(a)
+		b_arr.append(b)
+		c_arr.append(c)
+	return a_arr,b_arr,c_arr
+
+
+def cost_func(p,h,k,l):
+	a_arr, b_arr, c_arr = calc_plane(p,h,k,l)
+	c = N.array(c_arr)
+	res = (c-c.mean())**2
+	#dof=len(I)-len(p)
+	#fake_dof=len(I)
+	#print 'chi',(y-ycalc)/err
+	return res#/Ierr#/N.sqrt(fake_dof)
+
+
+
+def myfunctlin(p, fjac=None,h=None,k=None,l=None):
+	# Parameter values are passed in "p"
+	# If fjac==None then partial derivatives should not be
+	# computed.  It will always be None if MPFIT is called with default
+	# flag.
+	# Non-negative status value means MPFIT should continue, negative means
+	# stop the calculation.
+	status = 0
+	return [status, cost_func(p,h,k,l)]
+
+def fit_plane(h,k,l,p0=None):
+	if p0==None:
+		p0=[1./N.sqrt(5),-1./N.sqrt(2),0,0,0,1] #a guess...
+	parbase={'value':0., 'fixed':0, 'limited':[0,0], 'limits':[0.,0.]}
+	parinfo=[]
+	for i in range(len(p0)):
+		parinfo.append(copy.deepcopy(parbase))
+	for i in range(len(p0)): 
+		parinfo[i]['value']=p0[i]
+	if 0:
+		for i in range(len(p0)): 
+			parinfo[i]['limited']=[1,1]
+			parinfo[i]['limits']=[-1,1]
+	fa = {'h':h, 'k':k,'l':l}
+	print 'linearizing'
+	m = mpfit(myfunctlin, p0, parinfo=parinfo,functkw=fa)
+	p = m.params
+	print 'status = ', m.status
+	print 'params = ', m.params
+	#your parameters define two noncollinear vectors that will form the basis for your space
+	o1=N.array([p[0],p[1],p[2]])
+	o2=N.array([p[3],p[4],p[5]])
+	o1,o2,o3=make_orthonormal(o1,o2)
+	return o1,o2,o3
 
  
+
+def join(tas1, tas2):
+	"""Joins two TripleAxis objects"""
+	#average all similar points
+	#put all detectors on the same monitor, assumed that the first monitor is desired throughout
+	pass #TODO
+
+
 
 
 def filereader(filename):
@@ -1305,6 +1504,7 @@ if __name__=="__main__":
         
         bt7 = filereader('EscanQQ7HorNSF91831.bt7')
         print 'translations done'
+	aarr,barr,carr=bt7.calc_plane()
         bt7.normalize_monitor(90000)
         #print 'detailed balance done'
         bt7.harmonic_monitor_correction('BT7')
