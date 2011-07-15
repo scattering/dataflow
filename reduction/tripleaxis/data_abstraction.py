@@ -436,7 +436,7 @@ class Detector(Component):
 class DetectorSet(object):
         """This defines a group of detectors"""
         def __init__(self):
-                self.primary_detector=Detector('Primary detector',dimension=None,values=None,err=None,units='counts', 
+                self.primary_detector=Detector('primary detector',dimension=None,values=None,err=None,units='counts', 
                      aliases=None,friends=None, isInterpolatable=True)
                 self.detector_mode=None
                         
