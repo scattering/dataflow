@@ -4,7 +4,7 @@ Triple Axis Spectrometer reduction and analysis modules
 import math, os, sys
 
 #Relative imports for use in the larger project
-
+'''
 from ...reduction.tripleaxis.data_abstraction import TripleAxis, filereader
 from ..calc import run_template
 from .. import wireit
@@ -27,7 +27,7 @@ from ..modules.tas_load import load_module
 '''
 #direct imports for use individually (ie running this file)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
-from dataflow.reduction.tripleaxis.data_abstraction import TripleAxis, filereader
+from dataflow.reduction.tripleaxis import data_abstraction
 from dataflow.dataflow.calc import run_template
 from dataflow.dataflow import wireit
 from dataflow import ROOT_URL
@@ -35,7 +35,7 @@ from django.utils import simplejson
 
 import numpy
 from dataflow.dataflow import config
-from dataflow.dataflow.core import Instrument, Datatype, Template, register_instrument
+from dataflow.dataflow.core import Instrument, Data, Template, register_instrument
 #from dataflow.dataflow.modules.load import load_module
 from dataflow.dataflow.modules.join import join_module
 from dataflow.dataflow.modules.scale import scale_module
@@ -45,9 +45,9 @@ from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_modu
 from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
 from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
 from dataflow.dataflow.modules.tas_load import load_module
-'''
-TAS_DATA = 'data1d.tas'
 
+TAS_DATA = 'data1d.tas'
+data1d = Data(TAS_DATA, data_abstraction)
 # Reduction operations may refer to data from other objects, but may not
 # modify it.  Instead of modifying, first copy the data and then work on
 # the copy.
@@ -84,20 +84,13 @@ def data_scale(data, scale):
     result = {'name': outname, 'x': x, 'y': y, 'dy': dy, 'monitor': mon}
     return result
 
-# ==== Data types ====
-
-data1d = Datatype(id=TAS_DATA,
-                  name='1-D Triple Axis Data',
-                  plot='tasplot')
-
-
 
 # === Component binding ===
 
 def load_action(files=None, intent=None, position=None, xtype=None):
     """Currently set up to load ONLY 1 file"""
     #print "loading", files
-    result = [filereader(f) for f in files]
+    result = [data_abstraction.filereader(f) for f in files]
     return dict(output=result)
     
 load = load_module(id='tas.load', datatype=TAS_DATA,
@@ -253,7 +246,9 @@ def TAS_RUN():
 	for i in range(len(value['output'])):
 		if not type(value['output'][i])==type({}):
         		value['output'][i] = value['output'][i].get_plottable()
+    print result
     return result
+hi=TAS_RUN()
 #print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
 #print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
 #print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))

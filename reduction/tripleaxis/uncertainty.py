@@ -267,6 +267,17 @@ class Measurement(object):
             return Measurement(*err1d.tan(self.x,self.variance))
         else:
             return Measurement(numpy.tan(self.x),None)
+    def cos(self):
+        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+            return Measurement(*err1d.cos(self.x,self.variance))
+        else:
+            return Measurement(numpy.cos(self.x),None)
+    
+    def sin(self):
+        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+            return Measurement(*err1d.sin(self.x,self.variance))
+        else:
+            return Measurement(numpy.sin(self.x),None)
 
 def log(val): return self.log()
 def exp(val): return self.exp()

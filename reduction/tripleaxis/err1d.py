@@ -88,6 +88,18 @@ def tan(X,varX):
     varZ=varX/numpy.cos(numpy.sqrt(varX))**4
     return Z,varZ
 
+def sin(X,varX):
+    """sin with error propagation"""
+    Z=numpy.sin(X)
+    varZ=varX*numpy.cos(numpy.sqrt(varX))**2
+    return Z,varZ
+
+def cos(X,varX):
+    """cos with error propagation"""
+    Z=numpy.cos(X)
+    varZ=varX*numpy.sin(numpy.sqrt(varX))**2
+    return Z,varZ
+
 # Confirm this formula before using it
 # def pow(X,varX, Y,varY):
 #    Z = X**Y
