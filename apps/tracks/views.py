@@ -3,7 +3,13 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
-from apps.tracks.forms import languageSelectForm 
+from apps.tracks.forms import languageSelectForm
+from django.contrib.auth.decorators import login_required
+
+## models
+from django.contrib.auth.models import User 
+from models import *
+
 
 from ...apps.fileview import testftp
 
@@ -175,4 +181,12 @@ def languageSelect(request):
                             {'lang':request.POST['instruments']})
     form = languageSelectForm()
     return render_to_response('tracer_testingforWireit/languageSelect.html', {'form':form})
+    
+    
+###########
+## Views for users, redirects to MyProjects page from login. Then continues logically from there.
+@login_required
+def myProjects(request):
+	projects = request.user.projects
+	return render_to_response('userProjects/displayProjects.html', {'projects',projects})
     

@@ -31,7 +31,7 @@ __all__ = ['instrument_to_wireit_menu', 'instrument_to_wireit_language',
            'wireit_diagram_to_template', 'template_to_wireit_diagram',
            'template_list']
 
-import json
+import json, pickle
 
 from .core import lookup_module, Template
 from . import config
@@ -200,7 +200,7 @@ def _emit_module_position(module):
 # GET CONFIG FROM TEMPLATE?
     config = dict(position=position, xtype=xtype)
     config.update(module['config'])
-    print "Config:", config
+#    print "Config:", config
     return dict(config=config,
                 name=underlying_module.name,
                 value={},
@@ -228,4 +228,4 @@ def _parse_module_position(module, instrument):
     position = module['config']['position']
     id = instrument.id_by_name(str(module['name']))
     #print dict(module=id, position=position,config=module['config'])
-    return dict(module=id, position=position,config=module['config'])#, config = {blah=blah}
+    return dict(module=id, position=position, config=module['config'])#, config = {blah=blah}
