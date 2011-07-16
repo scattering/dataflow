@@ -41,7 +41,7 @@ if __name__=="__main__":
     call('svn co svn://openopt.org/PythonPackages OOSuite',shell=True)
     call('cd OOSuite; python install_all.py; cd ..',shell=True)
     for command in merc_commands:
-    	call('hg clone %s'%(command,), shell=True)
+    	call('hg clone %s'%(command,), shell=True) # Default: clones into directory where you're running install.py
     for command in easy_commands:
         call('pip install %s'%(command,),shell=True)
 

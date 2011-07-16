@@ -1,4 +1,5 @@
 var andrdata = {
+  type: '2d',
   "dims": {
     "xdim": 201, 
     "xmax": 0.10000000000000001, 
