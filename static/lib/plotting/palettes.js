@@ -1,5 +1,5 @@
 var _fs = function(ks) {
-  return function(i) { return $.map($.map(ks, _f), function(f) { return f(i); }); };
+  return function(i) { return jQuery.map(jQuery.map(ks, _f), function(f) { return f(i); }); };
 };
 var _f = function(k) {
   return function(i) { return k * i; };
@@ -54,27 +54,27 @@ var reses = [ 2, 4, 8, 16, 32, 64, 128, 256, 311 ];
 
 function renderSelects(ids) {
   for (func in funcs)
-    $('#' + ids[0]).append($('<option />', { value: func, text: func }));
+    jQuery('#' + ids[0]).append(jQuery('<option />', { value: func, text: func }));
   for (palette in palettes)
-    $('#' + ids[1]).append($('<option />', { value: palette, text: palette }));
+    jQuery('#' + ids[1]).append(jQuery('<option />', { value: palette, text: palette }));
   for (numedge in numedges)
-    $('#' + ids[2]).append($('<option />', { value: numedge, text: numedges[numedge] }));
+    jQuery('#' + ids[2]).append(jQuery('<option />', { value: numedge, text: numedges[numedge] }));
   for (res in reses)
-    $('#' + ids[3]).append($('<option />', { value: reses[res], text: reses[res] }));
-  $('#' + ids[4]).click({ ids: ids }, updatePalette);
+    jQuery('#' + ids[3]).append(jQuery('<option />', { value: reses[res], text: reses[res] }));
+  jQuery('#' + ids[4]).click({ ids: ids }, updatePalette);
 }
 function updatePalette(e) {
   if (e == undefined)
     e = { data: { ids: ['funcs', 'palettes', 'numedges', 'res', 'submit'] }};
     
-  var func = $('#' + e.data.ids[0]).val();
+  var func = jQuery('#' + e.data.ids[0]).val();
   data[0].func = funcs[func].f;
   data[0].desc = funcs[func].desc;
-  $('#desc').html(funcs[func].desc);
-  data[0].dims.dx = (data[0].dims.xmax - data[0].dims.xmin) / $('#' + e.data.ids[3]).val();
-  data[0].dims.dy = (data[0].dims.ymax - data[0].dims.ymin) / $('#' + e.data.ids[3]).val();
-  data[0].palette = $('#' + e.data.ids[1]).val();
-  data[0].edges = 1 * $('#' + e.data.ids[2]).val();
+  jQuery('#desc').html(funcs[func].desc);
+  data[0].dims.dx = (data[0].dims.xmax - data[0].dims.xmin) / jQuery('#' + e.data.ids[3]).val();
+  data[0].dims.dy = (data[0].dims.ymax - data[0].dims.ymin) / jQuery('#' + e.data.ids[3]).val();
+  data[0].palette = jQuery('#' + e.data.ids[1]).val();
+  data[0].edges = 1 * jQuery('#' + e.data.ids[2]).val();
   data[0] = DataSeries(data[0]);
 //  plot.series[0] = newData;
 //  plot.replot();
@@ -166,7 +166,7 @@ function color_blend_segments(h, segmentdata) {
   if (h < 0 || h > 1) throw 'Error: h is not in the domain [0, 1]';
   var colors = ['red', 'green', 'blue'];
   var color_blend = [];
-  for (i in colors) {
+  for (var i = 0; i < colors.length; i ++) {
     var colordata = segmentdata[colors[i]];
     var left = searchsorted(colordata, h, 'left', 0);
     var right = Math.min(searchsorted(colordata, h, 'right', 0), colordata.length - 1);

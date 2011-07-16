@@ -407,9 +407,8 @@
         
         if (sw > 0 && sh > 0) {
             //test('mycanvas', this);
-            this.points = data[0].points;//
-            test('invis', this);
-            img = canvas2img('invis');
+            test(this.invisid, this);
+            img = canvas2img(this.invisid);
             
             var idx = 0;
             this.bubbleCanvases[idx] = new $.jqplot.BubbleCanvas();
