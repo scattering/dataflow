@@ -7,8 +7,9 @@ The function run_template
 from pprint import pprint
 from inspect import getsource
 from .core import lookup_module, lookup_datatype
-import hashlib, redis
+import hashlib, redis, types, os
 
+os.system("redis-server") # ensure redis is running
 server = redis.Redis("localhost")
 
 def run_template(template, config):
@@ -58,13 +59,12 @@ def run_template(template, config):
                     result[terminal['id']] = [cls.loads(str) for str in server.lrange(terminal_fp, 0, -1)]
         else:
             result = module.action(**kwargs)
-            for terminal_id, arr in result.items():
+            for terminal_id, res in result.items():
                 terminal_fp = name_terminal(fp, terminal_id)
-                for data in arr:
+                for data in res:
                     server.rpush(terminal_fp, data.dumps())
             server.set(fp, fp) # used for checking if the calculation exists; could wrap this whole thing with loop of output terminals
         all_results[nodenum] = result
-    
     # retrieve plottable results
     ans = {}
     for nodenum, result in all_results.items():

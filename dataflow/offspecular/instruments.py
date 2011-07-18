@@ -1,7 +1,7 @@
 """
 Offspecular reflectometry reduction modules
 """
-import os, sys
+import os, sys, simplejson
 dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.append(dir)
 
@@ -33,26 +33,40 @@ OSPEC_DATA_HE3 = OSPEC_DATA + '.he3'
 datahe3 = Data(OSPEC_DATA_HE3, He3AnalyzerCollection)
 
 # Load module
-def load_action(files=[], intent=''):
+def load_action(files=[], intent='', auto_PolState=False, PolStates=[]):
     print "loading", files
-    result = [_load_data(f) for f in files] # not bundles
+    if PolStates == []:
+        PolStates = [''] * len(files)
+    result = [_load_data(f, auto_PolState, state) for f, state in zip(files, PolStates)] # not bundles
     return dict(output=result)
-def _load_data(name):
+def _load_data(name, auto_PolState, PolState):
     (dirName, fileName) = os.path.split(name)
-    return LoadICPData(fileName, path=dirName, auto_PolState=True)
+    return LoadICPData(fileName, path=dirName, auto_PolState=auto_PolState, PolState=PolState)
+auto_PolState_field = {
+        "type":"bool",
+        "label": "Auto-polstate",
+        "name": "auto_PolState",
+        "value": False,
+}
+PolStates_field = {
+        "type":"list",
+        "label": "PolStates",
+        "name": "PolStates",
+        "value": [],
+}
 load = load_module(id='ospec.load', datatype=OSPEC_DATA,
-                   version='1.0', action=load_action)
+                   version='1.0', action=load_action, fields=[auto_PolState_field, PolStates_field])
 
 # Save module
 def save_action(input=[], ext=None):
-    for f in input: _save_one(f, ext) # not bundles
+    for index, f in enumerate(input): _save_one(f, ext, index) # not bundles
     return {}
-def _save_one(input, ext):
+def _save_one(input, ext, index):
     default_filename = "default.cg1"
     # modules like autogrid return MetaArrays that don't have filenames
     outname = initname = input._info[-1]["path"] + "/" + input._info[-1].get("filename", default_filename)
     if ext is not None:
-        outname = ".".join([os.path.splitext(outname)[0], ext])
+        outname = ".".join([os.path.splitext(outname)[0] + str(index), ext])
     print "saving", initname, 'as', outname
     input.write(outname)
 save = save_module(id='ospec.save', datatype=OSPEC_DATA,
@@ -77,15 +91,13 @@ combine = combine_module(id='ospec.combine', datatype=OSPEC_DATA, version='1.0',
 # Offset module
 def offset_action(input=[], offsets={}):
     print "offsetting"
-    result = CoordinateOffset().apply(input, offsets=offsets)
-    return dict(output=result)
+    return dict(output=CoordinateOffset().apply(input, offsets=offsets))
 offset = offset_module(id='ospec.offset', datatype=OSPEC_DATA, version='1.0', action=offset_action)
 
 # Wiggle module
 def wiggle_action(input=[], amp=0.14):
     print "wiggling"
-    result = WiggleCorrection().apply(input, amp=amp)
-    return dict(output=result)
+    return dict(output=WiggleCorrection().apply(input, amp=amp))
 wiggle = wiggle_module(id='ospec.wiggle', datatype=OSPEC_DATA, version='1.0', action=wiggle_action)
 
 # Pixels to two theta module
@@ -124,9 +136,9 @@ load_he3 = load_he3_module(id='ospec.loadhe3', datatype=OSPEC_DATA_HE3,
 def append_polarization_matrix_action(input=[], he3cell=None):
     print "appending polarization matrix"
     he3analyzer = None
-    if he3cell != None:
+    if he3cell != None: # should always be true; he3cell is now required
         he3analyzer = he3cell[0]
-    return dict(output=[AppendPolarizationMatrix().apply(input, he3cell=he3analyzer)])
+    return dict(output=AppendPolarizationMatrix().apply(input, he3cell=he3analyzer))
 append_polarization = append_polarization_matrix_module(id='ospec.append', datatype=OSPEC_DATA,
                     cell_datatype=OSPEC_DATA_HE3, version='1.0', action=append_polarization_matrix_action)
 
@@ -136,14 +148,14 @@ def combine_polarized_action(input=[], grid=None):
     output_grid = None
     if grid != None:
         output_grid = grid[0]
-    return dict(output=[CombinePolarized().apply(input, grid=output_grid)])
+    return dict(output=CombinePolarized().apply(input, grid=output_grid))
 combine_polarized = combine_polarized_module(id='ospec.comb_polar', datatype=OSPEC_DATA,
                                              version='1.0', action=combine_polarized_action)
 
 # Polarization correction module
 def polarization_correct_action(input=[], assumptions=0, auto_assumptions=True):
     print "polarization correction"
-    return dict(output=[PolarizationCorrect().apply(polar_dict, assumptions=assumptions, auto_assumptions=auto_assumptions) for polar_dict in input])
+    return dict(output=PolarizationCorrect().apply(input, assumptions=assumptions, auto_assumptions=auto_assumptions)) 
 correct_polarized = polarization_correct_module(id='ospec.correct_polar', datatype=OSPEC_DATA,
                                              version='1.0', action=polarization_correct_action)
 
@@ -164,29 +176,57 @@ for instrument in instrmnts:
 
 # Testing
 if __name__ == '__main__':
-    path, ext = dir + '/dataflow/sampledata/ANDR/sabc/Isabc20', '.cg1'
-    files = [path + str(i + 1).zfill(2) + ext for i in range(1, 12)]
-    modules = [
-        dict(module="ospec.load", position=(50, 50),
-             config={'files': files, 'intent': 'signal'}),
-        dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
-        dict(module="ospec.combine", position=(150, 100), config={}),
-        dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':0}}),
-        dict(module="ospec.wiggle", position=(350, 200), config={}),
-        dict(module="ospec.twotheta", position=(450, 250), config={}),
-        dict(module="ospec.qxqz", position=(550, 300), config={}),
-        dict(module="ospec.grid", position=(600, 350), config={}),
-    ]
-    wires = [
-        dict(source=[0, 'output'], target=[4, 'input']),
-        dict(source=[4, 'output'], target=[3, 'input']),
-        dict(source=[3, 'output'], target=[5, 'input']),
-        dict(source=[5, 'output'], target=[2, 'input']),
-        dict(source=[5, 'output'], target=[7, 'input']),
-        dict(source=[7, 'output'], target=[2, 'grid']),
-        dict(source=[2, 'output'], target=[6, 'input']),
-        dict(source=[6, 'output'], target=[1, 'input']),
-    ]
+    polarized = True
+    if not polarized:
+        path, ext = dir + '/dataflow/sampledata/ANDR/sabc/Isabc20', '.cg1'
+        files = [path + str(i + 1).zfill(2) + ext for i in range(1, 12)]
+        modules = [
+            dict(module="ospec.load", position=(50, 50),
+                 config={'files': files, 'intent': 'signal'}),
+            dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
+            dict(module="ospec.combine", position=(150, 100), config={}),
+            dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':0}}),
+            dict(module="ospec.wiggle", position=(350, 200), config={}),
+            dict(module="ospec.twotheta", position=(450, 250), config={}),
+            dict(module="ospec.qxqz", position=(550, 300), config={}),
+            dict(module="ospec.grid", position=(600, 350), config={}),
+        ]
+        wires = [
+            dict(source=[0, 'output'], target=[4, 'input']),
+            dict(source=[4, 'output'], target=[3, 'input']),
+            dict(source=[3, 'output'], target=[5, 'input']),
+            dict(source=[5, 'output'], target=[2, 'input']),
+            dict(source=[5, 'output'], target=[7, 'input']),
+            dict(source=[7, 'output'], target=[2, 'grid']),
+            dict(source=[2, 'output'], target=[6, 'input']),
+            dict(source=[6, 'output'], target=[1, 'input']),
+        ]
+    else:
+        path, ext = dir + '/dataflow/sampledata/ANDR/cshape_121609/Iremun00', ['.ca1', '.cb1']
+        files = [path + str(i + 1) + extension for i in range(0, 7) for extension in ext if i != 2]
+        pols = simplejson.load(open(dir + '/dataflow/sampledata/ANDR/cshape_121609/file_catalog.json', 'r'))
+        pol_states = [pols[os.path.split(file)[-1]]['polarization'] for file in files]
+        modules = [
+            dict(module="ospec.load", position=(50, 50),
+                 config={'files': files, 'intent': 'signal', 'PolStates':pol_states}),
+            dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
+            dict(module="ospec.combine", position=(150, 100), config={}),
+            dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':0}}),
+            dict(module="ospec.wiggle", position=(350, 200), config={}),
+            dict(module="ospec.twotheta", position=(450, 250), config={}),
+            dict(module="ospec.qxqz", position=(550, 300), config={}),
+            dict(module="ospec.grid", position=(600, 350), config={}),
+        ]
+        wires = [
+            dict(source=[0, 'output'], target=[4, 'input']),
+            dict(source=[4, 'output'], target=[3, 'input']),
+            dict(source=[3, 'output'], target=[5, 'input']),
+            dict(source=[5, 'output'], target=[2, 'input']),
+            dict(source=[5, 'output'], target=[7, 'input']),
+            dict(source=[7, 'output'], target=[2, 'grid']),
+            dict(source=[2, 'output'], target=[6, 'input']),
+            dict(source=[6, 'output'], target=[1, 'input']),
+        ]
     config = [d['config'] for d in modules]
     template = Template(name='test ospec',
                         description='example ospec diagram',
