@@ -3,6 +3,7 @@ import os
 import ROOT_URL
 
 
+
 HOMEDIR = __file__[:-12]
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -34,7 +35,7 @@ if 1:
 	DATABASES = {
 	    'default': {
 		'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-		'NAME': r'/tmp/testdb6',                      # Or path to database file if using sqlite3.
+		'NAME': r'/tmp/DBs/testdb9',                      # Or path to database file if using sqlite3.
 		'USER': '',                      # Not used with sqlite3.
 		'PASSWORD': '',                  # Not used with sqlite3.
 		'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.

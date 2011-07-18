@@ -3,15 +3,21 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
-from apps.tracks.forms import languageSelectForm, titleOnlyForm, experimentForm, titleOnlyFormExperiment
+from apps.tracks.forms import languageSelectForm, titleOnlyForm, experimentForm1, experimentForm2, titleOnlyFormExperiment
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger #paging for lists
 from django.core.exceptions import ObjectDoesNotExist
+
+import hashlib
 
 ## models
 from django.contrib.auth.models import User 
 from models import * #add models by name
+
+## adds test objects to DB
+from ... import fillDB
 
 
 from ...apps.fileview import testftp
@@ -110,13 +116,15 @@ b = {'save':'successful'}
 # they can be stored in a local list:
 wirings_list = offspec+a+SANS+SANS_2
 
+@csrf_exempt 
 def listWirings(request):
     context=RequestContext(request)
     print 'I am loading'
-    return HttpResponse(simplejson.dumps(wirings_list), context_instance=context)
+    return HttpResponse(simplejson.dumps(wirings_list)) #, context_instance=context
 
 #    return HttpResponse(simplejson.dumps(a)) #andr vs bt7 testing
 
+@csrf_exempt 
 def saveWiring(request):
     context=RequestContext(request)
     print 'I am saving'
@@ -124,8 +132,9 @@ def saveWiring(request):
     # this stores the wires in a simple list, in memory on the django server.
     # replace this with a call to storing the wiring in a real database.
     wirings_list.append(new_wiring)
-    return HttpResponse(simplejson.dumps(b), context_instance=context)
+    return HttpResponse(simplejson.dumps(b)) #, context_instance=context
 
+@csrf_exempt 
 def runReduction(request):
     context=RequestContext(request)
     print 'I am reducing'
@@ -140,7 +149,7 @@ def runReduction(request):
    # 	openFile.close()
     #result = SANS_INS.TESTING()
     #print simplejson.dumps(result)
-    return HttpResponse(simplejson.dumps(result), context_instance=context)
+    return HttpResponse(simplejson.dumps(result)) #, context_instance=context
     
     #print FILES
 ###### BT7 TESTING
@@ -175,19 +184,21 @@ def runReduction(request):
 ## The intermediate template 'editorRedirect.html' is used so that we can redirect to /editor/ while preserving 
 ## the language selection.
 
+@csrf_exempt 
 def displayEditor(request):
     context=RequestContext(request)
     print request.POST.has_key('language')
     if request.POST.has_key('language'):
-        return render_to_response('tracer_testingforWireit/editor.html', {'lang':request.POST['language']}, context=RequestContext(request))
+        return render_to_response('tracer_testingforWireit/editor.html', {'lang':request.POST['language']}, context_instance=context)
     else:
         return HttpResponseRedirect('/editor/langSelect/')
 
+@csrf_exempt 
 def languageSelect(request):
     context=RequestContext(request)
     if request.POST.has_key('instruments'):
         return render_to_response('tracer_testingforWireit/editorRedirect.html',
-                            {'lang':request.POST['instruments']})
+                            {'lang':request.POST['instruments']}, context_instance=context)
     form = languageSelectForm()
     return render_to_response('tracer_testingforWireit/languageSelect.html', {'form':form}, context_instance=context)
     
@@ -235,10 +246,46 @@ def editProject(request, project_id):
 	form = titleOnlyFormExperiment()
 	return render_to_response('userProjects/editProject.html', {'project':project,'form':form,'experiments':experiments}, context_instance=context)
 
-@login_required #may want a separate form for files so that you can add multiple files w/out changing facility, etc...
+@login_required 
 def editExperiment(request, experiment_id):
-	context=RequestContext(request)
 	experiment = Experiment.objects.get(id=experiment_id)
-	form = experimentForm()
-	return render_to_response('userProjects/editExperiment.html', {'form':form, 'experiment':experiment,}, context_instance = context)
+	if request.FILES.has_key('files'):
+		file_data = request.FILES['files']
+		file_sha1 = hashlib.sha1()
+		for line in file_data.read():
+			file_sha1.update(line)
+		write_here = '/tmp/FILES/' + file_sha1.hexdigest()
+		write_here = open(write_here, 'w')
+		for line in file_data:
+			write_here.write(line)
+		write_here.close()
+		new_file = File.objects.create(name=file_sha1.hexdigest(), location = '/tmp/FILES/')
+		experiment.Files.add(new_file)
+	if request.POST.has_key('instrument_name'):
+		if request.POST['instrument_name']:
+			instrument = Instrument.objects.get(id=request.POST['instrument_name'])
+			instrument_class = instrument.instrument_class
+			experiment.instrument = instrument
+			experiment.save()
+	if request.POST.has_key('facility'):
+		if request.POST['facility']:
+			facility = Facility.objects.get(id=request.POST['facility'])
+			experiment.facility = facility
+			experiment.save()
+	if request.POST.has_key('templates'):
+		if request.POST['templates']:
+			template = Template.objects.get(id=request.POST['templates'])
+			experiment.templates.add(template)
+		#print file_sha1.hexdigest()
+		#print hashlib.sha1(request.FILES['files'].read()).hexdigest()	
+	context=RequestContext(request)
+	facility = experiment.facility
+	instrument = experiment.instrument
+	if instrument:
+		instrument_class = experiment.instrument.instrument_class
+	else:
+		instrument_class = None
+	form1 = experimentForm1(initial= {'facility':facility, 'instrument_class':instrument_class, 'instrument_name':instrument})
+	form2 = experimentForm2()
+	return render_to_response('userProjects/editExperiment.html', {'form1':form1, 'form2':form2, 'experiment':experiment,}, context_instance = context)
     
