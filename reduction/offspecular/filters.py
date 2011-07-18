@@ -755,14 +755,14 @@ class CombinePolarized(Filter2D):
         # grid covering all polstates is now made:  now create
         # sublists for each polarization state
         
-        combined_datasets = {}
+        combined_datasets = []
         for PolState in pol_datasets:
             # combined single polarization:
             csingle = Combine().apply(pol_datasets[PolState], deepcopy(grid))
             #print type(pol_datasets[PolState])
             #extra info changed
             csingle._info[-1]['PolState'] = PolState
-            combined_datasets[PolState] = csingle
+            combined_datasets.append(csingle)
         # we end up with a dictionary set of datasets (e.g. {"++": data1, "--": data2} )
         
         return combined_datasets
@@ -840,11 +840,10 @@ class PolarizationCorrect(Filter2D):
     def progress_update(self, percent_done):
         print '{0}% done'.format(percent_done)
         
-    def check_grids(self, combined_data):
+    def check_grids(self, datasets):
         """ Combined data will be dictionary of labeled datasets: 
         e.g. {"++": datapp, "+-": datapm} etc."""
         compatible = True
-        datasets = combined_data.values()
         firstdata = datasets[0]
         for dataset in datasets[1:]:
             # allclose is the next best thing to "==" for a floating point array
@@ -852,9 +851,9 @@ class PolarizationCorrect(Filter2D):
             compatible &= allclose(dataset.axisValues(1), firstdata.axisValues(1))
         return compatible
     
-    def guess_assumptions(self, combined_data):
+    def guess_assumptions(self, datasets):
         assumptions = None
-        polstates = combined_data.keys()
+        polstates = [datum._info[-1]['PolState'] for datum in datasets]
         if set(polstates) == set(["++", "+-", "-+", "--"]):
             assumptions = 0
         elif set(polstates) == set(["++", "-+", "--"]):
@@ -875,17 +874,18 @@ class PolarizationCorrect(Filter2D):
             # binning on datasets in combined data is not the same!  quit.
             return
             
-        data_shape = combined_data.values()[0].shape
-        polstates = combined_data.keys()
+        data_shape = combined_data[0].shape
+        polstates = [datum._info[-1]['PolState'] for datum in datasets]
             
         NT = empty(data_shape[:2] + (4, 4))
         alldata = empty(data_shape[:2] + (len(polstates), 4))
         # recall order of I, R is different for the way we've set up NT matrix (not diagonal)
         # [Iuu, Iud, Idu, Idd] but [Ruu, Rud, Rdd, Rdu]
         #['NT++','NT+-','NT--','NT-+']
-        for PolState in combined_data:
-            NT[:, :, self.polstate_order[PolState]] = combined_data[PolState][:, :, ['NT++', 'NT+-', 'NT-+', 'NT--']]
-            alldata[:, :, self.polstate_order[PolState]] = combined_data[PolState][:, :, ['counts', 'pixels', 'monitor', 'count_time']]
+        for dataset in combined_data:
+            PolState = dataset._info[-1]['PolState']
+            NT[:, :, self.polstate_order[PolState]] = dataset[:, :, ['NT++', 'NT+-', 'NT-+', 'NT--']]
+            alldata[:, :, self.polstate_order[PolState]] = dataset[:, :, ['counts', 'pixels', 'monitor', 'count_time']]
             #alldata[:,:,self.polstate_order[PolState]] = combined_data[PolState][:,:,['counts','pixels','monitor','count_time']]
         # should result in: 
         #NT[:,:,0] = combined_data['++'][:,:,['NT++','NT+-','NT-+','NT--']]
@@ -954,9 +954,9 @@ class PolarizationCorrect(Filter2D):
                     self.progress_update(new_percent_done)
                     percent_done = new_percent_done
                     
-        combined_R = {}
-        for PolState in polstates:
-            combined_R[PolState] = MetaArray(R[:, :, output_columns[PolState]], info=combined_data[PolState].infoCopy())
+        combined_R = []
+        for index, PolState in enumerate(polstates):
+            combined_R.append(MetaArray(R[:, :, output_columns[PolState]], info=combined_data[index].infoCopy()))
         return combined_R
             
     def add_to_grid(self, dataset, grid):

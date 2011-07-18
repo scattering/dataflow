@@ -56,34 +56,16 @@ def run_template(template, config):
                 if terminal['use'] == 'out':
                     cls = lookup_datatype(terminal['datatype']).cls
                     terminal_fp = name_terminal(fp, terminal['id'])
-                    res = None
-                    terminal_type = server.type(terminal_fp)
-                    if terminal_type == 'list': # [Data]
-                        res = [cls.loads(str) for str in server.lrange(terminal_fp, 0, -1)]
-                    elif terminal_type == 'hash': # {string:Data}
-                        res = server.hgetall(terminal_fp)
-                        for key, value in res.items():
-                            res[key] = cls.loads(value)
-                    else:
-                        raise TypeError("Illegal type in server: " + terminal_fp)
-                    result[terminal['id']] = res
+                    result[terminal['id']] = [cls.loads(str) for str in server.lrange(terminal_fp, 0, -1)]
         else:
             result = module.action(**kwargs)
             for terminal_id, res in result.items():
                 terminal_fp = name_terminal(fp, terminal_id)
-                terminal_type = type(res)
-                if terminal_type == types.ListType: # [Data]
-                    for data in res:
-                        server.rpush(terminal_fp, data.dumps())
-                elif terminal_type == types.DictType: # {string:Data}
-                    for key, value in res:
-                        server.hset(terminal_fp, key, value.dumps())
-                else:
-                    raise TypeError("Illegal type in output: " + terminal_fp)
+                for data in res:
+                    server.rpush(terminal_fp, data.dumps())
             server.set(fp, fp) # used for checking if the calculation exists; could wrap this whole thing with loop of output terminals
         all_results[nodenum] = result
     # retrieve plottable results
-    # need to write for dictionaries
     ans = {}
     for nodenum, result in all_results.items():
         fp = name_plottable(fingerprints[nodenum])

@@ -124,7 +124,7 @@ load_he3 = load_he3_module(id='ospec.loadhe3', datatype=OSPEC_DATA_HE3,
 def append_polarization_matrix_action(input=[], he3cell=None):
     print "appending polarization matrix"
     he3analyzer = None
-    if he3cell != None:
+    if he3cell != None: # should always be true; he3cell is now required
         he3analyzer = he3cell[0]
     return dict(output=[AppendPolarizationMatrix().apply(input, he3cell=he3analyzer)])
 append_polarization = append_polarization_matrix_module(id='ospec.append', datatype=OSPEC_DATA,
@@ -136,14 +136,14 @@ def combine_polarized_action(input=[], grid=None):
     output_grid = None
     if grid != None:
         output_grid = grid[0]
-    return dict(output=[CombinePolarized().apply(input, grid=output_grid)])
+    return dict(output=CombinePolarized().apply(input, grid=output_grid)) # already returns a list
 combine_polarized = combine_polarized_module(id='ospec.comb_polar', datatype=OSPEC_DATA,
                                              version='1.0', action=combine_polarized_action)
 
 # Polarization correction module
 def polarization_correct_action(input=[], assumptions=0, auto_assumptions=True):
     print "polarization correction"
-    return dict(output=[PolarizationCorrect().apply(polar_dict, assumptions=assumptions, auto_assumptions=auto_assumptions) for polar_dict in input])
+    return dict(output=PolarizationCorrect().apply(input, assumptions=assumptions, auto_assumptions=auto_assumptions)) # returns a list already
 correct_polarized = polarization_correct_module(id='ospec.correct_polar', datatype=OSPEC_DATA,
                                              version='1.0', action=polarization_correct_action)
 
