@@ -180,28 +180,32 @@ def runReduction(request):
 ## Views for displaying a language selection form and for calling the file association table with the selected language.
 ## scheme is the same as for the editor
 
-########
-## Simple view for displaying editor if called from an experiment page
 
-@csrf_exempt
-def displayEditorExp(request, project_id, experiment_id):
-	context = RequestContext(request)
-	experiment = Experiment.objects.get(id=experiment_id)
-	lang = experiment.instrument.instrument_class
-	files = [[i.name, i.friendly_name] for i in experiment.Files]  
-	return render_to_response('tracer_testforWireit/editor.html', {'lang':lang, 'files':files}, context_instance = context)
 
 ########
 ## Views for displaying a language selection form and for calling the editor template with the selected language.
 ## The intermediate template 'editorRedirect.html' is used so that we can redirect to /editor/ while preserving 
 ## the language selection.
 
+## HAVING TROUBLE SENDING LIST OF STRINGS AS CONTEXT TO THE EDITOR
 @csrf_exempt 
 def displayEditor(request):
     context=RequestContext(request)
     print request.POST.has_key('language')
     if request.POST.has_key('language'):
-        return render_to_response('tracer_testingforWireit/editor.html', {'lang':request.POST['language'], }, context_instance=context)
+    	if request.POST.has_key('experiment_id'):
+    		experiment = Experiment.objects.get(id=request.POST['experiment_id'])
+    		file_list = experiment.Files.all()
+    		files = [simplejson.dumps(i.friendly_name) for i in file_list]
+    		#files = simplejson.dumps(files)
+    	else:
+    		experiment = []
+    		files = []
+    	files = simplejson.dumps(files)
+    	print 'EXPERIMENT: ', experiment
+    	print 'FILES: ', files
+    	
+        return render_to_response('tracer_testingforWireit/editor.html', {'lang':request.POST['language']}, context_instance=context)
     else:
         return HttpResponseRedirect('/editor/langSelect/')
 

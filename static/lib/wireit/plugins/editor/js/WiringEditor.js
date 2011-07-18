@@ -574,7 +574,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
     			YAHOO.util.Dom.get('FAT').removeChild(YAHOO.util.Dom.get('FAT').lastChild);
 			}
 		  // Call the File Association Table with appropriate headers
-		  makeFileTable(this.getFATHeaders())
+		  makeFileTable(this.getFATHeaders(),FILES)
 		  ///console.log(this.getFATHeaders())
 
  		}
@@ -625,8 +625,8 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 
 	/**
 	* This method returns a list of strings for the column headers in the FAT.
-	* Currently, it simply runs through all existing wires and adds source and target (checking by uniqueID)
-	* module name to the list
+	* Currently, it simply runs through all existing wires and adds the target (Module name, terminal name)
+	* if the wire's source is Load
 	* 7/8
 	**/
 	getFATHeaders: function() {
@@ -636,7 +636,11 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		var hitModules = [] // at some point to check which modules have already been touched
 		var headersList = [] // actual list of headers
 		for (var i in wireList) {
-			headersList.push(moduleList[wireList[i].tgt.moduleId].name + ' ' + wireList[i].tgt.terminal)
+			if (moduleList[wireList[i].src.moduleId].name === 'Load') {
+			
+				headersList.push(moduleList[wireList[i].tgt.moduleId].name + ' ' + wireList[i].tgt.terminal)
+				//console.log(moduleList[wireList[i].src.moduleId].name)
+				}
 			}
 		return headersList;	
 		},

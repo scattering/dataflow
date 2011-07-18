@@ -14,10 +14,10 @@ urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views',
 		('^listWirings/$', 'listWirings'),
 		
 		# Wiring editor display urls
+		('^editor/(?P<experiment_id>\d+)/$', 'displayExpRedirect'),
 		('^editor/$', 'displayEditor'),
 		('^editor/langSelect/$', 'languageSelect'),
-		('^myProjects/editProject/(?P<project_id>\d+)/editExperiment/(?P<experiment_id>\d+)/editor/$', 'displayEditorExp'),
-
+		
 		# Wiring editor adapter urls
 		('^editor/listWirings/$', 'listWirings'),
 		('^editor/saveWiring/$', 'saveWiring'),
