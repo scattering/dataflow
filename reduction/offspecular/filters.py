@@ -1,14 +1,11 @@
 from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin
-import os, simplejson, datetime, sys
-import types
+import os, simplejson, datetime, sys, types, xml.dom.minidom
 from copy import deepcopy
 
 from FilterableMetaArray import FilterableMetaArray as MetaArray
 from he3analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
 from reduction.formats import load
 import reduction.rebin as reb
-#import get_timestamps
-import xml.dom.minidom
 
 class Supervisor():
     """ class to hold rebinned_data objects and increment their reference count """
@@ -552,17 +549,14 @@ class InsertTimestamps(Filter2D):
     
     @autoApplyToList
     @updateCreationStory
-    def apply(self, data, timestamp_file='end_times.json', regenerate_end_times=False, override_existing=False):
+    def apply(self, data, timestamp_file='end_times.json', override_existing=False):
         # first of all, if there is already a timestamp, skip!
         #extra info changed
         if data._info[-1].has_key('end_datetime') and not override_existing:
             return data
         path = data._info[-1]['path']
         fn = os.path.join(path, timestamp_file)
-        if regenerate_end_times:
-            timestamps = get_timestamps.load_timestamps()
-        else:
-            timestamps = simplejson.load(open(fn, 'r'))
+        timestamps = simplejson.load(open(fn, 'r'))
             
         # now figure out which file was the source:
         new_info = data.infoCopy()
