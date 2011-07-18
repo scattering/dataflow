@@ -5,34 +5,40 @@
 </head>
 <body>
     <div id="content-1" style="float:left;">
-    <h2>EDIT EXPERIMENT: </h2>
+    <h2>EXPERIMENT: <i>{{ experiment.ProposalNum }}</i> </h2>
     <form action="." method="POST">
     {% csrf_token %}
         <table>
             {{ form1.as_table }}
         </table>
         <p><input type="submit" value="Save changes"></p>
-    </form>
-    </div>
-    <div id="content-2" style="float:left;">
-    	<h2> {{ experiment.ProposalNum }} </h2>
-    	<form action="." method="POST" enctype="multipart/form-data">
+        </form>
+         <hr></hr>
+         
+        <form action="." method="POST" enctype="multipart/form-data">
     	{% csrf_token %}
         	<table>
             		{{ form2.as_table }}
         	</table>
         <p><input type="submit" value="Add entries"></p>
     </form>
+    
     <hr></hr>
-    <h4> Templates: </h4>
+   <a STYLE="text-decoration:none" href="editor"> Start reducing! </a>
+    </div>
+    <div id="content-2" style="float:left;margin-left:7%">
+
+    	
+
+    <h2> Templates: </h2>
 	{% for template in experiment.templates.all %}
     <li>{{ template}}
     </li>
 	{% endfor %}
     	
-    <h4> Files: </h4>
+    <h2> Files: </h2>
     	{% for file in experiment.Files.all %}
-    	<li> {{file }} </li>
+    	<li> {{file.friendly_name }} </li>
     	{% endfor %}	
     
     </div>

@@ -4,6 +4,7 @@ from models import *
 language_choices = (
 			('bt7', 'bt7'),
 			('sans', 'sans'),
+			('sans2', 'sans2'),
 			('refl', 'refl'),
 			('andr', 'andr'),
 			('tas', 'tas'),

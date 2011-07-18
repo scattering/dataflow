@@ -29,6 +29,7 @@ gridList = []
 	extend: 'Ext.data.Model',
 	fields: [
 		{name: 'filename', type: 'string'},
+		{name: 'filehash', type: 'string'},
 		{name: 'filetype'},
 		{name: 'group', type: 'string'},
 	]
@@ -151,17 +152,30 @@ url: '/files',
             direction:'ASC'
         }]
     });
-
-// insert records into the store to play around with
-for (var j = 0; j < 3; j++) {
-	for (var i = 0; i < 20; i ++) {
-		fname = 'new_file' + i
+if (fileList) {
+	for i in fileList {
 		var newFile = Ext.ModelManager.create({
-			filename: fname,
+			filename: i[1],
+			filehash: i[0],
 			filetype: 'N',
-			group: j,},
-	'Data');
-			store.insert(0, newFile);
+			},
+			'Data');
+		store.insert(0, newFile);
+		}
+	}
+// insert records into the store to play around with if a file list has not been passed into the Wiring Editor
+if !(fileList) {
+	for (var j = 0; j < 3; j++) {
+		for (var i = 0; i < 20; i ++) {
+			fname = 'new_file' + i
+			var newFile = Ext.ModelManager.create({
+				filename: fname,
+				filehash: '0',
+				filetype: 'N',
+				group: j,},
+		'Data');
+				store.insert(0, newFile);
+		}
 	}
 }
 

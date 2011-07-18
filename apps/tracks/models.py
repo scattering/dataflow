@@ -20,7 +20,8 @@ class Userprofile(models.Model):
 class File(models.Model):
 	#permissions = models.ForeignKey(Permission, null=True) # or should this be a string of permission names
 	name = models.CharField(max_length=160, primary_key=True) # sha1 hash of file contents
-	location = models.CharField(max_length=300) #location of file on disc
+	friendly_name = models.CharField(max_length=60)
+	location = models.CharField(max_length=300) #location of file on disk
 	metadata = models.ManyToManyField('Metadata', null=True)
 	def __unicode__(self):
 		return self.name
