@@ -12,6 +12,7 @@ if __name__ == "__main__":
                   #'python-django',
                   'python-setuptools',
                   'python-redis',
+                  'redis-server',
                   'python-numpy',
                   'python-scipy',
                   'python-matplotlib',
