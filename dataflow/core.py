@@ -328,7 +328,7 @@ dataid : string
     
     @classmethod
     def loads(cls, str):
-        return Data()
+        return Data(str, Data)
 
 
 # ============= Parent traversal =============
