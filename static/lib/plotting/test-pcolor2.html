@@ -14,7 +14,7 @@
 <script language="javascript" type="text/javascript" src="plotting_api.js"></script>
 <script language="javascript" type="text/javascript" src="palettes.js"></script>
 <script language="javascript" type="text/javascript" src="sansdata.js"></script>
-<!--<script language="javascript" type="text/javascript" src="andrdata.js"></script>-->
+<script language="javascript" type="text/javascript" src="andrdata2.js"></script>
 <link rel="stylesheet" type="text/css" href="jqplot/jquery.jqplot.css" />
 <style rel="stylesheet" type="text/css">
 .jqplot-target { font-family: helvetica; }
@@ -23,9 +23,11 @@ h3 { font-weight: normal; }
 .jqplot-bubble-point { border: 1px dashed orange; }
 </style>
 <script type="text/javascript">
-//sansdata=andrdata;
+sansdata=andrdata2;
 sansdata.z=$.map(sansdata.z, function(x){f= $.map(x, function(d){return d+1}); return [f];});
 var m = Matrix(sansdata.z);
+sansdata.dims = { xmin: -3, xmax: 3, dx: .5*96/1024, ymin: -3, ymax: 3, dy: .5*96/1024 };
+/*
 var data =
 [
   DataSeries({
@@ -37,7 +39,7 @@ var data =
     dims: m.autodims,
     palette: "jet",
     edges: 255,
-  }),/*
+  }),
   DataSeries({
     name: "Test",
     func: noob,
@@ -46,8 +48,8 @@ var data =
     dims: { xmin: -3, xmax: 3, dx: .5*96/1024, ymin: -3, ymax: 3, dy: .5*96/1024 },
     palette: 'jet',
     edges: 255,
-  })*/
-];
+  })
+];*/
 
 function noob(x,y) {
   return (1 - x/2 + Math.pow(x,5) + Math.pow(y,3))*Math.exp(-Math.pow(x,2)-Math.pow(y,2));
