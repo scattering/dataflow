@@ -401,7 +401,7 @@ class Detector(Component):
 
 
         def __init__(self,name,dimension=None,values=None,err=None,units='counts', 
-                     aliases=None,friends=None, isInterpolatable=True,isDistinct=None, efficiencies=None):
+                     aliases=None,friends=None, isInterpolatable=True,isDistinct=False, efficiencies=None):
                 self.name=name
                 self.units=units
                 self.measurement=err_check(values,err)
@@ -436,7 +436,7 @@ class Detector(Component):
 class DetectorSet(object):
         """This defines a group of detectors"""
         def __init__(self):
-                self.primary_detector=Detector('primary detector',dimension=None,values=None,err=None,units='counts', 
+                self.primary_detector=Detector('primary_detector',dimension=None,values=None,err=None,units='counts', 
                      aliases=None,friends=None, isInterpolatable=True)
                 self.detector_mode=None
                         
@@ -713,7 +713,7 @@ class Slits(object):
 
 class TripleAxis(object):
         def __init__(self):
-		self.data=[] #large nd array of all data columns
+		#self.data=[] #large nd array of all data columns
                 self.monochromator=Monochromator()
                 self.analyzer=Analyzer()
                 self.sample=Sample()
@@ -793,7 +793,6 @@ class TripleAxis(object):
 		ordery=[]
 		data = {}
 		for key,value in self.__dict__.iteritems():
-			print 'key:',key
 			if key=='detectors':
 				for field in value:
 
@@ -876,10 +875,7 @@ def translate(bt7,dataset):
         translate_metadata(bt7,dataset)
         translate_detectors(bt7,dataset)
 
-
 def translate_monochromator(bt7,dataset):
-	#TODO:
-	#append data from dataset to bt7.data (nd list) then set bt7.monochromator.field=bt7[val]
         translate_dict={}
         #key--> on bt7
         #value -> input, i.e. the field in dataset.data or dataset.metadata
@@ -1073,19 +1069,11 @@ def translate_physical_motors(bt7,dataset):
                 bt7.physical_motors.ei.measurement.x=np.ones(np.array(dataset.data['e']).shape)*dataset.metadata['ei']
                 bt7.physical_motors.ei.measurement.variance=None
                 bt7.physical_motors.ef=bt7.physical_motors.ei.measurement-bt7.physical_motors.e.measurement
-		bt7.data.append(getattr(bt7.physical_motors,'ei'))
-		setattr(bt7.physical_motors,'ei',bt7.data[len(bt7.data)-1])
-		bt7.data.append(getattr(bt7.physical_motors,'ef'))
-		setattr(bt7.physical_motors,'ef',bt7.data[len(bt7.data)-1])
                 #our convention is that Ei=Ef+delta_E (aka omega)
         else:
                 bt7.physical_motors.ef.measurement.x=np.ones(np.array(dataset.data['e']).shape)*dataset.metadata['ef']
                 bt7.physical_motors.ef.measurement.variance=None
                 bt7.physical_motors.ei.measurement.x=bt7.physical_motors.ef.measurement.x+bt7.physical_motors.e.measurement.x  #punt for now, later should figure out what to do if variance is None
-		bt7.data.append(getattr(bt7.physical_motors,'ei'))
-		setattr(bt7.physical_motors,'ei',bt7.data[len(bt7.data)-1])
-		bt7.data.append(getattr(bt7.physical_motors,'ef'))
-		setattr(bt7.physical_motors,'ef',bt7.data[len(bt7.data)-1])
 		
 	Ei = bt7.physical_motors.ei.measurement
 	Ef = bt7.physical_motors.ef.measurement
@@ -1093,8 +1081,6 @@ def translate_physical_motors(bt7,dataset):
         Qsquared = (Ei + Ef - 2*np.sqrt(Ei*Ef)*np.cos(A4/2))/2.072
 	Q = np.sqrt(Qsquared)
 	bt7.physical_motors.q.measurement=Q
-	bt7.data.append(getattr(bt7.physical_motors,'q'))
-	setattr(bt7.physical_motors,'q',bt7.data[len(bt7.data)-1])
 	
 	try:
 		o1temp=bt7.sample.orientation.orient1
@@ -1108,13 +1094,6 @@ def translate_physical_motors(bt7,dataset):
 		setattr(bt7.physical_motors.orient3, 'value', o3)
 		#TODO - make 'fancy' names for these?
 		#setattr(bt7.physical_motors.orient3, 'name', '110')
-		
-		bt7.data.append(getattr(bt7.physical_motors.orient1,'value'))
-		setattr(bt7.physical_motors.orient1,'value',bt7.data[len(bt7.data)-1])
-		bt7.data.append(getattr(bt7.physical_motors.orient2,'value'))
-		setattr(bt7.physical_motors.orient2,'value',bt7.data[len(bt7.data)-1])
-		bt7.data.append(getattr(bt7.physical_motors.orient3,'value'))
-		setattr(bt7.physical_motors.orient3,'value',bt7.data[len(bt7.data)-1])
 		
 	except:
 		pass
@@ -1288,11 +1267,6 @@ def translate_detectors(bt7,dataset):
         bt7.detectors.primary_detector.measurement.x=np.array(dataset.data['detector'],'Float64')
         bt7.detectors.primary_detector.measurement.variance=np.array(dataset.data['detector'],'Float64')
         bt7.detectors.detector_mode=dataset.metadata['analyzerdetectormode']
-        
-        bt7.data.append(getattr(bt7.detectors,'primary_detector'))
-	setattr(bt7.detectors,'primary_detector',bt7.data[len(bt7.data)-1])
-	bt7.data.append(getattr(bt7.detectors,'detector_mode'))
-	setattr(bt7.detectors,'detector_mode',bt7.data[len(bt7.data)-1])
 	
 	
         #later, I should do something clever to determine how many detectors are in the file,
@@ -1344,9 +1318,6 @@ def set_detector(bt7,dataset,detector_name,data_name):
                 
                 setattr(getattr(bt7.detectors,detector_name).measurement,'x',np.copy(data))
                 setattr(getattr(bt7.detectors,detector_name).measurement,'variance',np.copy(data))
-		bt7.data.append(getattr(bt7.detectors,detector_name))
-		setattr(bt7.detectors,detector_name,bt7.data[len(bt7.data)-1])
-		print 'detector:',detector_name,'  index: ',(len(bt7.data)-1)
         else:
                 delattr(bt7.detectors,detector_name)  #We were lied to by ICE and this detector isn't really present...
 
@@ -1403,39 +1374,28 @@ def map_motors(translate_dict,tas,target_field,dataset):
                                 try:
                                         getattr(target_field,key).measurement.x=np.array(dataset.data[value],'Float64')
                                         getattr(target_field,key).measurement.variance=None
-					tas.data.append(getattr(target_field,key)) #Add newly updated data field to large data array
-					setattr(target_field,key,tas.data[len(tas.data)-1]) #make that data field a pointer to large data array
-                                except:
+				except:
                                         getattr(target_field,key).measurement.x=np.array(dataset.data[value])  #These may be "IN", or "OUT", or "N/A"
                                         getattr(target_field,key).measurement.variance=None
-					tas.data.append(getattr(target_field,key))
-					setattr(target_field,key,tas.data[len(tas.data)-1])
                         else:
                                 try:
-					tas.data.append(Motor(key,values=np.array(dataset.data[value],'Float64'),
+					setattr(target_field,key,Motor(key,values=np.array(dataset.data[value],'Float64'),
 					                      err=None,
 					                      units=None,
 					                      isDistinct=True,
 					                      isInterpolatable=True))
-					setattr(target_field,key,tas.data[len(tas.data)-1])
                                 except:
-                                        tas.append(Motor(key,values=dataset.data[value],
+                                        setattr(target_field,key,Motor(key,values=dataset.data[value],
 					                 err=None,
 					                 units=None,
 					                 isDistinct=True,
 					                 isInterpolatable=True))
-					setattr(target_field,key,tas.data[len(tas.data)-1])
                 elif dataset.metadata.has_key(value):
                         if hasattr(target_field, key) and isinstance(getattr(target_field, key),Motor):
                                 getattr(target_field,key).measurement.x=dataset.metadata[value] #do we need try escape logic here?
                                 getattr(target_field,key).measurement.variance=None
-				tas.data.append(getattr(target_field,key))
-				setattr(target_field,key,tas.data[len(tas.data)-1])
                         else:
-                                setattr(target_field,key,dataset.metadata[value])
-				tas.data.append(getattr(target_field,key))
-				setattr(target_field,key,tas.data[len(tas.data)-1])
-                
+                                setattr(target_field,key,dataset.metadata[value])               
                 
 
 
@@ -1546,8 +1506,23 @@ def join(tas1, tas2):
 	"""Joins two TripleAxis objects"""
 	#average all similar points
 	#put all detectors on the same monitor, assumed that the first monitor is desired throughout
-	#.where
-	pass 
+	joinedtas=tas1
+	#tas1.detectors.primary_detector.measurement.join(tas2.detectors.primary_detector.measurement)
+	for key,value in joinedtas.__dict__.iteritems():
+		if key=='data' or key=='meta_data' or key=='sample' or key=='sample_environment':
+			#ignoring metadata for now
+			pass
+		#elif key=='detectors':
+		#	for field in value:
+		#		pass
+		else:
+			for field in value:
+				obj=getattr(tas2,key)
+				field.measurement.join(getattr(obj,field.name).measurement)
+				pass
+	return joinedtas
+	#np.where(hasattr('isDistinct') and isDistinct,,) #todo finish writing
+
 
 
 
@@ -1560,24 +1535,17 @@ def filereader(filename):
         translate(instrument, mydata)
         return instrument
 
-if __name__=="__main__":
-        #myfilestr=r'c:\bifeo3xtal\jan8_2008\9175\mesh53439.bt7'
-        #myfilestr=r'EscanQQ7HorNSF91831.bt7'
-        #print 'hi'
-        #mydatareader=readncnr.datareader()
-        #mydata=mydatareader.readbuffer(myfilestr)
-        #print mydata.metadata.varying
-        #mydata = filereader('EscanQQ7HorNSF91831.bt7') #NOTE: include the r in the beginning!
-        #bt7=TripleAxis()
-        #translate(bt7,mydata)
-        
+if __name__=="__main__":       
         bt7 = filereader('EscanQQ7HorNSF91831.bt7')
-	plotobj=bt7.get_plottable()
+	
         print 'translations done'
 	#aarr,barr,carr=bt7.calc_plane()
 	#test= bt7.dumps()
 	#test1= pickle.loads(test)
-	plotobj=simplejson.dumps(plotobj)
+	
+	#plotobj=bt7.get_plottable()
+	#plotobj=simplejson.dumps(plotobj)
+	join(bt7,bt7)
         bt7.normalize_monitor(90000)
         #print 'detailed balance done'
         bt7.harmonic_monitor_correction('BT7')
