@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Test plotting API</title>
+
+<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="jqplot/excanvas.js"></<!script><![endif]-->
+<script language="javascript" type="text/javascript" src="jqplot/jquery-1.5.1.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/jquery.jqplot.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.errorbarRenderer.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.pcolorRenderer.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.logAxisRenderer.js"></script>
+<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.cursor.js"></script>
+<!--<script language="javascript" type="text/javascript" src="jqplot/plugins/jqplot.AxisTickRenderer.js"></script>-->
+<script language="javascript" type="text/javascript" src="../prototype.js"></script>
+<script language="javascript" type="text/javascript" src="plotting_api.js"></script>
+<script language="javascript" type="text/javascript" src="palettes.js"></script>
+<script language="javascript" type="text/javascript" src="sansdata.js"></script>
+<script language="javascript" type="text/javascript" src="Sansdata2.js"></script>
+<script language="javascript" type="text/javascript" src="andrdata.js"></script>
+<script language="javascript" type="text/javascript" src="andrdata2.js"></script>
+<script language="javascript" type="text/javascript" src="ಠ_ಠ.js"></script>
+<script language="javascript" type="text/javascript" src="ಠ_ಠ TAS.js"></script>
+<link rel="stylesheet" type="text/css" href="jqplot/jquery.jqplot.css" />
+<link rel="stylesheet" type="text/css" href="plotting_api.css" />
+<style rel="stylesheet" type="text/css">
+.jqplot-target { font-family: helvetica; }
+.m { font-family: cambria,serif; }
+h3 { font-weight: normal; }
+.jqplot-bubble-point { border: 1px dashed orange; }
+</style>
+<script type="text/javascript">
+// Because both jQuery and Prototype.js ♥ $
+
+//sansdata=andrdata;
+/*
+sansdata.z=$.map(sansdata.z, function(x){f= $.map(x, function(d){return d+1}); return [f];});
+var m = Matrix(sansdata.z);
+sansdata.dims = { xmin: -3, xmax: 3, dx: .5*96/1024, ymin: -3, ymax: 3, dy: .5*96/1024 };
+*/
+
+jQuery(document).ready(function() {
+  jQuery.jqplot.config.enablePlugins = true;
+  plottingAPI([/*sansdata,*/ sansdata2, /*andrdata, andrdata2, tasdata,*/ tasdata2, sansdata], 'chart1');
+  console.log('Ready');
+});
+</script>
+</head>
+<body>
+<div id="plots"></div>
+<hr style="clear: left;" />
+<form id="form1">
+<p id="selectx"><label for="seriesx">Select <i>x</i>-axis series:</label> <select id="seriesx"></select></p>
+<p id="selecty"><label for="seriesy">Select <i>y</i>-axis series:</label> <select id="seriesy"></select></p>
+<p><input id="submit" type="button" value="Update plot" /></p>
+</form>
+<h3 id="desc"></h3>
+<canvas id="mycanvas" width="1024" height="1024" style="border: 1px dotted #bbb;"></canvas>
+<canvas id="invis" width="1024" height="1024" style="display: one;"></canvas>
+<canvas id="invis2" width="1" height="1024" style="display: one;"></canvas>
+</body>
+</html>

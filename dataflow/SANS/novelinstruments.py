@@ -35,7 +35,7 @@ from django.utils import simplejson
 
 from dataflow import config
 from dataflow.calc import run_template
-from dataflow.core import Datatype, Instrument, Template, register_instrument
+from dataflow.core import Data, Instrument, Template, register_instrument
 from dataflow.modules.load import load_module
 from dataflow.modules.save import save_module
 from reduction.sans.filters import *
@@ -50,10 +50,14 @@ from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
 from dataflow.SANS.convert_qxqy import convert_qxqy_module
 from dataflow.SANS.annular_av import annular_av_module
 from dataflow.SANS.absolute_scaling import absolute_scaling_module
-
+from dataflow.SANS.correct_dead_time import correct_dead_time_module
+from reduction.sans.filters import SansData
+from reduction.sans.filters import Transmission
+from reduction.sans.filters import plot1D
+from reduction.sans.filters import div
 #Transmissions
-Tsam = 0
-Temp = 0
+Tsamm = 0
+Tempp = 0
 #Qx,Qy
 qx = {}
 qy = {}
@@ -62,38 +66,24 @@ correctVer = SansData()
 fileList = []
  
 # Datatype
-SANS_DATA = 'data1d.sans'
-data2d = Datatype(id=SANS_DATA,
-                  name='SANS Data',
-                  plot='sansplot')
-
+SANS_DATA = 'data2d.sans'
+data2d = Data(SANS_DATA, SansData)
+trans = Data(SANS_DATA,Transmission)
+data1d = Data(SANS_DATA,plot1D)
+datadiv = Data(SANS_DATA,div)
+#Datatype(id=SANS_DATA,
+                  #name='SANS Data',
+                  #plot='sansplot')
+#dictionary = Datatype(id='dictionary', 
+                        #name = 'dictionary',
+                        #plot = None)
  
 # Load module
 def load_action(files=None, intent=None):
     print "loading", files
-    result = [_load_data(f) for f in files] # not bundles
+    result = [_load_data(files)]  # not bundles
 
-    global fileList
-    fileList = result
-    plottable_2D = {
-    'z': fileList[0].data.x.tolist(),
-    'title': 'SAM',
-    'dims': {
-      'xmax': 128.0,
-      'xmin': 0.0,
-      'ymin': 0.0,
-      'ymax': 128.0,
-      'xdim': 128,
-      'ydim': 128,
-    },
-    'type':'2d',
-    'xlabel': 'X',
-    'ylabel': 'Y',
-    'zlabel': 'Intensity',
-};
-
-    #plottable_2D = json.dumps(plottable_2D)
-    return dict(output=plottable_2D)
+    return dict(output=result)
 def _load_data(name):
     print name
     if os.path.splitext(name)[1] == ".DIV":
@@ -106,7 +96,7 @@ load = load_module(id='sans.load', datatype=SANS_DATA,version='1.0', action=load
 
 # Save module
 def save_action(input=None, ext=None):
-    #for f in input: _save_one(f, ext) # not bundles
+    for f in input: _save_one(f, ext) # not bundles
     return {}
 def _save_one(input, ext):
     outname = initname = map_files('save')
@@ -120,165 +110,85 @@ save = save_module(id='sans.save', datatype=SANS_DATA,
 
 
 # Modules
-def monitor_normalize_action(input=None):
- 
-    result = [monitor_normalize(f) for f in input]
-    print "result: ", result
-    return result
-def correct_solid_angle_action(input = None):
-   
-    result = [correct_solid_angle(f) for f in input]
-    return result
+def correct_dead_time_action(sample,empty_cell,blocked):
+    lis = [sample[0][0],empty_cell[0][0],blocked[0][0]] 
+    #Enter DeadTime parameter eventually
+    solidangle = [correct_solid_angle(f) for f in lis]
+    det_eff = [correct_detector_efficiency(f) for f in solidangle]
+    result = det_eff
+    return dict(sample=[result[0]],empty_cell=[result[1]],blocked=[result[2]])
+deadtime = correct_dead_time_module(id='sans.correct_dead_time', datatype=SANS_DATA, version='1.0', action=correct_dead_time_action)
 
-def generate_transmission_action(input=None):
-    
-    print "input: ",input
-    
-    global Tsam,Temp
+def generate_transmission_action(sample,empty_cell,Tsam,Temp):
     coord_left=(55,53)
     coord_right=(74,72)
-    Tsam=generate_transmission(input[3],input[2],coord_left,coord_right)
-    Temp=generate_transmission(input[4],input[2],coord_left,coord_right)
+    lis = [sample[0][0],empty_cell[0][0],Tsam[0][0],Temp[0][0]] 
+    print "input: ",lis
+    #Enter Normalization Parameter eventually
+    norm = [monitor_normalize(f) for f in lis]
+    print "input: ",norm
+    global Tsamm,Tempp
+    
+    Tsam=generate_transmission(lis[2],lis[2],coord_left,coord_right)
+    Tsamm =Tsam
+    Temp=generate_transmission(lis[3],lis[2],coord_left,coord_right)
+    tran = Transmission(Tsam,Temp)
+
+    
     print 'Sample transmission= {0} (IGOR Value = 0.724): '.format(Tsam)
     print 'Empty Cell transmission= {0} (IGOR Value = 0.929): '.format(Temp)
-    
-def correct_detector_eff(input = None):
-    result = [correct_detector_efficiency(f) for f in input]
-    return result
-def deadtm(input= None):
-    result = [correct_dead_time(f) for f in input]
-    return result
-    
-def initial_correction_action(input=None):
-    global fileList
-    lis = []
-    for i in fileList:
-            lis.append(i)
-       
-    print "Lis: ",lis
-    #For solid angle, detector eff, and deadtime corrections (all using helper functions)
-    liss = lis[0:3]
-    liss.append(lis[5])
-    lis = liss
-    print "Lis: ",lis
-    
-    lis = correct_solid_angle_action(lis)
-    lis = correct_detector_eff(lis)
-    lis = deadtm(lis)
-    blocked = lis[-1]
-    lis.remove(blocked)
-    lis.append(fileList[3])
-    lis.append(fileList[4])
-    lis = monitor_normalize_action(lis)
-    lis.append(blocked)
-    lis.append(fileList[-1])
-    print "Lis: ",lis 
-    generate_transmission_action(lis)
-    
-    
-    #SAM,BGD,EMP,Trans
-    global Tsam,Temp
-    BGD = blocked
-    COR = initial_correction(lis[0],BGD,lis[1],Tsam/Temp)
-    print "COR: ",COR.data.x
-    global correctVer
-    correctVer = COR
-    print "result: ", correctVer
-
-    plottable_2D = {
-    'z': COR.data.x.tolist(),
-    'title': 'COR',
-    'dims': {
-      'xmax': 128.0,
-      'xmin': 0.0,
-      'ymin': 0.0,
-      'ymax': 128.0,
-      'xdim': 128,
-      'ydim': 128,
-    },
-    'type':'2d',
-    'xlabel': 'X',
-    'ylabel': 'Y',
-    'zlabel': 'Intensity',
-};
-    #plottable_2D = json.dumps(plottable_2D)
-    return dict(output=plottable_2D)
+    result = norm
+    return dict(sample=[result[0]],empty_cell=[result[1]],trans = [tran])#,=[result[3]])
+generate_trans = generate_transmission_module(id='sans.generate_transmission', datatype=SANS_DATA, version='1.0', action=generate_transmission_action)        
+def initial_correction_action(sample,empty_cell,blocked,trans):
+    lis = [sample[0][0],empty_cell[0][0],blocked[0][0],trans[0][0]] 
+    tran = lis[-1]
+    SAM = lis[0]
+    EMP = lis[1]
+    BGD = lis[2]
+    CORR = initial_correction(SAM,BGD,EMP,tran.Tsam/tran.Temp)
+    result = CORR
+   
+    return dict(COR = [result])
 initial_corr = initial_correction_module(id='sans.initial_correction', datatype=SANS_DATA, version='1.0', action=initial_correction_action)
 
-def convertq_action():
-    global correctVer
-    result = convert_q(correctVer)
-    return result
-
-def correct_detector_sensitivity_action(input=None):
-    global fileList,correctVer
-    print "input: ",input
-    sensitivity = fileList[len(fileList)-1]
-    DIV = correct_detector_sensitivity(correctVer,sensitivity)
-    correctVer = DIV
-    plottable_2D = {
-    'z': correctVer.data.x.tolist(),
-    'title': 'DIV',
-    'dims': {
-      'xmax': 128.0,
-      'xmin': 0.0,
-      'ymin': 0.0,
-      'ymax': 128.0,
-      'xdim': 128,
-      'ydim': 128,
-    },
-    'type':'2d',
-    'xlabel': 'X',
-    'ylabel': 'Y',
-    'zlabel': 'Intensity',
-};
-    #plottable_2D = json.dumps(plottable_2D)
-    
-    result = plottable_2D
-    return dict(output=result)
+def correct_detector_sensitivity_action(COR,DIV):
+    lis = [COR[0][0],DIV[0][0]]
+    print "####################DIV#############"
+    print DIV[0][0]
+    CORRECT = lis[0]
+    sensitivity = lis[-1]
+    DIVV = correct_detector_sensitivity(CORRECT,sensitivity)
+    result = DIVV
+    return dict(DIV = [result])
 correct_det_sens = correct_detector_sensitivity_module(id='sans.correct_detector_sensitivity', datatype=SANS_DATA, version='1.0', action=correct_detector_sensitivity_action)
 def convert_qxqy_action():
     global correctVer,qx,qy
     correctVer,qx,qy = convert_qxqy(correctVer)
     print "Convertqxqy"
-def annular_av_action(input=None):
-    global correctVer,fileList
-    AVG = annular_av(correctVer)
-    result = AVG
-    print "AVG: ",result
-    return dict(output=result)
-annul_av = annular_av_module(id='sans.annular_av', datatype=SANS_DATA, version='1.0', action=annular_av_action)
-def absolute_scaling_action(input=None):
-    #sample,empty,DIV,Tsam,instrument
-    global correctVer,fileList,Tsam,qx,qy
-    sensitivity = fileList[len(fileList)-1]
-    EMP = fileList[2]
-    ABS = absolute_scaling(correctVer,EMP,sensitivity,Tsam,'NG3')
-    correctVer = ABS
-    correctVer = convertq_action()
-    convert_qxqy_action()
-    result = [ABS]
-    print "abs: ",result
-    plottable_2D = {
-    'z': correctVer.data.x.tolist(),
-    'title': 'COR',
-    'dims': {
-      'xmax': 128.0,
-      'xmin': 0.0,
-      'ymin': 0.0,
-      'ymax': 128.0,
-      'xdim': 128,
-      'ydim': 128,
-    },
-    'type':'2d',
-    'xlabel': 'X',
-    'ylabel': 'Y',
-    'zlabel': 'Intensity',
-};
-    #plottable_2D = json.dumps(plottable_2D)
-    return dict(output=plottable_2D);
-absolute = absolute_scaling_module(id='sans.absolute_scaling', datatype=SANS_DATA, version='1.0', action=absolute_scaling_action)
 
+def absolute_scaling_action(DIV,empty,sensitivity):
+    #sample,empty,DIV,Tsam,instrument
+    lis = [DIV[0][0],empty[0][0],sensitivity[0][0]]
+    global Tsamm,qx,qy
+    sensitivity = lis[-1]
+    EMP = lis[1]
+    print "Empty: ", EMP
+    DIV = lis[0]
+    ABS = absolute_scaling(DIV,EMP,sensitivity,Tsamm,'NG3')
+    
+    correct = convert_q(ABS)
+    correct,qx,qy = convert_qxqy(correct)
+    result = [correct]
+   
+    return dict(ABS=result)
+absolute = absolute_scaling_module(id='sans.absolute_scaling', datatype=SANS_DATA, version='1.0', action=absolute_scaling_action)
+def annular_av_action(ABS):
+    AVG = annular_av(ABS[0][0])
+    result = [AVG]
+    print "Done Red"
+    return dict(OneD=result)
+annul_av = annular_av_module(id='sans.annular_av', datatype=SANS_DATA, version='1.0', action=annular_av_action)
 def correct_background_action(input=None):
     result = [correct_background(bundle[-1], bundle[0]) for bundle in input]
     return dict(output=result)
@@ -289,7 +199,7 @@ SANS_INS = Instrument(id='ncnr.sans.ins',
                  name='NCNR SANS INS',
                  archive=config.NCNR_DATA + '/sansins',
                  menu=[('Input', [load, save]),
-                       ('Reduction', [correct_det_sens,initial_corr,annul_av,absolute])
+                       ('Reduction', [deadtime,generate_trans,correct_det_sens,initial_corr,annul_av,absolute]),
                                               ],
                  requires=[config.JSCRIPT + '/sansplot.js'],
                  datatypes=[data2d],
@@ -299,29 +209,92 @@ instruments = [SANS_INS]
 # Testing
 if __name__ == '__main__':
 #def TESTING():
-    global fileList
+    #global fileList
     fileList = [map_files('sample_4m'),map_files('empty_cell_4m'),map_files('empty_4m'),map_files('trans_sample_4m'),map_files('trans_empty_cell_4m'),map_files('blocked_4m'),map_files('div')]
     #fileList = ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105"]
     for instrument in instruments:
         register_instrument(instrument)
     modules = [
+        #Sample 0
+           #files hard coded for now
         dict(module="sans.load", position=(5, 20),
-             config={'files': fileList, 'intent': 'signal'}),
+             config={'files': fileList[0], 'intent': 'signal'}),
+        #Empty Cell 1
+        dict(module="sans.load", position=(5, 30),
+             config={'files': fileList[1], 'intent': 'signal'}),
+        #Empty 2
+        dict(module="sans.load", position=(5, 40),
+             config={'files': fileList[2], 'intent': 'signal'}),
+        #Blocked 3
+        dict(module="sans.load", position=(5, 50),
+             config={'files': fileList[5], 'intent': 'signal'}),
+        #4 
+        dict(module="sans.correct_dead_time", position=(360 , 50), config={}),
+        
+        #Tsam 5
+        dict(module="sans.load", position=(50,100),
+             config={'files': fileList[3], 'intent': 'signal'}),
+        #Temp 6
+        dict(module="sans.load", position=(50,100),
+             config={'files': fileList[4], 'intent': 'signal'}),
+        #7
+        dict(module="sans.generate_transmission", position=(120 ,80), config={}),
+        #8
         dict(module="sans.save", position=(500, 500), config={'ext': 'dat'}),
+        #9
         dict(module="sans.initial_correction", position=(360 , 100), config={}),
+        
+        #DIV 10
+        dict(module="sans.load", position=(100,300),
+             config={'files': fileList[-1], 'intent': 'signal'}),
+        
+        #11
         dict(module="sans.correct_detector_sensitivity", position=(360 , 200), config={}),
+        #EMP 12
+        dict(module="sans.load", position=(100,300),
+             config={'files': fileList[2], 'intent': 'signal'}),
+        #13
         dict(module="sans.absolute_scaling", position=(360 , 300), config={}),
+        #14
         dict(module="sans.annular_av", position=(360 , 400), config={}),
         
         #dict(module="sans.correct_background", position=(360 , 60), config={}),
         
         ]
     wires = [
-        dict(source=[0, 'output'], target=[2, 'input']),
-        dict(source=[2, 'output'], target=[3, 'input']),
-        dict(source=[3, 'output'], target=[4, 'input']),
-        dict(source=[4, 'output'], target=[5, 'input']),
-        dict(source=[5, 'output'], target=[1, 'input']),
+        #Deadtime (includes solid angle and detector eff)
+        dict(source=[0, 'output'], target=[4, 'sample']),
+        dict(source=[1, 'output'], target=[4, 'empty_cell']),
+       # dict(source=[2, 'output'], target=[4, 'empty']),
+        dict(source=[3, 'output'], target=[4, 'blocked']),
+        #Generate Trans (include monitor normalization)
+        dict(source=[4, 'sample'], target=[7, 'sample']),
+        dict(source=[4, 'empty_cell'], target=[7, 'empty_cell']),
+       # dict(source=[4, 'empty'], target=[7, 'empty']),
+        dict(source=[5, 'output'], target=[7, 'Tsam']),        
+        dict(source=[6, 'output'], target=[7, 'Temp']), 
+        #Initial Correction
+        dict(source=[7, 'sample'], target=[9, 'sample']),
+        dict(source=[7, 'empty_cell'], target=[9, 'empty_cell']),
+        dict(source=[4, 'blocked'], target=[9, 'blocked']),
+        dict(source=[7, 'trans'], target=[9, 'trans']),
+        #DIV Correction
+        dict(source=[9, 'COR'], target=[11, 'COR']),
+        dict(source=[10, 'output'], target=[11, 'DIV']),
+        #ABS Scaling
+        dict(source=[11, 'DIV'], target=[13, 'DIV']),
+        dict(source=[12, 'output'], target=[13, 'empty']),
+        dict(source=[10, 'output'], target=[13, 'sensitivity']),        
+        #Annular Average
+        dict(source=[13, 'ABS'], target=[14, 'ABS']),
+        dict(source=[14, 'OneD'], target=[8, 'input']),
+        
+        
+        
+        #dict(source=[2, 'output'], target=[3, 'input']),
+        #dict(source=[3, 'output'], target=[4, 'input']),
+        #dict(source=[4, 'output'], target=[5, 'input']),
+        #dict(source=[5, 'output'], target=[1, 'input']),
 
         ]
     config = [d['config'] for d in modules]
@@ -331,13 +304,13 @@ if __name__ == '__main__':
                         wires=wires,
                         instrument=SANS_INS.id,
                         )
-    f = open("/home/elakian/tem.txt","w")
-    f.write("Template: ")
-    f.write( simplejson.dumps(wireit.template_to_wireit_diagram(template)))
-    f.write("\n")
-    f.write("Lang: ")
-    f.write(simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))) 
-    f.close()
+    #f = open("/home/elakian/tem.txt","w")
+    #f.write("Template: ")
+    #f.write( simplejson.dumps(wireit.template_to_wireit_diagram(template)))
+    #f.write("\n")
+    #f.write("Lang: ")
+    #f.write(simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))) 
+    #f.close()
     #print 'TEMPLATE', simplejson.dumps(wireit.template_to_wireit_diagram(template))
     #print 'LANGUAGE', simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))                
     run_template(template, config)

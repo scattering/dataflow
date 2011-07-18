@@ -1,28 +1,27 @@
 """
-Return transmission based on bottom left and top right coordinates
+Deadtime Correction 
 """
 
 from .. import config
 from ..core import Module
 
-def generate_transmission_module(id=None, datatype=None, action=None,
+def correct_dead_time_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
-    """Return transmission based on bottom left and top right coordinates"""
+    """Deadtime corrections - has a parameter"""
 
     icon = {
-        'URI': config.IMAGES + "generate_transmission.png",
+        'URI': config.IMAGES + "deadtime.png",
         'terminals': {
-            #inputs
+            #Inputs
             'sample': (0, 10, -1, 0),
-            'empty_cell': (0, 40, -1, 0),
-            #'empty': (0, 70, -1, 0),
-            'Tsam': (0, 100, -1, 0),
-            'Temp': (0, 130, -1, 0),
-            
+            'empty_cell': (0, 20, -1, 0),
+            #'empty': (0, 30, -1, 0),
+            'blocked': (0, 40, -1, 0),
+            #Outputs
             'sample': (20, 10, 1, 0),
-            'empty_cell': (20, 10, 1, 0),
-            #'empty': (20, 10, 1, 0),
-            'trans': (20, 10, 1, 0),
+           #'empty cell': (20, 20, 1, 0),
+            'empty': (20,30, 1, 0),
+            'blocked': (20, 40, 1, 0),
         }
     }
     
@@ -48,14 +47,7 @@ def generate_transmission_module(id=None, datatype=None, action=None,
              #required=False,
              #multiple=True,
              #),
-        dict(id='Tsam',
-             datatype=datatype,
-             use='in',
-             description='data',
-             required=False,
-             multiple=True,
-             ),
-        dict(id='Temp',
+        dict(id='blocked',
              datatype=datatype,
              use='in',
              description='data',
@@ -67,28 +59,28 @@ def generate_transmission_module(id=None, datatype=None, action=None,
         dict(id='sample',
              datatype=datatype,
              use='out',
-             description='correct',
+             description='Dead time',
              ),
         dict(id='empty_cell',
              datatype=datatype,
              use='out',
-             description='correct',
+             description='Dead time',
              ),
         #dict(id='empty',
              #datatype=datatype,
              #use='out',
-             #description='correct',
+             #description='Dead time',
              #),
-        dict(id='trans',
+        dict(id='blocked',
              datatype=datatype,
              use='out',
-             description='correct',
+             description='Dead Time',
              ),
     ]
 
     # Combine everything into a module.
     module = Module(id=id,
-                  name='generate_transmission',
+                  name='Dead time Correction',
                   version=version,
                   description=action.__doc__,
                   icon=icon,

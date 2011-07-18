@@ -1,0 +1,52 @@
+"""
+Load an he3 analyzer collection
+"""
+
+from ... import config
+from ...core import Module
+
+def load_he3_module(id=None, datatype=None, action=None,
+                version='0.0', fields=[]):
+    """Module for loading an he3 analyzer collection"""
+
+    icon = {
+        'URI': config.IMAGES + "load_he3.png",
+        'terminals': {
+            'output': (20, 10, 1, 0),
+        }
+    }
+    
+    terminals = [
+        dict(id='output',
+             datatype=datatype,
+             use='out',
+             description='data',
+             ),
+    ]
+
+    filename_field = {
+        "type":"[file]",
+        "label": "Files",
+        "name": "files",
+        "value": [],
+    }
+    
+    cells_field = {
+        "type":"[cell]",
+        "label": "Cells",
+        "name": "cells",
+        "value": [],
+    }
+    
+    # Combine everything into a module.
+    module = Module(id=id,
+                  name='Load he3',
+                  version=version,
+                  description=action.__doc__,
+                  icon=icon,
+                  terminals=terminals,
+                  fields=[filename_field, cells_field] + fields,
+                  action=action,
+                  )
+
+    return module

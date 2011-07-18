@@ -165,7 +165,7 @@ def initial_correction_action(input=None):
             lis.append(i)
        
     print "Lis: ",lis
-    lis = monitor_normalize_action(lis[0:5])
+    lis = monitor_normalize_action(lis[0:6])
     generate_transmission_action(lis)
     
     
@@ -212,7 +212,7 @@ def correct_detector_sensitivity_action(input=None):
     global fileList,correctVer
     print "input: ",input
     sensitivity = fileList[len(fileList)-1]
-    DIV = correct_detector_sensitivity(correctVer,sensitivity)
+    DIV = correct_detector_sensitivity(fileList[0],sensitivity)
     correctVer = DIV
     plottable_2D = {
     'z': correctVer.data.x.tolist(),

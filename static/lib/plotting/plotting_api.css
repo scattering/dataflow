@@ -1,0 +1,8 @@
+.plot-region { width: 660px; height: 600px; border: 1px dotted #888; }
+.plot-axis   { text-align: center; }
+.plot-axis-y { width: 100px; height: 260px; float: left; padding-top: 240px; }
+.plot-axis-x { width: 500px; height: 100px; float: left; }
+.plot-axis-c { width: 100px; height: 100px; clear: left; float: left; }
+.plot-target { width: 500px; height: 500px; float: left; }
+.plot-colorbar { width: 60px; }
+.plot-invis { height: 90px; }

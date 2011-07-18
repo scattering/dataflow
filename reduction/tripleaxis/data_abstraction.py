@@ -436,7 +436,7 @@ class Detector(Component):
 class DetectorSet(object):
         """This defines a group of detectors"""
         def __init__(self):
-                self.primary_detector=Detector('Primary detector',dimension=None,values=None,err=None,units='counts', 
+                self.primary_detector=Detector('primary detector',dimension=None,values=None,err=None,units='counts', 
                      aliases=None,friends=None, isInterpolatable=True)
                 self.detector_mode=None
                         
@@ -523,7 +523,8 @@ class Time(object):
                                                        isInterpolatable=True)
         def __iter__(self):
                 for key,value in self.__dict__.iteritems():
-			yield value
+			if isinstance(value, Motor):
+				yield value
 		
 		
 class Temperature(object):                
@@ -677,7 +678,9 @@ class Blades(object):
                 self.blades=[]
                 for i in range(nblades):
                         self.blades.append(Motor(title+'_blade_'+str(i),values=None,err=None,units='degrees',isDistinct=False))
-
+        def __iter__(self):
+                for blade in self.blades:
+			yield blade
                 
                 
 class PolarizedBeam(object):
@@ -692,7 +695,9 @@ class PolarizedBeam(object):
                 self.vsample=Motor('ei_flip',values=None,err=None,units='amps',isDistinct=False) #vertical current
                 self.sample_guide_field_rotatation=Motor('sample_guide_field_rotation',values=None,err=None,units='degrees',isDistinct=False)
                 self.flipper_state=Motor('flipper_state',values=None,err=None,units='',isDistinct=False) #short hand, can be A,B,C, etc.
-
+        def __iter__(self):
+                for key,value in self.__dict__.iteritems():
+			yield value
 
 class Slits(object):
         def __init__(self):
@@ -700,7 +705,9 @@ class Slits(object):
                                            , isInterpolatable=True) 
                 self.back_slit_width=Motor('back_slit_width',values=None,err=None,units='degrees',isDistinct=False
                                            , isInterpolatable=True) 
-                
+	def __iter__(self):
+                for key,value in self.__dict__.iteritems():
+			yield value
 
 
 
@@ -786,21 +793,36 @@ class TripleAxis(object):
 		ordery=[]
 		data = {}
 		for key,value in self.__dict__.iteritems():
+			print 'key:',key
 			if key=='detectors':
 				for field in value:
-					ordery.append({'key': field.name, 'label': field.name})
+
 					val = field.measurement.x
 					err = field.measurement.variance
-					if val==None:
-						val = None
+					
+					vals=[]
+					errs=[]
+					if type(val[0])==type(np.empty((1,1))):
+						#if the detector has multiple channels, split them up
+						for channels in val:
+							for channel in channels:
+								vals.append(channel[0])
+						for channels in err:
+							for channel in channels:
+								errs.append(channel[0])		
+						
+						#for i in range(len(vals)):
+							#name=field.name+' channel %d' % (i,)
+							#ordery.append({'key': name, 'label': name})
+							#data[name]={'values': vals[i],'errors': errs[i]}
+							
+						ordery.append({'key': field.name, 'label': field.name})
+						data[field.name]={'values': vals,'errors': errs}
+
 					else:
-						val = val.tolist()
-					if err==None:
-						err = None
-					else:
-						err = err.tolist()
-					data[field.name]={'values': val,'errors':err}
-			elif key=='data' or key=='meta_data' or key=='sample' or 'sample_environment':
+						ordery.append({'key': field.name, 'label': field.name})
+						data[field.name]={'values': val.tolist(),'errors':err.tolist()}
+			elif key=='data' or key=='meta_data' or key=='sample' or key=='sample_environment':
 				#ignoring these data fields for plotting
 				pass	
 			else:
@@ -816,7 +838,7 @@ class TripleAxis(object):
 						err = None
 					else:
 						err = err.tolist()
-					data[key]={'values': val,'errors': err}
+					data[field.name]={'values': val,'errors': err}
 
 				
                 plottable_data = {
@@ -1524,7 +1546,8 @@ def join(tas1, tas2):
 	"""Joins two TripleAxis objects"""
 	#average all similar points
 	#put all detectors on the same monitor, assumed that the first monitor is desired throughout
-	pass #TODO
+	#.where
+	pass 
 
 
 
@@ -1554,7 +1577,7 @@ if __name__=="__main__":
 	#aarr,barr,carr=bt7.calc_plane()
 	#test= bt7.dumps()
 	#test1= pickle.loads(test)
-	
+	plotobj=simplejson.dumps(plotobj)
         bt7.normalize_monitor(90000)
         #print 'detailed balance done'
         bt7.harmonic_monitor_correction('BT7')
