@@ -12,20 +12,41 @@ def absolute_scaling_module(id=None, datatype=None, action=None,
     icon = {
         'URI': config.IMAGES + map_pics('abs'),
         'terminals': {
-            'input': (0, 10, -1, 0),
-            'output': (20, 10, 1, 0),
+            #inputs
+            'DIV': (0, 10, -1, 0),
+            'empty': (0, 10, -1, 0),
+            'sensitivity': (0, 10, -1, 0),
+            
+            'ABS': (20, 10, 1, 0),
         }
     }
     
     terminals = [
-        dict(id='input',
+        dict(id='DIV',
              datatype=datatype,
              use='in',
              description='data',
              required=False,
              multiple=True,
              ),
-        dict(id='output',
+        dict(id='empty',
+             datatype=datatype,
+             use='in',
+             description='data',
+             required=False,
+             multiple=True,
+             ),     
+        dict(id='sensitivity',
+             datatype=datatype,
+             use='in',
+             description='data',
+             required=False,
+             multiple=True,
+             ),
+        
+        
+        
+        dict(id='ABS',
              datatype=datatype,
              use='out',
              description='Absolute Scaling',

@@ -12,20 +12,32 @@ def correct_detector_sensitivity_module(id=None, datatype=None, action=None,
     icon = {
         'URI': config.IMAGES + map_pics('div'),
         'terminals': {
-            'input': (0, 10, -1, 0),
-            'output': (20, 10, 1, 0),
+            #inputs
+            'COR': (0, 10, -1, 0),
+            'DIV': (0, 20, -1, 0),
+            
+            'DIV': (20, 10, 1, 0),
         }
     }
     
     terminals = [
-        dict(id='input',
+        dict(id='COR',
              datatype=datatype,
              use='in',
              description='data',
              required=False,
              multiple=True,
              ),
-        dict(id='output',
+        dict(id='DIV',
+             datatype=datatype,
+             use='in',
+             description='data',
+             required=False,
+             multiple=True,
+             ),        
+        
+        
+        dict(id='DIV',
              datatype=datatype,
              use='out',
              description='correct',
