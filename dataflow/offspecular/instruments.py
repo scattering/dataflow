@@ -61,34 +61,40 @@ autogrid = autogrid_module(id='ospec.grid', datatype=OSPEC_DATA,
 # Combine module
 def combine_action(input=None, grid=None):
     print "joining"
-    return dict(output=[Combine().apply(input, grid=grid[0])]) # should be only one grid
+    output_grid = None
+    if grid != None:
+        output_grid = grid[0]
+    return dict(output=[Combine().apply(input, grid=output_grid)])
 combine = combine_module(id='ospec.combine', datatype=OSPEC_DATA, version='1.0', action=combine_action)
 
 # Offset module
 def offset_action(input=None, offsets={}):
     print "offsetting"
-    result = [CoordinateOffset().apply(f, offsets=offsets) for f in input]
+    result = CoordinateOffset().apply(input, offsets=offsets)
     return dict(output=result)
 offset = offset_module(id='ospec.offset', datatype=OSPEC_DATA, version='1.0', action=offset_action)
 
 # Wiggle module
 def wiggle_action(input=None, amp=0.14):
     print "wiggling"
-    result = [WiggleCorrection().apply(f, amp=amp) for f in input]
+    result = WiggleCorrection().apply(input, amp=amp)
     return dict(output=result)
 wiggle = wiggle_module(id='ospec.wiggle', datatype=OSPEC_DATA, version='1.0', action=wiggle_action)
 
 # Pixels to two theta module
 def pixels_two_theta_action(input=None, pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6):
     print "converting pixels to two theta"
-    result = [PixelsToTwotheta().apply(f, pixels_per_degree=pixels_per_degree, qzero_pixel=qzero_pixel, instr_resolution=instr_resolution) for f in input]
+    result = PixelsToTwotheta().apply(input, pixels_per_degree=pixels_per_degree, qzero_pixel=qzero_pixel, instr_resolution=instr_resolution)
     return dict(output=result)
 pixels_two_theta = pixels_two_theta_module(id='ospec.twotheta', datatype=OSPEC_DATA, version='1.0', action=pixels_two_theta_action)
 
 # Two theta to qxqz module
 def two_theta_qxqz_action(input=None, output_grid=None, wavelength=5.0):
     print "converting theta and two theta to qx and qz"
-    result = [ThetaTwothetaToQxQz().apply(f, output_grid=output_grid, wavelength=wavelength) for f in input]
+    grid = None
+    if output_grid != None:
+        grid = output_grid[0]
+    result = ThetaTwothetaToQxQz().apply(input, output_grid=grid, wavelength=wavelength)
     return dict(output=result)
 two_theta_qxqz = two_theta_qxqz_module(id='ospec.qxqz', datatype=OSPEC_DATA, version='1.0', action=two_theta_qxqz_action)
 
@@ -110,7 +116,6 @@ for instrument in instrmnts:
 if __name__ == '__main__':
     path, ext = dir + '/dataflow/sampledata/ANDR/sabc/Isabc20', '.cg1'
     files = [path + str(i + 1).zfill(2) + ext for i in range(1, 12)]
-    print files
     modules = [
         dict(module="ospec.load", position=(50, 50),
              config={'files': files, 'intent': 'signal'}),
