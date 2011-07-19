@@ -9,7 +9,7 @@ sys.path.append(dir)
 # python uses __name__ for relative imports so I cannot use
 # the ... in place of dataflow when testing
 from dataflow.dataflow import config
-from dataflow.dataflow.calc import run_template
+from dataflow.dataflow.calc import run_template, get_plottable, calc_single
 from dataflow.dataflow.core import Data, Instrument, Template, register_instrument
 from dataflow.dataflow.modules.load import load_module
 from dataflow.dataflow.modules.save import save_module
@@ -194,13 +194,14 @@ if __name__ == '__main__':
                         wires=wires,
                         instrument=ANDR.id,
                         )
-    result = run_template(template, config)
-    print "Starting again. This time should be A LOT quicker (if the server was empty at runtime)."
-    result2 = run_template(template, config)
-    print "Writing to files"
-    for nodenum, plottable in result.items():
-        for terminal_id, plot in plottable.items():
-            with open('data/' + terminal_id + "_" + str(nodenum) + ".txt", "w") as f:
-                for format in plot:
-                    f.write(format + "\n")
+    #result = run_template(template, config)
+    #print "Starting again. This time should be A LOT quicker (if the server was empty at runtime)."
+    #result2 = run_template(template, config)
+    result = get_plottable(template, config, template.order()[-2], 'output')
+    #print "Writing to files"
+    #for nodenum, plottable in result.items():
+    #    for terminal_id, plot in plottable.items():
+    #        with open('data/' + terminal_id + "_" + str(nodenum) + ".txt", "w") as f:
+    #            for format in plot:
+    #                f.write(format + "\n")
     print "Done"
