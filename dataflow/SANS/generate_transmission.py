@@ -4,13 +4,13 @@ Return transmission based on bottom left and top right coordinates
 
 from .. import config
 from ..core import Module
-
+from ..SANS.map_pics import map_pics
 def generate_transmission_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
     """Return transmission based on bottom left and top right coordinates"""
 
     icon = {
-        'URI': config.IMAGES + "generate_transmission.png",
+        'URI': config.IMAGES + map_pics('trans'),
         'terminals': {
             #inputs
             'sample': (0, 10, -1, 0),
@@ -22,7 +22,7 @@ def generate_transmission_module(id=None, datatype=None, action=None,
             'sample': (20, 10, 1, 0),
             'empty_cell': (20, 10, 1, 0),
             #'empty': (20, 10, 1, 0),
-            'trans': (20, 10, 1, 0),
+            #'trans': (20, 10, 1, 0),
         }
     }
     
@@ -79,11 +79,11 @@ def generate_transmission_module(id=None, datatype=None, action=None,
              #use='out',
              #description='correct',
              #),
-        dict(id='trans',
-             datatype=datatype,
-             use='out',
-             description='correct',
-             ),
+        #dict(id='trans',
+             #datatype=datatype,
+             #use='out',
+             #description='correct',
+             #),
     ]
 
     # Combine everything into a module.

@@ -4,13 +4,13 @@ Deadtime Correction
 
 from .. import config
 from ..core import Module
-
+from ..SANS.map_pics import map_pics
 def correct_dead_time_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
     """Deadtime corrections - has a parameter"""
 
     icon = {
-        'URI': config.IMAGES + "deadtime.png",
+        'URI': config.IMAGES + map_pics('deadtime'),
         'terminals': {
             #Inputs
             'sample': (0, 10, -1, 0),
@@ -19,8 +19,8 @@ def correct_dead_time_module(id=None, datatype=None, action=None,
             'blocked': (0, 40, -1, 0),
             #Outputs
             'sample': (20, 10, 1, 0),
-           #'empty cell': (20, 20, 1, 0),
-            'empty': (20,30, 1, 0),
+            'empty_cell': (20, 20, 1, 0),
+            #'empty': (20,30, 1, 0),
             'blocked': (20, 40, 1, 0),
         }
     }

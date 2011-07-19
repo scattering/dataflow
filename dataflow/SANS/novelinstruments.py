@@ -51,10 +51,10 @@ from dataflow.SANS.convert_qxqy import convert_qxqy_module
 from dataflow.SANS.annular_av import annular_av_module
 from dataflow.SANS.absolute_scaling import absolute_scaling_module
 from dataflow.SANS.correct_dead_time import correct_dead_time_module
-from reduction.sans.filters import SansData
-from reduction.sans.filters import Transmission
-from reduction.sans.filters import plot1D
-from reduction.sans.filters import div
+#from reduction.sans.filters import SansData
+#from reduction.sans.filters import Transmission
+#from reduction.sans.filters import plot1D
+#from reduction.sans.filters import div
 #Transmissions
 Tsamm = 0
 Tempp = 0
@@ -64,7 +64,7 @@ qy = {}
 correctVer = SansData()
 #List of Files
 fileList = []
- 
+
 # Datatype
 SANS_DATA = 'data2d.sans'
 data2d = Data(SANS_DATA, SansData)
@@ -81,8 +81,8 @@ datadiv = Data(SANS_DATA,div)
 # Load module
 def load_action(files=None, intent=None):
     print "loading", files
-    result = [_load_data(files)]  # not bundles
-
+    result = [_load_data(f) for f in files]  # not bundles
+    print "Result: ",result
     return dict(output=result)
 def _load_data(name):
     print name
@@ -123,10 +123,8 @@ def generate_transmission_action(sample,empty_cell,Tsam,Temp):
     coord_left=(55,53)
     coord_right=(74,72)
     lis = [sample[0][0],empty_cell[0][0],Tsam[0][0],Temp[0][0]] 
-    print "input: ",lis
     #Enter Normalization Parameter eventually
     norm = [monitor_normalize(f) for f in lis]
-    print "input: ",norm
     global Tsamm,Tempp
     
     Tsam=generate_transmission(lis[2],lis[2],coord_left,coord_right)
@@ -138,15 +136,20 @@ def generate_transmission_action(sample,empty_cell,Tsam,Temp):
     print 'Sample transmission= {0} (IGOR Value = 0.724): '.format(Tsam)
     print 'Empty Cell transmission= {0} (IGOR Value = 0.929): '.format(Temp)
     result = norm
-    return dict(sample=[result[0]],empty_cell=[result[1]],trans = [tran])#,=[result[3]])
+    sam = result[0]
+    sam.Tsam = Tsam
+    sam.Temp = Temp
+    return dict(sample=[sam],empty_cell=[result[1]])#,=[result[3]])
 generate_trans = generate_transmission_module(id='sans.generate_transmission', datatype=SANS_DATA, version='1.0', action=generate_transmission_action)        
-def initial_correction_action(sample,empty_cell,blocked,trans):
-    lis = [sample[0][0],empty_cell[0][0],blocked[0][0],trans[0][0]] 
+def initial_correction_action(sample,empty_cell,blocked):
+    lis = [sample[0][0],empty_cell[0][0],blocked[0][0]] 
+    #print "Trans: ",lis[-1]
     tran = lis[-1]
     SAM = lis[0]
     EMP = lis[1]
     BGD = lis[2]
-    CORR = initial_correction(SAM,BGD,EMP,tran.Tsam/tran.Temp)
+    CORR = initial_correction(SAM,BGD,EMP,SAM.Tsam/SAM.Temp)
+    CORR.Tsam = SAM.Tsam
     result = CORR
    
     return dict(COR = [result])
@@ -155,10 +158,11 @@ initial_corr = initial_correction_module(id='sans.initial_correction', datatype=
 def correct_detector_sensitivity_action(COR,DIV):
     lis = [COR[0][0],DIV[0][0]]
     print "####################DIV#############"
-    print DIV[0][0]
+    print lis[1]
     CORRECT = lis[0]
     sensitivity = lis[-1]
     DIVV = correct_detector_sensitivity(CORRECT,sensitivity)
+    DIVV.Tsam = COR[0][0].Tsam
     result = DIVV
     return dict(DIV = [result])
 correct_det_sens = correct_detector_sensitivity_module(id='sans.correct_detector_sensitivity', datatype=SANS_DATA, version='1.0', action=correct_detector_sensitivity_action)
@@ -175,7 +179,7 @@ def absolute_scaling_action(DIV,empty,sensitivity):
     EMP = lis[1]
     print "Empty: ", EMP
     DIV = lis[0]
-    ABS = absolute_scaling(DIV,EMP,sensitivity,Tsamm,'NG3')
+    ABS = absolute_scaling(DIV,EMP,sensitivity,DIV.Tsam,'NG3')
     
     correct = convert_q(ABS)
     correct,qx,qy = convert_qxqy(correct)
@@ -218,25 +222,25 @@ if __name__ == '__main__':
         #Sample 0
            #files hard coded for now
         dict(module="sans.load", position=(5, 20),
-             config={'files': fileList[0], 'intent': 'signal'}),
+             config={'files': [fileList[0]], 'intent': 'signal'}),
         #Empty Cell 1
         dict(module="sans.load", position=(5, 30),
-             config={'files': fileList[1], 'intent': 'signal'}),
+             config={'files': [fileList[1]], 'intent': 'signal'}),
         #Empty 2
         dict(module="sans.load", position=(5, 40),
-             config={'files': fileList[2], 'intent': 'signal'}),
+             config={'files': [fileList[2]], 'intent': 'signal'}),
         #Blocked 3
         dict(module="sans.load", position=(5, 50),
-             config={'files': fileList[5], 'intent': 'signal'}),
+             config={'files': [fileList[5]], 'intent': 'signal'}),
         #4 
         dict(module="sans.correct_dead_time", position=(360 , 50), config={}),
         
         #Tsam 5
         dict(module="sans.load", position=(50,100),
-             config={'files': fileList[3], 'intent': 'signal'}),
+             config={'files': [fileList[3]], 'intent': 'signal'}),
         #Temp 6
         dict(module="sans.load", position=(50,100),
-             config={'files': fileList[4], 'intent': 'signal'}),
+             config={'files': [fileList[4]], 'intent': 'signal'}),
         #7
         dict(module="sans.generate_transmission", position=(120 ,80), config={}),
         #8
@@ -246,13 +250,13 @@ if __name__ == '__main__':
         
         #DIV 10
         dict(module="sans.load", position=(100,300),
-             config={'files': fileList[-1], 'intent': 'signal'}),
+             config={'files': [fileList[-1]], 'intent': 'signal'}),
         
         #11
         dict(module="sans.correct_detector_sensitivity", position=(360 , 200), config={}),
         #EMP 12
         dict(module="sans.load", position=(100,300),
-             config={'files': fileList[2], 'intent': 'signal'}),
+             config={'files': [fileList[2]], 'intent': 'signal'}),
         #13
         dict(module="sans.absolute_scaling", position=(360 , 300), config={}),
         #14
@@ -277,11 +281,13 @@ if __name__ == '__main__':
         dict(source=[7, 'sample'], target=[9, 'sample']),
         dict(source=[7, 'empty_cell'], target=[9, 'empty_cell']),
         dict(source=[4, 'blocked'], target=[9, 'blocked']),
-        dict(source=[7, 'trans'], target=[9, 'trans']),
+       # dict(source=[7, 'trans'], target=[9, 'trans']),
+        
         #DIV Correction
         dict(source=[9, 'COR'], target=[11, 'COR']),
         dict(source=[10, 'output'], target=[11, 'DIV']),
-        #ABS Scaling
+        dict(source =[11,'DIV'],target = [8,'input']),
+        ###ABS Scaling
         dict(source=[11, 'DIV'], target=[13, 'DIV']),
         dict(source=[12, 'output'], target=[13, 'empty']),
         dict(source=[10, 'output'], target=[13, 'sensitivity']),        
@@ -290,12 +296,14 @@ if __name__ == '__main__':
         dict(source=[14, 'OneD'], target=[8, 'input']),
         
         
-        
+        #dict(source =[9,'COR'],target = [8,'input']),
         #dict(source=[2, 'output'], target=[3, 'input']),
         #dict(source=[3, 'output'], target=[4, 'input']),
         #dict(source=[4, 'output'], target=[5, 'input']),
         #dict(source=[5, 'output'], target=[1, 'input']),
 
+        
+        #dict(source =[11,'DIV'],target = [8,'input']),
         ]
     config = [d['config'] for d in modules]
     template = Template(name='test sans',
