@@ -35,7 +35,7 @@ def append_polarization_matrix_module(id=None, datatype=None, cell_datatype=None
              datatype=datatype,
              use='in',
              description='He3 cell',
-             required=False,
+             required=True,
              multiple=False,
              ),
         dict(id='output',
