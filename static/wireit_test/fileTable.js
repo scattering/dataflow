@@ -266,7 +266,7 @@ var myGrid = Ext.create('Ext.grid.Panel', {
    plugins: [cellEdit],
    multiSelect: true,
    height: 250,
-   width: 250,
+   width: 400,
 });
 
 
@@ -409,7 +409,7 @@ panelItems = [myGrid].concat(gridList) //gridList]
 
     // grid display panel
     var displayPanel = Ext.create('Ext.Panel', {
-        width : (headerList.length)*200+8+250,
+        width : (headerList.length)*200+8+400,
         height : 500,
         layout: {
 		type: 'hbox',
@@ -422,7 +422,7 @@ panelItems = [myGrid].concat(gridList) //gridList]
 
    // overall display panel  
 var panelTwo = Ext.create('Ext.Panel', {
-	width : (headerList.length)*200+8+250+10,
+	width : (headerList.length)*200+8+400+10,
 	height: 530,
 	layout: {
 		type: 'vbox',

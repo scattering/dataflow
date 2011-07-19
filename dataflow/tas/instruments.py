@@ -251,8 +251,10 @@ def TAS_RUN():
     print result
     '''
     return result
+
+
 hi=TAS_RUN()
-print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
+#print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
 #print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
-#print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
+print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
 print "done"
