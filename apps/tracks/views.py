@@ -3,15 +3,21 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
-from apps.tracks.forms import languageSelectForm, titleOnlyForm, experimentForm, titleOnlyFormExperiment
+from apps.tracks.forms import languageSelectForm, titleOnlyForm, experimentForm1, experimentForm2, titleOnlyFormExperiment
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger #paging for lists
 from django.core.exceptions import ObjectDoesNotExist
+
+import hashlib
 
 ## models
 from django.contrib.auth.models import User 
 from models import * #add models by name
+
+## adds test objects to DB
+from ... import fillDB
 
 
 from ...apps.fileview import testftp
@@ -22,7 +28,7 @@ from ...apps.fileview import testftp
 #from ...dataflow.tas.instruments import BT7
 #from ...dataflow.offspecular.instruments import ANDR
 #from ...dataflow.tas import instruments
-#from ...dataflow.SANS import newinstruments as SANS_INS
+from ...dataflow.SANS import novelinstruments as SANS_INS
 #from ...dataflow.tas import instruments as TAS_INS
 
 import random
@@ -86,6 +92,7 @@ SANS_2 = [{"name":"SANS 2","wires": [{"src": {"terminal": "output", "moduleId": 
 
 TAS_2= [{"name":"real TAS","wires": [{"src": {"terminal": "output", "moduleId": 0}, "tgt": {"terminal": "input", "moduleId": 1}}], "modules": [{"terminals": "input", "config": {"files": ["/home/alex/Desktop/dataflow/reduction/tripleaxis/EscanQQ7HorNSF91831.bt7"], "position": [50, 50], "xtype": "WireIt.Container"}, "name": "TripleAxis Load", "value": {}}, {"terminals": {"input": [-15, 1, -1, 0], "output": [15, 1, 1, 0]}, "config": {"position": [250, 400], "target_monitor": 900000, "xtype": "WireIt.ImageContainer"}, "name": "Normalize Monitor", "value": {}}], "properties": {"name": "test reduction", "description": "example reduction diagram"}}]
 
+SANS_3=[{"name":"SANS_NEW","wires": [{"src": {"terminal": "output", "moduleId": 0}, "tgt": {"terminal": "sample", "moduleId": 4}}, {"src": {"terminal": "output", "moduleId": 1}, "tgt": {"terminal": "empty_cell", "moduleId": 4}}, {"src": {"terminal": "output", "moduleId": 3}, "tgt": {"terminal": "blocked", "moduleId": 4}}, {"src": {"terminal": "sample", "moduleId": 4}, "tgt": {"terminal": "sample", "moduleId": 7}}, {"src": {"terminal": "empty_cell", "moduleId": 4}, "tgt": {"terminal": "empty_cell", "moduleId": 7}}, {"src": {"terminal": "output", "moduleId": 5}, "tgt": {"terminal": "Tsam", "moduleId": 7}}, {"src": {"terminal": "output", "moduleId": 6}, "tgt": {"terminal": "Temp", "moduleId": 7}}, {"src": {"terminal": "sample", "moduleId": 7}, "tgt": {"terminal": "sample", "moduleId": 9}}, {"src": {"terminal": "empty_cell", "moduleId": 7}, "tgt": {"terminal": "empty_cell", "moduleId": 9}}, {"src": {"terminal": "blocked", "moduleId": 4}, "tgt": {"terminal": "blocked", "moduleId": 9}}, {"src": {"terminal": "trans", "moduleId": 7}, "tgt": {"terminal": "trans", "moduleId": 9}}, {"src": {"terminal": "COR", "moduleId": 9}, "tgt": {"terminal": "COR", "moduleId": 11}}, {"src": {"terminal": "output", "moduleId": 10}, "tgt": {"terminal": "DIV", "moduleId": 11}}, {"src": {"terminal": "DIV", "moduleId": 11}, "tgt": {"terminal": "DIV", "moduleId": 13}}, {"src": {"terminal": "output", "moduleId": 12}, "tgt": {"terminal": "empty", "moduleId": 13}}, {"src": {"terminal": "output", "moduleId": 10}, "tgt": {"terminal": "sensitivity", "moduleId": 13}}, {"src": {"terminal": "ABS", "moduleId": 13}, "tgt": {"terminal": "ABS", "moduleId": 14}}, {"src": {"terminal": "OneD", "moduleId": 14}, "tgt": {"terminal": "input", "moduleId": 8}}], "modules": [{"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110", "position": [5, 20], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108", "position": [5, 30], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102", "position": [5, 40], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC007.SA3_SRK_S107", "position": [5, 50], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": {"sample": [20, 10, 1, 0], "empty_cell": [0, 20, -1, 0], "empty": [20, 30, 1, 0], "blocked": [20, 40, 1, 0]}, "config": {"position": [360, 50], "xtype": "WireIt.ImageContainer"}, "name": "Dead time Correction", "value": {}}, {"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106", "position": [50, 100], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105", "position": [50, 100], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": {"sample": [20, 10, 1, 0], "trans": [20, 10, 1, 0], "empty_cell": [20, 10, 1, 0], "Tsam": [0, 100, -1, 0], "Temp": [0, 130, -1, 0]}, "config": {"position": [120, 80], "xtype": "WireIt.ImageContainer"}, "name": "generate_transmission", "value": {}}, {"terminals": "", "config": {"position": [500, 500], "ext": "dat", "xtype": "WireIt.Container"}, "name": "Save", "value": {}}, {"terminals": {"sample": [0, 10, -1, 0], "COR": [20, 10, 1, 0], "trans": [0, 140, -1, 0], "empty_cell": [0, 50, -1, 0], "blocked": [0, 90, -1, 0]}, "config": {"position": [360, 100], "xtype": "WireIt.ImageContainer"}, "name": "initial_correction", "value": {}}, {"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/PLEX_2NOV2007_NG3.DIV", "position": [100, 300], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": {"DIV": [20, 10, 1, 0], "COR": [0, 10, -1, 0]}, "config": {"position": [360, 200], "xtype": "WireIt.ImageContainer"}, "name": "Correct Detector Sensitivity", "value": {}}, {"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102", "position": [100, 300], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": {"DIV": [0, 10, -1, 0], "ABS": [20, 10, 1, 0], "sensitivity": [0, 10, -1, 0], "empty": [0, 10, -1, 0]}, "config": {"position": [360, 300], "xtype": "WireIt.ImageContainer"}, "name": "absolute_scaling", "value": {}}, {"terminals": {"ABS": [0, 10, -1, 0], "OneD": [20, 10, 1, 0]}, "config": {"position": [360, 400], "xtype": "WireIt.ImageContainer"}, "name": "annular_av", "value": {}}], "properties": {"name": "test sans", "description": "example sans data"}}]
 sample_data = {
     'type': '2d',
     'z':  [ [1, 2], [3, 4] ],
@@ -108,15 +115,17 @@ b = {'save':'successful'}
 
 # this is a temporary option until wirings are stored in the database:
 # they can be stored in a local list:
-wirings_list = offspec+a+SANS+SANS_2
+wirings_list = offspec+a+SANS+SANS_2+SANS_3
 
+@csrf_exempt 
 def listWirings(request):
     context=RequestContext(request)
     print 'I am loading'
-    return HttpResponse(simplejson.dumps(wirings_list), context_instance=context)
+    return HttpResponse(simplejson.dumps(wirings_list)) #, context_instance=context
 
 #    return HttpResponse(simplejson.dumps(a)) #andr vs bt7 testing
 
+@csrf_exempt 
 def saveWiring(request):
     context=RequestContext(request)
     print 'I am saving'
@@ -124,14 +133,15 @@ def saveWiring(request):
     # this stores the wires in a simple list, in memory on the django server.
     # replace this with a call to storing the wiring in a real database.
     wirings_list.append(new_wiring)
-    return HttpResponse(simplejson.dumps(b), context_instance=context)
+    return HttpResponse(simplejson.dumps(b)) #, context_instance=context
 
+@csrf_exempt 
 def runReduction(request):
     context=RequestContext(request)
     print 'I am reducing'
 ####### SANS TESTING
-    result = TAS_INS.TAS_RUN()
-    print "RESULT", result
+    SANS_INS.TESTING()
+   # print "RESULT", result
     #print result
     #for i in range(6):
    #	name = 'checkingSANSresults' + str(i) + '.txt'
@@ -140,7 +150,7 @@ def runReduction(request):
    # 	openFile.close()
     #result = SANS_INS.TESTING()
     #print simplejson.dumps(result)
-    return HttpResponse(simplejson.dumps(result), context_instance=context)
+    return HttpResponse(simplejson.dumps({"hey":"there"})) #, context_instance=context
     
     #print FILES
 ###### BT7 TESTING
@@ -170,24 +180,41 @@ def runReduction(request):
 ## Views for displaying a language selection form and for calling the file association table with the selected language.
 ## scheme is the same as for the editor
 
+
+
 ########
 ## Views for displaying a language selection form and for calling the editor template with the selected language.
 ## The intermediate template 'editorRedirect.html' is used so that we can redirect to /editor/ while preserving 
 ## the language selection.
 
+## HAVING TROUBLE SENDING LIST OF STRINGS AS CONTEXT TO THE EDITOR
+@csrf_exempt 
 def displayEditor(request):
     context=RequestContext(request)
     print request.POST.has_key('language')
     if request.POST.has_key('language'):
-        return render_to_response('tracer_testingforWireit/editor.html', {'lang':request.POST['language']}, context=RequestContext(request))
+    	if request.POST.has_key('experiment_id'):
+    		experiment = Experiment.objects.get(id=request.POST['experiment_id'])
+    		file_list = experiment.Files.all()
+    		files = [simplejson.dumps(i.friendly_name) for i in file_list]
+    		#files = simplejson.dumps(files)
+    	else:
+    		experiment = []
+    		files = []
+    	files = simplejson.dumps(files)
+    	print 'EXPERIMENT: ', experiment
+    	print 'FILES: ', files
+    	
+        return render_to_response('tracer_testingforWireit/editor.html', {'lang':request.POST['language']}, context_instance=context)
     else:
         return HttpResponseRedirect('/editor/langSelect/')
 
+@csrf_exempt 
 def languageSelect(request):
     context=RequestContext(request)
     if request.POST.has_key('instruments'):
         return render_to_response('tracer_testingforWireit/editorRedirect.html',
-                            {'lang':request.POST['instruments']})
+                            {'lang':request.POST['instruments']}, context_instance=context)
     form = languageSelectForm()
     return render_to_response('tracer_testingforWireit/languageSelect.html', {'form':form}, context_instance=context)
     
@@ -235,10 +262,46 @@ def editProject(request, project_id):
 	form = titleOnlyFormExperiment()
 	return render_to_response('userProjects/editProject.html', {'project':project,'form':form,'experiments':experiments}, context_instance=context)
 
-@login_required #may want a separate form for files so that you can add multiple files w/out changing facility, etc...
+@login_required 
 def editExperiment(request, experiment_id):
-	context=RequestContext(request)
 	experiment = Experiment.objects.get(id=experiment_id)
-	form = experimentForm()
-	return render_to_response('userProjects/editExperiment.html', {'form':form, 'experiment':experiment,}, context_instance = context)
+	if request.FILES.has_key('files'):
+		file_data = request.FILES['files']
+		file_sha1 = hashlib.sha1()
+		for line in file_data.read():
+			file_sha1.update(line)
+		write_here = '/tmp/FILES/' + file_sha1.hexdigest()
+		write_here = open(write_here, 'w')
+		for line in file_data:
+			write_here.write(line)
+		write_here.close()
+		new_file = File.objects.create(name=file_sha1.hexdigest(),friendly_name = file_data.name, location = '/tmp/FILES/')
+		experiment.Files.add(new_file)
+	if request.POST.has_key('instrument_name'):
+		if request.POST['instrument_name']:
+			instrument = Instrument.objects.get(id=request.POST['instrument_name'])
+			instrument_class = instrument.instrument_class
+			experiment.instrument = instrument
+			experiment.save()
+	if request.POST.has_key('facility'):
+		if request.POST['facility']:
+			facility = Facility.objects.get(id=request.POST['facility'])
+			experiment.facility = facility
+			experiment.save()
+	if request.POST.has_key('templates'):
+		if request.POST['templates']:
+			template = Template.objects.get(id=request.POST['templates'])
+			experiment.templates.add(template)
+		#print file_sha1.hexdigest()
+		#print hashlib.sha1(request.FILES['files'].read()).hexdigest()	
+	context=RequestContext(request)
+	facility = experiment.facility
+	instrument = experiment.instrument
+	if instrument:
+		instrument_class = experiment.instrument.instrument_class
+	else:
+		instrument_class = None
+	form1 = experimentForm1(initial= {'facility':facility, 'instrument_class':instrument_class, 'instrument_name':instrument})
+	form2 = experimentForm2()
+	return render_to_response('userProjects/editExperiment.html', {'form1':form1, 'form2':form2, 'experiment':experiment,}, context_instance = context)
     

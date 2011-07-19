@@ -1,4 +1,4 @@
-function makeFileTable(headerList) {
+function makeFileTable(headerList, fileList) {
 /* FILE ASSOCIATIONS TABLE, Andrew Tracer, 6/8/2011
 
 Field:
@@ -29,6 +29,8 @@ gridList = []
 	extend: 'Ext.data.Model',
 	fields: [
 		{name: 'filename', type: 'string'},
+		{name: 'filehash', type: 'string'},
+		{name: 'filelocation', type: 'string'},
 		{name: 'filetype'},
 		{name: 'group', type: 'string'},
 	]
@@ -152,18 +154,36 @@ url: '/files',
         }]
     });
 
-// insert records into the store to play around with
-for (var j = 0; j < 3; j++) {
-	for (var i = 0; i < 20; i ++) {
-		fname = 'new_file' + i
+if (fileList.length != 0) {
+	for (var i in fileList) {
+		thisFile = fileList[i]
 		var newFile = Ext.ModelManager.create({
-			filename: fname,
+			filename: thisFile[1],
+			filehash: thisFile[0],
+			filelocation: thisFile[2],
 			filetype: 'N',
-			group: j,},
-	'Data');
-			store.insert(0, newFile);
+			},
+			'Data');
+		store.insert(0, newFile);
 	}
 }
+	
+// insert records into the store to play around with if a file list has not been passed into the Wiring Editor
+if (fileList.length==0) {
+	for (var j = 0; j < 3; j++) {
+		for (var i = 0; i < 20; i ++) {
+			fname = 'new_file' + i
+			var newFile = Ext.ModelManager.create({
+				filename: fname,
+				filehash: '0',
+				filetype: 'N',
+				group: j,},
+		'Data');
+				store.insert(0, newFile);
+		}
+	}
+}
+
 
 // combobox options for file type editing
 combo = []
@@ -334,7 +354,7 @@ for (var i in headerList) {
 			}	
 		],
 		//tbar: [{text: ''}],
-		height: 250,
+		height: 200,
 		width: 200,
 	})
 	)

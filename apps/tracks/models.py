@@ -19,11 +19,12 @@ class Userprofile(models.Model):
 
 class File(models.Model):
 	#permissions = models.ForeignKey(Permission, null=True) # or should this be a string of permission names
-	name = models.CharField(max_length=160, primary_key=True) # what format are we storing the contents in?
-	location = models.CharField(max_length=300) #location of file on disc
+	name = models.CharField(max_length=160, primary_key=True) # sha1 hash of file contents
+	friendly_name = models.CharField(max_length=60)
+	location = models.CharField(max_length=300) #location of file on disk
 	metadata = models.ManyToManyField('Metadata', null=True)
 	def __unicode__(self):
-		return self.location.split('/')[-1]
+		return self.name
 	
 class Metadata(models.Model):
 	Myfile = models.ForeignKey('File', related_name="file")
@@ -33,7 +34,7 @@ class Metadata(models.Model):
 		return self.Key + ": " + self.Value
 
 class Template(models.Model):
-	Title = models.CharField(max_length=50) # name of experiment associated with template
+	Title = models.CharField(max_length=50)
 	Representation = models.TextField() # can easily convert back and forth from strings to 							    # dicts with str(dict) and dict(str)
 	user = models.ForeignKey(User)
 	#permissions = models.ForeignKey(Permission, null=True)
@@ -52,18 +53,19 @@ class Project(models.Model):
 
 class Experiment(models.Model):
 	ProposalNum = models.CharField(max_length=100) # IMS proposal/request number
-	Files = models.ForeignKey('File', null=True)
+	Files = models.ManyToManyField('File', null=True)
 	facility = models.ForeignKey('Facility', null=True)
 	users = models.ForeignKey(User)
 	#permissions = models.ForeignKey(Permission, null=True)
 	instrument = models.ForeignKey('Instrument', null=True)
+	templates = models.ManyToManyField('Template', null=True)
 	def __unicode__(self):
 		return self.ProposalNum
 
 class Instrument(models.Model):
 	Name = models.CharField(max_length=50) #e.g. bt7 
-	Templates = models.ForeignKey('Template')
-	metadata = models.ForeignKey('Metadata')
+	Templates = models.ManyToManyField('Template', null=True)
+	metadata = models.ManyToManyField('Metadata', null=True)
 	instrument_class = models.CharField(max_length=50)
 	Calibrations = models.CharField(max_length=100) # is this so that we can have different instances of an
 							# an instrument varying by calibration?
@@ -73,7 +75,9 @@ class Instrument(models.Model):
 		
 class Facility(models.Model):
 	Name = models.CharField(max_length=50) #e.g., NCNR, HFIR, 
-	instruments = models.ForeignKey('Instrument')
+	instruments = models.ManyToManyField('Instrument', null=True)
+	def __unicode__(self):
+		return self.Name
 	
 	
 	

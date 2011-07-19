@@ -114,6 +114,9 @@ div.Bubble div.body {
 
 </style>
 
+<!-- Ajax csrf fix 
+<script type="text/javascript" src="../../static/lib/ajaxCSRFfix.js"></script>
+-->
 <!-- ExtJS -->
 <script type="text/javascript" src="../../static/lib/ext/ext-all.js"></script>
 
@@ -297,6 +300,7 @@ div.Bubble div.body {
 <script type="text/javascript" src="../../static/wireit_test/language.js"></script>
 <script type="text/javascript" src="../../static/wireit_test/ANDRdefinition.js"></script>
 <script type="text/javascript" src="../../static/wireit_test/SANSdefinition.js"></script>
+<script type="text/javascript" src="../../static/wireit_test/SANSnewdefinition.js"></script>
 <script type="text/javascript" src="../../static/wireit_test/TASlang.js"></script>
 
 
@@ -323,7 +327,8 @@ YAHOO.util.Event.onDOMReady( function() {
 	try {	
 
 		CHOSEN_LANG = languageDictionary["{{ lang }}"]
-
+		FILES = [['ah6asd','myFile1','/'], ['bh45ba','myfile2','/'],['cfasdsasg4','myFile3','/']]
+		console.log(FILES)
 		// setting up the WireEditor with the adapter 'tracks'
 		CHOSEN_LANG['adapter'] = WireIt.WiringEditor.adapters.tracks;
 		

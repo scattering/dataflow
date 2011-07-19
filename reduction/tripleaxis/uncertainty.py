@@ -27,7 +27,18 @@ __all__ = ['Measurement']
 # TODO: C implementation of *,/,**?
 class Measurement(object):
     # Make standard deviation available
-    def _getdx(self): return numpy.sqrt(self.variance)
+    def join(self,other):
+        if isinstance(other,Measurement):
+            #self=Measurement([self.x,other.x],[self.dx,other.dx])
+            xs=numpy.hstack((self.x,other.x))
+            variances=numpy.hstack((self.variance,other.variance))
+            self.x=xs
+            self.variance=variances
+            #self=Measurement(xs,variances)
+    def _getdx(self): 
+        if self.variance==None:
+            return None
+        return numpy.sqrt(self.variance)
     def _setdx(self,dx):
         # Direct operation
         #    variance = dx**2
@@ -188,7 +199,10 @@ class Measurement(object):
     def __str__(self):
         #return str(self.x)+" +/- "+str(numpy.sqrt(self.variance))
         if numpy.isscalar(self.x):
-            return format_uncertainty(self.x,numpy.sqrt(self.variance))
+            if self.variance==None:
+                return format_uncertainty(self.x,self.variance)
+            else:
+                return format_uncertainty(self.x,numpy.sqrt(self.variance))
         else:
             return [format_uncertainty(v,dv)
                     for v,dv in zip(self.x,numpy.sqrt(self.variance))]
