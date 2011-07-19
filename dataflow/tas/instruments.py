@@ -5,7 +5,7 @@ import math, os, sys
 
 #Relative imports for use in the larger project
 '''
-from ...reduction.tripleaxis.data_abstraction import TripleAxis, filereader
+from ...reduction.tripleaxis import data_abstraction
 from ..calc import run_template
 from .. import wireit
 from ... import ROOT_URL
@@ -13,7 +13,7 @@ from django.utils import simplejson
 import numpy
 
 from .. import config
-from ..core import Instrument, Datatype, Template, register_instrument
+from ..core import Instrument, Data, Template, register_instrument
 
 #from dataflow.dataflow.modules.load import load_module
 from ..modules.join import join_module
