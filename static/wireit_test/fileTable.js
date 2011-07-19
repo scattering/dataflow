@@ -30,7 +30,6 @@ gridList = []
 	fields: [
 		{name: 'filename', type: 'string'},
 		{name: 'filehash', type: 'string'},
-		{name: 'filelocation', type: 'string'},
 		{name: 'filetype'},
 		{name: 'group', type: 'string'},
 	]
@@ -160,7 +159,6 @@ if (fileList.length != 0) {
 		var newFile = Ext.ModelManager.create({
 			filename: thisFile[1],
 			filehash: thisFile[0],
-			filelocation: thisFile[2],
 			filetype: 'N',
 			},
 			'Data');
@@ -486,7 +484,7 @@ function generate_FileGroups() {
 	if (index != -1) {
 		groups_to_run.splice(groups_to_run.indexOf(''),1)
 		}
-	console.log(groups_to_run)
+	//console.log(groups_to_run)
 	for (var i in groups_to_run) {
 		send_to_Wireit = {}
 		for (var j in storeList) {
@@ -515,7 +513,7 @@ function run_reduction() {
 					// in group i
 					}
 				}
-			console.log(send_to_Wireit)
+			//console.log(send_to_Wireit)
 			window.editor.runReduction(send_to_Wireit)
 			}
 		else if (btn == 'ok') {

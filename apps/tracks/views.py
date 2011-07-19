@@ -112,6 +112,8 @@ sample_data = {
 
 b = {'save':'successful'}
 
+SANS_NEW_TEMPLATE_FROM_WIREIT = {"modules":[{"config":{"files":"ca8cb687ebf5f2aea77cb4640b93d4b16eaf69af","position":[5,20],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"files":"b908f8d0d9a24b5e2b8d25ca27780015a37d29f8","position":[5,30],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"position":[5,40],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"position":[5,50],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"position":[360,50],"xtype":"WireIt.ImageContainer"},"name":"Dead time Correction","value":{}},{"config":{"position":[50,100],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"position":[50,100],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"position":[120,80],"xtype":"WireIt.ImageContainer"},"name":"generate_transmission","value":{}},{"config":{"position":[717,445],"xtype":"WireIt.Container"},"name":"Save","value":{}},{"config":{"position":[360,100],"xtype":"WireIt.ImageContainer"},"name":"initial_correction","value":{}},{"config":{"position":[100,300],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"position":[360,200],"xtype":"WireIt.ImageContainer"},"name":"Correct Detector Sensitivity","value":{}},{"config":{"position":[100,300],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"position":[360,300],"xtype":"WireIt.ImageContainer"},"name":"absolute_scaling","value":{}},{"config":{"position":[360,400],"xtype":"WireIt.ImageContainer"},"name":"annular_av","value":{}}],"name":"test sans","properties":{"description":"example sans data","name":"test sans"},"wires":[{"src":{"moduleId":0,"terminal":"output"},"tgt":{"moduleId":4,"terminal":"sample"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":1,"terminal":"output"},"tgt":{"moduleId":4,"terminal":"empty_cell"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":3,"terminal":"output"},"tgt":{"moduleId":4,"terminal":"blocked"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":4,"terminal":"sample"},"tgt":{"moduleId":7,"terminal":"sample"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":4,"terminal":"empty_cell"},"tgt":{"moduleId":7,"terminal":"empty_cell"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":5,"terminal":"output"},"tgt":{"moduleId":7,"terminal":"Tsam"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":6,"terminal":"output"},"tgt":{"moduleId":7,"terminal":"Temp"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":7,"terminal":"sample"},"tgt":{"moduleId":9,"terminal":"sample"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":7,"terminal":"empty_cell"},"tgt":{"moduleId":9,"terminal":"empty_cell"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":4,"terminal":"blocked"},"tgt":{"moduleId":9,"terminal":"blocked"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":7,"terminal":"trans"},"tgt":{"moduleId":9,"terminal":"trans"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":9,"terminal":"COR"},"tgt":{"moduleId":11,"terminal":"COR"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":10,"terminal":"output"},"tgt":{"moduleId":11,"terminal":"DIV"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":11,"terminal":"DIV"},"tgt":{"moduleId":13,"terminal":"DIV"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":12,"terminal":"output"},"tgt":{"moduleId":13,"terminal":"empty"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":10,"terminal":"output"},"tgt":{"moduleId":13,"terminal":"sensitivity"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":13,"terminal":"ABS"},"tgt":{"moduleId":14,"terminal":"ABS"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":14,"terminal":"OneD"},"tgt":{"moduleId":8,"terminal":"input"},"xtype":"WireIt.BezierWire"}]}
+
 
 # this is a temporary option until wirings are stored in the database:
 # they can be stored in a local list:
@@ -137,10 +139,11 @@ def saveWiring(request):
 
 @csrf_exempt 
 def runReduction(request):
+    print request.POST['data']
     context=RequestContext(request)
     print 'I am reducing'
 ####### SANS TESTING
-    SANS_INS.TESTING()
+    #SANS_INS.TESTING()
    # print "RESULT", result
     #print result
     #for i in range(6):
@@ -196,16 +199,15 @@ def displayEditor(request):
     	if request.POST.has_key('experiment_id'):
     		experiment = Experiment.objects.get(id=request.POST['experiment_id'])
     		file_list = experiment.Files.all()
-    		files = [simplejson.dumps(i.friendly_name) for i in file_list]
-    		#files = simplejson.dumps(files)
     	else:
     		experiment = []
-    		files = []
-    	files = simplejson.dumps(files)
-    	print 'EXPERIMENT: ', experiment
-    	print 'FILES: ', files
-    	
-        return render_to_response('tracer_testingforWireit/editor.html', {'lang':request.POST['language']}, context_instance=context)
+    		file_list = []
+    	file_context = {}
+    	for i in range(len(file_list)):
+    		file_context[file_list[i].name + ',,,z,z,z,z,,,' + file_list[i].friendly_name] = ''
+    	file_context['file_keys'] = file_context.keys()
+	file_context['lang'] = request.POST['language']
+        return render_to_response('tracer_testingforWireit/editor.html', file_context, context_instance=context)
     else:
         return HttpResponseRedirect('/editor/langSelect/')
 
