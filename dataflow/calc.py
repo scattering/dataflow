@@ -81,6 +81,103 @@ def run_template(template, config):
         ans[nodenum] = plottable
     return ans
 
+def calc_single(template, config, nodenum, terminal_id):
+    """ Calculate fingerprint of terminal in question - if it exists in the cache,
+    get it.  Otherwise, calculate from scratch (retrieving parent values recursively) """
+    # Find the modules
+    node = template.modules[nodenum]
+    module_id = node['module'] # template.modules[node]
+    module = lookup_module(module_id)
+    terminal = module.get_terminal_by_id(terminal_id)
+    
+    if terminal['use'] != 'out':
+        # then this is an input terminal... can't get it!
+        return {}
+    
+    all_fp = fingerprint_template(template, config)
+    fp = name_fingerprint(all_fp[nodenum])
+    terminal_fp = name_terminal(fp, terminal_id)
+
+    #result = {}
+    if server.exists(terminal_fp):# or module.name == 'Save': 
+        print "retrieving cached value: " + terminal_fp
+        cls = lookup_datatype(terminal['datatype']).cls
+        result = [cls.loads(str) for str in server.lrange(terminal_fp, 0, -1)]
+    else:
+        # get inputs from parents
+        parents = template.get_parents(nodenum)
+        # this is a list of wires that terminate on this module
+        kwargs = {}
+        for wire in parents:
+            source_nodenum, source_terminal_id = wire['source']
+            source_data = calc_single(template, config, source_nodenum, source_terminal_id)
+            target_id = wire['target'][1]
+            if target_id in kwargs:
+                # this explicitly assumes all data is a list
+                # so that we can concatenate multiple inputs
+                kwargs[target_id].append(source_data)
+            else:
+                kwargs[target_id] = source_data
+        
+        # Include configuration information
+        configuration = {}
+        configuration.update(node.get('config', {}))
+        configuration.update(config[nodenum])
+        kwargs.update(configuration)
+        
+        calc_value = module.action(**kwargs)
+        # pushing the value of all the outputs for this node to cache, 
+        # even though only one was asked for
+        for terminal_id, arr in calc_value.items():
+            terminal_fp = name_terminal(fp, terminal_id)
+            for data in arr:
+                server.rpush(terminal_fp, data.dumps())
+        #server.set(fp, fp) # used for checking if the calculation exists; could wrap this whole thing with loop of output terminals
+        result = calc_value[terminal_id]
+    return result
+
+def get_plottable(template, config, nodenum, terminal_id):
+    # Find the modules
+    node = template.modules[nodenum]
+    module_id = node['module'] # template.modules[node]
+    module = lookup_module(module_id)
+    terminal = module.get_terminal_by_id(terminal_id)
+    
+    all_fp = fingerprint_template(template, config)
+    fp = all_fp[nodenum]
+    plottable_fp = name_terminal(name_plottable(fp), terminal_id)
+    
+    if server.exists(plottable_fp):
+        print "retrieving cached value: " + plottable_fp
+        plottable = server.lrange(plottable_fp, 0, -1)
+    else:
+        data = calc_single(template, config, nodenum, terminal_id)
+        plottable = convert_to_plottable(data)
+        for item in plottable:
+            server.rpush(plottable_fp, item)
+            
+    return plottable
+
+def fingerprint_template(template, config):
+    """ run the fingerprint operation on the whole template, returning
+    the dict of fingerprints (one per output terminal) """    
+    fingerprints = {}
+    for nodenum, wires in template:
+        # Find the modules
+        node = template.modules[nodenum]
+        module_id = node['module'] # template.modules[node]
+        module = lookup_module(module_id)
+        inputs = _map_inputs(module, wires)
+        
+        # Include configuration information
+        configuration = {}
+        configuration.update(node.get('config', {}))
+        configuration.update(config[nodenum])
+        
+        # Fingerprinting
+        fp = finger_print(module, configuration, nodenum, inputs, fingerprints) # terminals included
+        fingerprints[nodenum] = fp
+    return fingerprints
 
 def _lookup_results(result, s):
     # Hack to figure out if we have a bundle.  Fix this!
