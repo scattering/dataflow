@@ -1544,11 +1544,24 @@ def join(tas1, tas2):
 					distinct.append(field)
 				else:
 					not_distinct.append(field)
-	return joinedtas
+	
+	joinedtas2=remove_duplicates(joinedtas, distinct, not_distinct)
+	return joinedtas2
 	#np.where(hasattr('isDistinct') and isDistinct,,) #todo finish writing
 
 
 def remove_duplicates(tas,distinct,not_distinct):
+	#skip=[] #list of row indices to skip (ie unique pts to keep in datafile)
+	for field in distinct:
+		for i in range(len(distinct[0])):
+			for j in range(i,len(distinct[0])):
+				#TODO may have to check if field has a window defined...
+				if field[i].measurement-field[i].window<=field[j].measurement and field[i].measurement+field[i].window>=field[j].measurement:
+					#after comparing to all others, if the row has a unique
+					#isDistinct column, the row is unique. Store it and don't
+					#check its row anymore --> it stays
+				
+	
 	pass
 
 def filereader(filename):
