@@ -677,7 +677,7 @@ class Blades(object):
         def __init__(self,title='',nblades=7):
                 self.blades=[]
                 for i in range(nblades):
-                        self.blades.append(Motor(title+'_blade_'+str(i),values=None,err=None,units='degrees',isDistinct=False))
+                        self.blades.append(Motor(title+'blade'+str(i),values=None,err=None,units='degrees',isDistinct=False))
         def __iter__(self):
                 for blade in self.blades:
 			yield blade
@@ -693,7 +693,7 @@ class PolarizedBeam(object):
                 self.ef_cancel=Motor('ei_flip',values=None,err=None,units='amps',isDistinct=False)
                 self.hsample=Motor('ei_flip',values=None,err=None,units='amps',isDistinct=False) #horizontal current
                 self.vsample=Motor('ei_flip',values=None,err=None,units='amps',isDistinct=False) #vertical current
-                self.sample_guide_field_rotatation=Motor('sample_guide_field_rotation',values=None,err=None,units='degrees',isDistinct=False)
+                self.sample_guide_field_rotatation=Motor('sample_guide_field_rotatation',values=None,err=None,units='degrees',isDistinct=False)
                 self.flipper_state=Motor('flipper_state',values=None,err=None,units='',isDistinct=False) #short hand, can be A,B,C, etc.
         def __iter__(self):
                 for key,value in self.__dict__.iteritems():
@@ -779,6 +779,13 @@ class TripleAxis(object):
                 for detector in bt7.detectors:
                         detector.measurement=detector.measurement*rescor
                 return
+	
+	def efficiency_correction(self,efficiencies):
+		#TODO
+		for detector in self.detectors:
+			detector*=efficiencies
+			
+		pass
 	
 	def dumps(self):
 		return pickle.dumps(self)
@@ -868,7 +875,7 @@ def translate(bt7,dataset):
         translate_physical_motors(bt7,dataset)
         translate_filters(bt7,dataset)
         translate_apertures(bt7,dataset)
-        #translate_polarized_beam(bt7,dataset)
+        translate_polarized_beam(bt7,dataset)
         translate_slits(bt7,dataset)
         translate_temperature(bt7,dataset)
         translate_time(bt7,dataset)
@@ -1507,6 +1514,8 @@ def join(tas1, tas2):
 	#average all similar points
 	#put all detectors on the same monitor, assumed that the first monitor is desired throughout
 	joinedtas=tas1
+	distinct=[]
+	not_distinct=[]
 	#tas1.detectors.primary_detector.measurement.join(tas2.detectors.primary_detector.measurement)
 	for key,value in joinedtas.__dict__.iteritems():
 		if key=='data' or key=='meta_data' or key=='sample' or key=='sample_environment':
@@ -1515,17 +1524,31 @@ def join(tas1, tas2):
 		#elif key=='detectors':
 		#	for field in value:
 		#		pass
+		elif key.find('blade')>=0:
+			#TODO: how should we handle joining when both TAS objects have unequal #blades?
+			obj=getattr(tas2,key)
+			i=0
+			for blade in value.blades:
+				blade.measurement.join(obj.blades[i].measurement)
+				i+=1
+				if blade.isDistinct:
+					distinct.append(blade)
+				else:
+					not_distinct.append(blade)
 		else:
 			for field in value:
 				obj=getattr(tas2,key)
 				field.measurement.join(getattr(obj,field.name).measurement)
-				pass
+				if field.isDistinct:
+					distinct.append(field)
+				else:
+					not_distinct.append(field)
 	return joinedtas
 	#np.where(hasattr('isDistinct') and isDistinct,,) #todo finish writing
 
 
-
-
+def remove_duplicates(tas,distinct,not_distinct):
+	pass
 
 def filereader(filename):
         filestr=filename

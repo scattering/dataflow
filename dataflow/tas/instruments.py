@@ -40,11 +40,12 @@ from dataflow.dataflow.core import Instrument, Data, Template, register_instrume
 from dataflow.dataflow.modules.join import join_module
 from dataflow.dataflow.modules.scale import scale_module
 from dataflow.dataflow.modules.save import save_module
+from dataflow.dataflow.modules.tas_load import load_module
 from dataflow.dataflow.modules.tas_normalize_monitor import normalize_monitor_module
 from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
 from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
 from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
-from dataflow.dataflow.modules.tas_load import load_module
+
 
 TAS_DATA = 'data1d.tas'
 data1d = Data(TAS_DATA, data_abstraction)
@@ -248,8 +249,8 @@ def TAS_RUN():
         		value['output'][i] = value['output'][i].get_plottable()
     print result
     return result
-hi=TAS_RUN()
-#print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
+#hi=TAS_RUN()
+print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
 #print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
 #print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
 print "done"
