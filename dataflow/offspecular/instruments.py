@@ -36,8 +36,8 @@ datahe3 = Data(OSPEC_DATA_HE3, He3AnalyzerCollection)
 # Load module
 def load_action(files=[], intent='', auto_PolState=False, PolStates=[]):
     print "loading", files
-    if PolStates == []:
-        PolStates = [''] * len(files)
+    if len(PolStates) < len(files):
+        PolStates += [''] * (len(files) - len(PolStates))
     result = [_load_data(f, auto_PolState, state) for f, state in zip(files, PolStates)] # not bundles
     return dict(output=result)
 def _load_data(name, auto_PolState, PolState):
@@ -123,8 +123,8 @@ two_theta_qxqz = two_theta_qxqz_module(id='ospec.qxqz', datatype=OSPEC_DATA, ver
 # Load he3 module
 def load_he3_action(files=[], cells=[]):
     print "loading he3", files
-    if cells == []:
-        cells = [[]] * len(files)
+    if len(cells) < len(files):
+        cells += [[]] * (len(files) - len(cells))
     result = [_load_he3_data(f, cell) for f, cell in zip(files, cells)]
     return dict(output=result)
 def _load_he3_data(name, cells):
@@ -217,7 +217,7 @@ if __name__ == '__main__':
             dict(module="ospec.load", position=(50, 50),
                  config={'files': files, 'intent': 'signal', 'PolStates':pol_states}),
             dict(module="ospec.timestamp", position=(60, 60), config={'timestamp_file':'end_times.json'}),
-            dict(module="ospec.loadhe3", position=(60, 60), config={'files':[dir+'/dataflow/sampledata/ANDR/cshape_121609/He3Cells.json']}),
+            dict(module="ospec.loadhe3", position=(60, 60), config={'files':[dir + '/dataflow/sampledata/ANDR/cshape_121609/He3Cells.json']}),
             dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
             dict(module="ospec.comb_polar", position=(150, 100), config={}),
             dict(module="ospec.append", position=(250, 150), config={}),
