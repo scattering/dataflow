@@ -278,11 +278,12 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	        modules: value.working.modules,
 	        properties: value.working.properties,
 	        wires: value.working.wires,
-	        language: value.language,
+	        language: value.working.language,
+	        clickedOn: this.wireClickedOn
         };
         for (var i in file_associations) {
         	if (typeof file_associations[i] == "object") {
-        	    this.toReduce.modules[i.split(": ").pop()].config['files'] = FILE_DICT[file_associations[i][0]]
+        	    this.toReduce.modules[i.split(": ").pop()].config['files'] = [file_associations[i][0]]
         	}
         	else {
 		    // not entering in a 'files' config if the module is not a loader        		
@@ -295,7 +296,9 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
            	scope: this,
 	    });	    
  	},
-
+	
+	// PASSING THE WIRE OVER TO THE SERVER, SO WE SHOULD GET BACK ONLY ONE PLOTTABLE OBJECT
+	// NO NEED TO CHECK THE WIRE SOURCE HERE, JUST PLOT WHATEVER YOU GET
 	runModuleSuccess: function(display) {
 		plotid = 'plot';
 

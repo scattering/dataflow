@@ -375,8 +375,10 @@ YAHOO.util.Event.onDOMReady( function() {
 			}		
 		WireIt.Wire.prototype.onWireClick = function(x,y) {
 			console.log('WIRE CLICK!')
+			editor.wireClickedOn = {'source': this.src, 'target':this.tgt}
 			editor.wireClickSource = this.src.moduleId
 			editor.wireClickTarget = this.tgt.moduleId
+			// grab wire by ID
 			editor.runReduction(editor.templateConfig[editor.reductionInstance])
 			}
 		// Open the infos panel
