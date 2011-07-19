@@ -23,6 +23,7 @@ from dataflow.dataflow.offspecular.modules.load_he3_analyzer_collection import l
 from dataflow.dataflow.offspecular.modules.append_polarization_matrix import append_polarization_matrix_module
 from dataflow.dataflow.offspecular.modules.combine_polarized import combine_polarized_module
 from dataflow.dataflow.offspecular.modules.polarization_correct import polarization_correct_module
+from dataflow.dataflow.offspecular.modules.timestamps import timestamp_module
 from dataflow.reduction.offspecular.filters import *
 from dataflow.reduction.offspecular.he3analyzer import *
 from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
@@ -124,7 +125,7 @@ def load_he3_action(files=[], cells=[]):
     print "loading he3", files
     if cells == []:
         cells = [[]] * len(files)
-    result = [_load_he3_data(f, cell) for f, cell in zip(files, cells)] # not bundles
+    result = [_load_he3_data(f, cell) for f, cell in zip(files, cells)]
     return dict(output=result)
 def _load_he3_data(name, cells):
     (dirName, fileName) = os.path.split(name)
@@ -156,8 +157,14 @@ combine_polarized = combine_polarized_module(id='ospec.comb_polar', datatype=OSP
 def polarization_correct_action(input=[], assumptions=0, auto_assumptions=True):
     print "polarization correction"
     return dict(output=PolarizationCorrect().apply(input, assumptions=assumptions, auto_assumptions=auto_assumptions)) 
-correct_polarized = polarization_correct_module(id='ospec.correct_polar', datatype=OSPEC_DATA,
+correct_polarized = polarization_correct_module(id='ospec.corr_polar', datatype=OSPEC_DATA,
                                              version='1.0', action=polarization_correct_action)
+
+def timestamp_action(input=[], timestamp_file='end_times.json', override_existing=False):
+    print "stamping times"
+    return dict(output=InsertTimestamps().apply(input, timestamp_file=timestamp_file, override_existing=override_existing))
+timestamp = timestamp_module(id='ospec.timestamp', datatype=OSPEC_DATA,
+                             version='1.0', action=timestamp_action)
 
 #Instrument definitions
 ANDR = Instrument(id='ncnr.ospec.andr',
@@ -165,7 +172,7 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                  archive=config.NCNR_DATA + '/andr',
                  menu=[('Input', [load, save]),
                        ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, two_theta_qxqz]),
-                       ('Polarization reduction', [load_he3, append_polarization, combine_polarized, correct_polarized]),
+                       ('Polarization reduction', [load_he3, timestamp, append_polarization, combine_polarized, correct_polarized]),
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],
                  datatypes=[data2d, datahe3],
@@ -209,23 +216,23 @@ if __name__ == '__main__':
         modules = [
             dict(module="ospec.load", position=(50, 50),
                  config={'files': files, 'intent': 'signal', 'PolStates':pol_states}),
+            dict(module="ospec.timestamp", position=(60, 60), config={'timestamp_file':'end_times.json'}),
+            dict(module="ospec.loadhe3", position=(60, 60), config={'files':[dir+'/dataflow/sampledata/ANDR/cshape_121609/He3Cells.json']}),
             dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
-            dict(module="ospec.combine", position=(150, 100), config={}),
-            dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':0}}),
-            dict(module="ospec.wiggle", position=(350, 200), config={}),
-            dict(module="ospec.twotheta", position=(450, 250), config={}),
-            dict(module="ospec.qxqz", position=(550, 300), config={}),
+            dict(module="ospec.comb_polar", position=(150, 100), config={}),
+            dict(module="ospec.append", position=(250, 150), config={}),
+            dict(module="ospec.corr_polar", position=(350, 200), config={}),
             dict(module="ospec.grid", position=(600, 350), config={}),
         ]
         wires = [
-            dict(source=[0, 'output'], target=[4, 'input']),
-            dict(source=[4, 'output'], target=[3, 'input']),
-            dict(source=[3, 'output'], target=[5, 'input']),
-            dict(source=[5, 'output'], target=[2, 'input']),
+            dict(source=[0, 'output'], target=[1, 'input']),
+            dict(source=[1, 'output'], target=[5, 'input']),
+            dict(source=[2, 'output'], target=[5, 'he3cell']),
+            dict(source=[5, 'output'], target=[4, 'input']),
             dict(source=[5, 'output'], target=[7, 'input']),
-            dict(source=[7, 'output'], target=[2, 'grid']),
-            dict(source=[2, 'output'], target=[6, 'input']),
-            dict(source=[6, 'output'], target=[1, 'input']),
+            dict(source=[7, 'output'], target=[4, 'grid']),
+            dict(source=[4, 'output'], target=[6, 'input']),
+            dict(source=[6, 'output'], target=[3, 'input']),
         ]
     config = [d['config'] for d in modules]
     template = Template(name='test ospec',
