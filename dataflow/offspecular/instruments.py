@@ -244,11 +244,16 @@ if __name__ == '__main__':
     #result = run_template(template, config)
     #print "Starting again. This time should be A LOT quicker (if the server was empty at runtime)."
     #result2 = run_template(template, config)
-    result = get_plottable(template, config, template.order()[-2], 'output')
+    nodenum = template.order()[-2]
+    terminal = 'output'
+    result = get_plottable(template, config, nodenum, terminal)
     #print "Writing to files"
     #for nodenum, plottable in result.items():
     #    for terminal_id, plot in plottable.items():
     #        with open('data/' + terminal_id + "_" + str(nodenum) + ".txt", "w") as f:
     #            for format in plot:
     #                f.write(format + "\n")
+    with open('data/' + terminal + "_" + str(nodenum) + ".txt", "w") as f:
+        for format in result:
+            f.write(format + "\n")
     print "Done"
