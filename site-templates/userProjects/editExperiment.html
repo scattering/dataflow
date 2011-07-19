@@ -24,7 +24,14 @@
     </form>
     
     <hr></hr>
-   <a STYLE="text-decoration:none" href="editor"> Start reducing! </a>
+    <form action="../../../../../../editor/" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="language" value={{ experiment.instrument.instrument_class }} />
+    <input type="hidden" name="experiment_id" value={{ experiment.id }} />
+    <p><input type="submit" value="Start reducing!"></p>
+    </form>
+
+   <!--<a STYLE="text-decoration:none" href="editor/"> Start reducing! </a>-->
     </div>
     <div id="content-2" style="float:left;margin-left:7%">
 

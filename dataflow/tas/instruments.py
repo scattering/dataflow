@@ -48,7 +48,7 @@ from dataflow.dataflow.modules.tas_volume_correction import volume_correction_mo
 
 
 TAS_DATA = 'data1d.tas'
-data1d = Data(TAS_DATA, data_abstraction)
+data1d = Data(TAS_DATA, data_abstraction.TripleAxis)
 # Reduction operations may refer to data from other objects, but may not
 # modify it.  Instead of modifying, first copy the data and then work on
 # the copy.
@@ -242,14 +242,16 @@ template = Template(name='test reduction',
 # the actual call to perform the reduction
 def TAS_RUN():
     result = run_template(template, config)
+    '''
     print 'in TAS'
     for key, value in result.iteritems():
 	for i in range(len(value['output'])):
 		if not type(value['output'][i])==type({}):
         		value['output'][i] = value['output'][i].get_plottable()
     print result
+    '''
     return result
-#hi=TAS_RUN()
+hi=TAS_RUN()
 print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
 #print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
 #print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))

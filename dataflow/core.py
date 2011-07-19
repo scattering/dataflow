@@ -127,6 +127,15 @@ terminals.
         self.terminals = terminals
         self.action = action
 
+    def get_terminal_by_id(self, id):
+        """ 
+Lookup terminal by id, and return.
+Returns None if id does not exist.
+"""
+        terminal_lookup = dict((t['id'], t) for t in self.terminals)
+        return terminal_lookup[id]
+        
+        
 class Template(object):
     """
 A template captures the computational workflow as a wiring diagram.
@@ -206,6 +215,14 @@ Version aware unpickler. Expects (version, state)
         if version != '1.0':
             raise TypeError('Template definition mismatch')
         self.__dict__ = state
+        
+    def get_parents(self, id):
+        """
+Retrieve the data objects that go into the inputs of a module
+"""  
+        parents = [w for w in self.wires if w['target'][0] == id]
+        return parents
+
 
 class Instrument(object):
     """

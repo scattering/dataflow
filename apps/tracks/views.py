@@ -28,8 +28,10 @@ from ...apps.fileview import testftp
 #from ...dataflow.tas.instruments import BT7
 #from ...dataflow.offspecular.instruments import ANDR
 #from ...dataflow.tas import instruments
-from ...dataflow.SANS import novelinstruments as SANS_INS
+#from ...dataflow.SANS import novelinstruments as SANS_INS
 #from ...dataflow.tas import instruments as TAS_INS
+
+from ...dataflow import wireit
 
 import random
 
@@ -92,7 +94,9 @@ SANS_2 = [{"name":"SANS 2","wires": [{"src": {"terminal": "output", "moduleId": 
 
 TAS_2= [{"name":"real TAS","wires": [{"src": {"terminal": "output", "moduleId": 0}, "tgt": {"terminal": "input", "moduleId": 1}}], "modules": [{"terminals": "input", "config": {"files": ["/home/alex/Desktop/dataflow/reduction/tripleaxis/EscanQQ7HorNSF91831.bt7"], "position": [50, 50], "xtype": "WireIt.Container"}, "name": "TripleAxis Load", "value": {}}, {"terminals": {"input": [-15, 1, -1, 0], "output": [15, 1, 1, 0]}, "config": {"position": [250, 400], "target_monitor": 900000, "xtype": "WireIt.ImageContainer"}, "name": "Normalize Monitor", "value": {}}], "properties": {"name": "test reduction", "description": "example reduction diagram"}}]
 
-SANS_3=[{"name":"SANS_NEW","wires": [{"src": {"terminal": "output", "moduleId": 0}, "tgt": {"terminal": "sample", "moduleId": 4}}, {"src": {"terminal": "output", "moduleId": 1}, "tgt": {"terminal": "empty_cell", "moduleId": 4}}, {"src": {"terminal": "output", "moduleId": 3}, "tgt": {"terminal": "blocked", "moduleId": 4}}, {"src": {"terminal": "sample", "moduleId": 4}, "tgt": {"terminal": "sample", "moduleId": 7}}, {"src": {"terminal": "empty_cell", "moduleId": 4}, "tgt": {"terminal": "empty_cell", "moduleId": 7}}, {"src": {"terminal": "output", "moduleId": 5}, "tgt": {"terminal": "Tsam", "moduleId": 7}}, {"src": {"terminal": "output", "moduleId": 6}, "tgt": {"terminal": "Temp", "moduleId": 7}}, {"src": {"terminal": "sample", "moduleId": 7}, "tgt": {"terminal": "sample", "moduleId": 9}}, {"src": {"terminal": "empty_cell", "moduleId": 7}, "tgt": {"terminal": "empty_cell", "moduleId": 9}}, {"src": {"terminal": "blocked", "moduleId": 4}, "tgt": {"terminal": "blocked", "moduleId": 9}}, {"src": {"terminal": "trans", "moduleId": 7}, "tgt": {"terminal": "trans", "moduleId": 9}}, {"src": {"terminal": "COR", "moduleId": 9}, "tgt": {"terminal": "COR", "moduleId": 11}}, {"src": {"terminal": "output", "moduleId": 10}, "tgt": {"terminal": "DIV", "moduleId": 11}}, {"src": {"terminal": "DIV", "moduleId": 11}, "tgt": {"terminal": "DIV", "moduleId": 13}}, {"src": {"terminal": "output", "moduleId": 12}, "tgt": {"terminal": "empty", "moduleId": 13}}, {"src": {"terminal": "output", "moduleId": 10}, "tgt": {"terminal": "sensitivity", "moduleId": 13}}, {"src": {"terminal": "ABS", "moduleId": 13}, "tgt": {"terminal": "ABS", "moduleId": 14}}, {"src": {"terminal": "OneD", "moduleId": 14}, "tgt": {"terminal": "input", "moduleId": 8}}], "modules": [{"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110", "position": [5, 20], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108", "position": [5, 30], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102", "position": [5, 40], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC007.SA3_SRK_S107", "position": [5, 50], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": {"sample": [20, 10, 1, 0], "empty_cell": [0, 20, -1, 0], "empty": [20, 30, 1, 0], "blocked": [20, 40, 1, 0]}, "config": {"position": [360, 50], "xtype": "WireIt.ImageContainer"}, "name": "Dead time Correction", "value": {}}, {"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106", "position": [50, 100], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105", "position": [50, 100], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": {"sample": [20, 10, 1, 0], "trans": [20, 10, 1, 0], "empty_cell": [20, 10, 1, 0], "Tsam": [0, 100, -1, 0], "Temp": [0, 130, -1, 0]}, "config": {"position": [120, 80], "xtype": "WireIt.ImageContainer"}, "name": "generate_transmission", "value": {}}, {"terminals": "", "config": {"position": [500, 500], "ext": "dat", "xtype": "WireIt.Container"}, "name": "Save", "value": {}}, {"terminals": {"sample": [0, 10, -1, 0], "COR": [20, 10, 1, 0], "trans": [0, 140, -1, 0], "empty_cell": [0, 50, -1, 0], "blocked": [0, 90, -1, 0]}, "config": {"position": [360, 100], "xtype": "WireIt.ImageContainer"}, "name": "initial_correction", "value": {}}, {"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/PLEX_2NOV2007_NG3.DIV", "position": [100, 300], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": {"DIV": [20, 10, 1, 0], "COR": [0, 10, -1, 0]}, "config": {"position": [360, 200], "xtype": "WireIt.ImageContainer"}, "name": "Correct Detector Sensitivity", "value": {}}, {"terminals": "", "config": {"files": "/var/www/DATAFLOW/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102", "position": [100, 300], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": {"DIV": [0, 10, -1, 0], "ABS": [20, 10, 1, 0], "sensitivity": [0, 10, -1, 0], "empty": [0, 10, -1, 0]}, "config": {"position": [360, 300], "xtype": "WireIt.ImageContainer"}, "name": "absolute_scaling", "value": {}}, {"terminals": {"ABS": [0, 10, -1, 0], "OneD": [20, 10, 1, 0]}, "config": {"position": [360, 400], "xtype": "WireIt.ImageContainer"}, "name": "annular_av", "value": {}}], "properties": {"name": "test sans", "description": "example sans data"}}]
+
+SANS_3={"name":"Sans_New","wires": [{"src": {"terminal": "output", "moduleId": 0}, "tgt": {"terminal": "sample", "moduleId": 4}}, {"src": {"terminal": "output", "moduleId": 1}, "tgt": {"terminal": "empty_cell", "moduleId": 4}}, {"src": {"terminal": "output", "moduleId": 3}, "tgt": {"terminal": "blocked", "moduleId": 4}}, {"src": {"terminal": "sample", "moduleId": 4}, "tgt": {"terminal": "sample", "moduleId": 7}}, {"src": {"terminal": "empty_cell", "moduleId": 4}, "tgt": {"terminal": "empty_cell", "moduleId": 7}}, {"src": {"terminal": "output", "moduleId": 5}, "tgt": {"terminal": "Tsam", "moduleId": 7}}, {"src": {"terminal": "output", "moduleId": 6}, "tgt": {"terminal": "Temp", "moduleId": 7}}, {"src": {"terminal": "sample", "moduleId": 7}, "tgt": {"terminal": "sample", "moduleId": 9}}, {"src": {"terminal": "empty_cell", "moduleId": 7}, "tgt": {"terminal": "empty_cell", "moduleId": 9}}, {"src": {"terminal": "blocked", "moduleId": 4}, "tgt": {"terminal": "blocked", "moduleId": 9}}, {"src": {"terminal": "COR", "moduleId": 9}, "tgt": {"terminal": "COR", "moduleId": 11}}, {"src": {"terminal": "output", "moduleId": 10}, "tgt": {"terminal": "DIV", "moduleId": 11}}, {"src": {"terminal": "DIV", "moduleId": 11}, "tgt": {"terminal": "input", "moduleId": 8}}, {"src": {"terminal": "DIV", "moduleId": 11}, "tgt": {"terminal": "DIV", "moduleId": 13}}, {"src": {"terminal": "output", "moduleId": 12}, "tgt": {"terminal": "empty", "moduleId": 13}}, {"src": {"terminal": "output", "moduleId": 10}, "tgt": {"terminal": "sensitivity", "moduleId": 13}}, {"src": {"terminal": "ABS", "moduleId": 13}, "tgt": {"terminal": "ABS", "moduleId": 14}}, {"src": {"terminal": "OneD", "moduleId": 14}, "tgt": {"terminal": "input", "moduleId": 8}}], "modules": [{"terminals": "", "config": {"files": ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110"], "position": [5, 20], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"files": ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108"], "position": [5, 30], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"files": ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102"], "position": [5, 40], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"files": ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC007.SA3_SRK_S107"], "position": [5, 50], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": {"sample": [20, 10, 1, 0], "empty_cell": [20, 20, 1, 0], "blocked": [20, 40, 1, 0]}, "config": {"position": [360, 50], "xtype": "WireIt.ImageContainer"}, "name": "Dead time Correction", "value": {}}, {"terminals": "", "config": {"files": ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106"], "position": [50, 100], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": "", "config": {"files": ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105"], "position": [50, 100], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": {"sample": [20, 10, 1, 0], "empty_cell": [20, 10, 1, 0], "Tsam": [0, 100, -1, 0], "Temp": [0, 130, -1, 0]}, "config": {"position": [120, 80], "xtype": "WireIt.ImageContainer"}, "name": "generate_transmission", "value": {}}, {"terminals": "", "config": {"position": [500, 500], "ext": "dat", "xtype": "WireIt.Container"}, "name": "Save", "value": {}}, {"terminals": {"sample": [0, 10, -1, 0], "COR": [20, 10, 1, 0], "empty_cell": [0, 50, -1, 0], "blocked": [0, 90, -1, 0]}, "config": {"position": [360, 100], "xtype": "WireIt.ImageContainer"}, "name": "initial_correction", "value": {}}, {"terminals": "", "config": {"files": ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/PLEX_2NOV2007_NG3.DIV"], "position": [100, 300], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": {"DIV": [20, 10, 1, 0], "COR": [0, 10, -1, 0]}, "config": {"position": [360, 200], "xtype": "WireIt.ImageContainer"}, "name": "Correct Detector Sensitivity", "value": {}}, {"terminals": "", "config": {"files": ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102"], "position": [100, 300], "intent": "signal", "xtype": "WireIt.Container"}, "name": "Load", "value": {}}, {"terminals": {"DIV": [0, 10, -1, 0], "ABS": [20, 10, 1, 0], "sensitivity": [0, 10, -1, 0], "empty": [0, 10, -1, 0]}, "config": {"position": [360, 300], "xtype": "WireIt.ImageContainer"}, "name": "absolute_scaling", "value": {}}, {"terminals": {"ABS": [0, 10, -1, 0], "OneD": [20, 10, 1, 0]}, "config": {"position": [360, 400], "xtype": "WireIt.ImageContainer"}, "name": "annular_av", "value": {}}], "properties": {"name": "test sans", "description": "example sans data"}}
+
 sample_data = {
     'type': '2d',
     'z':  [ [1, 2], [3, 4] ],
@@ -111,6 +115,16 @@ sample_data = {
 }
 
 b = {'save':'successful'}
+
+SANS_NEW_TEMPLATE_FROM_WIREIT = {"modules":[{"config":{"files":"ccfeddc4ac7df1da644cca3978fa0605c3f6a46c","position":[5,20],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"files":"c861215a942e29b31f194510a8a8943580c996e4","position":[5,30],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"position":[5,40],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"position":[5,50],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"position":[360,50],"xtype":"WireIt.ImageContainer"},"name":"Dead time Correction","value":{}},{"config":{"files":"e557ef077aa8a005864f56f021b9ffb8b306830f","position":[9,128],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"files":"da9fb2123f17053fe4f020cea0e4a1014c14da7b","position":[42,326],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"position":[120,80],"xtype":"WireIt.ImageContainer"},"name":"generate_transmission","value":{}},{"config":{"position":[696,555],"xtype":"WireIt.Container"},"name":"Save","value":{}},{"config":{"position":[360,100],"xtype":"WireIt.ImageContainer"},"name":"initial_correction","value":{}},{"config":{"files":"b71b34f334e224a82c493b27d62dbeb0fec92682","position":[32,394],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"position":[360,200],"xtype":"WireIt.ImageContainer"},"name":"Correct Detector Sensitivity","value":{}},{"config":{"files":"0f8549cf8ab92292f8fc3f2d9bda7948980ec9f2","position":[72,474],"xtype":"WireIt.Container"},"name":"Load","value":{}},{"config":{"position":[360,300],"xtype":"WireIt.ImageContainer"},"name":"absolute_scaling","value":{}},{"config":{"position":[360,400],"xtype":"WireIt.ImageContainer"},"name":"annular_av","value":{}}],"name":"test sans","properties":{"description":"example sans data","name":"test sans"},"wires":[{"src":{"moduleId":0,"terminal":"output"},"tgt":{"moduleId":4,"terminal":"sample"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":1,"terminal":"output"},"tgt":{"moduleId":4,"terminal":"empty_cell"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":3,"terminal":"output"},"tgt":{"moduleId":4,"terminal":"blocked"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":4,"terminal":"sample"},"tgt":{"moduleId":7,"terminal":"sample"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":4,"terminal":"empty_cell"},"tgt":{"moduleId":7,"terminal":"empty_cell"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":5,"terminal":"output"},"tgt":{"moduleId":7,"terminal":"Tsam"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":6,"terminal":"output"},"tgt":{"moduleId":7,"terminal":"Temp"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":7,"terminal":"sample"},"tgt":{"moduleId":9,"terminal":"sample"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":7,"terminal":"empty_cell"},"tgt":{"moduleId":9,"terminal":"empty_cell"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":4,"terminal":"blocked"},"tgt":{"moduleId":9,"terminal":"blocked"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":9,"terminal":"COR"},"tgt":{"moduleId":11,"terminal":"COR"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":10,"terminal":"output"},"tgt":{"moduleId":11,"terminal":"DIV"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":11,"terminal":"DIV"},"tgt":{"moduleId":8,"terminal":"input"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":11,"terminal":"DIV"},"tgt":{"moduleId":13,"terminal":"DIV"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":12,"terminal":"output"},"tgt":{"moduleId":13,"terminal":"empty"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":10,"terminal":"output"},"tgt":{"moduleId":13,"terminal":"sensitivity"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":13,"terminal":"ABS"},"tgt":{"moduleId":14,"terminal":"ABS"},"xtype":"WireIt.BezierWire"},{"src":{"moduleId":14,"terminal":"OneD"},"tgt":{"moduleId":8,"terminal":"input"},"xtype":"WireIt.BezierWire"}]}
+
+# apps.tracks.models, convert file hash to file path
+	# File.objects.get(id=hash).location ("/tmp/FILES/{filename}")
+	# wireit.py, convert wireit_diagram to template
+# 
+
+
+
 
 
 # this is a temporary option until wirings are stored in the database:
@@ -137,10 +151,13 @@ def saveWiring(request):
 
 @csrf_exempt 
 def runReduction(request):
+    #print request.POST['data']
+    template_test = wireit.wireit_diagram_to_template(SANS_NEW_TEMPLATE_FROM_WIREIT)
+    print template_test
     context=RequestContext(request)
     print 'I am reducing'
 ####### SANS TESTING
-    SANS_INS.TESTING()
+    #SANS_INS.TESTING()
    # print "RESULT", result
     #print result
     #for i in range(6):
@@ -180,28 +197,31 @@ def runReduction(request):
 ## Views for displaying a language selection form and for calling the file association table with the selected language.
 ## scheme is the same as for the editor
 
-########
-## Simple view for displaying editor if called from an experiment page
 
-@csrf_exempt
-def displayEditorExp(request, project_id, experiment_id):
-	context = RequestContext(request)
-	experiment = Experiment.objects.get(id=experiment_id)
-	lang = experiment.instrument.instrument_class
-	files = [[i.name, i.friendly_name] for i in experiment.Files]  
-	return render_to_response('tracer_testforWireit/editor.html', {'lang':lang, 'files':files}, context_instance = context)
 
 ########
 ## Views for displaying a language selection form and for calling the editor template with the selected language.
 ## The intermediate template 'editorRedirect.html' is used so that we can redirect to /editor/ while preserving 
 ## the language selection.
 
+## HAVING TROUBLE SENDING LIST OF STRINGS AS CONTEXT TO THE EDITOR
 @csrf_exempt 
 def displayEditor(request):
     context=RequestContext(request)
     print request.POST.has_key('language')
     if request.POST.has_key('language'):
-        return render_to_response('tracer_testingforWireit/editor.html', {'lang':request.POST['language'], }, context_instance=context)
+    	if request.POST.has_key('experiment_id'):
+    		experiment = Experiment.objects.get(id=request.POST['experiment_id'])
+    		file_list = experiment.Files.all()
+    	else:
+    		experiment = []
+    		file_list = []
+    	file_context = {}
+    	for i in range(len(file_list)):
+    		file_context[file_list[i].name + ',,,z,z,z,z,,,' + file_list[i].friendly_name] = ''
+    	file_context['file_keys'] = file_context.keys()
+	file_context['lang'] = request.POST['language']
+        return render_to_response('tracer_testingforWireit/editor.html', file_context, context_instance=context)
     else:
         return HttpResponseRedirect('/editor/langSelect/')
 

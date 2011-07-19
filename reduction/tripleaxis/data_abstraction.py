@@ -813,21 +813,22 @@ class TripleAxis(object):
 						for channels in val:
 							for channel in channels:
 								vals.append(channel[0])
-						for channels in err:
-							for channel in channels:
-								errs.append(channel[0])		
-						
-						#for i in range(len(vals)):
-							#name=field.name+' channel %d' % (i,)
-							#ordery.append({'key': name, 'label': name})
-							#data[name]={'values': vals[i],'errors': errs[i]}
-							
+						if err==None:
+							errs = None
+						else:
+							for channels in err:
+								for channel in channels:
+									errs.append(channel[0])		
+									
 						ordery.append({'key': field.name, 'label': field.name})
 						data[field.name]={'values': vals,'errors': errs}
 
 					else:
 						ordery.append({'key': field.name, 'label': field.name})
-						data[field.name]={'values': val.tolist(),'errors':err.tolist()}
+						if err==None:
+							data[field.name]={'values': val.tolist(),'errors':err}
+						else:
+							data[field.name]={'values': val.tolist(),'errors':err.tolist()}
 			elif key=='data' or key=='meta_data' or key=='sample' or key=='sample_environment':
 				#ignoring these data fields for plotting
 				pass	

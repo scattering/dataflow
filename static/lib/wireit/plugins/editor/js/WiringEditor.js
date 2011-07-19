@@ -265,7 +265,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	* @method runReduction
 	*/
 
-	runReduction: function(FILES) {
+	runReduction: function(file_associations) {
 	    var value = this.getValue()
 	    //console.log(value)
 
@@ -278,8 +278,17 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	        modules: value.working.modules,
 	        properties: value.working.properties,
 	        wires: value.working.wires,
-	        language: this.options.languageName,
+	        language: value.language,
         };
+        for (var i in file_associations) {
+        	if (typeof file_associations[i] == "object") {
+        	    this.toReduce.modules[i.split(": ").pop()].config['files'] = FILE_DICT[file_associations[i][0]]
+        	}
+        	else {
+		    // not entering in a 'files' config if the module is not a loader        		
+        	}
+        }
+        console.log(this.toReduce)
 	    this.adapter.runReduction(this.toReduce, {
            	success: this.runModuleSuccess,
            	failure: this.runModuleFailure,
@@ -292,7 +301,6 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 
 		//console.log(display)
 		//var toPlot = display[this.wireClickSource].output[0], zipped = [];
-		//var toPlot = { z: [[1,2,3,4],[1,2,3,4]], title: "this sucks" };
 		if (this.wireClickSource) {
 			toPlot = display[this.wireClickSource].output
 			}
@@ -574,7 +582,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
     			YAHOO.util.Dom.get('FAT').removeChild(YAHOO.util.Dom.get('FAT').lastChild);
 			}
 		  // Call the File Association Table with appropriate headers
-		  makeFileTable(this.getFATHeaders())
+		  makeFileTable(this.getFATHeaders(),FILES)
 		  ///console.log(this.getFATHeaders())
 
  		}
@@ -616,7 +624,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	  }
  
 	  obj.properties = this.propertiesForm.getValue();
-  
+  	  obj['language'] = CHOSEN_LANG_NAME
 	  return {
 	     name: obj.properties.name,
 	     working: obj
@@ -625,8 +633,8 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 
 	/**
 	* This method returns a list of strings for the column headers in the FAT.
-	* Currently, it simply runs through all existing wires and adds source and target (checking by uniqueID)
-	* module name to the list
+	* Currently, it simply runs through all existing wires and adds the target (Module name, terminal name)
+	* if the wire's source is Load
 	* 7/8
 	**/
 	getFATHeaders: function() {
@@ -636,7 +644,11 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		var hitModules = [] // at some point to check which modules have already been touched
 		var headersList = [] // actual list of headers
 		for (var i in wireList) {
-			headersList.push(moduleList[wireList[i].tgt.moduleId].name + ' ' + wireList[i].tgt.terminal)
+			if (moduleList[wireList[i].src.moduleId].name === 'Load') {
+			
+				headersList.push(moduleList[wireList[i].tgt.moduleId].name + ' ' + wireList[i].tgt.terminal + ': ' + wireList[i].src.moduleId)
+				//console.log(moduleList[wireList[i].src.moduleId].name)
+				}
 			}
 		return headersList;	
 		},
@@ -656,6 +668,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		this.maxReduction = setMax;
 		this.templateConfig = templateConfig;
 		this.displayCurrentReduction();
+		this.setModuleConfigs()
 	
 	},
 	
@@ -670,6 +683,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			this.reductionInstance -= 1
 			YAHOO.util.Dom.get('reductionInstance').innerHTML = String(this.reductionInstance)
 			this.displayCurrentReduction()
+			this.setModuleConfigs()
 			}
 	
 	},
@@ -680,6 +694,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			this.reductionInstance += 1
 			YAHOO.util.Dom.get('reductionInstance').innerHTML = this.reductionInstance
 			this.displayCurrentReduction()
+			this.setModuleConfigs()
 			}
 	},
 	
@@ -690,7 +705,16 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			HTML += '<dt>' + i + "</dt><dd>" + this.templateConfig[this.reductionInstance][i] + '</dd>'
 			}
 		HTML += "</dl>";
-		YAHOO.util.Dom.get('instance-info').innerHTML = HTML
+		YAHOO.util.Dom.get('instance-files-info').innerHTML = HTML
+	},
+	
+	/**
+	* This method takes the templateConfig and current instance number and sets the modules configurations
+	* accordingly. File configurations are set in runReduction. Files configs are separated from other module
+	* configs as we want other module configs to be preserved with a template. Files should not be.
+	**/
+	setModuleConfigs: function() {
+		
 	},
 
 
