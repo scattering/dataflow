@@ -194,8 +194,8 @@ def runReduction(request):
         template = wireit.wireit_diagram_to_template(data, instrument)
         # configuration for template is embedded
         result = get_plottable(template, config, nodenum, terminal_id)
-    print result
     print type(result)
+    print len(result), [simplejson.loads(s).keys() for s in result]
     ####### SANS TESTING
     #SANS_INS.TESTING()
     # print "RESULT", result

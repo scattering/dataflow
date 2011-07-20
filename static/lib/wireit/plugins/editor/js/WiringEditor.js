@@ -308,7 +308,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			toPlot = display[this.wireClickSource].output
 			}
 		else {
-			toPlot = display[0].output
+			toPlot = display
 		}
 		console.log(toPlot)
 		plottingAPI(toPlot, plotid)
