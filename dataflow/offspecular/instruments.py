@@ -10,6 +10,7 @@ sys.path.append(dir)
 # the ... in place of dataflow when testing
 TESTING = 1
 if TESTING:
+    from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
     from dataflow.dataflow import config
     from dataflow.dataflow.calc import run_template, get_plottable, calc_single
     from dataflow.dataflow.core import Data, Instrument, Template, register_instrument
@@ -204,7 +205,7 @@ for instrument in instrmnts:
 
 # Testing
 if __name__ == '__main__':
-    polarized = True
+    polarized = False
     if not polarized:
         path, ext = dir + '/dataflow/sampledata/ANDR/sabc/Isabc20', '.cg1'
         files = [path + str(i + 1).zfill(2) + ext for i in range(1, 12)]
@@ -265,6 +266,8 @@ if __name__ == '__main__':
     #result = run_template(template, config)
     #print "Starting again. This time should be A LOT quicker (if the server was empty at runtime)."
     #result2 = run_template(template, config)
+    print simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
+    sys.exit()
     nodenum = template.order()[-2]
     terminal = 'output'
     result = get_plottable(template, config, nodenum, terminal)
