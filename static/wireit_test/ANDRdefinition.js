@@ -182,7 +182,7 @@ var andrlang = {
                 "icon": "../../static/img/rowantests/sum.png"
             }, 
             "width": "64px",
-            "name": "Join"
+            "name": "Combine"
         }, 
         {
             "container": {
