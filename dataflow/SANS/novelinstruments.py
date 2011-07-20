@@ -331,7 +331,7 @@ def TESTING():
         
         #dict(source =[11,'DIV'],target = [8,'input']),
         ]
-    config = [d['config'] for d in modules]
+    config = {n: d['config'] for n, d in enumerate(modules)}
     template = Template(name='test sans',
                         description='example sans data',
                         modules=modules,
