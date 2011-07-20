@@ -13,7 +13,8 @@ def combine_polarized_module(id=None, datatype=None, action=None,
     """
 
     icon = {
-        'URI': config.IMAGES + 'sum_polar.png',
+        'URI': config.IMAGES + config.ANDR_FOLDER + 'sum_polar.png',
+        'image': config.IMAGES + config.ANDR_FOLDER + 'sum_polar_image.png',
         'terminals': {
             'input': (-15, 1, -1, 0),
             'grid': (-10, 1, -1, 0),

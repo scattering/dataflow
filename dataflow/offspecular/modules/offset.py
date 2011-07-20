@@ -10,10 +10,11 @@ def offset_module(id=None, datatype=None, action=None,
     """Module for shifting a dataset"""
 
     icon = {
-        'URI': config.IMAGES + "offset.png",
+        'URI': config.IMAGES + config.ANDR_FOLDER + "offset.png",
+        'image': config.IMAGES + config.ANDR_FOLDER + "offset_image.png",
         'terminals': {
-            'input': (0, 10, -1, 0),
-            'output': (20, 10, 1, 0),
+            'input': (-12, 16, -1, 0),
+            'output': (48, 16, 1, 0),
         }
     }
     

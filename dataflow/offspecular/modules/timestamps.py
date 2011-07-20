@@ -11,7 +11,8 @@ def timestamp_module(id=None, datatype=None, action=None,
     """Module for adding timestamps to a dataset"""
 
     icon = {
-        'URI': config.IMAGES + "timestamp.png",
+        'URI': config.IMAGES + config.ANDR_FOLDER + "timestamp.png",
+        'image': config.IMAGES + config.ANDR_FOLDER + "timestamp_image.png",
         'terminals': {
             'input': (0, 10, -1, 0),
             'output': (20, 10, 1, 0),

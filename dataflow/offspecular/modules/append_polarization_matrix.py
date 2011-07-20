@@ -14,7 +14,8 @@ def append_polarization_matrix_module(id=None, datatype=None, cell_datatype=None
     """
 
     icon = {
-        'URI': config.IMAGES + 'app_polar_matrix.png',
+        'URI': config.IMAGES + config.ANDR_FOLDER + 'app_polar_matrix.png',
+        'image': config.IMAGES + config.ANDR_FOLDER + 'app_polar_matrix_image.png',
         'terminals': {
             'input': (-15, 1, -1, 0),
             'he3cell': (-10, 1, -1, 0),
