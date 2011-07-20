@@ -35,7 +35,7 @@ class Metadata(models.Model):
 
 class Template(models.Model):
 	Title = models.CharField(max_length=50)
-	Representation = models.TextField() # can easily convert back and forth from strings to 							    # dicts with str(dict) and dict(str)
+	Representation = models.TextField() # can easily convert back and forth from strings to dicts with str(dict) and dict(str)
 	user = models.ForeignKey(User)
 	#permissions = models.ForeignKey(Permission, null=True)
 	def __unicode__(self):

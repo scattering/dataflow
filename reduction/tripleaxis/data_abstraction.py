@@ -1560,9 +1560,7 @@ def remove_duplicates(tas,distinct,not_distinct):
 					#after comparing to all others, if the row has a unique
 					#isDistinct column, the row is unique. Store it and don't
 					#check its row anymore --> it stays
-				
-	
-	pass
+				    pass
 
 def filereader(filename):
         filestr=filename
