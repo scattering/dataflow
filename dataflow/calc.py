@@ -7,7 +7,7 @@ The function run_template
 from pprint import pprint
 from inspect import getsource
 from .core import lookup_module, lookup_datatype
-import hashlib, redis, types, os, sys
+import hashlib, redis, types, os
 
 os.system("redis-server") # ensure redis is running
 server = redis.Redis("localhost")
@@ -98,8 +98,7 @@ def calc_single(template, config, nodenum, terminal_id):
     fp = name_fingerprint(all_fp[nodenum])
     terminal_fp = name_terminal(fp, terminal_id)
 
-    #result = {}
-    if server.exists(terminal_fp):# or module.name == 'Save': 
+    if server.exists(terminal_fp):
         print "retrieving cached value: " + terminal_fp
         cls = lookup_datatype(terminal['datatype']).cls
         result = [cls.loads(str) for str in server.lrange(terminal_fp, 0, -1)]
@@ -132,7 +131,6 @@ def calc_single(template, config, nodenum, terminal_id):
             terminal_fp = name_terminal(fp, terminal_id)
             for data in arr:
                 server.rpush(terminal_fp, data.dumps())
-        #server.set(fp, fp) # used for checking if the calculation exists; could wrap this whole thing with loop of output terminals
         result = calc_value[terminal_id]
     return result
 
@@ -176,7 +174,7 @@ def fingerprint_template(template, config):
             input_fp = fingerprints[source_nodenum]
             inputs_fp.append([target_terminal_id, input_fp])
         #inputs = _map_inputs(module, wires)
-
+        
         # Include configuration information
         configuration = {}
         configuration.update(node.get('config', {}))
@@ -186,7 +184,7 @@ def fingerprint_template(template, config):
         fp = finger_print(module, configuration, nodenum, inputs_fp) # terminals included
         fingerprints[nodenum] = fp
 
-    return fingerprints    
+    return fingerprints
 
 def _lookup_results(result, s):
     # Hack to figure out if we have a bundle.  Fix this!

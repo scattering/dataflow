@@ -1,7 +1,7 @@
 from numpy import exp, zeros, float64, vectorize, array, where, empty, linalg
 import datetime, time
 import wx, wx.calendar
-import simplejson, os
+import simplejson, os, pickle
 from ...dataflow.core import Data
 
 class He3Analyzer:
@@ -234,7 +234,7 @@ class He3Analyzer:
 
         return NT
 
-class He3AnalyzerCollection(Data):
+class He3AnalyzerCollection():
     """ 
     Holds a collection of defined He3Analyzers,
     with methods for adding more and deleting.
@@ -329,14 +329,17 @@ class He3AnalyzerCollection(Data):
         return self.getActiveCell(t).getNTMasked(t, *args, **kwargs)
     
     def dumps(self):
-        raise NotImplementedError("Write a dumps method for He3AnalyzerCollection")
+        return pickle.dumps(self)
+        #raise NotImplementedError("Write a dumps method for He3AnalyzerCollection")
     
     @classmethod
-    def loads(self):
-        raise NotImplementedError("Write a loads method for He3AnalyzerCollection")
+    def loads(self, str):
+        return pickle.loads(str)
+        #raise NotImplementedError("Write a loads method for He3AnalyzerCollection")
     
     def get_plottable(self):
-        raise NotImplementedError("Write a get_plottable method for He3AnalyzerCollection")
+        return simplejson.dumps({})
+        #raise NotImplementedError("Write a get_plottable method for He3AnalyzerCollection")
     
 class wxHe3AnalyzerCollection(He3AnalyzerCollection):
     """ version with wx GUI interaction for AddNew and getActiveCell """
