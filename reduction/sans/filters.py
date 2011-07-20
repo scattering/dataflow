@@ -19,7 +19,7 @@ import simplejson, datetime
 #from dataflow.core import Data
 print 'PATH', os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from ...dataflow.core import Data 
+#from ...dataflow.core import Data 
 from cStringIO import StringIO
 import pickle
 
@@ -139,9 +139,9 @@ class plot1D(object):
         plottable_data = {
             'type': 'nd',
             'title': '1D Sans Data',
-            'clear_existing': false,
-            'orderx': [{'key': 'Q', label: 'Q'}],
-            'ordery': [{'key': 'I', label: 'Intensity'}],
+            'clear_existing': False,
+            'orderx': [{'key': 'Q', 'label': 'Q'}],
+            'ordery': [{'key': 'I', 'label': 'Intensity'}],
             'series': [
                 {
                     'label': 'File 1',
