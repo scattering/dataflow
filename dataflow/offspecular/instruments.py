@@ -255,7 +255,7 @@ if __name__ == '__main__':
             dict(source=[4, 'output'], target=[6, 'input']),
             dict(source=[6, 'output'], target=[3, 'input']),
         ]
-    config = {n: d['config'] for n, d in enumerate(modules)}
+    config = dict((n, d['config']) for (n, d) in enumerate(modules))
     template = Template(name='test ospec',
                         description='example ospec diagram',
                         modules=modules,
