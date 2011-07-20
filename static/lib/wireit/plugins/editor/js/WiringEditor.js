@@ -310,7 +310,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		else {
 			toPlot = display[0].output
 		}
-		//console.log(toPlot)
+		console.log(toPlot)
 		plottingAPI(toPlot, plotid)
 
 	},
@@ -557,6 +557,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		            var baseContainerConfig = this.modulesByName[m.name].container;
 		            YAHOO.lang.augmentObject(m.config, baseContainerConfig); 
 		            m.config.title = m.name;
+		            console.log(m) // continue working on this (pulling module config from dumped template)
 		            var container = this.layer.addContainer(m.config);
 		            Dom.addClass(container.el, "WiringEditor-module-"+m.name);
 		            container.setValue(m.value);
@@ -647,6 +648,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		var hitModules = [] // at some point to check which modules have already been touched
 		var headersList = [] // actual list of headers
 		for (var i in wireList) {
+			console.log(i)
 			if (moduleList[wireList[i].src.moduleId].name === 'Load') {
 			
 				headersList.push(moduleList[wireList[i].tgt.moduleId].name + ' ' + wireList[i].tgt.terminal + ': ' + wireList[i].src.moduleId)
@@ -713,11 +715,23 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	
 	/**
 	* This method takes the templateConfig and current instance number and sets the modules configurations
-	* accordingly. File configurations are set in runReduction. Files configs are separated from other module
-	* configs as we want other module configs to be preserved with a template. Files should not be.
+	* accordingly. File configurations are set in runReduction.
 	**/
 	setModuleConfigs: function() {
 		
+	},
+	
+	displayClickedModuleConfig: function(module) {
+	console.log('in display module config!')
+	HTML = '<dl class ="instance-info-display">'
+	config = module.getConfig()
+	//console.log(module.getConfig())
+	for (i in config) {
+		//console.log(i, config[i])
+		HTML += '<dt>' + i + "</dt><dd>" + config[i] + '</dd>'
+		}
+	HTML += "</dl>";
+	YAHOO.util.Dom.get('instance-modules-info').innerHTML = HTML	
 	},
 
 
