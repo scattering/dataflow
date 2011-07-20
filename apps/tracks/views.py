@@ -154,18 +154,30 @@ def saveWiring(request):
     wirings_list.append(new_wiring)
     return HttpResponse(simplejson.dumps(b)) #, context_instance=context
 
+def get_filepath_by_hash(fh):
+    return File.objects.get(name=str(fh)).location + str(fh)
+
 @csrf_exempt 
 def runReduction(request):
     data = simplejson.loads(request.POST['data'])
     print 'IN RUN REDUCTION'
-    for i in data['modules']:
-    	j = i['config']
-    	print j
-    	if j.has_key('files'):
-    	    print j['files']
-    	    j['files'] = map(lambda x: [File.objects.get(name=str(x)).location + x], j['files'])
+    config = {}
+    for m in data['modules']:
+        if m.has_key('config') and m['config'].has_key('files'):
+            print m['config']
+    for i, m in enumerate(data['modules']):
+        if m.has_key('config') and m['config'].has_key('files'):
+            file_hashes = m['config']['files']
+            file_paths = [get_filepath_by_hash(fh) for fh in file_hashes]
+            config.update({i: {'files': file_paths}})
+    print config
+   # 	j = i['config']
+   # 	print j
+   # 	if j.has_key('files'):
+   # 	    print j['files']
+   # 	    j['files'] = map(lambda x: [File.objects.get(name=str(x)).location + x], j['files'])
     	    #print j['files']
-    print 'RR 2'
+    #print 'RR 2'
     #print data
     #template_test = wireit.wireit_diagram_to_template(SANS_NEW_TEMPLATE_FROM_WIREIT)
     #print template_test
@@ -179,8 +191,7 @@ def runReduction(request):
     result = "{}"
     if instrument is not None:
         template = wireit.wireit_diagram_to_template(data, instrument)
-        # configuration for template is embedded, so just make empty one
-        config = dict((m, {}) for m in range(len(data['modules'])))
+        # configuration for template is embedded
         result = get_plottable(template, config, nodenum, terminal_id)
     print type(result)
     ####### SANS TESTING
