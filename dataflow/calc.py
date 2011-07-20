@@ -33,6 +33,15 @@ def run_template(template, config):
         module = lookup_module(module_id)
         inputs = _map_inputs(module, wires)
         
+        parents = template.get_parents(nodenum)
+        # this is a list of wires that terminate on this module
+        inputs_fp = []
+        for wire in parents:
+            source_nodenum, source_terminal_id = wire['source']
+            target_nodenum, target_terminal_id = wire['target']
+            input_fp = fingerprints[source_nodenum]
+            inputs_fp.append([target_terminal_id, input_fp])
+            
         # substitute values for inputs
         kwargs = dict((k, _lookup_results(all_results, v)) 
                       for k, v in inputs.items())
@@ -40,11 +49,11 @@ def run_template(template, config):
         # Include configuration information
         configuration = {}
         configuration.update(node.get('config', {}))
-        configuration.update(config[nodenum])
+        configuration.update(config.get(nodenum, {}))
         kwargs.update(configuration)
         
         # Fingerprinting
-        fp = finger_print(module, configuration, nodenum, inputs, fingerprints) # terminals included
+        fp = finger_print(module, configuration, nodenum, inputs_fp) # terminals included
         fingerprints[nodenum] = fp
         fp = name_fingerprint(fp)
         print fp
@@ -88,6 +97,7 @@ def calc_single(template, config, nodenum, terminal_id):
     node = template.modules[nodenum]
     module_id = node['module'] # template.modules[node]
     module = lookup_module(module_id)
+    print module.id, terminal_id
     terminal = module.get_terminal_by_id(terminal_id)
     
     if terminal['use'] != 'out':
@@ -98,8 +108,7 @@ def calc_single(template, config, nodenum, terminal_id):
     fp = name_fingerprint(all_fp[nodenum])
     terminal_fp = name_terminal(fp, terminal_id)
 
-    #result = {}
-    if server.exists(terminal_fp):# or module.name == 'Save': 
+    if server.exists(terminal_fp):
         print "retrieving cached value: " + terminal_fp
         cls = lookup_datatype(terminal['datatype']).cls
         result = [cls.loads(str) for str in server.lrange(terminal_fp, 0, -1)]
@@ -115,24 +124,23 @@ def calc_single(template, config, nodenum, terminal_id):
             if target_id in kwargs:
                 # this explicitly assumes all data is a list
                 # so that we can concatenate multiple inputs
-                kwargs[target_id].append(source_data)
+                kwargs[target_id] += source_data
             else:
                 kwargs[target_id] = source_data
         
         # Include configuration information
         configuration = {}
         configuration.update(node.get('config', {}))
-        configuration.update(config[nodenum])
+        configuration.update(config.get(nodenum, {}))
         kwargs.update(configuration)
         
         calc_value = module.action(**kwargs)
         # pushing the value of all the outputs for this node to cache, 
         # even though only one was asked for
-        for terminal_id, arr in calc_value.items():
-            terminal_fp = name_terminal(fp, terminal_id)
+        for terminal_name, arr in calc_value.items():
+            terminal_fp = name_terminal(fp, terminal_name)
             for data in arr:
                 server.rpush(terminal_fp, data.dumps())
-        #server.set(fp, fp) # used for checking if the calculation exists; could wrap this whole thing with loop of output terminals
         result = calc_value[terminal_id]
     return result
 
@@ -167,16 +175,25 @@ def fingerprint_template(template, config):
         node = template.modules[nodenum]
         module_id = node['module'] # template.modules[node]
         module = lookup_module(module_id)
-        inputs = _map_inputs(module, wires)
+        parents = template.get_parents(nodenum)
+        # this is a list of wires that terminate on this module
+        inputs_fp = []
+        for wire in parents:
+            source_nodenum, source_terminal_id = wire['source']
+            target_nodenum, target_terminal_id = wire['target']
+            input_fp = fingerprints[source_nodenum]
+            inputs_fp.append([target_terminal_id, input_fp])
+        #inputs = _map_inputs(module, wires)
         
         # Include configuration information
         configuration = {}
         configuration.update(node.get('config', {}))
-        configuration.update(config[nodenum])
+        configuration.update(config.get(nodenum, {}))
         
         # Fingerprinting
-        fp = finger_print(module, configuration, nodenum, inputs, fingerprints) # terminals included
+        fp = finger_print(module, configuration, nodenum, inputs_fp) # terminals included
         fingerprints[nodenum] = fp
+
     return fingerprints
 
 def _lookup_results(result, s):
@@ -227,7 +244,7 @@ def _map_inputs(module, wires):
             kwargs[terminal['id']] = collect[0]
     return kwargs
 
-def finger_print(module, args, nodenum, inputs, fingerprints):
+def finger_print(module, args, nodenum, inputs_fp):
     """
     Create a unique sha1 hash for a module based on its attributes and inputs.
     """
@@ -237,17 +254,20 @@ def finger_print(module, args, nodenum, inputs, fingerprints):
     fp = str(d) # source code (not 100% due to helper methods)
     fp += str(args) # all arguments for the given module
     fp += str(nodenum) # node number
-    for terminal_id, input_arr in inputs.items():
-        fp += terminal_id
-        if input_arr != None and isinstance(input_arr, list) and len(input_arr) > 0: # default value checking for non-required terminals
-            if isinstance(input_arr[0], list): # Multiple = True; bundle
-                fp += str([fingerprints[input[0]] for input in input_arr])
-            elif isinstance(input_arr[0], int):  # Multiple = False; single input
-                fp += str(fingerprints[input_arr[0]])
-            else:
-                raise TypeError("Input array should either be a bundle of inputs or just one input")
-        else:
-            fp += str(input_arr) # whatever the default value was
+    for item in inputs_fp:
+        terminal_id, input_fp = item
+        fp += terminal_id + input_fp
+#    for terminal_id, input_arr in inputs.items():
+#        fp += terminal_id
+#        if input_arr != None and isinstance(input_arr, list) and len(input_arr) > 0: # default value checking for non-required terminals
+#            if isinstance(input_arr[0], list): # Multiple = True; bundle
+#                fp += str([fingerprints[input[0]] for input in input_arr])
+#            elif isinstance(input_arr[0], int):  # Multiple = False; single input
+#                fp += str(fingerprints[input_arr[0]])
+#            else:
+#                raise TypeError("Input array should either be a bundle of inputs or just one input")
+#        else:
+#            fp += str(input_arr) # whatever the default value was
     fp = hashlib.sha1(fp).hexdigest()
     return fp
 

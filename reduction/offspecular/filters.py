@@ -1,4 +1,4 @@
-from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin
+from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin, allclose, zeros_like
 import os, simplejson, datetime, sys, types, xml.dom.minidom
 from copy import deepcopy
 
@@ -869,7 +869,7 @@ class PolarizationCorrect(Filter2D):
             return
             
         data_shape = combined_data[0].shape
-        polstates = [datum._info[-1]['PolState'] for datum in datasets]
+        polstates = [datum._info[-1]['PolState'] for datum in combined_data]
             
         NT = empty(data_shape[:2] + (4, 4))
         alldata = empty(data_shape[:2] + (len(polstates), 4))
