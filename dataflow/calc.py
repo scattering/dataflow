@@ -25,7 +25,7 @@ def run_template(template, config):
     large data sets.
     """
     all_results = {}
-    fingerprints = {}
+    fingerprints = fingerprint_template(template, config)
     for nodenum, wires in template:
         # Find the modules
         node = template.modules[nodenum]
@@ -53,10 +53,7 @@ def run_template(template, config):
         kwargs.update(configuration)
         
         # Fingerprinting
-        fp = finger_print(module, configuration, nodenum, inputs_fp) # terminals included
-        fingerprints[nodenum] = fp
-        fp = name_fingerprint(fp)
-        print fp
+        fp = name_fingerprint(fingerprints[nodenum])
         
         # Overwrite even if there was already the same reduction?
         if server.exists(fp):# or module.name == 'Save': 
@@ -97,7 +94,6 @@ def calc_single(template, config, nodenum, terminal_id):
     node = template.modules[nodenum]
     module_id = node['module'] # template.modules[node]
     module = lookup_module(module_id)
-    print module.id, terminal_id
     terminal = module.get_terminal_by_id(terminal_id)
     
     if terminal['use'] != 'out':

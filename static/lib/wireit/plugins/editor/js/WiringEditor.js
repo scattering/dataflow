@@ -267,8 +267,8 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 
 	runReduction: function(file_associations) {
 	    var value = this.getValue()
-	    //console.log(value)
 
+	    //console.log(value)
 	    if(value.name === "") {
        		this.alert("Please choose a name");
            	return;
@@ -281,9 +281,15 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	        language: value.working.language,
 	        clickedOn: this.wireClickedOn
         };
+        for (var j in this.toReduce.modules) {
+        	this.toReduce.modules[j].config = this.toReduce.modules[j].config[this.reductionInstance]
+        	this.toReduce.modules[j].config['files'] = []
+        	}
         for (var i in file_associations) {
         	if (typeof file_associations[i] == "object") {
-        	    this.toReduce.modules[i.split(": ").pop()].config['files'] = [file_associations[i][0]]
+        		for (var k in file_associations[i]) {
+        	   		this.toReduce.modules[i.split(": ").pop()].config['files'].push(FILE_DICT[file_associations[i][k]])
+        	   	}
         	}
         	else {
 		    // not entering in a 'files' config if the module is not a loader        		
@@ -308,7 +314,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			toPlot = display[this.wireClickSource].output
 			}
 		else {
-			toPlot = display[0].output
+			toPlot = display
 		}
 		console.log(toPlot)
 		plottingAPI(toPlot, plotid)
@@ -557,10 +563,13 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		            var baseContainerConfig = this.modulesByName[m.name].container;
 		            YAHOO.lang.augmentObject(m.config, baseContainerConfig); 
 		            m.config.title = m.name;
-		            console.log(m) // continue working on this (pulling module config from dumped template)
+		            //console.log('pre', m) // continue working on this (pulling module config from dumped template)
 		            var container = this.layer.addContainer(m.config);
+		            //console.log('post',container)
 		            Dom.addClass(container.el, "WiringEditor-module-"+m.name);
 		            container.setValue(m.value);
+		            container.tracksConfigs = {1: m.config}
+		            //console.log(container)
 		         }
 		         else {
 		            throw new Error("WiringEditor: module '"+m.name+"' not found !");
@@ -648,7 +657,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		var hitModules = [] // at some point to check which modules have already been touched
 		var headersList = [] // actual list of headers
 		for (var i in wireList) {
-			console.log(i)
+			//console.log(i)
 			if (moduleList[wireList[i].src.moduleId].name === 'Load') {
 			
 				headersList.push(moduleList[wireList[i].tgt.moduleId].name + ' ' + wireList[i].tgt.terminal + ': ' + wireList[i].src.moduleId)
@@ -673,7 +682,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		this.maxReduction = setMax;
 		this.templateConfig = templateConfig;
 		this.displayCurrentReduction();
-		this.setModuleConfigs()
+		this.extendModuleConfigs()
 	
 	},
 	
@@ -688,7 +697,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			this.reductionInstance -= 1
 			YAHOO.util.Dom.get('reductionInstance').innerHTML = String(this.reductionInstance)
 			this.displayCurrentReduction()
-			this.setModuleConfigs()
+			//this.setModuleConfigs()
 			}
 	
 	},
@@ -699,7 +708,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			this.reductionInstance += 1
 			YAHOO.util.Dom.get('reductionInstance').innerHTML = this.reductionInstance
 			this.displayCurrentReduction()
-			this.setModuleConfigs()
+			//this.setModuleConfigs()
 			}
 	},
 	
@@ -714,24 +723,41 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	},
 	
 	/**
-	* This method takes the templateConfig and current instance number and sets the modules configurations
-	* accordingly. File configurations are set in runReduction.
+	* This method makes sure that each module has a config list for every reduction instance
 	**/
-	setModuleConfigs: function() {
-		
+	
+	extendModuleConfigs: function() {
+		console.log('In ExtendModuleConfig')
+		containers = this.layer.containers
+		for (var i=0; i < containers.length; i++) {
+			size = Object.size(containers[i].tracksConfigs)
+			diff = this.maxReduction - size
+			tempConfig = containers[i].tracksConfigs[1]
+			//console.log('diff',diff)
+			//console.log(tempConfig)
+			if (diff>0) {
+				//console.log('there is a diff')
+				for (var j = 1; j <= diff; j ++ ) {
+					containers[i].tracksConfigs[size+j] = {}
+					for (var k in tempConfig) {
+						containers[i].tracksConfigs[size+j][k] = tempConfig[k]
+						}
+					}
+				}
+			}
 	},
 	
 	displayClickedModuleConfig: function(module) {
-	console.log('in display module config!')
-	HTML = '<dl class ="instance-info-display">'
-	config = module.getConfig()
-	//console.log(module.getConfig())
-	for (i in config) {
-		//console.log(i, config[i])
-		HTML += '<dt>' + i + "</dt><dd>" + config[i] + '</dd>'
+		//console.log('in display module config!')
+		HTML = '<dl class ="instance-info-display">'
+		config = module.getConfig()[this.reductionInstance]
+		//console.log(module.getConfig())
+		for (i in config) {
+			//console.log(i, config[i])
+			HTML += '<dt>' + i + "</dt><dd>" + config[i] + '</dd>'
 		}
-	HTML += "</dl>";
-	YAHOO.util.Dom.get('instance-modules-info').innerHTML = HTML	
+		HTML += "</dl>";
+		YAHOO.util.Dom.get('instance-modules-info').innerHTML = HTML	
 	},
 
 

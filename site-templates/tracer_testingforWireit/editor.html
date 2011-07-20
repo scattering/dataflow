@@ -135,6 +135,7 @@ div.Bubble div.body {
 
 <!-- Uniq Array -->
 <script type="text/javascript" src="../../static/lib/UniqArray.js"></script>
+<script type="text/javascript" src="../../static/lib/js-object-length.js"></script>
 
 <!-- YUI -->
 <script type="text/javascript" src="../../static/lib/yui/yahoo/yahoo.js"></script>
@@ -299,8 +300,10 @@ div.Bubble div.body {
 <!-- Languages -->
 <script type="text/javascript" src="../../static/wireit_test/language.js"></script>
 <script type="text/javascript" src="../../static/wireit_test/ANDRdefinition.js"></script>
+<script type="text/javascript" src="../../static/wireit_test/ANDRdefinition2.js"></script>
 <script type="text/javascript" src="../../static/wireit_test/SANSdefinition.js"></script>
 <script type="text/javascript" src="../../static/wireit_test/SANSnewdefinition.js"></script>
+<script type="text/javascript" src="../../static/wireit_test/SANSnewnewdef.js"></script>
 <script type="text/javascript" src="../../static/wireit_test/TASlang.js"></script>
 
 
@@ -359,12 +362,12 @@ YAHOO.util.Event.onDOMReady( function() {
 		WireIt.ImageContainer.prototype.height = 40;
 		WireIt.ImageContainer.prototype.width = 40;
 		WireIt.ImageContainer.prototype.onMouseDown = function() {
-			console.log('clicked on imageContainer')
+			//console.log('clicked on imageContainer')
 			editor.displayClickedModuleConfig(this)
 			holder = this;
 			}
 		WireIt.Container.prototype.onMouseDown = function() {
-			console.log('clicked on container')
+			//console.log('clicked on container')
 			editor.displayClickedModuleConfig(this)
 			},
 		WireIt.Container.prototype.getConfig = function() {
@@ -372,10 +375,14 @@ YAHOO.util.Event.onDOMReady( function() {
 			configs['position'] = this.getXY()
 			configs['xtype'] = this.xtype
 			if (this.tracksConfigs) {
-				for (var i in this.tracksConfigs[editor.reductionInstance]) {
-					configs[i] = this.tracksConfigs[editor.reductionInstance][i] 
-					}
-				}
+				configs = this.tracksConfigs
+				//console.log('Getting Config', editor.reductionInstance)
+				//console.log(this.tracksConfigs[editor.reductionInstance])
+				//for (var i in this.tracksConfigs[editor.reductionInstance]) {
+				//	configs[i] = this.tracksConfigs[editor.reductionInstance][i] 
+				//	}
+				//}
+      				}
       			return configs
 		},
 			
@@ -453,7 +460,7 @@ Ext.onReady(function() {
                                 <h2>Plotting!</h2>
 
                                 <div>
-                                        <div id="plot" style="display: block; border:1px solid; width:500px; height: 500px; float: left;"></div>
+                                        <div id="plots" style="display: block; border:1px solid; width:500px; height: 500px; float: left;"></div>
                                         <canvas id="colorbar" width="60" height="500" style="float: left;"></canvas><br style="clear: left;" />
 
                                         <div style="display: none;">

@@ -139,6 +139,7 @@ class plot1D(object):
         plottable_data = {
             'type': 'nd',
             'title': '1D Sans Data',
+
             'clear_existing': False,
             'orderx': [{'key': 'Q', 'label': 'Q'}],
             'ordery': [{'key': 'I', 'label': 'Intensity'}],

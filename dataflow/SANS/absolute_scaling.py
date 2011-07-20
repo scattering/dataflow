@@ -10,7 +10,7 @@ def absolute_scaling_module(id=None, datatype=None, action=None,
     """Abs"""
 
     icon = {
-        'URI': config.IMAGES + map_pics('abs'),
+        'URI': config.IMAGES + "SANS/abs_image.png",
         'terminals': {
             #inputs
             'DIV': (0, 10, -1, 0),
@@ -52,7 +52,12 @@ def absolute_scaling_module(id=None, datatype=None, action=None,
              description='Absolute Scaling',
              ),
     ]
-
+    ins_name_field = {
+        'type' :'string',
+        'label':'Instrument Name (NG3,NG5,or NG7)',
+        'name' :'instrument',
+        'value':'',
+        }
     # Combine everything into a module.
     module = Module(id=id,
                   name='absolute_scaling',
@@ -60,7 +65,7 @@ def absolute_scaling_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=fields,
+                  fields=[ins_name_field]+fields,
                   action=action,
                   )
 

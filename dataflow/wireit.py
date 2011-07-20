@@ -90,6 +90,7 @@ def _module_to_wireit(module):
     # Map terminals to the container    
     if module.icon:
         icon = module.icon['URI']
+        image = module.icon.get('image', icon)
         terminal_locations = module.icon['terminals']
         
         # Check that icon has spots for all terminals
@@ -106,7 +107,7 @@ def _module_to_wireit(module):
             
         container = dict(xtype='WireIt.ImageContainer',
                          icon=icon,
-                         image=icon,
+                         image=image,
                          terminals=terminals)
     else:
         step = config.TERMINAL_SPACING

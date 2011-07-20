@@ -10,11 +10,12 @@ def two_theta_qxqz_module(id=None, datatype=None, action=None,
     """Creates a module for converting theta and two theta to qx and qz"""
 
     icon = {
-        'URI': config.IMAGES + "qxqz.png",
+        'URI': config.IMAGES + config.ANDR_FOLDER + "qxqz.png",
+        'image': config.IMAGES + config.ANDR_FOLDER + "qxqz_image.png",
         'terminals': {
-            'input': (0, 10, -1, 0),
-            'output_grid': (10, 10, -1, 0),
-            'output': (20, 10, 1, 0),
+            'input': (-12, 4, -1, 0),
+            'output_grid': (-12, 40, -1, 0),
+            'output': (48, 16, 1, 0),
         }
     }
     
