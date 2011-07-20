@@ -8,6 +8,7 @@ language_choices = (
 			('refl', 'refl'),
 			('andr', 'andr'),
 			('tas', 'tas'),
+			('new_andr', 'new_andr'),
 			('sans_novel','sans_novel'),
 )
 
@@ -33,8 +34,6 @@ class experimentForm1(forms.Form):
 	instrument_class = forms.ChoiceField(instrument_class_choices) #how to generate the choices
 	instrument_name = forms.ModelChoiceField(queryset= Instrument.objects.all(), empty_label="(Select an instrument)")
 
-	
 class experimentForm2(forms.Form):
 	templates = forms.ModelChoiceField(queryset = Template.objects.all(), empty_label="(Select a Template)")
 	files = forms.FileField()
-	
