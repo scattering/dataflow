@@ -226,13 +226,8 @@ wires = [
     dict(source=[0, 'output'], target=[1, 'input']),
     #dict(source=[1, 'output'], target=[2, 'input']),
     ]
-config = [
-    {},
-    {},
-    #{},
-    #{'instrument_name': 'BT7'},
-    #{}
-    ]
+config = {}
+
 template = Template(name='test reduction',
                     description='example reduction diagram',
                     modules=modules,
