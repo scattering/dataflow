@@ -499,7 +499,7 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     lookup = {"a":"--", "b":"+-", "c":"-+", "d":"++", "g": ""}
     if path == None:
         path = os.getcwd()
-    file_obj = load(os.path.join(path, filename))
+    file_obj = load(os.path.join(path, filename), format='NCNR NG-1')
     if not (len(file_obj.detector.counts.shape) == 2):
         # not a 2D object!
         return
