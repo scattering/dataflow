@@ -1,1 +1,1 @@
-var languageDictionary = {'bt7': testLanguage, 'sans': sans_lang, 'refl': testLanguage, 'andr':andrlang, 'tas': tas_lang, 'sans2': sans_new_lang}
+var languageDictionary = {'bt7': bt7, 'sans': sans, 'refl': bt7, 'andr':andr, 'tas': tas, 'sans2': sans2}

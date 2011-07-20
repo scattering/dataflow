@@ -76,8 +76,8 @@ WireIt.WiringEditor.adapters.tracks = {
 			success: function(o) {
 				var s = o.responseText;
 				         // CHANGED (7/5/11), JSON parsing was not working
-					 r = YAHOO.lang.JSON.parse(s)
-					 //r = eval('(function() { return ' + s + '; })()');
+					 //r = YAHOO.lang.JSON.parse(s)
+					 r = eval('(function() { return ' + s + '; })()');
 			 	callbacks.success.call(callbacks.scope, r);
 			},
 			failure: function(o) {
