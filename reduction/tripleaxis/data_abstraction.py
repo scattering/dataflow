@@ -48,8 +48,8 @@ class Meta_tag(object):
                 self.name=name
                 self.value=value
                 self.isDistinct=isDistinct
-                
-                
+
+
 class MetaData(object):
         def __init__(self,comment=None,filename=None, instrument_name=None,
                      epoch=None,experiment_name=None, experiment_id=None,
@@ -75,7 +75,7 @@ class MetaData(object):
                 self.fixed_eief=Meta_tag('fixed_eief',fixed_eief,isDistinct=True) #either ei or ef
                 self.counting_standard=Meta_tag('counting_standard',counting_standard,isDistinct=True) # this is either monitor or time
                 self.desired_detector=Meta_tag('desired_detector',desired_detector,isDistinct=True) #detector, sd, psddet, etc.
-                
+
 class IceMetaData(MetaData):
         def __init__(self, ice_version=None, ice_repository_info=None, experimental_details=None,
                      experiment_comment=None, desired_npoints=None, user=None, ranges=None,scan_description=None):
@@ -136,7 +136,7 @@ class Component(object):
                         return uncertainty.Measurement(self.x[key],self.variance[key])
                 else:
                         return uncertainty.Measurement(self.x[key],None)
-                        
+
         def __setitem__(self,key,value):
                 self.x[key] = value.x
                 self.variance[key] = value.variance
@@ -178,7 +178,7 @@ class Component(object):
                                 #return uncertainty.Measurement(self.x/other, self.variance/other**2)
                         #else:
                                 #return uncertainty.Measurement(self.x/other, None)
-                                
+
         #def __pow__(self, other):
                 #if isinstance(other,uncertainty.Measurement):
                         ## Haven't calcuated variance in (a+/-da) ** (b+/-db)
@@ -208,21 +208,21 @@ class Component(object):
         #def __iadd__(self, other):
                 #if isinstance(other,uncertainty.Measurement):
                         #self.x,self.variance \
-                            #= err1d.add_inplace(self.x,self.variance,other.x,other.variance)
+                                #= err1d.add_inplace(self.x,self.variance,other.x,other.variance)
                 #else:
                         #self.x+=other
                 #return self
         #def __isub__(self, other):
                 #if isinstance(other,uncertainty.Measurement):
                         #self.x,self.variance \
-                            #= err1d.sub_inplace(self.x,self.variance,other.x,other.variance)
+                                #= err1d.sub_inplace(self.x,self.variance,other.x,other.variance)
                 #else:
                         #self.x-=other
                 #return self
         #def __imul__(self, other):
                 #if isinstance(other,uncertainty.Measurement):
                         #self.x, self.variance \
-                            #= err1d.mul_inplace(self.x,self.variance,other.x,other.variance)
+                                #= err1d.mul_inplace(self.x,self.variance,other.x,other.variance)
                 #else:
                         #self.x *= other
                         #self.variance *= other**2
@@ -230,7 +230,7 @@ class Component(object):
         #def __itruediv__(self, other):
                 #if isinstance(other,uncertainty.Measurement):
                         #self.x,self.variance \
-                            #= err1d.div_inplace(self.x,self.variance,other.x,other.variance)
+                                #= err1d.div_inplace(self.x,self.variance,other.x,other.variance)
                 #else:
                         #self.x /= other
                         #self.variance /= other**2
@@ -279,7 +279,7 @@ class Component(object):
                                         else:
                                                 for nx in range(Nx):
                                                         res.append(format_uncertainty(self.x[nx],None))                                                
-                                                
+
                         return np.array(res).T.__repr__()
         def __repr__(self):
                 return "Measurement(%s,%s)"%(str(self.x),str(self.variance))
@@ -341,8 +341,8 @@ def err_check(values,err):
         else:
                 measurement=uncertainty.Measurement(values, err**2)
         return measurement
-        
-        
+
+
 class Motor(Component):
         """This is the motor class.  A Motor must have a name, for example, 'a1'
         Furthermore, it is given a set of values and stderr for initialization.
@@ -390,7 +390,7 @@ class SampleEnvironment(Component):
                 self.friends=friends  
                 #If I am updated, then my friends might need to be updated, for example, hkl-> a3,a4, etc.
 
-                
+
 
 class Detector(Component):
         """This is the detector class.  A detector must have a name, for example, 'psd'
@@ -409,13 +409,13 @@ class Detector(Component):
                 self.isDistinct=isDistinct
                 self.isInterpolatable=isInterpolatable
                 self.friends=friends  
-		self.efficiencies=efficiencies
+                self.efficiencies=efficiencies
                 #If I am updated, then my friends might need to be updated
                 self.dimension=dimension
                 #Internally, I imagine that we should internally store the detector a multidimensional array.
                 # Each point is an array that is nxm pixels and then we have k points.  So, for a 2D psd for example,
                 # we would have kpoints x (n x m) array where n and m define the dimensions of the 2D psd
-        
+
         def correct_efficiencies(self,efficiencies):
                 """This function will correct the detector for efficiencies, in place"""
                 pass
@@ -432,14 +432,14 @@ class Detector(Component):
 #                self.name=name
 #        def __getitem__(self, key): return self.__dict__[key]
 #        def __setitem__(self, key, item): self.__dict__[key] = item
- 
+
 class DetectorSet(object):
         """This defines a group of detectors"""
         def __init__(self):
                 self.primary_detector=Detector('primary_detector',dimension=None,values=None,err=None,units='counts', 
-                     aliases=None,friends=None, isInterpolatable=True)
+                                               aliases=None,friends=None, isInterpolatable=True)
                 self.detector_mode=None
-                        
+
         def __iter__(self):
                 for key,value in self.__dict__.iteritems():
                         if not key=='detector_mode':
@@ -448,10 +448,10 @@ class DetectorSet(object):
         #def next(self):
         #        for key, value in self.__dict__.iteritems():
         #                yield value
-                
 
 
-                          
+
+
 class Mosaic(object):
         def __init__(self,horizontal=None, vertical=None):
                 self.horizontal=horizontal
@@ -478,14 +478,14 @@ class Monochromator(object):
                 self.focus_pg=Motor('focus_pg',values=None,err=None,units='degrees',isDistinct=True,
                                     isInterpolatable=True)
                 self.translation=Motor('translation',values=None,err=None,units='degrees',isDistinct=False,
-                                    isInterpolatable=True)
+                                       isInterpolatable=True)
                 self.elevation=Motor('elevation',values=None,err=None,units='degrees',isDistinct=False,
-                                    isInterpolatable=True)
+                                     isInterpolatable=True)
         def __iter__(self):
                 for key,value in self.__dict__.iteritems():
-			if isinstance(value, Motor):
-				yield value
-			
+                        if isinstance(value, Motor):
+                                yield value
+
 class Filters(object):
         """Filters"""
         def __init__(self):
@@ -498,8 +498,8 @@ class Filters(object):
                 #filter translation has values of "IN" and "OUT" 
         def __iter__(self):
                 for key,value in self.__dict__.iteritems():
-			yield value
-			
+                        yield value
+
 class Apertures(object):
         def __init__(self):
                 self.aperture_horizontal=Motor('aperture_horizontal',values=None,err=None,units='degrees',isDistinct=False,
@@ -508,48 +508,48 @@ class Apertures(object):
                                              isInterpolatable=False)
         def __iter__(self):
                 for key,value in self.__dict__.iteritems():
-			yield value
-			
+                        yield value
+
 class Time(object):
         def __init__(self):
                 self.duration=Motor('duration',values=None,err=None,units='seconds',isDistinct=True,
-                                                       isInterpolatable=True)
+                                    isInterpolatable=True)
                 self.timestamp=Motor('timestamp',values=None,err=None,units='seconds',isDistinct=False,
-                                                       isInterpolatable=True)
+                                     isInterpolatable=True)
                 #We should decide if we ignore timestamps, for now let's do so....
                 self.monitor=Motor('monitor',values=None,err=None,units='neutrons',isDistinct=False,
-                                                       isInterpolatable=True)
+                                   isInterpolatable=True)
                 self.monitor2=Motor('monitor2',values=None,err=None,units='neutrons',isDistinct=False,
-                                                       isInterpolatable=True)
+                                    isInterpolatable=True)
         def __iter__(self):
                 for key,value in self.__dict__.iteritems():
-			if isinstance(value, Motor):
-				yield value
-		
-		
+                        if isinstance(value, Motor):
+                                yield value
+
+
 class Temperature(object):                
         def __init__(self):
                 self.temperature=SampleEnvironment('temperature',values=None,err=None,units='K',isDistinct=True,
-                                               isInterpolatable=True)
+                                                   isInterpolatable=True)
                 self.temperature_control_reading=SampleEnvironment('temperature_control_reading',values=None,err=None,units='K',isDistinct=False,
-                                               isInterpolatable=True)
+                                                                   isInterpolatable=True)
                 self.temperature_heater_power=SampleEnvironment('temperature_heater_power',values=None,err=None,units='percentage',isDistinct=False,
-                                               isInterpolatable=True) #usuallly a percentage for most controllers...
+                                                                isInterpolatable=True) #usuallly a percentage for most controllers...
                 self.temperature_setpoint=SampleEnvironment('temperature_setpoint',values=None,err=None,units='K',isDistinct=False,
-                                               isInterpolatable=True)
-	def __iter__(self):
+                                                            isInterpolatable=True)
+        def __iter__(self):
                 for key,value in self.__dict__.iteritems():
-			yield value
+                        yield value
 
 class MagneticField(object):                
         def __init__(self):
                 self.magnetic_field=SampleEnvironment('magnetic_field',values=None,err=None,units='Tesla',isDistinct=True,
-                                               isInterpolatable=True)
+                                                      isInterpolatable=True)
 
-  
-        
-                
-                
+
+
+
+
 class Analyzer(object):
         """An analyzer"""
         def __init__(self, name='Analyzer',
@@ -567,12 +567,12 @@ class Analyzer(object):
                 self.detector_mode=detector_mode #DiffDet, SinglDetFlat,SinglDetHFoc,PSDDiff,PSDFlat,Undefined
                 self.focus_mode=focus_mode
                 self.dspacing=dspacing
-		
-	def __iter__(self):
+
+        def __iter__(self):
                 for key,value in self.__dict__.iteritems():
-			if isinstance(value, Motor):
-				yield value
-                
+                        if isinstance(value, Motor):
+                                yield value
+
 
 
 
@@ -582,7 +582,7 @@ class Primary_Motors(object):
                 """These are a1, which defines the focusing convention and is equal to "dfm" in files
                 a5 also defines the focusing condition.  Instead, use analyzer_rotation and dfm_rotation
                 when present to do calculations.
-                
+
                 """
                 self.a1=Motor('a1',values=None,err=None,units='degrees',isDistinct=True, isInterpolatable=True)
                 self.a2=Motor('a2',values=None,err=None,units='degrees',isDistinct=True, isInterpolatable=True)
@@ -593,13 +593,13 @@ class Primary_Motors(object):
                 self.sample_elevator=Motor('sample_elevator',values=None,err=None,units='degrees',isDistinct=False
                                            , isInterpolatable=True)
                 self.sample_upper_tilt=Motor('sample_upper_tilt',values=None,err=None,units='degrees',isDistinct=False
-                                           , isInterpolatable=True) #note, needs to be changed in UB Mode
+                                             , isInterpolatable=True) #note, needs to be changed in UB Mode
                 self.sample_lower_tilt=Motor('sample_lower_tilt',values=None,err=None,units='degrees',isDistinct=False
-                                           , isInterpolatable=True) #note, needs to be changed in UB Mode
+                                             , isInterpolatable=True) #note, needs to be changed in UB Mode
                 self.sample_upper_translation=Motor('sample_upper_translation',values=None,err=None,units='degrees',isDistinct=False
-                                           , isInterpolatable=True)
+                                                    , isInterpolatable=True)
                 self.sample_lower_translation=Motor('sample_lower_translation',values=None,err=None,units='degrees',isDistinct=False
-                                           , isInterpolatable=True) #note, needs to be changed in UB Mode
+                                                    , isInterpolatable=True) #note, needs to be changed in UB Mode
                 self.dfm_rotation=Motor('dfm_rotation',values=None,err=None,units='degrees',isDistinct=True
                                         , isInterpolatable=True)
                 self.analyzer_rotation=Motor('analyzer_rotation',values=None,err=None,units='degrees',isDistinct=True
@@ -610,7 +610,7 @@ class Primary_Motors(object):
                 #                             , isInterpolatable=True)
         def __iter__(self):
                 for key,value in self.__dict__.iteritems():
-			yield value
+                        yield value
 
 class Physical_Motors(object):
         def __init__(self):
@@ -623,17 +623,17 @@ class Physical_Motors(object):
                 self.e=Motor('e',values=None,err=None,units='meV',isDistinct=True,
                              isInterpolatable=True)
                 self.ei=Motor('ei',values=None,err=None,units='meV',isDistinct=True,
-                             isInterpolatable=True)
+                              isInterpolatable=True)
                 self.ef=Motor('ef',values=None,err=None,units='meV',isDistinct=True,
-                             isInterpolatable=True)
+                              isInterpolatable=True)
                 self.q=Motor('q',values=None,err=None,units='angstrom_inverse',isDistinct=True,
                              isInterpolatable=True)
-		self.orient1=Motor('orient1',values=None,err=None,units='rlu',isDistinct=True,
-                             isInterpolatable=True)
-		self.orient2=Motor('orient2',values=None,err=None,units='rlu',isDistinct=True,
-                             isInterpolatable=True)
-		self.orient3=Motor('orient3',values=None,err=None,units='rlu',isDistinct=True,
-                             isInterpolatable=True)
+                self.orient1=Motor('orient1',values=None,err=None,units='rlu',isDistinct=True,
+                                   isInterpolatable=True)
+                self.orient2=Motor('orient2',values=None,err=None,units='rlu',isDistinct=True,
+                                   isInterpolatable=True)
+                self.orient3=Motor('orient3',values=None,err=None,units='rlu',isDistinct=True,
+                                   isInterpolatable=True)
                 #self.qx=Motor('qx',values=None,err=None,units='rlu',isDistinct=True,
                 #              isInterpolatable=True)
                 #self.qy=Motor('qy',values=None,err=None,units='rlu',isDistinct=True,
@@ -644,8 +644,8 @@ class Physical_Motors(object):
                 #               isInterpolatable=True) #is this a tuple???
         def __iter__(self):
                 for key,value in self.__dict__.iteritems():
-			yield value
-			
+                        yield value
+
 class Collimators(object):
         """Our collimators:  
         post_analyzer_collimator:user_defined
@@ -668,11 +668,11 @@ class Collimators(object):
                 self.pre_monochromator_collimator=Motor('post_monochromator_collimator',values=None,err=None,units='minutes',isDistinct=True)
                 self.radial_collimator=Motor('radial_collimator',values=None,err=None,units='degrees',isDistinct=True, window=2.0)
                 self.soller_collimator=Motor('soller_collimator',values=None,err=None,units='degrees',isDistinct=False, window=2.0)
-        
+
         def __iter__(self):
                 for key,value in self.__dict__.iteritems():
-			yield value
-	
+                        yield value
+
 class Blades(object):
         def __init__(self,title='',nblades=7):
                 self.blades=[]
@@ -680,9 +680,9 @@ class Blades(object):
                         self.blades.append(Motor(title+'blade'+str(i),values=None,err=None,units='degrees',isDistinct=False))
         def __iter__(self):
                 for blade in self.blades:
-			yield blade
-                
-                
+                        yield blade
+
+
 class PolarizedBeam(object):
         def __init__(self):
                 self.ei_flip=Motor('ei_flip',values=None,err=None,units='amps',isDistinct=False) #used to determine if the flipper is on
@@ -697,23 +697,23 @@ class PolarizedBeam(object):
                 self.flipper_state=Motor('flipper_state',values=None,err=None,units='',isDistinct=False) #short hand, can be A,B,C, etc.
         def __iter__(self):
                 for key,value in self.__dict__.iteritems():
-			yield value
+                        yield value
 
 class Slits(object):
         def __init__(self):
                 self.back_slit_height=Motor('back_slit_height',values=None,err=None,units='degrees',isDistinct=False
-                                           , isInterpolatable=True) 
+                                            , isInterpolatable=True) 
                 self.back_slit_width=Motor('back_slit_width',values=None,err=None,units='degrees',isDistinct=False
                                            , isInterpolatable=True) 
-	def __iter__(self):
+        def __iter__(self):
                 for key,value in self.__dict__.iteritems():
-			yield value
+                        yield value
 
 
 
 class TripleAxis(object):
         def __init__(self):
-		#self.data=[] #large nd array of all data columns
+                #self.data=[] #large nd array of all data columns
                 self.monochromator=Monochromator()
                 self.analyzer=Analyzer()
                 self.sample=Sample()
@@ -729,7 +729,7 @@ class TripleAxis(object):
                 self.meta_data=IceMetaData()
                 self.apertures=Apertures()
                 self.temperature=Temperature()
-                
+
                 self.analyzer_blades=Blades(title='analyzer',nblades=8)
         def detailed_balance(self):
                 beta_times_temp = 11.6
@@ -753,7 +753,7 @@ class TripleAxis(object):
                 """Multiplies the monitor correction through all of the detectors in the Detector_Sets."""
                 #Use for constant-Q scans with fixed scattering energy, Ef.
                 #CURRENTLY: Assumes Ef is fixed under constant-Q scan; could implement check later
-        
+
                 coefficients = establish_correction_coefficients('monitor_correction_coordinates.txt')
                 M = coefficients[instrument_name]
                 for i in range(0, len(M)):
@@ -763,7 +763,7 @@ class TripleAxis(object):
                         Eii=self.physical_motors.ei.measurement
                         detector.measurement=detector.measurement*(M[0] + M[1]*Eii + M[2]*Eii**2 + M[3]*Eii**3 + M[4]*Eii**4)
                 return
-                        
+
         def resolution_volume_correction(self):
                 """Correct constant Q-scans with fixed incident energy, Ei, for the fact that the resolution volume changes
                 as Ef changes"""
@@ -779,75 +779,75 @@ class TripleAxis(object):
                 for detector in bt7.detectors:
                         detector.measurement=detector.measurement*rescor
                 return
-	
-	def efficiency_correction(self,efficiencies):
-		#TODO
-		for detector in self.detectors:
-			detector*=efficiencies
-			
-		pass
-	
-	def dumps(self):
-		return pickle.dumps(self)
-	
-	@classmethod
-	def loads(cls, str_version):
-		return pickle.loads(str_version)
-	
+
+        def efficiency_correction(self,efficiencies):
+                #TODO
+                for detector in self.detectors:
+                        detector*=efficiencies
+
+                pass
+
+        def dumps(self):
+                return pickle.dumps(self)
+
+        @classmethod
+        def loads(cls, str_version):
+                return pickle.loads(str_version)
+
         def get_plottable(self):
-        	#For now, hardcodes None into the variances until uncertainty can be fixed
-		orderx=[]
-		ordery=[]
-		data = {}
-		for key,value in self.__dict__.iteritems():
-			if key=='detectors':
-				for field in value:
+                #For now, hardcodes None into the variances until uncertainty can be fixed
+                orderx=[]
+                ordery=[]
+                data = {}
+                for key,value in self.__dict__.iteritems():
+                        if key=='detectors':
+                                for field in value:
 
-					val = field.measurement.x
-					err = field.measurement.variance
-					
-					vals=[]
-					errs=[]
-					if type(val[0])==type(np.empty((1,1))):
-						#if the detector has multiple channels, split them up
-						for channels in val:
-							for channel in channels:
-								vals.append(channel[0])
-						if err==None:
-							errs = None
-						else:
-							for channels in err:
-								for channel in channels:
-									errs.append(channel[0])		
-									
-						ordery.append({'key': field.name, 'label': field.name})
-						data[field.name]={'values': vals,'errors': errs}
+                                        val = field.measurement.x
+                                        err = field.measurement.variance
 
-					else:
-						ordery.append({'key': field.name, 'label': field.name})
-						if err==None:
-							data[field.name]={'values': val.tolist(),'errors':err}
-						else:
-							data[field.name]={'values': val.tolist(),'errors':err.tolist()}
-			elif key=='data' or key=='meta_data' or key=='sample' or key=='sample_environment':
-				#ignoring these data fields for plotting
-				pass	
-			else:
-				for field in value:
-					orderx.append({'key': field.name, 'label': field.name})
-					val = field.measurement.x
-					err = field.measurement.variance
-					if val==None:
-						val = None
-					else:
-						val = val.tolist()
-					if err==None:
-						err = None
-					else:
-						err = err.tolist()
-					data[field.name]={'values': val,'errors': err}
+                                        vals=[]
+                                        errs=[]
+                                        if type(val[0])==type(np.empty((1,1))):
+                                                #if the detector has multiple channels, split them up
+                                                for channels in val:
+                                                        for channel in channels:
+                                                                vals.append(channel[0])
+                                                if err==None:
+                                                        errs = None
+                                                else:
+                                                        for channels in err:
+                                                                for channel in channels:
+                                                                        errs.append(channel[0])		
 
-				
+                                                ordery.append({'key': field.name, 'label': field.name})
+                                                data[field.name]={'values': vals,'errors': errs}
+
+                                        else:
+                                                ordery.append({'key': field.name, 'label': field.name})
+                                                if err==None:
+                                                        data[field.name]={'values': val.tolist(),'errors':err}
+                                                else:
+                                                        data[field.name]={'values': val.tolist(),'errors':err.tolist()}
+                        elif key=='data' or key=='meta_data' or key=='sample' or key=='sample_environment':
+                                #ignoring these data fields for plotting
+                                pass	
+                        else:
+                                for field in value:
+                                        orderx.append({'key': field.name, 'label': field.name})
+                                        val = field.measurement.x
+                                        err = field.measurement.variance
+                                        if val==None:
+                                                val = None
+                                        else:
+                                                val = val.tolist()
+                                        if err==None:
+                                                err = None
+                                        else:
+                                                err = err.tolist()
+                                        data[field.name]={'values': val,'errors': err}
+
+
                 plottable_data = {
                         'type': 'nd',
                         'title': 'Triple Axis Plot',
@@ -859,7 +859,7 @@ class TripleAxis(object):
                                 'data': data,
                                 'color': 'Red',
                                 'style': 'line',
-		        }],
+                                }],
                 }
                 return plottable_data
 
@@ -871,7 +871,7 @@ def translate(bt7,dataset):
         translate_monochromator(bt7,dataset)
         translate_analyzer(bt7,dataset)
         translate_collimator(bt7,dataset)
-	translate_sample(bt7,dataset) #sample must be done before physical motors to calculate orient1,2,3 from dataset
+        translate_sample(bt7,dataset) #sample must be done before physical motors to calculate orient1,2,3 from dataset
         translate_primary_motors(bt7,dataset) #primary motors must be done before physical motors for Q calc.
         translate_physical_motors(bt7,dataset)
         translate_filters(bt7,dataset)
@@ -896,13 +896,13 @@ def translate_monochromator(bt7,dataset):
         translate_dict['dspacing']='monochromator_dspacing'
         map_motors(translate_dict, bt7,bt7.monochromator, dataset)
         #map_motors(translate_dict, bt7.monochromator, dataset)
-        
+
         #for key,value in translate_dict.iteritems():
         #        if dataset.data.has_key(value):
         #                setattr(bt7.monochromator,key,dataset.data[value])
         #        if dataset.metadata.has_key(value):
         #                setattr(bt7.monochromator,key,dataset.metadata[value])
-                
+
         #bt7.monochromator.focus_cu=dataset.data['focuscu']
         #bt7.monochromator.focus_pg=dataset.data['focuspg']
         #bt7.monochromator.horizontal_focus=dataset.metadata['monohorizfocus']
@@ -929,9 +929,9 @@ def translate_monochromator(bt7,dataset):
         #monochromator_blades.blades[8]=dataset.data.monoblade09
         #monochromator_blades.blades[9]=dataset.data.monoblade10
         bt7.monochromator.blades=monochromator_blades
-       
-        
-        
+
+
+
 def translate_analyzer(bt7,dataset):
         bt7.analyzer.dspacing=dataset.metadata['analyzer_dspacing']
         if dataset.metadata.has_key('analyzerfocusmode'):
@@ -958,19 +958,19 @@ def translate_analyzer(bt7,dataset):
         #analyzer_blades.blades[11]=dataset.data.analyzerblade12
         #analyzer_blades.blades[12]=dataset.data.analyzerblade13
         bt7.analyzer.blades=analyzer_blades
-        
 
-      
+
+
 def translate_collimator(bt7,dataset):
-	translate_dict={}
-	translate_dict['pre_monochromator_collimator']='premonocoll'
-	translate_dict['post_monochromator_collimator']='postmonocoll'
-	translate_dict['pre_analyzer_collimator']='preanacoll'
-	translate_dict['post_analyzer_collimator']='postanacoll'
+        translate_dict={}
+        translate_dict['pre_monochromator_collimator']='premonocoll'
+        translate_dict['post_monochromator_collimator']='postmonocoll'
+        translate_dict['pre_analyzer_collimator']='preanacoll'
+        translate_dict['post_analyzer_collimator']='postanacoll'
         translate_dict['radial_collimator']='rc'
-	translate_dict['soller_collimator']='sc'
-	map_motors(translate_dict,bt7,bt7.collimators,dataset)
-	
+        translate_dict['soller_collimator']='sc'
+        map_motors(translate_dict,bt7,bt7.collimators,dataset)
+
         #bt7.collimators.pre_monochromator_collimator=dataset.data['premonocoll']
         #bt7.collimators.post_monochromator_collimator =dataset.data['postmonocoll']
         #bt7.collimators.pre_analyzer_collimator=dataset.data['preanacoll']
@@ -979,17 +979,17 @@ def translate_collimator(bt7,dataset):
         #        bt7.collimators.radial_collimator=dataset.data['rc']
         #if dataset.data.has_key('sc'):
         #        bt7.collimators.soller_collimator=dataset.data['sc']
-        
+
 def translate_apertures(bt7,dataset):
         translate_dict={}
         translate_dict['aperture_horizontal']='aperthori'
         translate_dict['aperture_vertical']='apertvert'
         map_motors(translate_dict,bt7,bt7.apertures, dataset)
-	#map_motors(translate_dict,bt7.apertures, dataset)
-	
+        #map_motors(translate_dict,bt7.apertures, dataset)
+
         #bt7.apertures.aperture_horizontal=dataset.aperthori
         #bt7.apertures.aperture_vertical=dataset.apertvert
-            
+
 def translate_polarized_beam(bt7,dataset):
         translate_dict={}
         translate_dict['ei_flip']='eiflip'
@@ -1004,7 +1004,7 @@ def translate_polarized_beam(bt7,dataset):
         translate_dict['vsample']='vsample'
 
         map_motors(translate_dict,bt7,bt7.polarized_beam, dataset)
-	#map_motors(translate_dict, bt7.polarized_beam, dataset)
+        #map_motors(translate_dict, bt7.polarized_beam, dataset)
 
         #bt7.polarized_beam.ei_flip=dataset.eiflip
         #bt7.polarized_beam.ef_flip=dataset.efflip
@@ -1016,7 +1016,7 @@ def translate_polarized_beam(bt7,dataset):
         #bt7.polarized_beam.vsample=dataset.vsample
         #bt7.polarized_beam.ef_guide=dataset.efguide
         #bt7.polarized_beam.ei_cancel=dataset.data.eicancel
- 
+
 def translate_primary_motors(bt7,dataset):
         translate_dict={}
         translate_dict['sample_upper_tilt']='smplutilt'
@@ -1033,10 +1033,10 @@ def translate_primary_motors(bt7,dataset):
         translate_dict['analyzer_rotation']='analyzerrotation'
         translate_dict['dfm_rotation']='dfmrot'
         translate_dict['dfm']='dfm'
-        
+
         map_motors(translate_dict,bt7,bt7.primary_motors,dataset)
         #map_motors(translate_dict, bt7.primary_motors,dataset)
-	
+
         #for key,value in translate_dict.iteritems():
         #        if dataset.data.has_key(value):
         #                setattr(bt7.primary_motors,key,dataset.data[value])
@@ -1058,7 +1058,7 @@ def translate_primary_motors(bt7,dataset):
         #self.primary_motors.dfm_rotation=dataset.data.dfmrot
 
 
-                                
+
 def translate_physical_motors(bt7,dataset):
         translate_dict={}
         #key--> on bt7
@@ -1071,8 +1071,8 @@ def translate_physical_motors(bt7,dataset):
         translate_dict['l']='qz'
         translate_dict['e']='e'
         map_motors(translate_dict,bt7,bt7.physical_motors,dataset)
-	#map_motors(translate_dict,bt7.physical_motors,dataset)
-	
+        #map_motors(translate_dict,bt7.physical_motors,dataset)
+
         if dataset.metadata['efixed']=='ei':
                 bt7.physical_motors.ei.measurement.x=np.ones(np.array(dataset.data['e']).shape)*dataset.metadata['ei']
                 bt7.physical_motors.ei.measurement.variance=None
@@ -1082,29 +1082,29 @@ def translate_physical_motors(bt7,dataset):
                 bt7.physical_motors.ef.measurement.x=np.ones(np.array(dataset.data['e']).shape)*dataset.metadata['ef']
                 bt7.physical_motors.ef.measurement.variance=None
                 bt7.physical_motors.ei.measurement.x=bt7.physical_motors.ef.measurement.x+bt7.physical_motors.e.measurement.x  #punt for now, later should figure out what to do if variance is None
-		
-	Ei = bt7.physical_motors.ei.measurement
-	Ef = bt7.physical_motors.ef.measurement
-	A4 = bt7.primary_motors.sample_two_theta.measurement
-        Qsquared = (Ei + Ef - 2*np.sqrt(Ei*Ef)*np.cos(A4/2))/2.072
-	Q = np.sqrt(Qsquared)
-	bt7.physical_motors.q.measurement=Q
-	
-	try:
-		o1temp=bt7.sample.orientation.orient1
-		o2temp=bt7.sample.orientation.orient2
-		o1=np.array([o1temp['h'], o1temp['k'], o1temp['l']])
-		o2=np.array([o2temp['h'], o2temp['k'], o2temp['l']])
-		o1,o2,o3=make_orthonormal(o1,o2)
-		
-		setattr(bt7.physical_motors.orient1, 'value', o1)
-		setattr(bt7.physical_motors.orient2, 'value', o2)
-		setattr(bt7.physical_motors.orient3, 'value', o3)
-		#TODO - make 'fancy' names for these?
-		#setattr(bt7.physical_motors.orient3, 'name', '110')
-		
-	except:
-		pass
+
+        Ei = bt7.physical_motors.ei.measurement
+        Ef = bt7.physical_motors.ef.measurement
+        A4 = bt7.primary_motors.sample_two_theta.measurement
+        Qsquared = (Ei + Ef - 2*(Ei*Ef).sqrt()*(A4/2).cos())/2.072
+        Q = Qsquared.sqrt()
+        bt7.physical_motors.q.measurement=Q
+
+        try:
+                o1temp=bt7.sample.orientation.orient1
+                o2temp=bt7.sample.orientation.orient2
+                o1=np.array([o1temp['h'], o1temp['k'], o1temp['l']])
+                o2=np.array([o2temp['h'], o2temp['k'], o2temp['l']])
+                o1,o2,o3=make_orthonormal(o1,o2)
+
+                setattr(bt7.physical_motors.orient1, 'value', o1)
+                setattr(bt7.physical_motors.orient2, 'value', o2)
+                setattr(bt7.physical_motors.orient3, 'value', o3)
+                #TODO - make 'fancy' names for these?
+                #setattr(bt7.physical_motors.orient3, 'name', '110')
+
+        except:
+                pass
         #translate_dict['h']='h'
         #translate_dict['k']='k'
         #translate_dict['l']='l'
@@ -1113,9 +1113,9 @@ def translate_physical_motors(bt7,dataset):
         #self.physical_motors.qy=dataset.data.qy
         #self.physical_motors.qz=dataset.data.qz
         #self.physical_motors.e=dataset.data.e
-	#self.meta_data.fixed_eief=dataset.metadata.efixed
+        #self.meta_data.fixed_eief=dataset.metadata.efixed
         #self.meta_data.fixed_energy=dataset.metadata.ef
-        
+
 def translate_filters(bt7,dataset):
         translate_dict={}
         #key--> on bt7
@@ -1127,8 +1127,8 @@ def translate_filters(bt7,dataset):
         translate_dict['filter_translation']='temperaturesensor1'
         translate_dict['filter_rotation']='temperaturesensor2'
         map_motors(translate_dict,bt7,bt7.filters,dataset)
-	#map_motors(translate_dict,bt7.filters,dataset)
-        
+        #map_motors(translate_dict,bt7.filters,dataset)
+
         #self.filters.filter_tilt=dataset.filtilt
         #self.filters.filter_translation=dataset.filtran
         #self.filters.filter_rotation=dataset.filrot
@@ -1145,8 +1145,8 @@ def translate_time(bt7, dataset):
         translate_dict['monitor']='monitor'
         translate_dict['monitor2']='monitor2'
         map_motors(translate_dict,bt7,bt7.time,dataset)
-	#map_motors(translate_dict,bt7.time,dataset)
-	
+        #map_motors(translate_dict,bt7.time,dataset)
+
         #self.time.timestamp=dataset.timestamp
         #self.time.duration=dataset.data.time
         #self.time.monitor=dataset.data.monitor
@@ -1167,10 +1167,10 @@ def translate_temperature(bt7,dataset):
         translate_dict['temperature_control_reading']='temperaturecontrolreading'
         translate_dict['temperature_setpoint']='temperaturesetpoint'
         map_motors(translate_dict,bt7,bt7.temperature,dataset)
-	#map_motors(translate_dict,bt7.temperature,dataset)
+        #map_motors(translate_dict,bt7.temperature,dataset)
         if dataset.metadata.has_key('temperature_units'):
                 bt7.temperature.temperature.units=dataset.metadata['temperature_units']
-		
+
         #self.temperature.temperature=dataset.temp
         #self.temperature.temperature.units=dataset.metadata.temperature_units
         #self.temperature.temperaturesensor1=dataset.temperaturesensor1
@@ -1191,33 +1191,33 @@ def translate_slits(bt7,dataset):
         translate_dict['back_slit_width']='bksltwdth'
         translate_dict['back_slit_height']='bkslthght'
         map_motors(translate_dict,bt7,bt7.slits,dataset)
-	#map_motors(translate_dict,bt7.slits,dataset)
-        
+        #map_motors(translate_dict,bt7.slits,dataset)
+
         #self.slits.back_slit_width =dataset.data.bksltwdth
         #self.slits.back_slit_height =dataset.data.bkslthght
-        
-        
-        
+
+
+
 def translate_sample(bt7,dataset):
         translate_dict = {}
         translate_dict['orientation']='orientation'
         translate_dict['lattice']='lattice'
         map_motors(translate_dict,bt7,bt7.sample,dataset)
-	#map_motors(translate_dict,bt7.sample,dataset)        
-	
-	if bt7.sample.orientation.orient1==None:
-		#if the dataset has labels 'orient1' and 'orient2' but not 'orientation'
-		translate_dict = {}
-		translate_dict['orient1']='orient1'
-		translate_dict['orient2']='orient2'
-		map_motors(translate_dict,bt7,bt7.sample.orientation,dataset)
-		#map_motors(translate_dict,bt7.sample.orientation,dataset)
+        #map_motors(translate_dict,bt7.sample,dataset)        
+
+        if bt7.sample.orientation.orient1==None:
+                #if the dataset has labels 'orient1' and 'orient2' but not 'orientation'
+                translate_dict = {}
+                translate_dict['orient1']='orient1'
+                translate_dict['orient2']='orient2'
+                map_motors(translate_dict,bt7,bt7.sample.orientation,dataset)
+                #map_motors(translate_dict,bt7.sample.orientation,dataset)
         #bt7.sample.orientation =dataset.metadata.orientation
         #bt7.sample.mosaic=dataset.metadata.?
         #bt7.sample.lattice=dataset.metadata.lattice
-        
-        
-        
+
+
+
 def translate_metadata(bt7,dataset):
         translate_dict = {}
         translate_dict['epoch']='epoch'
@@ -1244,8 +1244,8 @@ def translate_metadata(bt7,dataset):
         translate_dict['desired_npoints']='npoints'
 
         map_motors(translate_dict,bt7,bt7.meta_data,dataset)
-	#ap_motors(translate_dict,bt7.meta_data,dataset)
-        
+        #ap_motors(translate_dict,bt7.meta_data,dataset)
+
         #self.meta_data.epoch=dataset.metadata.epoch
         #self.meta_data.counting_standard=dataset.metadata.count_type
         #self.meta_data.filename=dataset.metadata.filename
@@ -1270,47 +1270,47 @@ def translate_metadata(bt7,dataset):
         #self.meta_data.user=dataset.metadata.user
         #self.meta_data.scan_description=dataset.metadata.scan_description
         #self.meta_data.desired_npoints=dataset.metadata.npoints
-        
+
 def translate_detectors(bt7,dataset):
         bt7.detectors.primary_detector.measurement.x=np.array(dataset.data['detector'],'Float64')
         bt7.detectors.primary_detector.measurement.variance=np.array(dataset.data['detector'],'Float64')
         bt7.detectors.detector_mode=dataset.metadata['analyzerdetectormode']
-	
-	
+
+
         #later, I should do something clever to determine how many detectors are in the file,
         #or better yet, lobby to have the information in the ice file
         #but for now, let's just get something that works
-        
-        
+
+
         #detectors do NOT have a 'summed_counts' attribute currently.
         if dataset.metadata.has_key('analyzersdgroup'):
                 set_detector(bt7,dataset,'single_detector','analyzersdgroup')
                 #bt7.detectors.single_detector.summed_counts.measurement.x=dataset.data['singledet']
                 #bt7.detectors.single_detector.summed_counts.measurement.variance=dataset.data['singledet']
-                
+
         if dataset.metadata.has_key('analyzerdoordetectorgroup'):
                 set_detector(bt7,dataset,'door_detector','analyzerdoordetectorgroup')
                 #bt7.detectors.single_detector.summed_counts.measurement.x=bt7.detectors.door_detector.x.sum(axis=1)#None #dataset.data['doordet']  #Not sure why this one doesn't show up???
                 #bt7.detectors.single_detector.summed_counts.measurement.variance=bt7.detectors.door_detector.x.sum(axis=1)#None #dataset.data['doordet']  #Not sure why this one doesn't show up???
-              
+
         if dataset.metadata.has_key('analyzerddgroup'):
                 set_detector(bt7,dataset,'diffraction_detector','analyzerddgroup')
                 #bt7.detectors.diffraction_detector.summed_counts.measurement.x=dataset.data['diffdet']
                 #bt7.detectors.diffraction_detector.summed_counts.measurement.variance=dataset.data['diffdet']
-          
+
         if dataset.metadata.has_key('analyzerpsdgroup'):
                 set_detector(bt7,dataset,'position_sensitive_detector','analyzerpsdgroup')
                 #if hasattr(bt7.detectors,'position_sensitive_detector'):
                         #bt7.detectors.position_sensitive_detector.summed_counts.measurement.x=dataset.data['psdet']
                         #bt7.detectors.position_sensitive_detector.summed_counts.measurement.variance=dataset.data['psdet']
-               
-                
-                        
-                        
+
+
+
+
 def set_detector(bt7,dataset,detector_name,data_name):                        
         analyzergroup=dataset.metadata[data_name]
         setattr(bt7.detectors,detector_name,Detector(detector_name))
-        
+
         setattr(getattr(bt7.detectors,detector_name),'dimension',[len(dataset.metadata['analyzersdgroup']),1])
         Nx=getattr(getattr(bt7.detectors,detector_name),'dimension')[0]
         Ny=getattr(getattr(bt7.detectors,detector_name),'dimension')[1]
@@ -1323,14 +1323,14 @@ def set_detector(bt7,dataset,detector_name,data_name):
                 for nx in range(Nx):
                         curr_detector=dataset.metadata[data_name][nx]
                         data[:,nx,0]=np.array(dataset.data[curr_detector],'Float64')
-                
+
                 setattr(getattr(bt7.detectors,detector_name).measurement,'x',np.copy(data))
                 setattr(getattr(bt7.detectors,detector_name).measurement,'variance',np.copy(data))
         else:
                 delattr(bt7.detectors,detector_name)  #We were lied to by ICE and this detector isn't really present...
 
 
-		
+
 #Originally working map_motors:
 #def map_motors(translate_dict,target_field,dataset):
         ##key --> on bt7
@@ -1360,51 +1360,51 @@ def set_detector(bt7,dataset,detector_name,data_name):
                         #else:
                                 #try:
                                         #setattr(target_field,key,Motor(key,values=np.array(dataset.data[value],'Float64'),
-                                                                       #err=None,
-                                                                       #units=None,
-                                                                       #isDistinct=True,
-                                                                       #isInterpolatable=True))
-                                                                       ##Not sure how I should really be handling this--> this is for the case where the field doesn't already exist
+                                                                        #err=None,
+                                                                        #units=None,
+                                                                        #isDistinct=True,
+                                                                        #isInterpolatable=True))
+                                                                        ##Not sure how I should really be handling this--> this is for the case where the field doesn't already exist
                                 #except:
                                         #setattr(target_field,key,Motor(key,values=dataset.data[value],
-                                                                       #err=None,
-                                                                       #units=None,
-                                                                       #isDistinct=True,
-                                                                       #isInterpolatable=True))
+                                                                        #err=None,
+                                                                        #units=None,
+                                                                        #isDistinct=True,
+                                                                        #isInterpolatable=True))
 
 
 def map_motors(translate_dict,tas,target_field,dataset):
         #key --> on bt7
         #value --> input, i.e. the field in dataset.data or dataset.metadata
         for key,value in translate_dict.iteritems():
-		if dataset.data.has_key(value):
+                if dataset.data.has_key(value):
                         if hasattr(target_field, key) and isinstance(getattr(target_field, key),Motor):
                                 try:
                                         getattr(target_field,key).measurement.x=np.array(dataset.data[value],'Float64')
                                         getattr(target_field,key).measurement.variance=None
-				except:
+                                except:
                                         getattr(target_field,key).measurement.x=np.array(dataset.data[value])  #These may be "IN", or "OUT", or "N/A"
                                         getattr(target_field,key).measurement.variance=None
                         else:
                                 try:
-					setattr(target_field,key,Motor(key,values=np.array(dataset.data[value],'Float64'),
-					                      err=None,
-					                      units=None,
-					                      isDistinct=True,
-					                      isInterpolatable=True))
+                                        setattr(target_field,key,Motor(key,values=np.array(dataset.data[value],'Float64'),
+                                                                       err=None,
+                                                                       units=None,
+                                                                       isDistinct=True,
+                                                                       isInterpolatable=True))
                                 except:
                                         setattr(target_field,key,Motor(key,values=dataset.data[value],
-					                 err=None,
-					                 units=None,
-					                 isDistinct=True,
-					                 isInterpolatable=True))
+                                                                       err=None,
+                                                                       units=None,
+                                                                       isDistinct=True,
+                                                                       isInterpolatable=True))
                 elif dataset.metadata.has_key(value):
                         if hasattr(target_field, key) and isinstance(getattr(target_field, key),Motor):
                                 getattr(target_field,key).measurement.x=dataset.metadata[value] #do we need try escape logic here?
                                 getattr(target_field,key).measurement.variance=None
                         else:
                                 setattr(target_field,key,dataset.metadata[value])               
-                
+
 
 
 def establish_correction_coefficients(filename):
@@ -1429,140 +1429,178 @@ def establish_correction_coefficients(filename):
 
 
 def make_orthonormal(o1,o2):
-	"""Given two vectors, creates an orthonormal set of three vectors. 
-	Maintains the direction of o1 and the coplanarity of o1 and o2"""
-	o1=o1/N.linalg.norm(o1)
-	o2=o2/N.linalg.norm(o2)
-	o3=N.cross(o1,o2)
-	o3=o3/N.linalg.norm(o3)
-	o2=N.cross(o3,o1)
-	return o1,o2,o3
+        """Given two vectors, creates an orthonormal set of three vectors. 
+        Maintains the direction of o1 and the coplanarity of o1 and o2"""
+        o1=o1/N.linalg.norm(o1)
+        o2=o2/N.linalg.norm(o2)
+        o3=N.cross(o1,o2)
+        o3=o3/N.linalg.norm(o3)
+        o2=N.cross(o3,o1)
+        return o1,o2,o3
 
 def calc_plane(p,h,k,l,normalize=True):
-	o1=N.array([p[0],p[1],p[2]])
-	o2=N.array([p[3],p[4],p[5]])
-	if normalize:
-		o1,o2,o3=make_orthonormal(o1,o2)
-	else:
-		o3 = np.cross(o1,o2)
-	A=N.array([o1,o2,o3]).T
-	a_arr=[]
-	b_arr=[]
-	c_arr=[]
+        o1=N.array([p[0],p[1],p[2]])
+        o2=N.array([p[3],p[4],p[5]])
+        if normalize:
+                o1,o2,o3=make_orthonormal(o1,o2)
+        else:
+                o3 = np.cross(o1,o2)
+        A=N.array([o1,o2,o3]).T
+        a_arr=[]
+        b_arr=[]
+        c_arr=[]
 
-	for i in range(len(h)):
-		hkl=N.array([h[i],k[i],l[i]])
-		sol=N.linalg.solve(A,hkl)
-		a=sol[0]
-		b=sol[1]
-		c=sol[2]
-		a_arr.append(a)
-		b_arr.append(b)
-		c_arr.append(c)
-	return a_arr,b_arr,c_arr
+        for i in range(len(h)):
+                hkl=N.array([h[i],k[i],l[i]])
+                sol=N.linalg.solve(A,hkl)
+                a=sol[0]
+                b=sol[1]
+                c=sol[2]
+                a_arr.append(a)
+                b_arr.append(b)
+                c_arr.append(c)
+        return a_arr,b_arr,c_arr
 
 
 def cost_func(p,h,k,l):
-	a_arr, b_arr, c_arr = calc_plane(p,h,k,l)
-	c = N.array(c_arr)
-	res = (c-c.mean())**2
-	#dof=len(I)-len(p)
-	#fake_dof=len(I)
-	#print 'chi',(y-ycalc)/err
-	return res#/Ierr#/N.sqrt(fake_dof)
+        a_arr, b_arr, c_arr = calc_plane(p,h,k,l)
+        c = N.array(c_arr)
+        res = (c-c.mean())**2
+        #dof=len(I)-len(p)
+        #fake_dof=len(I)
+        #print 'chi',(y-ycalc)/err
+        return res#/Ierr#/N.sqrt(fake_dof)
 
 
 
 def myfunctlin(p, fjac=None,h=None,k=None,l=None):
-	# Parameter values are passed in "p"
-	# If fjac==None then partial derivatives should not be
-	# computed.  It will always be None if MPFIT is called with default
-	# flag.
-	# Non-negative status value means MPFIT should continue, negative means
-	# stop the calculation.
-	status = 0
-	return [status, cost_func(p,h,k,l)]
+        # Parameter values are passed in "p"
+        # If fjac==None then partial derivatives should not be
+        # computed.  It will always be None if MPFIT is called with default
+        # flag.
+        # Non-negative status value means MPFIT should continue, negative means
+        # stop the calculation.
+        status = 0
+        return [status, cost_func(p,h,k,l)]
 
 def fit_plane(h,k,l,p0=None):
-	if p0==None:
-		p0=[1./N.sqrt(5),-1./N.sqrt(2),0,0,0,1] #a guess...
-	parbase={'value':0., 'fixed':0, 'limited':[0,0], 'limits':[0.,0.]}
-	parinfo=[]
-	for i in range(len(p0)):
-		parinfo.append(copy.deepcopy(parbase))
-	for i in range(len(p0)): 
-		parinfo[i]['value']=p0[i]
-	if 0:
-		for i in range(len(p0)): 
-			parinfo[i]['limited']=[1,1]
-			parinfo[i]['limits']=[-1,1]
-	fa = {'h':h, 'k':k,'l':l}
-	print 'linearizing'
-	m = mpfit(myfunctlin, p0, parinfo=parinfo,functkw=fa)
-	p = m.params
-	print 'status = ', m.status
-	print 'params = ', m.params
-	#your parameters define two noncollinear vectors that will form the basis for your space
-	o1=N.array([p[0],p[1],p[2]])
-	o2=N.array([p[3],p[4],p[5]])
-	o1,o2,o3=make_orthonormal(o1,o2)
-	return o1,o2,o3
+        if p0==None:
+                p0=[1./N.sqrt(5),-1./N.sqrt(2),0,0,0,1] #a guess...
+        parbase={'value':0., 'fixed':0, 'limited':[0,0], 'limits':[0.,0.]}
+        parinfo=[]
+        for i in range(len(p0)):
+                parinfo.append(copy.deepcopy(parbase))
+        for i in range(len(p0)): 
+                parinfo[i]['value']=p0[i]
+        if 0:
+                for i in range(len(p0)): 
+                        parinfo[i]['limited']=[1,1]
+                        parinfo[i]['limits']=[-1,1]
+        fa = {'h':h, 'k':k,'l':l}
+        print 'linearizing'
+        m = mpfit(myfunctlin, p0, parinfo=parinfo,functkw=fa)
+        p = m.params
+        print 'status = ', m.status
+        print 'params = ', m.params
+        #your parameters define two noncollinear vectors that will form the basis for your space
+        o1=N.array([p[0],p[1],p[2]])
+        o2=N.array([p[3],p[4],p[5]])
+        o1,o2,o3=make_orthonormal(o1,o2)
+        return o1,o2,o3
 
- 
+
 
 def join(tas1, tas2):
-	"""Joins two TripleAxis objects"""
-	#average all similar points
-	#put all detectors on the same monitor, assumed that the first monitor is desired throughout
-	joinedtas=tas1
-	distinct=[]
-	not_distinct=[]
-	#tas1.detectors.primary_detector.measurement.join(tas2.detectors.primary_detector.measurement)
-	for key,value in joinedtas.__dict__.iteritems():
-		if key=='data' or key=='meta_data' or key=='sample' or key=='sample_environment':
-			#ignoring metadata for now
-			pass
-		#elif key=='detectors':
-		#	for field in value:
-		#		pass
-		elif key.find('blade')>=0:
-			#TODO: how should we handle joining when both TAS objects have unequal #blades?
-			obj=getattr(tas2,key)
-			i=0
-			for blade in value.blades:
-				blade.measurement.join(obj.blades[i].measurement)
-				i+=1
-				if blade.isDistinct:
-					distinct.append(blade)
-				else:
-					not_distinct.append(blade)
-		else:
-			for field in value:
-				obj=getattr(tas2,key)
-				field.measurement.join(getattr(obj,field.name).measurement)
-				if field.isDistinct:
-					distinct.append(field)
-				else:
-					not_distinct.append(field)
-	
-	joinedtas2=remove_duplicates(joinedtas, distinct, not_distinct)
-	return joinedtas2
-	#np.where(hasattr('isDistinct') and isDistinct,,) #todo finish writing
+        """Joins two TripleAxis objects"""
+        #average all similar points
+        #put all detectors on the same monitor, assumed that the first monitor is desired throughout
+        joinedtas=tas1
+        distinct=[]
+        not_distinct=[]
+        #tas1.detectors.primary_detector.measurement.join(tas2.detectors.primary_detector.measurement)
+        for key,value in joinedtas.__dict__.iteritems():
+                if key=='data' or key=='meta_data' or key=='sample' or key=='sample_environment':
+                        #ignoring metadata for now
+                        pass
+                #elif key=='detectors':
+                #	for field in value:
+                #		pass
+                elif key.find('blade')>=0:
+                        #TODO: how should we handle joining when both TAS objects have unequal #blades?
+                        obj=getattr(tas2,key)
+                        i=0
+                        for blade in value.blades:
+                                blade.measurement.join(obj.blades[i].measurement)
+                                i+=1
+                                if blade.isDistinct:
+                                        distinct.append(blade)
+                                else:
+                                        not_distinct.append(blade)
+                else:
+                        for field in value:
+                                obj=getattr(tas2,key)
+                                field.measurement.join(getattr(obj,field.name).measurement)
+                                if field.isDistinct:
+                                        distinct.append(field)
+                                else:
+                                        not_distinct.append(field)
+
+        joinedtas2=remove_duplicates(joinedtas, distinct, not_distinct)
+        return joinedtas2
+        #np.where(hasattr('isDistinct') and isDistinct,,) #todo finish writing
 
 
 def remove_duplicates(tas,distinct,not_distinct):
-	#skip=[] #list of row indices to skip (ie unique pts to keep in datafile)
-	for field in distinct:
-		for i in range(len(distinct[0])):
-			for j in range(i,len(distinct[0])):
-				#TODO may have to check if field has a window defined...
-				if field[i].measurement-field[i].window<=field[j].measurement and field[i].measurement+field[i].window>=field[j].measurement:
-					#after comparing to all others, if the row has a unique
-					#isDistinct column, the row is unique. Store it and don't
-					#check its row anymore --> it stays
-				
-	
-	pass
+        """Removes the duplicate data rows from TripleAxis object tas whose distinct fields (columns)
+        are in the list distinct and nondistinct fields are in the list nondistinct"""
+        #go through every column. If any row has a unique value, it is a unique row and stop comparing it to anything
+        #after every column is exhausted, if non-unique rows still exist then go column by
+        #column, find 'duplicates' and merge them
+        
+        uniques=[] #list of row indices to skip (ie unique pts to keep in datafile)
+        notuniques=[] #list of row indices of non-unique pts
+        newtas = tas
+        
+        for field in distinct:
+                for i in range(len(distinct[0])):
+                        if not uniques.__contains__(i): #if the row isn't unique
+                                isunique=True
+                                for j in range(len(distinct[0])):
+                                        if not i==j and not uniques.__contains__(j) and field.measurement[i].x == field.measurement[j].x:
+                                                #For this column (field), if this measurement is equal to any
+                                                #other measurement in the column, this measurment is not unique
+                                                #based on this column alone. Thus, break and check next row (measurement)
+                                                isunique=False
+                                                break
+                                if isunique:
+                                        #if every row in the column is distinct from the ith row, then it is unique
+                                        uniques.append(i)
+                        
+                if len(uniques)==len(distinct[0]):
+                        #if all rows are deemed unique, return
+                        return tas
+        for field in not_distinct:
+                for i in range(len(not_distinct[0])):
+                        if not uniques.__contains__(i): #if the row isn't unique
+                                isunique=True
+                                for j in range(len(not_distinct[0])):
+                                        if not i==j and not uniques.__contains__(j) and abs(field.measurement[i]-field.measurement[j]).x <= field.window:
+                                                #For this column (field), if this measurement is within the tolerance of any
+                                                #other measurement in the column, this measurment is not unique
+                                                #based on this column alone. Thus, break and check next row (measurement)
+                                                isunique=False
+                                                break
+                                if isunique:
+                                        #if every row in the column is 'distinct' from the ith row, then it is unique
+                                        uniques.append(i)
+                        
+                if len(uniques)==len(distinct[0]):
+                        #if all rows are deemed unique, return
+                        return tas
+
+        print len(uniques)
+        #return tas
+        
 
 def filereader(filename):
         filestr=filename
@@ -1574,20 +1612,19 @@ def filereader(filename):
 
 if __name__=="__main__":       
         bt7 = filereader('EscanQQ7HorNSF91831.bt7')
-	
+
         print 'translations done'
-	#aarr,barr,carr=bt7.calc_plane()
-	#test= bt7.dumps()
-	#test1= pickle.loads(test)
-	
-	#plotobj=bt7.get_plottable()
-	#plotobj=simplejson.dumps(plotobj)
-	join(bt7,bt7)
+        #aarr,barr,carr=bt7.calc_plane()
+        #test= bt7.dumps()
+        #test1= pickle.loads(test)
+
+        #plotobj=bt7.get_plottable()
+        #plotobj=simplejson.dumps(plotobj)
+        join(bt7,bt7)
         bt7.normalize_monitor(90000)
         #print 'detailed balance done'
         bt7.harmonic_monitor_correction('BT7')
         bt7.resolution_volume_correction()
         print 'bye'
-        
 
 
