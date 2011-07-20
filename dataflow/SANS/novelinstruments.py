@@ -42,7 +42,11 @@ from django.utils import simplejson
 import dataflow.wireit as wireit
 
 from dataflow import config
+<<<<<<< HEAD
 from dataflow.calc import run_template,get_plottable
+=======
+from dataflow.calc import run_template, get_plottable
+>>>>>>> 0234418c99c32b2ba06c176330c429270b4889f6
 from dataflow.core import Data, Instrument, Template, register_instrument
 from dataflow.modules.load import load_module
 from dataflow.modules.save import save_module
@@ -77,9 +81,9 @@ fileList = []
 # Datatype
 SANS_DATA = 'data2d.sans'
 data2d = Data(SANS_DATA, SansData)
-trans = Data(SANS_DATA,Transmission)
-data1d = Data(SANS_DATA,plot1D)
-datadiv = Data(SANS_DATA,div)
+trans = Data(SANS_DATA, Transmission)
+data1d = Data(SANS_DATA, plot1D)
+datadiv = Data(SANS_DATA, div)
 #Datatype(id=SANS_DATA,
                   #name='SANS Data',
                   #plot='sansplot')
@@ -91,7 +95,7 @@ datadiv = Data(SANS_DATA,div)
 def load_action(files=[], intent=''):
     print "loading", files
     result = [_load_data(f) for f in files]  # not bundles
-    print "Result: ",result
+    print "Result: ", result
     return dict(output=result)
 def _load_data(name):
     print name
@@ -100,7 +104,7 @@ def _load_data(name):
     else:
         return read_sample(myfilestr=name)
     
-load = load_module(id='sans.load', datatype=SANS_DATA,version='1.0', action=load_action)
+load = load_module(id='sans.load', datatype=SANS_DATA, version='1.0', action=load_action)
 
 
 # Save module
@@ -119,30 +123,28 @@ save = save_module(id='sans.save', datatype=SANS_DATA,
 
 
 # Modules
-def correct_dead_time_action(sample_in,empty_cell_in,empty_in,blocked_in):
-    lis = [sample_in[0],empty_cell_in[0],empty_in[0],blocked_in[0]] 
+def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in):
+    lis = [sample_in[0], empty_cell_in[0], empty_in[0], blocked_in[0]] 
     print "List: ", lis
     #Enter DeadTime parameter eventually
     solidangle = [correct_solid_angle(f) for f in lis]
     det_eff = [correct_detector_efficiency(f) for f in solidangle]
     deadtime = [correct_dead_time(f) for f in det_eff]
     result = deadtime
-    return dict(sample_out=[result[0]],empty_cell_out=[result[1]],empty_out=[result[2]],blocked_out=[result[3]])
+    return dict(sample_out=[result[0]], empty_cell_out=[result[1]], empty_out=[result[2]], blocked_out=[result[3]])
 deadtime = correct_dead_time_module(id='sans.correct_dead_time', datatype=SANS_DATA, version='1.0', action=correct_dead_time_action)
 
-def generate_transmission_action(sample_in,empty_cell_in,empty_in,Tsam_in,Temp_in):
-    coord_left=(55,53)
-    coord_right=(74,72)
-    lis = [sample_in[0],empty_cell_in[0],empty_in[0],Tsam_in[0],Temp_in[0]] 
-    print "Lis: ",lis
+def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Temp_in):
+    coord_left = (55, 53)
+    coord_right = (74, 72)
+    lis = [sample_in[0], empty_cell_in[0], empty_in[0], Tsam_in[0], Temp_in[0]] 
+    print "Lis: ", lis
     #Enter Normalization Parameter eventually
     norm = [monitor_normalize(f) for f in lis]
-    global Tsamm,Tempp
     
-    Tsam=generate_transmission(norm[3],norm[2],coord_left,coord_right)
-    Tsamm =Tsam
-    Temp=generate_transmission(norm[4],norm[2],coord_left,coord_right)
-    tran = Transmission(Tsam,Temp)
+    Tsam = generate_transmission(norm[3], norm[2], coord_left, coord_right)
+    Temp = generate_transmission(norm[4], norm[2], coord_left, coord_right)
+    #tran = Transmission(Tsam, Temp)
 
     
     print 'Sample transmission= {0} (IGOR Value = 0.724): '.format(Tsam)
@@ -151,48 +153,50 @@ def generate_transmission_action(sample_in,empty_cell_in,empty_in,Tsam_in,Temp_i
     sam = result[0]
     sam.Tsam = Tsam
     sam.Temp = Temp
-    return dict(sample_out=[sam],empty_cell_out=[result[1]])#,=[result[3]])
+    print "Tsam:", sam.Tsam
+    return dict(sample_out=[sam], empty_cell_out=[result[1]])#,=[result[3]])
 generate_trans = generate_transmission_module(id='sans.generate_transmission', datatype=SANS_DATA, version='1.0', action=generate_transmission_action)        
-def initial_correction_action(sample,empty_cell,blocked):
-    lis = [sample[0],empty_cell[0],blocked[0]]
+def initial_correction_action(sample, empty_cell, blocked):
+    print type(sample)
+    lis = [sample[0], empty_cell[0], blocked[0]]
     SAM = lis[0]
     EMP = lis[1]
     BGD = lis[2]
-    print "Tsam: ",SAM.Tsam
-    CORR = initial_correction(SAM,BGD,EMP,SAM.Tsam/SAM.Temp)
+    print "Tsam:", SAM.Tsam
+    CORR = initial_correction(SAM, BGD, EMP, SAM.Tsam / SAM.Temp)
     CORR.Tsam = SAM.Tsam
     result = CORR
-    return dict(COR = [result])
+    return dict(COR=[result])
 initial_corr = initial_correction_module(id='sans.initial_correction', datatype=SANS_DATA, version='1.0', action=initial_correction_action)
 
-def correct_detector_sensitivity_action(COR,DIV_in):
-    lis = [COR[0],DIV_in[0]]
+def correct_detector_sensitivity_action(COR, DIV_in):
+    lis = [COR[0], DIV_in[0]]
     print "####################DIV#############"
     print lis[1]
     CORRECT = lis[0]
     sensitivity = lis[-1]
-    DIVV = correct_detector_sensitivity(CORRECT,sensitivity)
+    DIVV = correct_detector_sensitivity(CORRECT, sensitivity)
     DIVV.Tsam = COR[0].Tsam
     result = DIVV
-    return dict(DIV_out = [result])
+    return dict(DIV_out=[result])
 correct_det_sens = correct_detector_sensitivity_module(id='sans.correct_detector_sensitivity', datatype=SANS_DATA, version='1.0', action=correct_detector_sensitivity_action)
 def convert_qxqy_action():
-    global correctVer,qx,qy
-    correctVer,qx,qy = convert_qxqy(correctVer)
+    global correctVer, qx, qy
+    correctVer, qx, qy = convert_qxqy(correctVer)
     print "Convertqxqy"
 
-def absolute_scaling_action(DIV,empty,sensitivity):
+def absolute_scaling_action(DIV, empty, sensitivity):
     #sample,empty,DIV,Tsam,instrument
-    lis = [DIV[0],empty[0],sensitivity[0]]
-    global Tsamm,qx,qy
+    lis = [DIV[0], empty[0], sensitivity[0]]
+    global Tsamm, qx, qy
     sensitivity = lis[-1]
     EMP = lis[1]
     print "Empty: ", EMP
     DIV = lis[0]
-    ABS = absolute_scaling(DIV,EMP,sensitivity,DIV.Tsam,'NG3')
+    ABS = absolute_scaling(DIV, EMP, sensitivity, DIV.Tsam, 'NG3')
     
     correct = convert_q(ABS)
-    correct,qx,qy = convert_qxqy(correct)
+    correct, qx, qy = convert_qxqy(correct)
     result = [correct]
    
     return dict(ABS=result)
@@ -213,7 +217,7 @@ SANS_INS = Instrument(id='ncnr.sans.ins',
                  name='NCNR SANS INS',
                  archive=config.NCNR_DATA + '/sansins',
                  menu=[('Input', [load, save]),
-                       ('Reduction', [deadtime,generate_trans,correct_det_sens,initial_corr,annul_av,absolute]),
+                       ('Reduction', [deadtime, generate_trans, correct_det_sens, initial_corr, annul_av, absolute]),
                                               ],
                  requires=[config.JSCRIPT + '/sansplot.js'],
                  datatypes=[data2d],
@@ -224,7 +228,7 @@ instruments = [SANS_INS]
 if __name__ == '__main__':
 #def TESTING():
     #global fileList
-    fileList = [map_files('sample_4m'),map_files('empty_cell_4m'),map_files('empty_4m'),map_files('trans_sample_4m'),map_files('trans_empty_cell_4m'),map_files('blocked_4m'),map_files('div')]
+    fileList = [map_files('sample_4m'), map_files('empty_cell_4m'), map_files('empty_4m'), map_files('trans_sample_4m'), map_files('trans_empty_cell_4m'), map_files('blocked_4m'), map_files('div')]
     #fileList = ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105"]
     for instrument in instruments:
         register_instrument(instrument)
@@ -246,26 +250,26 @@ if __name__ == '__main__':
         dict(module="sans.correct_dead_time", position=(360 , 50), config={}),
         
         #Tsam 5
-        dict(module="sans.load", position=(50,100),
+        dict(module="sans.load", position=(50, 100),
              config={'files': [fileList[3]], 'intent': 'signal'}),
         #Temp 6
-        dict(module="sans.load", position=(50,100),
+        dict(module="sans.load", position=(50, 100),
              config={'files': [fileList[4]], 'intent': 'signal'}),
         #7
-        dict(module="sans.generate_transmission", position=(120 ,80), config={}),
+        dict(module="sans.generate_transmission", position=(120 , 80), config={}),
         #8
         dict(module="sans.save", position=(500, 500), config={'ext': 'dat'}),
         #9
         dict(module="sans.initial_correction", position=(360 , 100), config={}),
         
         #DIV 10
-        dict(module="sans.load", position=(100,300),
+        dict(module="sans.load", position=(100, 300),
              config={'files': [fileList[-1]], 'intent': 'signal'}),
         
         #11
         dict(module="sans.correct_detector_sensitivity", position=(360 , 200), config={}),
         #EMP 12
-        dict(module="sans.load", position=(100,300),
+        dict(module="sans.load", position=(100, 300),
              config={'files': [fileList[2]], 'intent': 'signal'}),
         #13
         dict(module="sans.absolute_scaling", position=(360 , 300), config={}),
@@ -285,8 +289,8 @@ if __name__ == '__main__':
         dict(source=[4, 'sample_out'], target=[7, 'sample_in']),
         dict(source=[4, 'empty_cell_out'], target=[7, 'empty_cell_in']),
         dict(source=[4, 'empty_out'], target=[7, 'empty_in']),
-        dict(source=[5, 'output'], target=[7, 'Tsam_in']),        
-        dict(source=[6, 'output'], target=[7, 'Temp_in']), 
+        dict(source=[5, 'output'], target=[7, 'Tsam_in']),
+        dict(source=[6, 'output'], target=[7, 'Temp_in']),
         #Initial Correction
         dict(source=[7, 'sample_out'], target=[9, 'sample']),
         dict(source=[7, 'empty_cell_out'], target=[9, 'empty_cell']),
@@ -300,7 +304,7 @@ if __name__ == '__main__':
         ###ABS Scaling
         dict(source=[11, 'DIV_out'], target=[13, 'DIV']),
         dict(source=[12, 'output'], target=[13, 'empty']),
-        dict(source=[10, 'output'], target=[13, 'sensitivity']),        
+        dict(source=[10, 'output'], target=[13, 'sensitivity']),
         #Annular Average
         dict(source=[13, 'ABS'], target=[14, 'ABS']),
         dict(source=[14, 'OneD'], target=[8, 'input']),
@@ -332,9 +336,14 @@ if __name__ == '__main__':
     #print 'TEMPLATE', simplejson.dumps(wireit.template_to_wireit_diagram(template))
     #print 'RAW_INSTRUMENT: ', wireit.instrument_to_wireit_language(SANS_INS)
    # print 'LANGUAGE', simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))                
+<<<<<<< HEAD
     run_template(template, config)
     #result = get_plottable(template,config,14,'OneD')
     
+=======
+    #run_template(template, config)
+    result = get_plottable(template, config, 14, 'OneD')
+>>>>>>> 0234418c99c32b2ba06c176330c429270b4889f6
     #datadir=os.path.join(os.path.dirname(__file__),'ncnr_sample_data')
     #filedict={'empty_1m':os.path.join(datadir,'SILIC001.SA3_SRK_S101'),
               #'empty_4m':os.path.join(datadir,'SILIC002.SA3_SRK_S102'),

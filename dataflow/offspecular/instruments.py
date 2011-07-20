@@ -275,6 +275,7 @@ if __name__ == '__main__':
     #            for format in plot:
     #                f.write(format + "\n")
     with open('data/' + terminal + "_" + str(nodenum) + ".txt", "w") as f:
+        print "Writing:", f.name
         for format in result:
             f.write(format + "\n")
     print "Done"
