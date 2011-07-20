@@ -38,7 +38,9 @@ from django.utils import simplejson
 
 #print 'repo', ROOT_URL.REPO_ROOT
 #print 'home', ROOT_URL.HOMEDIR
+
 import dataflow.wireit as wireit
+
 from dataflow import config
 from dataflow.calc import run_template
 from dataflow.core import Data, Instrument, Template, register_instrument
@@ -57,6 +59,7 @@ from dataflow.SANS.convert_qxqy import convert_qxqy_module
 from dataflow.SANS.annular_av import annular_av_module
 from dataflow.SANS.absolute_scaling import absolute_scaling_module
 from dataflow.SANS.correct_dead_time import correct_dead_time_module
+
 #from reduction.sans.filters import SansData
 #from reduction.sans.filters import Transmission
 #from reduction.sans.filters import plot1D
@@ -312,7 +315,7 @@ if __name__ == '__main__':
         
         #dict(source =[11,'DIV'],target = [8,'input']),
         ]
-    config = [d['config'] for d in modules]
+    config = dict((n, d['config']) for (n, d) in enumerate(modules))
     template = Template(name='test sans',
                         description='example sans data',
                         modules=modules,

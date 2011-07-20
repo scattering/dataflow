@@ -18,10 +18,12 @@ def correct_dead_time_module(id=None, datatype=None, action=None,
             'empty_in': (0, 30, -1, 0),
             'blocked_in': (0, 40, -1, 0),
             #Outputs
+
             'sample_out': (20, 10, 1, 0),
             'empty_cell_out': (20, 20, 1, 0),
             'empty_out': (20,30, 1, 0),
             'blocked_out': (20, 40, 1, 0),
+
         }
     }
     

@@ -320,7 +320,7 @@ function plottingAPI(toPlots, plotid_prefix) {
     if (toPlots.constructor != Array)
         toPlots = [toPlot];
         // throw "Unsupported data format! Data must be a list of series.";
-    toPlots = $A(toPlots).flatten();
+   // toPlots = $A(toPlots).flatten();
 
     for (var i = 0; i < toPlots.length; i ++) {
         var toPlot = toPlots[i];

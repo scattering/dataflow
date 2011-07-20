@@ -15,27 +15,27 @@ def combine_module(id=None, datatype=None, action=None,
     icon = {
         'URI': config.IMAGES + 'sum.png',
         'terminals': {
-            'input': (-15, 1, -1, 0),
-            'grid': (-10, 1, -1, 0),
+            'input_data': (-15, 1, -1, 0),
+            'input_grid': (-10, 1, -1, 0),
             'output': (15, 1, 1, 0),
         }
     }
     
     
     terminals = [
-        dict(id='input',
+        dict(id='input_data',
              datatype=datatype,
              use='in',
              description='Data parts',
              required=True,
              multiple=False,
              ),
-        dict(id='grid',
+        dict(id='input_grid',
              datatype=datatype,
              use='in',
              description='Output grid',
              required=False,
-             multiple=False,
+             multiple=True,
              ),
         dict(id='output',
              datatype=datatype,
