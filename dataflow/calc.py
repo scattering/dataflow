@@ -33,6 +33,15 @@ def run_template(template, config):
         module = lookup_module(module_id)
         inputs = _map_inputs(module, wires)
         
+        parents = template.get_parents(nodenum)
+        # this is a list of wires that terminate on this module
+        inputs_fp = []
+        for wire in parents:
+            source_nodenum, source_terminal_id = wire['source']
+            target_nodenum, target_terminal_id = wire['target']
+            input_fp = fingerprints[source_nodenum]
+            inputs_fp.append([target_terminal_id, input_fp])
+            
         # substitute values for inputs
         kwargs = dict((k, _lookup_results(all_results, v)) 
                       for k, v in inputs.items())
@@ -44,7 +53,7 @@ def run_template(template, config):
         kwargs.update(configuration)
         
         # Fingerprinting
-        fp = finger_print(module, configuration, nodenum, inputs, fingerprints) # terminals included
+        fp = finger_print(module, configuration, nodenum, inputs_fp) # terminals included
         fingerprints[nodenum] = fp
         fp = name_fingerprint(fp)
         print fp
