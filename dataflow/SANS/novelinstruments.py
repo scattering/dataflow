@@ -292,12 +292,12 @@ if __name__ == '__main__':
         
         #11
         dict(module="sans.correct_detector_sensitivity", position=(360 , 200), config={}),
-        #EMP 12
-        dict(module="sans.load", position=(100, 300),
-             config={'files': [fileList[2]], 'intent': 'signal'}),
-        #13
+        ##EMP 12
+        #dict(module="sans.load", position=(100, 300),
+             #config={'files': [fileList[2]], 'intent': 'signal'}),
+        #12
         dict(module="sans.absolute_scaling", position=(360 , 300), config={'ins_name':'NG3'}),
-        #14
+        #13
         dict(module="sans.annular_av", position=(360 , 400), config={}),
         
         #dict(module="sans.correct_background", position=(360 , 60), config={}),
@@ -326,12 +326,12 @@ if __name__ == '__main__':
         dict(source=[10, 'output'], target=[11, 'DIV_in']),
         #dict(source =[11,'DIV'],target = [8,'input']),
         ###ABS Scaling
-        dict(source=[11, 'DIV_out'], target=[13, 'DIV']),
-        dict(source=[12, 'output'], target=[13, 'empty']),
-        dict(source=[10, 'output'], target=[13, 'sensitivity']),
+        dict(source=[11, 'DIV_out'], target=[12, 'DIV']),
+        dict(source=[2, 'output'], target=[12, 'empty']),
+        dict(source=[10, 'output'], target=[12, 'sensitivity']),
         #Annular Average
-        dict(source=[13, 'ABS'], target=[14, 'ABS']),
-        dict(source=[14, 'OneD'], target=[8, 'input']),
+        dict(source=[12, 'ABS'], target=[13, 'ABS']),
+        dict(source=[13, 'OneD'], target=[8, 'input']),
         
         
         #dict(source =[9,'COR'],target = [8,'input']),
@@ -359,7 +359,7 @@ if __name__ == '__main__':
     #f.close()
     print 'TEMPLATE', simplejson.dumps(wireit.template_to_wireit_diagram(template))
     #print 'RAW_INSTRUMENT: ', wireit.instrument_to_wireit_language(SANS_INS)
-    #print 'LANGUAGE', simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))                
+    print 'LANGUAGE', simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))                
 
     run_template(template, config)
     #get_plottable(template,config,14,'OneD')
