@@ -26,7 +26,7 @@ def annular_av_module(id=None, datatype=None, action=None,
              use='in',
              description='data',
              required=False,
-             multiple=True,
+             multiple=False,
              ),
         
         
