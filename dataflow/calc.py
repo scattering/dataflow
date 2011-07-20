@@ -33,6 +33,15 @@ def run_template(template, config):
         module = lookup_module(module_id)
         inputs = _map_inputs(module, wires)
         
+        parents = template.get_parents(nodenum)
+        # this is a list of wires that terminate on this module
+        inputs_fp = []
+        for wire in parents:
+            source_nodenum, source_terminal_id = wire['source']
+            target_nodenum, target_terminal_id = wire['target']
+            input_fp = fingerprints[source_nodenum]
+            inputs_fp.append([target_terminal_id, input_fp])
+            
         # substitute values for inputs
         kwargs = dict((k, _lookup_results(all_results, v)) 
                       for k, v in inputs.items())
@@ -111,7 +120,7 @@ def calc_single(template, config, nodenum, terminal_id):
             if target_id in kwargs:
                 # this explicitly assumes all data is a list
                 # so that we can concatenate multiple inputs
-                kwargs[target_id].append(source_data)
+                kwargs[target_id] += source_data
             else:
                 kwargs[target_id] = source_data
         
@@ -124,8 +133,8 @@ def calc_single(template, config, nodenum, terminal_id):
         calc_value = module.action(**kwargs)
         # pushing the value of all the outputs for this node to cache, 
         # even though only one was asked for
-        for terminal_id, arr in calc_value.items():
-            terminal_fp = name_terminal(fp, terminal_id)
+        for terminal_name, arr in calc_value.items():
+            terminal_fp = name_terminal(fp, terminal_name)
             for data in arr:
                 server.rpush(terminal_fp, data.dumps())
         result = calc_value[terminal_id]

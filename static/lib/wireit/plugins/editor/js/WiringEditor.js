@@ -283,7 +283,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
         };
         for (var i in file_associations) {
         	if (typeof file_associations[i] == "object") {
-        	    this.toReduce.modules[i.split(": ").pop()].config['files'] = [file_associations[i][0]]
+        	    this.toReduce.modules[i.split(": ").pop()].config['files'] = [FILE_DICT[file_associations[i][0]]]
         	}
         	else {
 		    // not entering in a 'files' config if the module is not a loader        		
@@ -557,10 +557,13 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		            var baseContainerConfig = this.modulesByName[m.name].container;
 		            YAHOO.lang.augmentObject(m.config, baseContainerConfig); 
 		            m.config.title = m.name;
-		            console.log(m) // continue working on this (pulling module config from dumped template)
+		            //console.log('pre', m) // continue working on this (pulling module config from dumped template)
 		            var container = this.layer.addContainer(m.config);
+		            //console.log('post',container)
 		            Dom.addClass(container.el, "WiringEditor-module-"+m.name);
 		            container.setValue(m.value);
+		            container.tracksConfigs = {1: m.config}
+		            console.log(container)
 		         }
 		         else {
 		            throw new Error("WiringEditor: module '"+m.name+"' not found !");
@@ -673,7 +676,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		this.maxReduction = setMax;
 		this.templateConfig = templateConfig;
 		this.displayCurrentReduction();
-		this.setModuleConfigs()
+		this.extendModuleConfigs()
 	
 	},
 	
@@ -688,7 +691,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			this.reductionInstance -= 1
 			YAHOO.util.Dom.get('reductionInstance').innerHTML = String(this.reductionInstance)
 			this.displayCurrentReduction()
-			this.setModuleConfigs()
+			//this.setModuleConfigs()
 			}
 	
 	},
@@ -699,7 +702,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 			this.reductionInstance += 1
 			YAHOO.util.Dom.get('reductionInstance').innerHTML = this.reductionInstance
 			this.displayCurrentReduction()
-			this.setModuleConfigs()
+			//this.setModuleConfigs()
 			}
 	},
 	
@@ -714,24 +717,39 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	},
 	
 	/**
-	* This method takes the templateConfig and current instance number and sets the modules configurations
-	* accordingly. File configurations are set in runReduction.
+	* This method makes sure that each module has a config list for every reduction instance
 	**/
-	setModuleConfigs: function() {
-		
+	
+	extendModuleConfigs: function() {
+		console.log('In ExtendModuleConfig')
+		containers = this.layer.containers
+		for (var i=0; i < containers.length; i++) {
+			size = Object.size(containers[i].tracksConfigs)
+			diff = this.maxReduction - size
+			tempConfig = containers[i].tracksConfigs[1]
+			if (diff) {
+				console.log('there is a diff')
+				for (var j = 0; j <= diff; j ++ ) {	
+					containers[i].tracksConfigs[size+j] = tempConfig
+					console.log(size+j)
+					containers[i].tracksConfigs[size+j]['instance'] = size+j
+					console.log(containers[i].tracksConfigs[size+j])
+					}
+				}
+			}
 	},
 	
 	displayClickedModuleConfig: function(module) {
-	console.log('in display module config!')
-	HTML = '<dl class ="instance-info-display">'
-	config = module.getConfig()
-	//console.log(module.getConfig())
-	for (i in config) {
-		//console.log(i, config[i])
-		HTML += '<dt>' + i + "</dt><dd>" + config[i] + '</dd>'
+		console.log('in display module config!')
+		HTML = '<dl class ="instance-info-display">'
+		config = module.getConfig()
+		//console.log(module.getConfig())
+		for (i in config) {
+			//console.log(i, config[i])
+			HTML += '<dt>' + i + "</dt><dd>" + config[i] + '</dd>'
 		}
-	HTML += "</dl>";
-	YAHOO.util.Dom.get('instance-modules-info').innerHTML = HTML	
+		HTML += "</dl>";
+		YAHOO.util.Dom.get('instance-modules-info').innerHTML = HTML	
 	},
 
 
