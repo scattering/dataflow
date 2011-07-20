@@ -30,8 +30,8 @@ from ...dataflow.calc import calc_single, fingerprint_template, get_plottable
 from ...dataflow.offspecular.instruments import ANDR
 print "ANDR imported:", ANDR.id
 #from ...dataflow.tas import instruments
-#from ...dataflow.SANS import novelinstruments as SANS_INS
-#from ...dataflow.tas import instruments as TAS_INS
+from ...dataflow.SANS.novelinstruments import SANS_INS
+from ...dataflow.tas.instruments import BT7 as TAS_INS
 
 from ...dataflow import wireit
 
@@ -190,7 +190,7 @@ def runReduction(request):
     nodenum = int(data['clickedOn']['source']['moduleId'])
     print "calculating: terminal=%s, nodenum=%d" % (terminal_id, nodenum)
     language = data['language']
-    instrument_by_language = {'new_andr': ANDR, 'andr':ANDR,'sans_novel':SANS_INS}
+    instrument_by_language = {'andr2': ANDR, 'andr':ANDR,'sans':SANS_INS, 'tas':TAS_INS}
     instrument = instrument_by_language.get(language, None)
     result = "{}"
     if instrument is not None:
@@ -198,7 +198,8 @@ def runReduction(request):
         # configuration for template is embedded
         result = get_plottable(template, config, nodenum, terminal_id)
     print type(result)
-    print len(result), [simplejson.loads(s).keys() for s in result]
+    print result
+    #print len(result), [simplejson.loads(s).keys() for s in result]
     ####### SANS TESTING
     #SANS_INS.TESTING()
     # print "RESULT", result

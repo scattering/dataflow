@@ -87,16 +87,16 @@ def data_scale(data, scale):
 
 # === Component binding ===
 
-def load_action(files=None, intent=None, position=None, xtype=None):
+def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
     """Currently set up to load ONLY 1 file"""
     #print "loading", files
     result = [data_abstraction.filereader(f) for f in files]
     return dict(output=result)
     
 load = load_module(id='tas.load', datatype=TAS_DATA,
-                   version='1.0', action=load_action)
+                   version='1.0', action=load_action,)
 
-def save_action(input=None, ext=None,xtype=None, position=None):
+def save_action(input=None, ext=None,xtype=None, position=None, **kwargs):
     # Note that save does not accept inputs from multiple components, so
     # we only need to deal with the bundle, not the list of bundles.
     # This is specified by terminal['multiple'] = False in modules/save.py
@@ -120,7 +120,7 @@ save = save_module(id='tas.save', datatype=TAS_DATA,
                    fields=[save_ext])
 
 
-def join_action(input=None, align=None, xtype=None, position=None):
+def join_action(input=None, align=None, xtype=None, position=None, **kwargs):
     # This is confusing because load returns a bundle and join, which can
     # link to multiple loads, has a list of bundles.  So flatten this list.
     # The confusion between bundles and items will bother us continuously,
@@ -142,7 +142,7 @@ join = join_module(id='tas.join', datatype=TAS_DATA,
                    version='1.0', action=join_action,
                    fields=[align_field])
 
-def scale_action(input=None, scale=None, xtype=None, position=None):
+def scale_action(input=None, scale=None, xtype=None, position=None, **kwargs):
     # operate on a bundle; need to resolve confusion between bundles and
     # individual inputs
     print "scale by", scale
@@ -157,26 +157,26 @@ scale = scale_module(id='tas.scale', datatype=TAS_DATA,
 #All TripleAxis reductions below require that:
 #  'input' be a TripleAxis object (see data_abstraction.py)
 
-def detailed_balance_action(input):
+def detailed_balance_action(input, **kwargs):
     for tasinstrument in input:
         tasinstrument.detailed_balance()
     return dict(output=input)
 
-def normalize_monitor_action(input, target_monitor):
+def normalize_monitor_action(input, target_monitor, **kwargs):
     #Requires the target monitor value
     for tasinstrument in input:
         tasinstrument.normalize_monitor(target_monitor)
     #result=input[0].get_plottable()
     return dict(output=input)
 
-def monitor_correction_action(input, instrument_name):
+def monitor_correction_action(input, instrument_name, **kwargs):
     #Requires instrument name, e.g. 'BT7'.  
     #Check monitor_correction_coordinates.txt for available instruments
     for tasinstrument in input:
         tasinstrument.harmonic_monitor_correction()
     return dict(ouput=input)
     
-def volume_correction_action(input):
+def volume_correction_action(input, **kwargs):
     for tasinstrument in input:
         tasinstrument.resolution_volume_correction()
     return dict(output=input)
@@ -213,25 +213,27 @@ if 1:
     for instrument in instruments:
 	register_instrument(instrument)
 
-modules = [
-    dict(module="tas.load", position=(10, 20), config={'files':[ROOT_URL.HOMEDIR[:-12]+ 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
-    dict(module="tas.normalize_monitor", position=(30, 20), config={'target_monitor': 900000}),
-    #dict(module="tas.detailed_balance"),
-    #dict(module="tas.monitor_correction"),
-    #dict(module="tas.volume_correction"),
-    ]
-wires = [
-    dict(source=[0, 'output'], target=[1, 'input']),
-    #dict(source=[1, 'output'], target=[2, 'input']),
-    ]
-config = {}
 
-template = Template(name='test reduction',
-                    description='example reduction diagram',
-                    modules=modules,
-                    wires=wires,
-                    instrument=BT7.id,
-                    )
+if 0:
+	modules = [
+	    dict(module="tas.load", position=(10, 20), config={'files':[ROOT_URL.HOMEDIR[:-12]+ 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
+	    dict(module="tas.normalize_monitor", position=(30, 20), config={'target_monitor': 900000}),
+	    #dict(module="tas.detailed_balance"),
+	    #dict(module="tas.monitor_correction"),
+	    #dict(module="tas.volume_correction"),
+	    ]
+	wires = [
+	    dict(source=[0, 'output'], target=[1, 'input']),
+	    #dict(source=[1, 'output'], target=[2, 'input']),
+	    ]
+	config = {}
+
+	template = Template(name='test reduction',
+		            description='example reduction diagram',
+		            modules=modules,
+		            wires=wires,
+		            instrument=BT7.id,
+		            )
 
 
 # the actual call to perform the reduction
@@ -248,8 +250,8 @@ def TAS_RUN():
     return result
 
 
-hi=TAS_RUN()
+#hi=TAS_RUN()
 #print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
 #print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
-print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
+#print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
 print "done"

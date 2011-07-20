@@ -132,7 +132,7 @@ class Component(object):
         def __len__(self):
                 return len(self.x)
         def __getitem__(self,key):
-                if self.variance:
+                if not self.variance==None:
                         return uncertainty.Measurement(self.x[key],self.variance[key])
                 else:
                         return uncertainty.Measurement(self.x[key],None)
@@ -316,6 +316,7 @@ class Component(object):
         def __ior__(self, other): return NotImplemented
 
         def __invert__(self): return NotImplmented  # For ~x
+
         def __complex__(self): return NotImplmented
         def __int__(self): return NotImplmented
         def __long__(self): return NotImplmented
@@ -796,6 +797,7 @@ class TripleAxis(object):
 	
         def get_plottable(self):
         	#For now, hardcodes None into the variances until uncertainty can be fixed
+        	print 'IN TAS GET_PLOTTABLE'
 		orderx=[]
 		ordery=[]
 		data = {}
@@ -843,6 +845,7 @@ class TripleAxis(object):
 						val = val.tolist()
 					if err==None:
 						err = None
+
 					else:
 						err = err.tolist()
 					data[field.name]={'values': val,'errors': err}
@@ -861,7 +864,9 @@ class TripleAxis(object):
                                 'style': 'line',
 		        }],
                 }
-                return plottable_data
+	        out = simplejson.dumps(plottable_data,sort_keys=True, indent=2)
+		return out
+
 
 
 # ****************************************************************************************************************************************************
@@ -1102,6 +1107,7 @@ def translate_physical_motors(bt7,dataset):
 		setattr(bt7.physical_motors.orient3, 'value', o3)
 		#TODO - make 'fancy' names for these?
 		#setattr(bt7.physical_motors.orient3, 'name', '110')
+
 		
 	except:
 		pass
@@ -1552,18 +1558,9 @@ def join(tas1, tas2):
 
 def remove_duplicates(tas,distinct,not_distinct):
 	#skip=[] #list of row indices to skip (ie unique pts to keep in datafile)
-	for field in distinct:
-		for i in range(len(distinct[0])):
-			for j in range(i,len(distinct[0])):
-				#TODO may have to check if field has a window defined...
-				if field[i].measurement-field[i].window<=field[j].measurement and field[i].measurement+field[i].window>=field[j].measurement:
-					#after comparing to all others, if the row has a unique
-					#isDistinct column, the row is unique. Store it and don't
-					#check its row anymore --> it stays
-				    pass
-
+	pass
 def filereader(filename):
-        filestr=filename
+        filestr=str(filename)
         mydatareader=readncnr.datareader()
         mydata=mydatareader.readbuffer(filestr)
         instrument = TripleAxis()
@@ -1578,8 +1575,8 @@ if __name__=="__main__":
 	#test= bt7.dumps()
 	#test1= pickle.loads(test)
 	
-	#plotobj=bt7.get_plottable()
-	#plotobj=simplejson.dumps(plotobj)
+	plotobj=bt7.get_plottable()
+	plotobj=simplejson.dumps(plotobj)
 	join(bt7,bt7)
         bt7.normalize_monitor(90000)
         #print 'detailed balance done'

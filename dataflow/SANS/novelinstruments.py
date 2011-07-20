@@ -7,29 +7,30 @@ import numpy as np
 dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(dir)
 from pprint import pprint
-#from ...dataflow import wireit
-#from .. import config
-#from ..calc import run_template
-#from .. import wireit
-#from ..core import Data, Instrument, Template, register_instrument
-#from ..modules.load import load_module
-#from ..modules.save import save_module
-#from ...reduction.sans.filters import *
-#from ..SANS.convertq import convertq_module
-#from ..SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
-#from ..SANS.monitor_normalize import monitor_normalize_module
-#from ..SANS.correct_background import correct_background_module
-#from ..SANS.generate_transmission import generate_transmission_module
-#from ..SANS.initial_correction import initial_correction_module
-#from ..SANS.correct_solid_angle import correct_solid_angle_module
-#from ..SANS.convert_qxqy import convert_qxqy_module
-#from ..SANS.annular_av import annular_av_module
-#from ..SANS.absolute_scaling import absolute_scaling_module
-#from ..SANS.correct_dead_time import correct_dead_time_module
-#from ...reduction.sans.filters import SansData
-#from ...reduction.sans.filters import Transmission
-#from ...reduction.sans.filters import plot1D
-#from ...reduction.sans.filters import div
+if 1:
+	from ...dataflow import wireit
+	from .. import config
+	from ..calc import run_template
+	from .. import wireit
+	from ..core import Data, Instrument, Template, register_instrument
+	from ..modules.load import load_module
+	from ..modules.save import save_module
+	from ...reduction.sans.filters import *
+	from ..SANS.convertq import convertq_module
+	from ..SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
+	from ..SANS.monitor_normalize import monitor_normalize_module
+	from ..SANS.correct_background import correct_background_module
+	from ..SANS.generate_transmission import generate_transmission_module
+	from ..SANS.initial_correction import initial_correction_module
+	from ..SANS.correct_solid_angle import correct_solid_angle_module
+	from ..SANS.convert_qxqy import convert_qxqy_module
+	from ..SANS.annular_av import annular_av_module
+	from ..SANS.absolute_scaling import absolute_scaling_module
+	from ..SANS.correct_dead_time import correct_dead_time_module
+	from ...reduction.sans.filters import SansData
+	from ...reduction.sans.filters import Transmission
+	from ...reduction.sans.filters import plot1D
+	from ...reduction.sans.filters import div
 
 
 from django.utils import simplejson
@@ -62,27 +63,29 @@ from django.utils import simplejson
 #from dataflow.dataflow.SANS.correct_dead_time import correct_dead_time_module
 
 #Import not for server
-import dataflow.wireit as wireit
 
-from dataflow import config
+if 0:
+	import dataflow.wireit as wireit
 
-from dataflow.calc import run_template,get_plottable
-from dataflow.core import Data, Instrument, Template, register_instrument
-from dataflow.modules.load import load_module
-from dataflow.modules.save import save_module
-from reduction.sans.filters import *
-from dataflow.SANS.convertq import convertq_module
-from dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
-from dataflow.SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
-from dataflow.SANS.monitor_normalize import monitor_normalize_module
-from dataflow.SANS.correct_background import correct_background_module
-from dataflow.SANS.generate_transmission import generate_transmission_module
-from dataflow.SANS.initial_correction import initial_correction_module
-from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
-from dataflow.SANS.convert_qxqy import convert_qxqy_module
-from dataflow.SANS.annular_av import annular_av_module
-from dataflow.SANS.absolute_scaling import absolute_scaling_module
-from dataflow.SANS.correct_dead_time import correct_dead_time_module
+	from dataflow import config
+
+	from dataflow.calc import run_template,get_plottable
+	from dataflow.core import Data, Instrument, Template, register_instrument
+	from dataflow.modules.load import load_module
+	from dataflow.modules.save import save_module
+	from reduction.sans.filters import *
+	from dataflow.SANS.convertq import convertq_module
+	from dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
+	from dataflow.SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
+	from dataflow.SANS.monitor_normalize import monitor_normalize_module
+	from dataflow.SANS.correct_background import correct_background_module
+	from dataflow.SANS.generate_transmission import generate_transmission_module
+	from dataflow.SANS.initial_correction import initial_correction_module
+	from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
+	from dataflow.SANS.convert_qxqy import convert_qxqy_module
+	from dataflow.SANS.annular_av import annular_av_module
+	from dataflow.SANS.absolute_scaling import absolute_scaling_module
+	from dataflow.SANS.correct_dead_time import correct_dead_time_module
 
 
 
@@ -116,7 +119,7 @@ datadiv = Data(SANS_DATA, div)
                         #plot = None)
  
 # Load module
-def load_action(files=[], intent=''):
+def load_action(files=[], intent='', **kwargs):
     print "loading", files
     result = [_load_data(f) for f in files]  # not bundles
     print "Result: ", result
@@ -132,7 +135,7 @@ load = load_module(id='sans.load', datatype=SANS_DATA, version='1.0', action=loa
 
 
 # Save module
-def save_action(input=[], ext=''):
+def save_action(input=[], ext='', **kwargs):
     for f in input: _save_one(f, ext) # not bundles
     return {}
 def _save_one(input, ext):
@@ -147,7 +150,8 @@ save = save_module(id='sans.save', datatype=SANS_DATA,
 
 
 # Modules
-def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in):
+def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in, **kwargs):
+    print sample_in, empty_cell_in, empty_in, blocked_in
     lis = [sample_in[0], empty_cell_in[0], empty_in[0], blocked_in[0]] 
     print "List: ", lis
     #Enter DeadTime parameter eventually
@@ -158,7 +162,7 @@ def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in):
     return dict(sample_out=[result[0]], empty_cell_out=[result[1]], empty_out=[result[2]], blocked_out=[result[3]])
 deadtime = correct_dead_time_module(id='sans.correct_dead_time', datatype=SANS_DATA, version='1.0', action=correct_dead_time_action)
 
-def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Temp_in):
+def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Temp_in, **kwargs):
     coord_left = (55, 53)
     coord_right = (74, 72)
     lis = [sample_in[0], empty_cell_in[0], empty_in[0], Tsam_in[0], Temp_in[0]] 
@@ -180,7 +184,7 @@ def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Te
     print "Tsam:", sam.Tsam
     return dict(sample_out=[sam], empty_cell_out=[result[1]])#,=[result[3]])
 generate_trans = generate_transmission_module(id='sans.generate_transmission', datatype=SANS_DATA, version='1.0', action=generate_transmission_action)        
-def initial_correction_action(sample, empty_cell, blocked):
+def initial_correction_action(sample, empty_cell, blocked, **kwargs):
     print type(sample)
     lis = [sample[0], empty_cell[0], blocked[0]]
     SAM = lis[0]
@@ -193,7 +197,7 @@ def initial_correction_action(sample, empty_cell, blocked):
     return dict(COR=[result])
 initial_corr = initial_correction_module(id='sans.initial_correction', datatype=SANS_DATA, version='1.0', action=initial_correction_action)
 
-def correct_detector_sensitivity_action(COR, DIV_in):
+def correct_detector_sensitivity_action(COR, DIV_in, **kwargs):
     lis = [COR[0], DIV_in[0]]
     print "####################DIV#############"
     print lis[1]
@@ -209,7 +213,7 @@ def convert_qxqy_action():
     correctVer, qx, qy = convert_qxqy(correctVer)
     print "Convertqxqy"
 
-def absolute_scaling_action(DIV, empty, sensitivity,ins_name = 'NG3'):
+def absolute_scaling_action(DIV, empty, sensitivity,ins_name = 'NG3', **kwargs):
     #sample,empty,DIV,Tsam,instrument
     lis = [DIV[0], empty[0], sensitivity[0]]
     global Tsamm, qx, qy
@@ -225,13 +229,13 @@ def absolute_scaling_action(DIV, empty, sensitivity,ins_name = 'NG3'):
    
     return dict(ABS=result)
 absolute = absolute_scaling_module(id='sans.absolute_scaling', datatype=SANS_DATA, version='1.0', action=absolute_scaling_action)
-def annular_av_action(ABS):
+def annular_av_action(ABS, **kwargs):
     AVG = annular_av(ABS[0])
     result = [AVG]
     print "Done Red"
     return dict(OneD=result)
 annul_av = annular_av_module(id='sans.annular_av', datatype=SANS_DATA, version='1.0', action=annular_av_action)
-def correct_background_action(input=None):
+def correct_background_action(input=None, **kwargs):
     result = [correct_background(bundle[-1], bundle[0]) for bundle in input]
     return dict(output=result)
 correct_back = correct_background_module(id='sans.correct_background', datatype=SANS_DATA, version='1.0', action=correct_background_action)
@@ -247,7 +251,8 @@ SANS_INS = Instrument(id='ncnr.sans.ins',
                  datatypes=[data2d],
                  )
 instruments = [SANS_INS]
-
+for instrument in instruments:
+        register_instrument(instrument)
 # Testing
 if __name__ == '__main__':
 #def TESTING():
