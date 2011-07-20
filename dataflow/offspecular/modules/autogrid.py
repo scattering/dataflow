@@ -13,10 +13,11 @@ def autogrid_module(id=None, datatype=None, action=None,
     """
 
     icon = {
-        'URI': config.IMAGES + 'grid.png',
+        'URI': config.IMAGES + config.ANDR_FOLDER + 'autogrid.png',
+        'image': config.IMAGES + config.ANDR_FOLDER + 'autogrid_image.png',
         'terminals': {
-            'input': (-15, 1, -1, 0),
-            'output': (15, 1, 1, 0),
+            'input': (-12, 16, -1, 0),
+            'output': (48, 16, 1, 0),
         }
     }
     

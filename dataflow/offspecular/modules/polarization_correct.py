@@ -10,7 +10,8 @@ def polarization_correct_module(id=None, datatype=None, action=None,
     """Module for correcting polarization"""
 
     icon = {
-        'URI': config.IMAGES + "polar_correct.png",
+        'URI': config.IMAGES + config.ANDR_FOLDER + "polar_correct.png",
+        'image': config.IMAGES + config.ANDR_FOLDER + "polar_correct_image.png",
         'terminals': {
             'input': (0, 10, -1, 0),
             'output': (20, 10, 1, 0),

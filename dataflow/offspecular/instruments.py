@@ -213,12 +213,12 @@ if __name__ == '__main__':
             dict(module="ospec.load", position=(50, 50),
                  config={'files': files, 'intent': 'signal'}),
             dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
-            dict(module="ospec.combine", position=(150, 100), config={}),
-            dict(module="ospec.offset", position=(250, 150), config={'offsets':{'theta':0}}),
-            dict(module="ospec.wiggle", position=(350, 200), config={}),
+            dict(module="ospec.combine", position=(452, 390), config={}),
+            dict(module="ospec.offset", position=(321, 171), config={'offsets':{'theta':0}}),
+            dict(module="ospec.wiggle", position=(204, 92), config={}),
             dict(module="ospec.twotheta", position=(450, 250), config={}),
-            dict(module="ospec.qxqz", position=(550, 300), config={}),
-            dict(module="ospec.grid", position=(600, 350), config={}),
+            dict(module="ospec.qxqz", position=(560, 392), config={}),
+            dict(module="ospec.grid", position=(350, 390), config={}),
         ]
         wires = [
             dict(source=[0, 'output'], target=[4, 'input']),
@@ -266,7 +266,10 @@ if __name__ == '__main__':
     #result = run_template(template, config)
     #print "Starting again. This time should be A LOT quicker (if the server was empty at runtime)."
     #result2 = run_template(template, config)
-    print simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
+    print template_to_wireit_diagram(template)
+    ins = simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
+    with open(dir + '/dataflow/static/wireit_test/ANDRdefinition2.js', 'w') as f:
+        f.write('var langandr = ' + ins + ';')
     sys.exit()
     nodenum = template.order()[-2]
     terminal = 'output'

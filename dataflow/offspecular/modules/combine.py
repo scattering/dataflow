@@ -13,11 +13,12 @@ def combine_module(id=None, datatype=None, action=None,
     """
 
     icon = {
-        'URI': config.IMAGES + 'sum.png',
+        'URI': config.IMAGES + config.ANDR_FOLDER + 'sum.png',
+        'image': config.IMAGES + config.ANDR_FOLDER + 'sum_image.png',
         'terminals': {
-            'input_data': (-15, 1, -1, 0),
-            'input_grid': (-10, 1, -1, 0),
-            'output': (15, 1, 1, 0),
+            'input_data': (-12, 4, -1, 0),
+            'input_grid': (-12, 40, -1, 0),
+            'output': (48, 16, 1, 0),
         }
     }
     
