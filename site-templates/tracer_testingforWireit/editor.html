@@ -361,12 +361,12 @@ YAHOO.util.Event.onDOMReady( function() {
 		WireIt.ImageContainer.prototype.height = 40;
 		WireIt.ImageContainer.prototype.width = 40;
 		WireIt.ImageContainer.prototype.onMouseDown = function() {
-			console.log('clicked on imageContainer')
+			//console.log('clicked on imageContainer')
 			editor.displayClickedModuleConfig(this)
 			holder = this;
 			}
 		WireIt.Container.prototype.onMouseDown = function() {
-			console.log('clicked on container')
+			//console.log('clicked on container')
 			editor.displayClickedModuleConfig(this)
 			},
 		WireIt.Container.prototype.getConfig = function() {
@@ -374,11 +374,14 @@ YAHOO.util.Event.onDOMReady( function() {
 			configs['position'] = this.getXY()
 			configs['xtype'] = this.xtype
 			if (this.tracksConfigs) {
-				console.log('Getting Config', editor.reductionInstance)
-				for (var i in this.tracksConfigs[editor.reductionInstance]) {
-					configs[i] = this.tracksConfigs[editor.reductionInstance][i] 
-					}
-				}
+				configs = this.tracksConfigs
+				//console.log('Getting Config', editor.reductionInstance)
+				//console.log(this.tracksConfigs[editor.reductionInstance])
+				//for (var i in this.tracksConfigs[editor.reductionInstance]) {
+				//	configs[i] = this.tracksConfigs[editor.reductionInstance][i] 
+				//	}
+				//}
+      				}
       			return configs
 		},
 			
