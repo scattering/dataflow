@@ -31,7 +31,7 @@ from ...dataflow.offspecular.instruments import ANDR
 print "ANDR imported:", ANDR.id
 #from ...dataflow.tas import instruments
 #from ...dataflow.SANS import novelinstruments as SANS_INS
-from ...dataflow.tas import instruments as TAS_INS
+#from ...dataflow.tas import instruments as TAS_INS
 
 from ...dataflow import wireit
 
@@ -157,6 +157,15 @@ def saveWiring(request):
 @csrf_exempt 
 def runReduction(request):
     data = simplejson.loads(request.POST['data'])
+    print 'IN RUN REDUCTION'
+    for i in data['modules']:
+    	j = i['config']
+    	print j
+    	if j.has_key('files'):
+    	    print j['files']
+    	    j['files'] = map(lambda x: [File.objects.get(name=str(x)).location + x], j['files'])
+    	    #print j['files']
+    print 'RR 2'
     #print data
     #template_test = wireit.wireit_diagram_to_template(SANS_NEW_TEMPLATE_FROM_WIREIT)
     #print template_test
