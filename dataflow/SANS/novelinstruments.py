@@ -42,7 +42,7 @@ from django.utils import simplejson
 import dataflow.wireit as wireit
 
 from dataflow import config
-from dataflow.calc import run_template
+from dataflow.calc import run_template,get_plottable
 from dataflow.core import Data, Instrument, Template, register_instrument
 from dataflow.modules.load import load_module
 from dataflow.modules.save import save_module
@@ -329,11 +329,12 @@ if __name__ == '__main__':
     #f.write("Lang: ")
     #f.write(simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))) 
     #f.close()
-    print 'TEMPLATE', simplejson.dumps(wireit.template_to_wireit_diagram(template))
+    #print 'TEMPLATE', simplejson.dumps(wireit.template_to_wireit_diagram(template))
     #print 'RAW_INSTRUMENT: ', wireit.instrument_to_wireit_language(SANS_INS)
    # print 'LANGUAGE', simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))                
     run_template(template, config)
-        
+    #result = get_plottable(template,config,14,'OneD')
+    
     #datadir=os.path.join(os.path.dirname(__file__),'ncnr_sample_data')
     #filedict={'empty_1m':os.path.join(datadir,'SILIC001.SA3_SRK_S101'),
               #'empty_4m':os.path.join(datadir,'SILIC002.SA3_SRK_S102'),
