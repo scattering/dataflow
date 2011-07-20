@@ -39,50 +39,50 @@ from django.utils import simplejson
 #print 'repo', ROOT_URL.REPO_ROOT
 #print 'home', ROOT_URL.HOMEDIR
 
-#import dataflow.dataflow.wireit as wireit
+import dataflow.dataflow.wireit as wireit
 
-#from dataflow.dataflow import config
+from dataflow.dataflow import config
 
-#from dataflow.dataflow.calc import run_template,get_plottable
-#from dataflow.dataflow.core import Data, Instrument, Template, register_instrument
-#from dataflow.dataflow.modules.load import load_module
-#from dataflow.dataflow.modules.save import save_module
-#from dataflow.reduction.sans.filters import *
-#from dataflow.dataflow.SANS.convertq import convertq_module
-#from dataflow.dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
-#from dataflow.dataflow.SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
-#from dataflow.dataflow.SANS.monitor_normalize import monitor_normalize_module
-#from dataflow.dataflow.SANS.correct_background import correct_background_module
-#from dataflow.dataflow.SANS.generate_transmission import generate_transmission_module
-#from dataflow.dataflow.SANS.initial_correction import initial_correction_module
-#from dataflow.dataflow.SANS.correct_solid_angle import correct_solid_angle_module
-#from dataflow.dataflow.SANS.convert_qxqy import convert_qxqy_module
-#from dataflow.dataflow.SANS.annular_av import annular_av_module
-#from dataflow.dataflow.SANS.absolute_scaling import absolute_scaling_module
-#from dataflow.dataflow.SANS.correct_dead_time import correct_dead_time_module
+from dataflow.dataflow.calc import run_template,get_plottable
+from dataflow.dataflow.core import Data, Instrument, Template, register_instrument
+from dataflow.dataflow.modules.load import load_module
+from dataflow.dataflow.modules.save import save_module
+from dataflow.reduction.sans.filters import *
+from dataflow.dataflow.SANS.convertq import convertq_module
+from dataflow.dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
+from dataflow.dataflow.SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
+from dataflow.dataflow.SANS.monitor_normalize import monitor_normalize_module
+from dataflow.dataflow.SANS.correct_background import correct_background_module
+from dataflow.dataflow.SANS.generate_transmission import generate_transmission_module
+from dataflow.dataflow.SANS.initial_correction import initial_correction_module
+from dataflow.dataflow.SANS.correct_solid_angle import correct_solid_angle_module
+from dataflow.dataflow.SANS.convert_qxqy import convert_qxqy_module
+from dataflow.dataflow.SANS.annular_av import annular_av_module
+from dataflow.dataflow.SANS.absolute_scaling import absolute_scaling_module
+from dataflow.dataflow.SANS.correct_dead_time import correct_dead_time_module
 
 #Import not for server
-import dataflow.wireit as wireit
-
-from dataflow import config
-
-from dataflow.calc import run_template,get_plottable
-from dataflow.core import Data, Instrument, Template, register_instrument
-from dataflow.modules.load import load_module
-from dataflow.modules.save import save_module
-from reduction.sans.filters import *
-from dataflow.SANS.convertq import convertq_module
-from dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
-from dataflow.SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
-from dataflow.SANS.monitor_normalize import monitor_normalize_module
-from dataflow.SANS.correct_background import correct_background_module
-from dataflow.SANS.generate_transmission import generate_transmission_module
-from dataflow.SANS.initial_correction import initial_correction_module
-from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
-from dataflow.SANS.convert_qxqy import convert_qxqy_module
-from dataflow.SANS.annular_av import annular_av_module
-from dataflow.SANS.absolute_scaling import absolute_scaling_module
-from dataflow.SANS.correct_dead_time import correct_dead_time_module
+#import dataflow.wireit as wireit
+#
+#from dataflow import config
+#
+#from dataflow.calc import run_template,get_plottable
+#from dataflow.core import Data, Instrument, Template, register_instrument
+#from dataflow.modules.load import load_module
+#from dataflow.modules.save import save_module
+#from reduction.sans.filters import *
+#from dataflow.SANS.convertq import convertq_module
+#from dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
+#from dataflow.SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
+#from dataflow.SANS.monitor_normalize import monitor_normalize_module
+#from dataflow.SANS.correct_background import correct_background_module
+#from dataflow.SANS.generate_transmission import generate_transmission_module
+#from dataflow.SANS.initial_correction import initial_correction_module
+#from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
+#from dataflow.SANS.convert_qxqy import convert_qxqy_module
+#from dataflow.SANS.annular_av import annular_av_module
+#from dataflow.SANS.absolute_scaling import absolute_scaling_module
+#from dataflow.SANS.correct_dead_time import correct_dead_time_module
 
 
 

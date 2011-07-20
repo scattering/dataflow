@@ -29,9 +29,8 @@ from ...dataflow.calc import calc_single, fingerprint_template, get_plottable
 #from ...dataflow.tas.instruments import BT7
 from ...dataflow.offspecular.instruments import ANDR
 print "ANDR imported:", ANDR.id
-#from ...dataflow.tas import instruments
-#from ...dataflow.SANS import novelinstruments as SANS_INS
-#from ...dataflow.tas import instruments as TAS_INS
+from ...dataflow.SANS.novelinstruments import SANS_INS
+print "SANS imported:", SANS_INS.id
 
 from ...dataflow import wireit
 
@@ -196,6 +195,7 @@ def runReduction(request):
     if instrument is not None:
         template = wireit.wireit_diagram_to_template(data, instrument)
         # configuration for template is embedded
+        print "getting result"
         result = get_plottable(template, config, nodenum, terminal_id)
     print type(result)
     print len(result), [simplejson.loads(s).keys() for s in result]
