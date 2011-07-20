@@ -139,11 +139,8 @@ class plot1D(object):
         plottable_data = {
             'type': 'nd',
             'title': '1D Sans Data',
-<<<<<<< HEAD
-            'clear_existing': 1==0,
-=======
+
             'clear_existing': False,
->>>>>>> 0234418c99c32b2ba06c176330c429270b4889f6
             'orderx': [{'key': 'Q', 'label': 'Q'}],
             'ordery': [{'key': 'I', 'label': 'Intensity'}],
             'series': [

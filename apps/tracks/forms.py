@@ -8,6 +8,7 @@ language_choices = (
 			('refl', 'refl'),
 			('andr', 'andr'),
 			('tas', 'tas'),
+			('sans_novel','sans_novel'),
 )
 
 instrument_class_list = []
