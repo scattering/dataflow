@@ -216,9 +216,9 @@ if __name__ == '__main__':
             dict(source=[0, 'output'], target=[4, 'input']),
             dict(source=[4, 'output'], target=[3, 'input']),
             dict(source=[3, 'output'], target=[5, 'input']),
-            dict(source=[5, 'output'], target=[2, 'input']),
+            dict(source=[5, 'output'], target=[2, 'input_data']),
             dict(source=[5, 'output'], target=[7, 'input']),
-            dict(source=[7, 'output'], target=[2, 'input_data']),
+            dict(source=[7, 'output'], target=[2, 'input_grid']),
             dict(source=[2, 'output'], target=[6, 'input']),
             dict(source=[6, 'output'], target=[1, 'input']),
         ]
