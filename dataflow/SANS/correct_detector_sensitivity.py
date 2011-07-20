@@ -15,9 +15,10 @@ def correct_detector_sensitivity_module(id=None, datatype=None, action=None,
         'terminals': {
             #inputs
             'COR': (0, 10, -1, 0),
-            'DIV': (0, 20, -1, 0),
+            'DIV_in': (0, 20, -1, 0),
             
-            'DIV': (20, 10, 1, 0),
+            #outputs
+            'DIV_out': (20, 10, 1, 0),
         }
     }
     
@@ -27,18 +28,18 @@ def correct_detector_sensitivity_module(id=None, datatype=None, action=None,
              use='in',
              description='data',
              required=False,
-             multiple=True,
+             multiple=False,
              ),
-        dict(id='DIV',
+        dict(id='DIV_in',
              datatype=datatype,
              use='in',
              description='data',
              required=False,
-             multiple=True,
+             multiple=False,
              ),        
         
         
-        dict(id='DIV',
+        dict(id='DIV_out',
              datatype=datatype,
              use='out',
              description='correct',
