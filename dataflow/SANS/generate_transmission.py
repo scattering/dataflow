@@ -85,7 +85,13 @@ def generate_transmission_module(id=None, datatype=None, action=None,
              #description='correct',
              #),
     ]
-
+    monitor_norm_field ={
+        'type' :'float',
+        'label':'Monitor Normalization Value (default=1e8)',
+        'name' :'mon0',
+        'value':1e8,
+        
+        }
     # Combine everything into a module.
     module = Module(id=id,
                   name='generate_transmission',
@@ -93,7 +99,7 @@ def generate_transmission_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=fields,
+                  fields=[monitor_norm_field]+fields,
                   action=action,
                   )
 

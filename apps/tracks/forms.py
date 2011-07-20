@@ -9,6 +9,7 @@ language_choices = (
 			('andr', 'andr'),
 			('tas', 'tas'),
 			('new_andr', 'new_andr'),
+			('sans_novel','sans_novel'),
 )
 
 instrument_class_list = []

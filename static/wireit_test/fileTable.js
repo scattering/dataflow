@@ -98,7 +98,9 @@ backStore.insert(0,newFile)
 		gridList[i].getView().refresh()
 	}
 	generate_FileGroups()
+	console.log('TEMPLATE CONFIGS', template_configs)
 	editor.FATupdate(template_configs)
+	
 };
 
 

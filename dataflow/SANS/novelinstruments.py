@@ -39,10 +39,34 @@ from django.utils import simplejson
 #print 'repo', ROOT_URL.REPO_ROOT
 #print 'home', ROOT_URL.HOMEDIR
 
+#import dataflow.dataflow.wireit as wireit
+
+#from dataflow.dataflow import config
+
+#from dataflow.dataflow.calc import run_template,get_plottable
+#from dataflow.dataflow.core import Data, Instrument, Template, register_instrument
+#from dataflow.dataflow.modules.load import load_module
+#from dataflow.dataflow.modules.save import save_module
+#from dataflow.reduction.sans.filters import *
+#from dataflow.dataflow.SANS.convertq import convertq_module
+#from dataflow.dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
+#from dataflow.dataflow.SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
+#from dataflow.dataflow.SANS.monitor_normalize import monitor_normalize_module
+#from dataflow.dataflow.SANS.correct_background import correct_background_module
+#from dataflow.dataflow.SANS.generate_transmission import generate_transmission_module
+#from dataflow.dataflow.SANS.initial_correction import initial_correction_module
+#from dataflow.dataflow.SANS.correct_solid_angle import correct_solid_angle_module
+#from dataflow.dataflow.SANS.convert_qxqy import convert_qxqy_module
+#from dataflow.dataflow.SANS.annular_av import annular_av_module
+#from dataflow.dataflow.SANS.absolute_scaling import absolute_scaling_module
+#from dataflow.dataflow.SANS.correct_dead_time import correct_dead_time_module
+
+#Import not for server
 import dataflow.wireit as wireit
 
 from dataflow import config
-from dataflow.calc import run_template, get_plottable
+
+from dataflow.calc import run_template,get_plottable
 from dataflow.core import Data, Instrument, Template, register_instrument
 from dataflow.modules.load import load_module
 from dataflow.modules.save import save_module
@@ -59,6 +83,10 @@ from dataflow.SANS.convert_qxqy import convert_qxqy_module
 from dataflow.SANS.annular_av import annular_av_module
 from dataflow.SANS.absolute_scaling import absolute_scaling_module
 from dataflow.SANS.correct_dead_time import correct_dead_time_module
+
+
+
+
 
 #from reduction.sans.filters import SansData
 #from reduction.sans.filters import Transmission
@@ -181,7 +209,7 @@ def convert_qxqy_action():
     correctVer, qx, qy = convert_qxqy(correctVer)
     print "Convertqxqy"
 
-def absolute_scaling_action(DIV, empty, sensitivity):
+def absolute_scaling_action(DIV, empty, sensitivity,ins_name = 'NG3'):
     #sample,empty,DIV,Tsam,instrument
     lis = [DIV[0], empty[0], sensitivity[0]]
     global Tsamm, qx, qy
@@ -189,7 +217,7 @@ def absolute_scaling_action(DIV, empty, sensitivity):
     EMP = lis[1]
     print "Empty: ", EMP
     DIV = lis[0]
-    ABS = absolute_scaling(DIV, EMP, sensitivity, DIV.Tsam, 'NG3')
+    ABS = absolute_scaling(DIV, EMP, sensitivity, DIV.Tsam, ins_name)
     
     correct = convert_q(ABS)
     correct, qx, qy = convert_qxqy(correct)
@@ -268,7 +296,7 @@ if __name__ == '__main__':
         dict(module="sans.load", position=(100, 300),
              config={'files': [fileList[2]], 'intent': 'signal'}),
         #13
-        dict(module="sans.absolute_scaling", position=(360 , 300), config={}),
+        dict(module="sans.absolute_scaling", position=(360 , 300), config={'ins_name':'NG3'}),
         #14
         dict(module="sans.annular_av", position=(360 , 400), config={}),
         
@@ -331,9 +359,12 @@ if __name__ == '__main__':
     #f.close()
     print 'TEMPLATE', simplejson.dumps(wireit.template_to_wireit_diagram(template))
     #print 'RAW_INSTRUMENT: ', wireit.instrument_to_wireit_language(SANS_INS)
-   # print 'LANGUAGE', simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))                
-    #run_template(template, config)
-    result = get_plottable(template, config, 14, 'OneD')
+    #print 'LANGUAGE', simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))                
+
+    run_template(template, config)
+    #get_plottable(template,config,14,'OneD')
+    #result = get_plottable(template, config, 14, 'OneD')
+    
     #datadir=os.path.join(os.path.dirname(__file__),'ncnr_sample_data')
     #filedict={'empty_1m':os.path.join(datadir,'SILIC001.SA3_SRK_S101'),
               #'empty_4m':os.path.join(datadir,'SILIC002.SA3_SRK_S102'),
