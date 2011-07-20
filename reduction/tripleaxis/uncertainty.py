@@ -30,11 +30,15 @@ class Measurement(object):
     def join(self,other):
         if isinstance(other,Measurement):
             #self=Measurement([self.x,other.x],[self.dx,other.dx])
+            #Should I set up checks so a None and a None combine to a single None?
+            #if self.x==other.x==None:
+            #    xs=None
+            #if self.variance==other.variance==None:
+            #    variances=None
             xs=numpy.hstack((self.x,other.x))
             variances=numpy.hstack((self.variance,other.variance))
             self.x=xs
             self.variance=variances
-            #self=Measurement(xs,variances)
     def _getdx(self): 
         if self.variance==None:
             return None

@@ -20,11 +20,9 @@ def correct_dead_time_module(id=None, datatype=None, action=None,
             #Outputs
             'sample': (20, 10, 1, 0),
             'empty_cell': (20, 20, 1, 0),
-<<<<<<< HEAD
+
             #'empty': (20,30, 1, 0),
-=======
            # 'empty': (20,30, 1, 0),
->>>>>>> 78710be80659e3fdfc83e6b1313ad8caa0b2e3eb
             'blocked': (20, 40, 1, 0),
         }
     }

@@ -7,7 +7,7 @@ The function run_template
 from pprint import pprint
 from inspect import getsource
 from .core import lookup_module, lookup_datatype
-import hashlib, redis, types, os
+import hashlib, redis, types, os, sys
 
 os.system("redis-server") # ensure redis is running
 server = redis.Redis("localhost")
@@ -166,7 +166,7 @@ def fingerprint_template(template, config):
         module_id = node['module'] # template.modules[node]
         module = lookup_module(module_id)
         inputs = _map_inputs(module, wires)
-        
+
         # Include configuration information
         configuration = {}
         configuration.update(node.get('config', {}))
@@ -175,6 +175,7 @@ def fingerprint_template(template, config):
         # Fingerprinting
         fp = finger_print(module, configuration, nodenum, inputs, fingerprints) # terminals included
         fingerprints[nodenum] = fp
+
     return fingerprints
 
 def _lookup_results(result, s):

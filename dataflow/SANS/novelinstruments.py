@@ -39,7 +39,7 @@ from django.utils import simplejson
 #print 'repo', ROOT_URL.REPO_ROOT
 #print 'home', ROOT_URL.HOMEDIR
 
-<<<<<<< HEAD
+
 from dataflow import config
 from dataflow.calc import run_template
 from dataflow.core import Data, Instrument, Template, register_instrument
@@ -58,7 +58,7 @@ from dataflow.SANS.convert_qxqy import convert_qxqy_module
 from dataflow.SANS.annular_av import annular_av_module
 from dataflow.SANS.absolute_scaling import absolute_scaling_module
 from dataflow.SANS.correct_dead_time import correct_dead_time_module
-=======
+
 #from dataflow import config
 #from dataflow.calc import run_template
 #from dataflow.core import Data, Instrument, Template, register_instrument
@@ -77,7 +77,6 @@ from dataflow.SANS.correct_dead_time import correct_dead_time_module
 #from dataflow.SANS.annular_av import annular_av_module
 #from dataflow.SANS.absolute_scaling import absolute_scaling_module
 #from dataflow.SANS.correct_dead_time import correct_dead_time_module
->>>>>>> 78710be80659e3fdfc83e6b1313ad8caa0b2e3eb
 #from reduction.sans.filters import SansData
 #from reduction.sans.filters import Transmission
 #from reduction.sans.filters import plot1D

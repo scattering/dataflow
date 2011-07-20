@@ -4,8 +4,8 @@ Triple Axis Spectrometer reduction and analysis modules
 import math, os, sys
 
 #Relative imports for use in the larger project
-'''
-from ...reduction.tripleaxis.data_abstraction import TripleAxis, filereader
+
+from ...reduction.tripleaxis import data_abstraction
 from ..calc import run_template
 from .. import wireit
 from ... import ROOT_URL
@@ -13,17 +13,18 @@ from django.utils import simplejson
 import numpy
 
 from .. import config
-from ..core import Instrument, Datatype, Template, register_instrument
+from ..core import Instrument, Data, Template, register_instrument
 
 #from dataflow.dataflow.modules.load import load_module
 from ..modules.join import join_module
 from ..modules.scale import scale_module
 from ..modules.save import save_module
+from ..modules.tas_load import load_module
 from ..modules.tas_normalize_monitor import normalize_monitor_module
 from ..modules.tas_detailed_balance import detailed_balance_module
 from ..modules.tas_monitor_correction import monitor_correction_module
 from ..modules.tas_volume_correction import volume_correction_module
-from ..modules.tas_load import load_module
+
 '''
 #direct imports for use individually (ie running this file)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
@@ -40,14 +41,15 @@ from dataflow.dataflow.core import Instrument, Data, Template, register_instrume
 from dataflow.dataflow.modules.join import join_module
 from dataflow.dataflow.modules.scale import scale_module
 from dataflow.dataflow.modules.save import save_module
+from dataflow.dataflow.modules.tas_load import load_module
 from dataflow.dataflow.modules.tas_normalize_monitor import normalize_monitor_module
 from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
 from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
 from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
-from dataflow.dataflow.modules.tas_load import load_module
 
+'''
 TAS_DATA = 'data1d.tas'
-data1d = Data(TAS_DATA, data_abstraction)
+data1d = Data(TAS_DATA, data_abstraction.TripleAxis)
 # Reduction operations may refer to data from other objects, but may not
 # modify it.  Instead of modifying, first copy the data and then work on
 # the copy.
@@ -208,9 +210,10 @@ BT7 = Instrument(id='ncnr.tas.bt7',
 
 
 # Return a list of triple axis instruments
-instruments = [BT7]
-for instrument in instruments:
-    register_instrument(instrument)
+if 1:
+	instruments = [BT7]
+	for instrument in instruments:
+	    register_instrument(instrument)
 
 modules = [
     dict(module="tas.load", position=(10, 20), config={'files':[ROOT_URL.HOMEDIR[:-12]+ 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
@@ -241,15 +244,19 @@ template = Template(name='test reduction',
 # the actual call to perform the reduction
 def TAS_RUN():
     result = run_template(template, config)
+    '''
     print 'in TAS'
     for key, value in result.iteritems():
 	for i in range(len(value['output'])):
 		if not type(value['output'][i])==type({}):
         		value['output'][i] = value['output'][i].get_plottable()
     print result
+    '''
     return result
+
+
 hi=TAS_RUN()
 #print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
 #print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
-#print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
+print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
 print "done"

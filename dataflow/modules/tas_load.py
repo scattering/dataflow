@@ -33,7 +33,7 @@ def load_module(id=None, datatype=None, action=None,
     
     # Combine everything into a module.
     module = Module(id=id,
-                  name='TripleAxis Load',
+                  name='Load',
                   version=version,
                   description=action.__doc__,
                   #icon=icon,
