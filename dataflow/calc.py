@@ -40,7 +40,7 @@ def run_template(template, config):
         # Include configuration information
         configuration = {}
         configuration.update(node.get('config', {}))
-        configuration.update(config[nodenum])
+        configuration.update(config.get(nodenum, {}))
         kwargs.update(configuration)
         
         # Fingerprinting
@@ -122,7 +122,7 @@ def calc_single(template, config, nodenum, terminal_id):
         # Include configuration information
         configuration = {}
         configuration.update(node.get('config', {}))
-        configuration.update(config[nodenum])
+        configuration.update(config.get(nodenum, {}))
         kwargs.update(configuration)
         
         calc_value = module.action(**kwargs)
@@ -166,16 +166,25 @@ def fingerprint_template(template, config):
         node = template.modules[nodenum]
         module_id = node['module'] # template.modules[node]
         module = lookup_module(module_id)
-        inputs = _map_inputs(module, wires)
+        parents = template.get_parents(nodenum)
+        # this is a list of wires that terminate on this module
+        inputs_fp = []
+        for wire in parents:
+            source_nodenum, source_terminal_id = wire['source']
+            target_nodenum, target_terminal_id = wire['target']
+            input_fp = fingerprints[source_nodenum]
+            inputs_fp.append([target_terminal_id, input_fp])
+        #inputs = _map_inputs(module, wires)
         
         # Include configuration information
         configuration = {}
         configuration.update(node.get('config', {}))
-        configuration.update(config[nodenum])
+        configuration.update(config.get(nodenum, {}))
         
         # Fingerprinting
-        fp = finger_print(module, configuration, nodenum, inputs, fingerprints) # terminals included
+        fp = finger_print(module, configuration, nodenum, inputs_fp) # terminals included
         fingerprints[nodenum] = fp
+
     return fingerprints
 
 def _lookup_results(result, s):
@@ -226,7 +235,7 @@ def _map_inputs(module, wires):
             kwargs[terminal['id']] = collect[0]
     return kwargs
 
-def finger_print(module, args, nodenum, inputs, fingerprints):
+def finger_print(module, args, nodenum, inputs_fp):
     """
     Create a unique sha1 hash for a module based on its attributes and inputs.
     """
@@ -236,17 +245,20 @@ def finger_print(module, args, nodenum, inputs, fingerprints):
     fp = str(d) # source code (not 100% due to helper methods)
     fp += str(args) # all arguments for the given module
     fp += str(nodenum) # node number
-    for terminal_id, input_arr in inputs.items():
-        fp += terminal_id
-        if input_arr != None and isinstance(input_arr, list) and len(input_arr) > 0: # default value checking for non-required terminals
-            if isinstance(input_arr[0], list): # Multiple = True; bundle
-                fp += str([fingerprints[input[0]] for input in input_arr])
-            elif isinstance(input_arr[0], int):  # Multiple = False; single input
-                fp += str(fingerprints[input_arr[0]])
-            else:
-                raise TypeError("Input array should either be a bundle of inputs or just one input")
-        else:
-            fp += str(input_arr) # whatever the default value was
+    for item in inputs_fp:
+        terminal_id, input_fp = item
+        fp += terminal_id + input_fp
+#    for terminal_id, input_arr in inputs.items():
+#        fp += terminal_id
+#        if input_arr != None and isinstance(input_arr, list) and len(input_arr) > 0: # default value checking for non-required terminals
+#            if isinstance(input_arr[0], list): # Multiple = True; bundle
+#                fp += str([fingerprints[input[0]] for input in input_arr])
+#            elif isinstance(input_arr[0], int):  # Multiple = False; single input
+#                fp += str(fingerprints[input_arr[0]])
+#            else:
+#                raise TypeError("Input array should either be a bundle of inputs or just one input")
+#        else:
+#            fp += str(input_arr) # whatever the default value was
     fp = hashlib.sha1(fp).hexdigest()
     return fp
 
