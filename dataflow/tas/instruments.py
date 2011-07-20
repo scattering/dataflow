@@ -3,8 +3,6 @@ Triple Axis Spectrometer reduction and analysis modules
 """
 import math, os, sys
 
-#Relative imports for use in the larger project
-
 from ...reduction.tripleaxis import data_abstraction
 from ..calc import run_template
 from .. import wireit
@@ -211,9 +209,9 @@ BT7 = Instrument(id='ncnr.tas.bt7',
 
 # Return a list of triple axis instruments
 if 1:
-	instruments = [BT7]
-	for instrument in instruments:
-	    register_instrument(instrument)
+    instruments = [BT7]
+    for instrument in instruments:
+	register_instrument(instrument)
 
 modules = [
     dict(module="tas.load", position=(10, 20), config={'files':[ROOT_URL.HOMEDIR[:-12]+ 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),

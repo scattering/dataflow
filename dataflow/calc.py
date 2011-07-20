@@ -97,7 +97,6 @@ def calc_single(template, config, nodenum, terminal_id):
     node = template.modules[nodenum]
     module_id = node['module'] # template.modules[node]
     module = lookup_module(module_id)
-    print module.id, terminal_id
     terminal = module.get_terminal_by_id(terminal_id)
     
     if terminal['use'] != 'out':
