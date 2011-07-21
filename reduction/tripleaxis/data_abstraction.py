@@ -861,6 +861,7 @@ class TripleAxis(object):
                                 'style': 'line',
                                 }],
                 }
+
                 return simplejson.dumps(plottable_data)
 
 
