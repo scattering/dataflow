@@ -8,7 +8,7 @@ dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir)
 from pprint import pprint
 
-if 1:
+if 0:
 	from ...dataflow import wireit
 	from .. import config
 	from ..calc import run_template
@@ -65,7 +65,29 @@ if 0:
 	from dataflow.SANS.absolute_scaling import absolute_scaling_module
 	from dataflow.SANS.correct_dead_time import correct_dead_time_module
 	from apps.tracks.models import File
+if 1:
+	import dataflow.dataflow.wireit as wireit
 
+	from dataflow.dataflow import config
+
+	from dataflow.dataflow.calc import run_template,get_plottable
+	from dataflow.dataflow.core import Data, Instrument, Template, register_instrument
+	from dataflow.dataflow.modules.load import load_module
+	from dataflow.dataflow.modules.save import save_module
+	from dataflow.reduction.sans.filters import *
+	from dataflow.dataflow.SANS.convertq import convertq_module
+	from dataflow.dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
+	from dataflow.dataflow.SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
+	from dataflow.dataflow.SANS.monitor_normalize import monitor_normalize_module
+	from dataflow.dataflow.SANS.correct_background import correct_background_module
+	from dataflow.dataflow.SANS.generate_transmission import generate_transmission_module
+	from dataflow.dataflow.SANS.initial_correction import initial_correction_module
+	from dataflow.dataflow.SANS.correct_solid_angle import correct_solid_angle_module
+	from dataflow.dataflow.SANS.convert_qxqy import convert_qxqy_module
+	from dataflow.dataflow.SANS.annular_av import annular_av_module
+	from dataflow.dataflow.SANS.absolute_scaling import absolute_scaling_module
+	from dataflow.dataflow.SANS.correct_dead_time import correct_dead_time_module
+	from dataflow.apps.tracks.models import File
 
 
 #Transmissions
@@ -235,6 +257,7 @@ if __name__ == '__main__':
     #fileList = ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105"]
     for instrument in instruments:
         register_instrument(instrument)
+	
     modules = [
         #Sample 0
            #files hard coded for now
