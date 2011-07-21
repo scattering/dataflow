@@ -61,11 +61,14 @@ class Measurement(object):
     def __len__(self):
         return len(self.x)
     def __getitem__(self,key):
-        if self.variance and self.x:
-            return Measurement(self.x[key],self.variance[key])
-        
+        if self.variance==None and self.x==None:
+            return self
+        elif self.variance==None:
+            return Measurement(self.x[key],self.variance)
+        elif self.x==None:
+            return Measurement(self.x,self.variance[key])
         else:
-            return Measurement(self.x[key],None)
+            return Measurement(self.x[key],self.variance[key])
     def __setitem__(self,key,value):
         self.x[key] = value.x
         self.variance[key] = value.variance

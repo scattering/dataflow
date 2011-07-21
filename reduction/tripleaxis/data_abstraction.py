@@ -686,13 +686,13 @@ class Blades(object):
 class PolarizedBeam(object):
         def __init__(self):
                 self.ei_flip=Motor('ei_flip',values=None,err=None,units='amps',isDistinct=False) #used to determine if the flipper is on
-                self.ef_flip=Motor('ef_flip',values=None,err=None,units='amps',isDistinct=False)
+                #self.ef_flip=Motor('ef_flip',values=None,err=None,units='amps',isDistinct=False)
                 self.ef_guide=Motor('ef_guide',values=None,err=None,units='amps',isDistinct=False) #guide field
-                self.ei_guide=Motor('ei_guide',values=None,err=None,units='amps',isDistinct=False)
+                #self.ei_guide=Motor('ei_guide',values=None,err=None,units='amps',isDistinct=False)
                 self.ei_cancel=Motor('ei_cancel',values=None,err=None,units='amps',isDistinct=False)
-                self.ef_cancel=Motor('ei_flip',values=None,err=None,units='amps',isDistinct=False)
-                self.hsample=Motor('ei_flip',values=None,err=None,units='amps',isDistinct=False) #horizontal current
-                self.vsample=Motor('ei_flip',values=None,err=None,units='amps',isDistinct=False) #vertical current
+                #self.ef_cancel=Motor('ei_cancel',values=None,err=None,units='amps',isDistinct=False)
+                self.hsample=Motor('hsample',values=None,err=None,units='amps',isDistinct=False) #horizontal current
+                self.vsample=Motor('vsample',values=None,err=None,units='amps',isDistinct=False) #vertical current
                 self.sample_guide_field_rotatation=Motor('sample_guide_field_rotatation',values=None,err=None,units='degrees',isDistinct=False)
                 self.flipper_state=Motor('flipper_state',values=None,err=None,units='',isDistinct=False) #short hand, can be A,B,C, etc.
         def __iter__(self):
@@ -861,7 +861,7 @@ class TripleAxis(object):
                                 'style': 'line',
                                 }],
                 }
-                return plottable_data
+                return simplejson.dumps(plottable_data)
 
 
 # ****************************************************************************************************************************************************
@@ -1557,50 +1557,72 @@ def remove_duplicates(tas,distinct,not_distinct):
         #after every column is exhausted, if non-unique rows still exist then go column by
         #column, find 'duplicates' and merge them
         
+        
+        
         uniques=[] #list of row indices to skip (ie unique pts to keep in datafile)
-        notuniques=[] #list of row indices of non-unique pts
+        dups=[]
+        for index in range(len(distinct[0])):
+                dups.append(range(len(distinct[0]))) #list of lists. Each inner list is a list of every row index (0 to len)
+                                                       #when a row becomes distinct from another, its index is removed from the the other's index
         newtas = tas
         
         for field in distinct:
                 for i in range(len(distinct[0])):
                         if not uniques.__contains__(i): #if the row isn't unique
-                                isunique=True
-                                for j in range(len(distinct[0])):
-                                        if not i==j and not uniques.__contains__(j) and field.measurement[i].x == field.measurement[j].x:
-                                                #For this column (field), if this measurement is equal to any
-                                                #other measurement in the column, this measurment is not unique
-                                                #based on this column alone. Thus, break and check next row (measurement)
-                                                isunique=False
-                                                break
-                                if isunique:
+                                for j in range(i+1, len(distinct[0])):
+                                        if not uniques.__contains__(j) and dups[i].__contains__(j):
+                                                #going through every row below row i since i has been compared to every other row already
+                                                if field.measurement[i].x != field.measurement[j].x:
+                                                        #For this column (field), if this measurement is not equal to any
+                                                        #another measurement in the column, these measurment are distinct
+                                                        #and the j index is removed from the dups[i] list and vise versa
+                                                        dups[i].remove(j)
+                                                        dups[j].remove(i)                                                        
+                                if len(dups[i])==1:
                                         #if every row in the column is distinct from the ith row, then it is unique
+                                        #MAY NOT NEED TO KEEP TRACK OF UNIQUES...
+                                        #CAN ALWAYS GET BY len(dups[i])==1
                                         uniques.append(i)
                         
                 if len(uniques)==len(distinct[0]):
                         #if all rows are deemed unique, return
                         return tas
+                
         for field in not_distinct:
-                for i in range(len(not_distinct[0])):
-                        if not uniques.__contains__(i): #if the row isn't unique
-                                isunique=True
-                                for j in range(len(not_distinct[0])):
-                                        if not i==j and not uniques.__contains__(j) and abs(field.measurement[i]-field.measurement[j]).x <= field.window:
-                                                #For this column (field), if this measurement is within the tolerance of any
-                                                #other measurement in the column, this measurment is not unique
-                                                #based on this column alone. Thus, break and check next row (measurement)
-                                                isunique=False
-                                                break
-                                if isunique:
-                                        #if every row in the column is 'distinct' from the ith row, then it is unique
-                                        uniques.append(i)
-                        
-                if len(uniques)==len(distinct[0]):
-                        #if all rows are deemed unique, return
-                        return tas
+                if not type(field)==Detector:
+                        for i in range(len(not_distinct[0])):
+                                if not uniques.__contains__(i): #if the row isn't unique
+                                        for j in range(i+1,len(not_distinct[0])):
+                                                if not uniques.__contains__(j) and dups[i].__contains__(j):
+                                                        #if row j is NOT unique and row j still a potential duplicate of row i, then proceed
+                                                        if (type(field.measurement[i].x)==str or type(field.measurement[i].x)==np.string_ or not hasattr(field,'window')):
+                                                                #if field has string values or doesn't have a window (tolerance), compare exact values                                                                
+                                                                if field.measurement[i].x!=field.measurement[j].x:
+                                                                        dups[i].remove(j)
+                                                                        dups[j].remove(i)
+                                                        elif field.measurement[i].x!=field.measurement[j].x or abs(field.measurement[i]-field.measurement[j]).x > field.window:
+                                                                #For this column (field), if this measurement is NOT within the tolerance of the
+                                                                #other measurement in the column, the measurements are distinct.
+                                                                #NOTE: keep the != check before the tolerance check to catch 'None's before performing subtraction
+                                                                dups[i].remove(j)
+                                                                dups[j].remove(i)
+                                        if len(dups[i])==1:
+                                                #if every row in the column is 'distinct' from the ith row, then it is unique
+                                                uniques.append(i)
+                                
+                        if len(uniques)==len(distinct[0]):
+                                #if all rows are deemed unique, return
+                                return tas
 
         print len(uniques)
-        #return tas
-        
+        #ALL UNIQUE ROWS ARE INDEXED IN uniques NOW
+
+        for alist in dups:
+                #average the detector counts of every detector of each row in alist
+                #and save the resulting averages into the first row of alist.
+                #then delete other rows, ie remove them
+                pass #TODO
+
 
 def filereader(filename):
         filestr=filename
