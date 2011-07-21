@@ -464,6 +464,16 @@ function updateSeriesSelects(toPlot, plotid) {
         }
     }
 }
+
+function get(arr, i) {
+    if (arr) {
+        return arr[i];
+    }
+    else {
+        return null;
+    }
+}
+
 function updateNdPlot(plot, toPlot, stage) {
     var plotid = plot.targetId.substring(1 * (plot.targetId[0] == '#'), plot.targetId.length - 7);
     var series = plot.series;
@@ -480,7 +490,11 @@ function updateNdPlot(plot, toPlot, stage) {
             datay = toPlot.series[s].data[quantityy];
         console.log(300, toPlot.series[s], quantityx, quantityy, datax, datay);
         // I know, I know: "series" is both singular and plural... go blame the English language, not me!
-        var serie = $A(datax.values).zip(datay.values, datax.errors, datay.errors, function(a) { return [a[0], a[1], { xerr: a[2], yerr: a[3] }]; });
+        //var serie = $A(datax.values).zip(datay.values, datax.errors, datay.errors, function(a) { return [a[0], a[1], { xerr: a[2], yerr: a[3] }]; });
+        var serie = new Array();
+        for (var i = 0; i < datax.values.length; i++) {
+            serie[i] = [datax.values[i], datay.values[i], {xerr: get(datax.errors, i), yerr: get(datay.errors, i)}];
+        }
         
         console.log('serie '+s, serie);
         if (!series[s] || !series[s].hasOwnProperty('data'))
