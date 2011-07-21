@@ -31,12 +31,14 @@ class Measurement(object):
         if isinstance(other,Measurement):
             #self=Measurement([self.x,other.x],[self.dx,other.dx])
             #Should I set up checks so a None and a None combine to a single None?
-            #if self.x==other.x==None:
-            #    xs=None
-            #if self.variance==other.variance==None:
-            #    variances=None
-            xs=numpy.hstack((self.x,other.x))
-            variances=numpy.hstack((self.variance,other.variance))
+            if self.x==None and other.x==None:
+                xs=None
+            else:
+                xs=numpy.hstack((self.x,other.x))
+            if self.variance==None and other.variance==None:
+                variances=None            
+            else:
+                variances=numpy.hstack((self.variance,other.variance))
             self.x=xs
             self.variance=variances
     def _getdx(self): 
@@ -59,7 +61,11 @@ class Measurement(object):
     def __len__(self):
         return len(self.x)
     def __getitem__(self,key):
-        return Measurement(self.x[key],self.variance[key])
+        if self.variance and self.x:
+            return Measurement(self.x[key],self.variance[key])
+        
+        else:
+            return Measurement(self.x[key],None)
     def __setitem__(self,key,value):
         self.x[key] = value.x
         self.variance[key] = value.variance
@@ -208,8 +214,7 @@ class Measurement(object):
             else:
                 return format_uncertainty(self.x,numpy.sqrt(self.variance))
         else:
-            return [format_uncertainty(v,dv)
-                    for v,dv in zip(self.x,numpy.sqrt(self.variance))]
+            return [format_uncertainty(v,dv) for v,dv in zip(self.x,numpy.sqrt(self.variance))]
     def __repr__(self):
         return "Measurement(%s,%s)"%(str(self.x),str(self.variance))
 
@@ -217,7 +222,6 @@ class Measurement(object):
     def __floordiv__(self, other): return NotImplemented
     def __mod__(self, other): return NotImplemented
     def __divmod__(self, other): return NotImplemented
-    def __mod__(self, other): return NotImplemented
     def __lshift__(self, other): return NotImplemented
     def __rshift__(self, other): return NotImplemented
     def __and__(self, other): return NotImplemented
@@ -227,7 +231,6 @@ class Measurement(object):
     def __rfloordiv__(self, other): return NotImplemented
     def __rmod__(self, other): return NotImplemented
     def __rdivmod__(self, other): return NotImplemented
-    def __rmod__(self, other): return NotImplemented
     def __rlshift__(self, other): return NotImplemented
     def __rrshift__(self, other): return NotImplemented
     def __rand__(self, other): return NotImplemented
@@ -244,15 +247,15 @@ class Measurement(object):
     def __ixor__(self, other): return NotImplemented
     def __ior__(self, other): return NotImplemented
 
-    def __invert__(self): return NotImplmented  # For ~x
-    def __complex__(self): return NotImplmented
-    def __int__(self): return NotImplmented
-    def __long__(self): return NotImplmented
-    def __float__(self): return NotImplmented
-    def __oct__(self): return NotImplmented
-    def __hex__(self): return NotImplmented
-    def __index__(self): return NotImplmented
-    def __coerce__(self): return NotImplmented
+    def __invert__(self): return NotImplemented  # For ~x
+    def __complex__(self): return NotImplemented
+    def __int__(self): return NotImplemented
+    def __long__(self): return NotImplemented
+    def __float__(self): return NotImplemented
+    def __oct__(self): return NotImplemented
+    def __hex__(self): return NotImplemented
+    def __index__(self): return NotImplemented
+    def __coerce__(self,other): return NotImplemented
 
     def log(self):
         return Measurement(*err1d.log(self.x,self.variance))

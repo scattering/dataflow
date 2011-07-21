@@ -15,7 +15,7 @@ def correct_detector_sensitivity_module(id=None, datatype=None, action=None,
         'terminals': {
             #inputs
             'COR': (0, 10, -1, 0),
-            'DIV_in': (0, 20, -1, 0),
+            'DIV_in': (0, 30, -1, 0),
             
             #outputs
             'DIV_out': (20, 10, 1, 0),

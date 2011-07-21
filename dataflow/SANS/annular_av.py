@@ -10,7 +10,7 @@ def annular_av_module(id=None, datatype=None, action=None,
     """Using Annular averaging, make 1D sans data (Q vs I)"""
 
     icon = {
-        'URI': config.IMAGES + "SANS/annular1.png",
+        'URI': config.IMAGES + "SANS/annular2_image.png",
         'terminals': {
             #inputs
             'ABS': (0, 10, -1, 0),
