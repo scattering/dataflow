@@ -13,9 +13,9 @@ def initial_correction_module(id=None, datatype=None, action=None,
         'URI': config.IMAGES + "SANS/initial_correction_image.png",
         'terminals': {
             #inputs
-            'sample': (0, 10, -1, 0),
-            'empty_cell': (0, 50, -1, 0),
-            'blocked': (0, 90, -1, 0),
+            'sample': (0, 8, -1, 0),
+            'empty_cell': (0, 28, -1, 0),
+            'blocked': (0, 48, -1, 0),
             #'trans': (0, 140, -1, 0),
             
             'COR': (20, 10, 1, 0),

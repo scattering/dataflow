@@ -7,29 +7,30 @@ import numpy as np
 dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(dir)
 from pprint import pprint
-#from ...dataflow import wireit
-#from .. import config
-#from ..calc import run_template
-#from .. import wireit
-#from ..core import Data, Instrument, Template, register_instrument
-#from ..modules.load import load_module
-#from ..modules.save import save_module
-#from ...reduction.sans.filters import *
-#from ..SANS.convertq import convertq_module
-#from ..SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
-#from ..SANS.monitor_normalize import monitor_normalize_module
-#from ..SANS.correct_background import correct_background_module
-#from ..SANS.generate_transmission import generate_transmission_module
-#from ..SANS.initial_correction import initial_correction_module
-#from ..SANS.correct_solid_angle import correct_solid_angle_module
-#from ..SANS.convert_qxqy import convert_qxqy_module
-#from ..SANS.annular_av import annular_av_module
-#from ..SANS.absolute_scaling import absolute_scaling_module
-#from ..SANS.correct_dead_time import correct_dead_time_module
-#from ...reduction.sans.filters import SansData
-#from ...reduction.sans.filters import Transmission
-#from ...reduction.sans.filters import plot1D
-#from ...reduction.sans.filters import div
+if 0:
+    from ...dataflow import wireit
+    from .. import config
+    from ..calc import run_template
+    from .. import wireit
+    from ..core import Data, Instrument, Template, register_instrument
+    from ..modules.load import load_module
+    from ..modules.save import save_module
+    from ...reduction.sans.filters import *
+    from ..SANS.convertq import convertq_module
+    from ..SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
+    from ..SANS.monitor_normalize import monitor_normalize_module
+    from ..SANS.correct_background import correct_background_module
+    from ..SANS.generate_transmission import generate_transmission_module
+    from ..SANS.initial_correction import initial_correction_module
+    from ..SANS.correct_solid_angle import correct_solid_angle_module
+    from ..SANS.convert_qxqy import convert_qxqy_module
+    from ..SANS.annular_av import annular_av_module
+    from ..SANS.absolute_scaling import absolute_scaling_module
+    from ..SANS.correct_dead_time import correct_dead_time_module
+    from ...reduction.sans.filters import SansData
+    from ...reduction.sans.filters import Transmission
+    from ...reduction.sans.filters import plot1D
+    from ...reduction.sans.filters import div
 
 
 from django.utils import simplejson
@@ -38,60 +39,53 @@ from django.utils import simplejson
 
 #print 'repo', ROOT_URL.REPO_ROOT
 #print 'home', ROOT_URL.HOMEDIR
-
-import dataflow.dataflow.wireit as wireit
-
-from dataflow.dataflow import config
-
-from dataflow.dataflow.calc import run_template,get_plottable
-from dataflow.dataflow.core import Data, Instrument, Template, register_instrument
-from dataflow.dataflow.modules.load import load_module
-from dataflow.dataflow.modules.save import save_module
-from dataflow.reduction.sans.filters import *
-from dataflow.dataflow.SANS.convertq import convertq_module
-from dataflow.dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
-from dataflow.dataflow.SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
-from dataflow.dataflow.SANS.monitor_normalize import monitor_normalize_module
-from dataflow.dataflow.SANS.correct_background import correct_background_module
-from dataflow.dataflow.SANS.generate_transmission import generate_transmission_module
-from dataflow.dataflow.SANS.initial_correction import initial_correction_module
-from dataflow.dataflow.SANS.correct_solid_angle import correct_solid_angle_module
-from dataflow.dataflow.SANS.convert_qxqy import convert_qxqy_module
-from dataflow.dataflow.SANS.annular_av import annular_av_module
-from dataflow.dataflow.SANS.absolute_scaling import absolute_scaling_module
-from dataflow.dataflow.SANS.correct_dead_time import correct_dead_time_module
+if 1:
+    import dataflow.dataflow.wireit as wireit
+    
+    from dataflow.dataflow import config
+    
+    from dataflow.dataflow.calc import run_template,get_plottable
+    from dataflow.dataflow.core import Data, Instrument, Template, register_instrument
+    from dataflow.dataflow.modules.load import load_module
+    from dataflow.dataflow.modules.save import save_module
+    from dataflow.reduction.sans.filters import *
+    from dataflow.dataflow.SANS.convertq import convertq_module
+    from dataflow.dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
+    from dataflow.dataflow.SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
+    from dataflow.dataflow.SANS.monitor_normalize import monitor_normalize_module
+    from dataflow.dataflow.SANS.correct_background import correct_background_module
+    from dataflow.dataflow.SANS.generate_transmission import generate_transmission_module
+    from dataflow.dataflow.SANS.initial_correction import initial_correction_module
+    from dataflow.dataflow.SANS.correct_solid_angle import correct_solid_angle_module
+    from dataflow.dataflow.SANS.convert_qxqy import convert_qxqy_module
+    from dataflow.dataflow.SANS.annular_av import annular_av_module
+    from dataflow.dataflow.SANS.absolute_scaling import absolute_scaling_module
+    from dataflow.dataflow.SANS.correct_dead_time import correct_dead_time_module
 
 #Import not for server
-#import dataflow.wireit as wireit
-#
-#from dataflow import config
-#
-#from dataflow.calc import run_template,get_plottable
-#from dataflow.core import Data, Instrument, Template, register_instrument
-#from dataflow.modules.load import load_module
-#from dataflow.modules.save import save_module
-#from reduction.sans.filters import *
-#from dataflow.SANS.convertq import convertq_module
-#from dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
-#from dataflow.SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
-#from dataflow.SANS.monitor_normalize import monitor_normalize_module
-#from dataflow.SANS.correct_background import correct_background_module
-#from dataflow.SANS.generate_transmission import generate_transmission_module
-#from dataflow.SANS.initial_correction import initial_correction_module
-#from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
-#from dataflow.SANS.convert_qxqy import convert_qxqy_module
-#from dataflow.SANS.annular_av import annular_av_module
-#from dataflow.SANS.absolute_scaling import absolute_scaling_module
-#from dataflow.SANS.correct_dead_time import correct_dead_time_module
+if 0:
+    import dataflow.wireit as wireit
+    
+    from dataflow import config
+    
+    from dataflow.calc import run_template,get_plottable
+    from dataflow.core import Data, Instrument, Template, register_instrument
+    from dataflow.modules.load import load_module
+    from dataflow.modules.save import save_module
+    from reduction.sans.filters import *
+    from dataflow.SANS.convertq import convertq_module
+    from dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
+    from dataflow.SANS.correct_detector_sensitivity import correct_detector_sensitivity_module
+    from dataflow.SANS.monitor_normalize import monitor_normalize_module
+    from dataflow.SANS.correct_background import correct_background_module
+    from dataflow.SANS.generate_transmission import generate_transmission_module
+    from dataflow.SANS.initial_correction import initial_correction_module
+    from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
+    from dataflow.SANS.convert_qxqy import convert_qxqy_module
+    from dataflow.SANS.annular_av import annular_av_module
+    from dataflow.SANS.absolute_scaling import absolute_scaling_module
+    from dataflow.SANS.correct_dead_time import correct_dead_time_module
 
-
-
-
-
-#from reduction.sans.filters import SansData
-#from reduction.sans.filters import Transmission
-#from reduction.sans.filters import plot1D
-#from reduction.sans.filters import div
 #Transmissions
 Tsamm = 0
 Tempp = 0
@@ -262,43 +256,43 @@ if __name__ == '__main__':
         dict(module="sans.load", position=(5, 20),
              config={'files': [fileList[0]], 'intent': 'signal'}),
         #Empty Cell 1
-        dict(module="sans.load", position=(5, 30),
+        dict(module="sans.load", position=(5, 50),
              config={'files': [fileList[1]], 'intent': 'signal'}),
         #Empty 2
-        dict(module="sans.load", position=(5, 40),
+        dict(module="sans.load", position=(5, 80),
              config={'files': [fileList[2]], 'intent': 'signal'}),
         #Blocked 3
-        dict(module="sans.load", position=(5, 50),
+        dict(module="sans.load", position=(5, 110),
              config={'files': [fileList[5]], 'intent': 'signal'}),
         #4 
-        dict(module="sans.correct_dead_time", position=(360 , 50), config={}),
+        dict(module="sans.correct_dead_time", position=(250 , 10), config={}),
         
         #Tsam 5
-        dict(module="sans.load", position=(50, 100),
+        dict(module="sans.load", position=(5, 200),
              config={'files': [fileList[3]], 'intent': 'signal'}),
         #Temp 6
-        dict(module="sans.load", position=(50, 100),
+        dict(module="sans.load", position=(5, 230),
              config={'files': [fileList[4]], 'intent': 'signal'}),
         #7
-        dict(module="sans.generate_transmission", position=(120 , 80), config={}),
+        dict(module="sans.generate_transmission", position=(400 , 10), config={}),
         #8
-        dict(module="sans.save", position=(500, 500), config={'ext': 'dat'}),
+        dict(module="sans.save", position=(660, 660), config={'ext': 'dat'}),
         #9
-        dict(module="sans.initial_correction", position=(360 , 100), config={}),
+        dict(module="sans.initial_correction", position=(480 , 100), config={}),
         
         #DIV 10
-        dict(module="sans.load", position=(100, 300),
+        dict(module="sans.load", position=(5, 300),
              config={'files': [fileList[-1]], 'intent': 'signal'}),
         
         #11
-        dict(module="sans.correct_detector_sensitivity", position=(360 , 200), config={}),
+        dict(module="sans.correct_detector_sensitivity", position=(540 , 200), config={}),
         ##EMP 12
         #dict(module="sans.load", position=(100, 300),
              #config={'files': [fileList[2]], 'intent': 'signal'}),
         #12
-        dict(module="sans.absolute_scaling", position=(360 , 300), config={'ins_name':'NG3'}),
+        dict(module="sans.absolute_scaling", position=(580 , 300), config={'ins_name':'NG3'}),
         #13
-        dict(module="sans.annular_av", position=(360 , 400), config={}),
+        dict(module="sans.annular_av", position=(610 , 400), config={}),
         
         #dict(module="sans.correct_background", position=(360 , 60), config={}),
         
