@@ -436,6 +436,7 @@ var panelTwo = Ext.create('Ext.Panel', {
 			xtype: 'button',
 			text: 'Run Reduction',
 			height: '30',
+			componentCls: 'big-button',
 			handler: run_reduction,
 		},
 		],

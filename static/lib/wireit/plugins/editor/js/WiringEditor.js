@@ -657,8 +657,8 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		var moduleList = wiringDiagram.modules
 		var hitModules = [] // at some point to check which modules have already been touched
 		var headersList = [] // actual list of headers
-		for (var i in wireList) {
-			//console.log(i)
+		for (var i=0; i < wireList.length; i++) {
+			console.log(i)
 			if (moduleList[wireList[i].src.moduleId].name === 'Load') {
 			
 				headersList.push(moduleList[wireList[i].tgt.moduleId].name + ' ' + wireList[i].tgt.terminal + ': ' + wireList[i].src.moduleId)
@@ -715,12 +715,19 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	
 	displayCurrentReduction: function() {
 		//console.log('In DISPLAY')
+		
+		// changes the reduction number
 		HTML = '<dl class ="instance-info-display">'
 		for (var i in this.templateConfig[this.reductionInstance]) {
 			HTML += '<dt>' + i + "</dt><dd>" + this.templateConfig[this.reductionInstance][i] + '</dd>'
 			}
 		HTML += "</dl>";
 		YAHOO.util.Dom.get('instance-files-info').innerHTML = HTML
+		
+		// updates the module info display
+		if (this.clickedModuleID) {
+			this.layer.containers[this.clickedModuleID].onMouseDown()
+		}
 	},
 	
 	/**
@@ -761,6 +768,42 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		YAHOO.util.Dom.get('instance-modules-info').innerHTML = HTML	
 	},
 
+	generateConfigForm: function(moduleID) {
+		while (YAHOO.util.Dom.get("instance-modules-input").hasChildNodes()) {
+	    			YAHOO.util.Dom.get("instance-modules-input").removeChild(YAHOO.util.Dom.get("instance-modules-input").lastChild);
+				}
+		configHeaders = []
+		badHeaders = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
+		configs = this.layer.containers[moduleID].getConfig()[this.reductionInstance]
+		//console.log(configs)
+		for (var j in configs) {
+			if (badHeaders.indexOf(j) == -1) {
+				configHeaders.push(j)
+			}
+		}
+		//console.log(configHeaders)
+		if (configHeaders) {
+			configForm(configHeaders, moduleID)
+			}
+		else {YAHOO.util.Dom.get("instance-modules-input").innerHTML = "THIS MODULE HAS NO CONFIGURABLE INPUTS"}
+	},
+	
+	setModuleConfigsFromForm: function(configs, moduleID, instanceNumber) {
+		if (typeof instanceNumber == "number") {
+			for (var i in configs) {
+				this.layer.containers[moduleID].tracksConfigs[this.reductionInstance][i] = configs[i]
+				}
+			}
+		else {
+			for (var i in configs) {
+				for (var j = 1; j <= this.maxReduction; j++) {
+					this.layer.containers[moduleID].tracksConfigs[j][i] = configs[i]
+					}
+				}
+			}
+		this.layer.containers[moduleID].onMouseDown()
+		//console.log(this.layer.containers[moduleID].tracksConfigs)
+		},
 
 
 });

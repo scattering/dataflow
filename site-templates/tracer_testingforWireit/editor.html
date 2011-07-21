@@ -75,7 +75,7 @@ div.Bubble div.body {
 	-moz-box-sizing: border-box;
 }
 
-.x-btn-inner {
+.x-btn#big-button button {
     border-color:#EE0000;
     font-size: 24px !important;
     font-weight: bold !important;
@@ -366,12 +366,16 @@ YAHOO.util.Event.onDOMReady( function() {
 		WireIt.ImageContainer.prototype.width = 40;
 		WireIt.ImageContainer.prototype.onMouseDown = function() {
 			//console.log('clicked on imageContainer')
+			editor.clickedModuleID = editor.layer.containers.indexOf(this)
 			editor.displayClickedModuleConfig(this)
+			editor.generateConfigForm(editor.layer.containers.indexOf(this))
 			holder = this;
 			}
 		WireIt.Container.prototype.onMouseDown = function() {
 			//console.log('clicked on container')
+			editor.clickedModuleID = editor.layer.containers.indexOf(this)
 			editor.displayClickedModuleConfig(this)
+			editor.generateConfigForm(editor.layer.containers.indexOf(this))
 			},
 		WireIt.Container.prototype.getConfig = function() {
 			configs = {}
