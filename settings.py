@@ -189,6 +189,14 @@ LOGGING = {
 
 ACCOUNT_ACTIVATION_DAYS = 2
 EMAIL_HOST = 'localhost'
-DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+#DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 LOGIN_REDIRECT_URL = '../myProjects/'
+
+if 1:    
+    EMAIL_USE_TLS = True
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_HOST_USER = 'drneutron@gmail.com'
+    EMAIL_HOST_PASSWORD = r'abcde'
+    EMAIL_PORT = 587
+    DEFAULT_FROM_EMAIL = 'support@drneutron.org <drneutron@gmail.com>'
 

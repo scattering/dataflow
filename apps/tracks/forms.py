@@ -4,12 +4,10 @@ from models import *
 language_choices = (
 			('bt7', 'bt7'),
 			('sans', 'sans'),
-			('sans2', 'sans2'),
 			('refl', 'refl'),
 			('andr', 'andr'),
 			('tas', 'tas'),
-			('new_andr', 'new_andr'),
-			('sans_novel','sans_novel'),
+			('andr2', 'andr2'),
 )
 
 instrument_class_list = []

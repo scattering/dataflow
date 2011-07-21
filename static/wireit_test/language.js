@@ -1,4 +1,4 @@
-var testLanguage = 
+var bt7 = 
 {
     "propertiesFields": [
         {

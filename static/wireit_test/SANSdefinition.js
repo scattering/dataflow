@@ -1,4 +1,4 @@
-var sans_lang = {
+var sans = {
     "modules": [
         {
             "container": {

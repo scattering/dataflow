@@ -1,4 +1,4 @@
-var andrlang = {
+var andr = {
     "modules": [
         {
             "container": {

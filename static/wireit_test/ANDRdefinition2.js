@@ -1,4 +1,4 @@
-var langandr = {
+var andr2 = {
   "languageName": "NCNR ANDR", 
   "modules": [
     {

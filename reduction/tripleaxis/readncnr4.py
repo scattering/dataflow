@@ -7,6 +7,7 @@ import writebt7
 import re
 import scanparser3 as scanparser
 import os
+from ...apps.tracks.models import File
 
 
 months={'jan':1,'feb':2,'mar':3,'apr':4,'may':5,'jun':6,'jul':7,'aug':8,'sep':9,'oct':10,'nov':11,'dec':12}
@@ -636,10 +637,12 @@ class datareader(object):
 
 
         def readbuffer(self,myfilestr,lines=N.Inf):
-                self.myfilestr=myfilestr
+                self.myfilestr= File.objects.get(name=myfilestr.split('/')[-1]).friendly_name
+                #self.myfilestr = myfilestr
+                print self.myfilestr
                 self.lines=lines
                 myfile = open(myfilestr, 'r')
-                self.instrument=myfilestr.split('.')[1]
+                self.instrument=self.myfilestr.split('.')[1]
                 if self.instrument in ['bt9','ng5','bt2']:
                         # Determine FileType
                         self.determinefiletype(myfile)

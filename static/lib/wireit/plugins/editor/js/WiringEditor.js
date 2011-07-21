@@ -307,16 +307,17 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	// NO NEED TO CHECK THE WIRE SOURCE HERE, JUST PLOT WHATEVER YOU GET
 	runModuleSuccess: function(display) {
 		plotid = 'plot';
-
+		toPlot = display
+		console.log(toPlot)
 		//console.log(display)
 		//var toPlot = display[this.wireClickSource].output[0], zipped = [];
-		if (this.wireClickSource) {
-			toPlot = display[this.wireClickSource].output
-			}
-		else {
-			toPlot = display
-		}
-		console.log(toPlot)
+		//if (this.wireClickSource) {
+		//	toPlot = display[this.wireClickSource].output
+		//	}
+		//else {
+		//	toPlot = display[0].output
+		//}
+		//console.log(toPlot)
 		plottingAPI(toPlot, plotid)
 
 	},

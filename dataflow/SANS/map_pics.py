@@ -2,10 +2,11 @@ import struct
 import sys,os
 
 def map_pics(key):
+
     """
 Generate the mapping between files and their roles
 """
-    
+   
     datadir=os.path.join(os.path.dirname(os.path.abspath(__file__)),'static/img/SANS')
     filedict={'initial':os.path.join(datadir,'initial_correction_image.png'),
               'deadtime':os.path.join(datadir,'deadtime.png'),

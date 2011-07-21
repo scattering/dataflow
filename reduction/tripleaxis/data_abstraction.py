@@ -861,7 +861,8 @@ class TripleAxis(object):
                                 'style': 'line',
                                 }],
                 }
-                return plottable_data
+                
+                return simplejson.dumps(plottable_data)
 
 
 # ****************************************************************************************************************************************************
@@ -1626,5 +1627,6 @@ if __name__=="__main__":
         bt7.harmonic_monitor_correction('BT7')
         bt7.resolution_volume_correction()
         print 'bye'
+
 
 
