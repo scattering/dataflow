@@ -190,7 +190,7 @@ LOGGING = {
 ACCOUNT_ACTIVATION_DAYS = 2
 EMAIL_HOST = 'localhost'
 #DEFAULT_FROM_EMAIL = 'webmaster@localhost'
-LOGIN_REDIRECT_URL = '/login/'
+LOGIN_REDIRECT_URL = '../myProjects/'
 
 if 1:    
     EMAIL_USE_TLS = True

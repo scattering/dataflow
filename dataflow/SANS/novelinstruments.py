@@ -32,6 +32,7 @@ if 1:
 	from ...reduction.sans.filters import Transmission
 	from ...reduction.sans.filters import plot1D
 	from ...reduction.sans.filters import div
+	from ...apps.tracks.models import File
 
 
 from django.utils import simplejson
@@ -63,6 +64,7 @@ if 0:
 	from dataflow.SANS.annular_av import annular_av_module
 	from dataflow.SANS.absolute_scaling import absolute_scaling_module
 	from dataflow.SANS.correct_dead_time import correct_dead_time_module
+	from apps.tracks.models import File
 
 
 
@@ -97,7 +99,8 @@ def load_action(files=[], intent='', **kwargs):
     return dict(output=result)
 def _load_data(name):
     print name
-    if os.path.splitext(name)[1] == ".DIV":
+    friendly_name = File.objects.get(name = name.split('/')[-1]).friendly_name
+    if os.path.splitext(friendly_name)[1] == ".DIV":
         return read_div(myfilestr=name)
     else:
         return read_sample(myfilestr=name)
