@@ -270,7 +270,7 @@ if __name__ == '__main__':
     ins = simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
     with open(dir + '/dataflow/static/wireit_test/ANDRdefinition2.js', 'w') as f:
         f.write('var langandr = ' + ins + ';')
-    sys.exit()
+    #sys.exit()
     nodenum = template.order()[-2]
     terminal = 'output'
     result = get_plottable(template, config, nodenum, terminal)
