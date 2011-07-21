@@ -63,8 +63,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/grid.png", 
-        "image": "../../static/img/grid.png", 
+        "icon": "../../static/img/rowantests/autogrid.png", 
+        "image": "../../static/img/rowantests/autogrid_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -81,8 +81,8 @@ var andr2 = {
             "multiple": false, 
             "name": "input", 
             "offsetPosition": {
-              "left": -15, 
-              "top": 1
+              "left": -12, 
+              "top": 16
             }, 
             "required": true
           }, 
@@ -101,8 +101,8 @@ var andr2 = {
             "multiple": true, 
             "name": "output", 
             "offsetPosition": {
-              "left": 15, 
-              "top": 1
+              "left": 48, 
+              "top": 16
             }, 
             "required": false
           }
@@ -113,8 +113,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/sum.png", 
-        "image": "../../static/img/sum.png", 
+        "icon": "../../static/img/rowantests/sum.png", 
+        "image": "../../static/img/rowantests/sum_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -131,8 +131,8 @@ var andr2 = {
             "multiple": false, 
             "name": "input_data", 
             "offsetPosition": {
-              "left": -15, 
-              "top": 1
+              "left": -12, 
+              "top": 4
             }, 
             "required": true
           }, 
@@ -151,8 +151,8 @@ var andr2 = {
             "multiple": true, 
             "name": "input_grid", 
             "offsetPosition": {
-              "left": -10, 
-              "top": 1
+              "left": -12, 
+              "top": 40
             }, 
             "required": false
           }, 
@@ -171,8 +171,8 @@ var andr2 = {
             "multiple": true, 
             "name": "output", 
             "offsetPosition": {
-              "left": 15, 
-              "top": 1
+              "left": 48, 
+              "top": 16
             }, 
             "required": false
           }
@@ -183,8 +183,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/offset.png", 
-        "image": "../../static/img/offset.png", 
+        "icon": "../../static/img/rowantests/offset.png", 
+        "image": "../../static/img/rowantests/offset_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -201,8 +201,8 @@ var andr2 = {
             "multiple": false, 
             "name": "input", 
             "offsetPosition": {
-              "left": 0, 
-              "top": 10
+              "left": -12, 
+              "top": 16
             }, 
             "required": true
           }, 
@@ -221,8 +221,8 @@ var andr2 = {
             "multiple": true, 
             "name": "output", 
             "offsetPosition": {
-              "left": 20, 
-              "top": 10
+              "left": 48, 
+              "top": 16
             }, 
             "required": false
           }
@@ -233,8 +233,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/wiggle.png", 
-        "image": "../../static/img/wiggle.png", 
+        "icon": "../../static/img/rowantests/wiggle.png", 
+        "image": "../../static/img/rowantests/wiggle_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -251,8 +251,8 @@ var andr2 = {
             "multiple": false, 
             "name": "input", 
             "offsetPosition": {
-              "left": 0, 
-              "top": 10
+              "left": -12, 
+              "top": 16
             }, 
             "required": true
           }, 
@@ -271,8 +271,8 @@ var andr2 = {
             "multiple": true, 
             "name": "output", 
             "offsetPosition": {
-              "left": 20, 
-              "top": 10
+              "left": 48, 
+              "top": 16
             }, 
             "required": false
           }
@@ -283,8 +283,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/twotheta.png", 
-        "image": "../../static/img/twotheta.png", 
+        "icon": "../../static/img/rowantests/twotheta.png", 
+        "image": "../../static/img/rowantests/twotheta_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -301,8 +301,8 @@ var andr2 = {
             "multiple": false, 
             "name": "input", 
             "offsetPosition": {
-              "left": 0, 
-              "top": 10
+              "left": -12, 
+              "top": 16
             }, 
             "required": true
           }, 
@@ -321,8 +321,8 @@ var andr2 = {
             "multiple": true, 
             "name": "output", 
             "offsetPosition": {
-              "left": 20, 
-              "top": 10
+              "left": 48, 
+              "top": 16
             }, 
             "required": false
           }
@@ -333,8 +333,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/qxqz.png", 
-        "image": "../../static/img/qxqz.png", 
+        "icon": "../../static/img/rowantests/qxqz.png", 
+        "image": "../../static/img/rowantests/qxqz_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -351,8 +351,8 @@ var andr2 = {
             "multiple": false, 
             "name": "input", 
             "offsetPosition": {
-              "left": 0, 
-              "top": 10
+              "left": -12, 
+              "top": 4
             }, 
             "required": true
           }, 
@@ -371,8 +371,8 @@ var andr2 = {
             "multiple": false, 
             "name": "output_grid", 
             "offsetPosition": {
-              "left": 10, 
-              "top": 10
+              "left": -12, 
+              "top": 40
             }, 
             "required": false
           }, 
@@ -391,8 +391,8 @@ var andr2 = {
             "multiple": true, 
             "name": "output", 
             "offsetPosition": {
-              "left": 20, 
-              "top": 10
+              "left": 48, 
+              "top": 16
             }, 
             "required": false
           }
@@ -403,8 +403,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/load_he3.png", 
-        "image": "../../static/img/load_he3.png", 
+        "icon": "../../static/img/rowantests/load_he3.png", 
+        "image": "../../static/img/rowantests/load_he3_image.png", 
         "terminals": [
           {
             "alwaysSrc": true, 
@@ -433,8 +433,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/timestamp.png", 
-        "image": "../../static/img/timestamp.png", 
+        "icon": "../../static/img/rowantests/timestamp.png", 
+        "image": "../../static/img/rowantests/timestamp_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -483,8 +483,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/app_polar_matrix.png", 
-        "image": "../../static/img/app_polar_matrix.png", 
+        "icon": "../../static/img/rowantests/app_polar_matrix.png", 
+        "image": "../../static/img/rowantests/app_polar_matrix_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -553,8 +553,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/sum_polar.png", 
-        "image": "../../static/img/sum_polar.png", 
+        "icon": "../../static/img/rowantests/sum_polar.png", 
+        "image": "../../static/img/rowantests/sum_polar_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -623,8 +623,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/polar_correct.png", 
-        "image": "../../static/img/polar_correct.png", 
+        "icon": "../../static/img/rowantests/polar_correct.png", 
+        "image": "../../static/img/rowantests/polar_correct_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 

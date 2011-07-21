@@ -3,7 +3,11 @@ import sys,os
 
 def map_pics(key):
 
-    datadir=os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),'/static/img/SANS')
+    """
+Generate the mapping between files and their roles
+"""
+   
+    datadir=os.path.join(os.path.dirname(os.path.abspath(__file__)),'static/img/SANS')
     filedict={'initial':os.path.join(datadir,'initial_correction_image.png'),
               'deadtime':os.path.join(datadir,'deadtime.png'),
               'trans':os.path.join(datadir,'gen_trans_image.png'),

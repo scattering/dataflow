@@ -10,7 +10,8 @@ def load_he3_module(id=None, datatype=None, action=None,
     """Module for loading an he3 analyzer collection"""
 
     icon = {
-        'URI': config.IMAGES + "load_he3.png",
+        'URI': config.IMAGES + config.ANDR_FOLDER + "load_he3.png",
+        'image': config.IMAGES + config.ANDR_FOLDER + "load_he3_image.png",
         'terminals': {
             'output': (20, 10, 1, 0),
         }

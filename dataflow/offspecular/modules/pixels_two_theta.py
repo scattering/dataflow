@@ -10,10 +10,11 @@ def pixels_two_theta_module(id=None, datatype=None, action=None,
     """Creates a module for converting to two theta"""
 
     icon = {
-        'URI': config.IMAGES + "twotheta.png",
+        'URI': config.IMAGES + config.ANDR_FOLDER + "twotheta.png",
+        'image': config.IMAGES + config.ANDR_FOLDER + "twotheta_image.png",
         'terminals': {
-            'input': (0, 10, -1, 0),
-            'output': (20, 10, 1, 0),
+            'input': (-12, 16, -1, 0),
+            'output': (48, 16, 1, 0),
         }
     }
     

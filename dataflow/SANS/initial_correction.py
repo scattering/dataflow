@@ -10,7 +10,7 @@ def initial_correction_module(id=None, datatype=None, action=None,
     """(SAM-BGD)-[tsam/temp](EMP-BGD)"""
 
     icon = {
-        'URI': config.IMAGES + map_pics('initial'),
+        'URI': config.IMAGES + "SANS/initial_correction_image.png",
         'terminals': {
             #inputs
             'sample': (0, 10, -1, 0),
