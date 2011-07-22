@@ -146,24 +146,24 @@ save = save_module(id='sans.save', datatype=SANS_DATA,
 
 
 # Modules
-def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in, deadtime_cons=3.4e-6 , **kwargs):
+def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in, deadtimeConstant=3.4e-6 , **kwargs):
     lis = [sample_in[0], empty_cell_in[0], empty_in[0], blocked_in[0]] 
     print "List: ", lis
     #Enter DeadTime parameter eventually
     solidangle = [correct_solid_angle(f) for f in lis]
     det_eff = [correct_detector_efficiency(f) for f in solidangle]
-    deadtime = [correct_dead_time(f, deadtime_cons) for f in det_eff]
+    deadtime = [correct_dead_time(f, deadtimeConstant) for f in det_eff]
     result = deadtime
     return dict(sample_out=[result[0]], empty_cell_out=[result[1]], empty_out=[result[2]], blocked_out=[result[3]])
 deadtime = correct_dead_time_module(id='sans.correct_dead_time', datatype=SANS_DATA, version='1.0', action=correct_dead_time_action)
 
-def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Temp_in, monitor_norm=1e8, bottomLeftCord={}, topRightCord={}, **kwargs):
+def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Temp_in, monitorNormalize=1e8, bottomLeftCord={}, topRightCord={}, **kwargs):
     coord_left = (bottomLeftCord['X'], bottomLeftCord['Y'])
     coord_right = (topRightCord['X'], topRightCord['Y'])
     lis = [sample_in[0], empty_cell_in[0], empty_in[0], Tsam_in[0], Temp_in[0]] 
     print "Lis: ", lis
     #Enter Normalization Parameter eventually
-    norm = [monitor_normalize(f) for f in lis]
+    norm = [monitor_normalize(f,monitorNormalize) for f in lis]
     
     Tsam = generate_transmission(norm[3], norm[2], coord_left, coord_right)
     Temp = generate_transmission(norm[4], norm[2], coord_left, coord_right)
@@ -272,7 +272,7 @@ if __name__ == '__main__':
         dict(module="sans.load", position=(5, 110),
              config={'files': [fileList[5]], 'intent': 'signal'}),
         #4 
-        dict(module="sans.correct_dead_time", position=(250 , 10), config={'deadtime_cons':3.4e-6}),
+        dict(module="sans.correct_dead_time", position=(250 , 10), config={'deadtimeConstant':3.4e-6}),
         
         #Tsam 5
         dict(module="sans.load", position=(5, 200),
@@ -281,7 +281,7 @@ if __name__ == '__main__':
         dict(module="sans.load", position=(5, 230),
              config={'files': [fileList[4]], 'intent': 'signal'}),
         #7
-        dict(module="sans.generate_transmission", position=(400 , 10), config={'monitor_norm':1e8, 'bottomLeftCord':{'X':55, 'Y':53}, 'topRightCord':{'X':74, 'Y':72}}),
+        dict(module="sans.generate_transmission", position=(400 , 10), config={'monitorNormalize':1e8, 'bottomLeftCord':{'X':55, 'Y':53}, 'topRightCord':{'X':74, 'Y':72}}),
         #8
         dict(module="sans.save", position=(660, 660), config={'ext': 'dat'}),
         #9

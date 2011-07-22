@@ -79,7 +79,7 @@ def correct_dead_time_module(id=None, datatype=None, action=None,
              description='Dead Time',
              ),
     ]
-    deadtime_cons_field = {
+    deadtimeConstant_field = {
         'type' :'float',
         'label':'Deadtime Constant (default=3.4e-6)',
         'name' :'deadtime',
@@ -92,7 +92,7 @@ def correct_dead_time_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[deadtime_cons_field]+fields,
+                  fields=[deadtimeConstant_field]+fields,
                   action=action,
                   )
 
