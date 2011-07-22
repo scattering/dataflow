@@ -13,14 +13,14 @@ def generate_transmission_module(id=None, datatype=None, action=None,
         'URI': config.IMAGES + "SANS/gen_trans_image.png",
         'terminals': {
             #inputs
-            'sample_in': (0, 5, -1, 0),
-            'empty_cell_in': (0, 15, -1, 0),
-            'empty_in': (0, 25, -1, 0),
-            'Tsam_in': (0, 35, -1, 0),
-            'Temp_in': (0, 45, -1, 0),
+            'sample_in': (-16, 5, -1, 0),
+            'empty_cell_in': (-16, 15, -1, 0),
+            'empty_in': (-16, 25, -1, 0),
+            'Tsam_in': (-16, 35, -1, 0),
+            'Temp_in': (-16, 45, -1, 0),
             
-            'sample_out': (30, 10, 1, 0),
-            'empty_cell_out': (30, 30, 1, 0),
+            'sample_out': (48, 10, 1, 0),
+            'empty_cell_out': (48, 30, 1, 0),
             #'empty_out': (20, 10, 1, 0),
             #'trans': (20, 10, 1, 0),
         }

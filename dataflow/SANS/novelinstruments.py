@@ -42,7 +42,7 @@ from django.utils import simplejson
 #print 'repo', ROOT_URL.REPO_ROOT
 #print 'home', ROOT_URL.HOMEDIR
 
-if 1:
+if 0:
 	import dataflow.wireit as wireit
 
 	from dataflow import config
@@ -65,7 +65,7 @@ if 1:
 	from dataflow.SANS.absolute_scaling import absolute_scaling_module
 	from dataflow.SANS.correct_dead_time import correct_dead_time_module
 	from apps.tracks.models import File
-if 0:
+if 1:
 	import dataflow.dataflow.wireit as wireit
 
 	from dataflow.dataflow import config
@@ -211,7 +211,7 @@ def convert_qxqy_action():
 def absolute_scaling_action(DIV, empty, sensitivity,ins_name = '', **kwargs):
     #sample,empty,DIV,Tsam,instrument
     lis = [DIV[0], empty[0], sensitivity[0]]
-    global qx, qy
+    global qx,qy
     sensitivity = lis[-1]
     EMP = lis[1]
     DIV = lis[0]
