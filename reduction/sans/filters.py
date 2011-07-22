@@ -581,33 +581,6 @@ def annular_av(sansdata):
     Ilog = np.log10(I).tolist()
     print "Qlog: ", Qlog
     print "Ilog: ", Ilog
-    
-    plottable_data = {
-        'type': 'nd',
-        'title': '1D Sans-Data',
-        'clear_existing': 1==3,
-        'orderx': [{'key': 'Q', 'label': 'Q'}, {'key': 'h', 'label': 'h'}, {'key': 'k', 'label': 'k'} ],
-        'ordery': [{'key': 'I', 'label': 'Intensity'}, {'key': 'SD', 'label': 'Single Detector'}],
-        'series': [
-            {
-                'label': '1D Data',
-                'data': {
-                    'Q': {
-                        'values': Q,
-                        'errors': [1, 2, 3, 4],
-                        },
-                    'I': {
-                        'values': I,
-                        'errors': [1, 2, 3, 4],
-                        },
-                    },
-                'color': 'Red',
-                'style': 'line',
-                },
-        ]
-        };
-    
-    #plottable_1D = json.dumps(plottable_1D)
     #plt.plot(Q,I,'ro')
     #plt.title('1D')
     #plt.xlabel('q(A^-1)')
