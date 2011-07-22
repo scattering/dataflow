@@ -13,11 +13,11 @@ def absolute_scaling_module(id=None, datatype=None, action=None,
         'URI': config.IMAGES + "SANS/abs_image.png",
         'terminals': {
             #inputs
-            'DIV': (0, 5, -1, 0),
-            'empty': (0, 25, -1, 0),
-            'sensitivity': (0, 40, -1, 0),
+            'DIV': (-16, 5, -1, 0),
+            'empty': (-16, 25, -1, 0),
+            'sensitivity': (-16, 40, -1, 0),
             
-            'ABS': (20, 10, 1, 0),
+            'ABS': (48, 10, 1, 0),
         }
     }
     
