@@ -157,7 +157,7 @@ def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in, dea
     return dict(sample_out=[result[0]], empty_cell_out=[result[1]], empty_out=[result[2]], blocked_out=[result[3]])
 deadtime = correct_dead_time_module(id='sans.correct_dead_time', datatype=SANS_DATA, version='1.0', action=correct_dead_time_action)
 
-def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Temp_in, monitorNormalize=1e8, bottomLeftCord={}, topRightCord={}, **kwargs):
+def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Temp_in, monitorNormalize=1e8, bottomLeftCoord={}, topRightCoord={}, **kwargs):
     coord_left = (bottomLeftCord['X'], bottomLeftCord['Y'])
     coord_right = (topRightCord['X'], topRightCord['Y'])
     lis = [sample_in[0], empty_cell_in[0], empty_in[0], Tsam_in[0], Temp_in[0]] 
@@ -281,7 +281,7 @@ if __name__ == '__main__':
         dict(module="sans.load", position=(5, 230),
              config={'files': [fileList[4]], 'intent': 'signal'}),
         #7
-        dict(module="sans.generate_transmission", position=(400 , 10), config={'monitorNormalize':1e8, 'bottomLeftCord':{'X':55, 'Y':53}, 'topRightCord':{'X':74, 'Y':72}}),
+        dict(module="sans.generate_transmission", position=(400 , 10), config={'monitorNormalize':1e8, 'bottomLeftCoord':{'X':55, 'Y':53}, 'topRightCoord':{'X':74, 'Y':72}}),
         #8
         dict(module="sans.save", position=(660, 660), config={'ext': 'dat'}),
         #9
