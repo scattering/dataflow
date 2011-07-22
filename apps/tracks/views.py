@@ -156,7 +156,10 @@ def listWirings(request):
     	experiments = Experiment.objects.get(id = data['experiment_id']).templates.all()
     	for i in experiments:
     		wires += [simplejson.loads(i.Representation)]
-    	return HttpResponse(simplejson.dumps(wires)) 
+    	if len(wires) == 0:
+    		return HttpResponse(simplejson.dumps(wirings_list))
+    	else:
+    		return HttpResponse(simplejson.dumps(wires)) 
 
 #    return HttpResponse(simplejson.dumps(a)) #andr vs bt7 testing
 
