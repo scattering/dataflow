@@ -205,7 +205,7 @@ for instrument in instrmnts:
 
 # Testing
 if __name__ == '__main__':
-    polarized = False
+    polarized = True
     if not polarized:
         path, ext = dir + '/dataflow/sampledata/ANDR/sabc/Isabc20', '.cg1'
         files = [path + str(i + 1).zfill(2) + ext for i in range(1, 12)]
@@ -268,9 +268,9 @@ if __name__ == '__main__':
     #result2 = run_template(template, config)
     print template_to_wireit_diagram(template)
     ins = simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
-    with open(dir + '/dataflow/static/wireit_test/ANDRdefinition2.js', 'w') as f:
-        f.write('var langandr = ' + ins + ';')
-    #sys.exit()
+    with open(dir + '/dataflow/static/wireit_test/ANDRdefinition3.js', 'w') as f:
+        f.write('var andr3 = ' + ins + ';')
+    sys.exit()
     nodenum = template.order()[-2]
     terminal = 'output'
     result = get_plottable(template, config, nodenum, terminal)
