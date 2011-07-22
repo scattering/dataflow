@@ -1,38 +1,29 @@
 <html>
-<head>
-<title>My Projects</title>
-
-</head>
-<body>
-	<h2>My Projects </h2>
-<hr>
-{% for project in projects.object_list %}
-    <li><a STYLE="text-decoration:none" href="editProject/{{project.id}}/"> {{ project|upper }} </a>
-    </li>
-{% endfor %}
-</hr>
-   <p> <form action="." method="POST">
-    {% csrf_token %}
-        <table>
-            {{ form.as_table }}
-        </table>
-        <p><input type="submit" value="Add this project"></p>
-    </form></p>
-
-<div class="pagination">
-    <span class="step-links">
-        {% if projects.has_previous %}
-            <a href="?page={{ projects.previous_page_number }}">previous</a>
-        {% endif %}
-
-        <span class="current">
-            Page {{ projects.number }} of {{ projects.paginator.num_pages }}.
-        </span>
-
-        {% if projects.has_next %}
-            <a href="?page={{ projects.next_page_number }}">next</a>
-        {% endif %}
-    </span>
-</div>
-</body>
+	<head>
+		<title>My Projects</title>
+	</head>
+	<body>
+		<h2>My Projects </h2>
+		<hr>
+		{% for project in projects.object_list %}
+		<li>
+			<a STYLE="text-decoration:none" href="editProject/{{project.id}}/"> {{ project|upper }} </a>
+		</li>
+		{% endfor %}
+		</hr>
+		<p>
+			<form action="." method="POST">
+				{% csrf_token %}
+				<table>
+					{{ form.as_table }}
+				</table>
+				<p>
+					<input type="submit" value="Add this project">
+				</p>
+			</form>
+		</p>
+		<div class="pagination">
+			<span class="step-links"> {% if projects.has_previous %} <a href="?page={{ projects.previous_page_number }}">previous</a> {% endif %} <span class="current"> Page {{ projects.number }} of {{ projects.paginator.num_pages }}. </span> {% if projects.has_next %} <a href="?page={{ projects.next_page_number }}">next</a> {% endif %} </span>
+		</div>
+	</body>
 </html>
