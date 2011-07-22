@@ -2,14 +2,17 @@ function configForm(headerList, moduleID) {
 
 	// headerList should contain a list of [fieldset title ("theta"), [list field names ["x","y"] (dict will have multiple, list and float only one) ] 
 	items = []
-	items2 = []
+	
 	console.log(headerList)
 	for (var i in headerList) {
+		items2 = []
 		for (var j in headerList[i][1]) {
 			item2 = {
 				fieldLabel: headerList[i][1][j],
 				name: headerList[i][1][j],
 				},
+			console.log('i', i, 'j', j)
+			console.log('adding item: ', item2)
 			items2.push(item2)
 			}
 			
