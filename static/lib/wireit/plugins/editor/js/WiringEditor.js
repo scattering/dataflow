@@ -228,8 +228,12 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
        	return;
     	}
 		// THIS IS WHERE THE MAGIC HAPPENS
-		// getValue returns the current wiring, and the tempSavedWiring parses all the relevant info
+		// getValue returns the current wiring, and the tempSavedWiring stores all the relevant info
 		this.tempSavedWiring = {name: wirename, modules: value.working.modules, properties: value.working.properties, wires:value.working.wires, language: this.options.languageName };
+	for (var i in this.tempSavedWiring.modules) {
+		console.log(i, this.tempSavedWiring.modules[i].config)
+		this.tempSavedWiring.modules[i].config = this.tempSavedWiring.modules[i].config[this.reductionInstance]
+		}
 	this.tempSavedWiring.properties.name = wirename
     	this.adapter.saveWiring(this.tempSavedWiring, {
        	success: this.saveModuleSuccess,
@@ -244,9 +248,9 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	  */
 	 saveModuleSuccess: function(o) {
 
-		this.markSaved();
+		//this.markSaved();
 
-	   this.alert("Saved !\n source code follows:\n" + JSON.stringify(this.tempSavedWiring));
+	   //this.alert("Saved !\n source code follows:\n" + JSON.stringify(this.tempSavedWiring));
 
 		// TODO: call a saveModuleSuccess callback...
 	 },

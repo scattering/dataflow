@@ -158,7 +158,11 @@ def saveWiring(request):
     new_wiring = simplejson.loads(request.POST['data'])
     # this stores the wires in a simple list, in memory on the django server.
     # replace this with a call to storing the wiring in a real database.
-    wirings_list.append(new_wiring)
+    #print 'TEMPLATE NAME: ', new_wiring['name']
+    #print 'TEMPLATE REPR: ', new_wiring
+    #print 'USER: ',request.user
+    Template.objects.create(Title = new_wiring['name'], Representation=simplejson.dumps(new_wiring), user=request.user)
+    #wirings_list.append(new_wiring)
     return HttpResponse(simplejson.dumps(b)) #, context_instance=context
 
 def get_filepath_by_hash(fh):
@@ -368,5 +372,5 @@ def editExperiment(request, experiment_id):
 	else:
 		instrument_class = None
 	form1 = experimentForm1(initial={'facility':facility, 'instrument_class':instrument_class, 'instrument_name':instrument})
-	form2 = experimentForm2()
+	form2 = experimentForm2(USER = request.user)
 	return render_to_response('userProjects/editExperiment.html', {'form1':form1, 'form2':form2, 'experiment':experiment, }, context_instance=context)
