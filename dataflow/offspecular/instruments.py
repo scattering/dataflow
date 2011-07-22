@@ -8,7 +8,7 @@ sys.path.append(dir)
 # left here for testing purposes
 # python uses __name__ for relative imports so I cannot use
 # the ... in place of dataflow when testing
-TESTING = 1
+TESTING = 0
 if TESTING:
     from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
     from dataflow.dataflow import config
