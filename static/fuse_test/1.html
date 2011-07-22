@@ -1,55 +1,58 @@
 <html>
-<head>
-    <title>Test</title>
-    
-    <link rel="stylesheet" type="text/css" href="../lib/yui/reset-fonts-grids/reset-fonts-grids.css" />
-    <link rel="stylesheet" type="text/css" href="../lib/yui/assets/skins/sam/skin.css" />
-    <script type="text/javascript" src="../lib/yui/yahoo/yahoo-debug.js"></script>
-    <script type="text/javascript" src="../lib/yui/utilities/utilities.js"></script>
-    <script type="text/javascript" src="../lib/yui/container/container-min.js"></script>
+	<head>
+		<title>Test</title>
+		<link rel="stylesheet" type="text/css" href="../lib/yui/reset-fonts-grids/reset-fonts-grids.css" />
+		<link rel="stylesheet" type="text/css" href="../lib/yui/assets/skins/sam/skin.css" />
+		<script type="text/javascript" src="../lib/yui/yahoo/yahoo-debug.js"></script>
+		<script type="text/javascript" src="../lib/yui/utilities/utilities.js"></script>
+		<script type="text/javascript" src="../lib/yui/container/container-min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../lib/ext/resources/css/ext-all.css" />
+		<script type="text/javascript" src="../lib/ext/bootstrap.js"></script>
+		<style type="text/css">
+			body {
+				width: 300px;
+			}
+			#foo1, #bar2 {
+				border: 4px solid lime;
+				background: lime;
+			}
+			#foo2, #bar1 {
+				border: 4px solid plum;
+				background: plum;
+			}
+			#foo2, #bar2 {
+				color: peru;
+			}
+		</style>
+		<script type="text/javascript">
+			Ext.onReady(function() {
+				var foo1 = new Ext.Container({
+					id : 'foo1',
+					renderTo : 'foo',
+					html : 'foo1 container (Ext)',
+				});
 
-    <link rel="stylesheet" type="text/css" href="../lib/ext/resources/css/ext-all.css" />
-    <script type="text/javascript" src="../lib/ext/bootstrap.js"></script>
-    
-    <style type="text/css">
-    body { width: 300px; }
-    #foo1,#bar2 { border: 4px solid lime; background: lime; }
-    #foo2,#bar1 { border: 4px solid plum; background: plum; }
-    #foo2,#bar2 { color: peru; }
-    </style>
-    
-    
-    <script type="text/javascript">
+				var foo2 = new YAHOO.widget.Module("foo2");
+				foo2.setBody('foo2 module (YUI)');
+				foo2.render('foo1');
 
-        Ext.onReady(function() {
-            var foo1 = new Ext.Container({
-                id: 'foo1',
-                renderTo: 'foo',
-                html: 'foo1 container (Ext)',
-            });
-            
-            var foo2 = new YAHOO.widget.Module("foo2");
-            foo2.setBody('foo2 module (YUI)');
-            foo2.render('foo1');
-            
-            var bar1 = new YAHOO.widget.Module("bar1");
-            bar1.setBody('bar1 module (YUI)');
-            bar1.render('bar');
-            
-            var bar2 = new Ext.Container({
-                id: 'bar2',
-                renderTo: 'bar1',
-                html: 'bar2 container (Ext)',
-            });
-        });
-        
-    </script>
+				var bar1 = new YAHOO.widget.Module("bar1");
+				bar1.setBody('bar1 module (YUI)');
+				bar1.render('bar');
 
-</head>
-<body class="yui-skin-sam">
-<div id="foo"></div>
-<br /><br />
-<div id="bar"></div>
-</body>
+				var bar2 = new Ext.Container({
+					id : 'bar2',
+					renderTo : 'bar1',
+					html : 'bar2 container (Ext)',
+				});
+			});
+
+		</script>
+	</head>
+	<body class="yui-skin-sam">
+		<div id="foo"></div>
+		<br />
+		<br />
+		<div id="bar"></div>
+	</body>
 </html>
-

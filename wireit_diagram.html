@@ -1,106 +1,196 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <html>
- <head>
-  <title>WireIt Testing</title>
-  
-<!-- Libs -->
-<link rel="stylesheet" type="text/css" href="static/lib/yui/reset-fonts/reset-fonts.css" /> 
-<link rel="stylesheet" type="text/css" href="static/lib/yui/container/assets/container.css"> 
+	<head>
+		<title>WireIt Testing</title>
+		<!-- Libs -->
+		<link rel="stylesheet" type="text/css" href="static/lib/yui/reset-fonts/reset-fonts.css" />
+		<link rel="stylesheet" type="text/css" href="static/lib/yui/container/assets/container.css">
+		<script type="text/javascript" src="static/lib/excanvas.js"></script>
+		<script type="text/javascript" src="static/lib/yui/utilities/utilities.js"></script>
+		<script type="text/javascript" src="static/lib/yui/event/event.js"></script>
+		<script type="text/javascript" src="static/lib/yui/container/container.js"></script>
+		<script type="text/javascript" src="static/lib/yui/layout/layout.js"></script>
+		<script type="text/javascript" src="static/lib/yui/button/button-min.js"></script>
+		<script type="text/javascript" src="static/lib/yui/json/json-min.js"></script>
+		<script type="text/javascript" src="static/lib/accordionview/accordion-min.js"></script>
+		<!-- WireIt -->
+		<script type="text/javascript" src="static/lib/wireit/wireit-min.js"></script>
+		<script type="text/javascript" src="static/lib/wireit/wiring-editor.js"></script>
+		<link rel="stylesheet" type="text/css" href="static/lib/wireit/css/WireIt.css" />
+		<script type="text/javascript" src="static/lib/wireit/json-rpc.js"></script>
+		<style>
+			div.WireIt-Container {
+				width: 350px; /* Prevent the modules from scratching on the right */
+			}
+			div.WireIt-ImageContainer {
+				width: auto;
+			}
+			div.WireIt-Terminal {
+				margin: 20px 8px;
+			}
+			.WiringEditor-module span {
+				position: relative;
+				top: -3px;
+			}
+		</style>
+		<script>
+			var demoLanguage = {
+				"propertiesFields" : [{
+					"typeInvite" : "Enter a title",
+					"type" : "string",
+					"name" : "name",
+					"label" : "Title"
+				}, {
+					"type" : "text",
+					"name" : "description",
+					"cols" : 30,
+					"label" : "Description"
+				}],
 
-<script type="text/javascript" src="static/lib/excanvas.js"></script>
-<script type="text/javascript" src="static/lib/yui/utilities/utilities.js"></script>
-<script type="text/javascript" src="static/lib/yui/event/event.js"></script>
-<script type="text/javascript" src="static/lib/yui/container/container.js"></script>
-<script type="text/javascript" src="static/lib/yui/layout/layout.js"></script>
-<script type="text/javascript" src="static/lib/yui/button/button-min.js"></script>
-<script type="text/javascript" src="static/lib/yui/json/json-min.js"></script>
-<script type="text/javascript" src="static/lib/accordionview/accordion-min.js"></script>
+				"modules" : [{
+					"container" : {
+						"width" : 120,
+						"terminals" : [{
+							"direction" : [1, 0],
+							"multiple" : true,
+							"name" : "output",
+							"required" : false,
+							"alwaysSrc" : true,
+							"ddConfig" : {
+								"type" : "data1d.tas:out",
+								"allowedTypes" : ["data1d.tas:in"]
+							},
+							"offsetPosition" : {
+								"top" : 1,
+								"right" : -16
+							}
+						}],
+						"xtype" : "WireIt.Container",
+						"height" : 16
+					},
+					"name" : "Load"
+				}, {
+					"container" : {
+						"width" : 120,
+						"terminals" : [{
+							"direction" : [-1, 0],
+							"multiple" : false,
+							"name" : "input",
+							"required" : false,
+							"alwaysSrc" : false,
+							"ddConfig" : {
+								"type" : "data1d.tas:in",
+								"allowedTypes" : ["data1d.tas:out"]
+							},
+							"offsetPosition" : {
+								"top" : 1,
+								"left" : -16
+							}
+						}],
+						"xtype" : "WireIt.Container",
+						"height" : 16
+					},
+					"name" : "Save"
+				}, {
+					"container" : {
+						"terminals" : [{
+							"direction" : [-1, 0],
+							"multiple" : true,
+							"name" : "input",
+							"required" : false,
+							"alwaysSrc" : false,
+							"ddConfig" : {
+								"type" : "data1d.tas:in",
+								"allowedTypes" : ["data1d.tas:out"]
+							},
+							"offsetPosition" : {
+								"top" : 1,
+								"left" : -15
+							}
+						}, {
+							"direction" : [1, 0],
+							"multiple" : true,
+							"name" : "output",
+							"required" : false,
+							"alwaysSrc" : true,
+							"ddConfig" : {
+								"type" : "data1d.tas:out",
+								"allowedTypes" : ["data1d.tas:in"]
+							},
+							"offsetPosition" : {
+								"top" : 1,
+								"left" : 15
+							}
+						}],
+						"xtype" : "WireIt.ImageContainer",
+						"image" : "static/img/silk/add.png",
+						"icon" : "static/img/silk/add.png"
+					},
+					"name" : "Join"
+				}, {
+					"container" : {
+						"terminals" : [{
+							"direction" : [-1, 0],
+							"multiple" : true,
+							"name" : "input",
+							"required" : false,
+							"alwaysSrc" : false,
+							"close" : false,
+							"ddConfig" : {
+								"type" : "data1d.tas:in",
+								"allowedTypes" : ["data1d.tas:out"]
+							},
+							"offsetPosition" : {
+								"top" : 10,
+								"left" : 0
+							}
+						}, {
+							"direction" : [1, 0],
+							"multiple" : true,
+							"name" : "output",
+							"required" : false,
+							"alwaysSrc" : true,
+							"ddConfig" : {
+								"type" : "data1d.tas:out",
+								"allowedTypes" : ["data1d.tas:in"]
+							},
+							"offsetPosition" : {
+								"top" : 10,
+								"left" : 20
+							}
+						}],
+						"xtype" : "WireIt.ImageContainer",
+						"image" : "static/img/fugue/balance.png",
+						"icon" : "static/img/fugue/balance.png",
+					},
+					"name" : "Scale"
+				}],
+				"languageName" : "NCNR BT7"
+			}
 
-
-<!-- WireIt -->
-<script type="text/javascript" src="static/lib/wireit/wireit-min.js"></script>
-<script type="text/javascript" src="static/lib/wireit/wiring-editor.js"></script>
-<link rel="stylesheet" type="text/css" href="static/lib/wireit/css/WireIt.css" />
-
-<script type="text/javascript" src="static/lib/wireit/json-rpc.js"></script>
-
-
-<style>
-div.WireIt-Container {
-	width: 350px; /* Prevent the modules from scratching on the right */
-}
-
-div.WireIt-ImageContainer {
-	width: auto;
-}
-
-div.WireIt-Terminal {
-	margin: 20px 8px;
-}
-
-.WiringEditor-module span {
-	position: relative;
-	top: -3px;
-}
-
-</style>
-<script>
-
-var demoLanguage = {"propertiesFields": [{"typeInvite": "Enter a title", "type": "string", "name": "name", "label": "Title"}, {"type": "text", "name": "description", "cols": 30, "label": "Description"}], 
-
-"modules": 
-
-[{"container": {"width": 120, "terminals": [{"direction": [1, 0], "multiple": true, "name": "output", "required": false, "alwaysSrc": true, "ddConfig": {"type": "data1d.tas:out", "allowedTypes": ["data1d.tas:in"]}, "offsetPosition": {"top": 1, "right": -16}}], "xtype": "WireIt.Container", "height": 16}, "name": "Load"}, 
-
-{"container": {"width": 120, "terminals": [{"direction": [-1, 0], "multiple": false, "name": "input", "required": false, "alwaysSrc": false, "ddConfig": {"type": "data1d.tas:in", "allowedTypes": ["data1d.tas:out"]}, "offsetPosition": {"top": 1, "left": -16}}], "xtype": "WireIt.Container", "height": 16}, "name": "Save"}, 
-
-{"container": {"terminals": [{"direction": [-1, 0], "multiple": true, "name": "input", "required": false, "alwaysSrc": false, "ddConfig": {"type": "data1d.tas:in", "allowedTypes": ["data1d.tas:out"]}, "offsetPosition": {"top": 1, "left": -15}}, {"direction": [1, 0], "multiple": true, "name": "output", "required": false, "alwaysSrc": true, "ddConfig": {"type": "data1d.tas:out", "allowedTypes": ["data1d.tas:in"]}, "offsetPosition": {"top": 1, "left": 15}}], "xtype": "WireIt.ImageContainer", "image":"static/img/silk/add.png", "icon": "static/img/silk/add.png"}, "name": "Join"}, 
-
-{"container": {"terminals": [{"direction": [-1, 0], "multiple": true, "name": "input", "required": false, "alwaysSrc": false, "close":false, "ddConfig": {"type": "data1d.tas:in", "allowedTypes": ["data1d.tas:out"]}, "offsetPosition": {"top": 10, "left": 0}}, {"direction": [1, 0], "multiple": true, "name": "output", "required": false, "alwaysSrc": true, "ddConfig": {"type": "data1d.tas:out", "allowedTypes": ["data1d.tas:in"]}, "offsetPosition": {"top": 10, "left": 20}}], "xtype": "WireIt.ImageContainer", "image": "static/img/fugue/balance.png", "icon":"static/img/fugue/balance.png",}, "name": "Scale"}], "languageName": "NCNR BT7"}
-
-YAHOO.util.Event.onDOMReady(function() {
-	try {
-		window._panels = 'test';
-		logicGates = new WireIt.WiringEditor(demoLanguage)
-	} catch(exc) {
-		console.log(exc)
-	}
-})
-
-</script>
-
- </head>
-
-<body class="yui-skin-sam">
-
-	<div id="top">
-	</div>
-
-
-	<div id="left">
-		
-		
-		
-	</div>
-	
-	<div id="right">
-	  <ul id="accordionView">
-
-		<li>
-			<div style='position: relative;'>
-				<div id="layerMap"></div>
-			</div>
-		</li>
-
-	  </ul>
-	</div>
-
-	<div id="center">
-	</div>
-	
-	
-
-	</div>
-
-</body>
+			YAHOO.util.Event.onDOMReady(function() {
+				try {
+					window._panels = 'test';
+					logicGates = new WireIt.WiringEditor(demoLanguage)
+				} catch(exc) {
+					console.log(exc)
+				}
+			})
+		</script>
+	</head>
+	<body class="yui-skin-sam">
+		<div id="top"></div>
+		<div id="left"></div>
+		<div id="right">
+			<ul id="accordionView">
+				<li>
+					<div style='position: relative;'>
+						<div id="layerMap"></div>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<div id="center"></div>
+		</div>
+	</body>
 </html>
