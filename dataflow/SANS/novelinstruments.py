@@ -64,7 +64,7 @@ if 0:
 	from dataflow.SANS.annular_av import annular_av_module
 	from dataflow.SANS.absolute_scaling import absolute_scaling_module
 	from dataflow.SANS.correct_dead_time import correct_dead_time_module
-	from apps.tracks.models import File
+	#from apps.tracks.models import File
 if 1:
 	import dataflow.dataflow.wireit as wireit
 
@@ -158,8 +158,8 @@ def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in, dea
 deadtime = correct_dead_time_module(id='sans.correct_dead_time', datatype=SANS_DATA, version='1.0', action=correct_dead_time_action)
 
 def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Temp_in, monitorNormalize=1e8, bottomLeftCoord={}, topRightCoord={}, **kwargs):
-    coord_left = (bottomLeftCord['X'], bottomLeftCord['Y'])
-    coord_right = (topRightCord['X'], topRightCord['Y'])
+    coord_left = (bottomLeftCoord['X'], bottomLeftCoord['Y'])
+    coord_right = (topRightCoord['X'], topRightCoord['Y'])
     lis = [sample_in[0], empty_cell_in[0], empty_in[0], Tsam_in[0], Temp_in[0]] 
     print "Lis: ", lis
     #Enter Normalization Parameter eventually
