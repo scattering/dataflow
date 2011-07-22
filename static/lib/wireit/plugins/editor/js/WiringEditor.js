@@ -793,7 +793,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		//console.log(configs)
 		for (var j in configs) {
 			if (badHeaders.indexOf(j) == -1) {
-				console.log(configs[j], typeof configs[j])
+				//console.log(configs[j], typeof configs[j])
 				if (typeof configs[j] == 'string' || typeof configs[j] == 'number'){
 					configHeaders.push([j,[j]])
 					}
@@ -806,8 +806,8 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 					}
 			}
 		}
-		console.log(configHeaders)
-		if (configHeaders) {
+		console.log(configHeaders, configHeaders.length)
+		if (configHeaders.length != 0) {
 			configForm(configHeaders, moduleID)
 			}
 		else {YAHOO.util.Dom.get("instance-modules-input").innerHTML = "THIS MODULE HAS NO CONFIGURABLE INPUTS"}

@@ -11,8 +11,8 @@ function configForm(headerList, moduleID) {
 				fieldLabel: headerList[i][1][j],
 				name: headerList[i][1][j],
 				},
-			console.log('i', i, 'j', j)
-			console.log('adding item: ', item2)
+			//console.log('i', i, 'j', j)
+			//console.log('adding item: ', item2)
 			items2.push(item2)
 			}
 			
