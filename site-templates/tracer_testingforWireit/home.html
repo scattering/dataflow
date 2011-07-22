@@ -1,17 +1,19 @@
-
 <html>
-<head>
-<title>Tracks Django</title>
-
-</head>
-<body>
-	<h2>DATAFLOW / TRACKS </h2>
-	<hr/>
-	<p> Why not look around? </p>
-	<ul>
-	{% for i in site_list %}
-    	<li><a href="{{ i }}">{{ i }} </a></li>
-	{% endfor %}
-	</ul>
-</body>
+	<head>
+		<title>Tracks Django</title>
+	</head>
+	<body>
+		<h2>DATAFLOW / TRACKS </h2>
+		<hr/>
+		<p>
+			Why not look around?
+		</p>
+		<ul>
+			{% for i in site_list %}
+			<li>
+				<a href="{{ i }}">{{ i }} </a>
+			</li>
+			{% endfor %}
+		</ul>
+	</body>
 </html>

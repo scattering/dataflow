@@ -2,17 +2,19 @@
 <script type="text/javascript" src="../../static/lib/ajaxCSRFfix.js"></script>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html lang="en">
-<head>
-    <title>Language Seletion for Wiring Editor</title>
-</head>
-<body>
-    <h2>Please select an instrument. </h2>
-    <form action="." method="POST">
-    {% csrf_token %}
-        <table>
-            {{ form.as_table }}
-        </table>
-        <p><input type="submit" value="Submit"></p>
-    </form>
-</body>
+	<head>
+		<title>Language Seletion for Wiring Editor</title>
+	</head>
+	<body>
+		<h2>Please select an instrument. </h2>
+		<form action="." method="POST">
+			{% csrf_token %}
+			<table>
+				{{ form.as_table }}
+			</table>
+			<p>
+				<input type="submit" value="Submit">
+			</p>
+		</form>
+	</body>
 </html>
