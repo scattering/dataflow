@@ -148,11 +148,11 @@ class plot1D(object):
                     'label': 'File 1',
                     'data': {
                         'Q': {
-                            'values': self.Q.tolist(),
+                            'values': self.Q,
                             'errors': [1, 2, 3, 4],
                             },
                         'I': {
-                            'values': self.I.tolist(),
+                            'values': self.I,
                             'errors': [1, 2, 3, 4],
                             },
                         },
