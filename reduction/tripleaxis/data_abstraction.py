@@ -665,7 +665,7 @@ class Collimators(object):
                 self.post_analyzer_collimator=Motor('post_analyzer_collimator',values=None,err=None,units='minutes',isDistinct=False)
                 self.post_monochromator_collimator=Motor('post_monochromator_collimator',values=None,err=None,units='minutes',isDistinct=False)
                 self.pre_analyzer_collimator=Motor('pre_analyzer_collimator',values=None,err=None,units='minutes',isDistinct=False)
-                self.pre_monochromator_collimator=Motor('post_monochromator_collimator',values=None,err=None,units='minutes',isDistinct=True)
+                self.pre_monochromator_collimator=Motor('pre_monochromator_collimator',values=None,err=None,units='minutes',isDistinct=True)
                 self.radial_collimator=Motor('radial_collimator',values=None,err=None,units='degrees',isDistinct=True, window=2.0)
                 self.soller_collimator=Motor('soller_collimator',values=None,err=None,units='degrees',isDistinct=False, window=2.0)
 
@@ -686,11 +686,8 @@ class Blades(object):
 class PolarizedBeam(object):
         def __init__(self):
                 self.ei_flip=Motor('ei_flip',values=None,err=None,units='amps',isDistinct=False) #used to determine if the flipper is on
-                #self.ef_flip=Motor('ef_flip',values=None,err=None,units='amps',isDistinct=False)
                 self.ef_guide=Motor('ef_guide',values=None,err=None,units='amps',isDistinct=False) #guide field
-                #self.ei_guide=Motor('ei_guide',values=None,err=None,units='amps',isDistinct=False)
                 self.ei_cancel=Motor('ei_cancel',values=None,err=None,units='amps',isDistinct=False)
-                #self.ef_cancel=Motor('ei_cancel',values=None,err=None,units='amps',isDistinct=False)
                 self.hsample=Motor('hsample',values=None,err=None,units='amps',isDistinct=False) #horizontal current
                 self.vsample=Motor('vsample',values=None,err=None,units='amps',isDistinct=False) #vertical current
                 self.sample_guide_field_rotatation=Motor('sample_guide_field_rotatation',values=None,err=None,units='degrees',isDistinct=False)
@@ -1523,9 +1520,14 @@ def join(tas1, tas2):
                 if key=='data' or key=='meta_data' or key=='sample' or key=='sample_environment':
                         #ignoring metadata for now
                         pass
-                #elif key=='detectors':
-                #	for field in value:
-                #		pass
+                elif key=='detectors':
+                	for field in value:
+				if field.name=='primary_detector':
+					obj=getattr(tas2,key)
+					field.measurement.join(getattr(obj,field.name).measurement)
+				else:
+					obj=getattr(tas2,key)
+					field.measurement.join_channels(getattr(obj,field.name).measurement)
                 elif key.find('blade')>=0:
                         #TODO: how should we handle joining when both TAS objects have unequal #blades?
                         obj=getattr(tas2,key)
@@ -1601,10 +1603,13 @@ def remove_duplicates(tas,distinct,not_distinct):
                                                                 if field.measurement[i].x!=field.measurement[j].x:
                                                                         dups[i].remove(j)
                                                                         dups[j].remove(i)
+                                                        elif field.measurement[i].x==None and field.measurement[j].x==None:
+                                                                pass #if both are None, do nothing --> they are not distinct values
                                                         elif field.measurement[i].x!=field.measurement[j].x or abs(field.measurement[i]-field.measurement[j]).x > field.window:
                                                                 #For this column (field), if this measurement is NOT within the tolerance of the
                                                                 #other measurement in the column, the measurements are distinct.
-                                                                #NOTE: keep the != check before the tolerance check to catch 'None's before performing subtraction
+                                                                #NOTE: keep the != check before the tolerance check to catch if only one of the
+                                                                #      measurements is a'None' before performing subtraction
                                                                 dups[i].remove(j)
                                                                 dups[j].remove(i)
                                         if len(dups[i])==1:
@@ -1615,16 +1620,43 @@ def remove_duplicates(tas,distinct,not_distinct):
                                 #if all rows are deemed unique, return
                                 return tas
 
-        print len(uniques)
         #ALL UNIQUE ROWS ARE INDEXED IN uniques NOW
-
+        rows_to_be_removed=[]
         for alist in dups:
                 #average the detector counts of every detector of each row in alist
                 #and save the resulting averages into the first row of alist.
                 #then delete other rows, ie remove them
-                pass #TODO
+                if len(alist)==1:
+                        #if the row is unique skip this list
+                        pass 
+                else:
+			for k in range(1,len(alist)):
+				for detector in newtas.detectors:
+                                        #average the first (0th) duplicate row's detectors with every other (kth) duplicate row's detectors
+                                        #and save the result into the first duplicate row.
+                                        detector.measurement[alist[0]]=(detector.measurement[alist[0]]+detector.measurement[alist[k]])/2.0
+				dups[alist[k]]=[alist[k]] #now the kth duplicate set of indices has only k, so it will be skipped
+				rows_to_be_removed.append(alist[k])
 
+        rows_to_be_removed.sort() #duplicate rows to be removed indices in order now
+        rows_to_be_removed.reverse() #duplicate rows to be removed indices in reverse order now
 
+        
+        for key,value in newtas.__dict__.iteritems():
+                if key=='data' or key=='meta_data' or key=='sample' or key=='sample_environment':
+                        #ignoring metadata for now
+                        pass
+                elif key.find('blade')>=0:
+                        for blade in value.blades:
+                                for k in rows_to_be_removed:
+                                        blade.measurement.__delitem__(k) #removes duplicate row from this detector (column)
+                else:
+                        for field in value:
+                                for k in rows_to_be_removed:
+                                        field.measurement.__delitem__(k) #removes duplicate row from this detector (column)
+        return newtas
+                                        
+                                        
 def filereader(filename):
         filestr=filename
         mydatareader=readncnr.datareader()
@@ -1643,7 +1675,7 @@ if __name__=="__main__":
 
         #plotobj=bt7.get_plottable()
         #plotobj=simplejson.dumps(plotobj)
-        join(bt7,bt7)
+        temp=join(bt7,bt7)
         bt7.normalize_monitor(90000)
         #print 'detailed balance done'
         bt7.harmonic_monitor_correction('BT7')
