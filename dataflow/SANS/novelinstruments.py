@@ -42,7 +42,7 @@ from django.utils import simplejson
 #print 'repo', ROOT_URL.REPO_ROOT
 #print 'home', ROOT_URL.HOMEDIR
 
-if 0:
+if 1:
 	import dataflow.wireit as wireit
 
 	from dataflow import config
@@ -65,7 +65,7 @@ if 0:
 	from dataflow.SANS.absolute_scaling import absolute_scaling_module
 	from dataflow.SANS.correct_dead_time import correct_dead_time_module
 	from apps.tracks.models import File
-if 1:
+if 0:
 	import dataflow.dataflow.wireit as wireit
 
 	from dataflow.dataflow import config
@@ -146,20 +146,20 @@ save = save_module(id='sans.save', datatype=SANS_DATA,
 
 
 # Modules
-def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in, **kwargs):
+def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in,deadtime_cons =3.4e-6 , **kwargs):
     lis = [sample_in[0], empty_cell_in[0], empty_in[0], blocked_in[0]] 
     print "List: ", lis
     #Enter DeadTime parameter eventually
     solidangle = [correct_solid_angle(f) for f in lis]
     det_eff = [correct_detector_efficiency(f) for f in solidangle]
-    deadtime = [correct_dead_time(f) for f in det_eff]
+    deadtime = [correct_dead_time(f,deadtime_cons) for f in det_eff]
     result = deadtime
     return dict(sample_out=[result[0]], empty_cell_out=[result[1]], empty_out=[result[2]], blocked_out=[result[3]])
 deadtime = correct_dead_time_module(id='sans.correct_dead_time', datatype=SANS_DATA, version='1.0', action=correct_dead_time_action)
 
-def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Temp_in, **kwargs):
-    coord_left = (55, 53)
-    coord_right = (74, 72)
+def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Temp_in,monitor_norm=1e8,bottomLeftCord={},topRightCord={}, **kwargs):
+    coord_left = (bottomLeftCord['X'], bottomLeftCord['Y'])
+    coord_right = (topRightCord['X'], topRightCord['Y'])
     lis = [sample_in[0], empty_cell_in[0], empty_in[0], Tsam_in[0], Temp_in[0]] 
     print "Lis: ", lis
     #Enter Normalization Parameter eventually
@@ -208,13 +208,12 @@ def convert_qxqy_action():
     correctVer, qx, qy = convert_qxqy(correctVer)
     print "Convertqxqy"
 
-def absolute_scaling_action(DIV, empty, sensitivity,ins_name = 'NG3', **kwargs):
+def absolute_scaling_action(DIV, empty, sensitivity,ins_name = '', **kwargs):
     #sample,empty,DIV,Tsam,instrument
     lis = [DIV[0], empty[0], sensitivity[0]]
-    global Tsamm, qx, qy
+    global qx, qy
     sensitivity = lis[-1]
     EMP = lis[1]
-    print "Empty: ", EMP
     DIV = lis[0]
     ABS = absolute_scaling(DIV, EMP, sensitivity, DIV.Tsam, ins_name)
     
@@ -273,7 +272,7 @@ if __name__ == '__main__':
         dict(module="sans.load", position=(5, 110),
              config={'files': [fileList[5]], 'intent': 'signal'}),
         #4 
-        dict(module="sans.correct_dead_time", position=(250 , 10), config={}),
+        dict(module="sans.correct_dead_time", position=(250 , 10), config={'deadtime_cons':3.4e-6}),
         
         #Tsam 5
         dict(module="sans.load", position=(5, 200),
@@ -282,7 +281,7 @@ if __name__ == '__main__':
         dict(module="sans.load", position=(5, 230),
              config={'files': [fileList[4]], 'intent': 'signal'}),
         #7
-        dict(module="sans.generate_transmission", position=(400 , 10), config={}),
+        dict(module="sans.generate_transmission", position=(400 , 10), config={'monitor_norm':1e8,'bottomLeftCord':{'X':55,'Y':53},'topRightCord':{'X':74,'Y':72}}),
         #8
         dict(module="sans.save", position=(660, 660), config={'ext': 'dat'}),
         #9

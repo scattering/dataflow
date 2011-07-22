@@ -92,6 +92,18 @@ def generate_transmission_module(id=None, datatype=None, action=None,
         'value':1e8,
         
         }
+    bottomLeftCord_field = {
+        'type' :'dict',
+        'label':'Bottom Left Coordinate',
+        'name' :'coords_bottom_left',
+        'value':{},
+        }
+    topRightCord_field = {
+        'type' :'dict',
+        'label':'Top Right Coordinate',
+        'name' :'coords_upper_right',
+        'value':{},
+        }
     # Combine everything into a module.
     module = Module(id=id,
                   name='generate_transmission',
@@ -99,7 +111,7 @@ def generate_transmission_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[monitor_norm_field]+fields,
+                  fields=[monitor_norm_field,bottomLeftCord_field,topRightCord_field]+fields,
                   action=action,
                   )
 
