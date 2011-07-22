@@ -762,13 +762,23 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		//console.log(module.getConfig())
 		for (i in config) {
 			//console.log(i, config[i])
-			HTML += '<dt>' + i + "</dt><dd>" + config[i] + '</dd>'
+			if (typeof config[i] == "object") {
+				HTML += '<dt>' + i +  "</dt><dd>"
+				for (var j in config[i]) {
+					HTML += "<p>" + j + ": " + config[i][j] + "</p>"
+					}
+				HTML += "</dd>"
+				}
+			else {
+				HTML += '<dt>' + i + "</dt><dd>" + config[i] + '</dd>'
+			}
 		}
 		HTML += "</dl>";
 		YAHOO.util.Dom.get('instance-modules-info').innerHTML = HTML	
 	},
 
 	generateConfigForm: function(moduleID) {
+		console.log('generating form')
 		while (YAHOO.util.Dom.get("instance-modules-input").hasChildNodes()) {
 	    			YAHOO.util.Dom.get("instance-modules-input").removeChild(YAHOO.util.Dom.get("instance-modules-input").lastChild);
 				}
@@ -778,10 +788,20 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		//console.log(configs)
 		for (var j in configs) {
 			if (badHeaders.indexOf(j) == -1) {
-				configHeaders.push(j)
+				console.log(configs[j], typeof configs[j])
+				if (typeof configs[j] == 'string' || typeof configs[j] == 'number'){
+					configHeaders.push([j,[j]])
+					}
+				if (typeof configs[j] == "object") {
+					fieldNames = []
+					for (var k in configs[j]) {
+						fieldNames.push(k)
+						}
+					configHeaders.push([j,fieldNames])
+					}
 			}
 		}
-		//console.log(configHeaders)
+		console.log(configHeaders)
 		if (configHeaders) {
 			configForm(configHeaders, moduleID)
 			}
@@ -791,14 +811,30 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	setModuleConfigsFromForm: function(configs, moduleID, instanceNumber) {
 		if (typeof instanceNumber == "number") {
 			for (var i in configs) {
-				this.layer.containers[moduleID].tracksConfigs[this.reductionInstance][i] = configs[i]
+				splitConfig = i.split(',')
+				console.log(splitConfig)
+				if (splitConfig[0] == splitConfig[1]) {
+					this.layer.containers[moduleID].tracksConfigs[this.reductionInstance][splitConfig[0]] = configs[i]
+					}
+				else {
+					this.layer.containers[moduleID].tracksConfigs[this.reductionInstance][splitConfig[0]][splitConfig[1]] = configs[i]
+				}
 				}
 			}
 		else {
 			for (var i in configs) {
-				for (var j = 1; j <= this.maxReduction; j++) {
-					this.layer.containers[moduleID].tracksConfigs[j][i] = configs[i]
+				splitConfig = i.split(',')
+				console.log(splitConfig)
+				if (splitConfig[0] == splitConfig[1]) {
+					for (var j = 1; j <= this.maxReduction; j++) {
+						this.layer.containers[moduleID].tracksConfigs[j][splitConfig[0]] = configs[i]
+						}
 					}
+				else {
+					for (var j = 1; j <= this.maxReduction; j++ ) {
+						this.layer.containers[moduleID].tracksConfigs[j][splitConfig[0]][splitConfig[1]] = configs[i]
+					}
+				}
 				}
 			}
 		this.layer.containers[moduleID].onMouseDown()
