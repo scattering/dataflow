@@ -28,7 +28,7 @@ def load_module(id=None, datatype=None, action=None,
         "type":"[file]",
         "label": "Files",
         "name": "files",
-        "value": '',
+        "value": [],
     }
     intent_field = {
         "type":"string",
