@@ -8,7 +8,7 @@ dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir)
 from pprint import pprint
 
-if 0:
+if 1:
 	from ...dataflow import wireit
 	from .. import config
 	from ..calc import run_template
@@ -65,7 +65,7 @@ if 0:
 	from dataflow.SANS.absolute_scaling import absolute_scaling_module
 	from dataflow.SANS.correct_dead_time import correct_dead_time_module
 	#from apps.tracks.models import File
-if 1:
+if 0:
 	import dataflow.dataflow.wireit as wireit
 
 	from dataflow.dataflow import config
