@@ -297,7 +297,7 @@ margin-bottom: 4px;
 			try {
 			CHOSEN_LANG_NAME = "{{ lang }}" // this is the language that is set as a template's language in
 			// WiringEditor.js getValue()
-			CHOSEN_LANG = languageDictionary["{{ lang }}"]
+			CHOSEN_LANG = languageDictionary["{{ lang }}"] // converts language string to language object
 			FILES = []
 			{% for variable in file_keys %}
 			FILES.push("{{ variable }}".split(',,,z,z,z,z,,,'))
@@ -314,6 +314,7 @@ margin-bottom: 4px;
 
 			// initial settings
 			plotCreated = false;
+			launchedFromExperimentPage = {{ experiment_id }}
 
 			// editor
 			editor = new WireIt.WiringEditor(CHOSEN_LANG);
@@ -322,6 +323,7 @@ margin-bottom: 4px;
 			editor.maxReduction = 1;
 
 			// more initial settings
+			editor.launchedFromExperimentPage = launchedFromExperimentPage
 
 			// imagecontainer initial height, width
 			WireIt.ImageContainer.prototype.height = 40;

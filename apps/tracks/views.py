@@ -148,7 +148,15 @@ wirings_list = offspec + a + SANS + SANS_2 + SANS_3 + TAS_2 + SANS_4
 def listWirings(request):
     context = RequestContext(request)
     print 'I am loading'
-    return HttpResponse(simplejson.dumps(wirings_list)) #, context_instance=context
+    data = simplejson.loads(request.POST['data'])
+    if data['experiment_id'] == -1:
+    	return HttpResponse(simplejson.dumps(wirings_list)) #, context_instance=context
+    else:
+    	wires = []
+    	experiments = Experiment.objects.get(id = data['experiment_id']).templates.all()
+    	for i in experiments:
+    		wires += [simplejson.loads(i.Representation)]
+    	return HttpResponse(simplejson.dumps(wires)) 
 
 #    return HttpResponse(simplejson.dumps(a)) #andr vs bt7 testing
 
@@ -266,19 +274,22 @@ def runReduction(request):
 @csrf_exempt 
 def displayEditor(request):
     context = RequestContext(request)
+    file_context = {}
     print request.POST.has_key('language')
     if request.POST.has_key('language'):
     	if request.POST.has_key('experiment_id'):
     		experiment = Experiment.objects.get(id=request.POST['experiment_id'])
     		file_list = experiment.Files.all()
+    		experiment_id = request.POST['experiment_id']
     	else:
     		experiment = []
     		file_list = []
-    	file_context = {}
+    		experiment_id = -1
     	for i in range(len(file_list)):
     		file_context[file_list[i].name + ',,,z,z,z,z,,,' + file_list[i].friendly_name] = ''
     	file_context['file_keys'] = file_context.keys()
 	file_context['lang'] = request.POST['language']
+	file_context['experiment_id'] = experiment_id
         return render_to_response('tracer_testingforWireit/editor.html', file_context, context_instance=context)
     else:
         return HttpResponseRedirect('/editor/langSelect/')

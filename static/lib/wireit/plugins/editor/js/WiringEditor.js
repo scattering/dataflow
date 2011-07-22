@@ -23,7 +23,8 @@ WireIt.WiringEditor = function(options) {
 	 if( this.adapter.init && YAHOO.lang.isFunction(this.adapter.init) ) {
 			this.adapter.init();
  	 }
-	 this.load();
+ 	 // Commented out the initial load. Now must click load to bring up the loading screen
+	 //this.load();
 };
 
 lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
@@ -452,7 +453,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	  */
 	load: function() {
     	console.log('LOADING') //debugging
-	    this.adapter.listWirings({language: this.options.languageName},{
+	    this.adapter.listWirings({language: this.options.languageName, experiment_id: this.launchedFromExperimentPage},{
 			success: function(result) {
 				this.onLoadSuccess(result);
 			},

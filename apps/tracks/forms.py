@@ -3,7 +3,6 @@ from models import *
 
 # language_choices should be the same as instrument_class_choices
 language_choices = (
-			('bt7', 'bt7'),
 			('sans', 'sans'),
 			('refl', 'refl'),
 			('andr', 'andr'),
