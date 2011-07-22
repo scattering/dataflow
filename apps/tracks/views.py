@@ -182,16 +182,6 @@ def runReduction(request):
                 conf.update({key: value})
         config.update({i:conf})
     print config
-   # 	j = i['config']
-   # 	print j
-   # 	if j.has_key('files'):
-   # 	    print j['files']
-   # 	    j['files'] = map(lambda x: [File.objects.get(name=str(x)).location + x], j['files'])
-    	    #print j['files']
-    #print 'RR 2'
-    #print data
-    #template_test = wireit.wireit_diagram_to_template(SANS_NEW_TEMPLATE_FROM_WIREIT)
-    #print template_test
     context = RequestContext(request)
     terminal_id = data['clickedOn']['source']['terminal']
     nodenum = int(data['clickedOn']['source']['moduleId'])
@@ -206,20 +196,6 @@ def runReduction(request):
         print "getting result"
         result = get_plottable(template, config, nodenum, terminal_id)
     print type(result)
-    print result
-    #print len(result), [simplejson.loads(s).keys() for s in result]
-    ####### SANS TESTING
-    #SANS_INS.TESTING()
-    # print "RESULT", result
-    #print result
-    #for i in range(6):
-    #	name = 'checkingSANSresults' + str(i) + '.txt'
-    # 	openFile =open(name,'w')
-    # 	openFile.write(simplejson.dumps(result[i]))
-    # 	openFile.close()
-    #result = SANS_INS.TESTING()
-    #print simplejson.dumps(result)
-    
     # Send back the first item in the bundle!
     return HttpResponse(result[0]) #, context_instance=context
     
