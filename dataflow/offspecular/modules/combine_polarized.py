@@ -16,9 +16,9 @@ def combine_polarized_module(id=None, datatype=None, action=None,
         'URI': config.IMAGES + config.ANDR_FOLDER + 'sum_polar.png',
         'image': config.IMAGES + config.ANDR_FOLDER + 'sum_polar_image.png',
         'terminals': {
-            'input': (-15, 1, -1, 0),
-            'grid': (-10, 1, -1, 0),
-            'output': (15, 1, 1, 0),
+            'input': (-12, 4, -1, 0),
+            'grid': (-12, 40, -1, 0),
+            'output': (48, 16, 1, 0),
         }
     }
     

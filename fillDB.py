@@ -4,6 +4,7 @@ if len(Instrument.objects.all()) < 1:
 	Instrument.objects.create(Name='ng3', instrument_class='sans')
 	Instrument.objects.create(Name='new_sans_ins', instrument_class='sans')
 	Instrument.objects.create(Name='ANDR', instrument_class='andr')
+	Instrument.objects.create(Name='andr2', instrument_class='andr2')
 	
 if len(Facility.objects.all()) == 0:
 	Facility.objects.create(Name='NCNR')
