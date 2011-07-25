@@ -2,8 +2,8 @@
 Offspecular reflectometry reduction modules
 """
 import os, sys, simplejson
-dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-sys.path.append(dir)
+#dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+#sys.path.append(dir)
 
 # left here for testing purposes
 # python uses __name__ for relative imports so I cannot use
@@ -46,8 +46,9 @@ else:
     from ..offspecular.modules.append_polarization_matrix import append_polarization_matrix_module
     from ..offspecular.modules.combine_polarized import combine_polarized_module
     from ..offspecular.modules.polarization_correct import polarization_correct_module
-    from ..offspecular.filters import *
-    from ..offspecular.he3analyzer import *
+    from ..offspecular.modules.timestamps import timestamp_module
+    from ...reduction.offspecular.filters import *
+    from ...reduction.offspecular.he3analyzer import *
     from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray
 
 OSPEC_DATA = 'data2d.ospec'

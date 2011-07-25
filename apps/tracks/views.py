@@ -27,7 +27,6 @@ from ...dataflow.calc import run_template
 from ...dataflow.calc import calc_single, fingerprint_template, get_plottable
 #from ...dataflow.core import register_instrument
 #from ...dataflow.tas.instruments import BT7
-
 from ...dataflow.offspecular.instruments import ANDR
 print "ANDR imported: ", ANDR.id
 #from ...dataflow.tas import instruments
