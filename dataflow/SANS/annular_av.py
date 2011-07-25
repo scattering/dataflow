@@ -39,7 +39,7 @@ def annular_av_module(id=None, datatype=None, action=None,
 
     # Combine everything into a module.
     module = Module(id=id,
-                  name='annular_av',
+                  name='Annular Average',
                   version=version,
                   description=action.__doc__,
                   icon=icon,

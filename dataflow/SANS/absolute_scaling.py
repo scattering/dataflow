@@ -60,7 +60,7 @@ def absolute_scaling_module(id=None, datatype=None, action=None,
         }
     # Combine everything into a module.
     module = Module(id=id,
-                  name='absolute_scaling',
+                  name='Absolute Scaling',
                   version=version,
                   description=action.__doc__,
                   icon=icon,

@@ -62,7 +62,7 @@ def initial_correction_module(id=None, datatype=None, action=None,
 
     # Combine everything into a module.
     module = Module(id=id,
-                  name='initial_correction',
+                  name='Initial Correction',
                   version=version,
                   description=action.__doc__,
                   icon=icon,
