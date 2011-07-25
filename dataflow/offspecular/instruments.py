@@ -8,8 +8,30 @@ sys.path.append(dir)
 # left here for testing purposes
 # python uses __name__ for relative imports so I cannot use
 # the ... in place of dataflow when testing
-TESTING = 0
-if TESTING:
+TESTING = 1
+SERVER = 1
+if SERVER:
+    from DATAFLOW.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
+    from DATAFLOW.dataflow import config
+    from DATAFLOW.dataflow.calc import run_template, get_plottable, calc_single
+    from DATAFLOW.dataflow.core import Data, Instrument, Template, register_instrument
+    from DATAFLOW.dataflow.modules.load import load_module
+    from DATAFLOW.dataflow.modules.save import save_module
+    from DATAFLOW.dataflow.offspecular.modules.combine import combine_module
+    from DATAFLOW.dataflow.offspecular.modules.autogrid import autogrid_module
+    from DATAFLOW.dataflow.offspecular.modules.offset import offset_module
+    from DATAFLOW.dataflow.offspecular.modules.wiggle import wiggle_module
+    from DATAFLOW.dataflow.offspecular.modules.pixels_two_theta import pixels_two_theta_module
+    from DATAFLOW.dataflow.offspecular.modules.two_theta_qxqz import two_theta_qxqz_module
+    from DATAFLOW.dataflow.offspecular.modules.load_he3_analyzer_collection import load_he3_module
+    from DATAFLOW.dataflow.offspecular.modules.append_polarization_matrix import append_polarization_matrix_module
+    from DATAFLOW.dataflow.offspecular.modules.combine_polarized import combine_polarized_module
+    from DATAFLOW.dataflow.offspecular.modules.polarization_correct import polarization_correct_module
+    from DATAFLOW.dataflow.offspecular.modules.timestamps import timestamp_module
+    from DATAFLOW.reduction.offspecular.filters import *
+    from DATAFLOW.reduction.offspecular.he3analyzer import *
+    from DATAFLOW.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
+elif TESTING:
     from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
     from dataflow.dataflow import config
     from dataflow.dataflow.calc import run_template, get_plottable, calc_single
