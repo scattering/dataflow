@@ -9,7 +9,7 @@ import os, sys, simplejson
 # python uses __name__ for relative imports so I cannot use
 # the ... in place of dataflow when testing
 TESTING = 1
-SERVER = 1
+SERVER = 0
 if SERVER:
     from DATAFLOW.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
     from DATAFLOW.dataflow import config

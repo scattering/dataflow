@@ -371,7 +371,12 @@ margin-bottom: 4px;
 			editor.wireClickedOn = {'source': this.src, 'target':this.tgt}
 			//editor.wireClickSource = this.src.moduleId
 			//editor.wireClickTarget = this.tgt.moduleId
-			editor.runReduction(editor.templateConfig[editor.reductionInstance])
+			try {
+				editor.runReduction(editor.templateConfig[editor.reductionInstance])
+				}
+			catch (ex) {
+				alert('Please enter file associations!')
+				}
 			}
 			// Open the infos panel
 			editor.accordionView.openPanel(2);
@@ -458,9 +463,7 @@ margin-bottom: 4px;
 					<div>
 						<div style="padding: 10px;">
 							<p>
-								Functional WireIt editor using BT7
-								language generated from Paul's
-								code.
+								Welcome to the NCNR's Dataflow application, a web-based data reduction application.
 							</p>
 							<br />
 							<p>
@@ -470,7 +473,7 @@ margin-bottom: 4px;
 							</p>
 							<br />
 							<p>
-								<a href="language.js" target=
+								<a href="/static/lib/language.js" target=
 								"_new">Click here to view the language
 								definition for this editor.</a>
 							</p>
@@ -493,9 +496,6 @@ margin-bottom: 4px;
 					<b>Drag and drop modules from the Module list</b> on the left to the working layer in the middle.
 				</p>
 				<br />
-				<p>
-					<a href="language.js" target="_new">Click here to view the language definition for this editor.</a>
-				</p>
 			</div>
 		</div>
 	</body>

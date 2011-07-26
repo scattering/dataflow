@@ -322,6 +322,7 @@ def editProject(request, project_id):
 
 @login_required 
 def editExperiment(request, experiment_id):
+	print request
 	experiment = Experiment.objects.get(id=experiment_id)
 	if request.FILES.has_key('files'):
 		file_data = request.FILES['files']
