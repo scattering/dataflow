@@ -81,7 +81,7 @@ class FilterableMetaArray(Data, MetaArray):
         ylabel = self._info[1]['name']
         zlabel = self._info[2]['cols'][0]['name']
         title = 'AND/R data' # That's creative enough, right?
-        type = '2d_image'
+        type = '2d'
         transform = 'log' # this is nice by default
         dump = dict(type=type, z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, transform=transform)
         res = simplejson.dumps(dump, sort_keys=True)
