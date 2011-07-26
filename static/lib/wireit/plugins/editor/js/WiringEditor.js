@@ -662,9 +662,10 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		var moduleList = wiringDiagram.modules
 		var hitModules = [] // at some point to check which modules have already been touched
 		var headersList = [] // actual list of headers
+		var loadCheck = /Load / // regex for checking if a module is a load, matches "Load "
 		for (var i=0; i < wireList.length; i++) {
 			//console.log(i)
-			if (moduleList[wireList[i].src.moduleId].name === 'Load') {
+			if (loadCheck.test(moduleList[wireList[i].src.moduleId].name)) {
 			
 				headersList.push(moduleList[wireList[i].tgt.moduleId].name + ' ' + wireList[i].tgt.terminal + ': ' + wireList[i].src.moduleId)
 				//console.log(moduleList[wireList[i].src.moduleId].name)
