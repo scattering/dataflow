@@ -371,6 +371,7 @@ margin-bottom: 4px;
 			WireIt.Wire.prototype.onWireClick = function(x,y) {
 			console.log('WIRE CLICK!')
 			editor.wireClickedOn = {'source': this.src, 'target':this.tgt}
+			//console.log(this)
 			//editor.wireClickSource = this.src.moduleId
 			//editor.wireClickTarget = this.tgt.moduleId
 			try {
@@ -378,11 +379,18 @@ margin-bottom: 4px;
 				}
 			catch (ex) {
 				alert('Please enter file associations!')
+				console.log(ex)
 				}
 			}
+			/**editor.layer.eventAddWire.subscribe(function(e,params) { 
+				var wire=params[0];
+				wire['src'] = wire.terminal1
+				wire['tgt'] = wire.terminal2
+				}, editor);
+**/
 			// Open the infos panel
-			editor.accordionView.openPanel(2);
-			editor.accordionView.closePanel(0);
+			//editor.accordionView.openPanel(2);
+			//editor.accordionView.closePanel(0);
 			}
 			catch(ex) {
 			alert('exception');
