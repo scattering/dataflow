@@ -202,7 +202,7 @@ def runReduction(request):
         print "getting result"
         result = get_plottable(template, config, nodenum, terminal_id)
     print type(result)
-    print result
+    #print result
     #print len(result), [simplejson.loads(s).keys() for s in result]
     ####### SANS TESTING
     #SANS_INS.TESTING()
