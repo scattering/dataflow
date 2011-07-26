@@ -25,15 +25,13 @@ from ...apps.fileview import testftp
 #from ...dataflow import wireit
 from ...dataflow.calc import run_template
 from ...dataflow.calc import calc_single, fingerprint_template, get_plottable
-#from ...dataflow.core import register_instrument
-#from ...dataflow.tas.instruments import BT7
 from ...dataflow.offspecular.instruments import ANDR
 print "ANDR imported: ", ANDR.id
-#from ...dataflow.tas import instruments
 from ...dataflow.SANS.novelinstruments import SANS_INS
 print "SANS imported: ", SANS_INS.id
 from ...dataflow.tas.instruments import BT7 as TAS_INS
 print "TAS imported: ", TAS_INS.id
+
 
 from ...dataflow import wireit
 
