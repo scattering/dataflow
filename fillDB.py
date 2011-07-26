@@ -2,7 +2,6 @@ from apps.tracks.models import *
 if len(Instrument.objects.all()) < 1:
 	Instrument.objects.create(Name='bt7', instrument_class='tas')
 	Instrument.objects.create(Name='ng3', instrument_class='sans')
-	Instrument.objects.create(Name='new_sans_ins', instrument_class='sans')
 	Instrument.objects.create(Name='ANDR', instrument_class='andr')
 	Instrument.objects.create(Name='andr2', instrument_class='andr2')
 	
