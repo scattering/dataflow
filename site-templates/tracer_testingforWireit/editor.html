@@ -123,6 +123,9 @@ div.Bubble div.body {
 <!-- JQPLOT -->
 <script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
 <script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery.jqplot.js"></script>
+<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
+<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+
 <script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.pcolorRenderer.js"></script>
 <script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.cursor.js"></script>
 <script type="text/javascript" src="../../static/lib/plotting/palettes.js"></script>
@@ -463,12 +466,11 @@ Ext.onReady(function() {
                                 <h2>Plotting!</h2>
 
                                 <div>
-                                        <div id="plots" style="display: block; border:1px solid; width:500px; height: 500px; float: left;"></div>
-                                        <canvas id="colorbar" width="60" height="500" style="float: left;"></canvas><br style="clear: left;" />
-
-                                        <div style="display: none;">
-                                            <canvas id="invis" width="1024" height="1024"></canvas>
-                                            <canvas id="invis2" width="1" height="1024"></canvas>
+                                        <div id="plots" style="display: block; width:350px; height: 350px; float: left;"></div>
+                                        <div id="colorbar" style="position: absolute; left: 350px; display: block; width: 60; height: 350;"></div>
+<!--                                        <canvas id="colorbar" width="60" height="350" style="position: absolute; left: 350px; display: block; border: 1px solid;"></canvas>-->
+<!--                                        <br style="clear: left;" />-->
+                                        <div id="plotbuttons" style = "display: block; width: 410px; height: 100px; border: 1px solid;"> </div>
                                         </div>
                                 </div>
                         </li>
