@@ -584,15 +584,15 @@ function plottingAPI(toPlots, plotid_prefix) {
         
         console.log(i, toPlot, toPlot.type, plot);
         switch (toPlot.type) {
-            case '2d':
+            /*case '2d':
                 document.getElementById('plots').appendChild(create2dPlotRegion(plotid));
                 
                 plot = renderData(toPlot, plotid + '_target', plot);
                 jQuery(document.getElementById(plotid + '_selecty')).append('<option />', { value: toPlot.ylabel, text: toPlot.ylabel });
                 jQuery(document.getElementById(plotid + '_selectx')).append('<option />', { value: toPlot.xlabel, text: toPlot.xlabel });
                 break;
-                
-            case '2d_image':
+            */    
+            case '2d':
                 if (!plotregion) {
                     document.getElementById('plots').appendChild(create2dPlotRegion(plotid));
                     plotregion = true;
