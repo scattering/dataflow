@@ -7,14 +7,15 @@ from ... import config
 from ...core import Module
 
 def timestamp_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields=[], stamp_datatype=None):
     """Module for adding timestamps to a dataset"""
 
     icon = {
         'URI': config.IMAGES + config.ANDR_FOLDER + "timestamp.png",
         'image': config.IMAGES + config.ANDR_FOLDER + "timestamp_image.png",
         'terminals': {
-            'input': (-12, 16, -1, 0),
+            'input': (-12, 4, -1, 0),
+            'stamps': (-12, 40, -1, 0),
             'output': (48, 16, 1, 0),
         }
     }
@@ -27,6 +28,13 @@ def timestamp_module(id=None, datatype=None, action=None,
              required=True,
              multiple=False,
              ),
+        dict(id='stamps',
+             datatype=stamp_datatype,
+             use='in',
+             description='JSON formatted timestamps',
+             required=True,
+             multiple=False,
+             ),
         dict(id='output',
              datatype=datatype,
              use='out',
@@ -34,13 +42,6 @@ def timestamp_module(id=None, datatype=None, action=None,
              ),
     ]
     
-    #timestamp_file='end_times.json', override_existing=False
-    filename_field = {
-        "type":"string",
-        "label": "Filename",
-        "name": "timestamp_file",
-        "value": 'end_times.json',
-    }
     override_field = {
         "type":"bool",
         "label": "Override existing?",
@@ -55,7 +56,7 @@ def timestamp_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[filename_field, override_field] + fields,
+                  fields=[override_field] + fields,
                   action=action,
                   )
 
