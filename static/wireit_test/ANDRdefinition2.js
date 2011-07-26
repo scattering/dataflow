@@ -36,6 +36,36 @@ var andr2 = {
         "height": 16, 
         "terminals": [
           {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec.he3:in"
+              ], 
+              "type": "data2d.ospec.he3:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "right": -16, 
+              "top": 1
+            }, 
+            "required": false
+          }
+        ], 
+        "width": 120, 
+        "xtype": "WireIt.Container"
+      }, 
+      "name": "Load he3"
+    }, 
+    {
+      "container": {
+        "height": 16, 
+        "terminals": [
+          {
             "alwaysSrc": false, 
             "ddConfig": {
               "allowedTypes": [
@@ -403,36 +433,6 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/rowantests/load_he3.png", 
-        "image": "../../static/img/rowantests/load_he3_image.png", 
-        "terminals": [
-          {
-            "alwaysSrc": true, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec.he3:in"
-              ], 
-              "type": "data2d.ospec.he3:out"
-            }, 
-            "direction": [
-              1, 
-              0
-            ], 
-            "multiple": true, 
-            "name": "output", 
-            "offsetPosition": {
-              "left": 20, 
-              "top": 10
-            }, 
-            "required": false
-          }
-        ], 
-        "xtype": "WireIt.ImageContainer"
-      }, 
-      "name": "Load he3"
-    }, 
-    {
-      "container": {
         "icon": "../../static/img/rowantests/timestamp.png", 
         "image": "../../static/img/rowantests/timestamp_image.png", 
         "terminals": [
@@ -451,8 +451,8 @@ var andr2 = {
             "multiple": false, 
             "name": "input", 
             "offsetPosition": {
-              "left": 0, 
-              "top": 10
+              "left": -12, 
+              "top": 16
             }, 
             "required": true
           }, 
@@ -471,8 +471,8 @@ var andr2 = {
             "multiple": true, 
             "name": "output", 
             "offsetPosition": {
-              "left": 20, 
-              "top": 10
+              "left": 48, 
+              "top": 16
             }, 
             "required": false
           }
@@ -501,8 +501,8 @@ var andr2 = {
             "multiple": false, 
             "name": "input", 
             "offsetPosition": {
-              "left": -15, 
-              "top": 1
+              "left": -12, 
+              "top": 4
             }, 
             "required": true
           }, 
@@ -521,8 +521,8 @@ var andr2 = {
             "multiple": false, 
             "name": "he3cell", 
             "offsetPosition": {
-              "left": -10, 
-              "top": 1
+              "left": -12, 
+              "top": 40
             }, 
             "required": true
           }, 
@@ -541,8 +541,8 @@ var andr2 = {
             "multiple": true, 
             "name": "output", 
             "offsetPosition": {
-              "left": 15, 
-              "top": 1
+              "left": 48, 
+              "top": 16
             }, 
             "required": false
           }
@@ -571,8 +571,8 @@ var andr2 = {
             "multiple": false, 
             "name": "input", 
             "offsetPosition": {
-              "left": -15, 
-              "top": 1
+              "left": -12, 
+              "top": 4
             }, 
             "required": true
           }, 
@@ -591,8 +591,8 @@ var andr2 = {
             "multiple": false, 
             "name": "grid", 
             "offsetPosition": {
-              "left": -10, 
-              "top": 1
+              "left": -12, 
+              "top": 40
             }, 
             "required": false
           }, 
@@ -611,8 +611,8 @@ var andr2 = {
             "multiple": true, 
             "name": "output", 
             "offsetPosition": {
-              "left": 15, 
-              "top": 1
+              "left": 48, 
+              "top": 16
             }, 
             "required": false
           }
@@ -641,8 +641,8 @@ var andr2 = {
             "multiple": false, 
             "name": "input", 
             "offsetPosition": {
-              "left": 0, 
-              "top": 10
+              "left": -12, 
+              "top": 16
             }, 
             "required": true
           }, 
@@ -661,8 +661,8 @@ var andr2 = {
             "multiple": true, 
             "name": "output", 
             "offsetPosition": {
-              "left": 20, 
-              "top": 10
+              "left": 48, 
+              "top": 16
             }, 
             "required": false
           }

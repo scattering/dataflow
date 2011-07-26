@@ -1,382 +1,349 @@
 <html>
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-	<title>WireIt - WiringEditor</title>
-
-<!-- YUI -->
-<link rel="stylesheet" type="text/css" href="../../static/lib/yui/reset-fonts-grids/reset-fonts-grids.css" />
-<link rel="stylesheet" type="text/css" href="../../static/lib/yui/assets/skins/sam/skin.css" />
-
-<!-- InputEx CSS -->
-<link type='text/css' rel='stylesheet' href='../../static/lib/wireit/plugins/inputex/lib/inputex/css/inputEx.css' />
-
-<!-- YUI-accordion CSS -->
-<link rel="stylesheet" type="text/css" href="../../static/lib/wireit/plugins/editor/lib/accordionview/assets/skins/sam/accordionview.css" />
-
-<!-- WireIt CSS -->
-<link rel="stylesheet" type="text/css" href="../../static/lib/wireit/assets/WireIt.css" />
-<link rel="stylesheet" type="text/css" href="../../static/lib/wireit/plugins/editor/assets/WireItEditor.css" />
-
-<!-- ExtJS CSS -->
-<link rel="stylesheet" type="text/css" href="../../static/lib/ext/resources/css/ext-all.css" />
-<!--<link rel="stylesheet" type="text/css" href="../../static/lib/ext/examples/shared/example.css" />-->
-<link rel="stylesheet" type="text/css" href="../../static/lib/ext/examples/ux/css/CheckHeader.css" />
-<!--<link rel="stylesheet" type="text/css" href="../../static/lib/ext/examples/button/button.css" />-->
-
-<style>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>WireIt - WiringEditor</title>
+		<!-- YUI -->
+		<link rel="stylesheet" type="text/css" href="../../static/lib/yui/reset-fonts-grids/reset-fonts-grids.css" />
+		<link rel="stylesheet" type="text/css" href="../../static/lib/yui/assets/skins/sam/skin.css" />
+		<!-- InputEx CSS -->
+		<link type='text/css' rel='stylesheet' href='../../static/lib/wireit/plugins/inputex/lib/inputex/css/inputEx.css' />
+		<!-- YUI-accordion CSS -->
+		<link rel="stylesheet" type="text/css" href="../../static/lib/wireit/plugins/editor/lib/accordionview/assets/skins/sam/accordionview.css" />
+		<!-- WireIt CSS -->
+		<!-- WireIt CSS -->
+		<link rel="stylesheet" type="text/css" href="../../static/lib/wireit/assets/WireIt.css" />
+		<link rel="stylesheet" type="text/css" href="../../static/lib/wireit/plugins/editor/assets/WireItEditor.css" />
+		<!-- ExtJS CSS -->
+		<link rel="stylesheet" type="text/css" href="../../static/lib/ext/resources/css/ext-all.css" />
+		<!--<link rel="stylesheet" type="text/css" href="../../static/lib/ext/examples/shared/example.css" /-->
+		<link rel="stylesheet" type="text/css" href="../../static/lib/ext/examples/ux/css/CheckHeader.css" />
+		<!--<link rel="stylesheet" type="text/css" href="../../static/lib/ext/examples/button/button.css" />-->
+		<style>
 div.WireIt-Container {
-	width: 350px; /* Prevent the modules from scratching on the right */
+width: 350px; /* Prevent the modules from scratching on the right */
 }
 
-div.WireIt-InOutContainer {	
-	width: 150px;
+div.WireIt-InOutContainer {
+width: 150px;
 }
 
 div.WireIt-InputExTerminal {
-	float: left;
-	width: 21px;
-	height: 21px;
-	position: relative;
+float: left;
+width: 21px;
+height: 21px;
+position: relative;
 }
 div.WireIt-InputExTerminal div.WireIt-Terminal {
-	top: -3px;
-	left: -7px;
+top: -3px;
+left: -7px;
 }
 div.inputEx-Group div.inputEx-label {
-	width:100px;
+width:100px;
 }
 
 div.WireIt-ImageContainer {
-	width: 64px;
-	height: 64px;
+width: 64px;
+height: 64px;
 }
 
 div.Bubble div.body {
-	width: 70px;
-	height: 45px;
-	opacity: 0.8;
-	cursor: move;
+width: 70px;
+height: 45px;
+opacity: 0.8;
+cursor: move;
 }
 
 .WiringEditor-module span {
-	position: relative;
-	top: -3px;
+position: relative;
+top: -3px;
 }
 
 .x-border-box .x-reset, .x-border-box .x-reset * {
-	box-sizing: content-box;
-	-webkit-box-sizing: content-box;
-	-moz-box-sizing: content-box;
+box-sizing: content-box;
+-webkit-box-sizing: content-box;
+-moz-box-sizing: content-box;
 }
 
 .x-border-box .x-reset .x-panel *, .x-border-box .x-reset .x-layout * {
-	box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
+box-sizing: border-box;
+-webkit-box-sizing: border-box;
+-moz-box-sizing: border-box;
 }
 
-.x-btn-inner {
-    border-color:#EE0000;
-    font-size: 24px !important;
-    font-weight: bold !important;
-    font-family: 'Arial' !important;
+.x-btn#big-button button {
+border-color:#EE0000;
+font-size: 24px !important;
+font-weight: bold !important;
+font-family: 'Arial' !important;
 }
 
 .x-menu-item-link * {
-	text align: left;
-	}
+text align: left;
+}
 
 .yui-button.yui-button-right {
-	float: right;
+float: right;
 }
 
 .yui-button.yui-button-removePadding button {
-	padding-left: 1em !important;
-	}
+padding-left: 1em !important;
+}
 
 .yui-button#WiringEditor-prevButton button {
 
-        background: url(../../static/img/silk/previous.png) center center no-repeat;;
-    }
-    
+background: url(../../static/img/silk/previous.png) center center no-repeat;;
+}
+
 .yui-button#WiringEditor-forwButton button {
 
-        background: url(../../static/img/silk/next.png) center center no-repeat;;
-    }
-    
+background: url(../../static/img/silk/next.png) center center no-repeat;;
+}
+
 .instance-info-display dt {
-	font-weight: bold;
-	}
+font-weight: bold;
+}
 .instance-info-display dd {
-	margin-left: 1em;
-	margin-bottom: 4px;
-	}
+margin-left: 1em;
+margin-bottom: 4px;
+}
+		</style>
+		<!-- Ajax csrf fix
+		<script type="text/javascript" src="../../static/lib/ajaxCSRFfix.js"></script>
+		-->
+		<!-- ExtJS -->
+		<script type="text/javascript" src="../../static/lib/ext/ext-all.js"></script>
+		<!-- JQPLOT -->
+		<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
+		<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery.jqplot.js"></script>
+		<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
+        <script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+		<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.pcolorRenderer.js"></script>
+		<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.cursor.js"></script>
+		<script type="text/javascript" src="../../static/lib/plotting/palettes.js"></script>
+		<script type="text/javascript" src="../../static/lib/plotting/plotting_api.js"></script>
+		<script type="text/javascript" src="../../static/lib/plotting/sansdata.js"></script>
+		<!-- Prototype lib
+		<script type="text/javascript" src="../../static/lib/prototype.js"></script>
+		-->
+		<!-- Uniq Array -->
+		<script type="text/javascript" src="../../static/lib/UniqArray.js"></script>
+		<script type="text/javascript" src="../../static/lib/js-object-length.js"></script>
+		<!-- YUI -->
+		<script type="text/javascript" src="../../static/lib/yui/yahoo/yahoo.js"></script>
+		<script type="text/javascript" src="../../static/lib/yui/yahoo/yahoo-debug.js"></script>
+		<script type="text/javascript" src="../../static/lib/yui/utilities/utilities.js"></script>
+		<script type="text/javascript" src="../../static/lib/yui/resize/resize-min.js"></script>
+		<script type="text/javascript" src="../../static/lib/yui/layout/layout-min.js"></script>
+		<script type="text/javascript" src="../../static/lib/yui/container/container-min.js"></script>
+		<script type="text/javascript" src="../../static/lib/yui/json/json-debug.js"></script>
+		<script type="text/javascript" src="../../static/lib/yui/button/button-min.js"></script>
+		<script type="text/javascript" src="../../static/lib/yui/tabview/tabview-min.js"></script>
+		<script src="../../static/lib/wireit/plugins/editor/lib/accordionview/accordionview-min.js"  type='text/javascript'></script>
+		<script type="text/javascript" src="../../static/lib/wireit/lib/excanvas.js"></script>
+		<!-- WireIt -->
+		<!-- <script type="text/javascript" src="../../../../build/wireit-inputex-editor-min.js"></script>  -->
+		<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-composable.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-grouping.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/WireIt.js"></script>
+		<!-- WireIt files, library
+		<script type="text/javascript" src="../../../../js/ArrowWire.js"></script>
+		<script type="text/javascript" src="../../../../js/BezierArrowWire.js"></script>
+		<script type="text/javascript" src="../../../../js/BezierWire.js"></script>
+		<script type="text/javascript" src="../../../../js/CanvasContainer.js"></script>
+		<script type="text/javascript" src="../../../../js/CanvasElement.js"></script>
+		<script type="text/javascript" src="../../../../js/Container.js"></script>
+		<script type="text/javascript" src="../../../../js/DD.js"></script>
+		<script type="text/javascript" src="../../../../js/DDResize.js"></script>
+		<script type="text/javascript" src="../../../../js/EllipseLabelContainer.js"></script>
+		<script type="text/javascript" src="../../../../js/ImageContainer.js"></script>
+		<script type="text/javascript" src="../../../../js/InOutContainer.js"></script>
+		<script type="text/javascript" src="../../../../js/Layer.js"></script>
+		<script type="text/javascript" src="../../../../js/LayerMap.js"></script>
+		<script type="text/javascript" src="../../../../js/LeftSquareArrowWire.js"></script>
+		<script type="text/javascript" src="../../../../js/RectLabelContainer.js"></script>
+		<script type="text/javascript" src="../../../../js/RightSquareArrowWire.js"></script>
+		<script type="text/javascript" src="../../../../js/Scissors.js"></script>
+		<script type="text/javascript" src="../../../../js/StepWire.js"></script>
+		<script type="text/javascript" src="../../../../js/Terminal.js"></script>
+		<script type="text/javascript" src="../../../../js/TerminalInput.js"></script>
+		<script type="text/javascript" src="../../../../js/TerminalOutput.js"></script>
+		<script type="text/javascript" src="../../../../js/TerminalProxy.js"></script>
+		<script type="text/javascript" src="../../../../js/Wire.js"></script>
+		-->
+		<!-- inputex -->
+		<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/lib/inputex/js/inputex-loader.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/lib/inputex/js/inputex.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/lib/inputex/js/Field.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/lib/inputex/js/Group.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/lib/inputex/js/Form.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/js/WirableField.js"></script>
+		<!-- inputex fields -->
+		<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/lib/inputex/js/fields/ListField.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/lib/inputex/js/fields/StringField.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/js/fields.js"></script>
+		<!-- inputex files, library
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/AutoComplete.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/CheckBox.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/ColorField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/ColorPickField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/CombineField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/DateField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/DatePickerField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/DateSelectMonthField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/DateSplitField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/DateTimeField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/DSSelectField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/EmailField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/FileField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/HiddenField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/InPlaceEdit.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/IntegerField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/IPv4Field.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/KeyOpValueField-beta.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/KeyValueField-beta.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/Lens-beta.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/ListField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/MapField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/MenuField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/MultiAutoComplete.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/MultiAutoCompleteCustom.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/MultiSelectField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/MultiSelectFieldCustom.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/NumberField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/PasswordField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/RadioButton.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/RadioField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/RTEField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/SelectField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/SerializeField-beta.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/SliderField.js.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/StringAvailability.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/StringField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/TextArea.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/TimeField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/TimeIntervalField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/TimeRange.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/TinyMCEField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/TreeField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/TypeField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/UneditableField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/UpperCaseField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/UrlField.js"></script>
+		<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/VectorField.js"></script>
+		-->
+		<!-- WireIt, included -->
+		<script type="text/javascript" src="../../static/lib/wireit/js/CanvasElement.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/Wire.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/Layer.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/LayerMap.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/Container.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/ImageContainer.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/InOutContainer.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/js/FormContainer.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/js/TextareaContainer.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/Terminal.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/TerminalInput.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/TerminalOutput.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/TerminalProxy.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/Scissors.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/DD.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/ArrowWire.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/BezierWire.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/js/BezierArrowWire.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-composable.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-editor-grouping.js"></script>
+		<!-- File Associations Table -->
+		<script type="text/javascript" src="../../static/wireit_test/fileTable.js"></script>
+		<!-- Module config form -->
+		<script type="text/javascript" src="../../static/wireit_test/moduleConfigForm.js"></script>
+		<!-- editor -->
+		<script type="text/javascript" src="../../static/lib/wireit/plugins/editor/js/BaseEditor.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/plugins/editor/js/ModuleProxy.js"></script>
+		<script type="text/javascript" src="../../static/lib/wireit/plugins/editor/js/WiringEditor.js"></script>
+		<!-- adapter -->
+		<!-- <script type="text/javascript" src="../../static/lib/wireit/plugins/editor/js/adapters/json-rpc.js"></script> -->
+		<script type="text/javascript" src="../../static/lib/tracks/test_adapter.js"></script>
+		<!-- Languages -->
+		<script type="text/javascript" src="../../static/wireit_test/language.js"></script>
+		<script type="text/javascript" src="../../static/wireit_test/ANDRdefinition.js"></script>
+		<script type="text/javascript" src="../../static/wireit_test/ANDRdefinition2.js"></script>
+		<!--<script type="text/javascript" src="../../static/wireit_test/SANSdefinition.js"></script>
+		<script type="text/javascript" src="../../static/wireit_test/SANSnewdefinition.js"></script> -->
+		<script type="text/javascript" src="../../static/wireit_test/SANSnewnewdef.js"></script>
+		<script type="text/javascript" src="../../static/wireit_test/TASlang.js"></script>
+		<!-- language dictionary -->
+		<script type="text/javascript" src="../../static/wireit_test/lang_dict.js"></script>
+		<style>
+			/* Comment Module */
+			div.WireIt-Container.WiringEditor-module-comment {
+				width: 200px;
+			}
+			div.WireIt-Container.WiringEditor-module-comment div.body {
+				background-color: #EEEE66;
+			}
+			div.WireIt-Container.WiringEditor-module-comment div.body textarea {
+				background-color: transparent;
+				font-weight: bold;
+				border: 0;
+			}
+		</style>
+		<script>
+			// InputEx needs a correct path to this image
+			inputEx.spacerUrl = "/inputex/trunk/images/space.gif";
 
-</style>
+			var holder = '';
 
-<!-- Ajax csrf fix 
-<script type="text/javascript" src="../../static/lib/ajaxCSRFfix.js"></script>
--->
-<!-- ExtJS -->
-<script type="text/javascript" src="../../static/lib/ext/ext-all.js"></script>
+			YAHOO.util.Event.onDOMReady( function() {
+			try {
+			CHOSEN_LANG_NAME = "{{ lang }}" // this is the language that is set as a template's language in
+			// WiringEditor.js getValue()
+			CHOSEN_LANG = languageDictionary["{{ lang }}"] // converts language string to language object
+			FILES = []
+			{% for variable in file_keys %}
+			FILES.push("{{ variable }}".split(',,,z,z,z,z,,,'))
+			{% endfor %}
 
-<!-- JQPLOT -->
-<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
-<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery.jqplot.js"></script>
-<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
-<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
-
-<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.pcolorRenderer.js"></script>
-<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.cursor.js"></script>
-<script type="text/javascript" src="../../static/lib/plotting/palettes.js"></script>
-<script type="text/javascript" src="../../static/lib/plotting/plotting_api.js"></script>
-<script type="text/javascript" src="../../static/lib/plotting/sansdata.js"></script>
-
-<!-- Prototype lib 
-<script type="text/javascript" src="../../static/lib/prototype.js"></script>
--->
-
-<!-- Uniq Array -->
-<script type="text/javascript" src="../../static/lib/UniqArray.js"></script>
-<script type="text/javascript" src="../../static/lib/js-object-length.js"></script>
-
-<!-- YUI -->
-<script type="text/javascript" src="../../static/lib/yui/yahoo/yahoo.js"></script>
-<script type="text/javascript" src="../../static/lib/yui/yahoo/yahoo-debug.js"></script>
-<script type="text/javascript" src="../../static/lib/yui/utilities/utilities.js"></script>
-<script type="text/javascript" src="../../static/lib/yui/resize/resize-min.js"></script>
-<script type="text/javascript" src="../../static/lib/yui/layout/layout-min.js"></script>
-<script type="text/javascript" src="../../static/lib/yui/container/container-min.js"></script>
-<script type="text/javascript" src="../../static/lib/yui/json/json-debug.js"></script>
-<script type="text/javascript" src="../../static/lib/yui/button/button-min.js"></script>
-<script type="text/javascript" src="../../static/lib/yui/tabview/tabview-min.js"></script>
-<script src="../../static/lib/wireit/plugins/editor/lib/accordionview/accordionview-min.js"  type='text/javascript'></script>
-<script type="text/javascript" src="../../static/lib/wireit/lib/excanvas.js"></script>
-
-
-<!-- WireIt -->
-<!-- <script type="text/javascript" src="../../../../build/wireit-inputex-editor-min.js"></script>  -->
-<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-composable.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-grouping.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/js/WireIt.js"></script>
-
-
-<!-- WireIt files, library
-<script type="text/javascript" src="../../../../js/ArrowWire.js"></script>
-<script type="text/javascript" src="../../../../js/BezierArrowWire.js"></script>
-<script type="text/javascript" src="../../../../js/BezierWire.js"></script>
-<script type="text/javascript" src="../../../../js/CanvasContainer.js"></script>
-<script type="text/javascript" src="../../../../js/CanvasElement.js"></script>
-<script type="text/javascript" src="../../../../js/Container.js"></script>
-<script type="text/javascript" src="../../../../js/DD.js"></script>
-<script type="text/javascript" src="../../../../js/DDResize.js"></script>
-<script type="text/javascript" src="../../../../js/EllipseLabelContainer.js"></script>
-<script type="text/javascript" src="../../../../js/ImageContainer.js"></script>
-<script type="text/javascript" src="../../../../js/InOutContainer.js"></script>
-<script type="text/javascript" src="../../../../js/Layer.js"></script>
-<script type="text/javascript" src="../../../../js/LayerMap.js"></script>
-<script type="text/javascript" src="../../../../js/LeftSquareArrowWire.js"></script>
-<script type="text/javascript" src="../../../../js/RectLabelContainer.js"></script>
-<script type="text/javascript" src="../../../../js/RightSquareArrowWire.js"></script>
-<script type="text/javascript" src="../../../../js/Scissors.js"></script>
-<script type="text/javascript" src="../../../../js/StepWire.js"></script>
-<script type="text/javascript" src="../../../../js/Terminal.js"></script>
-<script type="text/javascript" src="../../../../js/TerminalInput.js"></script>
-<script type="text/javascript" src="../../../../js/TerminalOutput.js"></script>
-<script type="text/javascript" src="../../../../js/TerminalProxy.js"></script>
-<script type="text/javascript" src="../../../../js/Wire.js"></script>
--->
-
-
-<!-- inputex -->
-<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/lib/inputex/js/inputex-loader.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/lib/inputex/js/inputex.js"></script>
-
-
-
-<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/lib/inputex/js/Field.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/lib/inputex/js/Group.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/lib/inputex/js/Form.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/js/WirableField.js"></script>
-
-<!-- inputex fields -->
-<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/lib/inputex/js/fields/ListField.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/lib/inputex/js/fields/StringField.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/js/fields.js"></script>
-
-
-<!-- inputex files, library
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/AutoComplete.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/CheckBox.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/ColorField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/ColorPickField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/CombineField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/DateField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/DatePickerField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/DateSelectMonthField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/DateSplitField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/DateTimeField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/DSSelectField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/EmailField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/FileField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/HiddenField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/InPlaceEdit.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/IntegerField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/IPv4Field.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/KeyOpValueField-beta.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/KeyValueField-beta.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/Lens-beta.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/ListField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/MapField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/MenuField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/MultiAutoComplete.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/MultiAutoCompleteCustom.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/MultiSelectField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/MultiSelectFieldCustom.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/NumberField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/PasswordField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/RadioButton.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/RadioField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/RTEField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/SelectField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/SerializeField-beta.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/SliderField.js.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/StringAvailability.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/StringField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/TextArea.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/TimeField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/TimeIntervalField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/TimeRange.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/TinyMCEField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/TreeField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/TypeField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/UneditableField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/UpperCaseField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/UrlField.js"></script>
-<script type="text/javascript" src="../../../../plugins/inputex/lib/inputex/js/fields/VectorField.js"></script>
--->
-
-<!-- WireIt, included -->
-<script type="text/javascript" src="../../static/lib/wireit/js/CanvasElement.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/js/Wire.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/js/Layer.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/js/LayerMap.js"></script>
-
-<script type="text/javascript" src="../../static/lib/wireit/js/Container.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/js/ImageContainer.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/js/InOutContainer.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/js/FormContainer.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/plugins/inputex/js/TextareaContainer.js"></script>
-
-
-<script type="text/javascript" src="../../static/lib/wireit/js/Terminal.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/js/TerminalInput.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/js/TerminalOutput.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/js/TerminalProxy.js"></script>
-
-<script type="text/javascript" src="../../static/lib/wireit/js/Scissors.js"></script>
-
-<script type="text/javascript" src="../../static/lib/wireit/js/DD.js"></script>
-
-<script type="text/javascript" src="../../static/lib/wireit/js/ArrowWire.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/js/BezierWire.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/js/BezierArrowWire.js"></script>
-
-<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-composable.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-editor-grouping.js"></script>
-
-
-<!-- File Associations Table -->
-<script type="text/javascript" src="../../static/wireit_test/fileTable.js"></script>
-
-<!-- Module config form -->
-<script type="text/javascript" src="../../static/wireit_test/moduleConfigForm.js"></script>
-
-<!-- editor -->
-<script type="text/javascript" src="../../static/lib/wireit/plugins/editor/js/BaseEditor.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/plugins/editor/js/ModuleProxy.js"></script>
-<script type="text/javascript" src="../../static/lib/wireit/plugins/editor/js/WiringEditor.js"></script>
-
-<!-- adapter -->
-<!-- <script type="text/javascript" src="../../static/lib/wireit/plugins/editor/js/adapters/json-rpc.js"></script> -->
-<script type="text/javascript" src="../../static/lib/tracks/test_adapter.js"></script>
-
-<!-- Languages -->
-<script type="text/javascript" src="../../static/wireit_test/language.js"></script>
-<script type="text/javascript" src="../../static/wireit_test/ANDRdefinition.js"></script>
-<script type="text/javascript" src="../../static/wireit_test/ANDRdefinition2.js"></script>
-<!--<script type="text/javascript" src="../../static/wireit_test/SANSdefinition.js"></script>
-<script type="text/javascript" src="../../static/wireit_test/SANSnewdefinition.js"></script> -->
-<script type="text/javascript" src="../../static/wireit_test/SANSnewnewdef.js"></script>
-<script type="text/javascript" src="../../static/wireit_test/TASlang.js"></script>
-
-
-<!-- language dictionary -->
-<script type="text/javascript" src="../../static/wireit_test/lang_dict.js"></script>
-
-
-<style>
-/* Comment Module */
-div.WireIt-Container.WiringEditor-module-comment { width: 200px; }
-div.WireIt-Container.WiringEditor-module-comment div.body { background-color: #EEEE66; }
-div.WireIt-Container.WiringEditor-module-comment div.body textarea { background-color: transparent; font-weight: bold; border: 0; }
-</style>
-
-
-<script>
-
-// InputEx needs a correct path to this image
-inputEx.spacerUrl = "/inputex/trunk/images/space.gif";
-
-var holder = '';
-
-YAHOO.util.Event.onDOMReady( function() {
-	try {	
-		CHOSEN_LANG_NAME = "{{ lang }}" // this is the language that is set as a template's language in	
-						// WiringEditor.js getValue()
-		CHOSEN_LANG = languageDictionary["{{ lang }}"]
-		FILES = []
-		{% for variable in file_keys %}
-     			FILES.push("{{ variable }}".split(',,,z,z,z,z,,,'))
-		{% endfor %}
-		
-		// for converting from readable name to unique hash
-		FILE_DICT = {} 
-		for (var i in FILES) {
+			// for converting from readable name to unique hash
+			FILE_DICT = {}
+			for (var i in FILES) {
 			FILE_DICT[FILES[i][1]]=FILES[i][0]
 			}
 
-		// setting up the WireEditor with the adapter 'tracks'
-		CHOSEN_LANG['adapter'] = WireIt.WiringEditor.adapters.tracks;
-		
-		
-		// initial settings
-		plotCreated = false;
+			// setting up the WireEditor with the adapter 'tracks'
+			CHOSEN_LANG['adapter'] = WireIt.WiringEditor.adapters.tracks;
 
-		// editor
-		editor = new WireIt.WiringEditor(CHOSEN_LANG);
+			// initial settings
+			plotCreated = false;
+			launchedFromExperimentPage = {{ experiment_id }}
+
+			// editor
+			editor = new WireIt.WiringEditor(CHOSEN_LANG);
 			// initial setting: for paging through multiple instances of the same reduction template
-		editor.reductionInstance = 1;
-		editor.maxReduction = 1; 
-		
-		// more initial settings
-		
+			editor.reductionInstance = 1;
+			editor.maxReduction = 1;
 
-		// imagecontainer initial height, width
-		WireIt.ImageContainer.prototype.height = 40;
-		WireIt.ImageContainer.prototype.width = 40;
-		WireIt.ImageContainer.prototype.onMouseDown = function() {
+			// more initial settings
+			editor.launchedFromExperimentPage = launchedFromExperimentPage
+
+			// imagecontainer initial height, width
+			WireIt.ImageContainer.prototype.height = 40;
+			WireIt.ImageContainer.prototype.width = 40;
+			WireIt.ImageContainer.prototype.onMouseDown = function() {
 			//console.log('clicked on imageContainer')
+			editor.clickedModuleID = editor.layer.containers.indexOf(this)
 			editor.displayClickedModuleConfig(this)
+			editor.generateConfigForm(editor.layer.containers.indexOf(this))
 			holder = this;
 			}
-		WireIt.Container.prototype.onMouseDown = function() {
+			WireIt.Container.prototype.onMouseDown = function() {
 			//console.log('clicked on container')
+			editor.clickedModuleID = editor.layer.containers.indexOf(this)
 			editor.displayClickedModuleConfig(this)
+			editor.generateConfigForm(editor.layer.containers.indexOf(this))
 			},
-		WireIt.Container.prototype.getConfig = function() {
+			WireIt.Container.prototype.getConfig = function() {
 			configs = {}
 			configs['position'] = this.getXY()
 			configs['xtype'] = this.xtype
@@ -385,85 +352,80 @@ YAHOO.util.Event.onDOMReady( function() {
 				//console.log('Getting Config', editor.reductionInstance)
 				//console.log(this.tracksConfigs[editor.reductionInstance])
 				//for (var i in this.tracksConfigs[editor.reductionInstance]) {
-				//	configs[i] = this.tracksConfigs[editor.reductionInstance][i] 
+				//	configs[i] = this.tracksConfigs[editor.reductionInstance][i]
 				//	}
 				//}
-      				}
-      			return configs
-		},
-			
-	
-		// setting up events for wires
-		WireIt.Wire.prototype.onWireIn = function(x,y) {
+			}
+			return configs
+			},
+
+			// setting up events for wires
+			WireIt.Wire.prototype.onWireIn = function(x,y) {
 			this.color = 'rgb(255,0,0)';
 			this.redraw();
 			}
-		WireIt.Wire.prototype.onWireOut = function(x,y) {
+			WireIt.Wire.prototype.onWireOut = function(x,y) {
 			this.color = 'rgb(173, 216, 230)';
 			this.redraw();
-			}		
-		WireIt.Wire.prototype.onWireClick = function(x,y) {
+			}
+			WireIt.Wire.prototype.onWireClick = function(x,y) {
 			console.log('WIRE CLICK!')
 			editor.wireClickedOn = {'source': this.src, 'target':this.tgt}
 			//editor.wireClickSource = this.src.moduleId
 			//editor.wireClickTarget = this.tgt.moduleId
-			editor.runReduction(editor.templateConfig[editor.reductionInstance])
+			try {
+				editor.runReduction(editor.templateConfig[editor.reductionInstance])
+				}
+			catch (ex) {
+				alert('Please enter file associations!')
+				}
 			}
-		// Open the infos panel
-		editor.accordionView.openPanel(2);
-		editor.accordionView.closePanel(0);
-	}
-	catch(ex) { 
-                alert('exception');
-		console.log(ex);
-	}
-});
+			// Open the infos panel
+			editor.accordionView.openPanel(2);
+			editor.accordionView.closePanel(0);
+			}
+			catch(ex) {
+			alert('exception');
+			console.log(ex);
+			}
+			});
 
-Ext.onReady(function() {
-		//$('html').removeClass('x-border-box');
-		//$('body').removeClass('x-reset');
-});
-</script>
-
-</head>
-
-<body id="woot" class="yui-skin-sam">
-
-	<div id="top">
-		<div class="logo">Dataflow / Tracks</a></div>
-		<div id="toolbar"></div>
-		<div class="topright">
-			<span>Enjoy!</span>  
+			Ext.onReady(function() {
+			//$('html').removeClass('x-border-box');
+			//$('body').removeClass('x-reset');
+			});
+		</script>
+	</head>
+	<body id="woot" class="yui-skin-sam">
+		<div id="top">
+			<div class="logo">
+				Dataflow / Tracks</a>
+			</div>
+			<div id="toolbar"></div>
+			<div class="topright">
+				<span>Enjoy!</span>
+			</div>
 		</div>
-	</div>
-
-
-	<div id="left">
-
-		 <ul id="modulesAccordionView">
-			<li>
-				<h2>Main</h2>
-				<div>
-					<div id='module-category-main'></div>
-				</div>
-			</li>
-
-		</ul>
-
-	</div>
-
-        <div id="right">
-                <ul id="accordionView">
-                        <li>
-                                <h2>Minimap</h2>
-
-                                <div style='position: relative;'>
-                                        <div id="layerMap"></div>
-                                </div>
-                        </li>
-
-                        <li>
-                                <h2>Plotting!</h2>
+		<div id="left">
+			<ul id="modulesAccordionView">
+				<li>
+					<h2>Main</h2>
+					<div>
+						<div id='module-category-main'></div>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<div id="right">
+			<ul id="accordionView">
+				<li>
+					<h2>Minimap</h2>
+					<div style='position: relative;'>
+						<div id="layerMap"></div>
+					</div>
+				</li>
+				<li>
+					<h2>Plotting!</h2>
 
                                 <div>
                                         <div id="plotbox" style="display: block; width: 450px; height: 350px;">
@@ -474,78 +436,70 @@ Ext.onReady(function() {
                                         </div>
                                         <div id="plotbuttons" style = "display: block; width: 410px; height: 100px; "> </div>
                                 </div>
-                        </li>
-
-                        <li>
-                                <h2>File Associations Table</h2>
-
-                                <div class="x-border-box">
-                                	<div id="FAT" style='position: relative;' class="x-reset"></div>
-                        	</div>
-                        </li>
-                        
-                        <li>
-                                <h2>Instance Info, Files</h2>
-
-                                <div>
-                                        <div id ="instance-files-info" style="padding: 10px;">
-                                        </div>
-                                </div>
-                        </li>
-                        
-                        <li>
-                                <h2>Instance Info, Module Configs</h2>
-
-                                <div>
-                                        <div id ="instance-modules-info" style="padding: 10px;">
-                                        </div>
-                                </div>
-                        </li>
-                        <li>
-                                <h2>Module Configs Input</h2>
-
-                                <div>
-                                        <div id ="instance-modules-input" style="padding: 10px;">
-                                        </div>
-                                </div>
-                        </li>
-
-                        <li>
-                                <h2>General Info</h2>
-
-                                <div>
-                                        <div style="padding: 10px;">
-                                                <p>Functional WireIt editor using BT7
-                                                language generated from Paul's
-                                                code.</p><br />
-
-                                                <p><b>Drag and drop modules from the
-                                                Module list</b> on the left to the
-                                                working layer in the middle.</p><br />
-
-                                                <p><a href="language.js" target=
-                                                "_new">Click here to view the language
-                                                definition for this editor.</a></p>
-                                        </div>
-                                </div>
-                        </li>
-                </ul>
-        </div>
-
-
-	<div id="center">
-	</div>
-
-	<div id="helpPanel">
-	    <div class="hd">Welcome to the WiringEditor demonstration</div>
-	    <div class="bd" style="text-align: left;">
-
-<p>Functional WireIt editor using BT7 language generated from Paul's code.</p>
-					<br />
-					<p><b>Drag and drop modules from the Module list</b> on the left to the working layer in the middle.</p>
-					<br />
-					<p><a href="language.js" target="_new">Click here to view the language definition for this editor.</a></p>
-	    </div>
-	</div>
-</body>
+				</li>
+				<li>
+					<h2>File Associations Table</h2>
+					<div class="x-border-box">
+						<div id="FAT" style='position: relative;' class="x-reset"></div>
+					</div>
+				</li>
+				<li>
+					<h2>Instance Info, Files</h2>
+					<div>
+						<div id ="instance-files-info" style="padding: 10px;"></div>
+					</div>
+				</li>
+				<li>
+					<h2>Instance Info, Module Configs</h2>
+					<div>
+						<div id ="instance-modules-info" style="padding: 10px;"></div>
+					</div>
+				</li>
+				<li>
+					<h2>Module Configs Input</h2>
+					<div>
+						<div id ="instance-modules-input" style="padding: 10px;"></div>
+					</div>
+				</li>
+				<li>
+					<h2>General Info</h2>
+					<div>
+						<div style="padding: 10px;">
+							<p>
+								Welcome to the NCNR's Dataflow application, a web-based data reduction application.
+							</p>
+							<br />
+							<p>
+								<b>Drag and drop modules from the
+								Module list</b> on the left to the
+								working layer in the middle.
+							</p>
+							<br />
+							<p>
+								<a href="/static/lib/language.js" target=
+								"_new">Click here to view the language
+								definition for this editor.</a>
+							</p>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<div id="center"></div>
+		<div id="helpPanel">
+			<div class="hd">
+				Welcome to the WiringEditor demonstration
+			</div>
+			<div class="bd" style="text-align: left;">
+				<p>
+					Functional WireIt editor using BT7 language generated from Paul's code.
+				</p>
+				<br />
+				<p>
+					<b>Drag and drop modules from the Module list</b> on the left to the working layer in the middle.
+				</p>
+				<br />
+			</div>
+		</div>
+	</body>
 </html>

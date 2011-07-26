@@ -13,16 +13,16 @@ def correct_dead_time_module(id=None, datatype=None, action=None,
         'URI': config.IMAGES + "SANS/deadtime.png",
         'terminals': {
             #Inputs
-            'sample_in': (0, 10, -1, 0),
-            'empty_cell_in': (0, 20, -1, 0),
-            'empty_in': (0, 30, -1, 0),
-            'blocked_in': (0, 40, -1, 0),
+            'sample_in': (-16, 10, -1, 0),
+            'empty_cell_in': (-16, 20, -1, 0),
+            'empty_in': (-16, 30, -1, 0),
+            'blocked_in': (-16, 40, -1, 0),
             #Outputs
 
-            'sample_out': (20, 10, 1, 0),
-            'empty_cell_out': (20, 20, 1, 0),
-            'empty_out': (20,30, 1, 0),
-            'blocked_out': (20, 40, 1, 0),
+            'sample_out': (48, 10, 1, 0),
+            'empty_cell_out': (48, 20, 1, 0),
+            'empty_out': (48,30, 1, 0),
+            'blocked_out': (48, 40, 1, 0),
 
         }
     }
@@ -79,7 +79,7 @@ def correct_dead_time_module(id=None, datatype=None, action=None,
              description='Dead Time',
              ),
     ]
-    deadtime_cons_field = {
+    deadtimeConstant_field = {
         'type' :'float',
         'label':'Deadtime Constant (default=3.4e-6)',
         'name' :'deadtime',
@@ -92,7 +92,7 @@ def correct_dead_time_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[deadtime_cons_field]+fields,
+                  fields=[deadtimeConstant_field]+fields,
                   action=action,
                   )
 

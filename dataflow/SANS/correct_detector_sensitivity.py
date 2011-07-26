@@ -14,11 +14,11 @@ def correct_detector_sensitivity_module(id=None, datatype=None, action=None,
         'URI': config.IMAGES + "SANS/div_image.png",
         'terminals': {
             #inputs
-            'COR': (0, 10, -1, 0),
-            'DIV_in': (0, 30, -1, 0),
+            'COR': (-16, 10, -1, 0),
+            'DIV_in': (-16, 30, -1, 0),
             
             #outputs
-            'DIV_out': (20, 10, 1, 0),
+            'DIV_out': (48, 10, 1, 0),
         }
     }
     

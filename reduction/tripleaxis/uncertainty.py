@@ -41,6 +41,20 @@ class Measurement(object):
                 variances=numpy.hstack((self.variance,other.variance))
             self.x=xs
             self.variance=variances
+    def join_channels(self,other):
+        if isinstance(other,Measurement):
+            #self=Measurement([self.x,other.x],[self.dx,other.dx])
+            #Should I set up checks so a None and a None combine to a single None?
+            if self.x==None and other.x==None:
+                xs=None
+            else:
+                xs=numpy.vstack((self.x,other.x))
+            if self.variance==None and other.variance==None:
+                variances=None            
+            else:
+                variances=numpy.vstack((self.variance,other.variance))
+            self.x=xs
+            self.variance=variances
     def _getdx(self): 
         if self.variance==None:
             return None
@@ -61,17 +75,22 @@ class Measurement(object):
     def __len__(self):
         return len(self.x)
     def __getitem__(self,key):
-        if self.variance and self.x:
-            return Measurement(self.x[key],self.variance[key])
-        
+        if self.variance==None and self.x==None:
+            return self
+        elif self.variance==None:
+            return Measurement(self.x[key],self.variance)
+        elif self.x==None:
+            return Measurement(self.x,self.variance[key])
         else:
-            return Measurement(self.x[key],None)
+            return Measurement(self.x[key],self.variance[key])
     def __setitem__(self,key,value):
         self.x[key] = value.x
         self.variance[key] = value.variance
     def __delitem__(self, key):
-        del self.x[key]
-        del self.variance[key]
+        if self.x!=None:
+            self.x=numpy.delete(self.x,key,0)
+        if self.variance!=None:
+            self.variance=numpy.delete(self.variance,key,0)
     #def __iter__(self): pass # Not sure we need iter
 
     # Normal operations: may be of mixed type
@@ -113,12 +132,16 @@ class Measurement(object):
             if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
                 return Measurement(*err1d.div(self.x,self.variance,other.x,other.variance))
             else:
-                return Measurement(self.x/other.x, None)
+                return Measurement(self.x/other.x, self.variance/other.x**2)  #maybe revisit this--we claim that other is a measurement, but if the variance is None, then what does it mean to divide by this--the current solution is practical.
         else:
-            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+            if not self.variance is None:
                 return Measurement(self.x/other, self.variance/other**2)
             else:
                 return Measurement(self.x/other,None)
+          #  if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
+          #      return Measurement(self.x/other, self.variance/other**2)
+          #  else:  The above covered the case for rdiv
+          #      return Measurement(self.x/other,self.variance/np.sqrt(other))
     def __pow__(self, other):
         if isinstance(other,Measurement):
             # Haven't calcuated variance in (a+/-da) ** (b+/-db)

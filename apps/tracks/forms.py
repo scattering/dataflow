@@ -1,8 +1,8 @@
 from django import forms
 from models import *
 
+# language_choices should be the same as instrument_class_choices
 language_choices = (
-			('bt7', 'bt7'),
 			('sans', 'sans'),
 			('refl', 'refl'),
 			('andr', 'andr'),
@@ -33,5 +33,9 @@ class experimentForm1(forms.Form):
 	instrument_name = forms.ModelChoiceField(queryset= Instrument.objects.all(), empty_label="(Select an instrument)")
 
 class experimentForm2(forms.Form):
-	templates = forms.ModelChoiceField(queryset = Template.objects.all(), empty_label="(Select a Template)")
-	files = forms.FileField()
+
+  	def __init__(self, *args, **kwargs):
+    		USER = kwargs.pop('USER')
+    		super(experimentForm2, self).__init__(*args, **kwargs)
+		self.fields['templates'] = forms.ModelChoiceField(queryset = Template.objects.filter(user=USER), empty_label="(Select a Template)")
+		self.fields['files'] = forms.FileField()

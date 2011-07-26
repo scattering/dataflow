@@ -13,12 +13,12 @@ def initial_correction_module(id=None, datatype=None, action=None,
         'URI': config.IMAGES + "SANS/initial_correction_image.png",
         'terminals': {
             #inputs
-            'sample': (0, 8, -1, 0),
-            'empty_cell': (0, 28, -1, 0),
-            'blocked': (0, 48, -1, 0),
+            'sample': (-16, 8, -1, 0),
+            'empty_cell': (-16, 28, -1, 0),
+            'blocked': (-16, 48, -1, 0),
             #'trans': (0, 140, -1, 0),
             
-            'COR': (20, 10, 1, 0),
+            'COR': (48, 10, 1, 0),
         }
     }
     
@@ -62,7 +62,7 @@ def initial_correction_module(id=None, datatype=None, action=None,
 
     # Combine everything into a module.
     module = Module(id=id,
-                  name='initial_correction',
+                  name='Initial Correction',
                   version=version,
                   description=action.__doc__,
                   icon=icon,

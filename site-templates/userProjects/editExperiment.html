@@ -1,55 +1,76 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html lang="en">
-<head>
-    <title>Edit Experiment</title>
-</head>
-<body>
-    <div id="content-1" style="float:left;">
-    <h2>EXPERIMENT: <i>{{ experiment.ProposalNum }}</i> </h2>
-    <form action="." method="POST">
-    {% csrf_token %}
-        <table>
-            {{ form1.as_table }}
-        </table>
-        <p><input type="submit" value="Save changes"></p>
-        </form>
-         <hr></hr>
-         
-        <form action="." method="POST" enctype="multipart/form-data">
-    	{% csrf_token %}
-        	<table>
-            		{{ form2.as_table }}
-        	</table>
-        <p><input type="submit" value="Add entries"></p>
-    </form>
-    
-    <hr></hr>
-    <form action="../../../../../../editor/" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="language" value={{ experiment.instrument.instrument_class }} />
-    <input type="hidden" name="experiment_id" value={{ experiment.id }} />
-    <p><input type="submit" value="Start reducing!"></p>
-    </form>
+	<head>
+		<title>Edit Experiment</title>
+	</head>
+	<body>
+		<div id="content-1" style="float:left;">
+			<h2>EXPERIMENT: <i>{{ experiment.ProposalNum }}</i></h2>
+			<form action="." method="POST">
+				{% csrf_token %}
+				<table>
+					{{ form1.as_table }}
+				</table>
+				<p>
+					<input type="submit" value="Save changes">
+				</p>
+			</form>
+			<hr>
+			</hr>
+			<form action="." method="POST" enctype="multipart/form-data">
+				{% csrf_token %}
+				<table>
+					{{ form2.as_table }}
+				</table>
+				<p>
+				<input type="file" id="files" name="files[]" multiple />
+				<output id="list"></output>
 
-   <!--<a STYLE="text-decoration:none" href="editor/"> Start reducing! </a>-->
-    </div>
-    <div id="content-2" style="float:left;margin-left:7%">
+				<script>
+				  function handleFileSelect(evt) {
+				    var files = evt.target.files; // FileList object
 
-    	
+				    // files is a FileList of File objects. List some properties.
+				    var output = [];
+				    for (var i = 0, f; f = files[i]; i++) {
+				      output.push('<li><strong>', f.name, '</strong> (', f.type || 'n/a', ') - ',
+						  f.size, ' bytes, last modified: ',
+						   '</li>');
+				    }
+				    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+				  }
 
-    <h2> Templates: </h2>
-	{% for template in experiment.templates.all %}
-    <li>{{ template}}
-    </li>
-	{% endfor %}
-    	
-    <h2> Files: </h2>
-    	{% for file in experiment.Files.all %}
-    	<li> {{file.friendly_name }} </li>
-    	{% endfor %}	
-    
-    </div>
-
-</body>
-
+				  document.getElementById('files').addEventListener('change', handleFileSelect, false);
+				</script>
+								</p>
+				<p>
+					<input type="submit" value="Add entries">
+				</p>
+			</form>
+			<hr>
+			</hr>
+			<form action="../../../../../../editor/" method="post">
+				{% csrf_token %}
+				<input type="hidden" name="language" value={{ experiment.instrument.instrument_class }} />
+				<input type="hidden" name="experiment_id" value={{ experiment.id }} />
+				<p>
+					<input type="submit" value="Start reducing!">
+				</p>
+			</form>
+			<!--<a STYLE="text-decoration:none" href="editor/"> Start reducing! </a>-->
+		</div>
+		<div id="content-2" style="float:left;margin-left:7%">
+			<h2> Templates: </h2>
+			{% for template in experiment.templates.all %}
+			<li>
+				{{ template}}
+			</li>
+			{% endfor %} <h2> Files: </h2>
+			{% for file in experiment.Files.all %}
+			<li>
+				{{file.friendly_name }}
+			</li>
+			{% endfor %}
+		</div>
+	</body>
 </html>

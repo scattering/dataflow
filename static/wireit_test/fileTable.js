@@ -1,4 +1,4 @@
-function makeFileTable(headerList, fileList) {
+function makeFileTable(headerList, fileList, moduleConfigs) {
 /* FILE ASSOCIATIONS TABLE, Andrew Tracer, 6/8/2011
 
 Field:
@@ -23,6 +23,9 @@ with multiple groups
 storeList = []
 gridList = []
 
+if (moduleConfigs) {
+	console.log('TEMPLATE HAS FILE CONFIGS')
+	}
 // defines data model 'Data'
 // may need to add a 'hidden' field hash to keep track of actual file identity
    Ext.define('Data', {
@@ -155,34 +158,6 @@ url: '/files',
         }]
     });
 
-if (fileList.length != 0) {
-	for (var i in fileList) {
-		thisFile = fileList[i]
-		var newFile = Ext.ModelManager.create({
-			filename: thisFile[1],
-			filehash: thisFile[0],
-			filetype: 'N',
-			},
-			'Data');
-		store.insert(0, newFile);
-	}
-}
-	
-// insert records into the store to play around with if a file list has not been passed into the Wiring Editor
-if (fileList.length==0) {
-	for (var j = 0; j < 3; j++) {
-		for (var i = 0; i < 20; i ++) {
-			fname = 'new_file' + i
-			var newFile = Ext.ModelManager.create({
-				filename: fname,
-				filehash: '0',
-				filetype: 'N',
-				group: j,},
-		'Data');
-				store.insert(0, newFile);
-		}
-	}
-}
 
 
 // combobox options for file type editing
@@ -405,6 +380,81 @@ width: 250,
 //console.log(storeList)
 //console.log(gridList)
 
+if (fileList.length != 0) {
+	//// PULLS IN APPROPRIATE FILE TYPES FROM CONFIGS, CAN ONLY SAVE ONE REDUCTION INSTANCE (GROUP) CURRENTLY
+	fileNames = []
+	for (var q in fileList) {
+		fileNames.push(fileList[q][1])
+		}
+	for (var z in moduleConfigs) {
+		//console.log(z)
+		if (moduleConfigs[z].config[1]['files']) {
+			//console.log('\t HAS FILES')
+			for (var y in moduleConfigs[z].config[1]['files']) {
+				ind = fileNames.indexOf(moduleConfigs[z].config[1]['files'][y][0])
+				//console.log(moduleConfigs[z].config[1]['files'][y][0], ind)
+				if (ind != -1) {
+					//console.log('\t \t FOUND A MATCH!')
+					fileList[ind].push(z)
+					}
+				}
+			}
+		}
+	//console.log('EDITED FILE LIST',fileList)
+	for (var m in fileList) {
+		if (fileList[m].length == 3) {
+			for (n in headerList) {
+				//console.log(headerList[n].split(': ').pop())
+				if (headerList[n].split(': ').pop() == fileList[m][2]) {
+					fileList[m][2] = headerList[n]
+					}
+				}
+			}
+		}
+	//console.log(fileList)
+
+	for (var i in fileList) {
+		thisFile = fileList[i]
+		if (thisFile.length == 2) {
+			var newFile = Ext.ModelManager.create({
+				filename: thisFile[1],
+				filehash: thisFile[0],
+				filetype: 'N',
+				},
+				'Data');
+			store.insert(0, newFile);
+			}
+		else {
+			var newFile = Ext.ModelManager.create({
+				filename: thisFile[1],
+				filehash: thisFile[0],
+				filetype: thisFile[2],
+				group: 1,
+				},
+				'Data');
+			store.insert(0, newFile);
+			}
+			
+	}
+	UpdateAll()
+}
+	
+// insert records into the store to play around with if a file list has not been passed into the Wiring Editor
+if (fileList.length==0) {
+	for (var j = 0; j < 3; j++) {
+		for (var i = 0; i < 20; i ++) {
+			fname = 'new_file' + i
+			var newFile = Ext.ModelManager.create({
+				filename: fname,
+				filehash: '0',
+				filetype: 'N',
+				group: j,},
+		'Data');
+				store.insert(0, newFile);
+		}
+	}
+}
+
   // setting up grid array to give panel
 panelItems = [myGrid].concat(gridList) //gridList]
 //console.log(panelItems)
@@ -436,6 +486,7 @@ var panelTwo = Ext.create('Ext.Panel', {
 			xtype: 'button',
 			text: 'Run Reduction',
 			height: '30',
+			componentCls: 'big-button',
 			handler: run_reduction,
 		},
 		],

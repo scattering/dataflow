@@ -13,14 +13,14 @@ def generate_transmission_module(id=None, datatype=None, action=None,
         'URI': config.IMAGES + "SANS/gen_trans_image.png",
         'terminals': {
             #inputs
-            'sample_in': (0, 5, -1, 0),
-            'empty_cell_in': (0, 15, -1, 0),
-            'empty_in': (0, 25, -1, 0),
-            'Tsam_in': (0, 35, -1, 0),
-            'Temp_in': (0, 45, -1, 0),
+            'sample_in': (-16, 5, -1, 0),
+            'empty_cell_in': (-16, 15, -1, 0),
+            'empty_in': (-16, 25, -1, 0),
+            'Tsam_in': (-16, 35, -1, 0),
+            'Temp_in': (-16, 45, -1, 0),
             
-            'sample_out': (30, 10, 1, 0),
-            'empty_cell_out': (30, 30, 1, 0),
+            'sample_out': (48, 10, 1, 0),
+            'empty_cell_out': (48, 30, 1, 0),
             #'empty_out': (20, 10, 1, 0),
             #'trans': (20, 10, 1, 0),
         }
@@ -85,21 +85,33 @@ def generate_transmission_module(id=None, datatype=None, action=None,
              #description='correct',
              #),
     ]
-    monitor_norm_field ={
+    monitorNormalize_field ={
         'type' :'float',
         'label':'Monitor Normalization Value (default=1e8)',
         'name' :'mon0',
         'value':1e8,
         
         }
+    bottomLeftCoord_field = {
+        'type' :'dict',
+        'label':'Bottom Left Coordinate',
+        'name' :'coords_bottom_left',
+        'value':{},
+        }
+    topRightCoord_field = {
+        'type' :'dict',
+        'label':'Top Right Coordinate',
+        'name' :'coords_upper_right',
+        'value':{},
+        }
     # Combine everything into a module.
     module = Module(id=id,
-                  name='generate_transmission',
+                  name='Generate Transmission',
                   version=version,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[monitor_norm_field]+fields,
+                  fields=[monitorNormalize_field,bottomLeftCoord_field,topRightCoord_field]+fields,
                   action=action,
                   )
 

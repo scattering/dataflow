@@ -8,7 +8,7 @@ dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dir)
 from pprint import pprint
 
-if 0:
+if 1:
 	from ...dataflow import wireit
 	from .. import config
 	from ..calc import run_template
@@ -28,10 +28,9 @@ if 0:
 	from ..SANS.annular_av import annular_av_module
 	from ..SANS.absolute_scaling import absolute_scaling_module
 	from ..SANS.correct_dead_time import correct_dead_time_module
-	from ...reduction.sans.filters import SansData
-	from ...reduction.sans.filters import Transmission
-	from ...reduction.sans.filters import plot1D
-	from ...reduction.sans.filters import div
+	#from ...reduction.sans.filters import SansData
+	#from ...reduction.sans.filters import plot1D
+	#from ...reduction.sans.filters import div
 	from ...apps.tracks.models import File
 
 
@@ -47,7 +46,7 @@ if 0:
 
 	from dataflow import config
 
-	from dataflow.calc import run_template,get_plottable
+	from dataflow.calc import run_template, get_plottable
 	from dataflow.core import Data, Instrument, Template, register_instrument
 	from dataflow.modules.load import load_module
 	from dataflow.modules.save import save_module
@@ -64,13 +63,13 @@ if 0:
 	from dataflow.SANS.annular_av import annular_av_module
 	from dataflow.SANS.absolute_scaling import absolute_scaling_module
 	from dataflow.SANS.correct_dead_time import correct_dead_time_module
-	from apps.tracks.models import File
-if 1:
+	#from apps.tracks.models import File
+if 0:
 	import dataflow.dataflow.wireit as wireit
 
 	from dataflow.dataflow import config
 
-	from dataflow.dataflow.calc import run_template,get_plottable
+	from dataflow.dataflow.calc import run_template, get_plottable
 	from dataflow.dataflow.core import Data, Instrument, Template, register_instrument
 	from dataflow.dataflow.modules.load import load_module
 	from dataflow.dataflow.modules.save import save_module
@@ -103,7 +102,6 @@ fileList = []
 # Datatype
 SANS_DATA = 'data2d.sans'
 data2d = Data(SANS_DATA, SansData)
-trans = Data(SANS_DATA, Transmission)
 data1d = Data(SANS_DATA, plot1D)
 datadiv = Data(SANS_DATA, div)
 #Datatype(id=SANS_DATA,
@@ -121,7 +119,7 @@ def load_action(files=[], intent='', **kwargs):
     return dict(output=result)
 def _load_data(name):
     print name
-    friendly_name = File.objects.get(name = name.split('/')[-1]).friendly_name
+    friendly_name = File.objects.get(name=name.split('/')[-1]).friendly_name
     if os.path.splitext(friendly_name)[1] == ".DIV":
         return read_div(myfilestr=name)
     else:
@@ -146,24 +144,24 @@ save = save_module(id='sans.save', datatype=SANS_DATA,
 
 
 # Modules
-def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in, **kwargs):
+def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in, deadtimeConstant=3.4e-6 , **kwargs):
     lis = [sample_in[0], empty_cell_in[0], empty_in[0], blocked_in[0]] 
     print "List: ", lis
     #Enter DeadTime parameter eventually
     solidangle = [correct_solid_angle(f) for f in lis]
     det_eff = [correct_detector_efficiency(f) for f in solidangle]
-    deadtime = [correct_dead_time(f) for f in det_eff]
+    deadtime = [correct_dead_time(f, deadtimeConstant) for f in det_eff]
     result = deadtime
     return dict(sample_out=[result[0]], empty_cell_out=[result[1]], empty_out=[result[2]], blocked_out=[result[3]])
 deadtime = correct_dead_time_module(id='sans.correct_dead_time', datatype=SANS_DATA, version='1.0', action=correct_dead_time_action)
 
-def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Temp_in, **kwargs):
-    coord_left = (55, 53)
-    coord_right = (74, 72)
+def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Temp_in, monitorNormalize=1e8, bottomLeftCoord={}, topRightCoord={}, **kwargs):
+    coord_left = (bottomLeftCoord['X'], bottomLeftCoord['Y'])
+    coord_right = (topRightCoord['X'], topRightCoord['Y'])
     lis = [sample_in[0], empty_cell_in[0], empty_in[0], Tsam_in[0], Temp_in[0]] 
     print "Lis: ", lis
     #Enter Normalization Parameter eventually
-    norm = [monitor_normalize(f) for f in lis]
+    norm = [monitor_normalize(f,monitorNormalize) for f in lis]
     
     Tsam = generate_transmission(norm[3], norm[2], coord_left, coord_right)
     Temp = generate_transmission(norm[4], norm[2], coord_left, coord_right)
@@ -208,13 +206,12 @@ def convert_qxqy_action():
     correctVer, qx, qy = convert_qxqy(correctVer)
     print "Convertqxqy"
 
-def absolute_scaling_action(DIV, empty, sensitivity,ins_name = 'NG3', **kwargs):
+def absolute_scaling_action(DIV, empty, sensitivity, ins_name='', **kwargs):
     #sample,empty,DIV,Tsam,instrument
     lis = [DIV[0], empty[0], sensitivity[0]]
-    global Tsamm, qx, qy
+    global qx,qy
     sensitivity = lis[-1]
     EMP = lis[1]
-    print "Empty: ", EMP
     DIV = lis[0]
     ABS = absolute_scaling(DIV, EMP, sensitivity, DIV.Tsam, ins_name)
     
@@ -273,7 +270,7 @@ if __name__ == '__main__':
         dict(module="sans.load", position=(5, 110),
              config={'files': [fileList[5]], 'intent': 'signal'}),
         #4 
-        dict(module="sans.correct_dead_time", position=(250 , 10), config={}),
+        dict(module="sans.correct_dead_time", position=(250 , 10), config={'deadtimeConstant':3.4e-6}),
         
         #Tsam 5
         dict(module="sans.load", position=(5, 200),
@@ -282,7 +279,7 @@ if __name__ == '__main__':
         dict(module="sans.load", position=(5, 230),
              config={'files': [fileList[4]], 'intent': 'signal'}),
         #7
-        dict(module="sans.generate_transmission", position=(400 , 10), config={}),
+        dict(module="sans.generate_transmission", position=(400 , 10), config={'monitorNormalize':1e8, 'bottomLeftCoord':{'X':55, 'Y':53}, 'topRightCoord':{'X':74, 'Y':72}}),
         #8
         dict(module="sans.save", position=(660, 660), config={'ext': 'dat'}),
         #9

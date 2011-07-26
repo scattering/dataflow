@@ -23,7 +23,8 @@ WireIt.WiringEditor = function(options) {
 	 if( this.adapter.init && YAHOO.lang.isFunction(this.adapter.init) ) {
 			this.adapter.init();
  	 }
-	 this.load();
+ 	 // Commented out the initial load. Now must click load to bring up the loading screen
+	 //this.load();
 };
 
 lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
@@ -228,8 +229,12 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
        	return;
     	}
 		// THIS IS WHERE THE MAGIC HAPPENS
-		// getValue returns the current wiring, and the tempSavedWiring parses all the relevant info
+		// getValue returns the current wiring, and the tempSavedWiring stores all the relevant info
 		this.tempSavedWiring = {name: wirename, modules: value.working.modules, properties: value.working.properties, wires:value.working.wires, language: this.options.languageName };
+	for (var i in this.tempSavedWiring.modules) {
+		//console.log(i, this.tempSavedWiring.modules[i].config)
+		this.tempSavedWiring.modules[i].config = this.tempSavedWiring.modules[i].config[this.reductionInstance]
+		}
 	this.tempSavedWiring.properties.name = wirename
     	this.adapter.saveWiring(this.tempSavedWiring, {
        	success: this.saveModuleSuccess,
@@ -244,9 +249,9 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	  */
 	 saveModuleSuccess: function(o) {
 
-		this.markSaved();
+		//this.markSaved();
 
-	   this.alert("Saved !\n source code follows:\n" + JSON.stringify(this.tempSavedWiring));
+	   //this.alert("Saved !\n source code follows:\n" + JSON.stringify(this.tempSavedWiring));
 
 		// TODO: call a saveModuleSuccess callback...
 	 },
@@ -295,7 +300,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		    // not entering in a 'files' config if the module is not a loader        		
         	}
         }
-        console.log(this.toReduce)
+        //console.log(this.toReduce)
 	    this.adapter.runReduction(this.toReduce, {
            	success: this.runModuleSuccess,
            	failure: this.runModuleFailure,
@@ -308,7 +313,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	runModuleSuccess: function(display) {
 		plotid = 'plot';
 		toPlot = display
-		console.log(toPlot)
+		//console.log(toPlot)
 		//console.log(display)
 		//var toPlot = display[this.wireClickSource].output[0], zipped = [];
 		//if (this.wireClickSource) {
@@ -448,7 +453,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	  */
 	load: function() {
     	console.log('LOADING') //debugging
-	    this.adapter.listWirings({language: this.options.languageName},{
+	    this.adapter.listWirings({language: this.options.languageName, experiment_id: this.launchedFromExperimentPage},{
 			success: function(result) {
 				this.onLoadSuccess(result);
 			},
@@ -596,7 +601,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
     			YAHOO.util.Dom.get('FAT').removeChild(YAHOO.util.Dom.get('FAT').lastChild);
 			}
 		  // Call the File Association Table with appropriate headers
-		  makeFileTable(this.getFATHeaders(),FILES)
+		  makeFileTable(this.getFATHeaders(),FILES, this.getValue().working.modules)
 		  ///console.log(this.getFATHeaders())
 
  		}
@@ -657,7 +662,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		var moduleList = wiringDiagram.modules
 		var hitModules = [] // at some point to check which modules have already been touched
 		var headersList = [] // actual list of headers
-		for (var i in wireList) {
+		for (var i=0; i < wireList.length; i++) {
 			//console.log(i)
 			if (moduleList[wireList[i].src.moduleId].name === 'Load') {
 			
@@ -675,18 +680,43 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	**/
 	
 	FATupdate: function(templateConfig) {
-		console.log('in Editor', templateConfig)
+		//console.log('in Editor', templateConfig)
 		setMax = 0;
 		for (i in templateConfig) {
 			setMax += 1
 			}
 		this.maxReduction = setMax;
 		this.templateConfig = templateConfig;
+		this.updateFileConfigs(templateConfig)
 		this.displayCurrentReduction();
 		this.extendModuleConfigs()
 	
 	},
 	
+	updateFileConfigs: function(file_associations) {
+	//console.log('ENTERING FILE CONFIGS')
+	for (var l in this.layer.containers) {
+		for (var j in this.layer.containers[l].tracksConfigs) {
+			this.layer.containers[l].tracksConfigs[j]['files'] = []
+			}
+		}
+	for (var j = 1; j <= Object.size(file_associations); j++) {
+	        for (var i in file_associations[j]) {
+        		if (typeof file_associations[j][i] == "object") {
+        			for (var k in file_associations[j][i]) {
+        				//console.log('j',j,'i',i,'k',k)
+        				//console.log(this.layer.containers[i.split(": ").pop()].tracksConfigs[j]['files'])
+        	   			this.layer.containers[i.split(": ").pop()].tracksConfigs[j]['files'].push([file_associations[j][i][k]])
+        	   	}
+        		}
+        
+        	else {
+		    // not entering in a 'files' config if the module is not a loader        		
+        	}
+        }
+        }
+        //console.log('LEAVING FILE CONFIGS')
+	},
 		
 	/**
 	* These following methods are for paging through the reduction template instances
@@ -715,12 +745,19 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 	
 	displayCurrentReduction: function() {
 		//console.log('In DISPLAY')
+		
+		// changes the reduction number
 		HTML = '<dl class ="instance-info-display">'
 		for (var i in this.templateConfig[this.reductionInstance]) {
 			HTML += '<dt>' + i + "</dt><dd>" + this.templateConfig[this.reductionInstance][i] + '</dd>'
 			}
 		HTML += "</dl>";
 		YAHOO.util.Dom.get('instance-files-info').innerHTML = HTML
+		
+		// updates the module info display
+		if (this.clickedModuleID) {
+			this.layer.containers[this.clickedModuleID].onMouseDown()
+		}
 	},
 	
 	/**
@@ -755,12 +792,84 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		//console.log(module.getConfig())
 		for (i in config) {
 			//console.log(i, config[i])
-			HTML += '<dt>' + i + "</dt><dd>" + config[i] + '</dd>'
+			if (typeof config[i] == "object") {
+				HTML += '<dt>' + i +  "</dt><dd>"
+				for (var j in config[i]) {
+					HTML += "<p>" + j + ": " + config[i][j] + "</p>"
+					}
+				HTML += "</dd>"
+				}
+			else {
+				HTML += '<dt>' + i + "</dt><dd>" + config[i] + '</dd>'
+			}
 		}
 		HTML += "</dl>";
 		YAHOO.util.Dom.get('instance-modules-info').innerHTML = HTML	
 	},
 
+	generateConfigForm: function(moduleID) {
+		console.log('generating form')
+		while (YAHOO.util.Dom.get("instance-modules-input").hasChildNodes()) {
+	    			YAHOO.util.Dom.get("instance-modules-input").removeChild(YAHOO.util.Dom.get("instance-modules-input").lastChild);
+				}
+		configHeaders = []
+		badHeaders = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
+		configs = this.layer.containers[moduleID].getConfig()[this.reductionInstance]
+		//console.log(configs)
+		for (var j in configs) {
+			if (badHeaders.indexOf(j) == -1) {
+				//console.log(configs[j], typeof configs[j])
+				if (typeof configs[j] == 'string' || typeof configs[j] == 'number'){
+					configHeaders.push([j,[j]])
+					}
+				if (typeof configs[j] == "object") {
+					fieldNames = []
+					for (var k in configs[j]) {
+						fieldNames.push(k)
+						}
+					configHeaders.push([j,fieldNames])
+					}
+			}
+		}
+		//console.log(configHeaders, configHeaders.length)
+		if (configHeaders.length != 0) {
+			configForm(configHeaders, moduleID)
+			}
+		else {YAHOO.util.Dom.get("instance-modules-input").innerHTML = "THIS MODULE HAS NO CONFIGURABLE INPUTS"}
+	},
+	
+	setModuleConfigsFromForm: function(configs, moduleID, instanceNumber) {
+		if (typeof instanceNumber == "number") {
+			for (var i in configs) {
+				splitConfig = i.split(',')
+				//console.log(splitConfig)
+				if (splitConfig[0] == splitConfig[1]) {
+					this.layer.containers[moduleID].tracksConfigs[this.reductionInstance][splitConfig[0]] = configs[i]
+					}
+				else {
+					this.layer.containers[moduleID].tracksConfigs[this.reductionInstance][splitConfig[0]][splitConfig[1]] = configs[i]
+				}
+				}
+			}
+		else {
+			for (var i in configs) {
+				splitConfig = i.split(',')
+				//console.log(splitConfig)
+				if (splitConfig[0] == splitConfig[1]) {
+					for (var j = 1; j <= this.maxReduction; j++) {
+						this.layer.containers[moduleID].tracksConfigs[j][splitConfig[0]] = configs[i]
+						}
+					}
+				else {
+					for (var j = 1; j <= this.maxReduction; j++ ) {
+						this.layer.containers[moduleID].tracksConfigs[j][splitConfig[0]][splitConfig[1]] = configs[i]
+					}
+				}
+				}
+			}
+		this.layer.containers[moduleID].onMouseDown()
+		//console.log(this.layer.containers[moduleID].tracksConfigs)
+		},
 
 
 });

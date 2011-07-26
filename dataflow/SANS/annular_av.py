@@ -13,10 +13,10 @@ def annular_av_module(id=None, datatype=None, action=None,
         'URI': config.IMAGES + "SANS/annular2_image.png",
         'terminals': {
             #inputs
-            'ABS': (0, 10, -1, 0),
+            'ABS': (-16, 10, -1, 0),
             
             #Outputs
-            'OneD': (20, 10, 1, 0),
+            'OneD': (48, 10, 1, 0),
         }
     }
     
@@ -39,7 +39,7 @@ def annular_av_module(id=None, datatype=None, action=None,
 
     # Combine everything into a module.
     module = Module(id=id,
-                  name='annular_av',
+                  name='Annular Average',
                   version=version,
                   description=action.__doc__,
                   icon=icon,

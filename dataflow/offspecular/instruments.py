@@ -2,14 +2,36 @@
 Offspecular reflectometry reduction modules
 """
 import os, sys, simplejson
-dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-sys.path.append(dir)
 
 # left here for testing purposes
 # python uses __name__ for relative imports so I cannot use
 # the ... in place of dataflow when testing
 TESTING = 1
-if TESTING:
+SERVER = 0
+if SERVER:
+    from DATAFLOW.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
+    from DATAFLOW.dataflow import config
+    from DATAFLOW.dataflow.calc import run_template, get_plottable, calc_single
+    from DATAFLOW.dataflow.core import Data, Instrument, Template, register_instrument
+    from DATAFLOW.dataflow.modules.load import load_module
+    from DATAFLOW.dataflow.modules.save import save_module
+    from DATAFLOW.dataflow.offspecular.modules.combine import combine_module
+    from DATAFLOW.dataflow.offspecular.modules.autogrid import autogrid_module
+    from DATAFLOW.dataflow.offspecular.modules.offset import offset_module
+    from DATAFLOW.dataflow.offspecular.modules.wiggle import wiggle_module
+    from DATAFLOW.dataflow.offspecular.modules.pixels_two_theta import pixels_two_theta_module
+    from DATAFLOW.dataflow.offspecular.modules.two_theta_qxqz import two_theta_qxqz_module
+    from DATAFLOW.dataflow.offspecular.modules.load_he3_analyzer_collection import load_he3_module
+    from DATAFLOW.dataflow.offspecular.modules.append_polarization_matrix import append_polarization_matrix_module
+    from DATAFLOW.dataflow.offspecular.modules.combine_polarized import combine_polarized_module
+    from DATAFLOW.dataflow.offspecular.modules.polarization_correct import polarization_correct_module
+    from DATAFLOW.dataflow.offspecular.modules.timestamps import timestamp_module
+    from DATAFLOW.reduction.offspecular.filters import *
+    from DATAFLOW.reduction.offspecular.he3analyzer import *
+    from DATAFLOW.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
+elif TESTING:
+    dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    sys.path.append(dir)
     from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
     from dataflow.dataflow import config
     from dataflow.dataflow.calc import run_template, get_plottable, calc_single
@@ -46,8 +68,9 @@ else:
     from ..offspecular.modules.append_polarization_matrix import append_polarization_matrix_module
     from ..offspecular.modules.combine_polarized import combine_polarized_module
     from ..offspecular.modules.polarization_correct import polarization_correct_module
-    from ..offspecular.filters import *
-    from ..offspecular.he3analyzer import *
+    from ..offspecular.modules.timestamps import timestamp_module
+    from ...reduction.offspecular.filters import *
+    from ...reduction.offspecular.he3analyzer import *
     from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray
 
 OSPEC_DATA = 'data2d.ospec'
@@ -192,9 +215,9 @@ timestamp = timestamp_module(id='ospec.timestamp', datatype=OSPEC_DATA,
 ANDR = Instrument(id='ncnr.ospec.andr',
                  name='NCNR ANDR',
                  archive=config.NCNR_DATA + '/andr',
-                 menu=[('Input', [load, save]),
+                 menu=[('Input', [load, load_he3, save]),
                        ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, two_theta_qxqz]),
-                       ('Polarization reduction', [load_he3, timestamp, append_polarization, combine_polarized, correct_polarized]),
+                       ('Polarization reduction', [timestamp, append_polarization, combine_polarized, correct_polarized]),
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],
                  datatypes=[data2d, datahe3],
@@ -205,7 +228,7 @@ for instrument in instrmnts:
 
 # Testing
 if __name__ == '__main__':
-    polarized = False
+    polarized = True
     if not polarized:
         path, ext = dir + '/dataflow/sampledata/ANDR/sabc/Isabc20', '.cg1'
         files = [path + str(i + 1).zfill(2) + ext for i in range(1, 12)]
@@ -236,15 +259,15 @@ if __name__ == '__main__':
         pols = simplejson.load(open(dir + '/dataflow/sampledata/ANDR/cshape_121609/file_catalog.json', 'r'))
         pol_states = [pols[os.path.split(file)[-1]]['polarization'] for file in files]
         modules = [
-            dict(module="ospec.load", position=(50, 50),
+            dict(module="ospec.load", position=(50, 25),
                  config={'files': files, 'intent': 'signal', 'PolStates':pol_states}),
-            dict(module="ospec.timestamp", position=(60, 60), config={'timestamp_file':'end_times.json'}),
-            dict(module="ospec.loadhe3", position=(60, 60), config={'files':[dir + '/dataflow/sampledata/ANDR/cshape_121609/He3Cells.json']}),
-            dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
-            dict(module="ospec.comb_polar", position=(150, 100), config={}),
-            dict(module="ospec.append", position=(250, 150), config={}),
-            dict(module="ospec.corr_polar", position=(350, 200), config={}),
-            dict(module="ospec.grid", position=(600, 350), config={}),
+            dict(module="ospec.timestamp", position=(100, 125), config={'timestamp_file':'end_times.json'}),
+            dict(module="ospec.loadhe3", position=(50, 375), config={'files':[dir + '/dataflow/sampledata/ANDR/cshape_121609/He3Cells.json']}),
+            dict(module="ospec.save", position=(700, 175), config={'ext': 'dat'}),
+            dict(module="ospec.comb_polar", position=(450, 180), config={}),
+            dict(module="ospec.append", position=(300, 225), config={}),
+            dict(module="ospec.corr_polar", position=(570, 125), config={}),
+            dict(module="ospec.grid", position=(350, 375), config={}),
         ]
         wires = [
             dict(source=[0, 'output'], target=[1, 'input']),
@@ -269,8 +292,8 @@ if __name__ == '__main__':
     print template_to_wireit_diagram(template)
     ins = simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
     with open(dir + '/dataflow/static/wireit_test/ANDRdefinition2.js', 'w') as f:
-        f.write('var langandr = ' + ins + ';')
-    #sys.exit()
+        f.write('var andr2 = ' + ins + ';')
+    sys.exit()
     nodenum = template.order()[-2]
     terminal = 'output'
     result = get_plottable(template, config, nodenum, terminal)

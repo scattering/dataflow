@@ -7,9 +7,9 @@ admin.autodiscover()
 
 import ROOT_URL
 
-urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views', 
+urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views',
 		('^hello/$', 'xhr_test'),
-		('^test/$','mytest'),
+		('^test/$', 'mytest'),
 		#('^login/$', 'django.contrib.auth.views.login'),
 		('^listWirings/$', 'listWirings'),
 		
@@ -44,7 +44,7 @@ urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views',
     # url(r'^admin/', include(admin.site.urls)),
 )
 
-urlpatterns+=patterns('',
+urlpatterns += patterns('',
 		      url(r'^admin/', include(admin.site.urls)),
 		      (r'', include('registration.backends.default.urls')),
 		      (r'^profiles/', include('profiles.urls')),
