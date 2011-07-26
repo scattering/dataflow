@@ -1,7 +1,7 @@
 """
 Offspecular reflectometry reduction modules
 """
-import os, sys, simplejson
+import os, sys, simplejson, pickle
 
 # left here for testing purposes
 # python uses __name__ for relative imports so I cannot use
@@ -26,6 +26,7 @@ if SERVER:
     from DATAFLOW.dataflow.offspecular.modules.combine_polarized import combine_polarized_module
     from DATAFLOW.dataflow.offspecular.modules.polarization_correct import polarization_correct_module
     from DATAFLOW.dataflow.offspecular.modules.timestamps import timestamp_module
+    from DATAFLOW.dataflow.offspecular.modules.load_timestamps import load_timestamp_module
     from DATAFLOW.reduction.offspecular.filters import *
     from DATAFLOW.reduction.offspecular.he3analyzer import *
     from DATAFLOW.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
@@ -49,6 +50,7 @@ elif TESTING:
     from dataflow.dataflow.offspecular.modules.combine_polarized import combine_polarized_module
     from dataflow.dataflow.offspecular.modules.polarization_correct import polarization_correct_module
     from dataflow.dataflow.offspecular.modules.timestamps import timestamp_module
+    from dataflow.dataflow.offspecular.modules.load_timestamps import load_timestamp_module
     from dataflow.reduction.offspecular.filters import *
     from dataflow.reduction.offspecular.he3analyzer import *
     from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
@@ -69,14 +71,26 @@ else:
     from ..offspecular.modules.combine_polarized import combine_polarized_module
     from ..offspecular.modules.polarization_correct import polarization_correct_module
     from ..offspecular.modules.timestamps import timestamp_module
+    from ..offspecular.modules.load_timestamps import load_timestamp_module
     from ...reduction.offspecular.filters import *
     from ...reduction.offspecular.he3analyzer import *
     from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray
+
+class Timestamp(dict):
+    def get_plottable(self):
+        return simplejson.dumps({})
+    def dumps(self):
+        return pickle.dumps(self)
+    @classmethod
+    def loads(cls, str):
+        return pickle.loads(str)
 
 OSPEC_DATA = 'data2d.ospec'
 data2d = Data(OSPEC_DATA, FilterableMetaArray)
 OSPEC_DATA_HE3 = OSPEC_DATA + '.he3'
 datahe3 = Data(OSPEC_DATA_HE3, He3AnalyzerCollection)
+OSPEC_DATA_TIMESTAMP = OSPEC_DATA + '.timestamp'
+datastamp = Data(OSPEC_DATA_TIMESTAMP, Timestamp)
 
 # Load module
 def load_action(files=[], intent='', auto_PolState=False, PolStates=[], **kwargs):
@@ -178,6 +192,14 @@ def _load_he3_data(name, cells):
 load_he3 = load_he3_module(id='ospec.loadhe3', datatype=OSPEC_DATA_HE3,
                    version='1.0', action=load_he3_action)
 
+# Load timestamps
+def load_timestamp_action(files=[]):
+    print "loading timestamps", files
+    result = [Timestamp(simplejson.load(open(f, 'r'))) for f in files]
+    return dict(output=result)
+load_stamp = load_timestamp_module(id='ospec.loadstamp', datatype=OSPEC_DATA_TIMESTAMP,
+                   version='1.0', action=load_timestamp_action)
+
 # Append polarization matrix module
 def append_polarization_matrix_action(input=[], he3cell=None):
     print "appending polarization matrix"
@@ -205,22 +227,25 @@ def polarization_correct_action(input=[], assumptions=0, auto_assumptions=True):
 correct_polarized = polarization_correct_module(id='ospec.corr_polar', datatype=OSPEC_DATA,
                                              version='1.0', action=polarization_correct_action)
 
-def timestamp_action(input=[], timestamp_file='end_times.json', override_existing=False):
+def timestamp_action(input=[], stamps=None, override_existing=False):
     print "stamping times"
-    return dict(output=InsertTimestamps().apply(input, timestamp_file=timestamp_file, override_existing=override_existing))
+    if stamps == None:
+        sys.exit("No timestamps specified; exiting")
+    timestamp_file = stamps[0] # only one timestamp
+    return dict(output=InsertTimestamps().apply(input, timestamp_file, override_existing=override_existing))
 timestamp = timestamp_module(id='ospec.timestamp', datatype=OSPEC_DATA,
-                             version='1.0', action=timestamp_action)
+                             version='1.0', action=timestamp_action, stamp_datatype=OSPEC_DATA_TIMESTAMP)
 
 #Instrument definitions
 ANDR = Instrument(id='ncnr.ospec.andr',
                  name='NCNR ANDR',
                  archive=config.NCNR_DATA + '/andr',
-                 menu=[('Input', [load, load_he3, save]),
+                 menu=[('Input', [load, load_he3, load_stamp, save]),
                        ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, two_theta_qxqz]),
                        ('Polarization reduction', [timestamp, append_polarization, combine_polarized, correct_polarized]),
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],
-                 datatypes=[data2d, datahe3],
+                 datatypes=[data2d, datahe3, datastamp],
                  )
 instrmnts = [ANDR]
 for instrument in instrmnts:
@@ -261,16 +286,18 @@ if __name__ == '__main__':
         modules = [
             dict(module="ospec.load", position=(50, 25),
                  config={'files': files, 'intent': 'signal', 'PolStates':pol_states}),
-            dict(module="ospec.timestamp", position=(100, 125), config={'timestamp_file':'end_times.json'}),
+            dict(module="ospec.timestamp", position=(100, 125), config={}),
             dict(module="ospec.loadhe3", position=(50, 375), config={'files':[dir + '/dataflow/sampledata/ANDR/cshape_121609/He3Cells.json']}),
             dict(module="ospec.save", position=(700, 175), config={'ext': 'dat'}),
             dict(module="ospec.comb_polar", position=(450, 180), config={}),
             dict(module="ospec.append", position=(300, 225), config={}),
             dict(module="ospec.corr_polar", position=(570, 125), config={}),
             dict(module="ospec.grid", position=(350, 375), config={}),
+            dict(module="ospec.loadstamp", position=(50, 250), config={'files':[dir + '/dataflow/sampledata/ANDR/cshape_121609/end_times.json']}),
         ]
         wires = [
             dict(source=[0, 'output'], target=[1, 'input']),
+            dict(source=[8, 'output'], target=[1, 'stamps']),
             dict(source=[1, 'output'], target=[5, 'input']),
             dict(source=[2, 'output'], target=[5, 'he3cell']),
             dict(source=[5, 'output'], target=[4, 'input']),
@@ -286,14 +313,13 @@ if __name__ == '__main__':
                         wires=wires,
                         instrument=ANDR.id,
                         )
-    #result = run_template(template, config)
-    #print "Starting again. This time should be A LOT quicker (if the server was empty at runtime)."
-    #result2 = run_template(template, config)
+    
     print template_to_wireit_diagram(template)
     ins = simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
     with open(dir + '/dataflow/static/wireit_test/ANDRdefinition2.js', 'w') as f:
         f.write('var andr2 = ' + ins + ';')
     sys.exit()
+    
     nodenum = template.order()[-2]
     terminal = 'output'
     result = get_plottable(template, config, nodenum, terminal)
