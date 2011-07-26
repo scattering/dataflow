@@ -549,15 +549,11 @@ class InsertTimestamps(Filter2D):
     
     @autoApplyToList
     @updateCreationStory
-    def apply(self, data, timestamp_file='end_times.json', override_existing=False):
+    def apply(self, data, timestamps, override_existing=False):
         # first of all, if there is already a timestamp, skip!
         #extra info changed
         if data._info[-1].has_key('end_datetime') and not override_existing:
             return data
-        path = data._info[-1]['path']
-        fn = os.path.join(path, timestamp_file)
-        timestamps = simplejson.load(open(fn, 'r'))
-            
         # now figure out which file was the source:
         new_info = data.infoCopy()
         source_filename = new_info[-1]['filename'][1:] # strip off leading 'I'
