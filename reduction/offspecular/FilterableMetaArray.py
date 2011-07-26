@@ -3,6 +3,9 @@ from numpy import ndarray, amin, amax, alen, array, fromstring
 import copy, simplejson, datetime
 from ...dataflow.core import Data
 from cStringIO import StringIO
+from dataflow.dataflow.offspecular.image_from_array import array_to_png
+import base64
+import cjson
 
 class FilterableMetaArray(Data, MetaArray):
     def __new__(*args, **kwargs):
@@ -61,19 +64,51 @@ class FilterableMetaArray(Data, MetaArray):
         return subarr
 
     def get_plottable(self):
-        z = [arr[:, 0].tolist() for arr in self]
-        axis = ['x', 'y']
+        array_out = self['Measurements':'counts']
+        z = [array_out.tolist()]
+        #zbin_base64 = base64.b64encode(array_out.tostring())
+        #z = [arr[:, 0].tolist() for arr in self]
         dims = {}
+        # can't display zeros effectively in log... set zmin to smallest non-zero
+        zmin = array_out[array_out > 1e-10].min()
+        dims['zmin'] = zmin
+        dims['zmax'] = array_out.max()
+        axis = ['x', 'y']
         for index, label in enumerate(axis):
             arr = self._info[index]['values']
             dims[axis[index] + 'min'] = amin(arr)
             dims[axis[index] + 'max'] = amax(arr)
             dims[axis[index] + 'dim'] = alen(arr)
+            dims['d' + axis[index]] = arr[1] - arr[0]
         xlabel = self._info[0]['name']
         ylabel = self._info[1]['name']
         zlabel = self._info[2]['cols'][0]['name']
         title = 'AND/R data' # That's creative enough, right?
-        type = '2d'
-        dump = dict(type=type, z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
-        res = simplejson.dumps(dump, sort_keys=True, indent=2)
+        type = '2d_image'
+        transform = 'log' # this is nice by default
+        dump = dict(type=type, z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, transform=transform)
+        res = simplejson.dumps(dump, sort_keys=True)
         return res
+        
+#    def get_plottable_new(self):
+#        array_out = self['Measurements':'counts']
+#        z = {'png': base64.b64encode(array_to_png(array_out, colormap='jet')), 
+#             'data': array_out.tolist()}
+#        dims = {}
+#        dims['zmin'] = array_out.min()
+#        dims['zmax'] = array_out.max()
+#        axis = ['x', 'y']
+#        for index, label in enumerate(axis):
+#            arr = self._info[index]['values']
+#            dims[axis[index] + 'min'] = amin(arr)
+#            dims[axis[index] + 'max'] = amax(arr)
+#            dims[axis[index] + 'dim'] = alen(arr)
+#            dims['d' + axis[index]] = arr[1] - arr[0]
+#        xlabel = self._info[0]['name']
+#        ylabel = self._info[1]['name']
+#        zlabel = self._info[2]['cols'][0]['name']
+#        title = 'AND/R data' # That's creative enough, right?
+#        type = '2d_image'
+#        dump = dict(type=type, z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
+#        res = simplejson.dumps(dump, sort_keys=True)
+#        return res

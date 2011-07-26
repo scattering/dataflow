@@ -127,12 +127,14 @@ function matrixfy(d, func, format) {
 
 
 function renderData(data, plotid, plot) {
+    var dims = data.dims
     var m = Matrix(data.z);
     data = [ DataSeries({
         title: data.title,
         func: m.at,
         axis: "lin",
         dims: m.autodims,
+        realdims: dims,
         palette: "jet",
         edges: 255,
     }) ];
@@ -141,12 +143,14 @@ function renderData(data, plotid, plot) {
   var options = { title: data[0].title, series: [], axes: { xaxis: { label: data[0].xlabel, tickOptions: { formatString: '%.2f' } }, yaxis: { label: data[0].ylabel, tickOptions: { formatString: '%.2f' } } }, cursor: { show: true, zoom: true, showTooltipDataPosition: true, showVerticalLine: true, showHorizontalLine: true, tooltipFormatString:  '%s (%s, %s, %s)' } };
   
   for (var index = 0; index < data.length; index ++) {
+    console.log(data[index].points[0])
 //    data[index].points = matrixfy(
     var s_ = data[index].points;
     var n  = data[index].edges;
     var edges_ = edges(data[index].zs,data[index].axis,n);
     data[index].edges_ = edges_;
     var palette = palettes[data[index].palette](n+1);
+    console.log(palette);
     data[index].palette_ = palette;
     //jQuery('#funcs').val(data[index].name);
     jQuery('#palettes').val(data[index].palette);
@@ -191,6 +195,230 @@ function renderData(data, plotid, plot) {
   return plot;
 
 }
+
+
+
+var imgd = null;
+var plot2d = null;
+var plot2d_colorbar = null;
+var process_bin_data = false;
+
+function renderImageColorbar(data, transform, plotid) {
+  var dims = data.dims;
+  console.log(dims)
+  
+  if (!plot2d_colorbar) {
+      //plot2 = $.jqplot(plotid+'_target', [edges], {
+      plot2d_colorbar = $.jqplot('colorbar', [[1,1]], {
+          title: 'Intensity',
+          series: [{showMarker:false, showLine:false, yaxis: 'y2axis'}],
+          seriesDefaults: [{yaxis: 'y2axis'}],
+        axes:{
+          xaxis:{
+            tickOptions: {show: false},
+          },
+          y2axis:{
+            //label: 'Intensity',
+            //labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+            tickOptions: {
+                formatString: "%.2f",
+                _styles: {left: 10},
+            }
+          }
+        },
+        grid: {shadow: false},
+    });
+  }
+  
+    function t(datum) {
+        if (transform=='log'){
+            return Math.log(datum)/Math.log(10)
+        }
+        else if (transform=='lin'){
+            return datum
+        }
+    }
+
+    plot2d_colorbar.axes.y2axis.min = t(dims.zmin);
+    plot2d_colorbar.axes.y2axis.max = t(dims.zmax);
+    //plot2d_colorbar.axes.yaxis.labelOptions.label = data.ylabel;
+    //plot2d_colorbar.grid._offsets.right = 20;
+    plot2d_colorbar.replot();
+  
+  var img = new Image();
+  var canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 256;
+  var context = canvas.getContext('2d');
+    
+  var grid = plot2d_colorbar.grid;  
+  var palette = palettes.jet(256);
+  var imgd = colorbar_context(context, palette);
+  
+  //context.putImageData(imgd, 0, 0);
+  img.src = canvas.toDataURL('image/png');
+  
+  img.onload = function(){
+    grid._ctx.drawImage(img, grid._left, grid._top, grid._width, grid._height);
+  // execute drawImage statements here
+    };
+  
+}
+
+function renderImageData(data, transform, plotid) {
+  var dims = data.dims;
+  var display_dims = data.display_dims || dims; // plot_dims = data_dims if not specified
+  
+  function roundToNearest(val, dmax, dmin, ddim){
+    // round a value to the nearest whole value in the range
+     var step = (dmax - dmin) / (ddim - 1);
+     var index = Math.floor((val - dmin) / step);
+     return (index * step) + dmin;
+  }
+  
+  display_dims.xmin = roundToNearest(display_dims.xmin, dims.xmax, dims.xmin, dims.xdim);
+  display_dims.xmax = roundToNearest(display_dims.xmax, dims.xmax, dims.xmin, dims.xdim);
+  display_dims.ymin = roundToNearest(display_dims.ymin, dims.ymax, dims.ymin, dims.ydim);
+  display_dims.ymax = roundToNearest(display_dims.ymax, dims.ymax, dims.ymin, dims.ydim);
+  
+  
+  var corners = [[dims.xmin, dims.ymin],[dims.xmax, dims.ymax]];
+  var series = [{showMarker:false, showLine:false}];
+  function t(datum) {
+        if (transform=='log'){
+            return Math.log(datum)/Math.log(10)
+        }
+        else if (transform=='lin'){
+            return datum
+        }
+    }
+  
+  if (!plot2d) {
+      //plot2 = $.jqplot(plotid+'_target', [edges], {
+      plot2d = $.jqplot('plots', [corners], {
+          series:series,
+        axes:{
+          xaxis:{
+            label: data.xlabel,
+            labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+            tickOptions: {
+                formatString: "%.2g"
+            }
+          },
+          yaxis:{
+            label: data.ylabel,
+            labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+            tickOptions: {
+                formatString: "%.2g",
+                // fix for ticks drifting to the left in accordionview!
+                _styles: {right: 0},
+            }
+          }
+        },
+        cursor: {
+            show: true,
+            tooltipLocation:'sw'
+      },
+        grid: {shadow: false},
+    });
+  }
+
+    plot2d.axes.xaxis.min = display_dims.xmin;
+    plot2d.axes.xaxis.max = display_dims.xmax;
+    // don't ask me why we can't use xaxis.label directly. Is it a bug in jqPlot?
+    plot2d.axes.xaxis.labelOptions.label = data.xlabel;
+    plot2d.axes.yaxis.min = display_dims.ymin;
+    plot2d.axes.yaxis.max = display_dims.ymax;
+    plot2d.axes.yaxis.labelOptions.label = data.ylabel;
+    //plot2d.grid._offsets.left = 75;
+    plot2d.replot()
+    plot2d.grid._offsets.left = plot2d.axes.yaxis._elem.width() 
+    // move the grid over so that the axes fit!
+    plot2d.replot()
+  
+  var grid = plot2d.grid;
+
+
+  //ctx = document.getElementById(plotid)
+  //console.log('I am here', decode64(data.z[0]), data.z[0].length);
+  var jet = palettes.jet;
+  var palette_array = jet(256).array;
+  //var invisid = 'invis';
+  // making a throwaway canvas:
+  var canvas = document.createElement('canvas');
+  canvas.hidden = true;
+  canvas.width = data.dims.xdim;
+  canvas.height = data.dims.ydim;
+  var context = canvas.getContext('2d');
+  //var context = getContext(invisid);
+  //var canvas = document.getElementById(invisid);
+  var myImageData = context.createImageData(data.dims.xdim, data.dims.ydim);
+  //bin_data = Base64.decode(data.z);
+  if (process_bin_data) {
+    bin_data = decode64(data.z);
+    console.log(data.z.length, bin_data.length);
+    var bin_reader = new BinaryReader(bin_data);
+
+  //dataz = data.z[0];
+    dataz=[]
+    console.log(data.dims.xdim, data.dims.ydim);
+    for (var r = 0; r < data.dims.xdim; r++) {
+      col = [];
+      for (var c = 0; c < data.dims.ydim; c++) {
+          col[c] = bin_reader.readDouble();
+      }
+      dataz[r] = col;
+    }
+  }
+  else {
+    dataz = data.z[0]
+  }
+  width = dataz.length;
+  height = dataz[0].length;
+  
+  canvas.width = width;
+  canvas.height = height;
+  
+  for (var r = 0; r < dataz.length; r++) {
+    for (var c = 0; c < dataz[0].length; c++) {
+        var offset = 4*((c*width) + r);
+        var z = dataz[r][c];
+        var plotz = Math.round((t(z+1) / t(data.dims.zmax)) * 255.0);
+
+        plotz = ((plotz>255)? 255 : plotz);
+        plotz = ((plotz<0)? 0 : plotz);
+        var rgb = palette_array[plotz];
+        //console.log(plotz, rgb)
+        myImageData.data[offset + 0] = rgb[0];
+        myImageData.data[offset + 1] = rgb[1];
+        myImageData.data[offset + 2] = rgb[2];
+        myImageData.data[offset + 3] = 255;
+    }
+  }
+  
+  imgd = myImageData;
+  context.putImageData(myImageData, 0, 0);
+  //img = canvas2img(invisid);
+  var img = new Image();
+  img.src = canvas.toDataURL('image/png');
+  //img.src = 'data:image/png;base64,' + data.z['png'];
+  
+  //img.src = decode64(data.z['png']);
+  //img.src="http://static.ak.fbcdn.net/images/welcome/welcome_page_map.png";
+  
+  img.onload = function(){
+    grid._ctx.drawImage(img, grid._left, grid._top, grid._width, grid._height);
+  // execute drawImage statements here
+    };
+  
+  return plot2d;
+  
+}  
+
+
 function colorbar(canvasid, palette) {
   var cvs = document.getElementById(canvasid);
   var ctx = getContext(canvasid);
@@ -212,6 +440,27 @@ function colorbar(canvasid, palette) {
   ctx.putImageData(imgd, 0, 0);
   return imgd;
 }
+
+function colorbar_context(context, palette) {
+  var ctx = context;
+  if (debug) {
+      console.log('palette: ', palette);
+  }
+  //cvs.height = palette.array.length;
+  
+  var imgd = ctx.createImageData(1, palette.array.length);
+  var pix = imgd.data;
+  for (var i = 0; n = pix.length, i < n; i += 4) {
+    var rgba = palette.array[palette.array.length - 1 - i/4];
+    pix[i] = rgba[0];
+    pix[i+1] = rgba[1];
+    pix[i+2] = rgba[2];
+    pix[i+3] = 255;
+  }
+  ctx.putImageData(imgd, 0, 0);
+  return imgd;
+}
+
 function renderColorbar(canvasid, palette, edges, nlabels) {
   var imgd = colorbar(canvasid + '_invis', palette);
   img2 = canvas2img(canvasid + '_invis');
@@ -316,18 +565,22 @@ plotdata2 = {
 function createPlotObject(plotid) {
     return { stage: 1, prevtype: null, targetId: plotid + '_target', series: [], options: { title: '', series: [], axes: {} } };
 }
+
+var plot2d = null;
+var plotregion = null;
+
 function plottingAPI(toPlots, plotid_prefix) {
     if (toPlots.constructor != Array)
         toPlots = [toPlots];
         // throw "Unsupported data format! Data must be a list of series.";
    // toPlots = $A(toPlots).flatten();
-
+         
     for (var i = 0; i < toPlots.length; i ++) {
         var toPlot = toPlots[i];
         var plotid = plotid_prefix + '_' + i;
+        console.log('plotid', plotid)
         var plot = (!plots[i]) ? createPlotObject(plotid) : plots[i];
         if (plot.prevtype != toPlot.type) plot.stage = 1;
-        
         
         console.log(i, toPlot, toPlot.type, plot);
         switch (toPlot.type) {
@@ -338,6 +591,19 @@ function plottingAPI(toPlots, plotid_prefix) {
                 jQuery(document.getElementById(plotid + '_selecty')).append('<option />', { value: toPlot.ylabel, text: toPlot.ylabel });
                 jQuery(document.getElementById(plotid + '_selectx')).append('<option />', { value: toPlot.xlabel, text: toPlot.xlabel });
                 break;
+                
+            case '2d_image':
+                if (!plotregion) {
+                    document.getElementById('plots').appendChild(create2dPlotRegion(plotid));
+                    plotregion = true;
+                }
+                var transform = toPlot.transform || 'lin';
+                plot = renderImageData(toPlot, transform, plotid);
+                var colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
+                jQuery(document.getElementById(plotid + '_selecty')).append('<option />', { value: toPlot.ylabel, text: toPlot.ylabel });
+                jQuery(document.getElementById(plotid + '_selectx')).append('<option />', { value: toPlot.xlabel, text: toPlot.xlabel });
+                break;
+                
             case 'nd':
                 document.getElementById('plots').appendChild(createNdPlotRegion(plotid));
 
@@ -529,7 +795,7 @@ function create2dPlotRegion(plotid, renderTo) {
     divx.setAttribute('id', plotid + '_divx');
     divx.setAttribute('class', 'plot-axis plot-axis-x');
     var divc = document.createElement('div');
-    divc.setAttribute('id', plotid + '_divx');
+    divc.setAttribute('id', plotid + '_divc');
     divc.setAttribute('class', 'plot-axis plot-axis-c');
     var divtarget = document.createElement('div');
     divtarget.setAttribute('id', plotid + '_target');
@@ -554,10 +820,12 @@ function create2dPlotRegion(plotid, renderTo) {
     var invis = document.createElement('canvas');
     invis.setAttribute('id', plotid + '_invis');
     invis.setAttribute('class', 'plot-invis');
+    invis.hidden = true;
     var colorbarinvis = document.createElement('canvas');
     colorbarinvis.setAttribute('width', 1);
     colorbarinvis.setAttribute('id', plotid + '_colorbar_invis');
     colorbarinvis.setAttribute('class', 'plot-invis plot-colorbar-invis');
+    colorbarinvis.hidden = true;
 
     
     divy.appendChild(selecty);

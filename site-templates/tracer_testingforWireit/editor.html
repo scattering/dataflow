@@ -115,6 +115,8 @@ margin-bottom: 4px;
 		<!-- JQPLOT -->
 		<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
 		<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery.jqplot.js"></script>
+		<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
+        <script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
 		<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.pcolorRenderer.js"></script>
 		<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.cursor.js"></script>
 		<script type="text/javascript" src="../../static/lib/plotting/palettes.js"></script>
@@ -371,7 +373,12 @@ margin-bottom: 4px;
 			editor.wireClickedOn = {'source': this.src, 'target':this.tgt}
 			//editor.wireClickSource = this.src.moduleId
 			//editor.wireClickTarget = this.tgt.moduleId
-			editor.runReduction(editor.templateConfig[editor.reductionInstance])
+			try {
+				editor.runReduction(editor.templateConfig[editor.reductionInstance])
+				}
+			catch (ex) {
+				alert('Please enter file associations!')
+				}
 			}
 			// Open the infos panel
 			editor.accordionView.openPanel(2);
@@ -419,15 +426,16 @@ margin-bottom: 4px;
 				</li>
 				<li>
 					<h2>Plotting!</h2>
-					<div>
-						<div id="plots" style="display: block; border:1px solid; width:500px; height: 500px; float: left;"></div>
-						<canvas id="colorbar" width="60" height="500" style="float: left;"></canvas>
-						<br style="clear: left;" />
-						<div style="display: none;">
-							<canvas id="invis" width="1024" height="1024"></canvas>
-							<canvas id="invis2" width="1" height="1024"></canvas>
-						</div>
-					</div>
+
+                                <div>
+                                        <div id="plotbox" style="display: block; width: 450px; height: 350px;">
+                                            <div id="plots" style="float: left; width:350px; height: 350px; "></div>
+                                            <div id="colorbar" style="float: left; width: 60; height: 350; "></div>
+<!--                                        <canvas id="colorbar" width="60" height="350" style="position: absolute; left: 350px; display: block; border: 1px solid;"></canvas>-->
+<!--                                        <br style="clear: left;" />-->
+                                        </div>
+                                        <div id="plotbuttons" style = "display: block; width: 410px; height: 100px; "> </div>
+                                </div>
 				</li>
 				<li>
 					<h2>File Associations Table</h2>
@@ -458,9 +466,7 @@ margin-bottom: 4px;
 					<div>
 						<div style="padding: 10px;">
 							<p>
-								Functional WireIt editor using BT7
-								language generated from Paul's
-								code.
+								Welcome to the NCNR's Dataflow application, a web-based data reduction application.
 							</p>
 							<br />
 							<p>
@@ -470,7 +476,7 @@ margin-bottom: 4px;
 							</p>
 							<br />
 							<p>
-								<a href="language.js" target=
+								<a href="/static/lib/language.js" target=
 								"_new">Click here to view the language
 								definition for this editor.</a>
 							</p>
@@ -493,9 +499,6 @@ margin-bottom: 4px;
 					<b>Drag and drop modules from the Module list</b> on the left to the working layer in the middle.
 				</p>
 				<br />
-				<p>
-					<a href="language.js" target="_new">Click here to view the language definition for this editor.</a>
-				</p>
 			</div>
 		</div>
 	</body>

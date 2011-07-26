@@ -106,7 +106,7 @@ def generate_transmission_module(id=None, datatype=None, action=None,
         }
     # Combine everything into a module.
     module = Module(id=id,
-                  name='generate_transmission',
+                  name='Generate Transmission',
                   version=version,
                   description=action.__doc__,
                   icon=icon,
