@@ -28,10 +28,9 @@ if 1:
 	from ..SANS.annular_av import annular_av_module
 	from ..SANS.absolute_scaling import absolute_scaling_module
 	from ..SANS.correct_dead_time import correct_dead_time_module
-	from ...reduction.sans.filters import SansData
-	from ...reduction.sans.filters import Transmission
-	from ...reduction.sans.filters import plot1D
-	from ...reduction.sans.filters import div
+	#from ...reduction.sans.filters import SansData
+	#from ...reduction.sans.filters import plot1D
+	#from ...reduction.sans.filters import div
 	from ...apps.tracks.models import File
 
 
@@ -103,7 +102,6 @@ fileList = []
 # Datatype
 SANS_DATA = 'data2d.sans'
 data2d = Data(SANS_DATA, SansData)
-trans = Data(SANS_DATA, Transmission)
 data1d = Data(SANS_DATA, plot1D)
 datadiv = Data(SANS_DATA, div)
 #Datatype(id=SANS_DATA,
