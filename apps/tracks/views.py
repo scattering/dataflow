@@ -316,7 +316,7 @@ def editProject(request, project_id):
 	except EmptyPage:
 		experiments = paginator.page(paginator.num_pages)
 	form = titleOnlyFormExperiment()
-	return render_to_response('userProjects/editProject.html', {'project':project, 'form':form, 'experiments':experiments}, context_instance=context)
+	return render_to_response('userProjects/editProject.html', {'project':project, 'form':form, 'experiments':experiments}, context_instance=context), 
 
 @login_required 
 def editExperiment(request, experiment_id):
