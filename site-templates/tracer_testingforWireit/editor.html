@@ -111,7 +111,7 @@ margin-bottom: 4px;
 		<script type="text/javascript" src="../../static/lib/ajaxCSRFfix.js"></script>
 		-->
 		<!-- ExtJS -->
-		<script type="text/javascript" src="../../static/lib/ext/ext-all.js"></script>
+		<script type="text/javascript" src="../../static/lib/ext/ext-all-debug.js"></script>
 		<!-- JQPLOT -->
 		<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
 		<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery.jqplot.js"></script>
@@ -371,7 +371,7 @@ margin-bottom: 4px;
 			WireIt.Wire.prototype.onWireClick = function(x,y) {
 			console.log('WIRE CLICK!')
 			editor.wireClickedOn = {'source': this.src, 'target':this.tgt}
-			//console.log(this)
+			console.log(this)
 			//editor.wireClickSource = this.src.moduleId
 			//editor.wireClickTarget = this.tgt.moduleId
 			try {
@@ -379,15 +379,28 @@ margin-bottom: 4px;
 				}
 			catch (ex) {
 				alert('Please enter file associations!')
-				console.log(ex)
 				}
 			}
-			/**editor.layer.eventAddWire.subscribe(function(e,params) { 
-				var wire=params[0];
-				wire['src'] = wire.terminal1
-				wire['tgt'] = wire.terminal2
-				}, editor);
-**/
+			editor.layer.eventAddWire.subscribe(function(event, layer) {
+				//console.log(layer[0])
+				if (layer[0].terminal2.container) { // so we only get events fired on completion
+					if (!layer[0].src) {
+						var src = {}
+						var tgt = {}
+						src['moduleId'] = editor.layer.containers.indexOf(layer[0].terminal1.container)
+						src['terminal'] = layer[0].terminal1.name
+						tgt['moduleId'] = editor.layer.containers.indexOf(layer[0].terminal2.container)
+						tgt['terminal'] = layer[0].terminal1.name
+					
+						layer[0]['src'] = src
+						layer[0]['tgt'] = tgt
+						}
+					}
+				//var wire=params[0];
+				//wire['src'] = wire.terminal1
+				//wire['tgt'] = wire.terminal2
+				}, editor.layer, true);
+
 			// Open the infos panel
 			//editor.accordionView.openPanel(2);
 			//editor.accordionView.closePanel(0);
