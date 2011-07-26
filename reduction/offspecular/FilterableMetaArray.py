@@ -69,7 +69,9 @@ class FilterableMetaArray(Data, MetaArray):
         #zbin_base64 = base64.b64encode(array_out.tostring())
         #z = [arr[:, 0].tolist() for arr in self]
         dims = {}
-        dims['zmin'] = array_out.min()
+        # can't display zeros effectively in log... set zmin to smallest non-zero
+        zmin = array_out[array_out > 1e-10].min()
+        dims['zmin'] = zmin
         dims['zmax'] = array_out.max()
         axis = ['x', 'y']
         for index, label in enumerate(axis):
@@ -83,7 +85,8 @@ class FilterableMetaArray(Data, MetaArray):
         zlabel = self._info[2]['cols'][0]['name']
         title = 'AND/R data' # That's creative enough, right?
         type = '2d_image'
-        dump = dict(type=type, z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
+        transform = 'log' # this is nice by default
+        dump = dict(type=type, z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, transform=transform)
         res = simplejson.dumps(dump, sort_keys=True)
         return res
         
