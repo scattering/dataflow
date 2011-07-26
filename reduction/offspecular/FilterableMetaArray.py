@@ -3,9 +3,6 @@ from numpy import ndarray, amin, amax, alen, array, fromstring
 import copy, simplejson, datetime
 from ...dataflow.core import Data
 from cStringIO import StringIO
-from dataflow.dataflow.offspecular.image_from_array import array_to_png
-import base64
-import cjson
 
 class FilterableMetaArray(Data, MetaArray):
     def __new__(*args, **kwargs):
