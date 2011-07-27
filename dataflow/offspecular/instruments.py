@@ -293,7 +293,7 @@ if __name__ == '__main__':
             dict(module="ospec.append", position=(300, 225), config={}),
             dict(module="ospec.corr_polar", position=(570, 125), config={}),
             dict(module="ospec.grid", position=(350, 375), config={}),
-            dict(module="ospec.loadstamp", position=(600, 600), config={'files':[dir + '/dataflow/sampledata/ANDR/cshape_121609/end_times.json']}),
+            dict(module="ospec.loadstamp", position=(50, 250), config={'files':[dir + '/dataflow/sampledata/ANDR/cshape_121609/end_times.json']}),
         ]
         wires = [
             dict(source=[0, 'output'], target=[1, 'input']),
@@ -314,11 +314,11 @@ if __name__ == '__main__':
                         instrument=ANDR.id,
                         )
     
-    #print template_to_wireit_diagram(template)
-    #ins = simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
-    #with open(dir + '/dataflow/static/wireit_test/ANDRdefinition2.js', 'w') as f:
-    #    f.write('var andr2 = ' + ins + ';')
-    #sys.exit()
+    print template_to_wireit_diagram(template)
+    ins = simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
+    with open(dir + '/dataflow/static/wireit_test/ANDRdefinition2.js', 'w') as f:
+        f.write('var andr2 = ' + ins + ';')
+    sys.exit()
     
     nodenum = template.order()[-2]
     terminal = 'output'
