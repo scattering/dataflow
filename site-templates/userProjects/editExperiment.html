@@ -24,12 +24,13 @@
 			</hr>
 			<form action="#" method="POST" enctype="multipart/form-data">
 				{% csrf_token %}
-				<!--<table>
+				<table>
 					{{ form2.as_table }}
 				</table>
-				-->
+			
 				
 				<p>
+				<!--	
 				<label for="files" > <strong>File Upload: </strong> </label>
 				<input type="file" value = "File Upload" id="files" name="files[]" multiple  />
 				<output id="list"></output>
@@ -56,6 +57,8 @@
 				  document.getElementById('files').addEventListener('change', handleFileSelect, false);
 				</script>
 								</p>
+								-->
+								
 				<p>
 					<input type="submit" value="Add entries">
 				</p>
