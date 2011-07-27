@@ -820,7 +820,7 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 		for (var j in configs) {
 			if (badHeaders.indexOf(j) == -1) {
 				//console.log(configs[j], typeof configs[j])
-				if (typeof configs[j] == 'string' || typeof configs[j] == 'number'){
+				if (typeof configs[j] == 'string' || typeof configs[j] == 'number' || typeof configs[j] == 'undefined'){
 					configHeaders.push([j,[j]])
 					}
 				if (typeof configs[j] == "object") {

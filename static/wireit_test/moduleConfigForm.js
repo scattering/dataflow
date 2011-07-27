@@ -64,7 +64,7 @@ function configForm(headerList, moduleID) {
 			    if (form.isValid()) {
 			     	//console.log("FORM FIELDS", form.getFields())
 			    	//console.log('FORM VALUES', form.getFieldValues())
-			    	//console.log('FORM FIELD ITEMS', form._fields.items)
+			    	console.log('FORM FIELD ITEMS', form._fields.items)
 			    	for (var j in form._fields.items) {
 			    		key = form._fields.items[j].ownerCt.title + ',' + form._fields.items[j].fieldLabel
 			    		moduleConfigs[key] = form._fields.items[j].lastValue

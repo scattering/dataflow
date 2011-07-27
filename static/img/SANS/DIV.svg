@@ -2,11 +2,13 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
+   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="744.09448819"
@@ -19,7 +21,33 @@
    inkscape:export-xdpi="59.925186"
    inkscape:export-ydpi="59.925186">
   <defs
-     id="defs4" />
+     id="defs4">
+    <linearGradient
+       id="linearGradient5702"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#bfb64c;stop-opacity:0.16862746;"
+         offset="0"
+         id="stop5704" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient5686"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#b85d59;stop-opacity:1;"
+         offset="0"
+         id="stop5688" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5686"
+       id="linearGradient5710"
+       x1="5.1740041"
+       y1="418.22006"
+       x2="740.88684"
+       y2="418.22006"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -29,19 +57,25 @@
      inkscape:pageshadow="2"
      inkscape:zoom="0.49497475"
      inkscape:cx="329.60155"
-     inkscape:cy="566.52139"
+     inkscape:cy="591.7752"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     showgrid="true"
+     showgrid="false"
      inkscape:snap-global="true"
      inkscape:window-width="1153"
      inkscape:window-height="809"
-     inkscape:window-x="1764"
-     inkscape:window-y="162"
-     inkscape:window-maximized="0">
+     inkscape:window-x="285"
+     inkscape:window-y="37"
+     inkscape:window-maximized="0"
+     showguides="true"
+     inkscape:guide-bbox="true">
     <inkscape:grid
        type="xygrid"
        id="grid2985" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="959.64491,109.09647"
+       id="guide3092" />
   </sodipodi:namedview>
   <metadata
      id="metadata7">
@@ -51,7 +85,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -60,13 +94,13 @@
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#000000;fill-rule:evenodd;stroke:url(#linearGradient5710);stroke-width:1.77699999999999991;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:0.43333334000000001;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect2987"
-       width="400"
-       height="400"
-       x="100"
-       y="92.362183"
-       ry="80"
+       width="733.93585"
+       height="688.07806"
+       x="6.0625043"
+       y="74.181023"
+       ry="137.61562"
        inkscape:export-filename="/var/www/dataflow/static/img/SANS/div_image.png"
        inkscape:export-xdpi="14.36409"
        inkscape:export-ydpi="14.36409" />
@@ -85,7 +119,7 @@
        xml:space="preserve"
        id="flowRoot2997"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#f9f9f9;fill-opacity:1;stroke:none;font-family:Sans"
-       transform="translate(-25.59375,-16.45577)"
+       transform="matrix(1.5066918,0,0,1.328745,-129.71171,-61.163033)"
        inkscape:export-filename="/var/www/dataflow/static/img/SANS/div_image.png"
        inkscape:export-xdpi="14.36409"
        inkscape:export-ydpi="14.36409"><flowRegion
@@ -102,10 +136,10 @@
          id="flowPara2996">Sensitivity</flowPara></flowRoot>    <rect
        style="fill:#ff0000"
        id="rect3011"
-       width="280.00009"
+       width="303.83765"
        height="39.999889"
-       x="159.99991"
-       y="332.36218"
+       x="199.99991"
+       y="386.30127"
        ry="9.9999809"
        inkscape:export-filename="/var/www/dataflow/static/img/SANS/div_image.png"
        inkscape:export-xdpi="14.36409"
@@ -119,7 +153,7 @@
        sodipodi:rx="30"
        sodipodi:ry="30"
        d="m 340,242.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
-       transform="translate(-10,40)"
+       transform="translate(40,90)"
        inkscape:export-filename="/var/www/dataflow/static/img/SANS/div_image.png"
        inkscape:export-xdpi="14.36409"
        inkscape:export-ydpi="14.36409" />
@@ -132,9 +166,59 @@
        sodipodi:rx="30"
        sodipodi:ry="30"
        d="m 340,242.36218 a 30,30 0 1 1 -60,0 30,30 0 1 1 60,0 z"
-       transform="translate(-10,180)"
+       transform="translate(41.91878,249.89847)"
        inkscape:export-filename="/var/www/dataflow/static/img/SANS/div_image.png"
        inkscape:export-xdpi="14.36409"
        inkscape:export-ydpi="14.36409" />
-  </g>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3060"
+       style="fill:black;stroke:none;stroke-opacity:1;stroke-width:1px;stroke-linejoin:miter;stroke-linecap:butt;fill-opacity:1;font-family:Sans;font-style:normal;font-weight:normal;font-size:40px;line-height:125%;letter-spacing:0px;word-spacing:0px"><flowRegion
+         id="flowRegion3062"><rect
+           id="rect3064"
+           width="1367.7466"
+           height="1113.1881"
+           x="-193.94928"
+           y="-109.31323" /></flowRegion><flowPara
+         id="flowPara3066"></flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3068"
+       style="fill:black;stroke:none;stroke-opacity:1;stroke-width:1px;stroke-linejoin:miter;stroke-linecap:butt;fill-opacity:1;font-family:Sans;font-style:normal;font-weight:normal;font-size:40px;line-height:125%;letter-spacing:0px;word-spacing:0px"><flowRegion
+         id="flowRegion3070"><rect
+           id="rect3072"
+           width="830.3454"
+           height="949.5434"
+           x="62.629456"
+           y="-14.358897" /></flowRegion><flowPara
+         id="flowPara3074"></flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3076"
+       style="fill:black;stroke:none;stroke-opacity:1;stroke-width:1px;stroke-linejoin:miter;stroke-linecap:butt;fill-opacity:1;font-family:Sans;font-style:normal;font-weight:normal;font-size:40px;line-height:125%;letter-spacing:0px;word-spacing:0px"><flowRegion
+         id="flowRegion3078"><rect
+           id="rect3080"
+           width="1131.3708"
+           height="1068.7413"
+           x="-62.629456"
+           y="-14.358897" /></flowRegion><flowPara
+         id="flowPara3082"></flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3084"
+       style="fill:black;stroke:none;stroke-opacity:1;stroke-width:1px;stroke-linejoin:miter;stroke-linecap:butt;fill-opacity:1;font-family:Sans;font-style:normal;font-weight:normal;font-size:40px;line-height:125%;letter-spacing:0px;word-spacing:0px"><flowRegion
+         id="flowRegion3086"><rect
+           id="rect3088"
+           width="777.81744"
+           height="749.5332"
+           x="14.142136"
+           y="58.372086" /></flowRegion><flowPara
+         id="flowPara3090"></flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3094"
+       style="fill:black;stroke:none;stroke-opacity:1;stroke-width:1px;stroke-linejoin:miter;stroke-linecap:butt;fill-opacity:1;font-family:Sans;font-style:normal;font-weight:normal;font-size:40px;line-height:125%;letter-spacing:0px;word-spacing:0px"><flowRegion
+         id="flowRegion3096"><rect
+           id="rect3098"
+           width="1214.2034"
+           height="1052.579"
+           x="-206.07112"
+           y="-87.089882" /></flowRegion><flowPara
+         id="flowPara3100"></flowPara></flowRoot>  </g>
 </svg>
