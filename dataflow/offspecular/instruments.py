@@ -97,10 +97,12 @@ def load_action(files=[], intent='', auto_PolState=False, PolStates=[], **kwargs
     print "loading", files
     if len(PolStates) < len(files):
         PolStates += [''] * (len(files) - len(PolStates))
+    PolStates = [state.replace(' ', '+') for state in PolStates]
     result = [_load_data(f, auto_PolState, state) for f, state in zip(files, PolStates)] # not bundles
     return dict(output=result)
 def _load_data(name, auto_PolState, PolState):
     (dirName, fileName) = os.path.split(name)
+    print "Loading:", name, PolState
     return LoadICPData(fileName, path=dirName, auto_PolState=auto_PolState, PolState=PolState)
 auto_PolState_field = {
         "type":"bool",
@@ -180,7 +182,7 @@ two_theta_qxqz = two_theta_qxqz_module(id='ospec.qxqz', datatype=OSPEC_DATA, ver
 # ======== Polarization modules ===========
 
 # Load he3 module
-def load_he3_action(files=[], cells=[]):
+def load_he3_action(files=[], cells=[], **kwargs):
     print "loading he3", files
     if len(cells) < len(files):
         cells += [[]] * (len(files) - len(cells))
@@ -193,7 +195,7 @@ load_he3 = load_he3_module(id='ospec.loadhe3', datatype=OSPEC_DATA_HE3,
                    version='1.0', action=load_he3_action)
 
 # Load timestamps
-def load_timestamp_action(files=[]):
+def load_timestamp_action(files=[], **kwargs):
     print "loading timestamps", files
     result = [Timestamp(simplejson.load(open(f, 'r'))) for f in files]
     return dict(output=result)
@@ -201,7 +203,7 @@ load_stamp = load_timestamp_module(id='ospec.loadstamp', datatype=OSPEC_DATA_TIM
                    version='1.0', action=load_timestamp_action)
 
 # Append polarization matrix module
-def append_polarization_matrix_action(input=[], he3cell=None):
+def append_polarization_matrix_action(input=[], he3cell=None, **kwargs):
     print "appending polarization matrix"
     he3analyzer = None
     if he3cell != None: # should always be true; he3cell is now required
@@ -211,7 +213,7 @@ append_polarization = append_polarization_matrix_module(id='ospec.append', datat
                     cell_datatype=OSPEC_DATA_HE3, version='1.0', action=append_polarization_matrix_action)
 
 # Combine polarized module
-def combine_polarized_action(input=[], grid=None):
+def combine_polarized_action(input=[], grid=None, **kwargs):
     print "combining polarized"
     output_grid = None
     if grid != None:
@@ -221,13 +223,13 @@ combine_polarized = combine_polarized_module(id='ospec.comb_polar', datatype=OSP
                                              version='1.0', action=combine_polarized_action)
 
 # Polarization correction module
-def polarization_correct_action(input=[], assumptions=0, auto_assumptions=True):
+def polarization_correct_action(input=[], assumptions=0, auto_assumptions=True, **kwargs):
     print "polarization correction"
     return dict(output=PolarizationCorrect().apply(input, assumptions=assumptions, auto_assumptions=auto_assumptions)) 
 correct_polarized = polarization_correct_module(id='ospec.corr_polar', datatype=OSPEC_DATA,
                                              version='1.0', action=polarization_correct_action)
 
-def timestamp_action(input=[], stamps=None, override_existing=False):
+def timestamp_action(input=[], stamps=None, override_existing=False, **kwargs):
     print "stamping times"
     if stamps == None:
         sys.exit("No timestamps specified; exiting")
@@ -314,11 +316,11 @@ if __name__ == '__main__':
                         instrument=ANDR.id,
                         )
     
-    print template_to_wireit_diagram(template)
-    ins = simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
-    with open(dir + '/dataflow/static/wireit_test/ANDRdefinition2.js', 'w') as f:
-        f.write('var andr2 = ' + ins + ';')
-    sys.exit()
+    #print template_to_wireit_diagram(template)
+    #ins = simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
+    #with open(dir + '/dataflow/static/wireit_test/ANDRdefinition2.js', 'w') as f:
+    #    f.write('var andr2 = ' + ins + ';')
+    #sys.exit()
     
     nodenum = template.order()[-2]
     terminal = 'output'

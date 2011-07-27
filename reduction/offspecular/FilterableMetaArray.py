@@ -84,7 +84,7 @@ class FilterableMetaArray(Data, MetaArray):
         type = '2d'
         transform = 'log' # this is nice by default
         dump = dict(type=type, z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, transform=transform)
-        res = simplejson.dumps(dump, sort_keys=True)
+        res = simplejson.dumps(dump, sort_keys=True, indent=2)
         return res
         
 #    def get_plottable_new(self):

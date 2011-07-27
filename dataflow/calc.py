@@ -129,7 +129,6 @@ def calc_single(template, config, nodenum, terminal_id):
         configuration.update(node.get('config', {}))
         configuration.update(config.get(nodenum, {}))
         kwargs.update(configuration)
-        
         calc_value = module.action(**kwargs)
         # pushing the value of all the outputs for this node to cache, 
         # even though only one was asked for
