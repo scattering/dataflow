@@ -50,7 +50,7 @@
 				    TEST_TRANSFER = {'data': files[0].getAsBinary()}
 				    //console.log(TEST_TRANSFER)
 				    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
-				    YAHOO.util.Connect.asyncRequest('POST', ',', function() {},YAHOO.lang.JSON.stringify(TEST_TRANSFER))
+				    YAHOO.util.Connect.asyncRequest('POST', '.', function() {},YAHOO.lang.JSON.stringify(TEST_TRANSFER))
 				  }
 
 				  document.getElementById('files').addEventListener('change', handleFileSelect, false);
