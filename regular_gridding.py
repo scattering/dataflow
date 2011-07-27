@@ -3,9 +3,23 @@ from matplotlib.mlab import griddata
 import matplotlib.pyplot as plt
 from numpy.random import uniform
 
-def regularlyGrid(xarr, yarr, zarr, xstart, xfinal, xstep, ystart, yfinal, ystep):
-	"Returns the regularly grided xi, yi, and zi arrays from the initial data."
-	# define grid.
+def regularlyGrid(xarr, yarr, zarr, xstart=None, xfinal=None, xstep=None, ystart=None, yfinal=None, ystep=None):
+    "Returns the regularly grided xi, yi, and zi arrays from the initial data."
+    # if xstart,xfinal,xstep,ystart,yfinal,ystep are NOT given, they are derived from the data
+    if xstart==None:
+        xstart=xarr.min()
+    if xfinal==None:
+        xfinal=xarr.max()
+    if xstep==None:
+        xstep=1.0*(xfinal-xstart)/len(xarr)
+    if ystart==None:
+        ystart=yarr.min()
+    if yfinal==None:
+        yfinal=yarr.max()
+    if ystep==None:
+        ystep=1.0*(yfinal-ystart)/len(yarr)
+	
+    # define grid.
 	xi = N.arange(xstart, xfinal, xstep)
 	yi = N.arange(ystart, yfinal, ystep)
 
@@ -17,7 +31,10 @@ def regularlyGrid(xarr, yarr, zarr, xstart, xfinal, xstep, ystart, yfinal, ystep
 
 	# grid the data.
 	zi = griddata(xarr, yarr, zarr, xi, yi)
+    return xi, yi, zi
 
+
+def plotGrid(xi,yi,zi):
 	# contour the gridded data, plotting dots at the randomly spaced data points.
 	CS = plt.contour(xi, yi, zi, 15, linewidths=0.5, colors='k')
 	CS = plt.contourf(xi, yi, zi, 15, cmap=plt.cm.jet)
@@ -30,7 +47,7 @@ def regularlyGrid(xarr, yarr, zarr, xstart, xfinal, xstep, ystart, yfinal, ystep
 	plt.title('Regular Grid')
 	plt.show()
 
-	return xi, yi, zi
+	
 
 def regularlyGridRandom():
 	"Makes a contour and contourf plot of randomly generated data pts."
