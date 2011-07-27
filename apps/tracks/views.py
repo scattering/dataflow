@@ -157,14 +157,16 @@ def listWirings(request):
 
 @csrf_exempt 
 def saveWiring(request):
-    context = RequestContext(request)
+    #context = RequestContext(request)
     print 'I am saving'
+    print request.POST
     new_wiring = simplejson.loads(request.POST['data'])
     # this stores the wires in a simple list, in memory on the django server.
     # replace this with a call to storing the wiring in a real database.
     #print 'TEMPLATE NAME: ', new_wiring['name']
     #print 'TEMPLATE REPR: ', new_wiring
     #print 'USER: ',request.user
+    print new_wiring
     Template.objects.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring), user=request.user)
     #wirings_list.append(new_wiring)
     return HttpResponse(simplejson.dumps(b)) #, context_instance=context

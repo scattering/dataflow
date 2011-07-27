@@ -46,7 +46,8 @@ WireIt.WiringEditor.adapters.tracks = {
 	
 	
 	_sendRequest: function(action, value, callbacks) {
-		/*
+		//value = {"hey":["++","+-"]}
+		/**
 		var params = [];
 		for(var key in value) {
 			if(value.hasOwnProperty(key)) {
@@ -55,7 +56,8 @@ WireIt.WiringEditor.adapters.tracks = {
 			}
 		}
 		var postData = params.join('&');
-		*/
+		**/
+		
 		var postData = 'data=' + YAHOO.lang.JSON.stringify(value);
 		
 		var url = "";
@@ -76,15 +78,15 @@ WireIt.WiringEditor.adapters.tracks = {
 			success: function(o) {
 				var s = o.responseText;
 				         // CHANGED (7/5/11), JSON parsing was not working
-					 //r = YAHOO.lang.JSON.parse(s)
-					 r = eval('(function() { return ' + s + '; })()');
+					 r = YAHOO.lang.JSON.parse(s)
+					 //r = eval('(function() { return ' + s + '; })()');
 			 	callbacks.success.call(callbacks.scope, r);
 			},
 			failure: function(o) {
 				var error = o.status + " " + o.statusText;
 				callbacks.failure.call(callbacks.scope, error);
 			}
-		},postData);
+		}, postData); 
 	}
 	
 };

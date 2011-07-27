@@ -419,7 +419,7 @@ if (fileList.length != 0) {
 			var newFile = Ext.ModelManager.create({
 				filename: thisFile[1],
 				filehash: thisFile[0],
-				filetype: 'N',
+				filetype: 'Unassigned',
 				},
 				'Data');
 			store.insert(0, newFile);
@@ -447,7 +447,7 @@ if (fileList.length==0) {
 			var newFile = Ext.ModelManager.create({
 				filename: fname,
 				filehash: '0',
-				filetype: 'N',
+				filetype: 'Unassigned',
 				group: j,},
 		'Data');
 				store.insert(0, newFile);
@@ -603,7 +603,7 @@ contextMenu = new Ext.menu.Menu({
 	{ 
 	text: 'Clear Type',
 	handler: function() {
-		setRecords(myGrid.getSelectionModel().getSelection(), 'filetype', 'N')
+		setRecords(myGrid.getSelectionModel().getSelection(), 'filetype', 'Unassigned')
 		UpdateAll()
 		},
 	},
