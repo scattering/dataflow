@@ -58,6 +58,18 @@ def absolute_scaling_module(id=None, datatype=None, action=None,
         'name' :'instrument',
         'value':'',
         }
+    bottomLeftCoord_field = {
+        'type' :'dict',
+        'label':'Bottom Left Coordinate',
+        'name' :'coords_bottom_left',
+        'value':{},
+        }
+    topRightCoord_field = {
+        'type' :'dict',
+        'label':'Top Right Coordinate',
+        'name' :'coords_upper_right',
+        'value':{},
+        }
     # Combine everything into a module.
     module = Module(id=id,
                   name='Absolute Scaling',
@@ -65,7 +77,7 @@ def absolute_scaling_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[ins_name_field]+fields,
+                  fields=[ins_name_field,bottomLeftCoord_field,topRightCoord_field]+fields,
                   action=action,
                   )
 

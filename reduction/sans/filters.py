@@ -101,9 +101,10 @@ class SansData(object):
         #return self.__str__()
     def get_plottable(self): 
         data = self.data.x.tolist()
+        zmin = self.data.x[self.data.x > 1e-10].min()
         plottable_data = {
             'type': '2d',
-            'z':  data,
+            'z':  [data],
             'title': '2D Sans Data',
             'dims': {
                 'xmax': 128,
@@ -112,6 +113,8 @@ class SansData(object):
                 'ymax': 128,
                 'xdim': 128,
                 'ydim': 128,
+                'zmin': zmin,
+                'zmax': self.data.x.max(),
                 },
             'xlabel': 'X',
             'ylabel': 'Y',
@@ -172,10 +175,11 @@ class div(object):
     def __init__(self,data= None):
         self.data = data
     def get_plottable(self): 
+        zmin = self.data[self.data > 1e-10].min()
 
         plottable_data = {
             'type': '2d',
-            'z':  self.data.tolist(),
+            'z':  [self.data.tolist()],
             'title': '2D Sans Data',
             'dims': {
                 'xmax': 128,
@@ -184,6 +188,8 @@ class div(object):
                 'ymax': 128,
                 'xdim': 128,
                 'ydim': 128,
+                'zmin': zmin,
+                'zmax': self.data.max(),
                 },
             'xlabel': 'X',
             'ylabel': 'Y',
@@ -594,7 +600,7 @@ def annular_av(sansdata):
     #sys.exit()
     return plot1
     
-def absolute_scaling(sample,empty,DIV,Tsam,instrument): #data (that is going through reduction),empty beam, div, Transmission of the sample,instrument(NG3.NG5,NG7)
+def absolute_scaling(sample,empty,DIV,Tsam,instrument,coord_left,coord_right): #data (that is going through reduction),empty beam, div, Transmission of the sample,instrument(NG3.NG5,NG7)
     """Converts to an absolute intensity scale """
    #ALL from metadata
     detCnt = empty.metadata['run.detcnt']
@@ -622,6 +628,7 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument): #data (that is going thr
     #file.write(repr(a))
     #file.close()
     
+    #2011-07-25 19:32:04 - Date in UTC of creation
     file = open(map_files("NG7"),"r") # r = read
     f = eval(file.read())
     file.close()
@@ -660,6 +667,8 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument): #data (that is going thr
     #---------------------------|
     coord_bottom_left=(55,53)
     coord_top_right=(74,72)
+    coord_bottom_left=coord_left
+    coord_top_right=coord_right
     summ = 0
     sumlist = []
     #-----Something wrong Here------
@@ -681,8 +690,8 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument): #data (that is going thr
     kappa = detCnt/countTime/attenTrans*1.0e8/(monCnt/countTime)*(pixel/sdd)**2 #Correct Value: 6617.1
     print "Kappa: ", kappa
                                                  
-    utc_datetime = date.datetime.utcnow()
-    print utc_datetime.strftime("%Y-%m-%d %H:%M:%S")
+    #utc_datetime = date.datetime.utcnow()
+    #print utc_datetime.strftime("%Y-%m-%d %H:%M:%S")
     
     #-----Using Kappa to Scale data-----#
     Dsam = sample.metadata['sample.thk']
