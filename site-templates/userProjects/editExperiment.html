@@ -1,7 +1,12 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<!DOCTYPE HTML>
 <html lang="en">
 	<head>
 		<title>Edit Experiment</title>
+		<script type="text/javascript" src="../../../../../../static/lib/yui/yahoo/yahoo-min.js"></script>
+		
+		<script type="text/javascript" src="../../../../../../static/lib/yui/event/event-min.js"></script>
+		<script type="text/javascript" src="../../../../../../static/lib/yui/connection/connection-min.js"></script>
+		<script type="text/javascript" src="../../../../../../static/lib/yui/json/json-min.js"></script>
 	</head>
 	<body>
 		<div id="content-1" style="float:left;">
@@ -17,13 +22,16 @@
 			</form>
 			<hr>
 			</hr>
-			<form action="." method="POST" enctype="multipart/form-data">
+			<form action="#" method="POST" enctype="multipart/form-data">
 				{% csrf_token %}
-				<table>
+				<!--<table>
 					{{ form2.as_table }}
 				</table>
+				-->
+				
 				<p>
-				<input type="file" id="files" name="files[]" multiple />
+				<label for="files" > <strong>File Upload: </strong> </label>
+				<input type="file" value = "File Upload" id="files" name="files[]" multiple  />
 				<output id="list"></output>
 
 				<script>
@@ -37,7 +45,12 @@
 						  f.size, ' bytes, last modified: ',
 						   '</li>');
 				    }
+
+				    //console.log(files[0])
+				    TEST_TRANSFER = {'data': files[0].getAsBinary()}
+				    //console.log(TEST_TRANSFER)
 				    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+				    YAHOO.util.Connect.asyncRequest('POST', ',', function() {},YAHOO.lang.JSON.stringify(TEST_TRANSFER))
 				  }
 
 				  document.getElementById('files').addEventListener('change', handleFileSelect, false);

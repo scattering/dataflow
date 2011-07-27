@@ -66,6 +66,36 @@ var andr2 = {
         "height": 16, 
         "terminals": [
           {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec.timestamp:in"
+              ], 
+              "type": "data2d.ospec.timestamp:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "right": -16, 
+              "top": 1
+            }, 
+            "required": false
+          }
+        ], 
+        "width": 120, 
+        "xtype": "WireIt.Container"
+      }, 
+      "name": "Load stamps"
+    }, 
+    {
+      "container": {
+        "height": 16, 
+        "terminals": [
+          {
             "alwaysSrc": false, 
             "ddConfig": {
               "allowedTypes": [
@@ -452,7 +482,27 @@ var andr2 = {
             "name": "input", 
             "offsetPosition": {
               "left": -12, 
-              "top": 16
+              "top": 4
+            }, 
+            "required": true
+          }, 
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec.timestamp:out"
+              ], 
+              "type": "data2d.ospec.timestamp:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "stamps", 
+            "offsetPosition": {
+              "left": -12, 
+              "top": 40
             }, 
             "required": true
           }, 
