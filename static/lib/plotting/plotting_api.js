@@ -300,7 +300,12 @@ function renderImageData(data, transform, plotid) {
   var series = [{showMarker:false, showLine:false}];
   function t(datum) {
         if (transform=='log'){
-            return Math.log(datum)/Math.log(10)
+            if (datum >=0) {
+                return Math.log(datum)/Math.log(10)
+            }
+            else {
+                return -Infinity
+            }
         }
         else if (transform=='lin'){
             return datum
@@ -428,7 +433,7 @@ function renderImageData(data, transform, plotid) {
         for (var c = 0; c < dataz[0].length; c++) {
             var offset = 4*((c*width) + r);
             var z = dataz[r][c];
-            var plotz = Math.round((t(z+1) / t(data.dims.zmax)) * 255.0);
+            var plotz = Math.round((t(z) / t(data.dims.zmax)) * 255.0);
 
             plotz = ((plotz>255)? 255 : plotz);
             plotz = ((plotz<0)? 0 : plotz);
@@ -851,12 +856,14 @@ function get(arr, i) {
 
 function updateNdPlot(plot, toPlot, plotid, plotid_prefix) {
     var stage = 2;
+    var plotdiv = document.getElementById(plotid_prefix);
+    
     if (!plot || !plot.hasOwnProperty("type") || plot.type!='nd'){
         stage = 1;
-        var plotdiv = document.getElementById(plotid_prefix);
         plotdiv.innerHTML = "";
-        plotdiv.appendChild(createNdPlotRegion(plotid));
     }
+    
+    plotdiv.appendChild(createNdPlotRegion(plotid));
     
     updateSeriesSelects(toPlot, plotid);
     //var plotid = plot.targetId.substring(1 * (plot.targetId[0] == '#'), plot.targetId.length - 7);
