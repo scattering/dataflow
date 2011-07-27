@@ -264,7 +264,8 @@ function renderImageColorbar(data, transform, plotid) {
   canvas.height = 256;
   var context = canvas.getContext('2d');
     
-  var grid = plot2d_colorbar.grid;  
+  var grid = plot2d_colorbar.grid;
+  console.log('cbargrid',plot2d_colorbar.grid)
   var palette = palettes.jet(256);
   var imgd = colorbar_context(context, palette);
   
@@ -365,6 +366,8 @@ function renderImageData(data, transform, plotid) {
         var xp = this.axes.xaxis.u2p;
         var yp = this.axes.yaxis.u2p;
         var dims = this.source_data.dims
+	if (!dims.dx){ dims.dx = (dims.xmax - dims.xmin)/(dims.xdim-1); }
+	if (!dims.dy){ dims.dy = (dims.ymax - dims.ymin)/(dims.ydim-1); }
         
         var xmin = Math.max(this.axes.xaxis.min, dims.xmin), xmax = Math.min(this.axes.xaxis.max, dims.xmax);
         var ymin = Math.max(this.axes.yaxis.min, dims.ymin), ymax = Math.min(this.axes.yaxis.max, dims.ymax);
@@ -633,7 +636,7 @@ function update2dPlot(plot, toPlot, target_id) {
         plotdiv.innerHTML = "";
         jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 450px; height: 350px;", id:"plotbox"}));
         jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width:350px; height: 350px; ", id:"plot2d"}));
-        jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width: 60; height: 350; ", id:"colorbar"}));
+        jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width: 100; height: 350; ", id:"colorbar"}));
         jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 410px; height: 100px;", id:"plotbuttons"}));
         jQuery(document.getElementById('plotbuttons')).append(jQuery('<select />', {id:"plot_selectz"}));
         jQuery(document.getElementById('plotbuttons')).append(jQuery('<input />', {id:"plot_update", type:"submit", value:"Update plot"}));
