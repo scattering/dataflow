@@ -1,10 +1,15 @@
 import numpy as np
 import uncertainty, err1d
-#import readice
+
 import readncnr4 as readncnr
 from formatnum import format_uncertainty
 import copy, simplejson, pickle
 from mpfit import mpfit
+
+import sys,os
+#sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+#from dataflow import regular_gridding
+from ... import regular_gridding
 #from ...dataflow import wireit
 eps=1e-8
 
@@ -783,7 +788,7 @@ class TripleAxis(object):
                         detector*=efficiencies
 
                 pass
-
+	
         def dumps(self):
                 return pickle.dumps(self)
 
@@ -791,73 +796,104 @@ class TripleAxis(object):
         def loads(cls, str_version):
                 return pickle.loads(str_version)
 
-        def get_plottable(self):
+        def get_plottable(self, xaxis=None, yaxis=None):
                 #For now, hardcodes None into the variances until uncertainty can be fixed
-                orderx=[]
+		orderx=[]
                 ordery=[]
                 data = {}
-                for key,value in self.__dict__.iteritems():
-                        if key=='detectors':
-                                for field in value:
+		if not xaxis==None or not yaxis==None:
+			#if axes are given (should be as motors)
+			xstart=xarr.min()
+			xfinal=xarr.max()
+			xstep=1.0*(xfinal-xstart)/len(xarr)
+			ystart=yarr.min()
+			yfinal=yarr.max()
+			ystep=1.0*(yfinal-ystart)/len(yarr)
+			
+			xi,yi,zi=regular_gridding.regularlyGrid(axis1.measurement.x, axis2.measurement.x, self.detectors.primary_detector.measurement.x, xstart=xstart,xfinal=xfinal,xstep=xstep,ystart=ystart,yfinal=yfinal,ystep=ystep)		                               
+			
+			plottable_data = {
+			        'type': '2d',
+			        'z':  [zi.tolist()],
+			        'title': 'TripleAxis Reduction Plot',
+			        'dims': {
+			                'xmax': xfinal,
+			                'xmin': xstart, 
+			                'ymin': ystart, 
+			                'ymax': yfinal,
+			                'xdim': xfinal-xstart,
+			                'ydim': yfinal-ystart,
+			                'zmin': zi.min(),
+			                'zmax': zi.max(),
+			        },
+			        'xlabel': xaxis.name,
+			        'ylabel': yaxis.name,
+			        'zlabel': 'Intensity (I)',
+			}
 
-                                        val = field.measurement.x
-                                        err = field.measurement.variance
+		else:
+			for key,value in self.__dict__.iteritems():
+				if key=='detectors':
+					for field in value:
+	
+						val = field.measurement.x
+						err = field.measurement.variance
+	
+						vals=[]
+						errs=[]
+						if type(val[0])==type(np.empty((1,1))):
+							#if the detector has multiple channels, split them up
+							for channels in val:
+								for channel in channels:
+									vals.append(channel[0])
+							if err==None:
+								errs = None
+							else:
+								for channels in err:
+									for channel in channels:
+										errs.append(channel[0])		
+	
+							ordery.append({'key': field.name, 'label': field.name})
+							data[field.name]={'values': vals,'errors': errs}
+	
+						else:
+							ordery.append({'key': field.name, 'label': field.name})
+							if err==None:
+								data[field.name]={'values': val.tolist(),'errors':err}
+							else:
+								data[field.name]={'values': val.tolist(),'errors':err.tolist()}
+				elif key=='data' or key=='meta_data' or key=='sample' or key=='sample_environment':
+					#ignoring these data fields for plotting
+					pass	
+				else:
+					for field in value:
+						orderx.append({'key': field.name, 'label': field.name})
+						val = field.measurement.x
+						err = field.measurement.variance
+						if val==None:
+							val = None
+						else:
+							val = val.tolist()
+						if err==None:
+							err = None
+						else:
+							err = err.tolist()
+						data[field.name]={'values': val,'errors': err}
 
-                                        vals=[]
-                                        errs=[]
-                                        if type(val[0])==type(np.empty((1,1))):
-                                                #if the detector has multiple channels, split them up
-                                                for channels in val:
-                                                        for channel in channels:
-                                                                vals.append(channel[0])
-                                                if err==None:
-                                                        errs = None
-                                                else:
-                                                        for channels in err:
-                                                                for channel in channels:
-                                                                        errs.append(channel[0])		
 
-                                                ordery.append({'key': field.name, 'label': field.name})
-                                                data[field.name]={'values': vals,'errors': errs}
-
-                                        else:
-                                                ordery.append({'key': field.name, 'label': field.name})
-                                                if err==None:
-                                                        data[field.name]={'values': val.tolist(),'errors':err}
-                                                else:
-                                                        data[field.name]={'values': val.tolist(),'errors':err.tolist()}
-                        elif key=='data' or key=='meta_data' or key=='sample' or key=='sample_environment':
-                                #ignoring these data fields for plotting
-                                pass	
-                        else:
-                                for field in value:
-                                        orderx.append({'key': field.name, 'label': field.name})
-                                        val = field.measurement.x
-                                        err = field.measurement.variance
-                                        if val==None:
-                                                val = None
-                                        else:
-                                                val = val.tolist()
-                                        if err==None:
-                                                err = None
-                                        else:
-                                                err = err.tolist()
-                                        data[field.name]={'values': val,'errors': err}
-
-
-                plottable_data = {
-                        'type': 'nd',
-                        'title': 'Triple Axis Plot',
-                        'clear_existing': False,
-                        'orderx': orderx,
-                        'ordery': ordery,
-                        'series': [{
-                                'label': 'File 1',
-                                'data': data,
-                                'color': 'Red',
-                                'style': 'line',
-                                }],
-                }
+			plottable_data = {
+		                'type': 'nd',
+		                'title': 'Triple Axis Plot',
+		                'clear_existing': False,
+		                'orderx': orderx,
+		                'ordery': ordery,
+		                'series': [{
+		                        'label': 'File 1',
+		                        'data': data,
+		                        'color': 'Red',
+		                        'style': 'line',
+		                        }],
+		        }
 
                 return simplejson.dumps(plottable_data)
 
@@ -1495,11 +1531,11 @@ def fit_plane(h,k,l,p0=None):
                         parinfo[i]['limited']=[1,1]
                         parinfo[i]['limits']=[-1,1]
         fa = {'h':h, 'k':k,'l':l}
-        print 'linearizing'
+        #print 'linearizing'
         m = mpfit(myfunctlin, p0, parinfo=parinfo,functkw=fa)
         p = m.params
-        print 'status = ', m.status
-        print 'params = ', m.params
+        #print 'status = ', m.status
+        #print 'params = ', m.params
         #your parameters define two noncollinear vectors that will form the basis for your space
         o1=N.array([p[0],p[1],p[2]])
         o2=N.array([p[3],p[4],p[5]])
@@ -1666,8 +1702,9 @@ def filereader(filename):
         return instrument
 
 if __name__=="__main__":       
-        bt7 = filereader('EscanQQ7HorNSF91831.bt7')
-
+        #bt7 = filereader('EscanQQ7HorNSF91831.bt7')
+	spin = filereader('spins data/bamno059.ng5')
+	
         print 'translations done'
         #aarr,barr,carr=bt7.calc_plane()
         #test= bt7.dumps()
