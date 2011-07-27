@@ -647,6 +647,9 @@ function update2dPlot(plot, toPlot, target_id) {
         jQuery(document.getElementById('plotbuttons')).append(jQuery('<input />', {id:"plot_update", type:"submit", value:"Update plot"}));
         jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'lin', text: 'lin' }));
         jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'log', text: 'log' }));
+        plot = null;
+        plot2d = null;
+        plot2d_colorbar = null;
     }
     
     var transform = toPlot.transform || 'lin';
@@ -721,13 +724,22 @@ function plottingAPI(toPlots, plotid_prefix) {
                 //document.getElementById('plot').appendChild(createNdPlotRegion(plotid));
 
                 //updateSeriesSelects(toPlot, plotid);
-                plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix);
+                plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, true);
                 
-                jQuery(document.getElementById(plotid + '_update')).click({ plot: plot, toPlot: toPlot }, function(e) {
-                    console.log(e);
-                    var plot = e.data.plot; var toPlot = e.data.toPlot;
-                    plot = updateNdPlot(plot, toPlot);
-                });
+                jQuery(document.getElementById(plotid + '_update')).click({ 
+                    plot: plot, 
+                    toPlot: toPlot, 
+                    plotid: plotid,
+                    plotid_prefix: plotid_prefix
+                    }, 
+                        function(e) {
+                            console.log(e);
+                            var plot = e.data.plot; 
+                            var toPlot = e.data.toPlot;
+                            var plotid = e.data.plotid;
+                            var plotid_prefix = e.data.plotid_prefix;
+                            plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix);
+                        });
             
             
                 break;
@@ -755,7 +767,8 @@ function plottingAPI(toPlots, plotid_prefix) {
                 break;
                 
             default:
-                throw "Unsupported plot type! Please specify the type as '1d' or '2d'.";
+                alert('plotting of datatype "' + toPlot.type + '" is unsupported')
+                //throw "Unsupported plot type! Please specify the type as '1d' or '2d'.";
         }
         
         prevtype = toPlot.type;
@@ -798,6 +811,7 @@ function createNdPlotRegion(plotid, renderTo) {
     divc.setAttribute('class', 'plot-axis plot-axis-c');
     var divtarget = document.createElement('div');
     divtarget.setAttribute('id', plotid + '_target');
+    divtarget.setAttribute('style', 'display: block; width: 450; height: 350;');
     divtarget.setAttribute('class', 'plot-target');
     var selecty = document.createElement('select');
     selecty.setAttribute('id', plotid + '_selecty');
@@ -854,22 +868,32 @@ function get(arr, i) {
     }
 }
 
-function updateNdPlot(plot, toPlot, plotid, plotid_prefix) {
+function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
     var stage = 2;
     var plotdiv = document.getElementById(plotid_prefix);
+    console.log('plotdiv:', plotdiv, plotid_prefix)
     
     if (!plot || !plot.hasOwnProperty("type") || plot.type!='nd'){
         stage = 1;
         plotdiv.innerHTML = "";
     }
     
-    plotdiv.appendChild(createNdPlotRegion(plotid));
+    if (create) {
+        plotdiv.appendChild(createNdPlotRegion(plotid));
+        updateSeriesSelects(toPlot, plotid);
+    }
     
-    updateSeriesSelects(toPlot, plotid);
+    target_id = plotid + '_target';
     //var plotid = plot.targetId.substring(1 * (plot.targetId[0] == '#'), plot.targetId.length - 7);
-    var series = plot.series;
-    var options = plot.options;
-    console.log(100, plotid, plot.series, toPlot);
+    var series = [];
+    var options = { title: '', series: [], axes: {}, cursor: {
+            show: true,
+            zoom: true,
+            tooltipFormatString: '%.3g, %.3g',
+            tooltipLocation:'ne',} };
+    //var series = plot.series;
+    //var options = plot.options;
+    console.log(100, plotid, toPlot);
     
     var quantityx = document.getElementById(plotid + '_selectx').value,
         quantityy = document.getElementById(plotid + '_selecty').value;
@@ -897,8 +921,8 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix) {
     }
     console.log('series', series, 'options', options);
     
-    if (plot.stage == 1) {
-        plot = jQuery.jqplot(plot.targetId, series, options);
+    if (stage == 1) {
+        plot = jQuery.jqplot(target_id, series, options);
         plot.type = 'nd';
     }
     else {
@@ -967,3 +991,68 @@ function create2dPlotRegion(plotid, renderTo) {
     
     return div;
 }
+
+//jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 450px; height: 350px;", id:"plotbox"}));
+//        jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width:350px; height: 350px; ", id:"plot2d"}));
+//        jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width: 100; height: 350; ", id:"colorbar"}));
+//        jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 410px; height: 100px;", id:"plotbuttons"}));
+//        jQuery(document.getElementById('plotbuttons')).append(jQuery('<select />', {id:"plot_selectz"}));
+//        jQuery(document.getElementById('plotbuttons')).append(jQuery('<input />', {id:"plot_update", type:"submit", value:"Update plot"}));
+//        jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'lin', text: 'lin' }));
+//        jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'log', text: 'log' }));
+//        plot = null;
+
+function create2dPlotRegion(plotid, renderTo) {
+    var div = document.createElement('div');
+    div.setAttribute('id', plotid);
+    div.setAttribute('style', "display: block; width: 450px; height: 350px;");
+    var div2d = document.createElement('div');
+    div2d.setAttribute('id', 'plot2d');
+    div2d.setAttribute('style', "float: left; width:350px; height: 350px; ");
+    var divc = document.createElement('div');
+    divc.setAttribute('id', plotid + 'colorbar');
+    divc.setAttribute('style', "float: left; width: 100; height: 350; ");
+
+
+    var selectz = document.createElement('select');
+    selectz.setAttribute('id', 'plot_selectz');
+    selectz.setAttribute('class', 'plot-axis-select');
+    var optlin = document.createElement('choice');
+    var selectx = document.createElement('select');
+    selectx.setAttribute('id', plotid + '_selectx');
+    selectx.setAttribute('class', 'plot-axis-select plot-axis-select-x');
+    var updatebutton = document.createElement('input');
+    updatebutton.setAttribute('id', plotid + '_update');
+    updatebutton.setAttribute('type', 'submit');
+    updatebutton.setAttribute('value', 'Update plot');
+    
+    var colorbar = document.createElement('canvas');
+    colorbar.setAttribute('width', 60);
+    colorbar.setAttribute('height', 500);
+    colorbar.setAttribute('id', plotid + '_colorbar');
+    colorbar.setAttribute('class', 'plot-colorbar');
+    var invis = document.createElement('canvas');
+    invis.setAttribute('id', plotid + '_invis');
+    invis.setAttribute('class', 'plot-invis');
+    invis.hidden = true;
+    var colorbarinvis = document.createElement('canvas');
+    colorbarinvis.setAttribute('width', 1);
+    colorbarinvis.setAttribute('id', plotid + '_colorbar_invis');
+    colorbarinvis.setAttribute('class', 'plot-invis plot-colorbar-invis');
+    colorbarinvis.hidden = true;
+
+    
+    divy.appendChild(selecty);
+    divx.appendChild(selectx);
+    divx.appendChild(updatebutton);
+    div.appendChild(divy);
+    div.appendChild(divtarget);
+    div.appendChild(colorbar);
+    div.appendChild(divc);
+    div.appendChild(divx);
+    divc.appendChild(invis);
+    divc.appendChild(colorbarinvis);
+    
+    return div;
+}        
+        
