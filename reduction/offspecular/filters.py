@@ -1,4 +1,4 @@
-from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin, allclose, zeros_like
+from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin, allclose, zeros_like, linalg, dot
 import os, simplejson, datetime, sys, types, xml.dom.minidom
 from copy import deepcopy
 
@@ -6,6 +6,7 @@ from FilterableMetaArray import FilterableMetaArray as MetaArray
 from he3analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
 from reduction.formats import load
 import reduction.rebin as reb
+from ...apps.tracks.models import File
 
 class Supervisor():
     """ class to hold rebinned_data objects and increment their reference count """
@@ -541,6 +542,9 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     data = MetaArray(data_array, dtype='float', info=info)
     return data                   
 
+def get_friendly_name(fh):
+    return File.objects.get(name=str(fh)).friendly_name[1:]
+
 class InsertTimestamps(Filter2D):
     """ This is a hack.  
     Get the timestamps from the source file directory listing
@@ -556,7 +560,7 @@ class InsertTimestamps(Filter2D):
             return data
         # now figure out which file was the source:
         new_info = data.infoCopy()
-        source_filename = new_info[-1]['filename'][1:] # strip off leading 'I'
+        source_filename = get_friendly_name(new_info[-1]['filename']) # strip off leading 'I'
         try:
             end_timestamp = timestamps[source_filename]
         except KeyError:
@@ -932,6 +936,8 @@ class PolarizationCorrect(Filter2D):
                     R[i, j, :, 2] = 1.0 # monitor is set to one.  Not sure about this one
                     R[i, j, :, 3] = 1.0 # count time is set to one also.
                 except:
+                    print sys.exc_info()
+                    sys.exit()
                     R[i, j, :, 0] = 0.0 # counts
                     R[i, j, :, 1] = 0.0 # pixels (need unitary transform)
                     R[i, j, :, 2] = 1.0 # monitor is set to one.  Not sure about this one
