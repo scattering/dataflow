@@ -282,7 +282,7 @@ if __name__ == '__main__':
         ]
     else:
         path, ext = dir + '/dataflow/sampledata/ANDR/cshape_121609/Iremun00', ['.ca1', '.cb1']
-        files = [path + str(i + 1) + extension for i in range(0, 7) for extension in ext if i != 2]
+        files = [path + str(i + 1) + extension for i in range(0, 9) for extension in ext if i != 2]
         pols = simplejson.load(open(dir + '/dataflow/sampledata/ANDR/cshape_121609/file_catalog.json', 'r'))
         pol_states = [pols[os.path.split(file)[-1]]['polarization'] for file in files]
         modules = [
@@ -316,10 +316,10 @@ if __name__ == '__main__':
                         instrument=ANDR.id,
                         )
     
-    #print template_to_wireit_diagram(template)
-    #ins = simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
-    #with open(dir + '/dataflow/static/wireit_test/ANDRdefinition2.js', 'w') as f:
-    #    f.write('var andr2 = ' + ins + ';')
+#    print template_to_wireit_diagram(template)
+#    ins = simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
+#    with open(dir + '/dataflow/static/wireit_test/ANDRdefinition2.js', 'w') as f:
+#        f.write('var andr2 = ' + ins + ';')
     #sys.exit()
     
     nodenum = template.order()[-2]
