@@ -52,27 +52,27 @@ data1d = Data(TAS_DATA, data_abstraction.TripleAxis)
 # modify it.  Instead of modifying, first copy the data and then work on
 # the copy.
 #
-def data_join(files, align):
-    # Join code: belongs in reduction.tripleaxis
-    #if align != 'x': raise TypeError("Can only align on x for now")
-    align = 'x' # Ignore align field for now since our data only has x,y,dy
-    new = {}
-    #print "files"; pprint(files)
-    for f in files:
-        for x, y, dy, mon in zip(f['x'], f['y'], f['dy'], f['monitor']):
-            if x not in new: new['x'] = (0, 0, 0)
-            Sy, Sdy, Smon = new['x']
-            new[x] = (y + Sy, dy ** 2 + Sdy, mon + Smon)
-    points = []
-    for xi in sorted(new.keys()):
-        Sy, Sdy, Smon = new[xi]
-        points.append((xi, Sy, math.sqrt(Sdy), Smon))
-    x, y, dy, mon = zip(*points)
+#def data_join(files, align):
+    ## Join code: belongs in reduction.tripleaxis
+    ##if align != 'x': raise TypeError("Can only align on x for now")
+    #align = 'x' # Ignore align field for now since our data only has x,y,dy
+    #new = {}
+    ##print "files"; pprint(files)
+    #for f in files:
+        #for x, y, dy, mon in zip(f['x'], f['y'], f['dy'], f['monitor']):
+            #if x not in new: new['x'] = (0, 0, 0)
+            #Sy, Sdy, Smon = new['x']
+            #new[x] = (y + Sy, dy ** 2 + Sdy, mon + Smon)
+    #points = []
+    #for xi in sorted(new.keys()):
+        #Sy, Sdy, Smon = new[xi]
+        #points.append((xi, Sy, math.sqrt(Sdy), Smon))
+    #x, y, dy, mon = zip(*points)
 
-    basename = min(f['name'] for f in files)
-    outname = os.path.splitext(basename)[0] + '.join'
-    result = {'name': outname, 'x': x, 'y': y, 'dy': dy, 'monitor': mon}
-    return result
+    #basename = min(f['name'] for f in files)
+    #outname = os.path.splitext(basename)[0] + '.join'
+    #result = {'name': outname, 'x': x, 'y': y, 'dy': dy, 'monitor': mon}
+    #return result
 
 def data_scale(data, scale):
     x = data['x']
@@ -120,32 +120,28 @@ save = save_module(id='tas.save', datatype=TAS_DATA,
                    fields=[save_ext])
 
 
-def join_action(input=None, align=None, xtype=None, position=None, **kwargs):
+def join_action(input,**kwargs):
     # This is confusing because load returns a bundle and join, which can
     # link to multiple loads, has a list of bundles.  So flatten this list.
     # The confusion between bundles and items will bother us continuously,
     # and it is probably best if every filter just operates on and returns
     # bundles, which I do in this example.
-    flat = []
-    for bundle in input: flat.extend(bundle)
-    print "joining on", ", ".join(align)
-    #pprint(flat)
-    result = [data_join(flat, align)]
-    return dict(output=result)
-align_field = {
-    "type":"[string]",
-    "label": "Align on",
-    "name": "align",
-    "value": "",
-}
+    joinedtas = None
+    for tas in input:
+	if joinedtas==None:
+	    joinedtas=tas
+	else:
+	    joinedtas=data_abstraction.join(joinedtas,tas)
+
+    return dict(output=joinedtas)
+
 join = join_module(id='tas.join', datatype=TAS_DATA,
-                   version='1.0', action=join_action,
-                   fields=[align_field])
+                   version='1.0', action=join_action)
 
 def scale_action(input=None, scale=None, xtype=None, position=None, **kwargs):
     # operate on a bundle; need to resolve confusion between bundles and
     # individual inputs
-    print "scale by", scale
+    #TODO --- old code, probably won't run!
     if numpy.isscalar(scale): scale = [scale] * len(input)
     flat = []
     for bundle in input: flat.extend(bundle)
@@ -217,7 +213,7 @@ if 1:
 if 0:
 	modules = [
 	    dict(module="tas.load", position=(10, 20), config={'files':[ROOT_URL.HOMEDIR[:-12]+ 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
-	    dict(module="tas.normalize_monitor", position=(30, 20), config={'target_monitor': 900000}),
+	    dict(module="tas.normalize_monitor", position=(30, 20), config={'target_monitor': 165000}),
 	    #dict(module="tas.detailed_balance"),
 	    #dict(module="tas.monitor_correction"),
 	    #dict(module="tas.volume_correction"),
