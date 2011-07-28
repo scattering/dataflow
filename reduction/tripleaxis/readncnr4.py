@@ -24,7 +24,7 @@ def get_tokenized_line(myfile,returnline=['']):
 class datareader(object):
         def __init__(self,myfilestr=None,myfriendlyfilestr=None):
                 self.myfilestr=myfilestr
-		        self.myfriendlyfilestr = myfilestr if (myfriendlyfilestr == None) else myfriendlyfilestr
+                self.myfriendlyfilestr = myfilestr if (myfriendlyfilestr == None) else myfriendlyfilestr
                 #define Data Abstraction Layer
                 self.data_abstraction_layer()
                 return
