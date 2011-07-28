@@ -1,28 +1,51 @@
 """
 Triple Axis Spectrometer reduction and analysis modules
 """
-import math, os, sys
+import math, os, sys, types
 
-if 0:
-    #relative imports for use in larger project
-    from ...reduction.tripleaxis import data_abstraction
-    from ..calc import run_template
-    from .. import wireit
-    from ... import ROOT_URL
-    from django.utils import simplejson
-    
-    import numpy
-    from .. import config
-    from ..core import Instrument, Data, Template, register_instrument
-    
-    from ..modules.join import join_module
-    from ..modules.scale import scale_module
-    from ..modules.save import save_module
-    from ..modules.tas_load import load_module
-    from ..modules.tas_normalize_monitor import normalize_monitor_module
-    from ..modules.tas_detailed_balance import detailed_balance_module
-    from ..modules.tas_monitor_correction import monitor_correction_module
-    from ..modules.tas_volume_correction import volume_correction_module
+from ...reduction.tripleaxis import data_abstraction
+from ..calc import run_template
+from .. import wireit
+from ... import ROOT_URL
+from django.utils import simplejson
+import numpy
+
+from .. import config
+from ..core import Instrument, Data, Template, register_instrument
+
+#from dataflow.dataflow.modules.load import load_module
+from ..modules.join import join_module
+from ..modules.scale import scale_module
+from ..modules.save import save_module
+from ..modules.tas_load import load_module
+from ..modules.tas_normalize_monitor import normalize_monitor_module
+from ..modules.tas_detailed_balance import detailed_balance_module
+from ..modules.tas_monitor_correction import monitor_correction_module
+from ..modules.tas_volume_correction import volume_correction_module
+from ...apps.tracks.models import File
+'''
+#direct imports for use individually (ie running this file)
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+from dataflow.reduction.tripleaxis import data_abstraction
+from dataflow.dataflow.calc import run_template
+from dataflow.dataflow import wireit
+from dataflow import ROOT_URL
+from django.utils import simplejson
+
+import numpy
+from dataflow.dataflow import config
+from dataflow.dataflow.core import Instrument, Data, Template, register_instrument
+#from dataflow.dataflow.modules.load import load_module
+from dataflow.dataflow.modules.join import join_module
+from dataflow.dataflow.modules.scale import scale_module
+from dataflow.dataflow.modules.save import save_module
+from dataflow.dataflow.modules.tas_load import load_module
+from dataflow.dataflow.modules.tas_normalize_monitor import normalize_monitor_module
+from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
+from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
+from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
+
+'''
 
 if 1:
     #direct imports for use individually (ie running this file)
@@ -90,7 +113,8 @@ def data_scale(data, scale):
 def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
     """Currently set up to load ONLY 1 file"""
     #print "loading", files
-    result = [data_abstraction.filereader(f) for f in files]
+    print 'FRIENDLY FILE', File.objects.get(name=files[0].split('/')[-1]).friendly_name
+    result = [data_abstraction.filereader(f, File.objects.get(name=f.split('/')[-1]).friendly_name) for f in files]
     return dict(output=result)
 
 load = load_module(id='tas.load', datatype=TAS_DATA,
@@ -133,18 +157,22 @@ def join_action(input, xaxis, yaxis, **kwargs):
         else:
             joinedtas=data_abstraction.join(joinedtas,tas)
 
-    return dict(output=joinedtas)
+    return dict(output=[joinedtas])
 
 join = join_module(id='tas.join', datatype=TAS_DATA,
                    version='1.0', action=join_action)
 
-def scale_action(input=None, scale=None, xtype=None, position=None, **kwargs):
+def scale_action(input=None, scale=1.0, xtype=None, position=None, **kwargs):
     # operate on a bundle; need to resolve confusion between bundles and
     # individual inputs
     #TODO --- old code, probably won't run!
     if numpy.isscalar(scale): scale = [scale] * len(input)
     flat = []
-    for bundle in input: flat.extend(bundle)
+    for bundle in input:
+        if type(bundle) is types.ListType:
+            flat.extend(bundle)
+        else: # we're not a bundle at all!
+            flat.append(bundle)
     result = [data_scale(f, s) for f, s in zip(flat, scale)]
     return dict(output=result)
 scale = scale_module(id='tas.scale', datatype=TAS_DATA,
