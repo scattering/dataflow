@@ -13,10 +13,11 @@ def detailed_balance_module(id=None, datatype=None, action=None,
     """
 
     icon = {
-        'URI': config.IMAGES + 'detailed balance.png', 
+        'URI': config.IMAGES + 'TAS/detailed balance.png', 
+        'image': config.IMAGES + 'TAS/detailed balance.png', 
         'terminals': {
-            'input': (-15, 1, -1, 0),
-            'output': (15, 1, 1, 0),
+            'input': (-12, 16, -1, 0),
+            'output': (48, 16, 1, 0),
         }
     }
     

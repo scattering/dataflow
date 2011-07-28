@@ -13,10 +13,11 @@ def monitor_correction_module(id=None, datatype=None, action=None,
     """
 
     icon = {
-        'URI': config.IMAGES + 'harmonic monitor correction.png', 
+        'URI': config.IMAGES + 'TAS/harmonic monitor correction.png', 
+        'image': config.IMAGES + 'TAS/harmonic monitor correction.png', 
         'terminals': {
-            'input': (-15, 1, -1, 0),
-            'output': (15, 1, 1, 0),
+            'input': (-12, 16, -1, 0),
+            'output': (48, 16, 1, 0),
         }
     }
     
