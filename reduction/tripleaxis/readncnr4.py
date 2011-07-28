@@ -232,7 +232,7 @@ class datareader(object):
 ##        self.metadata=mosaic
 
 
-             
+
                 self.data['premonocoll']=float(tokenized[0])*N.ones(self.metadata['pts_planned'],'Float64')
                 self.data['postmonocoll']=float(tokenized[1])*N.ones(self.metadata['pts_planned'],'Float64')
                 self.data['preanacoll']=float(tokenized[2])*N.ones(self.metadata['pts_planned'],'Float64')
