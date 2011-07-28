@@ -779,8 +779,6 @@ class TripleAxis(object):
                 """Correct constant Q-scans with fixed incident energy, Ei, for the fact that the resolution volume changes
                 as Ef changes"""
                 # Requires constant-Q scan with fixed incident energy, Ei
-                # theta_analyzer is occasionally producing a Measurement of Nan's only because
-                #    it is taking the arcsin of a value > 1
                 wavelength_analyzer=np.sqrt(81.80425/self.physical_motors.ef.measurement) #determine the wavelength based on the analyzer
                 theta_analyzer=np.arcsin(wavelength_analyzer/2/self.analyzer.dspacing)  #This is what things should be 
                 #alternatively, we could do theta_analyzer=np.radians(self.primary_motors.a6.measurement/2)
@@ -1586,6 +1584,7 @@ def join(tas1, tas2):
 				if field.name=='primary_detector':
 					obj=getattr(tas2,key)
 					field.measurement.join(getattr(obj,field.name).measurement)
+					field.dimension[0]=field.dimension[0]+getattr(obj,field.name).dimension[0]
 				else:
 					obj=getattr(tas2,key)
 					field.measurement.join_channels(getattr(obj,field.name).measurement)
@@ -1716,6 +1715,9 @@ def remove_duplicates(tas,distinct,not_distinct):
                         for field in value:
                                 for k in rows_to_be_removed:
                                         field.measurement.__delitem__(k) #removes duplicate row from this detector (column)
+	
+	#update primary detector dimension
+	newtas.detectors.primary_detector.dimension=[len(newtas.detectors.primary_detector.measurement.x),1]
         return newtas
                                         
                                         
@@ -1731,8 +1733,8 @@ if __name__=="__main__":
 	if 1:
 		#spin = filereader('spins data/bamno059.ng5')
 		#spin2 = filereader('spins data/bamno060.ng5')
-		spin=filereader(r'C:\Users\ylem\Dropbox\BAMO_SPINS_SummerSchool_2011\spins_0801\bamno059.ng5')
-		spin2=filereader(r'C:\Users\ylem\Dropbox\BAMO_SPINS_SummerSchool_2011\spins_0801\bamno060.ng5')
+		spin=filereader(r'spins data/bamno059.ng5')
+		spin2=filereader(r'spins data/bamno060.ng5')
 		spins = join(spin,spin2)
 		print 'fixme2'
 	if 0:

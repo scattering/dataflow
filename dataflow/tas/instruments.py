@@ -3,49 +3,28 @@ Triple Axis Spectrometer reduction and analysis modules
 """
 import math, os, sys, types
 
-from ...reduction.tripleaxis import data_abstraction
-from ..calc import run_template
-from .. import wireit
-from ... import ROOT_URL
-from django.utils import simplejson
-import numpy
+if 0:
+    from ...reduction.tripleaxis import data_abstraction
+    from ..calc import run_template
+    from .. import wireit
+    from ... import ROOT_URL
+    from django.utils import simplejson
+    import numpy
+    
+    from .. import config
+    from ..core import Instrument, Data, Template, register_instrument
+    
+    #from dataflow.dataflow.modules.load import load_module
+    from ..modules.join import join_module
+    from ..modules.scale import scale_module
+    from ..modules.save import save_module
+    from ..modules.tas_load import load_module
+    from ..modules.tas_normalize_monitor import normalize_monitor_module
+    from ..modules.tas_detailed_balance import detailed_balance_module
+    from ..modules.tas_monitor_correction import monitor_correction_module
+    from ..modules.tas_volume_correction import volume_correction_module
+    from ...apps.tracks.models import File
 
-from .. import config
-from ..core import Instrument, Data, Template, register_instrument
-
-#from dataflow.dataflow.modules.load import load_module
-from ..modules.join import join_module
-from ..modules.scale import scale_module
-from ..modules.save import save_module
-from ..modules.tas_load import load_module
-from ..modules.tas_normalize_monitor import normalize_monitor_module
-from ..modules.tas_detailed_balance import detailed_balance_module
-from ..modules.tas_monitor_correction import monitor_correction_module
-from ..modules.tas_volume_correction import volume_correction_module
-from ...apps.tracks.models import File
-'''
-#direct imports for use individually (ie running this file)
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
-from dataflow.reduction.tripleaxis import data_abstraction
-from dataflow.dataflow.calc import run_template
-from dataflow.dataflow import wireit
-from dataflow import ROOT_URL
-from django.utils import simplejson
-
-import numpy
-from dataflow.dataflow import config
-from dataflow.dataflow.core import Instrument, Data, Template, register_instrument
-#from dataflow.dataflow.modules.load import load_module
-from dataflow.dataflow.modules.join import join_module
-from dataflow.dataflow.modules.scale import scale_module
-from dataflow.dataflow.modules.save import save_module
-from dataflow.dataflow.modules.tas_load import load_module
-from dataflow.dataflow.modules.tas_normalize_monitor import normalize_monitor_module
-from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
-from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
-from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
-
-'''
 
 if 1:
     #direct imports for use individually (ie running this file)
@@ -144,7 +123,7 @@ save = save_module(id='tas.save', datatype=TAS_DATA,
                    fields=[save_ext])
 
 
-def join_action(input,**kwargs):
+def join_action(input, xaxis, yaxis, **kwargs):
     # This is confusing because load returns a bundle and join, which can
     # link to multiple loads, has a list of bundles.  So flatten this list.
     # The confusion between bundles and items will bother us continuously,
@@ -276,7 +255,7 @@ def TAS_RUN():
 
 
 if __name__=="__main__":
-    hi=TAS_RUN()
+    #hi=TAS_RUN()
     print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
     #print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
     print 'language',simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
