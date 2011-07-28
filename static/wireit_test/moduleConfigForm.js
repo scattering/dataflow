@@ -62,9 +62,12 @@ function configForm(headerList, moduleID) {
 			    var moduleConfigs = {}
 			    var form = this.up('form').getForm();
 			    if (form.isValid()) {
+			     	//console.log("FORM FIELDS", form.getFields())
+			    	//console.log('FORM VALUES', form.getFieldValues())
+			    	console.log('FORM FIELD ITEMS', form._fields.items)
 			    	for (var j in form._fields.items) {
-			    		//console.log('FORM ', form)
-			    		moduleConfigs[headerList[j]] = form._fields.items[j].lastValue
+			    		key = form._fields.items[j].ownerCt.title + ',' + form._fields.items[j].fieldLabel
+			    		moduleConfigs[key] = form._fields.items[j].lastValue
 			    		}
 				console.log('CONFIGS IN FORM', moduleConfigs);
 				editor.setModuleConfigsFromForm(moduleConfigs, moduleID, editor.reductionInstance)

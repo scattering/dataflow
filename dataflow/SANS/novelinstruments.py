@@ -206,14 +206,16 @@ def convert_qxqy_action():
     correctVer, qx, qy = convert_qxqy(correctVer)
     print "Convertqxqy"
 
-def absolute_scaling_action(DIV, empty, sensitivity, ins_name='', **kwargs):
+def absolute_scaling_action(DIV, empty, sensitivity, ins_name='',bottomLeftCoord={}, topRightCoord={}, **kwargs):
     #sample,empty,DIV,Tsam,instrument
+    coord_left = (bottomLeftCoord['X'], bottomLeftCoord['Y'])
+    coord_right = (topRightCoord['X'], topRightCoord['Y'])
     lis = [DIV[0], empty[0], sensitivity[0]]
     global qx,qy
     sensitivity = lis[-1]
     EMP = lis[1]
     DIV = lis[0]
-    ABS = absolute_scaling(DIV, EMP, sensitivity, DIV.Tsam, ins_name)
+    ABS = absolute_scaling(DIV, EMP, sensitivity, DIV.Tsam, ins_name,coord_left,coord_right)
     
     correct = convert_q(ABS)
     correct, qx, qy = convert_qxqy(correct)
@@ -295,7 +297,7 @@ if __name__ == '__main__':
         #dict(module="sans.load", position=(100, 300),
              #config={'files': [fileList[2]], 'intent': 'signal'}),
         #12
-        dict(module="sans.absolute_scaling", position=(580 , 300), config={'ins_name':'NG3'}),
+        dict(module="sans.absolute_scaling", position=(580 , 300), config={'ins_name':'NG3','bottomLeftCoord':{'X':55, 'Y':53}, 'topRightCoord':{'X':74, 'Y':72}}),
         #13
         dict(module="sans.annular_av", position=(610 , 400), config={}),
         

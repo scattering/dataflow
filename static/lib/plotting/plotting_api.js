@@ -14,6 +14,7 @@ var types = { lin: {
               }
             };
 var plots = [];
+var plot = null; // starting with just one plot.
 var stage = 1;
 function DataSeries(props) {
   props.matrixfy = function(format) {
@@ -196,6 +197,10 @@ function renderData(data, plotid, plot) {
 
 }
 
+function logTickFormatter(format, val) {
+    var new_val = Math.exp(Math.log(10)*val)
+    return $.jqplot.DefaultTickFormatter(format, new_val)
+}
 
 
 var imgd = null;
@@ -222,7 +227,7 @@ function renderImageColorbar(data, transform, plotid) {
             //labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
             tickRenderer: $.jqplot.CanvasAxisTickRenderer,
             tickOptions: {
-                formatString: "%.2f",
+                formatString: "%.4P",
                 _styles: {left: 10},
             }
           }
@@ -240,9 +245,16 @@ function renderImageColorbar(data, transform, plotid) {
         }
     }
 
+    if (transform == 'log'){
+        plot2d_colorbar.axes.y2axis.tickOptions.formatter = logTickFormatter
+    }
+    else {
+        plot2d_colorbar.axes.y2axis.tickOptions.formatter = $.jqplot.DefaultTickFormatter
+    }
+                                    
     plot2d_colorbar.axes.y2axis.min = t(dims.zmin);
     plot2d_colorbar.axes.y2axis.max = t(dims.zmax);
-    //plot2d_colorbar.axes.yaxis.labelOptions.label = data.ylabel;
+    //plot2d_colorbar.axes.y2axis.labelOptions.label = data.ylabel;
     //plot2d_colorbar.grid._offsets.right = 20;
     plot2d_colorbar.replot();
   
@@ -252,7 +264,8 @@ function renderImageColorbar(data, transform, plotid) {
   canvas.height = 256;
   var context = canvas.getContext('2d');
     
-  var grid = plot2d_colorbar.grid;  
+  var grid = plot2d_colorbar.grid;
+  console.log('cbargrid',plot2d_colorbar.grid)
   var palette = palettes.jet(256);
   var imgd = colorbar_context(context, palette);
   
@@ -287,7 +300,12 @@ function renderImageData(data, transform, plotid) {
   var series = [{showMarker:false, showLine:false}];
   function t(datum) {
         if (transform=='log'){
-            return Math.log(datum)/Math.log(10)
+            if (datum >=0) {
+                return Math.log(datum)/Math.LN10
+            }
+            else {
+                return -Infinity
+            }
         }
         else if (transform=='lin'){
             return datum
@@ -296,7 +314,7 @@ function renderImageData(data, transform, plotid) {
   
   if (!plot2d) {
       //plot2 = $.jqplot(plotid+'_target', [edges], {
-      plot2d = $.jqplot('plots', [corners], {
+      plot2d = $.jqplot(plotid, [corners], {
           series:series,
         axes:{
           xaxis:{
@@ -320,10 +338,15 @@ function renderImageData(data, transform, plotid) {
         },
         cursor: {
             show: true,
-            tooltipLocation:'sw'
+            zoom: true,
+            tooltipLocation:'se',
+            tooltipOffset: -60,
+            useAxesFormatters: false,
       },
         grid: {shadow: false},
+        type: '2d',
     });
+    plot2d.type = '2d';
   }
 
     plot2d.axes.xaxis.min = display_dims.xmin;
@@ -333,30 +356,113 @@ function renderImageData(data, transform, plotid) {
     plot2d.axes.yaxis.min = display_dims.ymin;
     plot2d.axes.yaxis.max = display_dims.ymax;
     plot2d.axes.yaxis.labelOptions.label = data.ylabel;
+    
+    plot2d.plugins.cursor.tooltipFormatString = data.xlabel + ': %.4P \n' + data.ylabel + ': %.4P'
+    plot2d.img = null;
     //plot2d.grid._offsets.left = 75;
     plot2d.replot()
     plot2d.grid._offsets.left = plot2d.axes.yaxis._elem.width() 
     // move the grid over so that the axes fit!
     plot2d.replot()
+    plot2d.source_data = data;
   
-  var grid = plot2d.grid;
+  plot2d.get_sxdx = function(){
 
+        var xp = this.axes.xaxis.u2p;
+        var yp = this.axes.yaxis.u2p;
+        var dims = this.source_data.dims
+	if (!dims.dx){ dims.dx = (dims.xmax - dims.xmin)/(dims.xdim-1); }
+	if (!dims.dy){ dims.dy = (dims.ymax - dims.ymin)/(dims.ydim-1); }
+        
+        var xmin = Math.max(this.axes.xaxis.min, dims.xmin), xmax = Math.min(this.axes.xaxis.max, dims.xmax);
+        var ymin = Math.max(this.axes.yaxis.min, dims.ymin), ymax = Math.min(this.axes.yaxis.max, dims.ymax);
+        if (debug) {
+            console.log('x', xmin,xmax, 'y', ymin,ymax, 'w', (xmax-xmin), 'h', (ymax-ymin));
+            console.log('dims', dims);
+        }
+        
+        var sx  = (xmin - dims.xmin)/dims.dx, sy  = (dims.ymax - ymax)/dims.dy,
+            sx2 = (xmax - dims.xmin)/dims.dx, sy2 = (dims.ymax - ymin)/dims.dy,
+            sw = sx2 - sx, sh = sy2 - sy;
+        if (debug)
+            console.log('sx', sx, 'sy', sy, 'sw', sw, 'sh', sh, '   sx2 ', sx2, 'sy2 ', sy2);
+        
+        var dx = xp.call(this.axes.xaxis, xmin), dy = yp.call(this.axes.yaxis, ymax),
+            dw = xp.call(this.axes.xaxis, xmax) - xp.call(this.axes.xaxis, xmin), dh = yp.call(this.axes.yaxis, ymin) - yp.call(this.axes.yaxis, ymax);
+        if (debug)
+            console.log('dx', dx, 'dy', dy, 'dw', dw, 'dh', dh);
+        return {sx:sx, sy:sy, sw:sw, sh:sh, dx:dx, dy:dy, dw:dw, dh:dh}
+  }
+  
+  plot2d.draw_image = function() {
+    var grid = this.grid;
+    var img = this.img;
+    if (img) {
+        var sxdx = this.get_sxdx();
+        if (sxdx.sw > 0 && sxdx.sh > 0) {
+            grid._ctx.drawImage(img, sxdx.sx, sxdx.sy, sxdx.sw, sxdx.sh, sxdx.dx, sxdx.dy, sxdx.dw, sxdx.dh);
+            console.log('draw_image')
+        }
+    }
+    
+  }
+  
+  plot2d.add_image = function(data, transform) {
+    this.img = null;
+    this.source_data = data;
+    var hooks = this.postDrawHooks.hooks;
+    for (i=0; i<hooks.length; i++) {
+            if (hooks[i].name == 'draw_image') {
+                hooks.splice(i,1);
+            }
+        }
+    var grid = this.grid;
+    var jet = palettes.jet;
+    var palette_array = jet(256).array;
+    var canvas = document.createElement('canvas');
+    canvas.hidden = true;
+    var width = data.dims.xdim;
+    var height = data.dims.ydim;
+    var context = canvas.getContext('2d');
+    var myImageData = context.createImageData(width, height);
+    canvas.width = width;
+    canvas.height = height;
+    var dataz = data.z[0]
+    var tzmax = t(data.dims.zmax);
+  
+      for (var r = 0; r < dataz.length; r++) {
+        for (var c = 0; c < dataz[0].length; c++) {
+            var offset = 4*((c*width) + r);
+            var z = dataz[r][c];
+            var plotz = Math.floor((t(z) / tzmax) * 255.0);
 
-  //ctx = document.getElementById(plotid)
-  //console.log('I am here', decode64(data.z[0]), data.z[0].length);
-  var jet = palettes.jet;
-  var palette_array = jet(256).array;
-  //var invisid = 'invis';
-  // making a throwaway canvas:
-  var canvas = document.createElement('canvas');
-  canvas.hidden = true;
-  canvas.width = data.dims.xdim;
-  canvas.height = data.dims.ydim;
-  var context = canvas.getContext('2d');
-  //var context = getContext(invisid);
-  //var canvas = document.getElementById(invisid);
-  var myImageData = context.createImageData(data.dims.xdim, data.dims.ydim);
+            plotz = ((plotz>255)? 255 : plotz);
+            plotz = ((plotz<0)? 0 : plotz);
+            var rgb = palette_array[plotz];
+            //console.log(plotz, rgb)
+            myImageData.data[offset + 0] = rgb[0];
+            myImageData.data[offset + 1] = rgb[1];
+            myImageData.data[offset + 2] = rgb[2];
+            myImageData.data[offset + 3] = 255;
+        }
+      }
+    context.putImageData(myImageData, 0, 0);
+    var img = new Image();
+    img.src = canvas.toDataURL('image/png');
+   
+    var that = this;
+    
+    img.onload = function(){
+        that.img = img;
+        that.postDrawHooks.add(that.draw_image);
+        that.draw_image();         
+    } 
+  }
+  
+  plot2d.add_image(data, transform)
+  
   //bin_data = Base64.decode(data.z);
+  /*
   if (process_bin_data) {
     bin_data = decode64(data.z);
     console.log(data.z.length, bin_data.length);
@@ -376,44 +482,7 @@ function renderImageData(data, transform, plotid) {
   else {
     dataz = data.z[0]
   }
-  width = dataz.length;
-  height = dataz[0].length;
-  
-  canvas.width = width;
-  canvas.height = height;
-  
-  for (var r = 0; r < dataz.length; r++) {
-    for (var c = 0; c < dataz[0].length; c++) {
-        var offset = 4*((c*width) + r);
-        var z = dataz[r][c];
-        var plotz = Math.round((t(z+1) / t(data.dims.zmax)) * 255.0);
-
-        plotz = ((plotz>255)? 255 : plotz);
-        plotz = ((plotz<0)? 0 : plotz);
-        var rgb = palette_array[plotz];
-        //console.log(plotz, rgb)
-        myImageData.data[offset + 0] = rgb[0];
-        myImageData.data[offset + 1] = rgb[1];
-        myImageData.data[offset + 2] = rgb[2];
-        myImageData.data[offset + 3] = 255;
-    }
-  }
-  
-  imgd = myImageData;
-  context.putImageData(myImageData, 0, 0);
-  //img = canvas2img(invisid);
-  var img = new Image();
-  img.src = canvas.toDataURL('image/png');
-  //img.src = 'data:image/png;base64,' + data.z['png'];
-  
-  //img.src = decode64(data.z['png']);
-  //img.src="http://static.ak.fbcdn.net/images/welcome/welcome_page_map.png";
-  
-  img.onload = function(){
-    grid._ctx.drawImage(img, grid._left, grid._top, grid._width, grid._height);
-  // execute drawImage statements here
-    };
-  
+  */
   return plot2d;
   
 }  
@@ -566,7 +635,41 @@ function createPlotObject(plotid) {
     return { stage: 1, prevtype: null, targetId: plotid + '_target', series: [], options: { title: '', series: [], axes: {} } };
 }
 
-var plot2d = null;
+function update2dPlot(plot, toPlot, target_id) {
+    if (!plot || !plot.hasOwnProperty("type") || plot.type!='2d'){
+        console.log('target_id: ', target_id)
+        var plotdiv = document.getElementById(target_id);
+        plotdiv.innerHTML = "";
+        jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 450px; height: 350px;", id:"plotbox"}));
+        jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width:350px; height: 350px; ", id:"plot2d"}));
+        jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width: 100; height: 350; ", id:"colorbar"}));
+        jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 410px; height: 100px;", id:"plotbuttons"}));
+        jQuery(document.getElementById('plotbuttons')).append(jQuery('<select />', {id:"plot_selectz"}));
+        jQuery(document.getElementById('plotbuttons')).append(jQuery('<input />', {id:"plot_update", type:"submit", value:"Update plot"}));
+        jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'lin', text: 'lin' }));
+        jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'log', text: 'log' }));
+        plot = null;
+        plot2d = null;
+        plot2d_colorbar = null;
+    }
+    
+    var transform = toPlot.transform || 'lin';
+    plot = renderImageData(toPlot, transform, 'plot2d');
+    colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
+    
+    jQuery('#plot_update').click({ plot: plot, colorbar: colorbar, toPlot: toPlot }, function(e) {
+        console.log(e);
+        var plot = e.data.plot; var toPlot = e.data.toPlot;
+        var selectz = document.getElementById('plot_selectz');
+        var transform = selectz[selectz.selectedIndex].value;
+        plot = renderImageData(toPlot, transform, 'plots');
+        colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
+    });
+    
+    return plot; 
+}
+
+var plot = null;
 var plotregion = null;
 
 function plottingAPI(toPlots, plotid_prefix) {
@@ -579,8 +682,8 @@ function plottingAPI(toPlots, plotid_prefix) {
         var toPlot = toPlots[i];
         var plotid = plotid_prefix + '_' + i;
         console.log('plotid', plotid)
-        var plot = (!plots[i]) ? createPlotObject(plotid) : plots[i];
-        if (plot.prevtype != toPlot.type) plot.stage = 1;
+        //var plot = (!plots[i]) ? createPlotObject(plotid) : plots[i];
+        //if (plot.prevtype != toPlot.type) plot.stage = 1;
         
         console.log(i, toPlot, toPlot.type, plot);
         switch (toPlot.type) {
@@ -593,28 +696,51 @@ function plottingAPI(toPlots, plotid_prefix) {
                 break;
             */    
             case '2d':
-                if (!plotregion) {
-                    document.getElementById('plots').appendChild(create2dPlotRegion(plotid));
-                    plotregion = true;
-                }
+                
+                //if (!plotregion) {
+                //    document.getElementById('plots').appendChild(create2dPlotRegion(plotid));
+                //    plotregion = true;
+                //}
+                plot = update2dPlot(plot, toPlot, plotid_prefix);
+                /*
                 var transform = toPlot.transform || 'lin';
-                plot = renderImageData(toPlot, transform, plotid);
+                plot = renderImageData(toPlot, transform, 'plot2d');
                 var colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
-                jQuery(document.getElementById(plotid + '_selecty')).append('<option />', { value: toPlot.ylabel, text: toPlot.ylabel });
-                jQuery(document.getElementById(plotid + '_selectx')).append('<option />', { value: toPlot.xlabel, text: toPlot.xlabel });
+                document.getElementById('plot_selectz').length = 0;
+                jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'lin', text: 'lin' }));
+                jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'log', text: 'log' }));
+                
+                jQuery('#plot_update').click({ plot: plot, colorbar: colorbar, toPlot: toPlot }, function(e) {
+                    console.log(e);
+                    var plot = e.data.plot; var toPlot = e.data.toPlot;
+                    var selectz = document.getElementById('plot_selectz');
+                    var transform = selectz[selectz.selectedIndex].value;
+                    plot = renderImageData(toPlot, transform, 'plots');
+                    colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
+                });
+                */               
                 break;
                 
             case 'nd':
-                document.getElementById('plots').appendChild(createNdPlotRegion(plotid));
+                //document.getElementById('plot').appendChild(createNdPlotRegion(plotid));
 
-                updateSeriesSelects(toPlot, plotid);
-                plot = updateNdPlot(plot, toPlot, stage);
+                //updateSeriesSelects(toPlot, plotid);
+                plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, true);
                 
-                jQuery(document.getElementById(plotid + '_update')).click({ plot: plot, toPlot: toPlot }, function(e) {
-                    console.log(e);
-                    var plot = e.data.plot; var toPlot = e.data.toPlot;
-                    plot = updateNdPlot(plot, toPlot);
-                });
+                jQuery(document.getElementById(plotid + '_update')).click({ 
+                    plot: plot, 
+                    toPlot: toPlot, 
+                    plotid: plotid,
+                    plotid_prefix: plotid_prefix
+                    }, 
+                        function(e) {
+                            console.log(e);
+                            var plot = e.data.plot; 
+                            var toPlot = e.data.toPlot;
+                            var plotid = e.data.plotid;
+                            var plotid_prefix = e.data.plotid_prefix;
+                            plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix);
+                        });
             
             
                 break;
@@ -642,7 +768,8 @@ function plottingAPI(toPlots, plotid_prefix) {
                 break;
                 
             default:
-                throw "Unsupported plot type! Please specify the type as '1d' or '2d'.";
+                alert('plotting of datatype "' + toPlot.type + '" is unsupported')
+                //throw "Unsupported plot type! Please specify the type as '1d' or '2d'.";
         }
         
         prevtype = toPlot.type;
@@ -685,6 +812,7 @@ function createNdPlotRegion(plotid, renderTo) {
     divc.setAttribute('class', 'plot-axis plot-axis-c');
     var divtarget = document.createElement('div');
     divtarget.setAttribute('id', plotid + '_target');
+    divtarget.setAttribute('style', 'display: block; width: 450; height: 350;');
     divtarget.setAttribute('class', 'plot-target');
     var selecty = document.createElement('select');
     selecty.setAttribute('id', plotid + '_selecty');
@@ -707,6 +835,7 @@ function createNdPlotRegion(plotid, renderTo) {
     
     return div;
 }
+
 function updateSeriesSelects(toPlot, plotid) {
     //var plotid = plot.targetId.substring(1 * (plot.targetId[0] == '#'), plot.targetId.length - 7);
     
@@ -740,11 +869,32 @@ function get(arr, i) {
     }
 }
 
-function updateNdPlot(plot, toPlot, stage) {
-    var plotid = plot.targetId.substring(1 * (plot.targetId[0] == '#'), plot.targetId.length - 7);
-    var series = plot.series;
-    var options = plot.options;
-    console.log(100, plotid, plot.series, toPlot);
+function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
+    var stage = 2;
+    var plotdiv = document.getElementById(plotid_prefix);
+    console.log('plotdiv:', plotdiv, plotid_prefix)
+    
+    if (!plot || !plot.hasOwnProperty("type") || plot.type!='nd'){
+        stage = 1;
+        plotdiv.innerHTML = "";
+    }
+    
+    if (create) {
+        plotdiv.appendChild(createNdPlotRegion(plotid));
+        updateSeriesSelects(toPlot, plotid);
+    }
+    
+    target_id = plotid + '_target';
+    //var plotid = plot.targetId.substring(1 * (plot.targetId[0] == '#'), plot.targetId.length - 7);
+    var series = [];
+    var options = { title: '', series: [], axes: {}, cursor: {
+            show: true,
+            zoom: true,
+            tooltipFormatString: '%.3g, %.3g',
+            tooltipLocation:'ne',} };
+    //var series = plot.series;
+    //var options = plot.options;
+    console.log(100, plotid, toPlot);
     
     var quantityx = document.getElementById(plotid + '_selectx').value,
         quantityy = document.getElementById(plotid + '_selecty').value;
@@ -772,8 +922,9 @@ function updateNdPlot(plot, toPlot, stage) {
     }
     console.log('series', series, 'options', options);
     
-    if (plot.stage == 1) {
-        plot = jQuery.jqplot(plot.targetId, series, options);
+    if (stage == 1) {
+        plot = jQuery.jqplot(target_id, series, options);
+        plot.type = 'nd';
     }
     else {
         plot.series.data = series;
@@ -841,3 +992,68 @@ function create2dPlotRegion(plotid, renderTo) {
     
     return div;
 }
+
+//jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 450px; height: 350px;", id:"plotbox"}));
+//        jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width:350px; height: 350px; ", id:"plot2d"}));
+//        jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width: 100; height: 350; ", id:"colorbar"}));
+//        jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 410px; height: 100px;", id:"plotbuttons"}));
+//        jQuery(document.getElementById('plotbuttons')).append(jQuery('<select />', {id:"plot_selectz"}));
+//        jQuery(document.getElementById('plotbuttons')).append(jQuery('<input />', {id:"plot_update", type:"submit", value:"Update plot"}));
+//        jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'lin', text: 'lin' }));
+//        jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'log', text: 'log' }));
+//        plot = null;
+
+function create2dPlotRegion(plotid, renderTo) {
+    var div = document.createElement('div');
+    div.setAttribute('id', plotid);
+    div.setAttribute('style', "display: block; width: 450px; height: 350px;");
+    var div2d = document.createElement('div');
+    div2d.setAttribute('id', 'plot2d');
+    div2d.setAttribute('style', "float: left; width:350px; height: 350px; ");
+    var divc = document.createElement('div');
+    divc.setAttribute('id', plotid + 'colorbar');
+    divc.setAttribute('style', "float: left; width: 100; height: 350; ");
+
+
+    var selectz = document.createElement('select');
+    selectz.setAttribute('id', 'plot_selectz');
+    selectz.setAttribute('class', 'plot-axis-select');
+    var optlin = document.createElement('choice');
+    var selectx = document.createElement('select');
+    selectx.setAttribute('id', plotid + '_selectx');
+    selectx.setAttribute('class', 'plot-axis-select plot-axis-select-x');
+    var updatebutton = document.createElement('input');
+    updatebutton.setAttribute('id', plotid + '_update');
+    updatebutton.setAttribute('type', 'submit');
+    updatebutton.setAttribute('value', 'Update plot');
+    
+    var colorbar = document.createElement('canvas');
+    colorbar.setAttribute('width', 60);
+    colorbar.setAttribute('height', 500);
+    colorbar.setAttribute('id', plotid + '_colorbar');
+    colorbar.setAttribute('class', 'plot-colorbar');
+    var invis = document.createElement('canvas');
+    invis.setAttribute('id', plotid + '_invis');
+    invis.setAttribute('class', 'plot-invis');
+    invis.hidden = true;
+    var colorbarinvis = document.createElement('canvas');
+    colorbarinvis.setAttribute('width', 1);
+    colorbarinvis.setAttribute('id', plotid + '_colorbar_invis');
+    colorbarinvis.setAttribute('class', 'plot-invis plot-colorbar-invis');
+    colorbarinvis.hidden = true;
+
+    
+    divy.appendChild(selecty);
+    divx.appendChild(selectx);
+    divx.appendChild(updatebutton);
+    div.appendChild(divy);
+    div.appendChild(divtarget);
+    div.appendChild(colorbar);
+    div.appendChild(divc);
+    div.appendChild(divx);
+    divc.appendChild(invis);
+    divc.appendChild(colorbarinvis);
+    
+    return div;
+}        
+        
