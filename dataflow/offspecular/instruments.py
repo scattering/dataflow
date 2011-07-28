@@ -85,6 +85,13 @@ class Timestamp(dict):
     def loads(cls, str):
         return pickle.loads(str)
 
+use_File = True
+def get_friendly_name(fh):
+    if use_File:
+        from ...apps.tracks.models import File
+        return File.objects.get(name=str(fh)).friendly_name
+    return fh
+
 OSPEC_DATA = 'data2d.ospec'
 data2d = Data(OSPEC_DATA, FilterableMetaArray)
 OSPEC_DATA_HE3 = OSPEC_DATA + '.he3'
@@ -93,12 +100,10 @@ OSPEC_DATA_TIMESTAMP = OSPEC_DATA + '.timestamp'
 datastamp = Data(OSPEC_DATA_TIMESTAMP, Timestamp)
 
 # Load module
-def load_action(files=[], intent='', auto_PolState=False, PolStates=[], **kwargs):
+def load_action(files=[], intent='', auto_PolState=False, PolStates={}, **kwargs):
     print "loading", files
-    if len(PolStates) < len(files):
-        PolStates += [''] * (len(files) - len(PolStates))
-    PolStates = [state.replace(' ', '+') for state in PolStates]
-    result = [_load_data(f, auto_PolState, state) for f, state in zip(files, PolStates)] # not bundles
+    PolStates = dict((file, state.replace(' ', '+')) for file, state in PolStates.items())
+    result = [_load_data(f, auto_PolState, PolStates.get(get_friendly_name(os.path.split(f)[-1]), '')) for f in files] # not bundles
     return dict(output=result)
 def _load_data(name, auto_PolState, PolState):
     (dirName, fileName) = os.path.split(name)
@@ -234,7 +239,7 @@ def timestamp_action(input=[], stamps=None, override_existing=False, **kwargs):
     if stamps == None:
         sys.exit("No timestamps specified; exiting")
     timestamp_file = stamps[0] # only one timestamp
-    return dict(output=InsertTimestamps().apply(input, timestamp_file, override_existing=override_existing))
+    return dict(output=[InsertTimestamps().apply(datum, timestamp_file, override_existing=override_existing, filename=get_friendly_name(datum._info[-1]['filename'])) for datum in input])
 timestamp = timestamp_module(id='ospec.timestamp', datatype=OSPEC_DATA,
                              version='1.0', action=timestamp_action, stamp_datatype=OSPEC_DATA_TIMESTAMP)
 
@@ -284,7 +289,7 @@ if __name__ == '__main__':
         path, ext = dir + '/dataflow/sampledata/ANDR/cshape_121609/Iremun00', ['.ca1', '.cb1']
         files = [path + str(i + 1) + extension for i in range(0, 9) for extension in ext if i != 2]
         pols = simplejson.load(open(dir + '/dataflow/sampledata/ANDR/cshape_121609/file_catalog.json', 'r'))
-        pol_states = [pols[os.path.split(file)[-1]]['polarization'] for file in files]
+        pol_states = dict((os.path.split(file)[-1], pols[os.path.split(file)[-1]]['polarization']) for file in files)
         modules = [
             dict(module="ospec.load", position=(50, 25),
                  config={'files': files, 'intent': 'signal', 'PolStates':pol_states}),
@@ -316,11 +321,11 @@ if __name__ == '__main__':
                         instrument=ANDR.id,
                         )
     
-#    print template_to_wireit_diagram(template)
-#    ins = simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
-#    with open(dir + '/dataflow/static/wireit_test/ANDRdefinition2.js', 'w') as f:
-#        f.write('var andr2 = ' + ins + ';')
-    #sys.exit()
+    print template_to_wireit_diagram(template)
+    ins = simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
+    with open(dir + '/dataflow/static/wireit_test/ANDRdefinition2.js', 'w') as f:
+        f.write('var andr2 = ' + ins + ';')
+    sys.exit()
     
     nodenum = template.order()[-2]
     terminal = 'output'
