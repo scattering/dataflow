@@ -6,7 +6,6 @@ from FilterableMetaArray import FilterableMetaArray as MetaArray
 from he3analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
 from reduction.formats import load
 import reduction.rebin as reb
-from ...apps.tracks.models import File
 
 class Supervisor():
     """ class to hold rebinned_data objects and increment their reference count """
@@ -542,9 +541,6 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     data = MetaArray(data_array, dtype='float', info=info)
     return data                   
 
-def get_friendly_name(fh):
-    return File.objects.get(name=str(fh)).friendly_name[1:]
-
 class InsertTimestamps(Filter2D):
     """ This is a hack.  
     Get the timestamps from the source file directory listing
@@ -553,14 +549,14 @@ class InsertTimestamps(Filter2D):
     
     @autoApplyToList
     @updateCreationStory
-    def apply(self, data, timestamps, override_existing=False):
+    def apply(self, data, timestamps, override_existing=False, filename=None):
         # first of all, if there is already a timestamp, skip!
         #extra info changed
         if data._info[-1].has_key('end_datetime') and not override_existing:
             return data
         # now figure out which file was the source:
         new_info = data.infoCopy()
-        source_filename = get_friendly_name(new_info[-1]['filename']) # strip off leading 'I'
+        source_filename = filename[1:] or new_info[-1]['filename'][1:] # strip off leading 'I'
         try:
             end_timestamp = timestamps[source_filename]
         except KeyError:
