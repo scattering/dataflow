@@ -322,47 +322,48 @@ def editProject(request, project_id):
 
 @login_required 
 def editExperiment(request, experiment_id):
-	print request
-	experiment = Experiment.objects.get(id=experiment_id)
-	if request.FILES.has_key('files'):
-		file_data = request.FILES['files']
-		file_sha1 = hashlib.sha1()
-		for line in file_data.read():
-			file_sha1.update(line)
-		write_here = '/tmp/FILES/' + file_sha1.hexdigest()
-		write_here = open(write_here, 'w')
-		for line in file_data:
-			write_here.write(line)
-		write_here.close()
-		new_file = File.objects.get(name=file_sha1.hexdigest())
-		if new_file is None:
+    print request
+    experiment = Experiment.objects.get(id=experiment_id)
+    if request.FILES.has_key('files'):
+        file_data = request.FILES['files']
+        file_sha1 = hashlib.sha1()
+        for line in file_data.read():
+            file_sha1.update(line)
+        write_here = '/tmp/FILES/' + file_sha1.hexdigest()
+        write_here = open(write_here, 'w')
+        for line in file_data:
+            write_here.write(line)
+        write_here.close()
+        new_files = File.objects.filter(name=file_sha1.hexdigest())
+        if len(new_files) > 0:
+            new_file = new_files[0]
+        else:
 		    new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=file_data.name, location='/tmp/FILES/')
-		experiment.Files.add(new_file)
-	if request.POST.has_key('instrument_name'):
-		if request.POST['instrument_name']:
-			instrument = Instrument.objects.get(id=request.POST['instrument_name'])
-			instrument_class = instrument.instrument_class
-			experiment.instrument = instrument
-			experiment.save()
-	if request.POST.has_key('facility'):
-		if request.POST['facility']:
-			facility = Facility.objects.get(id=request.POST['facility'])
-			experiment.facility = facility
-			experiment.save()
-	if request.POST.has_key('templates'):
-		if request.POST['templates']:
-			template = Template.objects.get(id=request.POST['templates'])
-			experiment.templates.add(template)
-		#print file_sha1.hexdigest()
-		#print hashlib.sha1(request.FILES['files'].read()).hexdigest()	
-	context = RequestContext(request)
-	facility = experiment.facility
-	instrument = experiment.instrument
-	if instrument:
-		instrument_class = experiment.instrument.instrument_class
-	else:
-		instrument_class = None
-	form1 = experimentForm1(initial={'facility':facility, 'instrument_class':instrument_class, 'instrument_name':instrument})
-	form2 = experimentForm2(USER=request.user)
-	return render_to_response('userProjects/editExperiment.html', {'form1':form1, 'form2':form2, 'experiment':experiment, }, context_instance=context)
-
+        experiment.Files.add(new_file)
+    if request.POST.has_key('instrument_name'):
+        if request.POST['instrument_name']:
+            instrument = Instrument.objects.get(id=request.POST['instrument_name'])
+            instrument_class = instrument.instrument_class
+            experiment.instrument = instrument
+            experiment.save()
+    if request.POST.has_key('facility'):
+        if request.POST['facility']:
+            facility = Facility.objects.get(id=request.POST['facility'])
+            experiment.facility = facility
+            experiment.save()
+    if request.POST.has_key('templates'):
+        if request.POST['templates']:
+            template = Template.objects.get(id=request.POST['templates'])
+            experiment.templates.add(template)
+        #print file_sha1.hexdigest()
+        #print hashlib.sha1(request.FILES['files'].read()).hexdigest()	
+    context = RequestContext(request)
+    facility = experiment.facility
+    instrument = experiment.instrument
+    if instrument:
+        instrument_class = experiment.instrument.instrument_class
+    else:
+        instrument_class = None
+    form1 = experimentForm1(initial={'facility':facility, 'instrument_class':instrument_class, 'instrument_name':instrument})
+    form2 = experimentForm2(USER=request.user)
+    return render_to_response('userProjects/editExperiment.html', {'form1':form1, 'form2':form2, 'experiment':experiment, }, context_instance=context)

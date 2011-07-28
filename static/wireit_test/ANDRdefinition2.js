@@ -123,8 +123,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/rowantests/autogrid.png", 
-        "image": "../../static/img/rowantests/autogrid_image.png", 
+        "icon": "../../static/img/offspecular/autogrid.png", 
+        "image": "../../static/img/offspecular/autogrid_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -173,8 +173,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/rowantests/sum.png", 
-        "image": "../../static/img/rowantests/sum_image.png", 
+        "icon": "../../static/img/offspecular/sum.png", 
+        "image": "../../static/img/offspecular/sum_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -243,8 +243,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/rowantests/offset.png", 
-        "image": "../../static/img/rowantests/offset_image.png", 
+        "icon": "../../static/img/offspecular/offset.png", 
+        "image": "../../static/img/offspecular/offset_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -293,8 +293,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/rowantests/wiggle.png", 
-        "image": "../../static/img/rowantests/wiggle_image.png", 
+        "icon": "../../static/img/offspecular/wiggle.png", 
+        "image": "../../static/img/offspecular/wiggle_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -343,8 +343,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/rowantests/twotheta.png", 
-        "image": "../../static/img/rowantests/twotheta_image.png", 
+        "icon": "../../static/img/offspecular/twotheta.png", 
+        "image": "../../static/img/offspecular/twotheta_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -393,8 +393,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/rowantests/qxqz.png", 
-        "image": "../../static/img/rowantests/qxqz_image.png", 
+        "icon": "../../static/img/offspecular/qxqz.png", 
+        "image": "../../static/img/offspecular/qxqz_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -463,8 +463,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/rowantests/timestamp.png", 
-        "image": "../../static/img/rowantests/timestamp_image.png", 
+        "icon": "../../static/img/offspecular/timestamp.png", 
+        "image": "../../static/img/offspecular/timestamp_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -533,8 +533,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/rowantests/app_polar_matrix.png", 
-        "image": "../../static/img/rowantests/app_polar_matrix_image.png", 
+        "icon": "../../static/img/offspecular/app_polar_matrix.png", 
+        "image": "../../static/img/offspecular/app_polar_matrix_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -603,8 +603,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/rowantests/sum_polar.png", 
-        "image": "../../static/img/rowantests/sum_polar_image.png", 
+        "icon": "../../static/img/offspecular/sum_polar.png", 
+        "image": "../../static/img/offspecular/sum_polar_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -673,8 +673,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        "icon": "../../static/img/rowantests/polar_correct.png", 
-        "image": "../../static/img/rowantests/polar_correct_image.png", 
+        "icon": "../../static/img/offspecular/polar_correct.png", 
+        "image": "../../static/img/offspecular/polar_correct_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
