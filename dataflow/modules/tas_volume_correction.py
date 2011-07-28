@@ -13,7 +13,7 @@ def volume_correction_module(id=None, datatype=None, action=None,
     """
 
     icon = {
-        'URI': config.IMAGES + 'sum.png', #GET ICON IMAGE --> replace 'sum.png'
+        'URI': config.IMAGES + 'volume resolution correction.png',
         'terminals': {
             'input': (-15, 1, -1, 0),
             'output': (15, 1, 1, 0),

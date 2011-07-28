@@ -845,10 +845,14 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 				splitConfig = i.split(',')
 				//console.log(splitConfig)
 				if (splitConfig[0] == splitConfig[1]) {
-					this.layer.containers[moduleID].tracksConfigs[this.reductionInstance][splitConfig[0]] = configs[i]
+					if ( typeof configs[i] != 'undefined') {
+						this.layer.containers[moduleID].tracksConfigs[this.reductionInstance][splitConfig[0]] = configs[i]
+						}
 					}
 				else {
-					this.layer.containers[moduleID].tracksConfigs[this.reductionInstance][splitConfig[0]][splitConfig[1]] = configs[i]
+					if (typeof configs[i] != 'undefined') {
+						this.layer.containers[moduleID].tracksConfigs[this.reductionInstance][splitConfig[0]][splitConfig[1]] = configs[i]
+					}
 				}
 				}
 			}
@@ -857,14 +861,18 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 				splitConfig = i.split(',')
 				//console.log(splitConfig)
 				if (splitConfig[0] == splitConfig[1]) {
+					if ( typeof configs[i] != 'undefined') {
 					for (var j = 1; j <= this.maxReduction; j++) {
 						this.layer.containers[moduleID].tracksConfigs[j][splitConfig[0]] = configs[i]
 						}
+						}
 					}
 				else {
+					if ( typeof configs[i] != 'undefined') {
 					for (var j = 1; j <= this.maxReduction; j++ ) {
 						this.layer.containers[moduleID].tracksConfigs[j][splitConfig[0]][splitConfig[1]] = configs[i]
 					}
+				}
 				}
 				}
 			}
