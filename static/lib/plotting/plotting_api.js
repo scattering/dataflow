@@ -301,7 +301,7 @@ function renderImageData(data, transform, plotid) {
   function t(datum) {
         if (transform=='log'){
             if (datum >=0) {
-                return Math.log(datum)/Math.log(10)
+                return Math.log(datum)/Math.LN10
             }
             else {
                 return -Infinity
@@ -433,7 +433,7 @@ function renderImageData(data, transform, plotid) {
         for (var c = 0; c < dataz[0].length; c++) {
             var offset = 4*((c*width) + r);
             var z = dataz[r][c];
-            var plotz = Math.round((t(z) / t(data.dims.zmax)) * 255.0);
+            var plotz = Math.floor((t(z) / t(data.dims.zmax)) * 255.0);
 
             plotz = ((plotz>255)? 255 : plotz);
             plotz = ((plotz<0)? 0 : plotz);
