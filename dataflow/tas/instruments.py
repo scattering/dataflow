@@ -1,7 +1,7 @@
 """
 Triple Axis Spectrometer reduction and analysis modules
 """
-import math, os, sys
+import math, os, sys, types
 
 if 0:
     #relative imports for use in larger project
@@ -23,6 +23,7 @@ if 0:
     from ..modules.tas_detailed_balance import detailed_balance_module
     from ..modules.tas_monitor_correction import monitor_correction_module
     from ..modules.tas_volume_correction import volume_correction_module
+    from ...apps.tracks.models import File
 
 if 1:
     #direct imports for use individually (ie running this file)
@@ -45,6 +46,7 @@ if 1:
     from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
     from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
     from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
+    from dataflow.apps.tracks.models import File
 
 TAS_DATA = 'data1d.tas'
 data1d = Data(TAS_DATA, data_abstraction.TripleAxis)
@@ -90,7 +92,7 @@ def data_scale(data, scale):
 def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
     """Currently set up to load ONLY 1 file"""
     #print "loading", files
-    result = [data_abstraction.filereader(f) for f in files]
+    result = [data_abstraction.filereader(f, File.objects.get(name=f.split('/')[-1]).friendly_name) for f in files]
     return dict(output=result)
 
 load = load_module(id='tas.load', datatype=TAS_DATA,
@@ -133,18 +135,22 @@ def join_action(input,**kwargs):
         else:
             joinedtas=data_abstraction.join(joinedtas,tas)
 
-    return dict(output=joinedtas)
+    return dict(output=[joinedtas])
 
 join = join_module(id='tas.join', datatype=TAS_DATA,
                    version='1.0', action=join_action)
 
-def scale_action(input=None, scale=None, xtype=None, position=None, **kwargs):
+def scale_action(input=None, scale=1.0, xtype=None, position=None, **kwargs):
     # operate on a bundle; need to resolve confusion between bundles and
     # individual inputs
     #TODO --- old code, probably won't run!
     if numpy.isscalar(scale): scale = [scale] * len(input)
     flat = []
-    for bundle in input: flat.extend(bundle)
+    for bundle in input:
+        if type(bundle) is types.ListType:
+            flat.extend(bundle)
+        else: # we're not a bundle at all!
+            flat.append(bundle)
     result = [data_scale(f, s) for f, s in zip(flat, scale)]
     return dict(output=result)
 scale = scale_module(id='tas.scale', datatype=TAS_DATA,
