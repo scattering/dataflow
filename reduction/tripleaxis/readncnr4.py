@@ -30,6 +30,7 @@ class datareader(object):
 
         def data_abstraction_layer(self):
                 self.metadata={}
+                self.data={}
                 self.additional_metadata={}
                 self.metadata['monitor_base']=None #float(tokenized[6])
                 self.metadata['monitor_prefactor']=None#float(tokenized[7])
@@ -231,7 +232,7 @@ class datareader(object):
 ##        self.metadata=mosaic
 
 
-             
+
                 self.data['premonocoll']=float(tokenized[0])*N.ones(self.metadata['pts_planned'],'Float64')
                 self.data['postmonocoll']=float(tokenized[1])*N.ones(self.metadata['pts_planned'],'Float64')
                 self.data['preanacoll']=float(tokenized[2])*N.ones(self.metadata['pts_planned'],'Float64')

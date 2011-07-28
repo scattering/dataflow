@@ -1625,15 +1625,16 @@ def remove_duplicates(tas,distinct,not_distinct):
         
         uniques=[] #list of row indices to skip (ie unique pts to keep in datafile)
         dups=[]
-        for index in range(len(distinct[0])):
-                dups.append(range(len(distinct[0]))) #list of lists. Each inner list is a list of every row index (0 to len)
+	numrows=tas.detectors.primary_detector.dimension[0]
+        for index in range(numrows):
+                dups.append(range(numrows)) #list of lists. Each inner list is a list of every row index (0 to len)
                                                        #when a row becomes distinct from another, its index is removed from the the other's index
         newtas = tas
         
         for field in distinct:
-                for i in range(len(distinct[0])):
+                for i in range(numrows):
                         if not uniques.__contains__(i): #if the row isn't unique
-                                for j in range(i+1, len(distinct[0])):
+                                for j in range(i+1, numrows):
                                         if not uniques.__contains__(j) and dups[i].__contains__(j):
                                                 #going through every row below row i since i has been compared to every other row already
                                                 if field.measurement[i].x != field.measurement[j].x:
@@ -1648,15 +1649,15 @@ def remove_duplicates(tas,distinct,not_distinct):
                                         #CAN ALWAYS GET BY len(dups[i])==1
                                         uniques.append(i)
                         
-                if len(uniques)==len(distinct[0]):
+                if len(uniques)==numrows:
                         #if all rows are deemed unique, return
                         return tas
                 
         for field in not_distinct:
                 if not type(field)==Detector:
-                        for i in range(len(not_distinct[0])):
+                        for i in range(numrows):
                                 if not uniques.__contains__(i): #if the row isn't unique
-                                        for j in range(i+1,len(not_distinct[0])):
+                                        for j in range(i+1,numrows):
                                                 if not uniques.__contains__(j) and dups[i].__contains__(j):
                                                         #if row j is NOT unique and row j still a potential duplicate of row i, then proceed
                                                         if (type(field.measurement[i].x)==str or type(field.measurement[i].x)==np.string_ or not hasattr(field,'window')):
@@ -1677,7 +1678,7 @@ def remove_duplicates(tas,distinct,not_distinct):
                                                 #if every row in the column is 'distinct' from the ith row, then it is unique
                                                 uniques.append(i)
                                 
-                        if len(uniques)==len(distinct[0]):
+                        if len(uniques)==numrows:
                                 #if all rows are deemed unique, return
                                 return tas
 
@@ -1727,12 +1728,14 @@ def filereader(filename):
         return instrument
 
 if __name__=="__main__":       
-	if 0:
-		spin = filereader('spins data/bamno059.ng5')
-		spin2 = filereader('spins data/bamno060.ng5')
-		spins = join(spin,spin2)
-		print 'fixme'
 	if 1:
+		#spin = filereader('spins data/bamno059.ng5')
+		#spin2 = filereader('spins data/bamno060.ng5')
+		spin=filereader(r'C:\Users\ylem\Dropbox\BAMO_SPINS_SummerSchool_2011\spins_0801\bamno059.ng5')
+		spin2=filereader(r'C:\Users\ylem\Dropbox\BAMO_SPINS_SummerSchool_2011\spins_0801\bamno060.ng5')
+		spins = join(spin,spin2)
+		print 'fixme2'
+	if 0:
 		bt7 = filereader('EscanQQ7HorNSF91831.bt7')
 		print 'translations done'
 		#aarr,barr,carr=bt7.calc_plane()
