@@ -370,7 +370,17 @@ root@P627694:/var/www/DATAFLOW/dataflow#
 elf,myfile):
                 self.get_columnmetadatas(myfile)
                 # get the names of the fields
-        #   prepare to read the data
+        #mport Instrument, Data, Template, register_instrument
+
+    from ..modules.join import join_module
+    from ..modules.scale import scale_module
+    from ..modules.save import save_module
+    from ..modules.tas_load import load_module
+    from ..modules.tas_normalize_monitor import normalize_monitor_module
+    from ..modules.tas_detailed_balance import detailed_balance_module
+    from ..modules.tas_monitor_correction import monitor_correction_module
+    from ..modules.tas_volume_correction import volume_correction_module
+   prepare to read the data
                 count =  0
                 while 1:
                         lineStr = myfile.readline()
@@ -662,6 +672,8 @@ root@P627694:/var/www/DATAFLOW/dataflow#
                         self.lines=lines
                         myfile = open(myfilestr, 'r')
                         self.instrument=myfriendlyfilestr.split('.')[1]
+                        filestr = myfilestr if (myfriendlyfilestr == None) else myfriendlyfilestr
+			self.intstrument= filestr.split(',')[-1]
                 if self.instrument in ['bt9','ng5','bt2']:
                         # Determine FileType
                         self.determinefiletype(myfile)
