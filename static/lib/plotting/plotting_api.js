@@ -428,12 +428,13 @@ function renderImageData(data, transform, plotid) {
     canvas.width = width;
     canvas.height = height;
     var dataz = data.z[0]
+    var tzmax = t(data.dims.zmax);
   
       for (var r = 0; r < dataz.length; r++) {
         for (var c = 0; c < dataz[0].length; c++) {
             var offset = 4*((c*width) + r);
             var z = dataz[r][c];
-            var plotz = Math.floor((t(z) / t(data.dims.zmax)) * 255.0);
+            var plotz = Math.floor((t(z) / tzmax) * 255.0);
 
             plotz = ((plotz>255)? 255 : plotz);
             plotz = ((plotz<0)? 0 : plotz);
