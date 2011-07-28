@@ -22,8 +22,9 @@ def get_tokenized_line(myfile,returnline=['']):
 
 
 class datareader(object):
-        def __init__(self,myfilestr=None):
+        def __init__(self,myfilestr=None,myfriendlyfilestr=None):
                 self.myfilestr=myfilestr
+		self.myfriendlyfilestr = myfilestr if (myfriendlyfilestr == None) else myfriendlyfilestr
                 #define Data Abstraction Layer
                 self.data_abstraction_layer()
                 return
@@ -636,7 +637,7 @@ class datareader(object):
 
 
 
-        def readbuffer(self,myfilestr,lines=N.Inf):
+        def readbuffer(self,myfilestr,lines=N.Inf,myfriendlyfilestr=None):
                 if 0:
                         self.myfilestr= File.objects.get(name=myfilestr.split('/')[-1]).friendly_name
                         #self.myfilestr = myfilestr
@@ -647,7 +648,7 @@ class datareader(object):
                 if 1:
                         self.lines=lines
                         myfile = open(myfilestr, 'r')
-                        self.instrument=myfilestr.split('.')[1]
+                        self.instrument=myfriendlyfilestr.split('.')[1]
                 if self.instrument in ['bt9','ng5','bt2']:
                         # Determine FileType
                         self.determinefiletype(myfile)

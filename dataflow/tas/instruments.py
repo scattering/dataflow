@@ -22,7 +22,7 @@ from ..modules.tas_normalize_monitor import normalize_monitor_module
 from ..modules.tas_detailed_balance import detailed_balance_module
 from ..modules.tas_monitor_correction import monitor_correction_module
 from ..modules.tas_volume_correction import volume_correction_module
-
+from ...apps.tracks.models import File
 '''
 #direct imports for use individually (ie running this file)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
@@ -90,7 +90,8 @@ def data_scale(data, scale):
 def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
     """Currently set up to load ONLY 1 file"""
     #print "loading", files
-    result = [data_abstraction.filereader(f) for f in files]
+    print 'FRIENDLY FILE', File.objects.get(name=files[0].split('/')[-1]).friendly_name
+    result = [data_abstraction.filereader(f, File.objects.get(name=f.split('/')[-1]).friendly_name) for f in files]
     return dict(output=result)
     
 load = load_module(id='tas.load', datatype=TAS_DATA,
@@ -133,7 +134,7 @@ def join_action(input,**kwargs):
 	else:
 	    joinedtas=data_abstraction.join(joinedtas,tas)
 
-    return dict(output=joinedtas)
+    return dict(output=[joinedtas])
 
 join = join_module(id='tas.join', datatype=TAS_DATA,
                    version='1.0', action=join_action)
