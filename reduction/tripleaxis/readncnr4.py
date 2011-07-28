@@ -637,7 +637,7 @@ class datareader(object):
 
 
 
-        def readbuffer(self,myfilestr,lines=N.Inf):
+        def readbuffer(self,myfilestr,lines=N.Inf,friendly_name=None):
                 if 0:
                         self.myfilestr= File.objects.get(name=myfilestr.split('/')[-1]).friendly_name
                         #self.myfilestr = myfilestr
@@ -648,7 +648,8 @@ class datareader(object):
                 if 1:
                         self.lines=lines
                         myfile = open(myfilestr, 'r')
-                        self.instrument=myfilestr.split('.')[1]
+                        filestr = myfilestr if (friendly_name == None) else friendly_name
+                        self.instrument=filestr.split('.')[1]
                 if self.instrument in ['bt9','ng5','bt2']:
                         # Determine FileType
                         self.determinefiletype(myfile)
