@@ -30,6 +30,7 @@ class datareader(object):
 
         def data_abstraction_layer(self):
                 self.metadata={}
+                self.data={}
                 self.additional_metadata={}
                 self.metadata['monitor_base']=None #float(tokenized[6])
                 self.metadata['monitor_prefactor']=None#float(tokenized[7])
