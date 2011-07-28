@@ -6,11 +6,18 @@ from formatnum import format_uncertainty
 import copy, simplejson, pickle
 from mpfit import mpfit
 
-import sys,os
-#sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+
 #from dataflow import regular_gridding
-from ... import regular_gridding
 #from ...dataflow import wireit
+
+if 0:
+	#for use in larger project
+	from ... import regular_gridding
+if 0:
+	#for use in local testing
+	import sys,os
+	sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+	from dataflow import regular_gridding
 eps=1e-8
 
 """
@@ -589,12 +596,14 @@ class Primary_Motors(object):
                 when present to do calculations.
 
                 """
-                self.a1=Motor('a1',values=None,err=None,units='degrees',isDistinct=True, isInterpolatable=True)
-                self.a2=Motor('a2',values=None,err=None,units='degrees',isDistinct=True, isInterpolatable=True)
-                self.a3=Motor('a3',values=None,err=None,units='degrees',isDistinct=True, isInterpolatable=True)
-                self.a4=Motor('a4',values=None,err=None,units='degrees',isDistinct=True, isInterpolatable=True)
-                self.a5=Motor('a5',values=None,err=None,units='degrees',isDistinct=True, isInterpolatable=True)
-                self.a6=Motor('a6',values=None,err=None,units='degrees',isDistinct=True, isInterpolatable=True)
+                self.monochromator_theta=Motor('monochromator_theta',values=None,err=None,units='degrees',isDistinct=True, isInterpolatable=True) #a1
+                self.monochromator_two_theta=Motor('monochromator_two_theta',values=None,err=None,units='degrees',isDistinct=True, isInterpolatable=True) #a2
+                self.sample_theta=Motor('sample_theta',values=None,err=None,units='degrees',isDistinct=True, isInterpolatable=True) #a3
+                self.sample_two_theta=Motor('sample_two_theta',values=None,err=None,units='degrees',isDistinct=True, isInterpolatable=True) #a4
+                self.analyzer_theta=Motor('analyzer_theta',values=None,err=None,units='degrees',isDistinct=True, isInterpolatable=True) #a5
+                self.analyzer_two_theta=Motor('analyzer_two_theta',values=None,err=None,units='degrees',isDistinct=True, isInterpolatable=True) #a6
+		#above 6 fields are 'a1' through 'a6' in ascending order. More accurate names are employed instead of 'a#'.
+                
                 self.sample_elevator=Motor('sample_elevator',values=None,err=None,units='degrees',isDistinct=False
                                            , isInterpolatable=True)
                 self.sample_upper_tilt=Motor('sample_upper_tilt',values=None,err=None,units='degrees',isDistinct=False
@@ -801,99 +810,99 @@ class TripleAxis(object):
 		orderx=[]
                 ordery=[]
                 data = {}
-		if not xaxis==None or not yaxis==None:
-			#if axes are given (should be as motors)
-			xstart=xarr.min()
-			xfinal=xarr.max()
-			xstep=1.0*(xfinal-xstart)/len(xarr)
-			ystart=yarr.min()
-			yfinal=yarr.max()
-			ystep=1.0*(yfinal-ystart)/len(yarr)
+		#if not xaxis==None or not yaxis==None:
+			##if axes are given (should be as motors)
+			#xstart=xarr.min()
+			#xfinal=xarr.max()
+			#xstep=1.0*(xfinal-xstart)/len(xarr)
+			#ystart=yarr.min()
+			#yfinal=yarr.max()
+			#ystep=1.0*(yfinal-ystart)/len(yarr)
 			
-			xi,yi,zi=regular_gridding.regularlyGrid(axis1.measurement.x, axis2.measurement.x, self.detectors.primary_detector.measurement.x, xstart=xstart,xfinal=xfinal,xstep=xstep,ystart=ystart,yfinal=yfinal,ystep=ystep)		                               
+			#xi,yi,zi=regular_gridding.regularlyGrid(axis1.measurement.x, axis2.measurement.x, self.detectors.primary_detector.measurement.x, xstart=xstart,xfinal=xfinal,xstep=xstep,ystart=ystart,yfinal=yfinal,ystep=ystep)		                               
 			
-			plottable_data = {
-			        'type': '2d',
-			        'z':  [zi.tolist()],
-			        'title': 'TripleAxis Reduction Plot',
-			        'dims': {
-			                'xmax': xfinal,
-			                'xmin': xstart, 
-			                'ymin': ystart, 
-			                'ymax': yfinal,
-			                'xdim': xfinal-xstart,
-			                'ydim': yfinal-ystart,
-			                'zmin': zi.min(),
-			                'zmax': zi.max(),
-			        },
-			        'xlabel': xaxis.name,
-			        'ylabel': yaxis.name,
-			        'zlabel': 'Intensity (I)',
-			}
+			#plottable_data = {
+			        #'type': '2d',
+			        #'z':  [zi.tolist()],
+			        #'title': 'TripleAxis Reduction Plot',
+			        #'dims': {
+			                #'xmax': xfinal,
+			                #'xmin': xstart, 
+			                #'ymin': ystart, 
+			                #'ymax': yfinal,
+			                #'xdim': xfinal-xstart,
+			                #'ydim': yfinal-ystart,
+			                #'zmin': zi.min(),
+			                #'zmax': zi.max(),
+			        #},
+			        #'xlabel': xaxis.name,
+			        #'ylabel': yaxis.name,
+			        #'zlabel': 'Intensity (I)',
+			#}
 
-		else:
-			for key,value in self.__dict__.iteritems():
-				if key=='detectors':
-					for field in value:
-	
-						val = field.measurement.x
-						err = field.measurement.variance
-	
-						vals=[]
-						errs=[]
-						if type(val[0])==type(np.empty((1,1))):
-							#if the detector has multiple channels, split them up
-							for channels in val:
-								for channel in channels:
-									vals.append(channel[0])
-							if err==None:
-								errs = None
-							else:
-								for channels in err:
-									for channel in channels:
-										errs.append(channel[0])		
-	
-							ordery.append({'key': field.name, 'label': field.name})
-							data[field.name]={'values': vals,'errors': errs}
-	
-						else:
-							ordery.append({'key': field.name, 'label': field.name})
-							if err==None:
-								data[field.name]={'values': val.tolist(),'errors':err}
-							else:
-								data[field.name]={'values': val.tolist(),'errors':err.tolist()}
-				elif key=='data' or key=='meta_data' or key=='sample' or key=='sample_environment':
-					#ignoring these data fields for plotting
-					pass	
-				else:
-					for field in value:
-						orderx.append({'key': field.name, 'label': field.name})
-						val = field.measurement.x
-						err = field.measurement.variance
-						if val==None:
-							val = None
-						else:
-							val = val.tolist()
+		#else:
+		for key,value in self.__dict__.iteritems():
+			if key=='detectors':
+				for field in value:
+
+					val = field.measurement.x
+					err = field.measurement.variance
+
+					vals=[]
+					errs=[]
+					if type(val[0])==type(np.empty((1,1))):
+						#if the detector has multiple channels, split them up
+						for channels in val:
+							for channel in channels:
+								vals.append(channel[0])
 						if err==None:
-							err = None
+							errs = None
 						else:
-							err = err.tolist()
-						data[field.name]={'values': val,'errors': err}
+							for channels in err:
+								for channel in channels:
+									errs.append(channel[0])		
+
+						ordery.append({'key': field.name, 'label': field.name})
+						data[field.name]={'values': vals,'errors': errs}
+
+					else:
+						ordery.append({'key': field.name, 'label': field.name})
+						if err==None:
+							data[field.name]={'values': val.tolist(),'errors':err}
+						else:
+							data[field.name]={'values': val.tolist(),'errors':err.tolist()}
+			elif key=='data' or key=='meta_data' or key=='sample' or key=='sample_environment':
+				#ignoring these data fields for plotting
+				pass	
+			else:
+				for field in value:
+					orderx.append({'key': field.name, 'label': field.name})
+					val = field.measurement.x
+					err = field.measurement.variance
+					if val==None:
+						val = None
+					else:
+						val = val.tolist()
+					if err==None:
+						err = None
+					else:
+						err = err.tolist()
+					data[field.name]={'values': val,'errors': err}
 
 
-			plottable_data = {
-		                'type': 'nd',
-		                'title': 'Triple Axis Plot',
-		                'clear_existing': False,
-		                'orderx': orderx,
-		                'ordery': ordery,
-		                'series': [{
-		                        'label': 'File 1',
-		                        'data': data,
-		                        'color': 'Red',
-		                        'style': 'line',
-		                        }],
-		        }
+		plottable_data = {
+	                'type': 'nd',
+	                'title': 'Triple Axis Plot',
+	                'clear_existing': False,
+	                'orderx': orderx,
+	                'ordery': ordery,
+	                'series': [{
+	                        'label': 'File 1',
+	                        'data': data,
+	                        'color': 'Red',
+	                        'style': 'line',
+	                        }],
+	        }
 
                 return simplejson.dumps(plottable_data)
 
@@ -1117,13 +1126,16 @@ def translate_physical_motors(bt7,dataset):
                 bt7.physical_motors.ef.measurement.variance=None
                 bt7.physical_motors.ei.measurement.x=bt7.physical_motors.ef.measurement.x+bt7.physical_motors.e.measurement.x  #punt for now, later should figure out what to do if variance is None
 
-        Ei = bt7.physical_motors.ei.measurement
-        Ef = bt7.physical_motors.ef.measurement
-        A4 = bt7.primary_motors.sample_two_theta.measurement
-        Qsquared = (Ei + Ef - 2*(Ei*Ef).sqrt()*(A4/2).cos())/2.072
-        Q = Qsquared.sqrt()
-        bt7.physical_motors.q.measurement=Q
-
+	try:
+		Ei = bt7.physical_motors.ei.measurement
+		Ef = bt7.physical_motors.ef.measurement
+		A4 = bt7.primary_motors.sample_two_theta.measurement
+		Qsquared = (Ei + Ef - 2*(Ei*Ef).sqrt()*(A4/2).cos())/2.072
+		Q = Qsquared.sqrt()
+		bt7.physical_motors.q.measurement=Q
+	except:
+		#Some data files, e.g. summer school spins files, do not have a1-a6
+		pass
         try:
                 o1temp=bt7.sample.orientation.orient1
                 o2temp=bt7.sample.orientation.orient2
@@ -1306,9 +1318,15 @@ def translate_metadata(bt7,dataset):
         #self.meta_data.desired_npoints=dataset.metadata.npoints
 
 def translate_detectors(bt7,dataset):
-        bt7.detectors.primary_detector.measurement.x=np.array(dataset.data['detector'],'Float64')
-        bt7.detectors.primary_detector.measurement.variance=np.array(dataset.data['detector'],'Float64')
-        bt7.detectors.detector_mode=dataset.metadata['analyzerdetectormode']
+	try:
+		bt7.detectors.primary_detector.measurement.x=np.array(dataset.data['detector'],'Float64')
+		bt7.detectors.primary_detector.measurement.variance=np.array(dataset.data['detector'],'Float64')
+        except:
+		bt7.detectors.primary_detector.measurement.x=np.array(dataset.data['counts'],'Float64')
+		bt7.detectors.primary_detector.measurement.variance=np.array(dataset.data['counts'],'Float64')	
+	
+	bt7.detectors.primary_detector.dimension=[len(bt7.detectors.primary_detector.measurement.x),1]
+	bt7.detectors.detector_mode=dataset.metadata['analyzerdetectormode']
 
 
         #later, I should do something clever to determine how many detectors are in the file,
@@ -1317,22 +1335,22 @@ def translate_detectors(bt7,dataset):
 
 
         #detectors do NOT have a 'summed_counts' attribute currently.
-        if dataset.metadata.has_key('analyzersdgroup'):
+        if dataset.metadata.has_key('analyzersdgroup') and not dataset.metadata['analyzersdgroup']==None:
                 set_detector(bt7,dataset,'single_detector','analyzersdgroup')
                 #bt7.detectors.single_detector.summed_counts.measurement.x=dataset.data['singledet']
                 #bt7.detectors.single_detector.summed_counts.measurement.variance=dataset.data['singledet']
 
-        if dataset.metadata.has_key('analyzerdoordetectorgroup'):
+        if dataset.metadata.has_key('analyzerdoordetectorgroup') and not dataset.metadata['analyzerdoordetectorgroup']==None:
                 set_detector(bt7,dataset,'door_detector','analyzerdoordetectorgroup')
                 #bt7.detectors.single_detector.summed_counts.measurement.x=bt7.detectors.door_detector.x.sum(axis=1)#None #dataset.data['doordet']  #Not sure why this one doesn't show up???
                 #bt7.detectors.single_detector.summed_counts.measurement.variance=bt7.detectors.door_detector.x.sum(axis=1)#None #dataset.data['doordet']  #Not sure why this one doesn't show up???
 
-        if dataset.metadata.has_key('analyzerddgroup'):
+        if dataset.metadata.has_key('analyzerddgroup') and not dataset.metadata['analyzerddgroup']==None:
                 set_detector(bt7,dataset,'diffraction_detector','analyzerddgroup')
                 #bt7.detectors.diffraction_detector.summed_counts.measurement.x=dataset.data['diffdet']
                 #bt7.detectors.diffraction_detector.summed_counts.measurement.variance=dataset.data['diffdet']
 
-        if dataset.metadata.has_key('analyzerpsdgroup'):
+        if dataset.metadata.has_key('analyzerpsdgroup') and not dataset.metadata['analyzerpsdgroup']==None:
                 set_detector(bt7,dataset,'position_sensitive_detector','analyzerpsdgroup')
                 #if hasattr(bt7.detectors,'position_sensitive_detector'):
                         #bt7.detectors.position_sensitive_detector.summed_counts.measurement.x=dataset.data['psdet']
@@ -1344,11 +1362,18 @@ def translate_detectors(bt7,dataset):
 def set_detector(bt7,dataset,detector_name,data_name):                        
         analyzergroup=dataset.metadata[data_name]
         setattr(bt7.detectors,detector_name,Detector(detector_name))
-
-        setattr(getattr(bt7.detectors,detector_name),'dimension',[len(dataset.metadata['analyzersdgroup']),1])
+	
+	dim=dataset.metadata['analyzersdgroup']
+        if not dim==None:
+		setattr(getattr(bt7.detectors,detector_name),'dimension',[len(dim),1])
+	else:
+		setattr(getattr(bt7.detectors,detector_name),'dimension',[0,0]) #if there is no analyzersdgroup, make dim 0
+	try:
+		npts=len(dataset.data[dataset.metadata['analyzersdgroup'][0]])  #I choose this one because the sd group SHOULD always be present.
+        except:
+		npts=0
         Nx=getattr(getattr(bt7.detectors,detector_name),'dimension')[0]
         Ny=getattr(getattr(bt7.detectors,detector_name),'dimension')[1]
-        npts=len(dataset.data[dataset.metadata['analyzersdgroup'][0]])  #I choose this one because the sd group SHOULD always be present.
         data=np.empty((npts,Nx,Ny),'Float64')
         #put all the data in data array which is npts x Nx x Ny, in this case, Ny=1 since our detectors are 1D
         #We have to do some defensive programming here.  It turns out that even though the metadata states that the PSD may be present,
@@ -1702,21 +1727,25 @@ def filereader(filename):
         return instrument
 
 if __name__=="__main__":       
-        #bt7 = filereader('EscanQQ7HorNSF91831.bt7')
-	spin = filereader('spins data/bamno059.ng5')
+	if 0:
+		spin = filereader('spins data/bamno059.ng5')
+		spin2 = filereader('spins data/bamno060.ng5')
+		spins = join(spin,spin2)
+		print 'fixme'
+	if 1:
+		bt7 = filereader('EscanQQ7HorNSF91831.bt7')
+		print 'translations done'
+		#aarr,barr,carr=bt7.calc_plane()
+		#test= bt7.dumps()
+		#test1= pickle.loads(test)
 	
-        print 'translations done'
-        #aarr,barr,carr=bt7.calc_plane()
-        #test= bt7.dumps()
-        #test1= pickle.loads(test)
-
-        #plotobj=bt7.get_plottable()
-        #plotobj=simplejson.dumps(plotobj)
-        temp=join(bt7,bt7)
-        bt7.normalize_monitor(90000)
-        #print 'detailed balance done'
-        bt7.harmonic_monitor_correction('BT7')
-        bt7.resolution_volume_correction()
+		#plotobj=bt7.get_plottable()
+		#plotobj=simplejson.dumps(plotobj)
+		temp=join(bt7,bt7)
+		bt7.normalize_monitor(90000)
+		#print 'detailed balance done'
+		bt7.harmonic_monitor_correction('BT7')
+		bt7.resolution_volume_correction()
         print 'bye'
 
 

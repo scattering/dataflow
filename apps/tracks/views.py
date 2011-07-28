@@ -204,9 +204,9 @@ def runReduction(request):
         # configuration for template is embedded
         print "getting result"
         result = get_plottable(template, config, nodenum, terminal_id)
-    print type(result)
-    # Send back the first item in the bundle!
-    return HttpResponse(result[0]) #, context_instance=context
+    # result is a list of plottable items (JSON strings) - need to concatenate them
+    JSON_result = '[' + ','.join(result) + ']' 
+    return HttpResponse(JSON_result) #, context_instance=context
     
     #print FILES
 ###### BT7 TESTING
