@@ -334,7 +334,9 @@ def editExperiment(request, experiment_id):
 		for line in file_data:
 			write_here.write(line)
 		write_here.close()
-		new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=file_data.name, location='/tmp/FILES/')
+		new_file = File.objects.get(name=file_sha1.hexdigest())
+		if new_file is None:
+		    new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=file_data.name, location='/tmp/FILES/')
 		experiment.Files.add(new_file)
 	if request.POST.has_key('instrument_name'):
 		if request.POST['instrument_name']:
