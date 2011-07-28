@@ -120,7 +120,7 @@ save = save_module(id='tas.save', datatype=TAS_DATA,
                    fields=[save_ext])
 
 
-def join_action(input,**kwargs):
+def join_action(input, xaxis, yaxis, **kwargs):
     # This is confusing because load returns a bundle and join, which can
     # link to multiple loads, has a list of bundles.  So flatten this list.
     # The confusion between bundles and items will bother us continuously,
