@@ -635,7 +635,7 @@ function createPlotObject(plotid) {
     return { stage: 1, prevtype: null, targetId: plotid + '_target', series: [], options: { title: '', series: [], axes: {} } };
 }
 
-function update2dPlot(plot, toPlot, target_id) {
+function update2dPlot(plot, toPlots, target_id, plotnum) {
     if (!plot || !plot.hasOwnProperty("type") || plot.type!='2d'){
         console.log('target_id: ', target_id)
         var plotdiv = document.getElementById(target_id);
@@ -645,6 +645,7 @@ function update2dPlot(plot, toPlot, target_id) {
         jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width: 100; height: 350; ", id:"colorbar"}));
         jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 410px; height: 100px;", id:"plotbuttons"}));
         jQuery(document.getElementById('plotbuttons')).append(jQuery('<select />', {id:"plot_selectz"}));
+        jQuery(document.getElementById('plotbuttons')).append(jQuery('<select />', {id:"plot_selectnum"}));
         jQuery(document.getElementById('plotbuttons')).append(jQuery('<input />', {id:"plot_update", type:"submit", value:"Update plot"}));
         jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'lin', text: 'lin' }));
         jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'log', text: 'log' }));
@@ -653,15 +654,27 @@ function update2dPlot(plot, toPlot, target_id) {
         plot2d_colorbar = null;
     }
     
+    document.getElementById('plot_selectnum').innerHTML = "";
+    for (var i=0; i<toPlots.length; i++) {
+        jQuery(document.getElementById('plot_selectnum')).append(jQuery('<option />', { value: i, text: 'dataset: ' + i }));
+    }
+    
+    var plotnum = plotnum || 0;
+    var toPlot = toPlots[plotnum];
+    var toPlots = toPlots;
     var transform = toPlot.transform || 'lin';
     plot = renderImageData(toPlot, transform, 'plot2d');
     colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
     
-    jQuery('#plot_update').click({ plot: plot, colorbar: colorbar, toPlot: toPlot }, function(e) {
+    jQuery('#plot_update').click({ plot: plot, colorbar: colorbar, toPlots: toPlots }, function(e) {
         console.log(e);
-        var plot = e.data.plot; var toPlot = e.data.toPlot;
+        var plot = e.data.plot; var toPlots = e.data.toPlots; var colorbar = e.data.colorbar;
         var selectz = document.getElementById('plot_selectz');
+        var selectnum = document.getElementById('plot_selectnum');
         var transform = selectz[selectz.selectedIndex].value;
+        var plotnum = selectnum[selectnum.selectedIndex].value;
+        var toPlot = toPlots[plotnum];
+        console.log('replot: ', plotnum, transform, toPlot, toPlots)
         plot = renderImageData(toPlot, transform, 'plots');
         colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
     });
@@ -671,60 +684,31 @@ function update2dPlot(plot, toPlot, target_id) {
 
 var plot = null;
 var plotregion = null;
+var toPlots_input = null;
 
 function plottingAPI(toPlots, plotid_prefix) {
+    toPlots_input = toPlots;
     if (toPlots.constructor != Array)
         toPlots = [toPlots];
+        console.log('changing singleton data to length-1 array')
         // throw "Unsupported data format! Data must be a list of series.";
    // toPlots = $A(toPlots).flatten();
-         
-    for (var i = 0; i < toPlots.length; i ++) {
-        var toPlot = toPlots[i];
-        var plotid = plotid_prefix + '_' + i;
-        console.log('plotid', plotid)
-        //var plot = (!plots[i]) ? createPlotObject(plotid) : plots[i];
-        //if (plot.prevtype != toPlot.type) plot.stage = 1;
+    
+    console.log('toPlots:', toPlots)
+    // assuming all plots in the list are of the same type!
+    plot_type = toPlots[0].type
+    
+    switch (plot_type) {
+        case '2d':
+            plot = update2dPlot(plot, toPlots, plotid_prefix);
+            break;
         
-        console.log(i, toPlot, toPlot.type, plot);
-        switch (toPlot.type) {
-            /*case '2d':
-                document.getElementById('plots').appendChild(create2dPlotRegion(plotid));
+        case 'nd': 
+             for (var i = 0; i < toPlots.length; i ++) {
+                var toPlot = toPlots[i];
+                var plotid = plotid_prefix + '_' + i;
+                console.log('plotid', plotid);
                 
-                plot = renderData(toPlot, plotid + '_target', plot);
-                jQuery(document.getElementById(plotid + '_selecty')).append('<option />', { value: toPlot.ylabel, text: toPlot.ylabel });
-                jQuery(document.getElementById(plotid + '_selectx')).append('<option />', { value: toPlot.xlabel, text: toPlot.xlabel });
-                break;
-            */    
-            case '2d':
-                
-                //if (!plotregion) {
-                //    document.getElementById('plots').appendChild(create2dPlotRegion(plotid));
-                //    plotregion = true;
-                //}
-                plot = update2dPlot(plot, toPlot, plotid_prefix);
-                /*
-                var transform = toPlot.transform || 'lin';
-                plot = renderImageData(toPlot, transform, 'plot2d');
-                var colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
-                document.getElementById('plot_selectz').length = 0;
-                jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'lin', text: 'lin' }));
-                jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'log', text: 'log' }));
-                
-                jQuery('#plot_update').click({ plot: plot, colorbar: colorbar, toPlot: toPlot }, function(e) {
-                    console.log(e);
-                    var plot = e.data.plot; var toPlot = e.data.toPlot;
-                    var selectz = document.getElementById('plot_selectz');
-                    var transform = selectz[selectz.selectedIndex].value;
-                    plot = renderImageData(toPlot, transform, 'plots');
-                    colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
-                });
-                */               
-                break;
-                
-            case 'nd':
-                //document.getElementById('plot').appendChild(createNdPlotRegion(plotid));
-
-                //updateSeriesSelects(toPlot, plotid);
                 plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, true);
                 
                 jQuery(document.getElementById(plotid + '_update')).click({ 
@@ -741,62 +725,14 @@ function plottingAPI(toPlots, plotid_prefix) {
                             var plotid_prefix = e.data.plotid_prefix;
                             plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix);
                         });
-            
-            
-                break;
-            case '1d':
-                var axis = "linear";
-                if (toPlot.x[axis].data.length != toPlot.y[0][axis].data.length)
-                    throw "Your data sucks";
-                zipped = [];
-                for (i in toPlot.x[axis].data)
-                    if (!isNaN(toPlot.x[axis].data[i]))
-                        zipped.push([toPlot.x[axis].data[i], toPlot.y[0][axis].data[i]]);
-                if (debug)
-                    console.log('zipped: ', zipped);
-
-
-                if (! plotCreated || prevtype != '1d') {
-                  plot = jQuery.jqplot(plotid, [zipped]);
-                  plotCreated = true;
-                }
-                else {
-                  plot.resetAxesScale();
-                  plot.series[0].data = zipped;
-                  plot.replot();
-                }
-                break;
-                
-            default:
-                alert('plotting of datatype "' + toPlot.type + '" is unsupported')
-                //throw "Unsupported plot type! Please specify the type as '1d' or '2d'.";
-        }
+            }
+            break;
         
-        prevtype = toPlot.type;
-        console.log(123);
-        plots[i] = plot;
-        console.log(1234);
-        
-        /* 
-        if (toPlot.x.length != toPlot.y.length)
-          throw "Your data sucks";
-        for (i in toPlot.x)
-          if (!isNaN(toPlot.x[i]))
-            zipped.push([toPlot.x[i], toPlot.y[i]]);
-
-
-        if (! plotCreated) {
-          plot=jQuery.jqplot(plotid, [zipped]);
-          plotCreated = true;
-          }
-        else {
-          plot.resetAxesScale();
-          plot.series[0].data = zipped;
-          plot.replot();
-        }
-        */
+        default:
+            alert('plotting of datatype "' + plot_type + '" is unsupported');
     }
 }
+
 function createNdPlotRegion(plotid, renderTo) {
     var div = document.createElement('div');
     div.setAttribute('id', plotid);
