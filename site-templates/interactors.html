@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Interactor test</title>
+<style type="text/css">
+  label { display: block; font-family: consolas, monospace; text-align: center; }
+  canvas { border: 1px dotted #888; }
+  .bk { float: left; margin-right: 4px; }
+</style>
+<script type="text/javascript" src="../../../static/lib/prototype.js"></script>
+<script type="text/javascript" src="../../../static/lib/interactors/interactors.js"></script>
+<script type="text/javascript">
+var c = [], interactors;
+window.onload = function() {
+    interactors = [
+        SegmentInteractor,
+        QuadrangleInteractor,
+        CircleInteractor,
+        AnnulusInteractor,
+        ArcInteractor,
+        ParallelogramInteractor,
+        RectangleInteractor,
+        GaussianInteractor,
+        QuadraticInteractor,
+        LinearInteractor,
+    ];
+    for (var i  = 0; i < interactors.length; i ++) {
+        var id = 'c' + (i + 1);
+        if (interactors[i].length)
+            var inst = interactors[i][0], width = interactors[i][1], height = interactors[i][2];
+        else
+            var inst = interactors[i], width = 300, height = 300;
+        
+        var lb = document.createElement('label');
+        lb.setAttribute('for', id);
+        var cv = document.createElement('canvas');
+        cv.setAttribute('id', id);
+        cv.setAttribute('width', width);
+        cv.setAttribute('height', height);
+        var dv = document.createElement('div');
+        dv.setAttribute('class', 'bk');
+        dv.appendChild(lb);
+        dv.appendChild(cv);
+        document.body.appendChild(dv);
+        
+        c[i + 1] = new inst(id);
+        lb.appendChild(document.createTextNode(c[i + 1].name + 'Interactor'));
+    }
+    
+}
+</script>
+</head>
+<body>
+</body>
+</html>
