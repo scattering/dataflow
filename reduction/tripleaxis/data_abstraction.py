@@ -1722,7 +1722,7 @@ def remove_duplicates(tas,distinct,not_distinct):
 def filereader(filename, friendly_name=None):
         filestr=filename
         mydatareader=readncnr.datareader()
-        mydata=mydatareader.readbuffer(filestr, friendly_name=friendly_name)
+        mydata=mydatareader.readbuffer(filestr, myfriendlyfilestr=friendly_name)
         instrument = TripleAxis()
         translate(instrument, mydata)
         return instrument
