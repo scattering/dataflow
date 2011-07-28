@@ -22,8 +22,9 @@ def get_tokenized_line(myfile,returnline=['']):
 
 
 class datareader(object):
-        def __init__(self,myfilestr=None):
+        def __init__(self,myfilestr=None,myfriendlyfilestr=None):
                 self.myfilestr=myfilestr
+		        self.myfriendlyfilestr = myfilestr if (myfriendlyfilestr == None) else myfriendlyfilestr
                 #define Data Abstraction Layer
                 self.data_abstraction_layer()
                 return
@@ -232,7 +233,7 @@ class datareader(object):
 ##        self.metadata=mosaic
 
 
-
+             
                 self.data['premonocoll']=float(tokenized[0])*N.ones(self.metadata['pts_planned'],'Float64')
                 self.data['postmonocoll']=float(tokenized[1])*N.ones(self.metadata['pts_planned'],'Float64')
                 self.data['preanacoll']=float(tokenized[2])*N.ones(self.metadata['pts_planned'],'Float64')
@@ -637,10 +638,9 @@ class datareader(object):
 
 
 
-        def readbuffer(self,myfilestr,lines=N.Inf,friendly_name=None):
+        def readbuffer(self,myfilestr,lines=N.Inf,myfriendlyfilestr=None):
                 if 0:
-                        self.myfilestr= File.objects.get(name=myfilestr.split('/')[-1]).friendly_name
-                        #self.myfilestr = myfilestr
+                        self.myfilestr = myfilestr
                         print self.myfilestr
                         self.lines=lines
                         myfile = open(myfilestr, 'r')
@@ -648,7 +648,7 @@ class datareader(object):
                 if 1:
                         self.lines=lines
                         myfile = open(myfilestr, 'r')
-                        filestr = myfilestr if (friendly_name == None) else friendly_name
+                        filestr = myfilestr if (myfriendlyfilestr == None) else myfriendlyfilestr
                         self.instrument=filestr.split('.')[1]
                 if self.instrument in ['bt9','ng5','bt2']:
                         # Determine FileType

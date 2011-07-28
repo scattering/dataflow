@@ -3,27 +3,49 @@ Triple Axis Spectrometer reduction and analysis modules
 """
 import math, os, sys, types
 
-if 0:
-    #relative imports for use in larger project
-    from ...reduction.tripleaxis import data_abstraction
-    from ..calc import run_template
-    from .. import wireit
-    from ... import ROOT_URL
-    from django.utils import simplejson
-    
-    import numpy
-    from .. import config
-    from ..core import Instrument, Data, Template, register_instrument
-    
-    from ..modules.join import join_module
-    from ..modules.scale import scale_module
-    from ..modules.save import save_module
-    from ..modules.tas_load import load_module
-    from ..modules.tas_normalize_monitor import normalize_monitor_module
-    from ..modules.tas_detailed_balance import detailed_balance_module
-    from ..modules.tas_monitor_correction import monitor_correction_module
-    from ..modules.tas_volume_correction import volume_correction_module
-    from ...apps.tracks.models import File
+from ...reduction.tripleaxis import data_abstraction
+from ..calc import run_template
+from .. import wireit
+from ... import ROOT_URL
+from django.utils import simplejson
+import numpy
+
+from .. import config
+from ..core import Instrument, Data, Template, register_instrument
+
+#from dataflow.dataflow.modules.load import load_module
+from ..modules.join import join_module
+from ..modules.scale import scale_module
+from ..modules.save import save_module
+from ..modules.tas_load import load_module
+from ..modules.tas_normalize_monitor import normalize_monitor_module
+from ..modules.tas_detailed_balance import detailed_balance_module
+from ..modules.tas_monitor_correction import monitor_correction_module
+from ..modules.tas_volume_correction import volume_correction_module
+from ...apps.tracks.models import File
+'''
+#direct imports for use individually (ie running this file)
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+from dataflow.reduction.tripleaxis import data_abstraction
+from dataflow.dataflow.calc import run_template
+from dataflow.dataflow import wireit
+from dataflow import ROOT_URL
+from django.utils import simplejson
+
+import numpy
+from dataflow.dataflow import config
+from dataflow.dataflow.core import Instrument, Data, Template, register_instrument
+#from dataflow.dataflow.modules.load import load_module
+from dataflow.dataflow.modules.join import join_module
+from dataflow.dataflow.modules.scale import scale_module
+from dataflow.dataflow.modules.save import save_module
+from dataflow.dataflow.modules.tas_load import load_module
+from dataflow.dataflow.modules.tas_normalize_monitor import normalize_monitor_module
+from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
+from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
+from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
+
+'''
 
 if 1:
     #direct imports for use individually (ie running this file)
@@ -46,7 +68,6 @@ if 1:
     from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
     from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
     from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
-    from dataflow.apps.tracks.models import File
 
 TAS_DATA = 'data1d.tas'
 data1d = Data(TAS_DATA, data_abstraction.TripleAxis)
@@ -92,6 +113,7 @@ def data_scale(data, scale):
 def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
     """Currently set up to load ONLY 1 file"""
     #print "loading", files
+    print 'FRIENDLY FILE', File.objects.get(name=files[0].split('/')[-1]).friendly_name
     result = [data_abstraction.filereader(f, File.objects.get(name=f.split('/')[-1]).friendly_name) for f in files]
     return dict(output=result)
 
