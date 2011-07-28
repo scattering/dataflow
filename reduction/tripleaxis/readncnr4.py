@@ -31,6 +31,7 @@ class datareader(object):
 
         def data_abstraction_layer(self):
                 self.metadata={}
+                self.data={}
                 self.additional_metadata={}
                 self.metadata['monitor_base']=None #float(tokenized[6])
                 self.metadata['monitor_prefactor']=None#float(tokenized[7])
@@ -232,7 +233,7 @@ class datareader(object):
 ##        self.metadata=mosaic
 
 
-             
+
                 self.data['premonocoll']=float(tokenized[0])*N.ones(self.metadata['pts_planned'],'Float64')
                 self.data['postmonocoll']=float(tokenized[1])*N.ones(self.metadata['pts_planned'],'Float64')
                 self.data['preanacoll']=float(tokenized[2])*N.ones(self.metadata['pts_planned'],'Float64')
@@ -360,7 +361,13 @@ class datareader(object):
                 self.metadata['comment']=myfile.readline().rstrip()
                 return self.metadata['scantype']
 
-        def readcolumns(self,myfile):
+        def readcolumns(trr.min()
+@@ -849,6 +850,7 @@ class TripleAxis(object):
+                                                        if err==None:
+                                                                errs = None
+                                                        else:
+root@P627694:/var/www/DATAFLOW/dataflow# 
+elf,myfile):
                 self.get_columnmetadatas(myfile)
                 # get the names of the fields
         #   prepare to read the data
@@ -402,6 +409,12 @@ class datareader(object):
                         self.timestamp_flag=False
                         self.columnlist.append('timestamp')
                         #print 'no timestamp'
+                        ystart=yarr.min()
+@@ -849,6 +850,7 @@ class TripleAxis(object):
+                                                        if err==None:
+                                                                errs = None
+                                                        else:
+root@P627694:/var/www/DATAFLOW/dataflow# 
                         self.columndict['timestamp']=[]
                 return
 
