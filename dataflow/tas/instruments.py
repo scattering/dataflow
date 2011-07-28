@@ -3,49 +3,49 @@ Triple Axis Spectrometer reduction and analysis modules
 """
 import math, os, sys
 
-from ...reduction.tripleaxis import data_abstraction
-from ..calc import run_template
-from .. import wireit
-from ... import ROOT_URL
-from django.utils import simplejson
-import numpy
+if 0:
+    #relative imports for use in larger project
+    from ...reduction.tripleaxis import data_abstraction
+    from ..calc import run_template
+    from .. import wireit
+    from ... import ROOT_URL
+    from django.utils import simplejson
+    
+    import numpy
+    from .. import config
+    from ..core import Instrument, Data, Template, register_instrument
+    
+    from ..modules.join import join_module
+    from ..modules.scale import scale_module
+    from ..modules.save import save_module
+    from ..modules.tas_load import load_module
+    from ..modules.tas_normalize_monitor import normalize_monitor_module
+    from ..modules.tas_detailed_balance import detailed_balance_module
+    from ..modules.tas_monitor_correction import monitor_correction_module
+    from ..modules.tas_volume_correction import volume_correction_module
 
-from .. import config
-from ..core import Instrument, Data, Template, register_instrument
+if 1:
+    #direct imports for use individually (ie running this file)
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+    from dataflow.reduction.tripleaxis import data_abstraction
+    from dataflow.dataflow.calc import run_template
+    from dataflow.dataflow import wireit
+    from dataflow import ROOT_URL
+    from django.utils import simplejson
+    
+    import numpy
+    from dataflow.dataflow import config
+    from dataflow.dataflow.core import Instrument, Data, Template, register_instrument
 
-#from dataflow.dataflow.modules.load import load_module
-from ..modules.join import join_module
-from ..modules.scale import scale_module
-from ..modules.save import save_module
-from ..modules.tas_load import load_module
-from ..modules.tas_normalize_monitor import normalize_monitor_module
-from ..modules.tas_detailed_balance import detailed_balance_module
-from ..modules.tas_monitor_correction import monitor_correction_module
-from ..modules.tas_volume_correction import volume_correction_module
+    from dataflow.dataflow.modules.join import join_module
+    from dataflow.dataflow.modules.scale import scale_module
+    from dataflow.dataflow.modules.save import save_module
+    from dataflow.dataflow.modules.tas_load import load_module
+    from dataflow.dataflow.modules.tas_normalize_monitor import normalize_monitor_module
+    from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
+    from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
+    from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
 
-'''
-#direct imports for use individually (ie running this file)
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
-from dataflow.reduction.tripleaxis import data_abstraction
-from dataflow.dataflow.calc import run_template
-from dataflow.dataflow import wireit
-from dataflow import ROOT_URL
-from django.utils import simplejson
-
-import numpy
-from dataflow.dataflow import config
-from dataflow.dataflow.core import Instrument, Data, Template, register_instrument
-#from dataflow.dataflow.modules.load import load_module
-from dataflow.dataflow.modules.join import join_module
-from dataflow.dataflow.modules.scale import scale_module
-from dataflow.dataflow.modules.save import save_module
-from dataflow.dataflow.modules.tas_load import load_module
-from dataflow.dataflow.modules.tas_normalize_monitor import normalize_monitor_module
-from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
-from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
-from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
-
-'''
 TAS_DATA = 'data1d.tas'
 data1d = Data(TAS_DATA, data_abstraction.TripleAxis)
 # Reduction operations may refer to data from other objects, but may not
@@ -92,7 +92,7 @@ def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
     #print "loading", files
     result = [data_abstraction.filereader(f) for f in files]
     return dict(output=result)
-    
+
 load = load_module(id='tas.load', datatype=TAS_DATA,
                    version='1.0', action=load_action,)
 
@@ -128,10 +128,10 @@ def join_action(input,**kwargs):
     # bundles, which I do in this example.
     joinedtas = None
     for tas in input:
-	if joinedtas==None:
-	    joinedtas=tas
-	else:
-	    joinedtas=data_abstraction.join(joinedtas,tas)
+        if joinedtas==None:
+            joinedtas=tas
+        else:
+            joinedtas=data_abstraction.join(joinedtas,tas)
 
     return dict(output=joinedtas)
 
@@ -171,7 +171,7 @@ def monitor_correction_action(input, instrument_name, **kwargs):
     for tasinstrument in input:
         tasinstrument.harmonic_monitor_correction()
     return dict(ouput=input)
-    
+
 def volume_correction_action(input, **kwargs):
     for tasinstrument in input:
         tasinstrument.resolution_volume_correction()
@@ -184,10 +184,10 @@ detailedbalance = detailed_balance_module(id='tas.detailed_balance', datatype=TA
                                           version='1.0', action=detailed_balance_action)
 
 monitorcorrection = monitor_correction_module(id='tas.monitor_correction', datatype=TAS_DATA,
-                                          version='1.0', action=monitor_correction_action)
+                                              version='1.0', action=monitor_correction_action)
 
 volumecorrection = volume_correction_module(id='tas.volume_correction', datatype=TAS_DATA,
-                                          version='1.0', action=volume_correction_action)
+                                            version='1.0', action=volume_correction_action)
 
 
 # ==== Instrument definitions ====
@@ -207,32 +207,33 @@ BT7 = Instrument(id='ncnr.tas.bt7',
 if 1:
     instruments = [BT7]
     for instrument in instruments:
-	register_instrument(instrument)
+        register_instrument(instrument)
 
 
-if 0:
-	modules = [
-	    dict(module="tas.load", position=(10, 20), config={'files':[ROOT_URL.HOMEDIR[:-12]+ 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
-	    dict(module="tas.normalize_monitor", position=(30, 20), config={'target_monitor': 165000}),
-	    #dict(module="tas.detailed_balance"),
-	    #dict(module="tas.monitor_correction"),
-	    #dict(module="tas.volume_correction"),
-	    ]
-	wires = [
-	    dict(source=[0, 'output'], target=[1, 'input']),
-	    #dict(source=[1, 'output'], target=[2, 'input']),
-	    ]
-	config = {}
+if 1:
+    modules = [
+        dict(module="tas.load", position=(10, 20), config={'files':[ROOT_URL.HOMEDIR[:-12]+ 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
+        dict(module="tas.normalize_monitor", position=(30, 20), config={'target_monitor': 165000}),
+        #dict(module="tas.detailed_balance"),
+        #dict(module="tas.monitor_correction"),
+        #dict(module="tas.volume_correction"),
+    ]
+    wires = [
+        dict(source=[0, 'output'], target=[1, 'input']),
+        #dict(source=[1, 'output'], target=[2, 'input']),
+    ]
+    config = {}
 
-	template = Template(name='test reduction',
-		            description='example reduction diagram',
-		            modules=modules,
-		            wires=wires,
-		            instrument=BT7.id,
-		            )
+    template = Template(name='test reduction',
+                        description='example reduction diagram',
+                        modules=modules,
+                        wires=wires,
+                        instrument=BT7.id,
+                        )
 
 
 # the actual call to perform the reduction
+
 def TAS_RUN():
     result = run_template(template, config)
     '''
@@ -246,8 +247,9 @@ def TAS_RUN():
     return result
 
 
-#hi=TAS_RUN()
-#print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
-#print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
-#print simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
-print "done"
+if __name__=="__main__":
+    hi=TAS_RUN()
+    print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
+    #print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
+    print 'language',simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
+    print "done"
