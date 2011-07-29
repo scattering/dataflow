@@ -332,6 +332,7 @@ margin-bottom: 4px;
 			WireIt.ImageContainer.prototype.width = 40;
 			WireIt.ImageContainer.prototype.onMouseDown = function() {
 			//console.log('clicked on imageContainer')
+			this.tracksConfigs[editor.reductionInstance].position = this.getXY()
 			editor.clickedModuleID = editor.layer.containers.indexOf(this)
 			editor.displayClickedModuleConfig(this)
 			editor.generateConfigForm(editor.layer.containers.indexOf(this))
