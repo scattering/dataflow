@@ -3,7 +3,7 @@ Triple Axis Spectrometer reduction and analysis modules
 """
 import math, os, sys, types
 
-if 1:
+if 0:
     from ...reduction.tripleaxis import data_abstraction
     from ..calc import run_template
     from .. import wireit
@@ -14,6 +14,7 @@ if 1:
     from .. import config
     from ..core import Instrument, Data, Template, register_instrument
     
+    #from dataflow.dataflow.modules.load import load_module
     from ..modules.join import join_module
     from ..modules.scale import scale_module
     from ..modules.save import save_module
@@ -25,7 +26,7 @@ if 1:
     from ...apps.tracks.models import File
 
 
-if 0:
+if 1:
     #direct imports for use individually (ie running this file)
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
     from dataflow.reduction.tripleaxis import data_abstraction
@@ -93,9 +94,9 @@ def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
     """Currently set up to load ONLY 1 file"""
     #print "loading", files
     #print 'FRIENDLY FILE', File.objects.get(name=files[0].split('/')[-1]).friendly_name
-    result = [data_abstraction.filereader(f, File.objects.get(name=f.split('/')[-1]).friendly_name) for f in files]
-    return dict(output=result)
-    #pass
+    #result = [data_abstraction.filereader(f, File.objects.get(name=f.split('/')[-1]).friendly_name) for f in files]
+    #return dict(output=result)
+    pass
 load = load_module(id='tas.load', datatype=TAS_DATA,
                    version='1.0', action=load_action,)
 
