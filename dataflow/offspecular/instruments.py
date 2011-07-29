@@ -27,6 +27,7 @@ if SERVER:
     from DATAFLOW.dataflow.offspecular.modules.polarization_correct import polarization_correct_module
     from DATAFLOW.dataflow.offspecular.modules.timestamps import timestamp_module
     from DATAFLOW.dataflow.offspecular.modules.load_timestamps import load_timestamp_module
+    from DATAFLOW.dataflow.offspecular.modules.empty_qxqz_grid import empty_qxqz_grid_module
     from DATAFLOW.reduction.offspecular.filters import *
     from DATAFLOW.reduction.offspecular.he3analyzer import *
     from DATAFLOW.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
@@ -51,6 +52,7 @@ elif TESTING:
     from dataflow.dataflow.offspecular.modules.polarization_correct import polarization_correct_module
     from dataflow.dataflow.offspecular.modules.timestamps import timestamp_module
     from dataflow.dataflow.offspecular.modules.load_timestamps import load_timestamp_module
+    from dataflow.dataflow.offspecular.modules.empty_qxqz_grid import empty_qxqz_grid_module
     from dataflow.reduction.offspecular.filters import *
     from dataflow.reduction.offspecular.he3analyzer import *
     from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
@@ -72,11 +74,12 @@ else:
     from ..offspecular.modules.polarization_correct import polarization_correct_module
     from ..offspecular.modules.timestamps import timestamp_module
     from ..offspecular.modules.load_timestamps import load_timestamp_module
+    from ..offspecular.modules.empty_qxqz_grid import empty_qxqz_grid_module
     from ...reduction.offspecular.filters import *
     from ...reduction.offspecular.he3analyzer import *
     from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray
 
-class Timestamp(dict):
+class PlottableDict(dict):
     def get_plottable(self):
         return simplejson.dumps({})
     def dumps(self):
@@ -97,7 +100,7 @@ data2d = Data(OSPEC_DATA, FilterableMetaArray)
 OSPEC_DATA_HE3 = OSPEC_DATA + '.he3'
 datahe3 = Data(OSPEC_DATA_HE3, He3AnalyzerCollection)
 OSPEC_DATA_TIMESTAMP = OSPEC_DATA + '.timestamp'
-datastamp = Data(OSPEC_DATA_TIMESTAMP, Timestamp)
+datastamp = Data(OSPEC_DATA_TIMESTAMP, PlottableDict)
 
 # Load module
 def load_action(files=[], intent='', auto_PolState=False, PolStates={}, **kwargs):
@@ -184,6 +187,11 @@ def two_theta_qxqz_action(input=[], output_grid=None, wavelength=5.0, **kwargs):
     return dict(output=result)
 two_theta_qxqz = two_theta_qxqz_module(id='ospec.qxqz', datatype=OSPEC_DATA, version='1.0', action=two_theta_qxqz_action)
 
+def empty_qxqz_grid_action(qxmin= -0.003, qxmax=0.003, qxbins=201, qzmin=0.0, qzmax=0.1, qzbins=201):
+    return dict(output=[EmptyQxQzGrid(qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)])
+empty_qxqz = empty_qxqz_grid_module(id='ospec.emptyqxqz', datatype=OSPEC_DATA, version='1.0', action=empty_qxqz_grid_action)
+
+
 # ======== Polarization modules ===========
 
 # Load he3 module
@@ -202,7 +210,7 @@ load_he3 = load_he3_module(id='ospec.loadhe3', datatype=OSPEC_DATA_HE3,
 # Load timestamps
 def load_timestamp_action(files=[], **kwargs):
     print "loading timestamps", files
-    result = [Timestamp(simplejson.load(open(f, 'r'))) for f in files]
+    result = [PlottableDict(simplejson.load(open(f, 'r'))) for f in files]
     return dict(output=result)
 load_stamp = load_timestamp_module(id='ospec.loadstamp', datatype=OSPEC_DATA_TIMESTAMP,
                    version='1.0', action=load_timestamp_action)
@@ -248,7 +256,7 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                  name='NCNR ANDR',
                  archive=config.NCNR_DATA + '/andr',
                  menu=[('Input', [load, load_he3, load_stamp, save]),
-                       ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, two_theta_qxqz]),
+                       ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, two_theta_qxqz, empty_qxqz]),
                        ('Polarization reduction', [timestamp, append_polarization, combine_polarized, correct_polarized]),
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],
