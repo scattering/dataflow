@@ -13,8 +13,9 @@ def normalize_monitor_module(id=None, datatype=None, action=None,
     """
 
     icon = {
-        'URI': config.IMAGES + 'TAS/monitor normalization.png', 
-        'image': config.IMAGES + 'TAS/monitor normalization.png', 
+        'URI': config.IMAGES + 'TAS/monitor_normalization.png', 
+        'image': config.IMAGES + 'TAS/monitor_normalization.png',
+        'width': 'auto', 
         'terminals': {
             'input': (-12, 16, -1, 0),
             'output': (48, 16, 1, 0),

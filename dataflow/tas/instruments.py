@@ -47,6 +47,7 @@ if 0:
     from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
     from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
     from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
+    from dataflow.apps.tracks.models import File
 
 TAS_DATA = 'data1d.tas'
 data1d = Data(TAS_DATA, data_abstraction.TripleAxis)
@@ -105,8 +106,9 @@ def save_action(input=None, ext=None,xtype=None, position=None, **kwargs):
     # This is specified by terminal['multiple'] = False in modules/save.py
     for f in input: _save_one(f, ext)
     return {}
+
 def _save_one(input, ext):
-    #pprint(input)
+    #TODO - make a real save... this is a dummy
     outname = input['name']
     if ext is not None:
         outname = ".".join([os.path.splitext(outname)[0], ext])
@@ -220,18 +222,31 @@ if 1:
 if 1:
     modules = [
         dict(module="tas.load", position=(10, 20), config={'files':[ROOT_URL.HOMEDIR[:-12]+ 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
-        dict(module="tas.normalize_monitor", position=(30, 20), config={'target_monitor': 165000}),
-        #dict(module="tas.detailed_balance"),
-        #dict(module="tas.monitor_correction"),
-        #dict(module="tas.volume_correction"),
+        dict(module="tas.normalize_monitor", position=(300, 20), config={'target_monitor': 165000}),
+        dict(module="tas.detailed_balance", position=(300, 220), config={}),
+        dict(module="tas.monitor_correction", position=(300, 420), config={'instrument_name':'BT7'}),
+        dict(module="tas.volume_correction", position=(300, 620), config={}),
+        dict(module="tas.save", position=(700, 20), config={}),
+        dict(module="tas.save", position=(700, 220), config={}),
+        dict(module="tas.save", position=(700, 420), config={}),
+        dict(module="tas.save", position=(700, 620), config={}),
     ]
     wires = [
         dict(source=[0, 'output'], target=[1, 'input']),
-        #dict(source=[1, 'output'], target=[2, 'input']),
+        dict(source=[1, 'output'], target=[6, 'input']),
+        
+        dict(source=[0, 'output'], target=[2, 'input']),
+        dict(source=[2, 'output'], target=[7, 'input']),
+        
+        dict(source=[0, 'output'], target=[3, 'input']),
+        dict(source=[3, 'output'], target=[8, 'input']),
+        
+        dict(source=[0, 'output'], target=[4, 'input']),
+        dict(source=[4, 'output'], target=[9, 'input']),
     ]
     config = {}
 
-    template = Template(name='test reduction',
+    template = Template(name='test reduction presentation',
                         description='example reduction diagram',
                         modules=modules,
                         wires=wires,

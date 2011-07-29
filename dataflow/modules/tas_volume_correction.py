@@ -13,8 +13,9 @@ def volume_correction_module(id=None, datatype=None, action=None,
     """
 
     icon = {
-        'URI': config.IMAGES + 'TAS/volume resolution correction.png',
-        'image': config.IMAGES + 'TAS/volume resolution correction.png', 
+        'URI': config.IMAGES + 'TAS/volume_resolution_correction.png',
+        'image': config.IMAGES + 'TAS/volume_resolution_correction.png',
+        'width': 'auto', 
         'terminals': {
             'input': (-12, 16, -1, 0),
             'output': (48, 16, 1, 0),
