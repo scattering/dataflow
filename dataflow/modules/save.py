@@ -10,7 +10,8 @@ def save_module(id=None, datatype=None, action=None,
     """Module for saving a dataset"""
 
     icon = {
-        'URI': config.IMAGES + "save.png",
+        'URI': config.IMAGES + "TAS/save.png",
+        'image': config.IMAGES + "TAS/save.png",
         'terminals': {
             'input': (0, 10, -1, 0),
         }

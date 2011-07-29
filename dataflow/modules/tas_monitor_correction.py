@@ -13,8 +13,9 @@ def monitor_correction_module(id=None, datatype=None, action=None,
     """
 
     icon = {
-        'URI': config.IMAGES + 'TAS/harmonic monitor correction.png', 
-        'image': config.IMAGES + 'TAS/harmonic monitor correction.png', 
+        'URI': config.IMAGES + 'TAS/harmonic_monitor_correction.png', 
+        'image': config.IMAGES + 'TAS/harmonic_monitor_correction.png', 
+        'width': 'auto', 
         'terminals': {
             'input': (-12, 16, -1, 0),
             'output': (48, 16, 1, 0),
