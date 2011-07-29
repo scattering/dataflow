@@ -3,7 +3,7 @@ Triple Axis Spectrometer reduction and analysis modules
 """
 import math, os, sys, types
 
-if 0:
+if 1:
     from ...reduction.tripleaxis import data_abstraction
     from ..calc import run_template
     from .. import wireit
@@ -26,7 +26,7 @@ if 0:
     from ...apps.tracks.models import File
 
 
-if 1:
+if 0:
     #direct imports for use individually (ie running this file)
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
     from dataflow.reduction.tripleaxis import data_abstraction

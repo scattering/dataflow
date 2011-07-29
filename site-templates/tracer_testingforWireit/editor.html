@@ -339,6 +339,7 @@ margin-bottom: 4px;
 			}
 			WireIt.Container.prototype.onMouseDown = function() {
 			//console.log('clicked on container')
+			this.tracksConfigs[editor.reductionInstance].position = this.getXY()
 			editor.clickedModuleID = editor.layer.containers.indexOf(this)
 			editor.displayClickedModuleConfig(this)
 			editor.generateConfigForm(editor.layer.containers.indexOf(this))
@@ -346,6 +347,7 @@ margin-bottom: 4px;
 			WireIt.Container.prototype.getConfig = function() {
 			configs = {}
 			configs['position'] = this.getXY()
+			//console.log('XY', this.getXY())
 			configs['xtype'] = this.xtype
 			if (this.tracksConfigs) {
 				configs = this.tracksConfigs
