@@ -652,23 +652,18 @@ lang.extend(WireIt.WiringEditor, WireIt.BaseEditor, {
 
 	/**
 	* This method returns a list of strings for the column headers in the FAT.
-	* Currently, it simply runs through all existing wires and adds the target (Module name, terminal name)
-	* if the wire's source is Load
+	* Runs through all existing wires and adds the target (Module name, terminal name) if the wire's source is Load
 	* 7/8
 	**/
 	getFATHeaders: function() {
 		var wiringDiagram = this.getValue().working
 		var wireList = wiringDiagram.wires
 		var moduleList = wiringDiagram.modules
-		var hitModules = [] // at some point to check which modules have already been touched
 		var headersList = [] // actual list of headers
 		var loadCheck = /Load/ // regex for checking if a module is a load, matches "Load"
-		for (var i=0; i < wireList.length; i++) {
-			//console.log(i)
+		for (var i=0; i < wireList.length; i++) {	
 			if (loadCheck.test(moduleList[wireList[i].src.moduleId].name)) {
-			
 				headersList.push(moduleList[wireList[i].tgt.moduleId].name + ' ' + wireList[i].tgt.terminal + ': ' + wireList[i].src.moduleId)
-				//console.log(moduleList[wireList[i].src.moduleId].name)
 				}
 			}
 		return headersList;	

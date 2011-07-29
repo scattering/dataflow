@@ -195,8 +195,8 @@ LOGIN_REDIRECT_URL = '../myProjects/'
 if 1:    
     EMAIL_USE_TLS = True
     EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_HOST_USER = 'drneutron@gmail.com'
-    EMAIL_HOST_PASSWORD = r'abcde'
+    EMAIL_HOST_USER = 'accounts@drneutron.org'
+    EMAIL_HOST_PASSWORD = r'NCNR12345!'
     EMAIL_PORT = 587
-    DEFAULT_FROM_EMAIL = 'support@drneutron.org <drneutron@gmail.com>'
+    DEFAULT_FROM_EMAIL = 'accounts@drneutron.org <accounts@drneutron.org>'
 

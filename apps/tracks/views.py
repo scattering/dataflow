@@ -51,12 +51,15 @@ def xhr_test(request):
 	message = "What is this, WSGI?"
     return HttpResponse(message)
 
+def showInteractors(request):
+	return render_to_response('interactors.html')
+
 def mytest(request):
    return render_to_response('tracer_testingforWireit/xhr_temp.html')
 
 def home(request):
     context = RequestContext(request)
-    site_list = ['/hello/', '/test/', '/editor/', '/loadFiles/']
+    site_list = ['/editor/', '/login/', '/interactors/']
     return render_to_response('tracer_testingforWireit/home.html', locals(), context_instance=context)
     
 ##################
