@@ -813,6 +813,9 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
     if (!plot || !plot.hasOwnProperty("type") || plot.type!='nd'){
         stage = 1;
         plotdiv.innerHTML = "";
+        var plot = { stage: 1, prevtype: null, targetId: plotid + '_target', series: [], options: { title: '', series: [], axes: {} }};
+        plot.options.cursor = { show: true, zoom: true, tooltipFormatString: '%.3g, %.3g', tooltipLocation:'ne'};
+        plot.options.series = [{ renderer: jQuery.jqplot.errorbarRenderer, rendererOptions: { errorBar: true } }]
     }
     
     if (create) {
@@ -822,12 +825,8 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
     
     target_id = plotid + '_target';
     //var plotid = plot.targetId.substring(1 * (plot.targetId[0] == '#'), plot.targetId.length - 7);
-    var series = [];
-    var options = { title: '', series: [], axes: {}, cursor: {
-            show: true,
-            zoom: true,
-            tooltipFormatString: '%.3g, %.3g',
-            tooltipLocation:'ne',} };
+    var series = plot.series;
+    var options = plot.options;
     //var series = plot.series;
     //var options = plot.options;
     console.log(100, plotid, toPlot);

@@ -14,7 +14,6 @@ if 1:
     from .. import config
     from ..core import Instrument, Data, Template, register_instrument
     
-    #from dataflow.dataflow.modules.load import load_module
     from ..modules.join import join_module
     from ..modules.scale import scale_module
     from ..modules.save import save_module
@@ -47,7 +46,7 @@ if 0:
     from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
     from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
     from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
-    from dataflow.apps.tracks.models import File
+    #from dataflow.apps.tracks.models import File
 
 TAS_DATA = 'data1d.tas'
 data1d = Data(TAS_DATA, data_abstraction.TripleAxis)
@@ -93,10 +92,10 @@ def data_scale(data, scale):
 def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
     """Currently set up to load ONLY 1 file"""
     #print "loading", files
-    print 'FRIENDLY FILE', File.objects.get(name=files[0].split('/')[-1]).friendly_name
+    #print 'FRIENDLY FILE', File.objects.get(name=files[0].split('/')[-1]).friendly_name
     result = [data_abstraction.filereader(f, File.objects.get(name=f.split('/')[-1]).friendly_name) for f in files]
     return dict(output=result)
-
+    #pass
 load = load_module(id='tas.load', datatype=TAS_DATA,
                    version='1.0', action=load_action,)
 
@@ -221,28 +220,25 @@ if 1:
 
 if 1:
     modules = [
-        dict(module="tas.load", position=(10, 20), config={'files':[ROOT_URL.HOMEDIR[:-12]+ 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
-        dict(module="tas.normalize_monitor", position=(300, 20), config={'target_monitor': 165000}),
-        dict(module="tas.detailed_balance", position=(300, 220), config={}),
-        dict(module="tas.monitor_correction", position=(300, 420), config={'instrument_name':'BT7'}),
-        dict(module="tas.volume_correction", position=(300, 620), config={}),
-        dict(module="tas.save", position=(700, 20), config={}),
-        dict(module="tas.save", position=(700, 220), config={}),
-        dict(module="tas.save", position=(700, 420), config={}),
-        dict(module="tas.save", position=(700, 620), config={}),
+        dict(module="tas.load", position=(10, 150), config={'files':[ROOT_URL.HOMEDIR[:-12]+ 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
+        dict(module="tas.normalize_monitor", position=(270, 20), config={'target_monitor': 165000}),
+        dict(module="tas.detailed_balance", position=(270, 120), config={}),
+        dict(module="tas.monitor_correction", position=(270, 220), config={'instrument_name':'BT7'}),
+        dict(module="tas.volume_correction", position=(270, 320), config={}),
+        dict(module="tas.save", position=(500, 150), config={}),
     ]
     wires = [
         dict(source=[0, 'output'], target=[1, 'input']),
-        dict(source=[1, 'output'], target=[6, 'input']),
+        dict(source=[1, 'output'], target=[5, 'input']),
         
         dict(source=[0, 'output'], target=[2, 'input']),
-        dict(source=[2, 'output'], target=[7, 'input']),
+        dict(source=[2, 'output'], target=[5, 'input']),
         
         dict(source=[0, 'output'], target=[3, 'input']),
-        dict(source=[3, 'output'], target=[8, 'input']),
+        dict(source=[3, 'output'], target=[5, 'input']),
         
         dict(source=[0, 'output'], target=[4, 'input']),
-        dict(source=[4, 'output'], target=[9, 'input']),
+        dict(source=[4, 'output'], target=[5, 'input']),
     ]
     config = {}
 

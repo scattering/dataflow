@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.0 r9654"
+   sodipodi:docname="Join.svg"
+   inkscape:export-filename="/home/alex/Desktop/dataflow/static/img/TAS/join.png"
+   inkscape:export-xdpi="13.840069"
+   inkscape:export-ydpi="13.840069">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.49497475"
+     inkscape:cx="385.17725"
+     inkscape:cy="742.85894"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:snap-nodes="false"
+     inkscape:snap-grids="true"
+     inkscape:snap-bbox="false"
+     inkscape:window-width="700"
+     inkscape:window-height="680"
+     inkscape:window-x="183"
+     inkscape:window-y="85"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#00ffff"
+       id="rect3166"
+       width="416.18286"
+       height="416.18286"
+       x="169.70566"
+       y="224.03709"
+       ry="58.09742" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot2987-7"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       transform="matrix(1.0059505,0,0,0.96229963,126.99135,-65.568881)"><flowRegion
+         id="flowRegion2989-8"><rect
+           id="rect2991-5"
+           width="180.56306"
+           height="109.38429"
+           x="202.85715"
+           y="343.79074" /></flowRegion><flowPara
+         id="flowPara2993-8"
+         style="font-size:56.91733551px">Join</flowPara></flowRoot>    <rect
+       style="fill:#1a1a1a"
+       id="rect3287"
+       width="230.31477"
+       height="30.85556"
+       x="260.61935"
+       y="469.98422"
+       ry="15.42778" />
+    <rect
+       style="fill:#1a1a1a"
+       id="rect3287-0"
+       width="226.27412"
+       height="31.406557"
+       x="370.76312"
+       y="-394.96429"
+       ry="15.703279"
+       transform="matrix(-0.00179073,0.9999984,-0.99999851,-0.00172844,0,0)" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Layer1" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Layer" />
+</svg>
