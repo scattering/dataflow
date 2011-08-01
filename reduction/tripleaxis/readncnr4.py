@@ -669,7 +669,7 @@ class datareader(object):
                         mydata=Data(self.metadata,self.columndict)
                         #print self.metadata
                         #print self.columnlist
-                        filename=os.path.split(myfilestr)[-1]
+                        filename=os.path.split(filestr)[-1]
                         self.metadata['filename']=filename
                         #print 'filename ', tokenized[1]
                         pattern = re.compile('^(?P<base>[^.]*?)(?P<seq>[0-9]*)(?P<ext>[.].*)?$')

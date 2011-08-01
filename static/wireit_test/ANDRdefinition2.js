@@ -26,7 +26,6 @@ var andr2 = {
             "required": false
           }
         ], 
-        "width": 120, 
         "xtype": "WireIt.Container"
       }, 
       "fields": [
@@ -82,7 +81,6 @@ var andr2 = {
             "required": false
           }
         ], 
-        "width": 120, 
         "xtype": "WireIt.Container"
       }, 
       "fields": [
@@ -120,7 +118,6 @@ var andr2 = {
             "required": false
           }
         ], 
-        "width": 120, 
         "xtype": "WireIt.Container"
       }, 
       "fields": [
@@ -158,7 +155,6 @@ var andr2 = {
             "required": true
           }
         ], 
-        "width": 120, 
         "xtype": "WireIt.Container"
       }, 
       "fields": [
@@ -601,7 +597,6 @@ var andr2 = {
             "required": false
           }
         ], 
-        "width": 120, 
         "xtype": "WireIt.Container"
       }, 
       "fields": [
