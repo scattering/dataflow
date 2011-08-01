@@ -11,6 +11,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger #paging
 from django.core.exceptions import ObjectDoesNotExist
 
 import hashlib
+import types
 
 ## models
 from django.contrib.auth.models import User 
@@ -331,21 +332,22 @@ def editExperiment(request, experiment_id):
     print request
     experiment = Experiment.objects.get(id=experiment_id)
     if request.FILES.has_key('files'):
-        file_data = request.FILES['files']
-        file_sha1 = hashlib.sha1()
-        for line in file_data.read():
-            file_sha1.update(line)
-        write_here = '/tmp/FILES/' + file_sha1.hexdigest()
-        write_here = open(write_here, 'w')
-        for line in file_data:
-            write_here.write(line)
-        write_here.close()
-        new_files = File.objects.filter(name=file_sha1.hexdigest())
-        if len(new_files) > 0:
-            new_file = new_files[0]
-        else:
-		    new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=file_data.name, location='/tmp/FILES/')
-        experiment.Files.add(new_file)
+        file_data = request.FILES.getlist('files')
+        for f in file_data:
+            file_sha1 = hashlib.sha1()
+            for line in f.read():
+                file_sha1.update(line)
+            write_here = '/tmp/FILES/' + file_sha1.hexdigest()
+            write_here = open(write_here, 'w')
+            for line in f:
+                write_here.write(line)
+            write_here.close()
+            new_files = File.objects.filter(name=file_sha1.hexdigest())
+            if len(new_files) > 0:
+                new_file = new_files[0]
+            else:
+		        new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location='/tmp/FILES/')
+            experiment.Files.add(new_file)
     if request.POST.has_key('instrument_name'):
         if request.POST['instrument_name']:
             instrument = Instrument.objects.get(id=request.POST['instrument_name'])
