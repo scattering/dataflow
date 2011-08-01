@@ -15,7 +15,6 @@ if 0:
     from ..core import Instrument, Data, Template, register_instrument
     
     from ..modules.join import join_module
-    from ..modules.scale import scale_module
     from ..modules.save import save_module
     from ..modules.tas_load import load_module
     from ..modules.tas_normalize_monitor import normalize_monitor_module
@@ -39,7 +38,6 @@ if 1:
     from dataflow.dataflow.core import Instrument, Data, Template, register_instrument
 
     from dataflow.dataflow.modules.join import join_module
-    from dataflow.dataflow.modules.scale import scale_module
     from dataflow.dataflow.modules.save import save_module
     from dataflow.dataflow.modules.tas_load import load_module
     from dataflow.dataflow.modules.tas_normalize_monitor import normalize_monitor_module
@@ -76,15 +74,6 @@ data1d = Data(TAS_DATA, data_abstraction.TripleAxis)
     #result = {'name': outname, 'x': x, 'y': y, 'dy': dy, 'monitor': mon}
     #return result
 
-def data_scale(data, scale):
-    x = data['x']
-    y = [v * scale for v in data['y']]
-    dy = [v * scale for v in data['dy']]
-    mon = [v * scale for v in data['monitor']]
-    basename = data['name']
-    outname = os.path.splitext(basename)[0] + '.scale'
-    result = {'name': outname, 'x': x, 'y': y, 'dy': dy, 'monitor': mon}
-    return result
 
 
 # === Component binding ===
@@ -145,22 +134,6 @@ def join_action(input, xaxis=None, yaxis=None, **kwargs):
 join = join_module(id='tas.join', datatype=TAS_DATA,
                    version='1.0', action=join_action)
 
-def scale_action(input=None, scale=1.0, xtype=None, position=None, **kwargs):
-    # operate on a bundle; need to resolve confusion between bundles and
-    # individual inputs
-    #TODO --- old code, probably won't run!
-    if numpy.isscalar(scale): scale = [scale] * len(input)
-    flat = []
-    for bundle in input:
-        if type(bundle) is types.ListType:
-            flat.extend(bundle)
-        else: # we're not a bundle at all!
-            flat.append(bundle)
-    result = [data_scale(f, s) for f, s in zip(flat, scale)]
-    return dict(output=result)
-scale = scale_module(id='tas.scale', datatype=TAS_DATA,
-                     version='1.0', action=scale_action)
-
 #All TripleAxis reductions below require that:
 #  'input' be a TripleAxis object (see data_abstraction.py)
 
@@ -206,7 +179,7 @@ BT7 = Instrument(id='ncnr.tas.bt7',
                  name='NCNR BT7',
                  archive=config.NCNR_DATA + '/bt7',
                  menu=[('Input', [load, save]),
-                       ('Reduction', [join, scale, normalizemonitor, detailedbalance,
+                       ('Reduction', [join, normalizemonitor, detailedbalance,
                                       monitorcorrection, volumecorrection])
                        ],
                  #requires=[config.JSCRIPT + '/tasplot.js'],
