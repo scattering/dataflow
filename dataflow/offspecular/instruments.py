@@ -187,7 +187,8 @@ def two_theta_qxqz_action(input=[], output_grid=None, wavelength=5.0, **kwargs):
     return dict(output=result)
 two_theta_qxqz = two_theta_qxqz_module(id='ospec.qxqz', datatype=OSPEC_DATA, version='1.0', action=two_theta_qxqz_action)
 
-def empty_qxqz_grid_action(qxmin= -0.003, qxmax=0.003, qxbins=201, qzmin=0.0, qzmax=0.1, qzbins=201):
+def empty_qxqz_grid_action(qxmin= -0.003, qxmax=0.003, qxbins=201, qzmin=0.0, qzmax=0.1, qzbins=201, **kwargs):
+    print "creating an empty QxQz grid"
     return dict(output=[EmptyQxQzGrid(qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)])
 empty_qxqz = empty_qxqz_grid_module(id='ospec.emptyqxqz', datatype=OSPEC_DATA, version='1.0', action=empty_qxqz_grid_action)
 
@@ -266,7 +267,7 @@ for instrument in instrmnts:
 
 # Testing
 if __name__ == '__main__':
-    polarized = True
+    polarized = False
     if not polarized:
         path, ext = dir + '/dataflow/sampledata/ANDR/sabc/Isabc20', '.cg1'
         files = [path + str(i + 1).zfill(2) + ext for i in range(1, 12)]
@@ -280,6 +281,7 @@ if __name__ == '__main__':
             dict(module="ospec.twotheta", position=(450, 250), config={}),
             dict(module="ospec.qxqz", position=(560, 392), config={}),
             dict(module="ospec.grid", position=(350, 390), config={}),
+            dict(module="ospec.emptyqxqz", position=(350, 470), config={}),
         ]
         wires = [
             dict(source=[0, 'output'], target=[4, 'input']),
@@ -289,6 +291,7 @@ if __name__ == '__main__':
             dict(source=[5, 'output'], target=[7, 'input']),
             dict(source=[7, 'output'], target=[2, 'input_grid']),
             dict(source=[2, 'output'], target=[6, 'input']),
+            dict(source=[8, 'output'], target=[6, 'output_grid']),
             dict(source=[6, 'output'], target=[1, 'input']),
         ]
     else:
