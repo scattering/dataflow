@@ -39,16 +39,16 @@ def autogrid_module(id=None, datatype=None, action=None,
     
     # extra_grid_point=True, min_step=1e-10
     grid_point_field = {
-        "type":"boolean",
-        "label": "extra_grid_point",
-        "name": "extra grid point",
+        "type":"bool",
+        "label": "extra grid point",
+        "name": "extra_grid_point",
         "value": True,
     }
     
     step_field = {
         "type":"float",
-        "label": "min_step",
-        "name": "minimum step",
+        "label": "minimum step",
+        "name": "min_step",
         "value": 1e-10,
     }
     

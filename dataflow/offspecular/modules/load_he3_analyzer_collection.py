@@ -26,18 +26,19 @@ def load_he3_module(id=None, datatype=None, action=None,
     ]
 
     filename_field = {
-        "type":"[file]",
+        "type":"list:str",
         "label": "Files",
         "name": "files",
         "value": [],
     }
     
-    cells_field = {
-        "type":"[cell]",
-        "label": "Cells",
-        "name": "cells",
-        "value": [],
-    }
+    # uses user define types - not acceptable
+    #cells_field = {
+    #    "type":"list:user",
+    #    "label": "Cells",
+    #    "name": "cells",
+    #    "value": [],
+    #}
     
     # Combine everything into a module.
     module = Module(id=id,
@@ -46,7 +47,7 @@ def load_he3_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   #icon=icon,
                   terminals=terminals,
-                  fields=[filename_field, cells_field] + fields,
+                  fields=[filename_field] + fields,
                   action=action,
                   )
 

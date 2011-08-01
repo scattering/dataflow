@@ -46,13 +46,6 @@ def append_polarization_matrix_module(id=None, datatype=None, cell_datatype=None
              ),
     ]
     
-    he3cell_field = {
-        "type":"He3AnalyzerCollection",
-        "label": "He3 cell",
-        "name": "he3cell",
-        "value": None,
-    }
-    
     # Combine everything into a module.
     module = Module(id=id,
                   name='Append polarization matrix',
@@ -60,7 +53,7 @@ def append_polarization_matrix_module(id=None, datatype=None, cell_datatype=None
                   description=description,
                   icon=icon,
                   terminals=terminals,
-                  fields=[he3cell_field] + fields,
+                  fields=fields,
                   action=action,
                   )
 

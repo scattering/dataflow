@@ -219,7 +219,7 @@ if 1:
         register_instrument(instrument)
 
 
-if 1:
+if 0:
     modules = [
         dict(module="tas.load", position=(10, 150), config={'files':[ROOT_URL.HOMEDIR[:-12]+ 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
         dict(module="tas.normalize_monitor", position=(270, 20), config={'target_monitor': 165000}),
@@ -242,7 +242,27 @@ if 1:
         dict(source=[4, 'output'], target=[5, 'input']),
     ]
     config = {}
+    
+    template = Template(name='test reduction presentation',
+                        description='example reduction diagram',
+                        modules=modules,
+                        wires=wires,
+                        instrument=BT7.id,
+                        )
 
+if 1:
+    #for loading spins files 59-71 for plotting
+    modules = [
+        dict(module="tas.load", position=(10, 40), config={}),
+        dict(module="tas.join", position=(250, 40), config={}),
+        dict(module="tas.save", position=(400, 40), config={}),
+    ]
+    wires = [
+        dict(source=[0, 'output'], target=[1, 'input']),
+        dict(source=[1, 'output'], target=[2, 'input']),
+    ]
+    config = {}
+    
     template = Template(name='test reduction presentation',
                         description='example reduction diagram',
                         modules=modules,

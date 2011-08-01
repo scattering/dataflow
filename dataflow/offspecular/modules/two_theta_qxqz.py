@@ -40,14 +40,6 @@ def two_theta_qxqz_module(id=None, datatype=None, action=None,
              description='data with qxqz',
              ),
     ]
-
-    # output_grid=None, wavelength=5.0
-    output_grid_field = {
-        "type":"MetaArray",
-        "label": "output_grid",
-        "name": "output grid",
-        "value": None,
-    }
     
     wavelength_field = {
         "type":"float",
@@ -63,7 +55,7 @@ def two_theta_qxqz_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[output_grid_field, wavelength_field] + fields,
+                  fields=[wavelength_field] + fields,
                   action=action,
                   )
 
