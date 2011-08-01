@@ -84,7 +84,12 @@
 			{% endfor %} <h2> Files: </h2>
 			{% for file in experiment.Files.all %}
 			<li>
-				{{file.friendly_name }}
+
+				<form action="#" method="post">
+				{% csrf_token %}
+				<input type="hidden" value = "{{file.friendly_name}}" name="delete_files">
+				{{file.friendly_name }} <input type="submit" value="delete">
+				</form>
 			</li>
 			{% endfor %}
 		</div>
