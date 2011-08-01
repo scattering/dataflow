@@ -1733,9 +1733,9 @@ if __name__=="__main__":
 	if 1:
 		#spin = filereader('spins data/bamno059.ng5')
 		#spin2 = filereader('spins data/bamno060.ng5')
-		spins=filereader(r'spins data/bamno059.ng5')
-		for num in range(60,72):
-			spins2=filereader(r'spins data/bamno0'+str(num)+'.ng5')
+		spins=filereader(r'spins_data/bamno059.ng5')
+		for num in range(60,62):
+			spins2=filereader(r'spins_data/bamno0'+str(num)+'.ng5')
 			spins = join(spins,spins2)
 		#spins = join(spin,spin2)
 		print spins.get_plottable()
