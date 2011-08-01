@@ -427,6 +427,9 @@
 					editor.layer.eventAddContainer.subscribe( function(event, layer) {
 						layer[0].onMouseDown()
 					}, editor.layer, true);
+					editor.layer.eventChanged.subscribe( function(event, layer) {
+
+					}, editor.layer, true);
 					
 					
 					// Open the infos panel
