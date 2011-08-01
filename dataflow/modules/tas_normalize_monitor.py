@@ -38,11 +38,11 @@ def normalize_monitor_module(id=None, datatype=None, action=None,
              ),
     ]
     
-    targetmonitor_field = {
+    target_monitor_field = {
         "type":"float",
         "label": "Target monitor",
         "name": "target_monitor",
-        "value": 1.0,
+        "value": 165000,
     }
     
     # Combine everything into a module.
@@ -52,7 +52,7 @@ def normalize_monitor_module(id=None, datatype=None, action=None,
                   description=description,
                   icon=icon,
                   terminals=terminals,
-                  fields=[targetmonitor_field] + fields,
+                  fields=[target_monitor_field] + fields,
                   action=action,
                   )
 
