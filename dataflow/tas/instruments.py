@@ -3,7 +3,7 @@ Triple Axis Spectrometer reduction and analysis modules
 """
 import math, os, sys, types
 
-if 0:
+if 1:
     from ...reduction.tripleaxis import data_abstraction
     from ..calc import run_template
     from .. import wireit
@@ -25,7 +25,7 @@ if 0:
     from ...apps.tracks.models import File
 
 
-if 1:
+if 0:
     #direct imports for use individually (ie running this file)
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
     from dataflow.reduction.tripleaxis import data_abstraction
@@ -92,14 +92,16 @@ def data_scale(data, scale):
 def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
     """Currently set up to load ONLY 1 file"""
     #print "loading", files
-    #print 'FRIENDLY FILE', File.objects.get(name=files[0].split('/')[-1]).friendly_name
-    result = [data_abstraction.filereader(f, File.objects.get(name=f.split('/')[-1]).friendly_name) for f in files]
+    print 'FRIENDLY FILE', File.objects.get(name=files[0].split('/')[-1]).friendly_name
+    print "/home/brendan/dataflow/reduction/tripleaxis/spins_data/" + File.objects.get(name=files[0].split('/')[-1]).friendly_name
+    result = [data_abstraction.filereader(f, friendly_name="/home/brendan/dataflow/reduction/tripleaxis/spins_data/" + File.objects.get(name=f.split('/')[-1]).friendly_name) for f in files]
+    print "done loading"
     return dict(output=result)
     #pass
 load = load_module(id='tas.load', datatype=TAS_DATA,
                    version='1.0', action=load_action,)
 
-def save_action(input=None, ext=None,xtype=None, position=None, **kwargs):
+def save_action(input=None, ext=None, xtype=None, position=None, **kwargs):
     # Note that save does not accept inputs from multiple components, so
     # we only need to deal with the bundle, not the list of bundles.
     # This is specified by terminal['multiple'] = False in modules/save.py
@@ -124,18 +126,19 @@ save = save_module(id='tas.save', datatype=TAS_DATA,
                    fields=[save_ext])
 
 
-def join_action(input, xaxis, yaxis, **kwargs):
+def join_action(input, xaxis=None, yaxis=None, **kwargs):
     # This is confusing because load returns a bundle and join, which can
     # link to multiple loads, has a list of bundles.  So flatten this list.
     # The confusion between bundles and items will bother us continuously,
     # and it is probably best if every filter just operates on and returns
     # bundles, which I do in this example.
     joinedtas = None
+    print "JOINING"
     for tas in input:
-        if joinedtas==None:
-            joinedtas=tas
+        if joinedtas == None:
+            joinedtas = tas
         else:
-            joinedtas=data_abstraction.join(joinedtas,tas)
+            joinedtas = data_abstraction.join(joinedtas, tas)
 
     return dict(output=[joinedtas])
 
@@ -203,7 +206,7 @@ BT7 = Instrument(id='ncnr.tas.bt7',
                  name='NCNR BT7',
                  archive=config.NCNR_DATA + '/bt7',
                  menu=[('Input', [load, save]),
-                       ('Reduction', [join, scale, normalizemonitor, detailedbalance, 
+                       ('Reduction', [join, scale, normalizemonitor, detailedbalance,
                                       monitorcorrection, volumecorrection])
                        ],
                  #requires=[config.JSCRIPT + '/tasplot.js'],
@@ -220,7 +223,7 @@ if 1:
 
 if 0:
     modules = [
-        dict(module="tas.load", position=(10, 150), config={'files':[ROOT_URL.HOMEDIR[:-12]+ 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
+        dict(module="tas.load", position=(10, 150), config={'files':[ROOT_URL.HOMEDIR[:-12] + 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
         dict(module="tas.normalize_monitor", position=(270, 20), config={'target_monitor': 165000}),
         dict(module="tas.detailed_balance", position=(270, 120), config={}),
         dict(module="tas.monitor_correction", position=(270, 220), config={'instrument_name':'BT7'}),
@@ -285,9 +288,9 @@ def TAS_RUN():
     return result
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     #hi=TAS_RUN()
     print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
     #print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
-    print 'language',simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
+    print 'language', simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
     print "done"

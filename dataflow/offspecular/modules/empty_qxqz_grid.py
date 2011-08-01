@@ -74,5 +74,5 @@ def empty_qxqz_grid_module(id=None, datatype=None, action=None,
                   fields=[qxmin_field, qxmax_field, qxbins_field, qzmin_field, qzmax_field, qzbins_field] + fields,
                   action=action,
                   )
-
+    
     return module

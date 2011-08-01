@@ -10,7 +10,7 @@ from mpfit import mpfit
 #from dataflow import regular_gridding
 #from ...dataflow import wireit
 
-if 0:
+if 1:
 	#for use in larger project
 	from ... import regular_gridding
 if 0:
@@ -806,8 +806,8 @@ class TripleAxis(object):
         def get_plottable(self, xaxis=None, yaxis=None):
                 #For now, hardcodes None into the variances until uncertainty can be fixed
 		orderx=[]
-                ordery=[]
-                data = {}
+		ordery=[]
+		data = {}
 		#if not xaxis==None or not yaxis==None:
 			##if axes are given (should be as motors)
 			#xstart=xarr.min()
@@ -874,20 +874,26 @@ class TripleAxis(object):
 				pass	
 			else:
 				for field in value:
-					orderx.append({'key': field.name, 'label': field.name})
+					#orderx.append({'key': field.name, 'label': field.name})
 					val = field.measurement.x
 					err = field.measurement.variance
-					if val==None:
+					if type(val)==np.ndarray:
+						val = val.tolist()
+					elif val==None:
 						val = None
 					else:
-						val = val.tolist()
-					if err==None:
+						val = [val]
+						
+					if type(err)==np.ndarray:
+						err = err.tolist()	
+					elif err==None:
 						err = None
 					else:
-						err = err.tolist()
+						err = [err]
+						
 					data[field.name]={'values': val,'errors': err}
 
-
+		orderx.append({'key': 'e', 'label': 'e'})
 		plottable_data = {
 	                'type': 'nd',
 	                'title': 'Triple Axis Plot',
