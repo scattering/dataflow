@@ -319,6 +319,10 @@
 					WireIt.ImageContainer.prototype.width = 40;
 					WireIt.ImageContainer.prototype.onMouseDown = function() {
 						//console.log('clicked on imageContainer')
+						if(!this.tracksConfigs)
+							this.tracksConfigs = [];
+						if(!this.tracksConfigs[editor.reductionInstance])
+							this.tracksConfigs[editor.reductionInstance] = {}
 						this.tracksConfigs[editor.reductionInstance].position = this.getXY()
 						editor.clickedModuleID = editor.layer.containers.indexOf(this)
 						editor.displayClickedModuleConfig(this)
@@ -327,6 +331,10 @@
 					}
 					WireIt.Container.prototype.onMouseDown = function() {
 						//console.log('clicked on container')
+						if(!this.tracksConfigs)
+							this.tracksConfigs = [];
+						if(!this.tracksConfigs[editor.reductionInstance])
+							this.tracksConfigs[editor.reductionInstance] = {}
 						this.tracksConfigs[editor.reductionInstance].position = this.getXY()
 						editor.clickedModuleID = editor.layer.containers.indexOf(this)
 						editor.displayClickedModuleConfig(this)
