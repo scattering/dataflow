@@ -363,7 +363,14 @@ def editExperiment(request, experiment_id):
             template = Template.objects.get(id=request.POST['templates'])
             experiment.templates.add(template)
         #print file_sha1.hexdigest()
-        #print hashlib.sha1(request.FILES['files'].read()).hexdigest()	
+        #print hashlib.sha1(request.FILES['files'].read()).hexdigest()
+    if request.POST.has_key('delete_files'):
+        if request.POST['delete_files']:
+            delete_files = request.POST.getlist('delete_files')
+            for f in delete_files:
+                print "f: ", f
+                print experiment.Files.filter(friendly_name = f)
+                experiment.Files.filter(friendly_name=f).delete()
     context = RequestContext(request)
     facility = experiment.facility
     instrument = experiment.instrument
