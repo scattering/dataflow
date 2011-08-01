@@ -858,8 +858,17 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
     console.log('series', series, 'options', options);
     
     if (stage == 1) {
+        var empty = (series.length == 0);
+        if (empty) {
+            series = [[[0,0]]];
+            options.series[0].show = false;
+        }
         plot = jQuery.jqplot(target_id, series, options);
         plot.type = 'nd';
+        if (empty) {
+            options.series[0].show = true;
+        }
+        
     }
     else {
         plot.series.data = series;
