@@ -113,16 +113,16 @@ def _load_data(name, auto_PolState, PolState):
     print "Loading:", name, PolState
     return LoadICPData(fileName, path=dirName, auto_PolState=auto_PolState, PolState=PolState)
 auto_PolState_field = {
-        "type":"bool",
+        "type":"boolean",
         "label": "Auto-polstate",
         "name": "auto_PolState",
         "value": False,
 }
 PolStates_field = {
-        "type":"list",
+        "type":"dict:string:string",
         "label": "PolStates",
         "name": "PolStates",
-        "value": [],
+        "value": {},
 }
 load = load_module(id='ospec.load', datatype=OSPEC_DATA,
                    version='1.0', action=load_action, fields=[auto_PolState_field, PolStates_field])
@@ -195,15 +195,13 @@ empty_qxqz = empty_qxqz_grid_module(id='ospec.emptyqxqz', datatype=OSPEC_DATA, v
 # ======== Polarization modules ===========
 
 # Load he3 module
-def load_he3_action(files=[], cells=[], **kwargs):
+def load_he3_action(files=[], **kwargs):
     print "loading he3", files
-    if len(cells) < len(files):
-        cells += [[]] * (len(files) - len(cells))
-    result = [_load_he3_data(f, cell) for f, cell in zip(files, cells)]
+    result = [_load_he3_data(f) for f in files]
     return dict(output=result)
-def _load_he3_data(name, cells):
+def _load_he3_data(name):
     (dirName, fileName) = os.path.split(name)
-    return He3AnalyzerCollection(filename=fileName, path=dirName, cells=cells)
+    return He3AnalyzerCollection(filename=fileName, path=dirName)
 load_he3 = load_he3_module(id='ospec.loadhe3', datatype=OSPEC_DATA_HE3,
                    version='1.0', action=load_he3_action)
 

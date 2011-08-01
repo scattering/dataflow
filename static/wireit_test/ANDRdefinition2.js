@@ -29,6 +29,32 @@ var andr2 = {
         "width": 120, 
         "xtype": "WireIt.Container"
       }, 
+      "fields": [
+        {
+          "label": "Files", 
+          "name": "files", 
+          "type": "[file]", 
+          "value": []
+        }, 
+        {
+          "label": "Intent", 
+          "name": "intent", 
+          "type": "string", 
+          "value": ""
+        }, 
+        {
+          "label": "Auto-polstate", 
+          "name": "auto_PolState", 
+          "type": "boolean", 
+          "value": false
+        }, 
+        {
+          "label": "PolStates", 
+          "name": "PolStates", 
+          "type": "dict:string:string", 
+          "value": {}
+        }
+      ], 
       "name": "Load"
     }, 
     {
@@ -59,6 +85,14 @@ var andr2 = {
         "width": 120, 
         "xtype": "WireIt.Container"
       }, 
+      "fields": [
+        {
+          "label": "Files", 
+          "name": "files", 
+          "type": "list:str", 
+          "value": []
+        }
+      ], 
       "name": "Load he3"
     }, 
     {
@@ -89,6 +123,14 @@ var andr2 = {
         "width": 120, 
         "xtype": "WireIt.Container"
       }, 
+      "fields": [
+        {
+          "label": "Files", 
+          "name": "files", 
+          "type": "list:str", 
+          "value": []
+        }
+      ], 
       "name": "Load stamps"
     }, 
     {
@@ -119,6 +161,20 @@ var andr2 = {
         "width": 120, 
         "xtype": "WireIt.Container"
       }, 
+      "fields": [
+        {
+          "label": "Intent", 
+          "name": "intent", 
+          "type": "string", 
+          "value": ""
+        }, 
+        {
+          "label": "Save extension", 
+          "name": "ext", 
+          "type": "[string]", 
+          "value": ""
+        }
+      ], 
       "name": "Save"
     }, 
     {
@@ -169,6 +225,20 @@ var andr2 = {
         ], 
         "xtype": "WireIt.ImageContainer"
       }, 
+      "fields": [
+        {
+          "label": "extra grid point", 
+          "name": "extra_grid_point", 
+          "type": "bool", 
+          "value": true
+        }, 
+        {
+          "label": "minimum step", 
+          "name": "min_step", 
+          "type": "float", 
+          "value": 1e-10
+        }
+      ], 
       "name": "Autogrid"
     }, 
     {
@@ -239,6 +309,7 @@ var andr2 = {
         ], 
         "xtype": "WireIt.ImageContainer"
       }, 
+      "fields": [], 
       "name": "Combine"
     }, 
     {
@@ -289,6 +360,14 @@ var andr2 = {
         ], 
         "xtype": "WireIt.ImageContainer"
       }, 
+      "fields": [
+        {
+          "label": "Offset amount", 
+          "name": "offsets", 
+          "type": "dict:str:float", 
+          "value": {}
+        }
+      ], 
       "name": "Offset"
     }, 
     {
@@ -339,6 +418,14 @@ var andr2 = {
         ], 
         "xtype": "WireIt.ImageContainer"
       }, 
+      "fields": [
+        {
+          "label": "amplitude", 
+          "name": "scale", 
+          "type": "float", 
+          "value": 0.14000000000000001
+        }
+      ], 
       "name": "Wiggle"
     }, 
     {
@@ -389,6 +476,26 @@ var andr2 = {
         ], 
         "xtype": "WireIt.ImageContainer"
       }, 
+      "fields": [
+        {
+          "label": "pixels per degree", 
+          "name": "pixels_per_degree", 
+          "type": "float", 
+          "value": 80.0
+        }, 
+        {
+          "label": "qzero pixel", 
+          "name": "qzero_pixel", 
+          "type": "int", 
+          "value": 309
+        }, 
+        {
+          "label": "instrument resolution", 
+          "name": "instr_resolution", 
+          "type": "float", 
+          "value": 9.9999999999999995e-07
+        }
+      ], 
       "name": "Pixels to two theta"
     }, 
     {
@@ -459,7 +566,83 @@ var andr2 = {
         ], 
         "xtype": "WireIt.ImageContainer"
       }, 
+      "fields": [
+        {
+          "label": "wavelength", 
+          "name": "wavelength", 
+          "type": "float", 
+          "value": 5.0
+        }
+      ], 
       "name": "Two theta to qxqz"
+    }, 
+    {
+      "container": {
+        "height": 16, 
+        "terminals": [
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:in"
+              ], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "right": -16, 
+              "top": 1
+            }, 
+            "required": false
+          }
+        ], 
+        "width": 120, 
+        "xtype": "WireIt.Container"
+      }, 
+      "fields": [
+        {
+          "label": "Qx min", 
+          "name": "qxmin", 
+          "type": "float", 
+          "value": -0.0030000000000000001
+        }, 
+        {
+          "label": "Qx max", 
+          "name": "qxmax", 
+          "type": "float", 
+          "value": 0.0030000000000000001
+        }, 
+        {
+          "label": "Qx bins", 
+          "name": "qxbins", 
+          "type": "int", 
+          "value": 201
+        }, 
+        {
+          "label": "Qz min", 
+          "name": "qzmin", 
+          "type": "float", 
+          "value": 0.0
+        }, 
+        {
+          "label": "Qz max", 
+          "name": "qzmax", 
+          "type": "float", 
+          "value": 0.10000000000000001
+        }, 
+        {
+          "label": "Qz bins", 
+          "name": "qzbins", 
+          "type": "int", 
+          "value": 201
+        }
+      ], 
+      "name": "Empty QxQz grid"
     }, 
     {
       "container": {
@@ -529,6 +712,14 @@ var andr2 = {
         ], 
         "xtype": "WireIt.ImageContainer"
       }, 
+      "fields": [
+        {
+          "label": "Override existing?", 
+          "name": "override_existing", 
+          "type": "bool", 
+          "value": false
+        }
+      ], 
       "name": "Timestamp"
     }, 
     {
@@ -599,6 +790,7 @@ var andr2 = {
         ], 
         "xtype": "WireIt.ImageContainer"
       }, 
+      "fields": [], 
       "name": "Append polarization matrix"
     }, 
     {
@@ -669,6 +861,7 @@ var andr2 = {
         ], 
         "xtype": "WireIt.ImageContainer"
       }, 
+      "fields": [], 
       "name": "Combine polarized"
     }, 
     {
@@ -719,6 +912,20 @@ var andr2 = {
         ], 
         "xtype": "WireIt.ImageContainer"
       }, 
+      "fields": [
+        {
+          "label": "Polarization assumptions", 
+          "name": "assumptions", 
+          "type": "int", 
+          "value": 0
+        }, 
+        {
+          "label": "Auto assumptions", 
+          "name": "auto_assumptions", 
+          "type": "bool", 
+          "value": true
+        }
+      ], 
       "name": "Polarization correction"
     }
   ], 

@@ -26,7 +26,7 @@ def load_timestamp_module(id=None, datatype=None, action=None,
     ]
 
     filename_field = {
-        "type":"[file]",
+        "type":"list:str",
         "label": "Files",
         "name": "files",
         "value": [],

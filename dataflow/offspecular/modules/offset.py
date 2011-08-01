@@ -34,7 +34,7 @@ def offset_module(id=None, datatype=None, action=None,
     ]
 
     offset_field = {
-        "type":"dict", # maps a name to the offset
+        "type":"dict:str:float", # maps a name to the offset
         "label": "Offset amount",
         "name": "offsets",
         "value": {},

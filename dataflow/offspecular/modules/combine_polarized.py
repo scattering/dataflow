@@ -45,13 +45,6 @@ def combine_polarized_module(id=None, datatype=None, action=None,
              ),
     ]
     
-    grid_field = {
-        "type":"FilterableMetaArray",
-        "label": "grid",
-        "name": "grid",
-        "value": None,
-    }
-    
     # Combine everything into a module.
     module = Module(id=id,
                   name='Combine polarized',
@@ -59,7 +52,7 @@ def combine_polarized_module(id=None, datatype=None, action=None,
                   description=description,
                   icon=icon,
                   terminals=terminals,
-                  fields=[grid_field] + fields,
+                  fields=fields,
                   action=action,
                   )
 

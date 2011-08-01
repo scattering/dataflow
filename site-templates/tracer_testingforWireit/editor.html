@@ -19,93 +19,80 @@
 		<link rel="stylesheet" type="text/css" href="../../static/lib/ext/examples/ux/css/CheckHeader.css" />
 		<!--<link rel="stylesheet" type="text/css" href="../../static/lib/ext/examples/button/button.css" />-->
 		<style>
-div.WireIt-Container {
-width: 350px; /* Prevent the modules from scratching on the right */
-}
-
-div.WireIt-InOutContainer {
-width: 150px;
-}
-
-div.WireIt-InputExTerminal {
-float: left;
-width: 21px;
-height: 21px;
-position: relative;
-}
-div.WireIt-InputExTerminal div.WireIt-Terminal {
-top: -3px;
-left: -7px;
-}
-div.inputEx-Group div.inputEx-label {
-width:100px;
-}
-
-div.WireIt-ImageContainer {
-width: 64px;
-height: 64px;
-}
-
-div.Bubble div.body {
-width: 70px;
-height: 45px;
-opacity: 0.8;
-cursor: move;
-}
-
-.WiringEditor-module span {
-position: relative;
-top: -3px;
-}
-
-.x-border-box .x-reset, .x-border-box .x-reset * {
-box-sizing: content-box;
--webkit-box-sizing: content-box;
--moz-box-sizing: content-box;
-}
-
-.x-border-box .x-reset .x-panel *, .x-border-box .x-reset .x-layout * {
-box-sizing: border-box;
--webkit-box-sizing: border-box;
--moz-box-sizing: border-box;
-}
-
-.x-btn#big-button button {
-border-color:#EE0000;
-font-size: 24px !important;
-font-weight: bold !important;
-font-family: 'Arial' !important;
-}
-
-.x-menu-item-link * {
-text align: left;
-}
-
-.yui-button.yui-button-right {
-float: right;
-}
-
-.yui-button.yui-button-removePadding button {
-padding-left: 1em !important;
-}
-
-.yui-button#WiringEditor-prevButton button {
-
-background: url(../../static/img/silk/previous.png) center center no-repeat;;
-}
-
-.yui-button#WiringEditor-forwButton button {
-
-background: url(../../static/img/silk/next.png) center center no-repeat;;
-}
-
-.instance-info-display dt {
-font-weight: bold;
-}
-.instance-info-display dd {
-margin-left: 1em;
-margin-bottom: 4px;
-}
+			div.WireIt-Container {
+				width: 350px;
+				/* Prevent the modules from scratching on the right */
+			}
+			div.WireIt-InOutContainer {
+				width: 150px;
+			}
+			div.WireIt-InputExTerminal {
+				float: left;
+				width: 21px;
+				height: 21px;
+				position: relative;
+			}
+			div.WireIt-InputExTerminal div.WireIt-Terminal {
+				top: -3px;
+				left: -7px;
+			}
+			div.inputEx-Group div.inputEx-label {
+				width:100px;
+			}
+			div.WireIt-ImageContainer {
+				width: 64px;
+				height: 64px;
+			}
+			div.Bubble div.body {
+				width: 70px;
+				height: 45px;
+				opacity: 0.8;
+				cursor: move;
+			}
+			.WiringEditor-module span {
+				position: relative;
+				top: -3px;
+			}
+			.x-border-box .x-reset, .x-border-box .x-reset * {
+				box-sizing: content-box;
+				-webkit-box-sizing: content-box;
+				-moz-box-sizing: content-box;
+			}
+			.x-border-box .x-reset .x-panel *, .x-border-box .x-reset .x-layout * {
+				box-sizing: border-box;
+				-webkit-box-sizing: border-box;
+				-moz-box-sizing: border-box;
+			}
+			.x-btn#big-button button {
+				border-color:#EE0000;
+				font-size: 24px !important;
+				font-weight: bold !important;
+				font-family: 'Arial' !important;
+			}
+			.x-menu-item-link * {
+				text align: left;
+			}
+			.yui-button.yui-button-right {
+				float: right;
+			}
+			.yui-button.yui-button-removePadding button {
+				padding-left: 1em !important;
+			}
+			.yui-button#WiringEditor-prevButton button {
+				background: url(../../static/img/silk/previous.png) center center no-repeat;
+				;
+			}
+			.yui-button#WiringEditor-forwButton button {
+				background: url(../../static/img/silk/next.png) center center no-repeat;
+				;
+			}
+			.instance-info-display dt {
+				font-weight: bold;
+			}
+			.instance-info-display dd {
+				margin-left: 1em;
+				margin-bottom: 4px;
+			}
 		</style>
 		<!-- Ajax csrf fix
 		<script type="text/javascript" src="../../static/lib/ajaxCSRFfix.js"></script>
@@ -116,7 +103,7 @@ margin-bottom: 4px;
 		<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
 		<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery.jqplot.js"></script>
 		<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
-        <script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+		<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
 		<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.pcolorRenderer.js"></script>
 		<script type="text/javascript" src="../../static/lib/plotting/jqplot/plugins/jqplot.cursor.js"></script>
 		<script type="text/javascript" src="../../static/lib/plotting/palettes.js"></script>
@@ -296,131 +283,149 @@ margin-bottom: 4px;
 			var holder = '';
 
 			YAHOO.util.Event.onDOMReady( function() {
-			try {
-			CHOSEN_LANG_NAME = "{{ lang }}" // this is the language that is set as a template's language in
-			// WiringEditor.js getValue()
-			CHOSEN_LANG = languageDictionary["{{ lang }}"] // converts language string to language object
-			FILES = []
-			{% for variable in file_keys %}
-			FILES.push("{{ variable }}".split(',,,z,z,z,z,,,'))
-			{% endfor %}
+				try {
+					CHOSEN_LANG_NAME = "{{ lang }}" // this is the language that is set as a template's language in
+					// WiringEditor.js getValue()
+					CHOSEN_LANG = languageDictionary["{{ lang }}"] // converts language string to language object
+					FILES = []
+					{% for variable in file_keys %}
+					FILES.push("{{ variable }}".split(',,,z,z,z,z,,,'))
+					{% endfor %}
 
-			// for converting from readable name to unique hash
-			FILE_DICT = {}
-			for (var i in FILES) {
-			FILE_DICT[FILES[i][1]]=FILES[i][0]
-			}
+					// for converting from readable name to unique hash
+					FILE_DICT = {}
+					for (var i in FILES) {
+						FILE_DICT[FILES[i][1]]=FILES[i][0]
+					}
 
-			// setting up the WireEditor with the adapter 'tracks'
-			CHOSEN_LANG['adapter'] = WireIt.WiringEditor.adapters.tracks;
+					// setting up the WireEditor with the adapter 'tracks'
+					CHOSEN_LANG['adapter'] = WireIt.WiringEditor.adapters.tracks;
 
-			// initial settings
-			plotCreated = false;
-			launchedFromExperimentPage = {{ experiment_id }}
+					// initial settings
+					plotCreated = false;
+					launchedFromExperimentPage = {{ experiment_id }}
 
-			// editor
-			editor = new WireIt.WiringEditor(CHOSEN_LANG);
-			// initial setting: for paging through multiple instances of the same reduction template
-			editor.reductionInstance = 1;
-			editor.maxReduction = 1;
+					// editor
+					editor = new WireIt.WiringEditor(CHOSEN_LANG);
+					// initial setting: for paging through multiple instances of the same reduction template
+					editor.reductionInstance = 1;
+					editor.maxReduction = 1;
 
-			// more initial settings
-			editor.launchedFromExperimentPage = launchedFromExperimentPage
+					// more initial settings
+					editor.launchedFromExperimentPage = launchedFromExperimentPage
 
-			// imagecontainer initial height, width
-			WireIt.ImageContainer.prototype.height = 40;
-			WireIt.ImageContainer.prototype.width = 40;
-			WireIt.ImageContainer.prototype.onMouseDown = function() {
-			//console.log('clicked on imageContainer')
-			this.tracksConfigs[editor.reductionInstance].position = this.getXY()
-			editor.clickedModuleID = editor.layer.containers.indexOf(this)
-			editor.displayClickedModuleConfig(this)
-			editor.generateConfigForm(editor.layer.containers.indexOf(this))
-			holder = this;
-			}
-			WireIt.Container.prototype.onMouseDown = function() {
-			//console.log('clicked on container')
-			this.tracksConfigs[editor.reductionInstance].position = this.getXY()
-			editor.clickedModuleID = editor.layer.containers.indexOf(this)
-			editor.displayClickedModuleConfig(this)
-			editor.generateConfigForm(editor.layer.containers.indexOf(this))
-			},
-			WireIt.Container.prototype.getConfig = function() {
-			configs = {}
-			configs['position'] = this.getXY()
-			//console.log('XY', this.getXY())
-			configs['xtype'] = this.xtype
-			if (this.tracksConfigs) {
-				configs = this.tracksConfigs
-				//console.log('Getting Config', editor.reductionInstance)
-				//console.log(this.tracksConfigs[editor.reductionInstance])
-				//for (var i in this.tracksConfigs[editor.reductionInstance]) {
-				//	configs[i] = this.tracksConfigs[editor.reductionInstance][i]
-				//	}
-				//}
-			}
-			return configs
-			},
-
-			// setting up events for wires
-			WireIt.Wire.prototype.onWireIn = function(x,y) {
-			this.color = 'rgb(255,0,0)';
-			this.redraw();
-			}
-			WireIt.Wire.prototype.onWireOut = function(x,y) {
-			this.color = 'rgb(173, 216, 230)';
-			this.redraw();
-			}
-			WireIt.Wire.prototype.onWireClick = function(x,y) {
-			console.log('WIRE CLICK!')
-			editor.wireClickedOn = {'source': this.src, 'target':this.tgt}
-			console.log(this)
-			//editor.wireClickSource = this.src.moduleId
-			//editor.wireClickTarget = this.tgt.moduleId
-			try {
-				editor.runReduction(editor.templateConfig[editor.reductionInstance])
-				}
-			catch (ex) {
-				alert('Please enter file associations!')
-				}
-			}
-			editor.layer.eventAddWire.subscribe(function(event, layer) {
-				//console.log(layer[0])
-				if (layer[0].terminal2.container) { // so we only get events fired on completion
-					if (!layer[0].src) {
-						var src = {}
-						var tgt = {}
-						src['moduleId'] = editor.layer.containers.indexOf(layer[0].terminal1.container)
-						src['terminal'] = layer[0].terminal1.name
-						tgt['moduleId'] = editor.layer.containers.indexOf(layer[0].terminal2.container)
-						tgt['terminal'] = layer[0].terminal1.name
-					
-						layer[0]['src'] = src
-						layer[0]['tgt'] = tgt
+					// imagecontainer initial height, width
+					WireIt.ImageContainer.prototype.height = 40;
+					WireIt.ImageContainer.prototype.width = 40;
+					WireIt.ImageContainer.prototype.onMouseDown = function() {
+						//console.log('clicked on imageContainer')
+						this.tracksConfigs[editor.reductionInstance].position = this.getXY()
+						editor.clickedModuleID = editor.layer.containers.indexOf(this)
+						editor.displayClickedModuleConfig(this)
+						editor.generateConfigForm(editor.layer.containers.indexOf(this))
+						holder = this;
+					}
+					WireIt.Container.prototype.onMouseDown = function() {
+						//console.log('clicked on container')
+						this.tracksConfigs[editor.reductionInstance].position = this.getXY()
+						editor.clickedModuleID = editor.layer.containers.indexOf(this)
+						editor.displayClickedModuleConfig(this)
+						editor.generateConfigForm(editor.layer.containers.indexOf(this))
+					},
+					WireIt.Container.prototype.getConfig = function() {
+						configs = {}
+						configs['position'] = this.getXY()
+						//console.log('XY', this.getXY())
+						configs['xtype'] = this.xtype
+						module = {};
+						for(var index in CHOSEN_LANG.modules){
+							if(CHOSEN_LANG.modules[index].name == this.title){
+								module = CHOSEN_LANG.modules[index];
+								break;
+							}
+						}
+						fields = module.fields;
+						configs[editor.reductionInstance] = {}
+						for(var index in fields) {
+							field = fields[index];
+							configs[editor.reductionInstance][field.name] = field.value;
+							console.log(field.name,field.value);
+						}
+						if (this.tracksConfigs) {
+							for(var index in this.tracksConfigs) {
+								fields = this.tracksConfigs[index];
+								for(var field in fields) {
+									configs[index][field] = fields[field];
+								}
+							}
+							//configs = this.tracksConfigs
+							//console.log('Getting Config', editor.reductionInstance)
+							//console.log(this.tracksConfigs[editor.reductionInstance])
+							//for (var i in this.tracksConfigs[editor.reductionInstance]) {
+							//	configs[i] = this.tracksConfigs[editor.reductionInstance][i]
+							//	}
+							//}
+						}
+						console.log("New configs:", configs);
+						return configs
+					},
+					// setting up events for wires
+					WireIt.Wire.prototype.onWireIn = function(x,y) {
+						this.color = 'rgb(255,0,0)';
+						this.redraw();
+					}
+					WireIt.Wire.prototype.onWireOut = function(x,y) {
+						this.color = 'rgb(173, 216, 230)';
+						this.redraw();
+					}
+					WireIt.Wire.prototype.onWireClick = function(x,y) {
+						console.log('WIRE CLICK!')
+						editor.wireClickedOn = {
+							'source': this.src,
+							'target':this.tgt
+						}
+						console.log(this)
+						//editor.wireClickSource = this.src.moduleId
+						//editor.wireClickTarget = this.tgt.moduleId
+						try {
+							editor.runReduction(editor.templateConfig[editor.reductionInstance])
+						} catch (ex) {
+							alert('Please enter file associations!')
 						}
 					}
-				//var wire=params[0];
-				//wire['src'] = wire.terminal1
-				//wire['tgt'] = wire.terminal2
-				}, editor.layer, true);
+					editor.layer.eventAddWire.subscribe( function(event, layer) {
+						//console.log(layer[0])
+						if (layer[0].terminal2.container) { // so we only get events fired on completion
+							if (!layer[0].src) {
+								var src = {}
+								var tgt = {}
+								src['moduleId'] = editor.layer.containers.indexOf(layer[0].terminal1.container)
+								src['terminal'] = layer[0].terminal1.name
+								tgt['moduleId'] = editor.layer.containers.indexOf(layer[0].terminal2.container)
+								tgt['terminal'] = layer[0].terminal1.name
 
-			// Open the infos panel
-			//editor.accordionView.openPanel(2);
-			//editor.accordionView.closePanel(0);
-			
-			// YUI testing
+								layer[0]['src'] = src
+								layer[0]['tgt'] = tgt
+							}
+						}
+						//var wire=params[0];
+						//wire['src'] = wire.terminal1
+						//wire['tgt'] = wire.terminal2
+					}, editor.layer, true);
+					// Open the infos panel
+					//editor.accordionView.openPanel(2);
+					//editor.accordionView.closePanel(0);
 
-			
-			}
-			catch(ex) {
-			alert('exception');
-			console.log(ex);
-			}
+					// YUI testing
+
+				} catch(ex) {
+					alert('exception');
+					console.log(ex);
+				}
 			});
-
-			Ext.onReady(function() {
-			//$('html').removeClass('x-border-box');
-			//$('body').removeClass('x-reset');
+			Ext.onReady( function() {
+				//$('html').removeClass('x-border-box');
+				//$('body').removeClass('x-reset');
 			});
 		</script>
 	</head>
@@ -429,7 +434,8 @@ margin-bottom: 4px;
 			<div class="logo">
 				Dataflow / Tracks</a>
 			</div>
-			<div id="toolbar"></div>
+			<div id="toolbar">
+			</div>
 			<div class="topright">
 				<span>Enjoy!</span>
 			</div>
@@ -439,7 +445,8 @@ margin-bottom: 4px;
 				<li>
 					<h2>Main</h2>
 					<div>
-						<div id='module-category-main'></div>
+						<div id='module-category-main'>
+						</div>
 					</div>
 				</li>
 			</ul>
@@ -449,38 +456,45 @@ margin-bottom: 4px;
 				<li>
 					<h2>Minimap</h2>
 					<div style='position: relative;'>
-						<div id="layerMap"></div>
+						<div id="layerMap">
+						</div>
 					</div>
 				</li>
 				<li>
 					<h2>Plotting!</h2>
 
-                                <div>
-                                    <div id="plot"> I am a plot. </div>
-                                </div>
+					<div>
+						<div id="plot">
+							I am a plot.
+						</div>
+					</div>
 				</li>
 				<li>
 					<h2>File Associations Table</h2>
 					<div class="x-border-box">
-						<div id="FAT" style='position: relative;' class="x-reset"></div>
+						<div id="FAT" style='position: relative;' class="x-reset">
+						</div>
 					</div>
 				</li>
 				<li>
 					<h2>Instance Info, Files</h2>
 					<div>
-						<div id ="instance-files-info" style="padding: 10px;"></div>
+						<div id ="instance-files-info" style="padding: 10px;">
+						</div>
 					</div>
 				</li>
 				<li>
 					<h2>Instance Info, Module Configs</h2>
 					<div>
-						<div id ="instance-modules-info" style="padding: 10px;"></div>
+						<div id ="instance-modules-info" style="padding: 10px;">
+						</div>
 					</div>
 				</li>
 				<li>
 					<h2>Module Configs Input</h2>
 					<div>
-						<div id ="instance-modules-input" style="padding: 10px;"></div>
+						<div id ="instance-modules-input" style="padding: 10px;">
+						</div>
 					</div>
 				</li>
 				<li>
@@ -507,7 +521,8 @@ margin-bottom: 4px;
 				</li>
 			</ul>
 		</div>
-		<div id="center"></div>
+		<div id="center">
+		</div>
 		<div id="helpPanel">
 			<div class="hd">
 				Welcome to the WiringEditor demonstration
