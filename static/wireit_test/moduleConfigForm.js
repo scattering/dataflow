@@ -74,6 +74,8 @@ function configForm(headerList, moduleID) {
 					for (var j in form._fields.items) {
 						key = form._fields.items[j].ownerCt.title + ',' + form._fields.items[j].fieldLabel
 						moduleConfigs[key] = form._fields.items[j].lastValue
+						if(moduleConfigs[key] == "0" && form._fields.items[j].id.split("-")[0] == 'numberfield')
+							moduleConfigs[key] = 0
 					}
 					console.log('CONFIGS IN FORM', moduleConfigs);
 					editor.setModuleConfigsFromForm(moduleConfigs, moduleID, editor.reductionInstance)
