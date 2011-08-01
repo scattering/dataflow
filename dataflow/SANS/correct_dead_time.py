@@ -10,7 +10,8 @@ def correct_dead_time_module(id=None, datatype=None, action=None,
     """Deadtime corrections - has a parameter"""
 
     icon = {
-        'URI': config.IMAGES + "SANS/deadtime.png",
+        'URI': config.IMAGES + "SANS/deadtime_image.png",
+	'image': config.IMAGES + "SANS/deadtime.png",
         'terminals': {
             #Inputs
             'sample_in': (-16, 10, -1, 0),

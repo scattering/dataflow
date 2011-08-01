@@ -10,7 +10,8 @@ def generate_transmission_module(id=None, datatype=None, action=None,
     """Return transmission based on bottom left and top right coordinates"""
 
     icon = {
-        'URI': config.IMAGES + "SANS/gen_trans_image.png",
+        'URI': config.IMAGES + "SANS/gen_trans.png",
+	'image': config.IMAGES + "SANS/gen_trans_image.png",
         'terminals': {
             #inputs
             'sample_in': (-16, 5, -1, 0),

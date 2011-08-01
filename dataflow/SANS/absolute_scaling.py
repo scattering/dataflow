@@ -10,7 +10,8 @@ def absolute_scaling_module(id=None, datatype=None, action=None,
     """Abs"""
 
     icon = {
-        'URI': config.IMAGES + "SANS/abs_image.png",
+        'URI': config.IMAGES + "SANS/Abs.png",
+	'image': config.IMAGES + 'SANS/abs_image.png',
         'terminals': {
             #inputs
             'DIV': (-16, 5, -1, 0),
