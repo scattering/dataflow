@@ -39,3 +39,4 @@ class experimentForm2(forms.Form):
     		super(experimentForm2, self).__init__(*args, **kwargs)
 		self.fields['templates'] = forms.ModelChoiceField(queryset = Template.objects.filter(user=USER), empty_label="(Select a Template)")
 		self.fields['files'] = forms.FileField()
+		self.fields['files'].widget.attrs['multiple'] = 'true'
