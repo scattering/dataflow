@@ -3,7 +3,7 @@ Triple Axis Spectrometer reduction and analysis modules
 """
 import math, os, sys, types
 
-if 1:
+if 0:
     from ...reduction.tripleaxis import data_abstraction
     from ..calc import run_template
     from .. import wireit
@@ -25,7 +25,7 @@ if 1:
     from ...apps.tracks.models import File
 
 
-if 0:
+if 1:
     #direct imports for use individually (ie running this file)
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
     from dataflow.reduction.tripleaxis import data_abstraction
@@ -221,7 +221,7 @@ if 1:
         register_instrument(instrument)
 
 
-if 0:
+if 1:
     modules = [
         dict(module="tas.load", position=(10, 150), config={'files':[ROOT_URL.HOMEDIR[:-12] + 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
         dict(module="tas.normalize_monitor", position=(270, 20), config={'target_monitor': 165000}),
@@ -252,7 +252,7 @@ if 0:
                         instrument=BT7.id,
                         )
 
-if 1:
+if 0:
     #for loading spins files 59-71 for plotting
     modules = [
         dict(module="tas.load", position=(10, 40), config={}),
