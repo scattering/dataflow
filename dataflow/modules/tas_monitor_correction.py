@@ -13,9 +13,9 @@ def monitor_correction_module(id=None, datatype=None, action=None,
     """
 
     icon = {
-        'URI': config.IMAGES + 'TAS/harmonic_monitor_correction.png', 
-        'image': config.IMAGES + 'TAS/harmonic_monitor_correction.png', 
-        'width': 'auto', 
+        'URI': config.IMAGES + 'TAS/harmonic_monitor_correction.png',
+        'image': config.IMAGES + 'TAS/harmonic_monitor_correction.png',
+        'width': 'auto',
         'terminals': {
             'input': (-12, 16, -1, 0),
             'output': (48, 16, 1, 0),
@@ -38,11 +38,11 @@ def monitor_correction_module(id=None, datatype=None, action=None,
              ),
     ]
     
-    instrumentname_field = {
-        "type":"String",
+    instrument_name_field = {
+        "type":"string",
         "label": "Instrument name",
         "name": "instrument_name",
-        "value": 1.0,
+        "value": 'BT7',
     }
     
     # Combine everything into a module.
@@ -52,7 +52,7 @@ def monitor_correction_module(id=None, datatype=None, action=None,
                   description=description,
                   icon=icon,
                   terminals=terminals,
-                  fields=[instrumentname_field] + fields,
+                  fields=[instrument_name_field] + fields,
                   action=action,
                   )
 

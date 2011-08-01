@@ -319,6 +319,10 @@
 					WireIt.ImageContainer.prototype.width = 40;
 					WireIt.ImageContainer.prototype.onMouseDown = function() {
 						//console.log('clicked on imageContainer')
+						if(!this.tracksConfigs)
+							this.tracksConfigs = [];
+						if(!this.tracksConfigs[editor.reductionInstance])
+							this.tracksConfigs[editor.reductionInstance] = {}
 						this.tracksConfigs[editor.reductionInstance].position = this.getXY()
 						editor.clickedModuleID = editor.layer.containers.indexOf(this)
 						editor.displayClickedModuleConfig(this)
@@ -327,6 +331,10 @@
 					}
 					WireIt.Container.prototype.onMouseDown = function() {
 						//console.log('clicked on container')
+						if(!this.tracksConfigs)
+							this.tracksConfigs = [];
+						if(!this.tracksConfigs[editor.reductionInstance])
+							this.tracksConfigs[editor.reductionInstance] = {}
 						this.tracksConfigs[editor.reductionInstance].position = this.getXY()
 						editor.clickedModuleID = editor.layer.containers.indexOf(this)
 						editor.displayClickedModuleConfig(this)
@@ -397,6 +405,7 @@
 						//console.log(layer[0])
 						if (layer[0].terminal2.container) { // so we only get events fired on completion
 							if (!layer[0].src) {
+								console.log('IN HERE')
 								var src = {}
 								var tgt = {}
 								src['moduleId'] = editor.layer.containers.indexOf(layer[0].terminal1.container)
@@ -406,12 +415,23 @@
 
 								layer[0]['src'] = src
 								layer[0]['tgt'] = tgt
+								for (var i in editor.layer.wires) {
+									
+									}
 							}
 						}
 						//var wire=params[0];
 						//wire['src'] = wire.terminal1
 						//wire['tgt'] = wire.terminal2
 					}, editor.layer, true);
+					editor.layer.eventAddContainer.subscribe( function(event, layer) {
+						layer[0].onMouseDown()
+					}, editor.layer, true);
+					editor.layer.eventChanged.subscribe( function(event, layer) {
+
+					}, editor.layer, true);
+					
+					
 					// Open the infos panel
 					//editor.accordionView.openPanel(2);
 					//editor.accordionView.closePanel(0);

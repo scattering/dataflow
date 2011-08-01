@@ -812,13 +812,13 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
     
     if (!plot || !plot.hasOwnProperty("type") || plot.type!='nd'){
         stage = 1;
-        plotdiv.innerHTML = "";
         var plot = { stage: 1, prevtype: null, targetId: plotid + '_target', series: [], options: { title: '', series: [], axes: {} }};
         plot.options.cursor = { show: true, zoom: true, tooltipFormatString: '%.3g, %.3g', tooltipLocation:'ne'};
         plot.options.series = [{ renderer: jQuery.jqplot.errorbarRenderer, rendererOptions: { errorBar: true } }]
     }
     
     if (create) {
+        plotdiv.innerHTML = ""
         plotdiv.appendChild(createNdPlotRegion(plotid));
         updateSeriesSelects(toPlot, plotid);
     }
@@ -843,10 +843,11 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
         // I know, I know: "series" is both singular and plural... go blame the English language, not me!
         //var serie = $A(datax.values).zip(datay.values, datax.errors, datay.errors, function(a) { return [a[0], a[1], { xerr: a[2], yerr: a[3] }]; });
         var serie = new Array();
-        for (var i = 0; i < datax.values.length; i++) {
-            serie[i] = [datax.values[i], datay.values[i], {xerr: get(datax.errors, i), yerr: get(datay.errors, i)}];
+        if (datax) {
+            for (var i = 0; i < datax.values.length; i++) {
+                serie[i] = [datax.values[i], datay.values[i], {xerr: get(datax.errors, i), yerr: get(datay.errors, i)}];
+            }
         }
-        
         console.log('serie '+s, serie);
         if (!series[s] || !series[s].hasOwnProperty('data'))
             series[s] = serie;
