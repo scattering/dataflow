@@ -10,7 +10,8 @@ def annular_av_module(id=None, datatype=None, action=None,
     """Using Annular averaging, make 1D sans data (Q vs I)"""
 
     icon = {
-        'URI': config.IMAGES + "SANS/annular2_image.png",
+        'URI': config.IMAGES + "SANS/circular_avg_image.png",
+	'image': config.IMAGES + "SANS/circular_avg.png", 
         'terminals': {
             #inputs
             'ABS': (-16, 10, -1, 0),
@@ -39,7 +40,7 @@ def annular_av_module(id=None, datatype=None, action=None,
 
     # Combine everything into a module.
     module = Module(id=id,
-                  name='Annular Average',
+                  name='Circular Average',
                   version=version,
                   description=action.__doc__,
                   icon=icon,

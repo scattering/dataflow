@@ -11,7 +11,8 @@ def correct_detector_sensitivity_module(id=None, datatype=None, action=None,
     """Uses .DIV to peform division in reduction steps"""
 
     icon = {
-        'URI': config.IMAGES + "SANS/div_image.png",
+        'URI': config.IMAGES + "SANS/div.png",
+	'image': config.IMAGES + "SANS/div_image.png",
         'terminals': {
             #inputs
             'COR': (-16, 10, -1, 0),
