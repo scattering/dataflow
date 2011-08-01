@@ -874,7 +874,7 @@ class TripleAxis(object):
 				pass	
 			else:
 				for field in value:
-					#orderx.append({'key': field.name, 'label': field.name})
+					orderx.append({'key': field.name, 'label': field.name})
 					val = field.measurement.x
 					err = field.measurement.variance
 					if type(val)==np.ndarray:
@@ -893,7 +893,6 @@ class TripleAxis(object):
 						
 					data[field.name]={'values': val,'errors': err}
 
-		orderx.append({'key': 'e', 'label': 'e'})
 		plottable_data = {
 	                'type': 'nd',
 	                'title': 'Triple Axis Plot',
