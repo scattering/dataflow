@@ -36,22 +36,22 @@ def pixels_two_theta_module(id=None, datatype=None, action=None,
     # pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6
     pixs_per_degree_field = {
         "type":"float",
-        "label": "pixels_per_degree",
-        "name": "pixels per degree",
+        "label": "pixels per degree",
+        "name": "pixels_per_degree",
         "value": 80.0,
     }
     
     qzero_pixel_field = {
         "type":"int",
-        "label": "qzero_pixel",
-        "name": "qzero pixel",
+        "label": "qzero pixel",
+        "name": "qzero_pixel",
         "value": 309,
     }
     
     resolution_field = {
         "type":"float",
-        "label": "instr_resolution",
-        "name": "instrument resolution",
+        "label": "instrument resolution",
+        "name": "instr_resolution",
         "value": 1e-6,
     }
 

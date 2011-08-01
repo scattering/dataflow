@@ -27,6 +27,7 @@ if SERVER:
     from DATAFLOW.dataflow.offspecular.modules.polarization_correct import polarization_correct_module
     from DATAFLOW.dataflow.offspecular.modules.timestamps import timestamp_module
     from DATAFLOW.dataflow.offspecular.modules.load_timestamps import load_timestamp_module
+    from DATAFLOW.dataflow.offspecular.modules.empty_qxqz_grid import empty_qxqz_grid_module
     from DATAFLOW.reduction.offspecular.filters import *
     from DATAFLOW.reduction.offspecular.he3analyzer import *
     from DATAFLOW.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
@@ -51,6 +52,7 @@ elif TESTING:
     from dataflow.dataflow.offspecular.modules.polarization_correct import polarization_correct_module
     from dataflow.dataflow.offspecular.modules.timestamps import timestamp_module
     from dataflow.dataflow.offspecular.modules.load_timestamps import load_timestamp_module
+    from dataflow.dataflow.offspecular.modules.empty_qxqz_grid import empty_qxqz_grid_module
     from dataflow.reduction.offspecular.filters import *
     from dataflow.reduction.offspecular.he3analyzer import *
     from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
@@ -72,11 +74,12 @@ else:
     from ..offspecular.modules.polarization_correct import polarization_correct_module
     from ..offspecular.modules.timestamps import timestamp_module
     from ..offspecular.modules.load_timestamps import load_timestamp_module
+    from ..offspecular.modules.empty_qxqz_grid import empty_qxqz_grid_module
     from ...reduction.offspecular.filters import *
     from ...reduction.offspecular.he3analyzer import *
     from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray
 
-class Timestamp(dict):
+class PlottableDict(dict):
     def get_plottable(self):
         return simplejson.dumps({})
     def dumps(self):
@@ -97,7 +100,7 @@ data2d = Data(OSPEC_DATA, FilterableMetaArray)
 OSPEC_DATA_HE3 = OSPEC_DATA + '.he3'
 datahe3 = Data(OSPEC_DATA_HE3, He3AnalyzerCollection)
 OSPEC_DATA_TIMESTAMP = OSPEC_DATA + '.timestamp'
-datastamp = Data(OSPEC_DATA_TIMESTAMP, Timestamp)
+datastamp = Data(OSPEC_DATA_TIMESTAMP, PlottableDict)
 
 # Load module
 def load_action(files=[], intent='', auto_PolState=False, PolStates={}, **kwargs):
@@ -110,16 +113,16 @@ def _load_data(name, auto_PolState, PolState):
     print "Loading:", name, PolState
     return LoadICPData(fileName, path=dirName, auto_PolState=auto_PolState, PolState=PolState)
 auto_PolState_field = {
-        "type":"bool",
+        "type":"boolean",
         "label": "Auto-polstate",
         "name": "auto_PolState",
         "value": False,
 }
 PolStates_field = {
-        "type":"list",
+        "type":"dict:string:string",
         "label": "PolStates",
         "name": "PolStates",
-        "value": [],
+        "value": {},
 }
 load = load_module(id='ospec.load', datatype=OSPEC_DATA,
                    version='1.0', action=load_action, fields=[auto_PolState_field, PolStates_field])
@@ -184,25 +187,29 @@ def two_theta_qxqz_action(input=[], output_grid=None, wavelength=5.0, **kwargs):
     return dict(output=result)
 two_theta_qxqz = two_theta_qxqz_module(id='ospec.qxqz', datatype=OSPEC_DATA, version='1.0', action=two_theta_qxqz_action)
 
+def empty_qxqz_grid_action(qxmin= -0.003, qxmax=0.003, qxbins=201, qzmin=0.0, qzmax=0.1, qzbins=201, **kwargs):
+    print "creating an empty QxQz grid"
+    return dict(output=[EmptyQxQzGrid(qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)])
+empty_qxqz = empty_qxqz_grid_module(id='ospec.emptyqxqz', datatype=OSPEC_DATA, version='1.0', action=empty_qxqz_grid_action)
+
+
 # ======== Polarization modules ===========
 
 # Load he3 module
-def load_he3_action(files=[], cells=[], **kwargs):
+def load_he3_action(files=[], **kwargs):
     print "loading he3", files
-    if len(cells) < len(files):
-        cells += [[]] * (len(files) - len(cells))
-    result = [_load_he3_data(f, cell) for f, cell in zip(files, cells)]
+    result = [_load_he3_data(f) for f in files]
     return dict(output=result)
-def _load_he3_data(name, cells):
+def _load_he3_data(name):
     (dirName, fileName) = os.path.split(name)
-    return He3AnalyzerCollection(filename=fileName, path=dirName, cells=cells)
+    return He3AnalyzerCollection(filename=fileName, path=dirName)
 load_he3 = load_he3_module(id='ospec.loadhe3', datatype=OSPEC_DATA_HE3,
                    version='1.0', action=load_he3_action)
 
 # Load timestamps
 def load_timestamp_action(files=[], **kwargs):
     print "loading timestamps", files
-    result = [Timestamp(simplejson.load(open(f, 'r'))) for f in files]
+    result = [PlottableDict(simplejson.load(open(f, 'r'))) for f in files]
     return dict(output=result)
 load_stamp = load_timestamp_module(id='ospec.loadstamp', datatype=OSPEC_DATA_TIMESTAMP,
                    version='1.0', action=load_timestamp_action)
@@ -248,7 +255,7 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                  name='NCNR ANDR',
                  archive=config.NCNR_DATA + '/andr',
                  menu=[('Input', [load, load_he3, load_stamp, save]),
-                       ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, two_theta_qxqz]),
+                       ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, two_theta_qxqz, empty_qxqz]),
                        ('Polarization reduction', [timestamp, append_polarization, combine_polarized, correct_polarized]),
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],
@@ -260,7 +267,7 @@ for instrument in instrmnts:
 
 # Testing
 if __name__ == '__main__':
-    polarized = True
+    polarized = False
     if not polarized:
         path, ext = dir + '/dataflow/sampledata/ANDR/sabc/Isabc20', '.cg1'
         files = [path + str(i + 1).zfill(2) + ext for i in range(1, 12)]
@@ -274,6 +281,7 @@ if __name__ == '__main__':
             dict(module="ospec.twotheta", position=(450, 250), config={}),
             dict(module="ospec.qxqz", position=(560, 392), config={}),
             dict(module="ospec.grid", position=(350, 390), config={}),
+            dict(module="ospec.emptyqxqz", position=(350, 470), config={}),
         ]
         wires = [
             dict(source=[0, 'output'], target=[4, 'input']),
@@ -283,6 +291,7 @@ if __name__ == '__main__':
             dict(source=[5, 'output'], target=[7, 'input']),
             dict(source=[7, 'output'], target=[2, 'input_grid']),
             dict(source=[2, 'output'], target=[6, 'input']),
+            dict(source=[8, 'output'], target=[6, 'output_grid']),
             dict(source=[6, 'output'], target=[1, 'input']),
         ]
     else:

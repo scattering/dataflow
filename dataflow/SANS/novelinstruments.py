@@ -145,6 +145,8 @@ save = save_module(id='sans.save', datatype=SANS_DATA,
 
 # Modules
 def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in, deadtimeConstant=3.4e-6 , **kwargs):
+    
+    deadtimeConstant = float(deadtimeConstant)
     lis = [sample_in[0], empty_cell_in[0], empty_in[0], blocked_in[0]] 
     print "List: ", lis
     #Enter DeadTime parameter eventually
@@ -156,11 +158,11 @@ def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in, dea
 deadtime = correct_dead_time_module(id='sans.correct_dead_time', datatype=SANS_DATA, version='1.0', action=correct_dead_time_action)
 
 def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Temp_in, monitorNormalize=1e8, bottomLeftCoord={}, topRightCoord={}, **kwargs):
-    coord_left = (bottomLeftCoord['X'], bottomLeftCoord['Y'])
-    coord_right = (topRightCoord['X'], topRightCoord['Y'])
+    coord_left = (int(bottomLeftCoord['X']), int(bottomLeftCoord['Y']))
+    coord_right = (int(topRightCoord['X']), int(topRightCoord['Y']))
+    monitorNormalize = float(monitorNormalize)
     lis = [sample_in[0], empty_cell_in[0], empty_in[0], Tsam_in[0], Temp_in[0]] 
     print "Lis: ", lis
-    #Enter Normalization Parameter eventually
     norm = [monitor_normalize(f,monitorNormalize) for f in lis]
     
     Tsam = generate_transmission(norm[3], norm[2], coord_left, coord_right)
@@ -174,7 +176,6 @@ def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Te
     sam = result[0]
     sam.Tsam = Tsam
     sam.Temp = Temp
-    print "Tsam:", sam.Tsam
     return dict(sample_out=[sam], empty_cell_out=[result[1]])#,=[result[3]])
 generate_trans = generate_transmission_module(id='sans.generate_transmission', datatype=SANS_DATA, version='1.0', action=generate_transmission_action)        
 def initial_correction_action(sample, empty_cell, blocked, **kwargs):
@@ -183,7 +184,6 @@ def initial_correction_action(sample, empty_cell, blocked, **kwargs):
     SAM = lis[0]
     EMP = lis[1]
     BGD = lis[2]
-    print "Tsam:", SAM.Tsam
     CORR = initial_correction(SAM, BGD, EMP, SAM.Tsam / SAM.Temp)
     CORR.Tsam = SAM.Tsam
     result = CORR
@@ -208,23 +208,23 @@ def convert_qxqy_action():
 
 def absolute_scaling_action(DIV, empty, sensitivity, ins_name='',bottomLeftCoord={}, topRightCoord={}, **kwargs):
     #sample,empty,DIV,Tsam,instrument
-    coord_left = (bottomLeftCoord['X'], bottomLeftCoord['Y'])
-    coord_right = (topRightCoord['X'], topRightCoord['Y'])
+    coord_left = (int(bottomLeftCoord['X']), int(bottomLeftCoord['Y']))
+    coord_right = (int(topRightCoord['X']),  int(topRightCoord['Y']))
     lis = [DIV[0], empty[0], sensitivity[0]]
-    global qx,qy
+    
     sensitivity = lis[-1]
     EMP = lis[1]
     DIV = lis[0]
     ABS = absolute_scaling(DIV, EMP, sensitivity, DIV.Tsam, ins_name,coord_left,coord_right)
     
-    correct = convert_q(ABS)
-    correct, qx, qy = convert_qxqy(correct)
-    result = [correct]
+
+    result = [ABS]
    
     return dict(ABS=result)
 absolute = absolute_scaling_module(id='sans.absolute_scaling', datatype=SANS_DATA, version='1.0', action=absolute_scaling_action)
 def annular_av_action(ABS, **kwargs):
-    AVG = annular_av(ABS[0])
+    correct = convert_q(ABS[0])
+    AVG = annular_av(correct)
     result = [AVG]
     print "Done Red"
     return dict(OneD=result)
@@ -272,7 +272,7 @@ if __name__ == '__main__':
         dict(module="sans.load", position=(5, 110),
              config={'files': [fileList[5]], 'intent': 'signal'}),
         #4 
-        dict(module="sans.correct_dead_time", position=(250 , 10), config={'deadtimeConstant':3.4e-6}),
+        dict(module="sans.correct_dead_time", position=(344 , 8), config={'deadtimeConstant':3.4e-6}),
         
         #Tsam 5
         dict(module="sans.load", position=(5, 200),
@@ -281,25 +281,25 @@ if __name__ == '__main__':
         dict(module="sans.load", position=(5, 230),
              config={'files': [fileList[4]], 'intent': 'signal'}),
         #7
-        dict(module="sans.generate_transmission", position=(400 , 10), config={'monitorNormalize':1e8, 'bottomLeftCoord':{'X':55, 'Y':53}, 'topRightCoord':{'X':74, 'Y':72}}),
+        dict(module="sans.generate_transmission", position=(584 , 4), config={'monitorNormalize':1e8, 'bottomLeftCoord':{'X':55, 'Y':53}, 'topRightCoord':{'X':74, 'Y':72}}),
         #8
         dict(module="sans.save", position=(660, 660), config={'ext': 'dat'}),
         #9
-        dict(module="sans.initial_correction", position=(480 , 100), config={}),
+        dict(module="sans.initial_correction", position=(779 , 45), config={}),
         
         #DIV 10
         dict(module="sans.load", position=(5, 300),
              config={'files': [fileList[-1]], 'intent': 'signal'}),
         
         #11
-        dict(module="sans.correct_detector_sensitivity", position=(540 , 200), config={}),
+        dict(module="sans.correct_detector_sensitivity", position=(750 , 161), config={}),
         ##EMP 12
         #dict(module="sans.load", position=(100, 300),
              #config={'files': [fileList[2]], 'intent': 'signal'}),
         #12
-        dict(module="sans.absolute_scaling", position=(580 , 300), config={'ins_name':'NG3','bottomLeftCoord':{'X':55, 'Y':53}, 'topRightCoord':{'X':74, 'Y':72}}),
+        dict(module="sans.absolute_scaling", position=(750 , 265), config={'ins_name':'NG3','bottomLeftCoord':{'X':55, 'Y':53}, 'topRightCoord':{'X':74, 'Y':72}}),
         #13
-        dict(module="sans.annular_av", position=(610 , 400), config={}),
+        dict(module="sans.annular_av", position=(750 , 383), config={}),
         
         #dict(module="sans.correct_background", position=(360 , 60), config={}),
         

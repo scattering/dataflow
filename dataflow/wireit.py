@@ -129,7 +129,7 @@ def _module_to_wireit(module):
                          width=config.LABEL_WIDTH,
                          terminals=terminals)
 
-    return dict(name=module.name, container=container)
+    return dict(name=module.name, container=container, fields=module.fields)
 
 def _terminal_to_wireit(terminal):
     """
