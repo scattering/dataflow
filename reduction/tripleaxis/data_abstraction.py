@@ -858,8 +858,8 @@ class TripleAxis(object):
 				                'xmin': xstart,
 				                'ymin': ystart,
 				                'ymax': yfinal,
-				                'xdim': xfinal - xstart,
-				                'ydim': yfinal - ystart,
+				                'xdim': len(xi),
+				                'ydim': len(yi),
 				                'zmin': zi.min(),
 				                'zmax': zi.max(),
 				        },
@@ -867,6 +867,7 @@ class TripleAxis(object):
 				        'ylabel': self.yaxis,
 				        'zlabel': 'Intensity (I)',
 				}
+				print plottable_data['dims']
 				print "done plotting"
 
 			else:
