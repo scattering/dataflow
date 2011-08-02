@@ -403,22 +403,45 @@
 						}
 					}
 					editor.layer.eventAddWire.subscribe( function(event, layer) {
-						/*if (layer[0].terminal2.container) { // so we only get events fired on completion
-						if (!layer[0].src) {
-						var src = {}
-						var tgt = {}
-						src['moduleId'] = editor.layer.containers.indexOf(layer[0].terminal1.container)
-						src['terminal'] = layer[0].terminal1.name
-						tgt['moduleId'] = editor.layer.containers.indexOf(layer[0].terminal2.container)
-						tgt['terminal'] = layer[0].terminal1.name
-
-						layer[0]['src'] = src
-						layer[0]['tgt'] = tgt
+						regex = /Load/
+						console.log("in add wire")
+						console.log(layer[0].terminal1.container.title)
+						if(regex.test(layer[0].terminal1.container.title)){
+							console.log("UPDATING FAT")
+							while (YAHOO.util.Dom.get('FAT').hasChildNodes()) {
+								YAHOO.util.Dom.get('FAT').removeChild(YAHOO.util.Dom.get('FAT').lastChild);
+							}
+							console.log(editor.getFATHeaders())
+							makeFileTable(editor.getFATHeaders(),FILES, editor.getValue().working.modules)
 						}
-						}*/
+					}, editor.layer, true);
+					editor.layer.eventRemoveWire.subscribe( function(event, layer) {
+						regex = /Load/
+						console.log("in remove wire")
+						console.log(layer[0].terminal1.container.title)
+						if(regex.test(layer[0].terminal1.container.title)){
+							console.log("UPDATING FAT")
+							while (YAHOO.util.Dom.get('FAT').hasChildNodes()) {
+								YAHOO.util.Dom.get('FAT').removeChild(YAHOO.util.Dom.get('FAT').lastChild);
+							}
+							console.log(editor.getFATHeaders())
+							makeFileTable(editor.getFATHeaders(),FILES, editor.getValue().working.modules)
+						}
 					}, editor.layer, true);
 					editor.layer.eventAddContainer.subscribe( function(event, layer) {
 						layer[0].onMouseDown()
+					}, editor.layer, true);
+					editor.layer.eventRemoveContainer.subscribe( function(event, layer) {
+						regex = /Load/
+						console.log("in remove")
+						if(regex.test(layer[0].title)){
+							console.log("UPDATING FAT")
+							while (YAHOO.util.Dom.get('FAT').hasChildNodes()) {
+								YAHOO.util.Dom.get('FAT').removeChild(YAHOO.util.Dom.get('FAT').lastChild);
+							}
+							console.log(editor.getFATHeaders())
+							makeFileTable(editor.getFATHeaders(),FILES, editor.getValue().working.modules)
+						}
 					}, editor.layer, true);
 					editor.layer.eventChanged.subscribe( function(event, layer) {
 						console.log("REWIRING")
