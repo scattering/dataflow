@@ -276,7 +276,7 @@ if __name__ == '__main__':
                  config={'files': files, 'intent': 'signal'}),
             dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
             dict(module="ospec.combine", position=(452, 390), config={}),
-            dict(module="ospec.offset", position=(321, 171), config={'offsets':{'theta':0}}),
+            dict(module="ospec.offset", position=(321, 171), config={'offsets':{'theta':0, 'xpixel':10}}),
             dict(module="ospec.wiggle", position=(204, 92), config={}),
             dict(module="ospec.twotheta", position=(450, 250), config={}),
             dict(module="ospec.qxqz", position=(560, 392), config={}),
