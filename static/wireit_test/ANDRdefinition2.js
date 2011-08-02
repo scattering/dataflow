@@ -365,7 +365,10 @@ var andr2 = {
           "label": "Offset amount", 
           "name": "offsets", 
           "type": "dict:str:float", 
-          "value": {}
+          "value": {
+            "theta": 0.0, 
+            "xpixel": 0.0
+          }
         }
       ], 
       "name": "Offset"
@@ -601,7 +604,7 @@ var andr2 = {
             "required": false
           }
         ], 
-        "width": 120, 
+        "width": 150, 
         "xtype": "WireIt.Container"
       }, 
       "fields": [
