@@ -44,6 +44,7 @@ if 1:
     from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
     from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
     from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
+    from dataflow.apps.tracks.models import File
     #from dataflow.apps.tracks.models import File
 
 TAS_DATA = 'data1d.tas'

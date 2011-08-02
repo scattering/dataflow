@@ -812,13 +812,13 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
     
     if (!plot || !plot.hasOwnProperty("type") || plot.type!='nd'){
         stage = 1;
+        plotdiv.innerHTML = ""
         var plot = { stage: 1, prevtype: null, targetId: plotid + '_target', series: [], options: { title: '', series: [], axes: {} }};
         plot.options.cursor = { show: true, zoom: true, tooltipFormatString: '%.3g, %.3g', tooltipLocation:'ne'};
         plot.options.series = [{ renderer: jQuery.jqplot.errorbarRenderer, rendererOptions: { errorBar: true } }]
     }
     
     if (create) {
-        plotdiv.innerHTML = ""
         plotdiv.appendChild(createNdPlotRegion(plotid));
         updateSeriesSelects(toPlot, plotid);
     }
