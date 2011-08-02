@@ -16,11 +16,11 @@ function configForm(headerList, moduleID) {
 			items2.push(item2)
 		}
 		defaultType = headerList[i][2];
-		if(defaultType == 'string' || defaultType == 'undefined'){
+		if(defaultType == 'string' || defaultType == 'undefined') {
 			defaultType = 'textfield';
-		} else if(defaultType == 'number'){
+		} else if(defaultType == 'number') {
 			defaultType = 'numberfield';
-		} else if(defaultType == 'boolean'){
+		} else if(defaultType == 'boolean') {
 			defaultType = 'checkbox';
 		}
 		item = {

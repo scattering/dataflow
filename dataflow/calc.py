@@ -247,8 +247,12 @@ def finger_print(module, args, nodenum, inputs_fp):
     # need access to Combine() and CoordinateOffset() source (e.g.)
     d['action'] = getsource(d['action']) # because it is a python method object (must convert it)
     fp = str(d) # source code (not 100% due to helper methods)
+    bad_args = ["position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
+    for arg in bad_args:
+        if arg in args: # don't want the template to "change" when a position changes (or when the others do either)
+            del args[arg]
     fp += str(args) # all arguments for the given module
-    fp += str(nodenum) # node number
+    #fp += str(nodenum) # node number; taken out because the template can be the same with modules in different places
     for item in inputs_fp:
         terminal_id, input_fp = item
         fp += terminal_id + input_fp

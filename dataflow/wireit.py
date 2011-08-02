@@ -124,9 +124,12 @@ def _module_to_wireit(module):
         height = max(in_offset, out_offset)
         height = min(height, step)        
 
+        label_width = config.LABEL_WIDTH
+        if hasattr(module, 'LABEL_WIDTH'):
+            label_width = module.LABEL_WIDTH
         container = dict(xtype='WireIt.Container',
                          height=height,
-                         width=config.LABEL_WIDTH,
+                         width=label_width,
                          terminals=terminals)
 
     return dict(name=module.name, container=container, fields=module.fields)
