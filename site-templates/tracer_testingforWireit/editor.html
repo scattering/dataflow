@@ -403,18 +403,6 @@
 						}
 					}
 					editor.layer.eventAddWire.subscribe( function(event, layer) {
-						for (var i in editor.layer.wires) {
-							wire = editor.layer.wires[i]
-							var src = {}
-							var tgt = {}
-							src['moduleId'] = editor.layer.containers.indexOf(wire.terminal1.container)
-							src['terminal'] = wire.terminal1.name
-							tgt['moduleId'] = editor.layer.containers.indexOf(wire.terminal2.container)
-							tgt['terminal'] = wire.terminal1.name
-
-							wire['src'] = src
-							wire['tgt'] = tgt
-						}
 						/*if (layer[0].terminal2.container) { // so we only get events fired on completion
 						if (!layer[0].src) {
 						var src = {}
@@ -428,15 +416,24 @@
 						layer[0]['tgt'] = tgt
 						}
 						}*/
-						//var wire=params[0];
-						//wire['src'] = wire.terminal1
-						//wire['tgt'] = wire.terminal2
 					}, editor.layer, true);
 					editor.layer.eventAddContainer.subscribe( function(event, layer) {
 						layer[0].onMouseDown()
 					}, editor.layer, true);
 					editor.layer.eventChanged.subscribe( function(event, layer) {
+						console.log("REWIRING")
+						for (var i in editor.layer.wires) {
+							wire = editor.layer.wires[i]
+							var src = {}
+							var tgt = {}
+							src['moduleId'] = editor.layer.containers.indexOf(wire.terminal1.container)
+							src['terminal'] = wire.terminal1.name
+							tgt['moduleId'] = editor.layer.containers.indexOf(wire.terminal2.container)
+							tgt['terminal'] = wire.terminal1.name
 
+							wire['src'] = src
+							wire['tgt'] = tgt
+						}
 					}, editor.layer, true);
 					// Open the infos panel
 					//editor.accordionView.openPanel(2);
