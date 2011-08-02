@@ -403,24 +403,31 @@
 						}
 					}
 					editor.layer.eventAddWire.subscribe( function(event, layer) {
-						//console.log(layer[0])
-						if (layer[0].terminal2.container) { // so we only get events fired on completion
-							if (!layer[0].src) {
-								console.log('IN HERE')
-								var src = {}
-								var tgt = {}
-								src['moduleId'] = editor.layer.containers.indexOf(layer[0].terminal1.container)
-								src['terminal'] = layer[0].terminal1.name
-								tgt['moduleId'] = editor.layer.containers.indexOf(layer[0].terminal2.container)
-								tgt['terminal'] = layer[0].terminal1.name
+						for (var i in editor.layer.wires) {
+							wire = editor.layer.wires[i]
+							var src = {}
+							var tgt = {}
+							src['moduleId'] = editor.layer.containers.indexOf(wire.terminal1.container)
+							src['terminal'] = wire.terminal1.name
+							tgt['moduleId'] = editor.layer.containers.indexOf(wire.terminal2.container)
+							tgt['terminal'] = wire.terminal1.name
 
-								layer[0]['src'] = src
-								layer[0]['tgt'] = tgt
-								for (var i in editor.layer.wires) {
-
-								}
-							}
+							wire['src'] = src
+							wire['tgt'] = tgt
 						}
+						/*if (layer[0].terminal2.container) { // so we only get events fired on completion
+						if (!layer[0].src) {
+						var src = {}
+						var tgt = {}
+						src['moduleId'] = editor.layer.containers.indexOf(layer[0].terminal1.container)
+						src['terminal'] = layer[0].terminal1.name
+						tgt['moduleId'] = editor.layer.containers.indexOf(layer[0].terminal2.container)
+						tgt['terminal'] = layer[0].terminal1.name
+
+						layer[0]['src'] = src
+						layer[0]['tgt'] = tgt
+						}
+						}*/
 						//var wire=params[0];
 						//wire['src'] = wire.terminal1
 						//wire['tgt'] = wire.terminal2
