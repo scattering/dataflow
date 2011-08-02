@@ -346,8 +346,8 @@
 						//console.log('XY', this.getXY())
 						configs['xtype'] = this.xtype
 						module = {};
-						for(var index in CHOSEN_LANG.modules){
-							if(CHOSEN_LANG.modules[index].name == this.title){
+						for(var index in CHOSEN_LANG.modules) {
+							if(CHOSEN_LANG.modules[index].name == this.title) {
 								module = CHOSEN_LANG.modules[index];
 								break;
 							}
@@ -416,8 +416,8 @@
 								layer[0]['src'] = src
 								layer[0]['tgt'] = tgt
 								for (var i in editor.layer.wires) {
-									
-									}
+
+								}
 							}
 						}
 						//var wire=params[0];
@@ -430,8 +430,6 @@
 					editor.layer.eventChanged.subscribe( function(event, layer) {
 
 					}, editor.layer, true);
-					
-					
 					// Open the infos panel
 					//editor.accordionView.openPanel(2);
 					//editor.accordionView.closePanel(0);
@@ -452,7 +450,7 @@
 	<body id="woot" class="yui-skin-sam">
 		<div id="top">
 			<div class="logo">
-				Dataflow / Tracks</a>
+				Dataflow / Tracks
 			</div>
 			<div id="toolbar">
 			</div>
