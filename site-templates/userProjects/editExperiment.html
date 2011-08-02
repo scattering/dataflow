@@ -79,7 +79,12 @@
 			<h2> Templates: </h2>
 			{% for template in experiment.templates.all %}
 			<li>
-				{{ template}}
+			    <form action="#" method="post">
+				{% csrf_token %}
+				<input type="hidden" value = "{{template.Title}}" name="delete_templates">
+				{{ template.Title }} <input type="submit" value="delete">
+				</form>
+				
 			</li>
 			{% endfor %} <h2> Files: </h2>
 			{% for file in experiment.Files.all %}
