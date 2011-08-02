@@ -839,25 +839,26 @@ class TripleAxis(object):
 				ystep = 1.0 * (yfinal - ystart) / len(yarr)
 				print "done with steps"
 				xi, yi, zi = regular_gridding.regularlyGrid(xarr, yarr, self.detectors.primary_detector.measurement.x, xstart=xstart, xfinal=xfinal, xstep=xstep, ystart=ystart, yfinal=yfinal, ystep=ystep)		                               
-				print xstart, xfinal
-				print ystart, yfinal
-				print zi.min(), zi.max()
-				print xfinal - xstart, yfinal - ystart
-				print zi
-				print len(xi), len(yi), len(zi)
-				print len(zi[0]), len(zi[1])
-				for list in zi:
-					list[list==None] = 0
-				print zi.tolist()[0]
+				#print xstart, xfinal
+				#print ystart, yfinal
+				#print zi.min(), zi.max()
+				#print xfinal - xstart, yfinal - ystart
+				#print zi
+				#print len(xi), len(yi), len(zi)
+				#print len(zi[0]), len(zi[1])
+				#for list in zi:
+				#	list[list==None] = 0
+				#print zi.tolist()[0]
+				zi = zi.T
 				plottable_data = {
 				        'type': '2d',
 				        'z':  [zi.tolist()],
 				        'title': 'TripleAxis Reduction Plot',
 				        'dims': {
-				                'xmax': xfinal,
-				                'xmin': xstart,
-				                'ymin': ystart,
-				                'ymax': yfinal,
+				                'xmax': xi.max(),
+				                'xmin': xi.min(),
+				                'ymin': yi.min(),
+				                'ymax': yi.max(),
 				                'xdim': len(xi),
 				                'ydim': len(yi),
 				                'zmin': zi.min(),
