@@ -371,6 +371,12 @@ def editExperiment(request, experiment_id):
                 print "f: ", f
                 print experiment.Files.filter(friendly_name=f)
                 experiment.Files.filter(friendly_name=f).delete()
+    if request.POST.has_key('delete_templates'):
+        if request.POST['delete_templates']:
+            delete_templates = request.POST.getlist('delete_templates')
+            for t in delete_templates:
+                print "t: ", t
+                experiment.templates.filter(Title=t).delete()
     context = RequestContext(request)
     facility = experiment.facility
     instrument = experiment.instrument
