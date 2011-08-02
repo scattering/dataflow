@@ -601,7 +601,7 @@ var andr2 = {
             "required": false
           }
         ], 
-        "width": 120, 
+        "width": 150, 
         "xtype": "WireIt.Container"
       }, 
       "fields": [
