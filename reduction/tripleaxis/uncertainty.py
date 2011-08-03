@@ -131,8 +131,10 @@ class Measurement(object):
         if isinstance(other,Measurement):
             if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
                 return Measurement(*err1d.div(self.x,self.variance,other.x,other.variance))
+            elif type(self)==numpy.ndarray:
+                return Measurement(self/other.x, self.variance/other.x**2)
             else:
-                return Measurement(self.x/other.x, self.variance/other.x**2)  #maybe revisit this--we claim that other is a measurement, but if the variance is None, then what does it mean to divide by this--the current solution is practical.
+                return Measurement(self.x/other.x, self.x/other.x**2)  #maybe revisit this--we claim that other is a measurement, but if the variance is None, then what does it mean to divide by this--the current solution is practical.
         else:
             if not self.variance is None:
                 return Measurement(self.x/other, self.variance/other**2)
