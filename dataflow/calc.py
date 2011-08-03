@@ -8,6 +8,7 @@ from pprint import pprint
 from inspect import getsource
 from .core import lookup_module, lookup_datatype
 import hashlib, redis, types, os
+from copy import deepcopy
 
 os.system("redis-server") # ensure redis is running
 server = redis.Redis("localhost")
@@ -95,7 +96,6 @@ def calc_single(template, config, nodenum, terminal_id):
     module_id = node['module'] # template.modules[node]
     module = lookup_module(module_id)
     terminal = module.get_terminal_by_id(terminal_id)
-    
     if terminal['use'] != 'out':
         # then this is an input terminal... can't get it!
         return {}
@@ -103,7 +103,6 @@ def calc_single(template, config, nodenum, terminal_id):
     all_fp = fingerprint_template(template, config)
     fp = name_fingerprint(all_fp[nodenum])
     terminal_fp = name_terminal(fp, terminal_id)
-
     if server.exists(terminal_fp):
         print "retrieving cached value: " + terminal_fp
         cls = lookup_datatype(terminal['datatype']).cls
@@ -149,7 +148,6 @@ def get_plottable(template, config, nodenum, terminal_id):
     all_fp = fingerprint_template(template, config)
     fp = all_fp[nodenum]
     plottable_fp = name_terminal(name_plottable(fp), terminal_id)
-    
     if server.exists(plottable_fp):
         print "retrieving cached value: " + plottable_fp
         plottable = server.lrange(plottable_fp, 0, -1)
@@ -190,7 +188,6 @@ def fingerprint_template(template, config):
         fp = finger_print(module, configuration, index, inputs_fp) # terminals included
         fingerprints[nodenum] = fp
         index += 1
-
     return fingerprints
 
 def _lookup_results(result, s):
@@ -245,32 +242,52 @@ def finger_print(module, args, nodenum, inputs_fp):
     """
     Create a unique sha1 hash for a module based on its attributes and inputs.
     """
-    d = module.__dict__.copy() # get all attributes
+    d = deepcopy(module.__dict__) # get all attributes
     # need access to Combine() and CoordinateOffset() source (e.g.)
     d['action'] = getsource(d['action']) # because it is a python method object (must convert it)
+    d = full_sort_dict(d)
     fp = str(d) # source code (not 100% due to helper methods)
+    # don't want the template to "change" when a position changes (or when the others do either)
     bad_args = ["position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
-    for arg in bad_args:
-        if arg in args: # don't want the template to "change" when a position changes (or when the others do either)
-            del args[arg]
-    fp += str(args) # all arguments for the given module
+    new_args = dict((arg, value) for arg, value in args.items() if arg not in bad_args)
+    new_args = full_sort_dict(new_args)
+    fp += str(new_args) # all arguments for the given module
     fp += str(nodenum) # node number in template order
     for item in inputs_fp:
         terminal_id, input_fp = item
         fp += terminal_id + input_fp
-#    for terminal_id, input_arr in inputs.items():
-#        fp += terminal_id
-#        if input_arr != None and isinstance(input_arr, list) and len(input_arr) > 0: # default value checking for non-required terminals
-#            if isinstance(input_arr[0], list): # Multiple = True; bundle
-#                fp += str([fingerprints[input[0]] for input in input_arr])
-#            elif isinstance(input_arr[0], int):  # Multiple = False; single input
-#                fp += str(fingerprints[input_arr[0]])
-#            else:
-#                raise TypeError("Input array should either be a bundle of inputs or just one input")
-#        else:
-#            fp += str(input_arr) # whatever the default value was
     fp = hashlib.sha1(fp).hexdigest()
     return fp
+
+# new methods that keep everything ordered
+def full_sort_dict(dict):
+    items = dict.items()
+    items.sort()
+    for index, (key, value) in enumerate(items):
+        items[index] = key, decide(value)
+    return items
+def full_sort_arr(arr):
+    for index, value in enumerate(arr):
+        arr[index] = decide(value)
+    return arr
+def full_sort_tuple(tuple):
+    for index, value in enumerate(tuple):
+        tuple = tuple_assignment(tuple, index, decide(value))
+    return tuple
+def tuple_assignment(tuple, index, item):
+    return tuple[:index] + (item,) + tuple[index + 1:]
+def decide(value):
+    value_type = type(value)
+    if value_type is types.DictType:
+        return full_sort_dict(value)
+    elif value_type is types.ListType:
+        return full_sort_arr(value)
+    elif value_type is types.TupleType:
+        return full_sort_tuple(value)
+    elif value_type is types.InstanceType:
+        return full_sort_dict(deepcopy(value.__dict__()))
+    else:
+        return value
 
 def convert_to_plottable(result):
     print "Starting new converter"
