@@ -196,7 +196,6 @@ def runReduction(request):
             elif key not in bad_headers:
                 conf.update({key: value})
         config.update({i:conf})
-    print config
     context = RequestContext(request)
     terminal_id = data['clickedOn']['source']['terminal']
     nodenum = int(data['clickedOn']['source']['moduleId'])
