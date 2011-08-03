@@ -242,15 +242,11 @@ def finger_print(module, args, nodenum, inputs_fp):
     """
     Create a unique sha1 hash for a module based on its attributes and inputs.
     """
-    d = deepcopy(module.__dict__) # get all attributes
-    # need access to Combine() and CoordinateOffset() source (e.g.)
-    d['action'] = getsource(d['action']) # because it is a python method object (must convert it)
-    d = full_sort_dict(d)
-    fp = str(d) # source code (not 100% due to helper methods)
-    # don't want the template to "change" when a position changes (or when the others do either)
+    d = format_ordered(deepcopy(module.__dict__))
+    fp = str(d)
     bad_args = ["position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
     new_args = dict((arg, value) for arg, value in args.items() if arg not in bad_args)
-    new_args = full_sort_dict(new_args)
+    new_args = format_ordered(new_args)
     fp += str(new_args) # all arguments for the given module
     fp += str(nodenum) # node number in template order
     for item in inputs_fp:
@@ -264,19 +260,19 @@ def full_sort_dict(dict):
     items = dict.items()
     items.sort()
     for index, (key, value) in enumerate(items):
-        items[index] = key, decide(value)
+        items[index] = key, format_ordered(value)
     return items
 def full_sort_arr(arr):
     for index, value in enumerate(arr):
-        arr[index] = decide(value)
+        arr[index] = format_ordered(value)
     return arr
 def full_sort_tuple(tuple):
     for index, value in enumerate(tuple):
-        tuple = tuple_assignment(tuple, index, decide(value))
+        tuple = tuple_assignment(tuple, index, format_ordered(value))
     return tuple
 def tuple_assignment(tuple, index, item):
     return tuple[:index] + (item,) + tuple[index + 1:]
-def decide(value):
+def format_ordered(value):
     value_type = type(value)
     if value_type is types.DictType:
         return full_sort_dict(value)
@@ -286,6 +282,8 @@ def decide(value):
         return full_sort_tuple(value)
     elif value_type is types.InstanceType:
         return full_sort_dict(deepcopy(value.__dict__()))
+    elif value_type is types.FunctionType:
+        return getsource(value)
     else:
         return value
 
