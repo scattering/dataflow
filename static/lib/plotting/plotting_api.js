@@ -304,7 +304,7 @@ function renderImageData(data, transform, plotid) {
                 return Math.log(datum)/Math.LN10
             }
             else {
-                return -Infinity
+                return NaN
             }
         }
         else if (transform=='lin'){
@@ -438,12 +438,19 @@ function renderImageData(data, transform, plotid) {
 
             plotz = ((plotz>255)? 255 : plotz);
             plotz = ((plotz<0)? 0 : plotz);
-            var rgb = palette_array[plotz];
+            if (plotz == NaN) {
+                var rgb = [0,0,0];
+                var alpha = 0;
+            }
+            else {
+                var rgb = palette_array[plotz];
+                var alpha = 255;
+            }
             //console.log(plotz, rgb)
             myImageData.data[offset + 0] = rgb[0];
             myImageData.data[offset + 1] = rgb[1];
             myImageData.data[offset + 2] = rgb[2];
-            myImageData.data[offset + 3] = 255;
+            myImageData.data[offset + 3] = alpha;
         }
       }
     context.putImageData(myImageData, 0, 0);

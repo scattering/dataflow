@@ -1,0 +1,13 @@
+'bamno058.ng5' 'Jan 31 2008 16:06' 'Q'     171750.    1  'NEUT'    1  'RAW'
+  Filename         Date            Scan       Mon    Prf  Base   #pts  Type
+bamno - guide-mono-open-s-be-radcol-11focana-det  
+   0   0   0   0       0  0  0         0  0  1  90.000     1  1  0
+ Collimation        Mosaic              Xstal Orientation
+     5.680     5.680    21.353    90.000    90.000   120.000
+Lattice Parameters in real space
+     1.060     0.000        5.000        3.354   3.354      0.00000   0.00000
+    E center  Delta E      EA fixed      M-dsp   A-dsp     Tmp strt   Tmp inc
+  0.333   0.333   3.000    0.0000  0.0000  0.0000      0.0000
+   Q (hkl scan center)        Delta Q (hkl)            Hfield
+    Q(x)    Q(y)    Q(z)     E       T-act    min       Counts
+  0.3333  0.3333  3.0000   1.0600  1.64000    0.27         110
