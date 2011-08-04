@@ -15,13 +15,13 @@ if 0:
     from ..core import Instrument, Data, Template, register_instrument
     
     #from dataflow.dataflow.modules.load import load_module
-    from ..modules.join import join_module
+    from .modules.tas_join import join_module
     from ..modules.save import save_module
-    from ..modules.tas_load import load_module
-    from ..modules.tas_normalize_monitor import normalize_monitor_module
-    from ..modules.tas_detailed_balance import detailed_balance_module
-    from ..modules.tas_monitor_correction import monitor_correction_module
-    from ..modules.tas_volume_correction import volume_correction_module
+    from .modules.tas_load import load_module
+    from .modules.tas_normalize_monitor import normalize_monitor_module
+    from .modules.tas_detailed_balance import detailed_balance_module
+    from .modules.tas_monitor_correction import monitor_correction_module
+    from .modules.tas_volume_correction import volume_correction_module
     from ...apps.tracks.models import File
 
 
@@ -38,13 +38,13 @@ if 1:
     from dataflow.dataflow import config
     from dataflow.dataflow.core import Instrument, Data, Template, register_instrument
 
-    from dataflow.dataflow.modules.join import join_module
+    from dataflow.dataflow.tas.modules.tas_join import join_module
     from dataflow.dataflow.modules.save import save_module
-    from dataflow.dataflow.modules.tas_load import load_module
-    from dataflow.dataflow.modules.tas_normalize_monitor import normalize_monitor_module
-    from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
-    from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
-    from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
+    from dataflow.dataflow.tas.modules.tas_load import load_module
+    from dataflow.dataflow.tas.modules.tas_normalize_monitor import normalize_monitor_module
+    from dataflow.dataflow.tas.modules.tas_detailed_balance import detailed_balance_module
+    from dataflow.dataflow.tas.modules.tas_monitor_correction import monitor_correction_module
+    from dataflow.dataflow.tas.modules.tas_volume_correction import volume_correction_module
     from dataflow.apps.tracks.models import File
     #from dataflow.apps.tracks.models import File
 
