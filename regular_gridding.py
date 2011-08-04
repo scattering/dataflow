@@ -29,10 +29,18 @@ def regularlyGrid(xarr, yarr, zarr, xstart=None, xfinal=None, xstep=None, ystart
 
 	# grid the data.
 	print len(xarr), len(yarr), len(zarr), len(xi), len(yi)
+	
+	xarr,yarr,zarr=remove_duplicates(xarr,yarr,zarr)
 	zi = griddata(xarr, yarr, zarr, xi, yi)
+	
 	print "done gridding"
 	return xi, yi, zi
 
+def remove_duplicates(xarr, yarr, zarr):
+	xs = N.unique(xarr)
+	#ys = N.unique(yarr)
+	for val in xs:
+		xarr.get(val)
 
 def plotGrid(xi, yi, zi):
 	# contour the gridded data, plotting dots at the randomly spaced data points.
