@@ -141,6 +141,8 @@ def _save_one(input, ext, index):
     input.write(outname)
 save = save_module(id='ospec.save', datatype=OSPEC_DATA,
                    version='1.0', action=save_action)
+save.xtype = 'SaveContainer'
+save.image = config.IMAGES + config.ANDR_FOLDER + "save_image.png"
 
 # Autogrid module
 def autogrid_action(input=[], extra_grid_point=True, min_step=1e-10, **kwargs):
@@ -276,7 +278,7 @@ if __name__ == '__main__':
                  config={'files': files, 'intent': 'signal'}),
             dict(module="ospec.save", position=(650, 350), config={'ext': 'dat'}),
             dict(module="ospec.combine", position=(452, 390), config={}),
-            dict(module="ospec.offset", position=(321, 171), config={'offsets':{'theta':0}}),
+            dict(module="ospec.offset", position=(321, 171), config={'offsets':{'theta':0, 'xpixel':10}}),
             dict(module="ospec.wiggle", position=(204, 92), config={}),
             dict(module="ospec.twotheta", position=(450, 250), config={}),
             dict(module="ospec.qxqz", position=(560, 392), config={}),
@@ -334,6 +336,24 @@ if __name__ == '__main__':
     ins = simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
     with open(dir + '/dataflow/static/wireit_test/ANDRdefinition2.js', 'w') as f:
         f.write('var andr2 = ' + ins + ';')
+        f.write("\n\nSaveContainer = function(opts, layer) {\
+\n    SaveContainer.superclass.constructor.call(this, opts, layer);\
+\n    var content = document.createElement('div')\
+\n    content.innerHTML = 'Click here to save:';\
+\n    var saveButton = document.createElement('img');\
+\n    saveButton.src = this.image;\
+\n    content.appendChild(saveButton);    \
+\n    this.setBody(content);\
+\n\
+\n    YAHOO.util.Event.addListener(saveButton, 'click', this.Save, this, true);\
+\n};\
+\n\nYAHOO.lang.extend(SaveContainer, WireIt.Container, {\
+\n    xtype: 'SaveContainer',\
+\n    Save: function(e) {\
+\n        console.log('save click:', e);\
+\n        alert('I am saving!');\
+\n    }\
+\n});")
     sys.exit()
     
     nodenum = template.order()[-2]

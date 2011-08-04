@@ -10,6 +10,7 @@ function configForm(headerList, moduleID) {
 			item2 = {
 				fieldLabel: headerList[i][1][j],
 				name: headerList[i][1][j],
+				decimalPrecision: Number.MAX_VALUE,
 			},
 			//console.log('i', i, 'j', j)
 			//console.log('adding item: ', item2)
@@ -29,6 +30,7 @@ function configForm(headerList, moduleID) {
 			collapsible: true,
 			defaultType: defaultType,
 			layout: 'anchor',
+			
 			defaults: {
 				anchor: '100%'
 			},
@@ -67,18 +69,38 @@ function configForm(headerList, moduleID) {
 			handler: function() {
 				var moduleConfigs = {}
 				var form = this.up('form').getForm();
+				console.log("submitting")
 				if (form.isValid()) {
+					console.log("valid")
 					//console.log("FORM FIELDS", form.getFields())
 					//console.log('FORM VALUES', form.getFieldValues())
 					console.log('FORM FIELD ITEMS', form._fields.items)
+					var allStringsBlank = true;
 					for (var j in form._fields.items) {
 						key = form._fields.items[j].ownerCt.title + ',' + form._fields.items[j].fieldLabel
 						moduleConfigs[key] = form._fields.items[j].lastValue
 						if(moduleConfigs[key] == "0" && form._fields.items[j].id.split("-")[0] == 'numberfield')
 							moduleConfigs[key] = 0
+						if(allStringsBlank && form._fields.items[j].id.split("-")[0] == 'textfield'){
+							if(form._fields.items[j].lastValue != undefined){
+								allStringsBlank = false;
+							}
+						}
 					}
 					console.log('CONFIGS IN FORM', moduleConfigs);
 					editor.setModuleConfigsFromForm(moduleConfigs, moduleID, editor.reductionInstance)
+					
+					console.log("All strings blank? ",allStringsBlank);
+					if(allStringsBlank){
+						for(var j in form._fields.items){
+							if(form._fields.items[j].id.split("-")[0] == 'textfield'){
+								key = form._fields.items[j].ownerCt.title + ',' + form._fields.items[j].fieldLabel
+								moduleConfigs[key] = "" // blank should be reset
+							}
+						}
+						console.log("RESETING ALL EMPTY STRING FIELDS");
+						editor.setModuleConfigsFromForm(moduleConfigs, moduleID, editor.reductionInstance);
+					}
 				}
 			}
 		},{

@@ -2,8 +2,8 @@
 For TripleAxis, normalize monitor
 """
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
 
 def normalize_monitor_module(id=None, datatype=None, action=None,
                              version='0.0', fields=[],

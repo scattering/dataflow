@@ -279,10 +279,9 @@
 			var value = this.getValue()
 
 			//console.log(value)
-			if(value.name === "") {
-				this.alert("Please choose a name");
-				return;
-			}
+//			while (value.name === "") {
+//				value.name = prompt("Please choose a name for this template:");
+//			}
 			this.toReduce = {
 				name: value.name,
 				modules: value.working.modules,

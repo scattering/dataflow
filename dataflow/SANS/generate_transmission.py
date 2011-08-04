@@ -88,22 +88,22 @@ def generate_transmission_module(id=None, datatype=None, action=None,
     ]
     monitorNormalize_field ={
         'type' :'float',
-        'label':'Monitor Normalization Value (default=1e8)',
-        'name' :'mon0',
+        'label':'Monitor Normalization Count (default=1e8)',
+        'name' :'monitorNormalize',
         'value':1e8,
         
         }
     bottomLeftCoord_field = {
         'type' :'dict',
         'label':'Bottom Left Coordinate',
-        'name' :'coords_bottom_left',
-        'value':{},
+        'name' :'bottomLeftCoord',
+        'value':{'X':0, 'Y':0},
         }
     topRightCoord_field = {
         'type' :'dict',
         'label':'Top Right Coordinate',
-        'name' :'coords_upper_right',
-        'value':{},
+        'name' :'topRightCoord',
+        'value':{'X':0, 'Y':0},
         }
     # Combine everything into a module.
     module = Module(id=id,
