@@ -1,10 +1,10 @@
 from MetaArray import MetaArray
 from numpy import ndarray, amin, amax, alen, array, fromstring
 import copy, simplejson, datetime
-from ...dataflow.core import Data
+#from ...dataflow.core import Data
 from cStringIO import StringIO
 
-class FilterableMetaArray(Data, MetaArray):
+class FilterableMetaArray(MetaArray):
     def __new__(*args, **kwargs):
         subarr = MetaArray.__new__(*args, **kwargs)
         return subarr
@@ -76,7 +76,7 @@ class FilterableMetaArray(Data, MetaArray):
             dims[axis[index] + 'min'] = amin(arr)
             dims[axis[index] + 'max'] = amax(arr)
             dims[axis[index] + 'dim'] = alen(arr)
-            dims['d' + axis[index]] = arr[1] - arr[0]
+            dims['d' + axis[index]] = float(arr[-1] - arr[0])/alen(arr)
         xlabel = self._info[0]['name']
         ylabel = self._info[1]['name']
         zlabel = self._info[2]['cols'][0]['name']
