@@ -2,101 +2,68 @@
 <html lang="en">
 	<head>
 		<title>Edit Experiment</title>
-		<script type="text/javascript" src="../../../../../../static/lib/yui/yahoo/yahoo-min.js"></script>
 		
-		<script type="text/javascript" src="../../../../../../static/lib/yui/event/event-min.js"></script>
-		<script type="text/javascript" src="../../../../../../static/lib/yui/connection/connection-min.js"></script>
-		<script type="text/javascript" src="../../../../../../static/lib/yui/json/json-min.js"></script>
+        <!-- Blueprint CSS -->
+        <link rel="stylesheet" href="/static/css/blueprint/blueprint/screen.css" type="text/css" media="screen, projection" />
+        <link rel="stylesheet" href="/static/css/blueprint/blueprint/print.css" type="text/css" media="print" />
+        <!--[if lt IE 8]><link rel="stylesheet" href="/static/css/blueprint/blueprint/ie.css" type="text/css" media="screen, projection" /><![endif]-->
+        <link rel="stylesheet" href="/static/css/blueprint/blueprint/plugins/fancy-type/screen.css" type="text/css" media="screen, projection" />
+        <style type="text/css">
+            label { font-weight: inherit; }
+        </style>
+		
+		<script type="text/javascript" src="/static/lib/yui/yahoo/yahoo-min.js"></script>
+		<script type="text/javascript" src="/static/lib/yui/event/event-min.js"></script>
+		<script type="text/javascript" src="/static/lib/yui/connection/connection-min.js"></script>
+		<script type="text/javascript" src="/static/lib/yui/json/json-min.js"></script>
 	</head>
 	<body>
-		<div id="content-1" style="float:left;">
-			<h2>EXPERIMENT: <i>{{ experiment.ProposalNum }}</i></h2>
-			<form action="." method="POST">
-				{% csrf_token %}
-				<table>
-					{{ form1.as_table }}
-				</table>
-				<p>
-					<input type="submit" value="Save changes">
-				</p>
+		<div class="container">
+			<h1 class="alt">Experiment: <span class="proposalnum">{{ experiment.ProposalNum }}</span></h1>
+			<hr />
+			<form action="." method="POST" enctype="multipart/form-data">
+		        {% csrf_token %}
+			    <div id="information-col" class="span-8 colborder">
+			        <h2>Information</h2>
+			        <table>
+				        {{ form1.as_table }}
+			        </table>
+		        </div>
+		        <div id="templates-files-col" class="span-15 last">
+            		<div class="span-6 colborder">
+		        	    <h2>Templates</h2>
+		        	    <!--<h3 class="alt">{{ form2.cur_templates.label }}</h3>-->
+		        	    {% if form2.cur_templates %}
+    		         	    {{ form2.cur_templates }}
+		        	    {% else %}
+    		        	    <p>There are currently 0 templates. Please add templates below.</p>
+		        	    {% endif %}
+		        	    <h3 class="alt">{{ form2.new_templates.label }}</h3>
+		        	    {{ form2.new_templates }}
+			        </div>
+			        <div class="span-8 last">
+			            <h2>Files</h2>
+		        	    <!--<h3 class="alt">{{ form2.cur_files.label }}</h3>-->
+		        	    {% if form2.cur_files %}
+		        	        {{ form2.cur_files }}
+		        	    {% else %}
+    		        	    <p>There are currently 0 files. Please add files below.</p>
+		        	    {% endif %}
+		        	    <h3 class="alt">{{ form2.new_files.label }}</h3>
+		        	    <p>{{ form2.new_files }}</p>
+		            </div>
+			    </div>
+	            <hr />
+			    <p><input type="submit" value="Save changes" /></p>
 			</form>
-			<hr>
-			</hr>
-			<form action="#" method="POST" enctype="multipart/form-data">
-				{% csrf_token %}
-				<table>
-					{{ form2.as_table }}
-				</table>
-			
-				
-				<p>
-				<!--	
-				<label for="files" > <strong>File Upload: </strong> </label>
-				<input type="file" value = "File Upload" id="files" name="files[]" multiple  />
-				<output id="list"></output>
-
-				<script>
-				  function handleFileSelect(evt) {
-				    var files = evt.target.files; // FileList object
-
-				    // files is a FileList of File objects. List some properties.
-				    var output = [];
-				    for (var i = 0, f; f = files[i]; i++) {
-				      output.push('<li><strong>', f.name, '</strong> (', f.type || 'n/a', ') - ',
-						  f.size, ' bytes, last modified: ',
-						   '</li>');
-				    }
-
-				    //console.log(files[0])
-				    TEST_TRANSFER = {'data': files[0].getAsBinary()}
-				    //console.log(TEST_TRANSFER)
-				    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
-				    YAHOO.util.Connect.asyncRequest('POST', '.', function() {},YAHOO.lang.JSON.stringify(TEST_TRANSFER))
-				  }
-
-				  document.getElementById('files').addEventListener('change', handleFileSelect, false);
-				</script>
-								</p>
-								-->
-								
-				<p>
-					<input type="submit" value="Add entries">
-				</p>
-			</form>
-			<hr>
-			</hr>
-			<form action="../../../../../../editor/" method="post">
-				{% csrf_token %}
-				<input type="hidden" name="language" value={{ experiment.instrument.instrument_class }} />
-				<input type="hidden" name="experiment_id" value={{ experiment.id }} />
-				<p>
-					<input type="submit" value="Start reducing!">
-				</p>
-			</form>
-			<!--<a STYLE="text-decoration:none" href="editor/"> Start reducing! </a>-->
-		</div>
-		<div id="content-2" style="float:left;margin-left:7%">
-			<h2> Templates: </h2>
-			{% for template in experiment.templates.all %}
-			<li>
-			    <form action="#" method="post">
-				{% csrf_token %}
-				<input type="hidden" value = "{{template.Title}}" name="delete_templates">
-				{{ template.Title }} <input type="submit" value="delete">
-				</form>
-				
-			</li>
-			{% endfor %} <h2> Files: </h2>
-			{% for file in experiment.Files.all %}
-			<li>
-
-				<form action="#" method="post">
-				{% csrf_token %}
-				<input type="hidden" value = "{{file.friendly_name}}" name="delete_files">
-				{{file.friendly_name }} <input type="submit" value="delete">
-				</form>
-			</li>
-			{% endfor %}
+			<form action="/editor/" method="post">
+				    {% csrf_token %}
+				    <p>
+        				<input type="hidden" name="language" value={{ experiment.instrument.instrument_class }} />
+        				<input type="hidden" name="experiment_id" value={{ experiment.id }} />
+					    <input type="submit" value="Start reducing!" />
+				    </p>
+			    </form>
 		</div>
 	</body>
 </html>
