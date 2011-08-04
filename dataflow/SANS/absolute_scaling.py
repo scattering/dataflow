@@ -56,20 +56,20 @@ def absolute_scaling_module(id=None, datatype=None, action=None,
     ins_name_field = {
         'type' :'string',
         'label':'Instrument Name (NG3,NG5,or NG7)',
-        'name' :'instrument',
+        'name' :'ins_name',
         'value':'',
         }
     bottomLeftCoord_field = {
         'type' :'dict',
         'label':'Bottom Left Coordinate',
-        'name' :'coords_bottom_left',
-        'value':{},
+        'name' :'bottomLeftCoord',
+        'value':{'X':0, 'Y':0},
         }
     topRightCoord_field = {
         'type' :'dict',
         'label':'Top Right Coordinate',
-        'name' :'coords_upper_right',
-        'value':{},
+        'name' :'topRightCoord',
+        'value':{'X':0, 'Y':0},
         }
     # Combine everything into a module.
     module = Module(id=id,

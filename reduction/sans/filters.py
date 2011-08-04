@@ -17,7 +17,7 @@ import time
 #from numpy import ndarray, amin, amax, alen, array, fromstring
 import simplejson, datetime
 #from dataflow.core import Data
-print 'PATH', os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+#print 'PATH', os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 #from ...dataflow.core import Data 
 from cStringIO import StringIO
