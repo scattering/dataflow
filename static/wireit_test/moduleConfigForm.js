@@ -10,6 +10,7 @@ function configForm(headerList, moduleID) {
 			item2 = {
 				fieldLabel: headerList[i][1][j],
 				name: headerList[i][1][j],
+				decimalPrecision: Number.MAX_VALUE,
 			},
 			//console.log('i', i, 'j', j)
 			//console.log('adding item: ', item2)
@@ -29,6 +30,7 @@ function configForm(headerList, moduleID) {
 			collapsible: true,
 			defaultType: defaultType,
 			layout: 'anchor',
+			
 			defaults: {
 				anchor: '100%'
 			},

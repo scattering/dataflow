@@ -2,8 +2,8 @@
 Join data sets
 """
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
 
 def join_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[],

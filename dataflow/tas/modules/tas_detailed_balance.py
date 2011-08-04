@@ -1,20 +1,20 @@
 """
-For TripleAxis, volume correction
+For TripleAxis, detailed balance
 """
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
 
-def volume_correction_module(id=None, datatype=None, action=None,
+def detailed_balance_module(id=None, datatype=None, action=None,
                              version='0.0', fields=[],
-                             description="apply TripleAxis volume correction"):
+                             description="apply TripleAxis detailed balance"):
     """
-    Return a module for correcting TripleAxis volume
+    Return a module for performing a detailed balance on a TripleAxis object
     """
 
     icon = {
-        'URI': config.IMAGES + 'TAS/volume_resolution_correction.png',
-        'image': config.IMAGES + 'TAS/volume_resolution_correction.png',
+        'URI': config.IMAGES + 'TAS/detailed_balance.png', 
+        'image': config.IMAGES + 'TAS/detailed_balance.png',
         'width': 'auto', 
         'terminals': {
             'input': (-12, 16, -1, 0),
@@ -34,14 +34,13 @@ def volume_correction_module(id=None, datatype=None, action=None,
         dict(id='output',
              datatype=datatype,
              use='out',
-             description='TripleAxis object with corrected volume',
+             description='TripleAxis object after detailed balance',
              ),
     ]
-    
-    
+
     # Combine everything into a module.
     module = Module(id=id,
-                  name='Volume Correction',
+                  name='Detailed Balance',
                   version=version,
                   description=description,
                   icon=icon,
