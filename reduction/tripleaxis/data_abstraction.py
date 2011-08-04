@@ -10,10 +10,10 @@ from mpfit import mpfit
 #from dataflow import regular_gridding
 #from ...dataflow import wireit
 
-if 0:
+if 1:
 	#for use in larger project
 	from ... import regular_gridding
-if 1:
+if 0:
 	#for use in local testing
 	import sys, os
 	sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
@@ -1781,13 +1781,25 @@ if __name__ == "__main__":
 		#spin = filereader('spins data/bamno059.ng5')
 		#spin2 = filereader('spins data/bamno060.ng5')
 		spins = filereader(r'spins_data/bamno059.ng5')
-		for num in range(60, 62):
+		for num in range(59, 72):
 			spins2 = filereader(r'spins_data/bamno0' + str(num) + '.ng5')
 			spins = join(spins, spins2)
 		#spins = join(spin,spin2)
 		print spins.get_plottable()
 		print 'fixme2'
 	if 1:
+		spins54 = filereader(r'spins_data/bamno054.ng5')
+		spins55 = filereader(r'spins_data/bamno055.ng5')
+		spins57 = filereader(r'spins_data/bamno057.ng5')
+		spins63 = filereader(r'spins_data/bamno063.ng5')
+		spins64 = filereader(r'spins_data/bamno064.ng5')
+		spins65 = filereader(r'spins_data/bamno065.ng5')
+		spins = join(spins55,spins64)
+		spins.xaxis='h'
+		spins.yaxis='e'
+		plotobj = spins.get_plottable()
+		print plotobj
+	if 0:
 		spins54 = filereader(r'spins_data/bamno054.ng5')
 		spins55 = filereader(r'spins_data/bamno055.ng5')
 		spins57 = filereader(r'spins_data/bamno057.ng5')
@@ -1801,7 +1813,8 @@ if __name__ == "__main__":
 		spins = join(spins, spins65)
 		spins.xaxis='h'
 		spins.yaxis='e'
-		print spins.get_plottable()
+		plotobj = spins.get_plottable()
+		print plotobj
 	if 0:
 		bt7 = filereader('EscanQQ7HorNSF91831.bt7')
 		print 'translations done'
