@@ -14,6 +14,7 @@ if 0:
     from .. import config
     from ..core import Instrument, Data, Template, register_instrument
     
+    #from dataflow.dataflow.modules.load import load_module
     from ..modules.join import join_module
     from ..modules.save import save_module
     from ..modules.tas_load import load_module
@@ -82,6 +83,7 @@ data1d = Data(TAS_DATA, data_abstraction.TripleAxis)
 def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
     """Currently set up to load ONLY 1 file"""
     #print "loading", files
+
     print 'FRIENDLY FILE', File.objects.get(name=files[0].split('/')[-1]).friendly_name
     print "/home/brendan/dataflow/reduction/tripleaxis/spins_data/" + File.objects.get(name=files[0].split('/')[-1]).friendly_name
     result = [data_abstraction.filereader(f, friendly_name="/home/brendan/dataflow/reduction/tripleaxis/spins_data/" + File.objects.get(name=f.split('/')[-1]).friendly_name) for f in files]
