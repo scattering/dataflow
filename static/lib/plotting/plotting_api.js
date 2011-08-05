@@ -449,7 +449,7 @@ function renderImageData(data, transform, plotid) {
 
             plotz = ((plotz>255)? 255 : plotz);
             plotz = ((plotz<0)? 0 : plotz);
-            if (plotz == NaN) {
+            if (isNaN(plotz)) {
                 var rgb = [0,0,0];
                 var alpha = 0;
             }
@@ -684,6 +684,7 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
     plot = renderImageData(toPlot, transform, 'plot2d');
     colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
     
+    jQuery('#plot_update').unbind('click');
     jQuery('#plot_update').click({ plot: plot, colorbar: colorbar, toPlots: toPlots }, function(e) {
         console.log(e);
         var plot = e.data.plot; var toPlots = e.data.toPlots; var colorbar = e.data.colorbar;
@@ -735,6 +736,7 @@ function plottingAPI(toPlots, plotid_prefix) {
                 plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, true);
                 console.log(123);
                 
+                jQuery(document.getElementById(plotid + '_update')).unbind('click');
                 jQuery(document.getElementById(plotid + '_update')).click({ 
                     plot: plot, 
                     toPlot: toPlot, 
@@ -804,6 +806,7 @@ function updateSeriesSelects(toPlot, plotid) {
     var orders = { 'orderx': selectx, 'ordery': selecty };
     
     for (var order in orders) {
+        orders[order].innerHTML = ""
         for (var i = 0; i < toPlot[order].length; i ++) {
             var quantity = toPlot[order][i];
             var key = quantity.key || quantity;
@@ -814,6 +817,7 @@ function updateSeriesSelects(toPlot, plotid) {
                 if (!toPlot.series[s].data.hasOwnProperty(key))
                     throw "Quantity '" + key + "' is undefined in series '" + toPlot.series[s].label + "', but is expected from '" + order + "'";
             }
+            console.log(key,label);
             // Append a new <option> for this quantity to the <select> element
             jQuery(orders[order]).append(jQuery('<option />', { value: key, text: label }));
         }
