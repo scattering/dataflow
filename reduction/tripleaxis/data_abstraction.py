@@ -10,10 +10,10 @@ from mpfit import mpfit
 #from dataflow import regular_gridding
 #from ...dataflow import wireit
 
-if 0:
+if 1:
 	#for use in larger project
 	from ... import regular_gridding
-if 1:
+if 0:
 	#for use in local testing
 	import sys, os
 	sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
@@ -753,10 +753,9 @@ class TripleAxis(object):
 			detector.measurement = detector.measurement * np.exp(-beta * E / 2)
 		return
 	def normalize_monitor(self, monitor):
-		# Turns out iterating through self.detectors makes detector a copy,
-		# and doesn't actually modify self.detectors -> could be the 'yield'
-		# statement producing a generator...
-		mon0 = self.time.monitor.measurement 
+		mon0 = self.time.monitor.measurement
+		if len(mon0) >1:
+		    mon0=mon0[0] 
 		for detector in self.detectors:
 			detector.measurement = detector.measurement * (mon0 / monitor)
 			print 'hi'
