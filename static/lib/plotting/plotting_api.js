@@ -870,7 +870,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
         // I know, I know: "series" is both singular and plural... go blame the English language, not me!
         //var serie = $A(datax.values).zip(datay.values, datax.errors, datay.errors, function(a) { return [a[0], a[1], { xerr: a[2], yerr: a[3] }]; });
         var serie = new Array();
-        if (datax) {
+        if (datax.values) {
             for (var i = 0; i < datax.values.length; i++) {
                 serie[i] = [datax.values[i], datay.values[i], {xerr: get(datax.errors, i), yerr: get(datay.errors, i)}];
             }
