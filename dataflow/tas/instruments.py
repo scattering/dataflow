@@ -14,6 +14,7 @@ if 1:
     from .. import config
     from ..core import Instrument, Data, Template, register_instrument
     
+    #from dataflow.dataflow.modules.load import load_module
     from .modules.tas_join import join_module
     from ..modules.save import save_module
     from .modules.tas_load import load_module
@@ -82,6 +83,7 @@ data1d = Data(TAS_DATA, data_abstraction.TripleAxis)
 def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
     """Currently set up to load ONLY 1 file"""
     #print "loading", files
+
     print 'FRIENDLY FILE', File.objects.get(name=files[0].split('/')[-1]).friendly_name
     print "/home/brendan/dataflow/reduction/tripleaxis/spins_data/" + File.objects.get(name=files[0].split('/')[-1]).friendly_name
     result = [data_abstraction.filereader(f, friendly_name="/home/brendan/dataflow/reduction/tripleaxis/spins_data/" + File.objects.get(name=f.split('/')[-1]).friendly_name) for f in files]
@@ -91,7 +93,7 @@ def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
 load = load_module(id='tas.load', datatype=TAS_DATA,
                    version='1.0', action=load_action,)
 
-def save_action(input=None, ext=None, xtype=None, position=None, **kwargs):
+def save_action(input, ext=None, xtype=None, position=None, **kwargs):
     # Note that save does not accept inputs from multiple components, so
     # we only need to deal with the bundle, not the list of bundles.
     # This is specified by terminal['multiple'] = False in modules/save.py
@@ -114,9 +116,8 @@ save_ext = {
 save = save_module(id='tas.save', datatype=TAS_DATA,
                    version='1.0', action=save_action,
                    fields=[save_ext])
-
-
-def join_action(input, xaxis=None, yaxis=None, **kwargs):
+    
+def join_action(input, xaxis='', yaxis='', **kwargs):
     # This is confusing because load returns a bundle and join, which can
     # link to multiple loads, has a list of bundles.  So flatten this list.
     # The confusion between bundles and items will bother us continuously,
@@ -129,23 +130,39 @@ def join_action(input, xaxis=None, yaxis=None, **kwargs):
             joinedtas = tas
         else:
             joinedtas = data_abstraction.join(joinedtas, tas)
-
+    joinedtas.xaxis = xaxis
+    joinedtas.yaxis = yaxis
     return dict(output=[joinedtas])
-
+xaxis_field = {
+        "type":"string",
+        "label": "X axis for 2D plotting",
+        "name": "xaxis",
+        "value": '',
+}
+yaxis_field = {
+        "type":"string",
+        "label": "Y axis for 2D plotting",
+        "name": "yaxis",
+        "value": '',
+}
 join = join_module(id='tas.join', datatype=TAS_DATA,
-                   version='1.0', action=join_action)
+                   version='1.0', action=join_action,fields = [xaxis_field,yaxis_field])
 
 #All TripleAxis reductions below require that:
 #  'input' be a TripleAxis object (see data_abstraction.py)
 
 def detailed_balance_action(input, **kwargs):
     for tasinstrument in input:
+        tasinstrument.xaxis = ''
+        tasinstrument.yaxis = ''
         tasinstrument.detailed_balance()
     return dict(output=input)
 
 def normalize_monitor_action(input, target_monitor, **kwargs):
     #Requires the target monitor value
     for tasinstrument in input:
+        tasinstrument.xaxis = ''
+        tasinstrument.yaxis = ''
         tasinstrument.normalize_monitor(target_monitor)
     #result=input[0].get_plottable()
     return dict(output=input)
@@ -154,11 +171,15 @@ def monitor_correction_action(input, instrument_name, **kwargs):
     #Requires instrument name, e.g. 'BT7'.  
     #Check monitor_correction_coordinates.txt for available instruments
     for tasinstrument in input:
+        tasinstrument.xaxis = ''
+        tasinstrument.yaxis = ''
         tasinstrument.harmonic_monitor_correction()
     return dict(ouput=input)
 
 def volume_correction_action(input, **kwargs):
     for tasinstrument in input:
+        tasinstrument.xaxis = ''
+        tasinstrument.yaxis = ''
         tasinstrument.resolution_volume_correction()
     return dict(output=input)
 

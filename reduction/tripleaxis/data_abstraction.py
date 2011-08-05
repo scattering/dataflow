@@ -756,7 +756,9 @@ class TripleAxis(object):
 		# Turns out iterating through self.detectors makes detector a copy,
 		# and doesn't actually modify self.detectors -> could be the 'yield'
 		# statement producing a generator...
-		mon0 = self.time.monitor.measurement 
+		mon0 = self.time.monitor.measurement
+		if len(mon0) > 1:
+		    mon0 = mon0[0]
 		for detector in self.detectors:
 			detector.measurement = detector.measurement * (mon0 / monitor)
 			print 'hi'
