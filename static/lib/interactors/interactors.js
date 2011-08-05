@@ -20,7 +20,7 @@ var Interactor = Class.create({
         this.color2 = '#f69';
         this.color = this.color1;
         
-        this.rc = Math.random();
+        this.rc = 1;//Math.random();
         
         //this.canvas.onmouseover = this.onMouseOver.bind(this);
         this.canvas.onmousemove = this.onMouseMove.bind(this);
@@ -317,6 +317,7 @@ var AnnulusInteractor = new Class.create(Interactor, {
     initialize: function($super, canvasid) {
         $super('Annulus', 'annulus.png', 0, canvasid);
         
+        this.showdata = false;
         this.c = new Center(this, 150, 150);
         this.p1 = new Point(this, 200, 150);
         this.p2 = new Point(this, 250, 150);
@@ -358,6 +359,19 @@ var AnnulusInteractor = new Class.create(Interactor, {
         });
         
         this.redraw();
+    },
+    
+    redraw: function($super) {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        if (this.showdata) {
+            this.context.globalAlpha = 1;
+            this.context.drawImage(sansimg, 30, 30, 68, 68, 0, 0, this.canvas.width, this.canvas.height);
+            this.context.globalAlpha = 0.6;
+        }
+        for (var i = 0; i < this.grobs.length; i ++) {
+            var grob = this.grobs[i];
+            grob.render(this.context);
+        }
     },
 });
 var ArcInteractor = new Class.create(Interactor, {
@@ -450,8 +464,8 @@ var Grob = Class.create({
         this.dpos = null;
         
         var h = this.parent.rc * 360;
-        this.color1 = 'hsl('+h+',100%,40%)'; //'#2C8139';
-        this.color2 = 'hsl('+h+',100%,60%)'; //'#4CCC60';
+        this.color1 = '#000';'hsl('+h+',100%,40%)'; //'#2C8139';
+        this.color2 = '#444';'hsl('+h+',100%,60%)'; //'#4CCC60';
         this.color = this.color1;
     },
     

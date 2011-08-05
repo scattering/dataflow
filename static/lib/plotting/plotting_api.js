@@ -141,17 +141,27 @@ function renderData(data, plotid, plot) {
     }) ];
 
   var series = [];
-  var options = { title: data[0].title, series: [], axes: { xaxis: { label: data[0].xlabel, tickOptions: { formatString: '%.2f' } }, yaxis: { label: data[0].ylabel, tickOptions: { formatString: '%.2f' } } }, cursor: { show: true, zoom: true, showTooltipDataPosition: true, showVerticalLine: true, showHorizontalLine: true, tooltipFormatString:  '%s (%s, %s, %s)' } };
+  var options = {
+    title: data[0].title,
+    series: [],
+    axes: {
+        xaxis: { label: data[0].xlabel, tickOptions: { formatString: '%.2f' } },
+        yaxis: { label: data[0].ylabel, tickOptions: { formatString: '%.2f' } },
+    },
+    cursor: { show: true, zoom: true, showTooltipDataPosition: true, showVerticalLine: true, showHorizontalLine: true, tooltipFormatString:  '%s (%s, %s, %s)' }
+  };
   
   for (var index = 0; index < data.length; index ++) {
-    console.log(data[index].points[0])
+    if (debug)
+       console.log(data[index].points[0]);
 //    data[index].points = matrixfy(
     var s_ = data[index].points;
     var n  = data[index].edges;
     var edges_ = edges(data[index].zs,data[index].axis,n);
     data[index].edges_ = edges_;
     var palette = palettes[data[index].palette](n+1);
-    console.log(palette);
+    if (debug)
+        console.log(palette);
     data[index].palette_ = palette;
     //jQuery('#funcs').val(data[index].name);
     jQuery('#palettes').val(data[index].palette);
@@ -210,7 +220,8 @@ var process_bin_data = false;
 
 function renderImageColorbar(data, transform, plotid) {
   var dims = data.dims;
-  console.log(dims)
+  if (debug)
+      console.log('dims:', dims)
   
   if (!plot2d_colorbar) {
       //plot2 = $.jqplot(plotid+'_target', [edges], {
@@ -696,13 +707,17 @@ var toPlots_input = null;
 
 function plottingAPI(toPlots, plotid_prefix) {
     toPlots_input = toPlots;
-    if (toPlots.constructor != Array)
+    if (toPlots.constructor != Array) {
         toPlots = [toPlots];
-        console.log('changing singleton data to length-1 array')
+        if (debug)
+            console.log('changing singleton data to length-1 array')
+
         // throw "Unsupported data format! Data must be a list of series.";
+    }
    // toPlots = $A(toPlots).flatten();
     
-    console.log('toPlots:', toPlots)
+    if (debug)
+        console.log('toPlots:', toPlots)
     // assuming all plots in the list are of the same type!
     plot_type = toPlots[0].type
     
@@ -715,9 +730,11 @@ function plottingAPI(toPlots, plotid_prefix) {
              for (var i = 0; i < toPlots.length; i ++) {
                 var toPlot = toPlots[i];
                 var plotid = plotid_prefix + '_' + i;
-                console.log('plotid', plotid);
+                if (debug)
+                    console.log('plotid:', plotid);
                 
                 plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, true);
+                console.log(123);
                 
                 jQuery(document.getElementById(plotid + '_update')).unbind('click');
                 jQuery(document.getElementById(plotid + '_update')).click({ 
@@ -819,7 +836,8 @@ function get(arr, i) {
 function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
     var stage = 2;
     var plotdiv = document.getElementById(plotid_prefix);
-    console.log('plotdiv:', plotdiv, plotid_prefix)
+    if (debug)
+        console.log('plotid:', plotid, 'plotdiv:', plotdiv, plotid_prefix)
     
     if (!plot || !plot.hasOwnProperty("type") || plot.type!='nd'){
         stage = 1;

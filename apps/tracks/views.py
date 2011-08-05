@@ -60,7 +60,7 @@ def mytest(request):
 
 def home(request):
     context = RequestContext(request)
-    site_list = ['/editor/', '/login/', '/interactors/']
+    site_list = ['/editor/', '/login/', '/myProjects/', '/interactors/']
     return render_to_response('tracer_testingforWireit/home.html', locals(), context_instance=context)
     
 ##################
@@ -327,10 +327,10 @@ def editProject(request, project_id):
 
 @login_required 
 def editExperiment(request, experiment_id):
-    print request
+    print request.POST
     experiment = Experiment.objects.get(id=experiment_id)
-    if request.FILES.has_key('files'):
-        file_data = request.FILES.getlist('files')
+    if request.FILES.has_key('new_files'):
+        file_data = request.FILES.getlist('new_files')
         for f in file_data:
             file_sha1 = hashlib.sha1()
             for line in f.read():
@@ -357,25 +357,26 @@ def editExperiment(request, experiment_id):
             facility = Facility.objects.get(id=request.POST['facility'])
             experiment.facility = facility
             experiment.save()
-    if request.POST.has_key('templates'):
-        if request.POST['templates']:
-            template = Template.objects.get(id=request.POST['templates'])
-            experiment.templates.add(template)
+    if request.POST.has_key('new_templates'):
+        if request.POST['new_templates']:
+            for i in list(request.POST.getlist('new_templates')):
+                template = Template.objects.get(id=i)
+                experiment.templates.add(template)
         #print file_sha1.hexdigest()
         #print hashlib.sha1(request.FILES['files'].read()).hexdigest()
-    if request.POST.has_key('delete_files'):
-        if request.POST['delete_files']:
-            delete_files = request.POST.getlist('delete_files')
+    if request.POST.has_key('cur_files'):
+        if request.POST['cur_files']:
+            delete_files = request.POST.getlist('cur_files')
             for f in delete_files:
                 print "f: ", f
-                print experiment.Files.filter(friendly_name=f)
-                experiment.Files.filter(friendly_name=f).delete()
-    if request.POST.has_key('delete_templates'):
-        if request.POST['delete_templates']:
-            delete_templates = request.POST.getlist('delete_templates')
+                print experiment.Files.filter(name=f)
+                experiment.Files.filter(name=f).delete()
+    if request.POST.has_key('cur_templates'):
+        if request.POST['cur_templates']:
+            delete_templates = request.POST.getlist('cur_templates')
             for t in delete_templates:
                 print "t: ", t
-                experiment.templates.filter(Title=t).delete()
+                experiment.templates.filter(id=t).delete()
     context = RequestContext(request)
     facility = experiment.facility
     instrument = experiment.instrument
@@ -383,7 +384,8 @@ def editExperiment(request, experiment_id):
         instrument_class = experiment.instrument.instrument_class
     else:
         instrument_class = None
-    form1 = experimentForm1(initial={'facility':facility, 'instrument_class':instrument_class, 'instrument_name':instrument})
-    form2 = experimentForm2(USER=request.user)
-    return render_to_response('userProjects/editExperiment.html', {'form1':form1, 'form2':form2, 'experiment':experiment, }, context_instance=context)
+    form1 = experimentForm1(initial={'facility':facility, 'instrument_class':instrument_class, 'instrument_name':instrument, })
+    form2 = experimentForm2(USER=request.user, experiment=experiment)
+    #print form2.fields['new_templates'].length
+    return render_to_response('userProjects/editExperiment.html', { 'form1':form1, 'form2': form2, 'experiment':experiment, }, context_instance=context)
 

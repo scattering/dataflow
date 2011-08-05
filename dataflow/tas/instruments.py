@@ -93,7 +93,7 @@ def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
 load = load_module(id='tas.load', datatype=TAS_DATA,
                    version='1.0', action=load_action,)
 
-def save_action(input=None, ext=None, xtype=None, position=None, **kwargs):
+def save_action(input, ext=None, xtype=None, position=None, **kwargs):
     # Note that save does not accept inputs from multiple components, so
     # we only need to deal with the bundle, not the list of bundles.
     # This is specified by terminal['multiple'] = False in modules/save.py
@@ -116,8 +116,7 @@ save_ext = {
 save = save_module(id='tas.save', datatype=TAS_DATA,
                    version='1.0', action=save_action,
                    fields=[save_ext])
-
-
+    
 def join_action(input, xaxis='', yaxis='', **kwargs):
     # This is confusing because load returns a bundle and join, which can
     # link to multiple loads, has a list of bundles.  So flatten this list.
@@ -154,12 +153,16 @@ join = join_module(id='tas.join', datatype=TAS_DATA,
 
 def detailed_balance_action(input, **kwargs):
     for tasinstrument in input:
+        tasinstrument.xaxis = ''
+        tasinstrument.yaxis = ''
         tasinstrument.detailed_balance()
     return dict(output=input)
 
 def normalize_monitor_action(input, target_monitor, **kwargs):
     #Requires the target monitor value
     for tasinstrument in input:
+        tasinstrument.xaxis = ''
+        tasinstrument.yaxis = ''
         tasinstrument.normalize_monitor(target_monitor)
     #result=input[0].get_plottable()
     return dict(output=input)
@@ -168,11 +171,15 @@ def monitor_correction_action(input, instrument_name, **kwargs):
     #Requires instrument name, e.g. 'BT7'.  
     #Check monitor_correction_coordinates.txt for available instruments
     for tasinstrument in input:
+        tasinstrument.xaxis = ''
+        tasinstrument.yaxis = ''
         tasinstrument.harmonic_monitor_correction()
     return dict(ouput=input)
 
 def volume_correction_action(input, **kwargs):
     for tasinstrument in input:
+        tasinstrument.xaxis = ''
+        tasinstrument.yaxis = ''
         tasinstrument.resolution_volume_correction()
     return dict(output=input)
 
