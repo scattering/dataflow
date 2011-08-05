@@ -438,7 +438,7 @@ function renderImageData(data, transform, plotid) {
 
             plotz = ((plotz>255)? 255 : plotz);
             plotz = ((plotz<0)? 0 : plotz);
-            if (plotz == NaN) {
+            if (isNaN(plotz)) {
                 var rgb = [0,0,0];
                 var alpha = 0;
             }
