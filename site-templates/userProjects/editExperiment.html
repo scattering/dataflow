@@ -4,7 +4,7 @@
 			<h1 class="alt span-16">Experiment <span class="proposalnum">{{ experiment.ProposalNum }}</span></h1>
 			<form action="/editor/" method="post" class="span-8 last">
                 {% csrf_token %}
-                <p>
+                <p style="padding-top: 0.8em;">
     				<input type="hidden" name="language" value={{ experiment.instrument.instrument_class }} />
     				<input type="hidden" name="experiment_id" value={{ experiment.id }} />
 	                <input type="submit" value="Start reducing!" />
@@ -25,16 +25,16 @@
         		<div class="span-11 colborder">
 	        	    <h2>Templates</h2>
 	        	    <h3 class="alt">{{ form2.cur_templates.label }}</h3>
-    			    <p><input type="submit" value="Remove checked files" /></p>
 	        	    {% if experiment.templates.all %}
 		         	    {{ form2.cur_templates }}
+    			        <p><input type="submit" value="Remove checked templates" /></p>
 	        	    {% else %}
 		        	    <p>There are currently 0 templates. Please add templates below.</p>
 	        	    {% endif %}
 	        	    <h3 class="alt">{{ form2.new_templates.label }}</h3>
-    			    <p><input type="submit" value="Add" /></p>
 	        	    {% if form2.new_templates %}
 		         	    {{ form2.new_templates }}
+    			        <p><input type="submit" value="Add checked templates" /></p>
 	        	    {% else %}
 		        	    <p>There are 0 templates available. Please create templates in the editor.</p>
 	        	    {% endif %}
@@ -42,14 +42,15 @@
 		        <div class="span-12 last">
 		            <h2>Files</h2>
 	        	    <h3 class="alt">{{ form2.cur_files.label }}</h3>
-    			    <p><input type="submit" value="Remove checked files" /></p>
 	        	    {% if experiment.Files.all %}
 	        	        {{ form2.cur_files }}
+        			    <p><input type="submit" value="Remove checked files" /></p>
 	        	    {% else %}
 		        	    <p>There are currently 0 files. Please add files below.</p>
 	        	    {% endif %}
 	        	    <h3 class="alt">{{ form2.new_files.label }}</h3>
 	        	    <p>{{ form2.new_files }}</p>
+	        	    <p><input type="submit" value="Add selected files" /></p>
 	            </div>
 			    </div>
 			</form>

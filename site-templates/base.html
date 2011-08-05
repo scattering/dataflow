@@ -21,6 +21,14 @@
     </head>
 	<body>
 	    <div class="container">
+	        <div style="text-align: right;">
+            {% if user.is_authenticated %}
+            <a href="/myProjects/">My projects</a> &middot; <a href="/logout/">Log out</a>
+            {%else%}
+            <a href="/login/">Log in</a> &middot; <a href="/register/">Register</a>
+            {% endif %}
+            </div>
+            <hr />
 		    {% block content %}
 		    {% endblock %}
 		</div>
