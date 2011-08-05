@@ -673,6 +673,7 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
     plot = renderImageData(toPlot, transform, 'plot2d');
     colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
     
+    jQuery('#plot_update').unbind('click');
     jQuery('#plot_update').click({ plot: plot, colorbar: colorbar, toPlots: toPlots }, function(e) {
         console.log(e);
         var plot = e.data.plot; var toPlots = e.data.toPlots; var colorbar = e.data.colorbar;
