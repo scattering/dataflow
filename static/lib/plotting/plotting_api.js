@@ -719,6 +719,7 @@ function plottingAPI(toPlots, plotid_prefix) {
                 
                 plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, true);
                 
+                jQuery(document.getElementById(plotid + '_update')).unbind('click');
                 jQuery(document.getElementById(plotid + '_update')).click({ 
                     plot: plot, 
                     toPlot: toPlot, 
@@ -788,6 +789,7 @@ function updateSeriesSelects(toPlot, plotid) {
     var orders = { 'orderx': selectx, 'ordery': selecty };
     
     for (var order in orders) {
+        orders[order].innerHTML = ""
         for (var i = 0; i < toPlot[order].length; i ++) {
             var quantity = toPlot[order][i];
             var key = quantity.key || quantity;
@@ -798,6 +800,7 @@ function updateSeriesSelects(toPlot, plotid) {
                 if (!toPlot.series[s].data.hasOwnProperty(key))
                     throw "Quantity '" + key + "' is undefined in series '" + toPlot.series[s].label + "', but is expected from '" + order + "'";
             }
+            console.log(key,label);
             // Append a new <option> for this quantity to the <select> element
             jQuery(orders[order]).append(jQuery('<option />', { value: key, text: label }));
         }
