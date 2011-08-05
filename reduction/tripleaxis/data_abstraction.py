@@ -10,10 +10,10 @@ from mpfit import mpfit
 #from dataflow import regular_gridding
 #from ...dataflow import wireit
 
-if 1:
+if 0:
 	#for use in larger project
 	from ... import regular_gridding
-if 0:
+if 1:
 	#for use in local testing
 	import sys, os
 	sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))

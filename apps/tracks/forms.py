@@ -21,7 +21,7 @@ class languageSelectForm(forms.Form):
 	instruments = forms.ChoiceField(choices = language_choices)
 	
 class titleOnlyForm(forms.Form):
-	new_project = forms.CharField(initial="My Project")
+	new_project = forms.CharField(initial="Project name")
 	
 class titleOnlyFormExperiment(forms.Form):
 	new_experiment = forms.CharField(initial="00000000")
@@ -38,9 +38,11 @@ class experimentForm2(forms.Form):
         USER = kwargs.pop('USER')
         experiment = kwargs.pop('experiment')
         super(experimentForm2, self).__init__(*args, **kwargs)
-        self.fields['new_templates'] = forms.ModelMultipleChoiceField(queryset=Template.objects.filter(user=USER), label='Add templates', widget=forms.CheckboxSelectMultiple)
+        cur_templates = experiment.templates.all()
+        new_templates = Template.objects.filter(user=USER) #.exclude(experiment.templates.all())
+        self.fields['new_templates'] = forms.ModelMultipleChoiceField(queryset=new_templates, label='Available templates', widget=forms.CheckboxSelectMultiple)
+        self.fields['new_templates'].length = len(new_templates)
         self.fields['new_files'] = forms.FileField(label='Add files')
         self.fields['new_files'].widget.attrs['multiple'] = 'true'
-        print experiment.templates.all()
-        self.fields['cur_templates'] = forms.ModelMultipleChoiceField(queryset=experiment.templates.all(), label='Current templates', widget=forms.CheckboxSelectMultiple)
+        self.fields['cur_templates'] = forms.ModelMultipleChoiceField(queryset=cur_templates, label='Current templates', widget=forms.CheckboxSelectMultiple)
         self.fields['cur_files'] = forms.ModelMultipleChoiceField(queryset=experiment.Files.all(), label='Current files', widget=forms.CheckboxSelectMultiple)

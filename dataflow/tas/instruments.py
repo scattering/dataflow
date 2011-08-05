@@ -14,14 +14,13 @@ if 0:
     from .. import config
     from ..core import Instrument, Data, Template, register_instrument
     
-    #from dataflow.dataflow.modules.load import load_module
-    from .modules.tas_join import join_module
+    from ..modules.join import join_module
     from ..modules.save import save_module
-    from .modules.tas_load import load_module
-    from .modules.tas_normalize_monitor import normalize_monitor_module
-    from .modules.tas_detailed_balance import detailed_balance_module
-    from .modules.tas_monitor_correction import monitor_correction_module
-    from .modules.tas_volume_correction import volume_correction_module
+    from ..modules.tas_load import load_module
+    from ..modules.tas_normalize_monitor import normalize_monitor_module
+    from ..modules.tas_detailed_balance import detailed_balance_module
+    from ..modules.tas_monitor_correction import monitor_correction_module
+    from ..modules.tas_volume_correction import volume_correction_module
     from ...apps.tracks.models import File
 
 
@@ -38,13 +37,13 @@ if 1:
     from dataflow.dataflow import config
     from dataflow.dataflow.core import Instrument, Data, Template, register_instrument
 
-    from dataflow.dataflow.tas.modules.tas_join import join_module
+    from dataflow.dataflow.modules.join import join_module
     from dataflow.dataflow.modules.save import save_module
-    from dataflow.dataflow.tas.modules.tas_load import load_module
-    from dataflow.dataflow.tas.modules.tas_normalize_monitor import normalize_monitor_module
-    from dataflow.dataflow.tas.modules.tas_detailed_balance import detailed_balance_module
-    from dataflow.dataflow.tas.modules.tas_monitor_correction import monitor_correction_module
-    from dataflow.dataflow.tas.modules.tas_volume_correction import volume_correction_module
+    from dataflow.dataflow.modules.tas_load import load_module
+    from dataflow.dataflow.modules.tas_normalize_monitor import normalize_monitor_module
+    from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
+    from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
+    from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
     from dataflow.apps.tracks.models import File
     #from dataflow.apps.tracks.models import File
 
@@ -83,7 +82,6 @@ data1d = Data(TAS_DATA, data_abstraction.TripleAxis)
 def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
     """Currently set up to load ONLY 1 file"""
     #print "loading", files
-
     print 'FRIENDLY FILE', File.objects.get(name=files[0].split('/')[-1]).friendly_name
     print "/home/brendan/dataflow/reduction/tripleaxis/spins_data/" + File.objects.get(name=files[0].split('/')[-1]).friendly_name
     result = [data_abstraction.filereader(f, friendly_name="/home/brendan/dataflow/reduction/tripleaxis/spins_data/" + File.objects.get(name=f.split('/')[-1]).friendly_name) for f in files]
@@ -118,7 +116,7 @@ save = save_module(id='tas.save', datatype=TAS_DATA,
                    fields=[save_ext])
 
 
-def join_action(input, xaxis='', yaxis='', **kwargs):
+def join_action(input, xaxis=None, yaxis=None, **kwargs):
     # This is confusing because load returns a bundle and join, which can
     # link to multiple loads, has a list of bundles.  So flatten this list.
     # The confusion between bundles and items will bother us continuously,
@@ -131,23 +129,11 @@ def join_action(input, xaxis='', yaxis='', **kwargs):
             joinedtas = tas
         else:
             joinedtas = data_abstraction.join(joinedtas, tas)
-    joinedtas.xaxis = xaxis
-    joinedtas.yaxis = yaxis
+
     return dict(output=[joinedtas])
-xaxis_field = {
-        "type":"string",
-        "label": "X axis for 2D plotting",
-        "name": "xaxis",
-        "value": '',
-}
-yaxis_field = {
-        "type":"string",
-        "label": "Y axis for 2D plotting",
-        "name": "yaxis",
-        "value": '',
-}
+
 join = join_module(id='tas.join', datatype=TAS_DATA,
-                   version='1.0', action=join_action,fields = [xaxis_field,yaxis_field])
+                   version='1.0', action=join_action)
 
 #All TripleAxis reductions below require that:
 #  'input' be a TripleAxis object (see data_abstraction.py)

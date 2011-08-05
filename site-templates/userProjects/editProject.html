@@ -1,29 +1,18 @@
-<html>
-	<head>
-		<title>Edit Project</title>
-	</head>
-	<body>
-		<h2>Edit Project <i> {{project}} </i></h2>
-		<hr>
-		{% for experiment in experiments.object_list %}
-		<li>
-			<a STYLE="text-decoration:none" href="editExperiment/{{experiment.id}}/"> {{ experiment|upper }} </a>
-		</li>
-		{% endfor %}
-		</hr>
-		<p>
-			<form action="." method="POST">
-				{% csrf_token %}
-				<table>
-					{{ form.as_table }}
-				</table>
-				<p>
-					<input type="submit" value="Add this experiment">
-				</p>
+{% extends "base.html" %}
+{% block title %}Edit project{% endblock %}
+{% block content %}
+		    <h1 class="alt">{{project}}</h1>
+		    <hr />
+		    <form action="." method="POST">
+			    {% csrf_token %}
+		        <ul>
+        		{% for experiment in experiments.object_list %}
+            		<li><a href="editExperiment/{{experiment.id}}/">{{ experiment }}</a></li>
+        		{% endfor %}
+            		<li>{{ form.new_experiment }} <input type="submit" value="Create experiment" /></li>
+        		</ul>
 			</form>
-		</p>
-		<div class="pagination">
-			<span class="step-links"> {% if experiments.has_previous %} <a href="?page={{ experiments.previous_page_number }}">previous</a> {% endif %} <span class="current"> Page {{ experiments.number }} of {{ experiments.paginator.num_pages }}. </span> {% if experiments.has_next %} <a href="?page={{ experiments.next_page_number }}">next</a> {% endif %} </span>
-		</div>
-	</body>
-</html>
+		    <p class="pagination">
+			    <span class="step-links">{% if experiments.has_previous %}<a href="?page={{ experiments.previous_page_number }}">previous</a> {% endif %}<span class="current">Page {{ experiments.number }} of {{ experiments.paginator.num_pages }}</span>{% if experiments.has_next %} <a href="?page={{ experiments.next_page_number }}">next</a>{% endif %}</span>
+	        </p>
+{% endblock %}

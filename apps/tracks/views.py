@@ -60,7 +60,7 @@ def mytest(request):
 
 def home(request):
     context = RequestContext(request)
-    site_list = ['/editor/', '/login/', '/interactors/']
+    site_list = ['/editor/', '/login/', '/myProjects/', '/interactors/']
     return render_to_response('tracer_testingforWireit/home.html', locals(), context_instance=context)
     
 ##################
@@ -359,8 +359,9 @@ def editExperiment(request, experiment_id):
             experiment.save()
     if request.POST.has_key('new_templates'):
         if request.POST['new_templates']:
-            template = Template.objects.get(id=request.POST['new_templates'])
-            experiment.templates.add(template)
+            for i in list(request.POST.getlist('new_templates')):
+                template = Template.objects.get(id=i)
+                experiment.templates.add(template)
         #print file_sha1.hexdigest()
         #print hashlib.sha1(request.FILES['files'].read()).hexdigest()
     if request.POST.has_key('cur_files'):
@@ -385,5 +386,6 @@ def editExperiment(request, experiment_id):
         instrument_class = None
     form1 = experimentForm1(initial={'facility':facility, 'instrument_class':instrument_class, 'instrument_name':instrument, })
     form2 = experimentForm2(USER=request.user, experiment=experiment)
-    return render_to_response('userProjects/editExperiment.html', {'form1':form1, 'form2': form2, 'experiment':experiment, }, context_instance=context)
+    #print form2.fields['new_templates'].length
+    return render_to_response('userProjects/editExperiment.html', { 'form1':form1, 'form2': form2, 'experiment':experiment, }, context_instance=context)
 
