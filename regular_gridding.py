@@ -29,10 +29,69 @@ def regularlyGrid(xarr, yarr, zarr, xstart=None, xfinal=None, xstep=None, ystart
 
 	# grid the data.
 	print len(xarr), len(yarr), len(zarr), len(xi), len(yi)
+	
+	xarr,yarr,zarr=remove_duplicates(xarr,yarr,zarr)
 	zi = griddata(xarr, yarr, zarr, xi, yi)
+	
 	print "done gridding"
 	return xi, yi, zi
 
+def remove_duplicates(xarr, yarr, zarr):
+	"""Removes duplicate points along the given axes for 2d plotting. In dataflow
+	only removes the points temporarily for the plotting, thus changing the
+	desired x and y axes will not result in a loss of data."""
+	
+	uniques = [] #list of row indices to skip (ie unique pts to keep in datafile)
+	dups = []
+	numrows = len(xarr)
+	for index in range(numrows):
+		dups.append(range(numrows)) #list of lists. Each inner list is a list of every row index (0 to len)
+		                            #when a row becomes distinct from another, its index is removed from the the other's index
+
+	#for field in distinct:
+	for i in range(numrows):
+		if not uniques.__contains__(i): #if the row isn't unique
+			for j in range(i + 1, numrows):
+				if not uniques.__contains__(j) and dups[i].__contains__(j):
+					if xarr[i] != xarr[j] or yarr[i] != yarr[j]:
+						dups[i].remove(j)
+						dups[j].remove(i)  
+			if len(dups[i]) == 1:
+				#if every row in the column is distinct from the ith row, then it is unique
+				#MAY NOT NEED TO KEEP TRACK OF UNIQUES...
+				#CAN ALWAYS GET BY len(dups[i])==1
+				uniques.append(i)
+
+	if len(uniques) == numrows:
+		#if all rows are deemed unique, return
+		return xarr,yarr,zarr
+
+	
+	#ALL UNIQUE ROWS ARE INDEXED IN uniques NOW
+	rows_to_be_removed = []
+	for alist in dups:
+		#average the detector counts of every detector of each row in alist
+		#and save the resulting averages into the first row of alist.
+		#then delete other rows, ie remove them
+		if len(alist) == 1:
+			#if the row is unique skip this list
+			pass 
+		else:
+			for k in range(1, len(alist)):
+				zarr[alist[0]] = (zarr[alist[0]] + zarr[alist[k]]) / 2.0
+				dups[alist[k]] = [alist[k]] #now the kth duplicate set of indices has only k, so it will be skipped
+				rows_to_be_removed.append(alist[k])
+
+	rows_to_be_removed.sort() #duplicate rows to be removed indices in order now
+	rows_to_be_removed.reverse() #duplicate rows to be removed indices in reverse order now
+
+	for k in rows_to_be_removed:
+		xarr = N.delete(xarr,k,0)
+		yarr = N.delete(yarr,k,0)
+		zarr = N.delete(zarr,k,0)
+	
+	#update primary detector dimension
+	return xarr,yarr,zarr
 
 def plotGrid(xi, yi, zi):
 	# contour the gridded data, plotting dots at the randomly spaced data points.

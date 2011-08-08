@@ -1,20 +1,16 @@
-<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
-<script type="text/javascript" src="../../static/lib/ajaxCSRFfix.js"></script>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
-<html lang="en">
-	<head>
-		<title>Language Seletion for Wiring Editor</title>
-	</head>
-	<body>
-		<h2>Please select an instrument. </h2>
-		<form action="." method="POST">
-			{% csrf_token %}
-			<table>
-				{{ form.as_table }}
-			</table>
-			<p>
-				<input type="submit" value="Submit">
-			</p>
-		</form>
-	</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Instrument select{% endblock %}
+{% load i18n %}
+
+{% block content %}
+            <h1 class="alt">Instrument</h1>
+            <hr />
+            <p>Please select an instrument.</p>
+            <form method="post" action="." style="width: 350px;">
+	            {% csrf_token %}
+	            <table>
+                	{{ form.as_table }}
+	            </table>
+	            <p><input type="submit" value="Select" /></p>
+            </form>
+{% endblock %}

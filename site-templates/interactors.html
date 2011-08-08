@@ -8,8 +8,9 @@
   canvas { border: 1px dotted #888; }
   .bk { float: left; margin-right: 4px; }
 </style>
-<script type="text/javascript" src="../../../static/lib/prototype.js"></script>
-<script type="text/javascript" src="../../../static/lib/interactors/interactors.js"></script>
+<script type="text/javascript" src="/static/lib/prototype.js"></script>
+<script type="text/javascript" src="/static/lib/plotting/asdf.js"></script>
+<script type="text/javascript" src="/static/lib/interactors/interactors.js"></script>
 <script type="text/javascript">
 var c = [], interactors;
 window.onload = function() {
@@ -24,6 +25,7 @@ window.onload = function() {
         GaussianInteractor,
         QuadraticInteractor,
         LinearInteractor,
+        AnnulusInteractor,
     ];
     for (var i  = 0; i < interactors.length; i ++) {
         var id = 'c' + (i + 1);
@@ -45,9 +47,9 @@ window.onload = function() {
         document.body.appendChild(dv);
         
         c[i + 1] = new inst(id);
+        if (i + 1 == 11) c[i + 1].showdata = true;
         lb.appendChild(document.createTextNode(c[i + 1].name + 'Interactor'));
     }
-    
 }
 </script>
 </head>

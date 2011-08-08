@@ -127,8 +127,15 @@ def _module_to_wireit(module):
         label_width = config.LABEL_WIDTH
         if hasattr(module, 'LABEL_WIDTH'):
             label_width = module.LABEL_WIDTH
-        container = dict(xtype='WireIt.Container',
+        xtype = 'WireIt.Container'
+        if hasattr(module, 'xtype'):
+            xtype = module.xtype
+        image = ''
+        if hasattr(module, 'image'):
+            image = module.image
+        container = dict(xtype=xtype,
                          height=height,
+                         image=image,
                          width=label_width,
                          terminals=terminals)
 
@@ -192,16 +199,12 @@ def _emit_module_position(module):
     terms = ''; #adds terminals to WireIt diagram
     if underlying_module.icon:
         xtype = 'WireIt.ImageContainer'
-	terms = underlying_module.icon['terminals'] # finds terminals from module
+        terms = underlying_module.icon['terminals'] # finds terminals from module
     else:
         xtype = 'WireIt.Container'
+        if hasattr(underlying_module, 'xtype'):
+            xtype = underlying_module.xtype
     position = module['position']
-    #return dict(config={'position': position, 'xtype': xtype},
-    #            name=underlying_module.name,
-    #            value={},
-    #            terminals=terms)
-    
-    # getting configuration from template
     config = dict(position=position, xtype=xtype)
     config.update(module['config'])
     return dict(config=config,

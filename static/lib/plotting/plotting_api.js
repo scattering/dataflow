@@ -141,17 +141,27 @@ function renderData(data, plotid, plot) {
     }) ];
 
   var series = [];
-  var options = { title: data[0].title, series: [], axes: { xaxis: { label: data[0].xlabel, tickOptions: { formatString: '%.2f' } }, yaxis: { label: data[0].ylabel, tickOptions: { formatString: '%.2f' } } }, cursor: { show: true, zoom: true, showTooltipDataPosition: true, showVerticalLine: true, showHorizontalLine: true, tooltipFormatString:  '%s (%s, %s, %s)' } };
+  var options = {
+    title: data[0].title,
+    series: [],
+    axes: {
+        xaxis: { label: data[0].xlabel, tickOptions: { formatString: '%.2f' } },
+        yaxis: { label: data[0].ylabel, tickOptions: { formatString: '%.2f' } },
+    },
+    cursor: { show: true, zoom: true, showTooltipDataPosition: true, showVerticalLine: true, showHorizontalLine: true, tooltipFormatString:  '%s (%s, %s, %s)' }
+  };
   
   for (var index = 0; index < data.length; index ++) {
-    console.log(data[index].points[0])
+    if (debug)
+       console.log(data[index].points[0]);
 //    data[index].points = matrixfy(
     var s_ = data[index].points;
     var n  = data[index].edges;
     var edges_ = edges(data[index].zs,data[index].axis,n);
     data[index].edges_ = edges_;
     var palette = palettes[data[index].palette](n+1);
-    console.log(palette);
+    if (debug)
+        console.log(palette);
     data[index].palette_ = palette;
     //jQuery('#funcs').val(data[index].name);
     jQuery('#palettes').val(data[index].palette);
@@ -210,7 +220,8 @@ var process_bin_data = false;
 
 function renderImageColorbar(data, transform, plotid) {
   var dims = data.dims;
-  console.log(dims)
+  if (debug)
+      console.log('dims:', dims)
   
   if (!plot2d_colorbar) {
       //plot2 = $.jqplot(plotid+'_target', [edges], {
@@ -438,7 +449,7 @@ function renderImageData(data, transform, plotid) {
 
             plotz = ((plotz>255)? 255 : plotz);
             plotz = ((plotz<0)? 0 : plotz);
-            if (plotz == NaN) {
+            if (isNaN(plotz)) {
                 var rgb = [0,0,0];
                 var alpha = 0;
             }
@@ -673,6 +684,7 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
     plot = renderImageData(toPlot, transform, 'plot2d');
     colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
     
+    jQuery('#plot_update').unbind('click');
     jQuery('#plot_update').click({ plot: plot, colorbar: colorbar, toPlots: toPlots }, function(e) {
         console.log(e);
         var plot = e.data.plot; var toPlots = e.data.toPlots; var colorbar = e.data.colorbar;
@@ -695,13 +707,17 @@ var toPlots_input = null;
 
 function plottingAPI(toPlots, plotid_prefix) {
     toPlots_input = toPlots;
-    if (toPlots.constructor != Array)
+    if (toPlots.constructor != Array) {
         toPlots = [toPlots];
-        console.log('changing singleton data to length-1 array')
+        if (debug)
+            console.log('changing singleton data to length-1 array')
+
         // throw "Unsupported data format! Data must be a list of series.";
+    }
    // toPlots = $A(toPlots).flatten();
     
-    console.log('toPlots:', toPlots)
+    if (debug)
+        console.log('toPlots:', toPlots)
     // assuming all plots in the list are of the same type!
     plot_type = toPlots[0].type
     
@@ -714,10 +730,13 @@ function plottingAPI(toPlots, plotid_prefix) {
              for (var i = 0; i < toPlots.length; i ++) {
                 var toPlot = toPlots[i];
                 var plotid = plotid_prefix + '_' + i;
-                console.log('plotid', plotid);
+                if (debug)
+                    console.log('plotid:', plotid);
                 
                 plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, true);
+                console.log(123);
                 
+                jQuery(document.getElementById(plotid + '_update')).unbind('click');
                 jQuery(document.getElementById(plotid + '_update')).click({ 
                     plot: plot, 
                     toPlot: toPlot, 
@@ -787,6 +806,7 @@ function updateSeriesSelects(toPlot, plotid) {
     var orders = { 'orderx': selectx, 'ordery': selecty };
     
     for (var order in orders) {
+        orders[order].innerHTML = ""
         for (var i = 0; i < toPlot[order].length; i ++) {
             var quantity = toPlot[order][i];
             var key = quantity.key || quantity;
@@ -797,6 +817,7 @@ function updateSeriesSelects(toPlot, plotid) {
                 if (!toPlot.series[s].data.hasOwnProperty(key))
                     throw "Quantity '" + key + "' is undefined in series '" + toPlot.series[s].label + "', but is expected from '" + order + "'";
             }
+            console.log(key,label);
             // Append a new <option> for this quantity to the <select> element
             jQuery(orders[order]).append(jQuery('<option />', { value: key, text: label }));
         }
@@ -815,7 +836,8 @@ function get(arr, i) {
 function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
     var stage = 2;
     var plotdiv = document.getElementById(plotid_prefix);
-    console.log('plotdiv:', plotdiv, plotid_prefix)
+    if (debug)
+        console.log('plotid:', plotid, 'plotdiv:', plotdiv, plotid_prefix)
     
     if (!plot || !plot.hasOwnProperty("type") || plot.type!='nd'){
         stage = 1;
@@ -852,7 +874,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
         // I know, I know: "series" is both singular and plural... go blame the English language, not me!
         //var serie = $A(datax.values).zip(datay.values, datax.errors, datay.errors, function(a) { return [a[0], a[1], { xerr: a[2], yerr: a[3] }]; });
         var serie = new Array();
-        if (datax) {
+        if (datax.values) {
             for (var i = 0; i < datax.values.length; i++) {
                 serie[i] = [datax.values[i], datay.values[i], {xerr: get(datax.errors, i), yerr: get(datay.errors, i)}];
             }

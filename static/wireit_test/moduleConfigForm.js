@@ -10,7 +10,7 @@ function configForm(headerList, moduleID) {
 			item2 = {
 				fieldLabel: headerList[i][1][j],
 				name: headerList[i][1][j],
-				decimalPrecision: Number.MAX_VALUE,
+				decimalPrecision: 15,
 			},
 			//console.log('i', i, 'j', j)
 			//console.log('adding item: ', item2)
@@ -79,8 +79,8 @@ function configForm(headerList, moduleID) {
 					for (var j in form._fields.items) {
 						key = form._fields.items[j].ownerCt.title + ',' + form._fields.items[j].fieldLabel
 						moduleConfigs[key] = form._fields.items[j].lastValue
-						if(moduleConfigs[key] == "0" && form._fields.items[j].id.split("-")[0] == 'numberfield')
-							moduleConfigs[key] = 0
+						if(form._fields.items[j].id.split("-")[0] == 'numberfield' && typeof moduleConfigs[key] == "string")
+							moduleConfigs[key] = Number(moduleConfigs[key]);
 						if(allStringsBlank && form._fields.items[j].id.split("-")[0] == 'textfield'){
 							if(form._fields.items[j].lastValue != undefined){
 								allStringsBlank = false;

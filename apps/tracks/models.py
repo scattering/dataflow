@@ -24,7 +24,7 @@ class File(models.Model):
 	location = models.CharField(max_length=300) #location of file on disk
 	metadata = models.ManyToManyField('Metadata', null=True)
 	def __unicode__(self):
-		return self.name
+		return self.friendly_name
 	
 class Metadata(models.Model):
 	Myfile = models.ForeignKey('File', related_name="file")

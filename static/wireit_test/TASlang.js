@@ -35,6 +35,7 @@ var tas = {
 				}
 			}],
 			"xtype" : "WireIt.Container",
+			"image" : "",
 			"height" : 16
 		},
 		"name" : "Load"
@@ -73,6 +74,7 @@ var tas = {
 				}
 			}],
 			"xtype" : "WireIt.Container",
+			"image" : "",
 			"height" : 16
 		},
 		"name" : "Save"

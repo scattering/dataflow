@@ -3,7 +3,7 @@ Triple Axis Spectrometer reduction and analysis modules
 """
 import math, os, sys, types
 
-if 0:
+if 1:
     from ...reduction.tripleaxis import data_abstraction
     from ..calc import run_template
     from .. import wireit
@@ -15,17 +15,17 @@ if 0:
     from ..core import Instrument, Data, Template, register_instrument
     
     #from dataflow.dataflow.modules.load import load_module
-    from ..modules.join import join_module
+    from .modules.tas_join import join_module
     from ..modules.save import save_module
-    from ..modules.tas_load import load_module
-    from ..modules.tas_normalize_monitor import normalize_monitor_module
-    from ..modules.tas_detailed_balance import detailed_balance_module
-    from ..modules.tas_monitor_correction import monitor_correction_module
-    from ..modules.tas_volume_correction import volume_correction_module
+    from .modules.tas_load import load_module
+    from .modules.tas_normalize_monitor import normalize_monitor_module
+    from .modules.tas_detailed_balance import detailed_balance_module
+    from .modules.tas_monitor_correction import monitor_correction_module
+    from .modules.tas_volume_correction import volume_correction_module
     from ...apps.tracks.models import File
 
 
-if 1:
+if 0:
     #direct imports for use individually (ie running this file)
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
     from dataflow.reduction.tripleaxis import data_abstraction
@@ -38,13 +38,13 @@ if 1:
     from dataflow.dataflow import config
     from dataflow.dataflow.core import Instrument, Data, Template, register_instrument
 
-    from dataflow.dataflow.modules.join import join_module
+    from dataflow.dataflow.tas.modules.tas_join import join_module
     from dataflow.dataflow.modules.save import save_module
-    from dataflow.dataflow.modules.tas_load import load_module
-    from dataflow.dataflow.modules.tas_normalize_monitor import normalize_monitor_module
-    from dataflow.dataflow.modules.tas_detailed_balance import detailed_balance_module
-    from dataflow.dataflow.modules.tas_monitor_correction import monitor_correction_module
-    from dataflow.dataflow.modules.tas_volume_correction import volume_correction_module
+    from dataflow.dataflow.tas.modules.tas_load import load_module
+    from dataflow.dataflow.tas.modules.tas_normalize_monitor import normalize_monitor_module
+    from dataflow.dataflow.tas.modules.tas_detailed_balance import detailed_balance_module
+    from dataflow.dataflow.tas.modules.tas_monitor_correction import monitor_correction_module
+    from dataflow.dataflow.tas.modules.tas_volume_correction import volume_correction_module
     from dataflow.apps.tracks.models import File
     #from dataflow.apps.tracks.models import File
 
@@ -93,7 +93,7 @@ def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
 load = load_module(id='tas.load', datatype=TAS_DATA,
                    version='1.0', action=load_action,)
 
-def save_action(input=None, ext=None, xtype=None, position=None, **kwargs):
+def save_action(input, ext=None, xtype=None, position=None, **kwargs):
     # Note that save does not accept inputs from multiple components, so
     # we only need to deal with the bundle, not the list of bundles.
     # This is specified by terminal['multiple'] = False in modules/save.py
@@ -116,8 +116,7 @@ save_ext = {
 save = save_module(id='tas.save', datatype=TAS_DATA,
                    version='1.0', action=save_action,
                    fields=[save_ext])
-
-
+    
 def join_action(input, xaxis='', yaxis='', **kwargs):
     # This is confusing because load returns a bundle and join, which can
     # link to multiple loads, has a list of bundles.  So flatten this list.
@@ -154,12 +153,16 @@ join = join_module(id='tas.join', datatype=TAS_DATA,
 
 def detailed_balance_action(input, **kwargs):
     for tasinstrument in input:
+        tasinstrument.xaxis = ''
+        tasinstrument.yaxis = ''
         tasinstrument.detailed_balance()
     return dict(output=input)
 
 def normalize_monitor_action(input, target_monitor, **kwargs):
     #Requires the target monitor value
     for tasinstrument in input:
+        tasinstrument.xaxis = ''
+        tasinstrument.yaxis = ''
         tasinstrument.normalize_monitor(target_monitor)
     #result=input[0].get_plottable()
     return dict(output=input)
@@ -168,11 +171,15 @@ def monitor_correction_action(input, instrument_name, **kwargs):
     #Requires instrument name, e.g. 'BT7'.  
     #Check monitor_correction_coordinates.txt for available instruments
     for tasinstrument in input:
+        tasinstrument.xaxis = ''
+        tasinstrument.yaxis = ''
         tasinstrument.harmonic_monitor_correction()
     return dict(ouput=input)
 
 def volume_correction_action(input, **kwargs):
     for tasinstrument in input:
+        tasinstrument.xaxis = ''
+        tasinstrument.yaxis = ''
         tasinstrument.resolution_volume_correction()
     return dict(output=input)
 
@@ -209,7 +216,7 @@ if 1:
         register_instrument(instrument)
 
 
-if 1:
+if 0:
     modules = [
         dict(module="tas.load", position=(10, 150), config={'files':[ROOT_URL.HOMEDIR[:-12] + 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
         dict(module="tas.normalize_monitor", position=(270, 20), config={'target_monitor': 165000}),
@@ -240,7 +247,7 @@ if 1:
                         instrument=BT7.id,
                         )
 
-if 0:
+if 1:
     #for loading spins files 59-71 for plotting
     modules = [
         dict(module="tas.load", position=(10, 40), config={}),

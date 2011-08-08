@@ -2,8 +2,8 @@
 For TripleAxis, monitor correction
 """
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
 
 def monitor_correction_module(id=None, datatype=None, action=None,
                              version='0.0', fields=[],

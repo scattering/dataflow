@@ -4,6 +4,7 @@ var andr2 = {
     {
       "container": {
         "height": 16, 
+        "image": "", 
         "terminals": [
           {
             "alwaysSrc": true, 
@@ -60,6 +61,7 @@ var andr2 = {
     {
       "container": {
         "height": 16, 
+        "image": "", 
         "terminals": [
           {
             "alwaysSrc": true, 
@@ -98,6 +100,7 @@ var andr2 = {
     {
       "container": {
         "height": 16, 
+        "image": "", 
         "terminals": [
           {
             "alwaysSrc": true, 
@@ -135,9 +138,8 @@ var andr2 = {
     }, 
     {
       "container": {
-        //"icon": "../../static/img/offspecular/save.png", 
-        "image": "../../static/img/offspecular/save_image.png", 
         "height": 16, 
+        "image": "../../static/img/offspecular/save_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -161,7 +163,6 @@ var andr2 = {
           }
         ], 
         "width": 120, 
-        "resizable" : true,
         "xtype": "SaveContainer"
       }, 
       "fields": [
@@ -585,6 +586,7 @@ var andr2 = {
     {
       "container": {
         "height": 16, 
+        "image": "", 
         "terminals": [
           {
             "alwaysSrc": true, 
@@ -952,20 +954,21 @@ var andr2 = {
 };
 
 SaveContainer = function(opts, layer) {
-	SaveContainer.superclass.constructor.call(this, opts, layer);
-	var content = document.createElement('div')
-	content.innerHTML = 'Click here to save:';
-	var saveButton = document.createElement('img');
-	saveButton.src = this.image;
-	content.appendChild(saveButton);	
-	this.setBody(content);
-	YAHOO.util.Event.addListener(saveButton, "click", this.Save, this, true);
+    SaveContainer.superclass.constructor.call(this, opts, layer);
+    var content = document.createElement('div')
+    content.innerHTML = 'Click here to save:';
+    var saveButton = document.createElement('img');
+    saveButton.src = this.image;
+    content.appendChild(saveButton);    
+    this.setBody(content);
+
+    YAHOO.util.Event.addListener(saveButton, 'click', this.Save, this, true);
 };
 
 YAHOO.lang.extend(SaveContainer, WireIt.Container, {
-	xtype: "SaveContainer",
-	Save: function(e) {
-	    console.log('save click:', e);
-	    alert('I am saving!');
-	}
+    xtype: 'SaveContainer',
+    Save: function(e) {
+        console.log('save click:', e);
+        alert('I am saving!');
+    }
 });
