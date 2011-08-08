@@ -1,0 +1,706 @@
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2011.8.3)  8 AUG 2011 12:45
+entering extended mode
+ %&-line parsing enabled.
+**documentation.ltx
+(./documentation.ltx
+LaTeX2e <2009/09/24>
+Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
+yphenation, loaded.
+(./iucr.cls
+\c@chapter=\count79
+\c@example=\count80
+
+Document Class: iucr 2010/12/07 IUCr article/chapter class
+(/usr/share/texmf-texlive/tex/latex/tools/multicol.sty
+Package: multicol 2008/12/05 v1.6h multicolumn formatting (FMi)
+\c@tracingmulticols=\count81
+\mult@box=\box26
+\multicol@leftmargin=\dimen102
+\c@unbalance=\count82
+\c@collectmore=\count83
+\doublecol@number=\count84
+\multicoltolerance=\count85
+\multicolpretolerance=\count86
+\full@width=\dimen103
+\page@free=\dimen104
+\premulticols=\dimen105
+\postmulticols=\dimen106
+\multicolsep=\skip41
+\multicolbaselineskip=\skip42
+\partial@page=\box27
+\last@line=\box28
+\mult@rightbox=\box29
+\mult@grightbox=\box30
+\mult@gfirstbox=\box31
+\mult@firstbox=\box32
+\@tempa=\box33
+\@tempa=\box34
+\@tempa=\box35
+\@tempa=\box36
+\@tempa=\box37
+\@tempa=\box38
+\@tempa=\box39
+\@tempa=\box40
+\@tempa=\box41
+\@tempa=\box42
+\@tempa=\box43
+\@tempa=\box44
+\@tempa=\box45
+\@tempa=\box46
+\@tempa=\box47
+\@tempa=\box48
+\@tempa=\box49
+\c@columnbadness=\count87
+\c@finalcolumnbadness=\count88
+\last@try=\dimen107
+\multicolovershoot=\dimen108
+\multicolundershoot=\dimen109
+\mult@nat@firstbox=\box50
+\colbreak@box=\box51
+)
+(/usr/share/texmf-texlive/tex/latex/psnfss/times.sty
+Package: times 2005/04/12 PSNFSS-v9.2a (SPQR) 
+)
+(/usr/share/texmf-texlive/tex/latex/graphics/graphics.sty
+Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf-texlive/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/etc/texmf/tex/latex/config/graphics.cfg
+File: graphics.cfg 2009/08/28 v1.8 graphics configuration of TeX Live
+)
+Package graphics Info: Driver file: dvips.def on input line 91.
+
+(/usr/share/texmf-texlive/tex/latex/graphics/dvips.def
+File: dvips.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
+))
+(/usr/share/texmf-texlive/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count89
+\float@exts=\toks14
+\float@box=\box52
+\@float@everytoks=\toks15
+\@floatcapt=\box53
+)
+(/usr/share/texmf-texlive/tex/latex/tools/tabularx.sty
+Package: tabularx 1999/01/07 v2.07 `tabularx' package (DPC)
+
+(/usr/share/texmf-texlive/tex/latex/tools/array.sty
+Package: array 2008/09/09 v2.4c Tabular extension package (FMi)
+\col@sep=\dimen110
+\extrarowheight=\dimen111
+\NC@list=\toks16
+\extratabsurround=\skip43
+\backup@length=\skip44
+)
+\TX@col@width=\dimen112
+\TX@old@table=\dimen113
+\TX@old@col=\dimen114
+\TX@target=\dimen115
+\TX@delta=\dimen116
+\TX@cols=\count90
+\TX@ftn=\toks17
+)
+(/usr/share/texmf-texlive/tex/generic/dvips/colordvi.tex)
+(/usr/share/texmf-texlive/tex/latex/base/article.cls
+Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
+(/usr/share/texmf-texlive/tex/latex/base/size10.clo
+File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
+)
+\c@part=\count91
+\c@section=\count92
+\c@subsection=\count93
+\c@subsubsection=\count94
+\c@paragraph=\count95
+\c@subparagraph=\count96
+\c@figure=\count97
+\c@table=\count98
+\abovecaptionskip=\skip45
+\belowcaptionskip=\skip46
+\bibindent=\dimen117
+)
+(/usr/share/texmf-texlive/tex/latex/harvard/harvard.sty
+Package: harvard 
+
+(/usr/share/texmf-texlive/tex/latex/base/ifthen.sty
+Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
+))
+LaTeX Font Info:    Redeclaring symbol font `operators' on input line 688.
+LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
+(Font)                  OT1/cmr/m/n --> OT1/ptmcm/m/n on input line 688.
+LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
+(Font)                  OT1/cmr/bx/n --> OT1/ptmcm/m/n on input line 688.
+LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
+(Font)                  OT1/ptmcm/m/n --> OT1/ptm/b/n on input line 689.
+LaTeX Font Info:    Redeclaring symbol font `letters' on input line 690.
+LaTeX Font Info:    Overwriting symbol font `letters' in version `normal'
+(Font)                  OML/cmm/m/it --> OML/ptmcm/m/it on input line 690.
+LaTeX Font Info:    Overwriting symbol font `letters' in version `bold'
+(Font)                  OML/cmm/b/it --> OML/ptmcm/m/it on input line 690.
+LaTeX Font Info:    Encoding `OML' has changed to `OT1' for symbol font
+(Font)              `letters' in the math version `bold' on input line 691.
+LaTeX Font Info:    Overwriting symbol font `letters' in version `bold'
+(Font)                  OML/ptmcm/m/it --> OT1/ptm/b/it on input line 691.
+
+FONT WARNINGS CAN USUALLY BE IGNORED. IF YOU EXPERIENCE
+PROBLEMS WITH FONTS, USE THE [preprint] OPTION
+LaTeX Font Info:    Redeclaring symbol font `symbols' on input line 694.
+LaTeX Font Info:    Overwriting symbol font `symbols' in version `normal'
+(Font)                  OMS/cmsy/m/n --> OMS/cmsy/m/n on input line 694.
+LaTeX Font Info:    Overwriting symbol font `symbols' in version `bold'
+(Font)                  OMS/cmsy/b/n --> OMS/cmsy/m/n on input line 694.
+LaTeX Font Info:    Redeclaring symbol font `largesymbols' on input line 695.
+LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `normal'
+(Font)                  OMX/cmex/m/n --> OMX/cmex/m/n on input line 695.
+LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `bold'
+(Font)                  OMX/cmex/m/n --> OMX/cmex/m/n on input line 695.
+\symbold=\mathgroup4
+\symitalic=\mathgroup5
+LaTeX Font Info:    Overwriting symbol font `italic' in version `bold'
+(Font)                  OT1/ptm/m/it --> OT1/ptm/b/it on input line 698.
+\symgreek=\mathgroup6
+LaTeX Font Info:    Overwriting symbol font `greek' in version `bold'
+(Font)                  OML/cmm/m/it --> OML/cmm/b/it on input line 700.
+\symuprightgreek=\mathgroup7
+LaTeX Font Info:    Overwriting symbol font `uprightgreek' in version `bold'
+(Font)                  OT1/ptmcm/m/n --> OT1/cmr/bx/n on input line 702.
+\symboldgreek=\mathgroup8
+\symbolduprightgreek=\mathgroup9
+LaTeX Font Info:    Redeclaring math symbol \alpha on input line 705.
+LaTeX Font Info:    Redeclaring math symbol \beta on input line 707.
+LaTeX Font Info:    Redeclaring math symbol \gamma on input line 709.
+LaTeX Font Info:    Redeclaring math symbol \delta on input line 711.
+LaTeX Font Info:    Redeclaring math symbol \epsilon on input line 713.
+LaTeX Font Info:    Redeclaring math symbol \zeta on input line 715.
+LaTeX Font Info:    Redeclaring math symbol \eta on input line 717.
+LaTeX Font Info:    Redeclaring math symbol \theta on input line 719.
+LaTeX Font Info:    Redeclaring math symbol \iota on input line 721.
+LaTeX Font Info:    Redeclaring math symbol \kappa on input line 723.
+LaTeX Font Info:    Redeclaring math symbol \lambda on input line 725.
+LaTeX Font Info:    Redeclaring math symbol \mu on input line 727.
+LaTeX Font Info:    Redeclaring math symbol \nu on input line 729.
+LaTeX Font Info:    Redeclaring math symbol \xi on input line 731.
+LaTeX Font Info:    Redeclaring math symbol \pi on input line 733.
+LaTeX Font Info:    Redeclaring math symbol \rho on input line 735.
+LaTeX Font Info:    Redeclaring math symbol \sigma on input line 737.
+LaTeX Font Info:    Redeclaring math symbol \tau on input line 739.
+LaTeX Font Info:    Redeclaring math symbol \upsilon on input line 741.
+LaTeX Font Info:    Redeclaring math symbol \phi on input line 743.
+LaTeX Font Info:    Redeclaring math symbol \chi on input line 745.
+LaTeX Font Info:    Redeclaring math symbol \psi on input line 747.
+LaTeX Font Info:    Redeclaring math symbol \omega on input line 749.
+LaTeX Font Info:    Redeclaring math symbol \varepsilon on input line 751.
+LaTeX Font Info:    Redeclaring math symbol \vartheta on input line 753.
+LaTeX Font Info:    Redeclaring math symbol \varpi on input line 755.
+LaTeX Font Info:    Redeclaring math symbol \varrho on input line 757.
+LaTeX Font Info:    Redeclaring math symbol \varsigma on input line 759.
+LaTeX Font Info:    Redeclaring math symbol \varphi on input line 761.
+LaTeX Font Info:    Redeclaring math symbol \Gamma on input line 763.
+LaTeX Font Info:    Redeclaring math symbol \Delta on input line 765.
+LaTeX Font Info:    Redeclaring math symbol \Theta on input line 767.
+LaTeX Font Info:    Redeclaring math symbol \Lambda on input line 769.
+LaTeX Font Info:    Redeclaring math symbol \Xi on input line 771.
+LaTeX Font Info:    Redeclaring math symbol \Pi on input line 773.
+LaTeX Font Info:    Redeclaring math symbol \Sigma on input line 775.
+LaTeX Font Info:    Redeclaring math symbol \Upsilon on input line 777.
+LaTeX Font Info:    Redeclaring math symbol \Phi on input line 779.
+LaTeX Font Info:    Redeclaring math symbol \Psi on input line 781.
+LaTeX Font Info:    Redeclaring math symbol \Omega on input line 783.
+LaTeX Font Info:    Redeclaring math alphabet \mathbf on input line 785.
+LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
+(Font)                  OT1/cmr/bx/n --> OT1/ptm/bx/n on input line 785.
+LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `bold'
+(Font)                  OT1/cmr/bx/n --> OT1/ptm/bx/n on input line 785.
+LaTeX Font Info:    Redeclaring math alphabet \mathit on input line 786.
+LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
+(Font)                  OT1/cmr/m/it --> OT1/ptm/m/it on input line 786.
+LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
+(Font)                  OT1/cmr/bx/it --> OT1/ptm/m/it on input line 786.
+LaTeX Font Info:    Redeclaring math alphabet \mathsfrm on input line 802.
+LaTeX Font Info:    Overwriting math alphabet `\mathsfrm' in version `normal'
+(Font)                  OT1/ptm/m/n --> OT1/ppl/m/n on input line 802.
+LaTeX Font Info:    Overwriting math alphabet `\mathsfrm' in version `bold'
+(Font)                  OT1/ptm/m/n --> OT1/ppl/m/n on input line 802.
+LaTeX Font Info:    Redeclaring math alphabet \mathsfit on input line 803.
+LaTeX Font Info:    Overwriting math alphabet `\mathsfit' in version `normal'
+(Font)                  OT1/ptm/m/it --> OT1/ppl/m/it on input line 803.
+LaTeX Font Info:    Overwriting math alphabet `\mathsfit' in version `bold'
+(Font)                  OT1/ptm/m/it --> OT1/ppl/m/it on input line 803.
+LaTeX Font Info:    Redeclaring math alphabet \mathsfbf on input line 804.
+LaTeX Font Info:    Overwriting math alphabet `\mathsfbf' in version `normal'
+(Font)                  OT1/ptm/b/n --> OT1/ppl/b/n on input line 804.
+LaTeX Font Info:    Overwriting math alphabet `\mathsfbf' in version `bold'
+(Font)                  OT1/ptm/b/n --> OT1/ppl/b/n on input line 804.
+LaTeX Font Info:    Redeclaring math alphabet \mathsfbi on input line 805.
+LaTeX Font Info:    Overwriting math alphabet `\mathsfbi' in version `normal'
+(Font)                  OT1/ptm/b/it --> OT1/ppl/b/it on input line 805.
+LaTeX Font Info:    Overwriting math alphabet `\mathsfbi' in version `bold'
+(Font)                  OT1/ptm/b/it --> OT1/ppl/b/it on input line 805.
+\colwidth=\skip47
+\frontwidth=\skip48
+\@ffnote=\box54
+\k@ynote=\box55
+\b@x=\box56
+\keyb@x=\box57
+\@float@every@inset=\toks18
+\c@inset=\count99
+\c@tchline=\box58
+\c@aufn=\count100
+\@ufn=\box59
+\vit@=\box60
+\c@refno=\count101
+\@PDB=\box61
+\@PDBscr@tch=\box62
+\@NDB=\box63
+\@NDBscr@tch=\box64
+\t@tlebox=\box65
+LaTeX Font Info:    Try loading font information for OT1+ptmcm on input line 73
+73.
+
+(/usr/share/texmf-texlive/tex/latex/psnfss/ot1ptmcm.fd
+File: ot1ptmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OT1/ptmcm.
+)
+LaTeX Font Info:    Try loading font information for OML+ptmcm on input line 73
+73.
+
+(/usr/share/texmf-texlive/tex/latex/psnfss/omlptmcm.fd
+File: omlptmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OML/ptmcm.
+)
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 7373.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 7373.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 7373
+.
+
+(/usr/share/texmf-texlive/tex/latex/psnfss/ot1ptm.fd
+File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
+)
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 7373.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 7373.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 7373.
+\currentlineskip=\skip49
+\interblockskip=\skip50
+\defaultinterblockskip=\skip51
+)
+LaTeX Font Info:    Try loading font information for OT1+ppl on input line 95.
+
+(/usr/share/texmf-texlive/tex/latex/psnfss/ot1ppl.fd
+File: ot1ppl.fd 2001/06/04 font definitions for OT1/ppl.
+)
+No file documentation.aux.
+\openout1 = `documentation.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 104.
+LaTeX Font Info:    ... okay on input line 104.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 104.
+LaTeX Font Info:    ... okay on input line 104.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 104.
+LaTeX Font Info:    ... okay on input line 104.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 104.
+LaTeX Font Info:    ... okay on input line 104.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 104.
+LaTeX Font Info:    ... okay on input line 104.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 104.
+LaTeX Font Info:    ... okay on input line 104.
+Beginning to process article (iucr) 
+\l@go=\box66
+\t@tle=\box67
+LaTeX Font Info:    Font shape `OT1/ppl/bx/n' in size <10> not available
+(Font)              Font shape `OT1/ppl/b/n' tried instead on input line 113.
+LaTeX Font Info:    Font shape `OT1/ppl/bx/n' in size <9> not available
+(Font)              Font shape `OT1/ppl/b/n' tried instead on input line 113.
+
+Underfull \hbox (badness 10000) in paragraph at lines 113--113
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 113--113
+
+ []
+
+LaTeX Font Info:    Font shape `OT1/ppl/bx/n' in size <14.4> not available
+(Font)              Font shape `OT1/ppl/b/n' tried instead on input line 113.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <14.4> on input line 113.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 113.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 113.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 124.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 124.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 124.
+LaTeX Font Info:    Font shape `OT1/ppl/bx/n' in size <8> not available
+(Font)              Font shape `OT1/ppl/b/n' tried instead on input line 149.
+LaTeX Font Info:    Font shape `OT1/ppl/bx/n' in size <6> not available
+(Font)              Font shape `OT1/ppl/b/n' tried instead on input line 149.
+\@ccline=\box68
+\c@pyline=\box69
+LaTeX Font Info:    Try loading font information for OMS+ppl on input line 161.
+
+(/usr/share/texmf-texlive/tex/latex/psnfss/omsppl.fd
+File: omsppl.fd 
+)
+LaTeX Font Info:    Font shape `OMS/ppl/m/n' in size <7> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 161.
+
+Overfull \hbox (159.33542pt too wide) detected at line 161
+[]
+ []
+
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 163.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <9> on input line 164.
+\@bstract=\box70
+
+Overfull \hbox (324.3614pt too wide) detected at line 173
+[]
+ []
+
+\topleft=\box71
+\topright=\box72
+\TOPscr@tch=\box73
+\toph@ight=\dimen118
+
+Overfull \hbox (364.19528pt too wide) detected at line 183
+[]
+ []
+
+
+Overfull \hbox (39.83386pt too wide) in paragraph at lines 183--183
+[] 
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 183
+[][]
+ []
+
+
+LaTeX Warning: Citation 'knuth84' on page 1 undefined on input line 193.
+
+
+LaTeX Warning: Citation 'lamport86' on page 1 undefined on input line 199.
+
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 224.
+
+(/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
+File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
+)
+
+Package multicol Warning: I moved some lines to the next page.
+(multicol)                Footnotes on page 1 might be wrong on input line 280.
+
+
+LaTeX Font Info:    Font shape `OT1/ppl/bx/n' in size <16> not available
+(Font)              Font shape `OT1/ppl/b/n' tried instead on input line 280.
+
+Overfull \vbox (18.0pt too high) has occurred while \output is active []
+
+LaTeX Font Info:    Font shape `OT1/ppl/bx/n' in size <12> not available
+(Font)              Font shape `OT1/ppl/b/n' tried instead on input line 280.
+
+Overfull \vbox (25.37831pt too high) has occurred while \output is active []
+
+
+Overfull \hbox (1.90002pt too wide) has occurred while \output is active
+ []
+ []
+
+[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
+
+]
+LaTeX Font Info:    Font shape `OT1/ptm/bx/it' in size <10> not available
+(Font)              Font shape `OT1/ptm/b/it' tried instead on input line 319.
+
+Overfull \hbox (8.46323pt too wide) in paragraph at lines 358--363
+[][]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 358--363
+
+ []
+
+
+Overfull \vbox (18.0pt too high) has occurred while \output is active []
+
+
+Overfull \vbox (25.22833pt too high) has occurred while \output is active []
+
+
+Overfull \hbox (1.90002pt too wide) has occurred while \output is active
+ []
+ []
+
+[2]
+Overfull \vbox (18.0pt too high) has occurred while \output is active []
+
+
+Overfull \vbox (25.22833pt too high) has occurred while \output is active []
+
+
+Overfull \hbox (1.90002pt too wide) has occurred while \output is active
+ []
+ []
+
+[3]
+Underfull \hbox (badness 6141) in paragraph at lines 679--682
+\OT1/ptm/m/it/10 tal-lo-graph-ica \OT1/ptm/m/n/10 three-column set-ting is used
+. The macro
+ []
+
+
+Overfull \vbox (18.0pt too high) has occurred while \output is active []
+
+
+Overfull \vbox (25.37831pt too high) has occurred while \output is active []
+
+
+Overfull \hbox (1.90002pt too wide) has occurred while \output is active
+ []
+ []
+
+[4]
+
+LaTeX Warning: Citation 'rauch76' on page 5 undefined on input line 874.
+
+
+Overfull \vbox (18.0pt too high) has occurred while \output is active []
+
+
+Overfull \vbox (25.22833pt too high) has occurred while \output is active []
+
+
+Overfull \hbox (1.90002pt too wide) has occurred while \output is active
+ []
+ []
+
+[5]
+
+LaTeX Warning: Citation 'pauling89' on page 6 undefined on input line 895.
+
+
+LaTeX Warning: Citation 'pargel84' on page 6 undefined on input line 896.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 918--927
+\OT1/ptm/m/n/10 just before the []\OT1/pcr/m/n/8 \end{document} \OT1/ptm/m/n/10
+ state-ment. The
+ []
+
+
+LaTeX Warning: Citation 'lamport86' on page 6 undefined on input line 928.
+
+LaTeX Font Info:    Font shape `OT1/ppl/bx/it' in size <9> not available
+(Font)              Font shape `OT1/ppl/b/it' tried instead on input line 961.
+
+Overfull \hbox (252.0pt too wide) detected at line 995
+[]
+ []
+
+
+Overfull \vbox (18.0pt too high) has occurred while \output is active []
+
+
+Overfull \vbox (25.22833pt too high) has occurred while \output is active []
+
+
+Overfull \hbox (1.90002pt too wide) has occurred while \output is active
+ []
+ []
+
+[6]
+File: fig1.ps Graphic file (type eps)
+ <fig1.ps>
+Overfull \vbox (18.0pt too high) has occurred while \output is active []
+
+
+Overfull \vbox (25.22833pt too high) has occurred while \output is active []
+
+
+Overfull \hbox (1.90002pt too wide) has occurred while \output is active
+ []
+ []
+
+[7
+Non-PDF special ignored!]
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 1188.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <12> on input line 1188.
+
+Overfull \hbox (252.0pt too wide) detected at line 1291
+[]
+ []
+
+
+Overfull \hbox (252.0pt too wide) detected at line 1297
+[]
+ []
+
+
+Overfull \hbox (252.0pt too wide) detected at line 1306
+[]
+ []
+
+
+Overfull \hbox (252.0pt too wide) detected at line 1316
+[]
+ []
+
+
+Overfull \hbox (6.15775pt too wide) in paragraph at lines 1282--1322
+[][] 
+ []
+
+
+Overfull \vbox (18.0pt too high) has occurred while \output is active []
+
+
+Overfull \vbox (25.22833pt too high) has occurred while \output is active []
+
+
+Overfull \hbox (1.90002pt too wide) has occurred while \output is active
+ []
+ []
+
+[8]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \vbox (18.0pt too high) has occurred while \output is active []
+
+
+Overfull \vbox (25.22833pt too high) has occurred while \output is active []
+
+
+Overfull \hbox (1.90002pt too wide) has occurred while \output is active
+ []
+ []
+
+[9]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \vbox (18.0pt too high) has occurred while \output is active []
+
+
+Overfull \vbox (25.37831pt too high) has occurred while \output is active []
+
+
+Overfull \hbox (1.90002pt too wide) has occurred while \output is active
+ []
+ []
+
+[10]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \vbox (18.0pt too high) has occurred while \output is active []
+
+
+Overfull \vbox (25.37831pt too high) has occurred while \output is active []
+
+
+Overfull \hbox (1.90002pt too wide) has occurred while \output is active
+ []
+ []
+
+[11]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \vbox (18.0pt too high) has occurred while \output is active []
+
+
+Overfull \vbox (25.37831pt too high) has occurred while \output is active []
+
+
+Overfull \hbox (1.90002pt too wide) has occurred while \output is active
+ []
+ []
+
+[12]
+Overfull \hbox (15.53568pt too wide) in paragraph at lines 1612--1617
+[]\OT1/ptm/m/n/10 The exam-ple below demon-strates how a short Con-fer-ence abs
+tract may be pre-sented using the []\OT1/pcr/m/n/8 abstract \OT1/ptm/m/n/10 opt
+ion in the []\OT1/pcr/m/n/8 \documentclass
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \vbox (18.0pt too high) has occurred while \output is active []
+
+
+Overfull \vbox (25.37831pt too high) has occurred while \output is active []
+
+
+Overfull \hbox (1.90002pt too wide) has occurred while \output is active
+ []
+ []
+
+[13]
+No file documentation.bbl.
+
+Finished processing article
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \vbox (18.0pt too high) has occurred while \output is active []
+
+
+Overfull \vbox (25.37831pt too high) has occurred while \output is active []
+
+
+Overfull \hbox (1.90002pt too wide) has occurred while \output is active
+ []
+ []
+
+[14] (./documentation.aux) ) 
+Here is how much of TeX's memory you used:
+ 1912 strings out of 495061
+ 22302 string characters out of 1182622
+ 120108 words of memory out of 3000000
+ 5046 multiletter control sequences out of 15000+50000
+ 66653 words of font info for 132 fonts, out of 3000000 for 9000
+ 28 hyphenation exceptions out of 8191
+ 30i,10n,24p,212b,474s stack positions out of 5000i,500n,10000p,200000b,50000s
+{/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.e
+nc}</usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/sh
+are/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-te
+xlive/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts
+/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texmf-texlive/fonts/type1/publi
+c/amsfonts/cm/cmsy7.pfb></usr/share/texmf-texlive/fonts/type1/urw/courier/ucrr8
+a.pfb></usr/share/texmf-texlive/fonts/type1/urw/palatino/uplb8a.pfb></usr/share
+/texmf-texlive/fonts/type1/urw/palatino/uplbi8a.pfb></usr/share/texmf-texlive/f
+onts/type1/urw/palatino/uplr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/ti
+mes/utmb8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmbi8a.pfb></us
+r/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb></usr/share/texmf-texliv
+e/fonts/type1/urw/times/utmri8a.pfb>
+Output written on documentation.pdf (14 pages, 222978 bytes).
+PDF statistics:
+ 101 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+

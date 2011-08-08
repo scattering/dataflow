@@ -1,0 +1,37 @@
+%%
+%% This is file `dvilaser.def',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% drivers.dtx  (with options: `dvilaser,psrules')
+%% 
+%% drivers.dtx Copyright (C) 1994      David Carlisle Sebastian Rahtz
+%%             Copyright (C) 1995 1996 1997 David Carlisle
+%%
+%% This file is part of the Standard LaTeX `Graphics Bundle'.
+%%
+%% It should be distributed *unchanged* and together with all other
+%% files in the graphics bundle. The file 00readme.txt contains a list
+%% of all of these files.
+%%
+%% A modified version of this file may be distributed, but it should
+%% be distributed with a *different* name. Changed files must be
+%% distributed *together with a complete and unchanged* distribution
+%% of these files.
+%%
+\ProvidesFile{dvilaser.def}
+        [1997/09/09 v3.0e Driver-dependant file (DPC,SPQR)]
+\def\Ginclude@eps#1{%
+\ifGin@clip
+  \typeout{no clipping support in dvilaser/ps}%
+\fi
+\special{ps: epsfile #1\space \the\Gin@req@width}%
+}
+\def\Gin@extensions{.eps,.ps}
+\@namedef{Gin@rule@.ps}#1{{eps}{.ps}{#1}}
+\@namedef{Gin@rule@.eps}#1{{eps}{.eps}{#1}}
+\@namedef{Gin@rule@*}#1{{eps}{\Gin@ext}{#1}}
+\endinput
+%%
+%% End of file `dvilaser.def'.

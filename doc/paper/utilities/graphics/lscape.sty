@@ -1,0 +1,46 @@
+%%
+%% This is file `lscape.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% lscape.dtx  (with options: `package')
+%% 
+%% lscape.dtx Copyright (C) 1994 1999 David Carlisle
+%%
+%% This file is part of the Standard LaTeX `Graphics Bundle'.
+%% It may be distributed under the terms of the LaTeX Project Public
+%% License, as described in lppl.txt in the base LaTeX distribution.
+%% Either version 1.0 or, at your option, any later version.
+%%
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\ProvidesPackage{lscape}
+          [1999/02/16 v3.0a Landscape Pages (DPC)]
+\DeclareOption*{\PassOptionsToPackage\CurrentOption{graphics}}
+\ProcessOptions
+\RequirePackage{graphics}
+\let\LS@makecol=\@makecol
+\let\LS@makefcolumn=\@makefcolumn
+\def\LS@rot{%
+  \setbox\@outputbox\vbox{\hbox{\rotatebox{90}{\box\@outputbox}}}}
+\def\landscape{%
+  \clearpage
+  \begingroup
+  \vsize=\textwidth
+  \hsize=\textheight
+  \linewidth=\hsize
+  \columnwidth=\hsize
+  \@colroom=\vsize
+  \textheight=\vsize
+  \@colht=\vsize
+  \def\@makecol{\LS@makecol\LS@rot}%
+  \def\@makefcolumn##1{\LS@makefcolumn{##1}\LS@rot}}
+\def\endlandscape{%
+  \clearpage
+  \endgroup
+  \global\@colht=\textheight
+  \global\vsize=\textheight
+  \global\@colroom=\textheight}
+\endinput
+%%
+%% End of file `lscape.sty'.

@@ -1,0 +1,65 @@
+#% Do not delete the line below; configure depends on this
+#  \DeclareLaTeXClass{iucr}
+# 
+# EAM - IUCr layout definition using
+#       iucr.cls from their web site
+#	Oct 2003
+
+Preamble
+  \usepackage{harvard}
+EndPreamble
+
+Input article.layout
+
+
+### New definitions for this layout only
+
+Style			Synopsis
+  LatexType             Environment
+  LatexName             synopsis
+  LabelType             Top_Environment
+  LabelString           Synopsis
+    
+  Align                 Left
+  AlignPossible         Left
+
+  Font 
+    Size                Tiny
+    Family              Sans
+  EndFont
+End
+
+Style			Acknowledgments
+  Align                 Left
+  AlignPossible         Left
+
+  Font 
+    Size                Small
+    Family              Sans
+  EndFont
+End
+
+# Bibliography style definition
+Style References
+  Margin		First_Dynamic
+  LatexType		Item_Environment
+  LatexName		thebibliography
+  NextNoIndent		1
+  LeftMargin		MM
+  ParSkip		0.4
+  ItemSep		0
+  TopSep		0.7
+  BottomSep		0.7
+  ParSep		0.5
+  Align			Block
+  AlignPossible		Block, Left
+  LabelType		Bibliography
+  LabelString		References
+  LabelBottomSep    0.7
+
+  # label font definition
+  LabelFont 
+    Series		Bold
+    Size		Larger
+  EndFont
+End

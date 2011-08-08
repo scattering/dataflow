@@ -1,0 +1,28 @@
+%%
+%% This is file `ln.def',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% drivers.dtx  (with options: `ln')
+%% 
+%% drivers.dtx Copyright (C) 1994      David Carlisle Sebastian Rahtz
+%%             Copyright (C) 1995 1996 1997 David Carlisle
+%%
+%% This file is part of the Standard LaTeX `Graphics Bundle'.
+%%
+%% It should be distributed *unchanged* and together with all other
+%% files in the graphics bundle. The file 00readme.txt contains a list
+%% of all of these files.
+%%
+%% A modified version of this file may be distributed, but it should
+%% be distributed with a *different* name. Changed files must be
+%% distributed *together with a complete and unchanged* distribution
+%% of these files.
+%%
+\ProvidesFile{ln.def}
+        [1997/09/09 v3.0e Driver-dependant file (DPC,SPQR)]
+\def\Ginclude@sixel#1{\special{ln03:sixel #1}}
+\endinput
+%%
+%% End of file `ln.def'.

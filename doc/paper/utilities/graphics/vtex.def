@@ -1,0 +1,326 @@
+\ProvidesFile{vtex.def}[1999/01/14 v6.3 graphics/color for VTeX]
+\RequirePackage{bitmap}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% LaTeX Colour and Graphics support for VTeX
+%%
+%% [Entirely based on other drivers] by David Carlisle
+%%
+%% NOTE::: This package MUST NOT be used with VTeX drivers prior to
+%% version 6.3. It has no chance of working and the results are
+%% not predictable.
+%%
+%% It may be used by specifying the vtex option to any of the
+%% supported packages, for example:
+%%
+%% \usepackage[vtex]{graphicx}
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%       April 20, 1998
+%       "LaTeX run out of counters" error fixed. All "\newcount"
+%       stuff is put outside the "Ginclude@eps" command body.
+%       Why does L2E use global allocation of counters? [MV+MK]
+%
+%       October 10, 1998
+%       VTeX/GeX 6.2 support: [MV+AK]
+%
+%       November 10, 1998
+%       Background color supported: [MV]
+%
+%       January 11, 1999
+%       Use DC's new userkeys. Great stuff!!! [MV]
+%       [GeXinnerscale-->innerscale; imagemask added]
+%
+%       January 14, 1999
+%       atres userkey added: [AK]
+%
+\makeatletter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% OpMode verification. Moved to the beginning since we now need this
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Are we running under VTeX?
+\ifx\OpMode\@undefined
+   \csname newcount\endcsname\OpMode \OpMode=0 \fi          %Pre-6.0 VTeX.
+\ifnum\OpMode=1
+   %\PackageWarningNoLine\@currname{VTeX is running in PDF mode}
+\else\ifnum\OpMode=2
+  %\PackageWarningNoLine\@currname{VTeX is running in native mode}
+\else\ifnum\OpMode>9
+  %\PackageWarningNoLine\@currname{VTeX is running in exporting mode}
+\else
+  %\PackageWarningNoLine\@currname{VTeX is running in dvi mode}
+\fi
+\fi
+\fi
+
+\def\@xxx#1"#2#3{%
+  \ifx\@empty#30\fi#2#3}
+
+\def\foo#1{%
+  \dimen@255sp
+  \dimen@#1\dimen@
+  \chardef\@tempa\dimen@
+  \xdef\@tempa{\expandafter\@xxx\meaning\@tempa\@empty}}
+
+% Colour Support. The following models may be used.
+%   * cmyk   supported directly.
+%   * rgb    supported directly.
+%   * RGB    converted to rgb by this file.
+%   * gray   converted to rgb by this file.
+%   * named  converted to cmyk by this file.
+%
+\def\c@lor@arg#1{%
+  \dimen@#1\p@
+  \ifdim\dimen@<\z@\dimen@\maxdimen\fi
+  \ifdim\dimen@>\p@
+    \PackageError{color}{Argument `#1' not in range [0,1]}\@ehd
+  \fi}
+\def\color@cmyk#1#2{\c@lor@@cmyk#2\@@#1}
+\def\c@lor@@cmyk#1,#2,#3,#4\@@#5{%
+  \c@lor@arg{#1}\foo{#1}\let\@@a=\@tempa%
+  \c@lor@arg{#2}\foo{#2}\let\@@b=\@tempa%
+  \c@lor@arg{#3}\foo{#3}\let\@@c=\@tempa%
+  \c@lor@arg{#4}\foo{#4}\let\@@d=\@tempa%
+  \edef#5{#1 #2 #3 #4 k #1 #2 #3 #4 K}%
+  \edef#5{c:\@@a\@@b\@@c\@@d}
+  }
+\def\color@gray#1#2{\c@lor@@rgb#2,#2,#2\@@#1}
+\def\color@rgb#1#2{\c@lor@@rgb#2\@@#1}
+\def\c@lor@@rgb#1,#2,#3\@@#4{%\
+  \c@lor@arg{#1}\foo{#1}\let\@tempc=\@tempa%
+  \c@lor@arg{#2}\foo{#2}\let\@tempb=\@tempa%
+  \c@lor@arg{#3}\foo{#3}%
+  \edef#4{c"\@tempc\@tempb\@tempa}%
+  }
+\def\color@RGB#1#2{\c@lor@@RGB#2\@@#1}
+\def\c@lor@@RGB#1,#2,#3\@@#4{%
+ \c@lor@RGB@rgb{#1}\@tempa
+ \c@lor@RGB@rgb{#2}\@tempb
+ \c@lor@RGB@rgb{#3}\@tempc
+ \c@lor@@rgb\@tempa,\@tempb,\@tempc\@@#4%
+  }
+\def\c@lor@RGB@rgb#1#2{%
+  \dimen@#1\p@
+  \divide\dimen@\@cclv
+  \edef#2{\strip@pt\dimen@}}
+
+\def\color@named#1#2{\c@lor@@named#2,,\@@#1}
+\def\c@lor@@named#1,#2,#3\@@#4{%
+  \@ifundefined{col@#1}%
+    {\PackageError{color}{Undefined color `#1'}\@ehd}%
+  {\edef#4{\csname col@#1\endcsname}}%
+  }
+
+\def\pdfliteral#1{\special{!=#1}}
+
+\def\set@color{%
+  \special{\current@color}\aftergroup\reset@color}
+\def\reset@color{\special{\current@color}}
+\def\set@page@color{\immediate\special{%
+        b\current@color}}
+\def\define@color@named#1#2{%
+   \expandafter\edef\csname col@#1\endcsname{#2}}
+\def\current@color{c"000000}
+
+\def\c@lor@to@ps#1#2 #3 #4\@@{%
+  <<<<#1#2 255 div #3 255 div #4 255 div setrgbcolor>>>>}
+\def\c@lor@to@ps#1 #2\@@{\csname c@lor@ps@#1\endcsname#2 \@@}
+\def\c@lor@to@ps#1\@@{\message{OOPS![#1]}}
+%% MK convert stuff like 'c"XXXXXX to PostScript Command
+\def\c@lor@to@ps#1#2#3\@@{%
+        (#3) (#2) 0 get 58 ne {dorgb} {docmyk} ifelse
+        }
+
+% Need the `colorfix' modifications as no internal colour stack
+% is maintained
+%<*colorfix>
+\AtBeginDocument{%
+  \let\@ldc@l@r\color
+  \def\color{\if@inlabel\leavevmode\fi\@ldc@l@r}%
+  \let\@lduseb@x\usebox
+  \def\usebox#1{\@lduseb@x{#1}\set@color}}
+%</colorfix>
+
+%
+% Graphic inclusion. Currently supports BMP GIF JPG TGA PCX PNG TIF EPS
+%
+% Same code is used for all bitmapped files.
+\def\Gread@@#1{%
+%  \message{<#1>,\the\Gin@req@width,\the\Gin@req@height,\Gin@scalex,\Gin@scaley}%
+%  \message{ImageMask="\vtex@imagemask"}%
+%  \message{vtex@incl@res=\vtex@incl@res}%
+  \sizegraph<#1>\relax
+  \def\Gin@llx{0}%
+  \let\Gin@lly\Gin@llx
+  \ifnum\vtex@incl@res>\z@
+    % This magic dimension equal 1in*1pt/1bp
+    \dimen@=4718592sp
+    \divide\dimen@ \vtex@incl@res\relax
+    \multiply\dimen@ \graphx
+    \Remove@@PT{\dimen@}\v@@Gin@ur
+    \edef\Gin@urx{\v@@Gin@ur}%
+    \dimen@=4718592sp
+    \divide\dimen@ \vtex@incl@res\relax
+    \multiply\dimen@ \graphy
+    \Remove@@PT{\dimen@}\v@@Gin@ur
+    \edef\Gin@ury{\v@@Gin@ur}%
+  \else
+    \def\Gin@urx{\the\graphx}%
+    \def\Gin@ury{\the\graphy}%
+  \fi
+}
+\let\Gread@gif=\Gread@@
+\let\Gread@png=\Gread@@
+\let\Gread@bmp=\Gread@@
+\let\Gread@pcx=\Gread@@
+\let\Gread@tga=\Gread@@
+\let\Gread@tif=\Gread@@
+\let\Gread@jpg=\Gread@@
+
+\def\Ginclude@@#1{%
+% \message{<#1>,\the\Gin@req@width,\the\Gin@req@height,\Gin@scalex,\Gin@scaley}%
+% it's kinda stupid to turn it on & off, but perhaps safer this way...
+ \if1\vtex@imagemask\special{!imagemask+}\fi
+ \InsertBitmapXY{\Gin@req@width}{\Gin@req@height}{#1}%
+ \if1\vtex@imagemask\special{!imagemask-}\fi
+ }
+
+\let\Ginclude@gif=\Ginclude@@
+\let\Ginclude@png=\Ginclude@@
+\let\Ginclude@bmp=\Ginclude@@
+\let\Ginclude@pcx=\Ginclude@@
+\let\Ginclude@tga=\Ginclude@@
+\let\Ginclude@tif=\Ginclude@@
+\let\Ginclude@jpg=\Ginclude@@
+
+\newcount\@llx
+\newcount\@lly
+\newcount\@urx
+\newcount\@ury
+\newcount\@w
+\newcount\@h
+\newdimen\@T
+\newcount\@clip
+\newcount\@innerscale
+%
+
+\def\Remove@@PT#1#2{\edef#2{\expandafter\remove@@PT\the#1}}
+{\catcode`p=12\catcode`t=12\gdef\remove@@PT#1pt{#1}}
+
+\def\Ginclude@eps#1{%
+  \message{<#1>}%
+  \bgroup
+   \def\@tempa{!}%
+   % Useless code?
+   \dimen@\Gin@req@width
+   \dimen@ii.1bp%
+   \divide\dimen@\dimen@ii
+   \@tempdima\Gin@req@height
+   \divide\@tempdima\dimen@ii
+   % Cast \Gin@llx, \Gin@lly, \Gin@urx, and \Gin@ury to scaled points
+   \@T=\Gin@llx pt\@llx=\@T
+   \@T=\Gin@lly pt\@lly=\@T
+   \@T=\Gin@urx pt\@urx=\@T
+   \@T=\Gin@ury pt\@ury=\@T
+   \@T=\vtex@innerscale pt\@innerscale=\@T
+    \@innerscale=\vtex@innerscale
+   % Cast \Gin@req@width and \Gin@req@height to scaled points
+   \@w=\Gin@req@width
+   \@h=\Gin@req@height
+   \ifnum\OpMode=1\ifnum\@innerscale=1\else
+    % Take \@innerscale into account
+     \multiply\@llx\@innerscale
+     \multiply\@lly\@innerscale
+     \multiply\@urx\@innerscale
+     \multiply\@ury\@innerscale
+     \multiply\@w\@innerscale
+     \multiply\@h\@innerscale
+   % Calculate the CTM scaling factor
+    \@T=10pt \divide\@T\@innerscale \divide\@T10
+    \Remove@@PT\@T\@Factor
+    % Setup the CTM
+    % Rescale the EPS figure according to the \@innerscale value
+    \special{!direct q}%
+   \special{pdfscale: \@Factor}%
+   \special{pS: /gexsc \the\@innerscale\space def gsave \the\@innerscale\space \the\@innerscale\space scale }%
+     \fi\fi
+   \ifnum\OpMode=1\else
+    \special{ps?vpsfig.pro}%  Stupid to do it every time, but c'est la vie.
+   \fi
+   \special{Psbb: 1\ifGin@clip1 \else0 \fi\space \the\@llx\space
+     \the\@lly\space \the\@urx\space \the\@ury\space
+     \the\@w\space \the\@h\space}%
+   % Include the EPS figure #1
+   \special{ps=#1}%
+   \special{ps>}%
+   \ifnum\OpMode=1\ifnum\@innerscale=1\else
+   \special{pS: grestore }%
+   \special{!direct Q}%
+   \fi\fi
+  \egroup
+}
+
+\def\Gin@extensions{.gif,.png,.jpg,.tif,.bmp,.tga,.pcx,.eps,.ps}
+\@namedef{Gin@rule@.png}#1{{png}{.png}{#1}}
+\@namedef{Gin@rule@.gif}#1{{gif}{.gif}{#1}}
+\@namedef{Gin@rule@.pcx}#1{{pcx}{.pcx}{#1}}
+\@namedef{Gin@rule@.tif}#1{{tif}{.tif}{#1}}
+\@namedef{Gin@rule@.tif}#1{{tif}{.tiff}{#1}}
+\@namedef{Gin@rule@.bmp}#1{{bmp}{.bmp}{#1}}
+\@namedef{Gin@rule@.tga}#1{{tga}{.tga}{#1}}
+\@namedef{Gin@rule@.tga}#1{{tga}{.targa}{#1}}
+\@namedef{Gin@rule@.jpg}#1{{jpg}{.jpg}{#1}}
+\@namedef{Gin@rule@.jpg}#1{{jpg}{.jpeg}{#1}}
+\@namedef{Gin@rule@.pdf}#1{{pdf}{.pdf}{#1}}
+\@namedef{Gin@rule@.ps}#1{{eps}{.ps}{#1}}
+\@namedef{Gin@rule@.eps}#1{{eps}{.eps}{#1}}
+\@namedef{Gin@rule@*}#1{{eps}{\Gin@ext}{#1}}
+
+% Rotation
+
+\def\Grot@start{%
+ \special{r(\Grot@cos,\Grot@sin,-\Grot@sin,\Grot@cos,0,0}%
+}
+
+\def\Grot@end{%
+ \special{r)}%
+}
+
+\def\Gscale@start{%
+ \special{r(\Gscale@x,0,0,\Gscale@y,0,0}%
+}
+
+\let\Gscale@end\Grot@end
+
+\def\Gin@PS@raw#1{\special{pS: #1}}
+\edef\Grot@cos{1}
+\edef\Grot@sin{0}
+
+% undo the trig.sty `optimisation' so that these 0 1 and -1 values
+% get written out as digits, not unexpandable TeX primitives.
+\AtBeginDocument{%
+\expandafter\def\csname sin(0)\endcsname{0}%
+\expandafter\def\csname cos(0)\endcsname{1}%
+\expandafter\def\csname sin(90)\endcsname{1}%
+\expandafter\def\csname cos(90)\endcsname{0}%
+\expandafter\def\csname sin(-90)\endcsname{-1}%
+\expandafter\def\csname cos(-90)\endcsname{0}%
+\expandafter\def\csname sin(180)\endcsname{0}%
+\expandafter\def\csname cos(180)\endcsname{-1}}
+
+\def\vtex@innerscale{1}
+\def\vtex@imagemask{0}
+\def\vtex@incl@res{0}
+
+\AtEndOfPackage{%
+\RequirePackage{keyval}%
+\define@key{Gin}{imagemask}[1]{\def\vtex@imagemask{#1}}%
+\define@key{Gin}{innerscale}{\def\vtex@innerscale{#1}}%
+\define@key{Gin}{atres}[0]{\def\vtex@incl@res{#1}}%
+}
+
+\endinput

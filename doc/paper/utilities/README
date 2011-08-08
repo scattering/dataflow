@@ -1,0 +1,13 @@
+This directory contains some of the packages that may be needed alongside
+the iucr LaTeX macro package. There is no guarantee that these are complete
+or up to date; however, I shall be pleased to update requested packages
+upon request, whenever possible. Please direct any such requests to
+bm@iucr.org.
+
+A complete set of TeX and LaTeX public packages may be accessed through CTAN,
+the Complete TeX Archive Network (e.g. http://tug2.cs.umb.edu/ctan/ or
+http://www.tex.ac.uk/tex-archive/)
+
+Brian McMahon
+bm@iucr.org
+13 July 1998

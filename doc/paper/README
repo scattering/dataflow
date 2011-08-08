@@ -1,0 +1,10 @@
+These are the source files for the IUCr LaTeX macro package.
+
+iucr.cls:          the class file containing all the macros
+template.ltx:      a skeleton template file used to construct an article for
+                   submission to an IUCr journal
+documentation.ltx: a documentation and test file
+fig1.ps:           a small PostScript figure included in the documentation
+                   as an example
+iucr.bib:          a BibTeX bibliography file for the documentation
+iucr.bst:          the IUCr BibTeX bibliography style file

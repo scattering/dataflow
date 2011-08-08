@@ -1,0 +1,319 @@
+\ProvidesFile{pdftex.def}[1999/01/26 v0.02l graphics/color for pdftex]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% LaTeX Colour and Graphics support for PDFTeX
+%%
+%% David Carlisle, Sebastian Rahtz and Hans Hagen
+%%
+%% It may be used by specifying the pdftex option to any of the
+%% supported packages, for example:
+%%
+%% \usepackage[pdftex]{graphicx}
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\ifx\pdftexversion\@undefined
+ \def\driver@release{1}%
+\else
+  \ifnum\pdftexversion<12
+    \def\driver@release{2}%
+  \else
+    \ifnum\pdftexversion<13
+      \ifnum \expandafter `\pdftexrevision < `n
+        \def\driver@release{3}%
+      \else
+        \def\driver@release{4}%
+      \fi
+    \else
+     \ifnum\pdftexversion=13
+       \def\driver@release{5}%
+     \else
+       \def\driver@release{6}%
+     \fi
+    \fi
+  \fi
+\fi
+
+% Colour Support. The following models may be used.
+%   * cmyk   supported directly.
+%   * rgb    supported directly.
+%   * RGB    converted to rgb by this file.
+%   * gray   converted to rgb by this file.
+%   * named  converted to cmyk by this file.
+%
+\def\c@lor@arg#1{%
+  \dimen@#1\p@
+  \ifdim\dimen@<\z@\dimen@\maxdimen\fi
+  \ifdim\dimen@>\p@
+    \PackageError{color}{Argument `#1' not in range [0,1]}\@ehd
+  \fi}
+\def\color@cmyk#1#2{\c@lor@@cmyk#2\@@#1}
+\def\c@lor@@cmyk#1,#2,#3,#4\@@#5{%
+  \c@lor@arg{#4}%
+  \c@lor@arg{#1}%
+  \c@lor@arg{#2}%
+  \c@lor@arg{#3}%
+  \edef#5{#1 #2 #3 #4 k #1 #2 #3 #4 K}%
+  }
+\def\color@gray#1#2{\c@lor@@rgb#2,#2,#2\@@#1}
+\def\color@rgb#1#2{\c@lor@@rgb#2\@@#1}
+\def\c@lor@@rgb#1,#2,#3\@@#4{%
+  \c@lor@arg{#1}%
+  \c@lor@arg{#2}%
+  \c@lor@arg{#3}%
+  \edef#4{#1 #2 #3 rg #1 #2 #3 RG}%
+  }
+\def\color@RGB#1#2{\c@lor@@RGB#2\@@#1}
+\def\c@lor@@RGB#1,#2,#3\@@#4{%
+ \c@lor@RGB@rgb{#1}\@tempa
+ \c@lor@RGB@rgb{#2}\@tempb
+ \c@lor@RGB@rgb{#3}\@tempc
+ \c@lor@@rgb\@tempa,\@tempb,\@tempc\@@#4%
+  }
+\def\c@lor@RGB@rgb#1#2{%
+  \dimen@#1\p@
+  \divide\dimen@\@cclv
+  \edef#2{\strip@pt\dimen@}}
+
+\def\color@named#1#2{\c@lor@@named#2,,\@@#1}
+\def\c@lor@@named#1,#2,#3\@@#4{%
+  \@ifundefined{col@#1}%
+    {\PackageError{color}{Undefined color `#1'}\@ehd}%
+  {\edef#4{\csname col@#1\endcsname}}%
+  }
+
+\def\set@color{\pdfliteral{\current@color}\aftergroup\reset@color}
+\def\reset@color{\pdfliteral{\current@color}}
+\def\define@color@named#1#2{%
+   \expandafter\edef\csname col@#1\endcsname{#2}}
+\def\current@color{1 1 1 1 k 1 1 1 1 K}
+
+
+% Need the `colorfix' modifications as no internal colour stack
+% is maintained
+%<*colorfix>
+\AtBeginDocument{%
+  \let\@ldc@l@r\color
+  \def\color{\if@inlabel\leavevmode\fi\@ldc@l@r}%
+  \let\@lduseb@x\usebox
+  \def\usebox#1{\@lduseb@x{#1}\set@color}}
+%</colorfix>
+
+%
+% Graphic inclusion. Currently supports .png, .jpg, .mps and .pdf inclusion;
+% .mps is MetaPost output. 
+% .mps inclusion depends on loading a CONTEXT module by Hans Hagen;
+% .pdf also needs a Context module unless pdftex 0.12n or later.
+%
+% PNG bitmaps may be scaled/rotated as usual
+% by the graphics commands or keyword arguments.
+%
+% Note the magic in front of the file name after \pdfimage, to
+% prevent it fouling up with file names starting with "depth".
+\def\Gread@png#1{%
+  \setbox\@tempboxa\hbox{\pdfimage\noexpand\noexpand\noexpand\@empty#1\relax}%
+   \def\Gin@llx{0}\let\Gin@lly\Gin@llx
+   \Gin@defaultbp\Gin@urx{\wd\@tempboxa}%
+   \Gin@defaultbp\Gin@ury{\ht\@tempboxa}}
+
+%
+% mechanism for re-use of objects also
+% allows us to get the size by deriving it from the initial storage;
+% this works for all graphics types.
+%
+\newcount\Gread@gobject
+\def\Gread@pdftex#1{%
+\@ifundefined{#1 image}{%
+ \ifnum\driver@release>4
+  \setbox\@tempboxa=\hbox{\pdfimage{#1}}%
+ \else
+  \setbox\@tempboxa=\hbox{\pdfimage\noexpand\noexpand\noexpand\@empty#1\relax}%
+ \fi
+ \def\Gin@llx{0}\let\Gin@lly\Gin@llx
+ \Gin@defaultbp\Gin@urx{\wd\@tempboxa}%
+ \Gin@defaultbp\Gin@ury{\ht\@tempboxa}%
+ \expandafter\xdef\csname#1 width\endcsname{\the\wd\@tempboxa}%
+ \expandafter\xdef\csname#1 height\endcsname{\the\ht\@tempboxa}%
+ \message{<#1 \the\wd\@tempboxa, \the\ht\@tempboxa,}% 
+ \pdfform\@tempboxa
+ \Gread@gobject=\pdflastform
+ \message{obj \the\Gread@gobject>}%
+ \expandafter\xdef\csname#1 image\endcsname{\pdfrefform\the\Gread@gobject}%
+ }{%
+ \def\Gin@llx{0}\let\Gin@lly\Gin@llx
+ \Gin@defaultbp\Gin@urx{\csname#1 width\endcsname}%
+ \Gin@defaultbp\Gin@ury{\csname#1 height\endcsname}%
+ }%
+}
+\def\Ginclude@pdftex#1{%
+ \def\@tempa{!}%
+ \ifx\Gin@scaley\@tempa
+     \let\Gin@scaley\Gin@scalex
+ \else
+    \ifx\Gin@scalex\@tempa\let\Gin@scalex\Gin@scaley\fi
+ \fi
+ \ifGin@clip
+  \typeout{no clipping support in pdfTeX}%
+ \fi
+ \message{<use #1>}%
+ \hbox{\Gscale@box{\Gin@scalex}[\Gin@scaley]{\csname#1 image\endcsname}}%
+}
+\ifnum\driver@release>3
+  \let\Gread@jpg\Gread@png
+\fi
+
+\edef\Gread@MBox{/MediaBox}
+\def\Gread@pdf#1{%
+  \begingroup
+  \@tempcnta\z@
+   \loop\ifnum\@tempcnta<\@xxxii
+   \catcode\@tempcnta14 %
+   \advance\@tempcnta\@ne
+  \repeat
+  \catcode127=14 %
+  \let\do\@makeother\dospecials\catcode`\ 10 %
+  \catcode\endlinechar5 %
+  \immediate\openin\@inputcheck#1 %
+  \ifeof\@inputcheck
+    \@latex@error{File `#1' not found}\@ehc
+  \else
+     \Gread@true
+     \let\@tempb\Gread@false
+     \loop
+% v0.02e: use \. not \@tempa so the space is preserved before [
+       \read\@inputcheck to\.%
+       \ifeof\@inputcheck
+         \Gread@false
+       \else
+         \expandafter\Gread@find@mbox\. []\\%
+       \fi
+     \ifGread@
+     \repeat
+    \immediate\closein\@inputcheck
+  \fi
+  \ifGin@bbox\else
+    \@latex@error
+      {Cannot determine size of graphic in #1 (no BoundingBox)}%
+      \@ehc
+    \gdef\@gtempa{0 0 72 72 }%
+  \fi
+  \endgroup
+  \expandafter\Gread@parse@bb\@gtempa\\}
+\long\def\Gread@find@mbox#1 [#2]#3\\{%
+  \def\@tempa{#1}%
+  \ifx\@tempa\Gread@MBox
+    \gdef\@gtempa{#2 }%
+    \@tempb
+    \Gin@bboxtrue
+  \fi
+}
+\def\Ginclude@png#1{%
+  \hbox{%
+% v0.02f add \@depth\z@ (from Sebastian)
+    \pdfimage
+      \@height\Gin@req@height \@width\Gin@req@width \@depth\z@
+      \noexpand\noexpand\noexpand\@empty#1\relax}}
+
+\def\Ginclude@mps#1{%
+   \def\@tempa{!}%
+   \ifx\Gin@scaley\@tempa
+     \let\Gin@scaley\Gin@scalex
+   \else
+    \ifx\Gin@scalex\@tempa\let\Gin@scalex\Gin@scaley\fi
+   \fi    
+   \hbox{%
+     \convertMPtoPDF{#1}{\Gin@scalex}{\Gin@scaley}%
+        }%
+}
+\def\Gread@mps{\Gread@eps}
+\ifnum\driver@release>3
+ \let\Ginclude@png\Ginclude@pdftex
+ \let\Ginclude@jpg\Ginclude@pdftex
+ \let\Ginclude@pdf\Ginclude@pdftex
+ \let\Gread@pdf\Gread@pdftex
+ \let\Gread@png\Gread@pdftex
+ \let\Gread@jpg\Gread@pdftex
+\else
+ \def\Ginclude@pdf#1{%
+   \def\@tempa{!}%
+   \ifx\Gin@scaley\@tempa
+     \let\Gin@scaley\Gin@scalex
+   \else
+    \ifx\Gin@scalex\@tempa\let\Gin@scalex\Gin@scaley\fi
+   \fi    
+   \hbox{%
+\convertPDFtoPDF{#1}{\Gin@scalex}{\Gin@scaley} {0bp} {0bp}{\Gin@req@width}{\Gin@req@height}%
+        }%
+}
+\fi
+
+% v0.02e: restrict the rules to just the types that pdftex can currently
+% deal with.
+\ifnum\driver@release>3
+ \def\Gin@extensions{.png,.pdf,.jpg,.mps}
+ \@namedef{Gin@rule@.jpg}#1{{jpg}{.jpg}{#1}}
+\else
+ \def\Gin@extensions{.png,.pdf,.mps}
+\fi
+\@namedef{Gin@rule@.png}#1{{png}{.png}{#1}}
+\@namedef{Gin@rule@.mps}#1{{mps}{.mps}{#1}}
+\@namedef{Gin@rule@.pdf}#1{{pdf}{.pdf}{#1}}
+
+
+% Rotation
+% slightly hacky, but set width of box 0 to 0pt otherwise
+% the CTM gets restored in the wrong place.
+
+% Patrick Daly found an error here with doubled minus signs when \Grot@sin is 
+% negative. Fixed.
+\def\Grot@start{%
+\pdfliteral{ q
+     \Grot@cos\space\Grot@sin\space\if-\Grot@sin\else-\Grot@sin\fi\space\Grot@cos\space
+     0 0 cm}%
+  \wd\z@\z@}
+
+\def\Grot@end{\pdfliteral{ Q}}
+
+% Scaling is OK, as graphics package does it right here.
+\def\Gscale@start{%
+  \pdfliteral{ q
+   \Gscale@x\space0 0 \Gscale@y\space 0 0 cm}}
+
+\let\Gscale@end\Grot@end
+
+% undo the trig.sty `optimisation' so that these 0 1 and -1 values
+% get written out as digits, not unexpandable TeX primitives.
+\AtBeginDocument{%
+\expandafter\def\csname sin(0)\endcsname{0}%
+\expandafter\def\csname cos(0)\endcsname{1}%
+\expandafter\def\csname sin(90)\endcsname{1}%
+\expandafter\def\csname cos(90)\endcsname{0}%
+\expandafter\def\csname sin(-90)\endcsname{-1}%
+\expandafter\def\csname cos(-90)\endcsname{0}%
+\expandafter\def\csname sin(180)\endcsname{0}%
+\expandafter\def\csname cos(180)\endcsname{-1}}
+
+% Are we running under PDFTeX?
+\ifx\pdfpageheight\@undefined
+  \PackageWarningNoLine\@currname
+    {pdftex option does not work with standard TeX}
+\else
+   \pdfpageheight\paperheight
+   \pdfpagewidth\paperwidth
+   \pdfoutput=1
+\fi
+
+
+% v0.02e: Restore catcodes of context letters. 
+% Not needed with current version of supp-pdf
+% but protects against older versions.
+\AtBeginDocument{%
+  \edef\@tempa{%
+    \catcode`\noexpand\!\the\catcode`\!
+    \catcode`\noexpand\@\the\catcode`\@
+    \catcode`\noexpand\?\the\catcode`\? }%
+  \InputIfFileExists{supp-pdf}{}{}%
+  \@tempa}
+
+\endinput
+
