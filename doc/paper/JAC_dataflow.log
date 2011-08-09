@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2011.8.3)  8 AUG 2011 15:46
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2011.8.3)  9 AUG 2011 14:09
 entering extended mode
  %&-line parsing enabled.
 **JAC_dataflow.tex
@@ -474,28 +474,28 @@ LaTeX Font Info:    Font shape `OT1/ppl/bx/n' in size <14.4> not available
 (Font)              Font shape `OT1/ppl/b/n' tried instead on input line 91.
 \@ccline=\box70
 
-Overfull \hbox (159.33542pt too wide) detected at line 134
+Overfull \hbox (159.33542pt too wide) detected at line 136
 []
  []
 
 \c@pyline=\box71
-LaTeX Font Info:    Try loading font information for OMS+ppl on input line 134.
+LaTeX Font Info:    Try loading font information for OMS+ppl on input line 136.
 
 (/usr/share/texmf-texlive/tex/latex/psnfss/omsppl.fd
 File: omsppl.fd 
 )
 LaTeX Font Info:    Font shape `OMS/ppl/m/n' in size <7> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 134.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 136.
 
-Overfull \hbox (159.33542pt too wide) detected at line 134
+Overfull \hbox (159.33542pt too wide) detected at line 136
 []
  []
 
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 136.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 138.
 \@bstract=\box72
 
-Overfull \hbox (324.3614pt too wide) detected at line 166
+Overfull \hbox (324.3614pt too wide) detected at line 168
 []
  []
 
@@ -504,34 +504,34 @@ Overfull \hbox (324.3614pt too wide) detected at line 166
 \TOPscr@tch=\box75
 \toph@ight=\dimen123
 
-Overfull \hbox (364.19528pt too wide) detected at line 175
+Overfull \hbox (364.19528pt too wide) detected at line 177
 []
  []
 
 
-Overfull \hbox (39.83386pt too wide) in paragraph at lines 175--175
+Overfull \hbox (39.83386pt too wide) in paragraph at lines 177--177
 [] 
  []
 
 
-Underfull \hbox (badness 10000) detected at line 175
+Underfull \hbox (badness 10000) detected at line 177
 [][]
  []
 
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 204.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 206.
 
 (/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
 LaTeX Font Info:    Font shape `OT1/ppl/bx/n' in size <16> not available
-(Font)              Font shape `OT1/ppl/b/n' tried instead on input line 226.
+(Font)              Font shape `OT1/ppl/b/n' tried instead on input line 228.
 
 Overfull \vbox (18.0pt too high) has occurred while \output is active []
 
 LaTeX Font Info:    Font shape `OT1/ppl/bx/n' in size <7> not available
-(Font)              Font shape `OT1/ppl/b/n' tried instead on input line 226.
+(Font)              Font shape `OT1/ppl/b/n' tried instead on input line 228.
 LaTeX Font Info:    Font shape `OT1/ppl/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ppl/b/n' tried instead on input line 226.
+(Font)              Font shape `OT1/ppl/b/n' tried instead on input line 228.
 
 Overfull \vbox (25.37831pt too high) has occurred while \output is active []
 
@@ -544,7 +544,7 @@ Overfull \hbox (1.90002pt too wide) has occurred while \output is active
 
 ]
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 257.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 259.
  (./JAC_dataflow.bbl)
 
 ! LaTeX Error: \caption outside float.
@@ -553,29 +553,29 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.299 \caption
+l.301 \caption
               {Supported browsers, at time of publication}
 You're in trouble here.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 301.
+(Font)              <9> on input line 303.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 301.
+(Font)              <6> on input line 303.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 301.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 303.
 
-Overfull \hbox (252.0pt too wide) detected at line 303
+Overfull \hbox (252.0pt too wide) detected at line 305
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 299--308
+Underfull \hbox (badness 10000) in paragraph at lines 301--310
 []\OT1/ptm/m/n/9 Supported browsers, at time of pub-li-ca-tion
  []
 
 
-Overfull \hbox (43.92775pt too wide) in paragraph at lines 299--308
+Overfull \hbox (43.92775pt too wide) in paragraph at lines 301--310
 [][] 
  []
 
@@ -587,7 +587,7 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 Overfull \vbox (18.0pt too high) has occurred while \output is active []
 
 LaTeX Font Info:    Font shape `OT1/ppl/bx/n' in size <8> not available
-(Font)              Font shape `OT1/ppl/b/n' tried instead on input line 319.
+(Font)              Font shape `OT1/ppl/b/n' tried instead on input line 321.
 
 Overfull \vbox (25.22833pt too high) has occurred while \output is active []
 
@@ -614,7 +614,7 @@ w/palatino/uplb8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/palatino/uplr8a
 /texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts
 /type1/urw/times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utm
 ri8a.pfb>
-Output written on JAC_dataflow.pdf (2 pages, 139230 bytes).
+Output written on JAC_dataflow.pdf (2 pages, 139276 bytes).
 PDF statistics:
  143 PDF objects out of 1000 (max. 8388607)
  28 named destinations out of 1000 (max. 500000)

@@ -100,12 +100,19 @@
 \author[a]{Brian}{Maranville}
 \author[a]{Paul}{Kienzle}
 \author[a,b]{Andrew}{Tracer}
+\author[a]{Ophir}{Lifshitz}
 \author[a]{Elakian}{Kanakaraj}
 \author[a]{Brendan}{Rowan}
 \author[a]{Alex}{Yee}
+<<<<<<< HEAD
+\author[a]{Joseph}{Redmon}
+=======
+\author[c]{Joseph}{Redmon}
+>>>>>>> 9781457d6a32764ecde0d31755336fbce2b0d565
 
 \aff[a]{National Institute of Standards and Technology, Gaithersburg, Maryland  20899 \country{USA}}
 \aff[b]{Princeton University, Princeton, NJ  08544 \country{USA}}
+\aff[c]{Unknown}
 
      % Use \shortauthor to indicate an abbreviated author list for use in
      % running heads (you will need to uncomment it).
@@ -278,8 +285,8 @@ of previous steps should not force this to happen.
 \ack{Acknowledgements}
 
 This work utilized facilities supported in part by the National Science Foundation under Agreement No. DMR-0944772.
-Andrew Tracer was supported as part of the Summer Undergraduate Research Fellowship (SURF),
-and Elakian Kanakaraj, Brendan Rowan and Alex Yee were supported by thed Summer High-school Internship Program (SHIP),
+Andrew Tracer was supported as part of the Summer Undergraduate Research Fellowship (SURF);
+Elakian Kanakaraj, Brendan Rowan and Alex Yee were supported by thed Summer High-school Internship Program (SHIP),
 both of which are also part of the above grant.
 
 The authors would like to thank Andrew Jackson, Steve Kline and Julie Borchers of the NIST Center for Neutron Research
