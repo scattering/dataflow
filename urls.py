@@ -1,3 +1,4 @@
+
 from django.conf.urls.defaults import patterns, include, url
 #from tracks.views import xhr_test, mytest, home
 
@@ -47,7 +48,7 @@ urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views',
 
 urlpatterns += patterns('',
 		      url(r'^admin/', include(admin.site.urls)),
-		      (r'', include('registration.backends.default.urls')),
+		      (r'', include('registration.urls')),
 		      (r'^profiles/', include('profiles.urls')),
 		      (r'', ROOT_URL.REPO_ROOT + '.apps.tracks.views.home'),
 		      
