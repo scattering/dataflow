@@ -1,5 +1,20 @@
 // test adapter, JSON
 
+function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 
 WireIt.WiringEditor.adapters.tracks = {
 	
@@ -74,6 +89,7 @@ WireIt.WiringEditor.adapters.tracks = {
 		else {
 			method = this.config[action].method;
 		}
+                YAHOO.util.Connect.initHeader('X-CSRFToken', getCookie('csrftoken'));
 		YAHOO.util.Connect.asyncRequest(method, url, {
 			success: function(o) {
 				var s = o.responseText;
