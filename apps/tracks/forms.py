@@ -46,3 +46,13 @@ class experimentForm2(forms.Form):
         self.fields['new_files'].widget.attrs['multiple'] = 'true'
         self.fields['cur_templates'] = forms.ModelMultipleChoiceField(queryset=cur_templates, label='Current templates', widget=forms.CheckboxSelectMultiple)
         self.fields['cur_files'] = forms.ModelMultipleChoiceField(queryset=experiment.Files.all(), label='Current files', widget=forms.CheckboxSelectMultiple)
+        
+class uploadFileForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        print 'kwargs:', kwargs
+        USER = kwargs.pop('USER')
+        experiment = kwargs.pop('experiment')
+        super(uploadFileForm, self).__init__(*args, **kwargs)
+        self.fields['upload_files'] = forms.FileField(label="Upload files")
+        self.fields['upload_files'].widget.attrs['multiple'] = 'true'
+        
