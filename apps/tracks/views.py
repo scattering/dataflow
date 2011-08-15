@@ -142,7 +142,7 @@ TAS_TEMPLATE_FROM_WIREIT = {"modules":[{"config":{"position":[50, 50], "xtype":"
 # they can be stored in a local list:
 wirings_list = offspec + a + SANS + TAS_2 + SANS_4
 
-@csrf_exempt 
+#@csrf_exempt 
 def listWirings(request):
     context = RequestContext(request)
     print 'I am loading'
@@ -161,7 +161,7 @@ def listWirings(request):
 
 #    return HttpResponse(simplejson.dumps(a)) #andr vs bt7 testing
 
-@csrf_exempt 
+#@csrf_exempt 
 def saveWiring(request):
     #context = RequestContext(request)
     print 'I am saving'
@@ -180,7 +180,7 @@ def saveWiring(request):
 def get_filepath_by_hash(fh):
     return File.objects.get(name=str(fh)).location + str(fh)
 
-@csrf_exempt 
+#@csrf_exempt 
 def runReduction(request):
     data = simplejson.loads(request.POST['data'])
     print 'IN RUN REDUCTION'
@@ -249,7 +249,7 @@ def runReduction(request):
 ## the language selection.
 
 ## HAVING TROUBLE SENDING LIST OF STRINGS AS CONTEXT TO THE EDITOR
-@csrf_exempt 
+#@csrf_exempt 
 def displayEditor(request):
     context = RequestContext(request)
     file_context = {}
@@ -272,7 +272,7 @@ def displayEditor(request):
     else:
         return HttpResponseRedirect('/editor/langSelect/')
 
-@csrf_exempt 
+#@csrf_exempt 
 def languageSelect(request):
     context = RequestContext(request)
     if request.POST.has_key('instruments'):
