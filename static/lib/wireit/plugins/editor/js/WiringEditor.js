@@ -269,6 +269,24 @@
 		saveModuleFailure: function(errorStr) {
 			this.alert("Unable to save the wiring : "+errorStr);
 		},
+		// added 8/10/11, Maranville
+		// uploads files to server as POST
+		/**
+		 * @method uploadFiles
+		 */
+		uploadFiles: function(files) {
+		    if (this.launchedFromExperimentPage) {
+		        var experiment_id = this.launchedFromExperimentPage;
+		        var post_data = {experiment_id: experiment_id};
+		        var csrf_token = getCookie('csrftoken');
+		        var uploader = new Uploader(files, "uploadFiles/", csrf_token, post_data);
+		        uploader.sendAll();
+		    }
+		    else {
+		        console.log("can't upload files unless associated with an experiment id");
+		    } 
+		},
+		
 		// added 6/21/11, Tracer
 		// sends current wiring diagram to server as POST, gets data to display/plot as a response
 		/**
