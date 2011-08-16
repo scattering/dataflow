@@ -23,6 +23,7 @@ urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views',
 		('^editor/listWirings/$', 'listWirings'),
 		('^editor/saveWiring/$', 'saveWiring'),
 		('^editor/runReduction/$', 'runReduction'),
+		('^editor/uploadFiles/$', 'uploadFiles'),
 
 		# File loader display urls (testing, 7/6)
 		('^loadFiles/$', 'displayFileLoad'),
