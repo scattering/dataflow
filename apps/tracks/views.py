@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger #paging for lists
 from django.core.exceptions import ObjectDoesNotExist
+import cStringIO, gzip
 
 import hashlib
 import types
@@ -211,8 +212,25 @@ def runReduction(request):
         result = get_plottable(template, config, nodenum, terminal_id)
     # result is a list of plottable items (JSON strings) - need to concatenate them
     JSON_result = '[' + ','.join(result) + ']' 
-    return HttpResponse(JSON_result) #, context_instance=context
     
+    print "result acquired"
+    zbuf = cStringIO.StringIO()
+    zfile = gzip.GzipFile(mode='wb', compresslevel=3, fileobj=zbuf)
+    zfile.write(JSON_result.encode('utf-8'))
+    zfile.close()
+    print "buffer written"
+    compressed_content = zbuf.getvalue()
+    response = HttpResponse(compressed_content)
+    response['Content-Encoding'] = 'gzip'
+    response['Content-Length'] = str(len(compressed_content))
+    print "response sent", str(len(compressed_content))
+    return response
+    #return HttpResponse(JSON_result) #, context_instance=context
+
+def uploadFiles(request):
+    print request.POST
+    print request.FILES
+    return HttpResponse('{"result": "success"}')    
     #print FILES
 ###### BT7 TESTING
 #    register_instrument(BT7)
@@ -389,3 +407,13 @@ def editExperiment(request, experiment_id):
     #print form2.fields['new_templates'].length
     return render_to_response('userProjects/editExperiment.html', { 'form1':form1, 'form2': form2, 'experiment':experiment, }, context_instance=context)
 
+@login_required
+def uploadFilesForm(request):
+    context = RequestContext(request)
+    if request.GET.has_key('experiment_id'):
+        experiment_id = request.GET['experiment_id']
+        print "experiment_id", experiment_id
+    #experiment = Experiment.objects.get(id=0)
+    print request.POST
+    print request.FILES
+    return render_to_response('FileUpload/editorUpload.html', {}, context_instance=context)
