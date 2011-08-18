@@ -709,7 +709,7 @@
 			//console.log('ENTERING FILE CONFIGS')
 			for (var l in this.layer.containers) {
 				for (var j in this.layer.containers[l].tracksConfigs) {
-					this.layer.containers[l].tracksConfigs[j]['files'] = []
+					this.layer.containers[l].tracksConfigs[j]['files'] = [];
 				}
 			}
 			for (var j = 1; j <= Object.size(file_associations); j++) {
@@ -718,7 +718,11 @@
 						for (var k in file_associations[j][i]) {
 							//console.log('j',j,'i',i,'k',k)
 							//console.log(this.layer.containers[i.split(": ").pop()].tracksConfigs[j]['files'])
-							this.layer.containers[i.split(": ").pop()].tracksConfigs[j]['files'].push([file_associations[j][i][k]])
+							var target_container = this.layer.containers[i.split(": ").pop()];
+							target_container.tracksConfigs[j]['files'].push([file_associations[j][i][k]]);
+							if (target_container.hasOwnProperty('updateFiles')) {
+							    target_container.updateFiles();
+							}
 						}
 					} else {
 						// not entering in a 'files' config if the module is not a loader
