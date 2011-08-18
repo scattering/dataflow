@@ -411,6 +411,7 @@ function renderImageData(data, transform, plotid) {
     if (img) {
         var sxdx = this.get_sxdx();
         if (sxdx.sw > 0 && sxdx.sh > 0) {
+            grid._ctx.mozImageSmoothingEnabled = false;
             grid._ctx.drawImage(img, sxdx.sx, sxdx.sy, sxdx.sw, sxdx.sh, sxdx.dx, sxdx.dy, sxdx.dw, sxdx.dh);
             console.log('draw_image')
         }
@@ -441,8 +442,8 @@ function renderImageData(data, transform, plotid) {
     var dataz = data.z[0]
     var tzmax = t(data.dims.zmax);
   
-      for (var r = 0; r < dataz.length; r++) {
-        for (var c = 0; c < dataz[0].length; c++) {
+      for (var r = 0; r < width; r++) {
+        for (var c = 0; c < height; c++) {
             var offset = 4*((c*width) + r);
             var z = dataz[r][c];
             var plotz = Math.floor((t(z) / tzmax) * 255.0);
@@ -466,6 +467,7 @@ function renderImageData(data, transform, plotid) {
       }
     context.putImageData(myImageData, 0, 0);
     var img = new Image();
+    //img.style.setProperty("image-rendering", "-webkit-optimize-contrast", "important");
     img.src = canvas.toDataURL('image/png');
    
     var that = this;
@@ -681,8 +683,10 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
     var toPlot = toPlots[plotnum];
     var toPlots = toPlots;
     var transform = toPlot.transform || 'lin';
+    console.log('starting 2d plot');
     plot = renderImageData(toPlot, transform, 'plot2d');
     colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
+
     
     jQuery('#plot_update').unbind('click');
     jQuery('#plot_update').click({ plot: plot, colorbar: colorbar, toPlots: toPlots }, function(e) {
