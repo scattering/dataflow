@@ -317,13 +317,14 @@
 					editor.maxReduction = 1;
 
 					// more initial settings
-					editor.launchedFromExperimentPage = launchedFromExperimentPage
+					editor.launchedFromExperimentPage = launchedFromExperimentPage;
 
 					// imagecontainer initial height, width
 					WireIt.ImageContainer.prototype.height = 40;
 					WireIt.ImageContainer.prototype.width = 40;
-					WireIt.ImageContainer.prototype.onMouseDown = function() {
+					WireIt.ImageContainer.prototype.onMouseDown = function(e) {
 						//console.log('clicked on imageContainer')
+						if (!e || e.which == 1) { return false; }
 						if(!this.tracksConfigs)
 							this.tracksConfigs = [];
 						if(!this.tracksConfigs[editor.reductionInstance])
@@ -333,9 +334,11 @@
 						editor.displayClickedModuleConfig(this)
 						editor.generateConfigForm(editor.layer.containers.indexOf(this))
 						holder = this;
+						return false;
 					}
-					WireIt.Container.prototype.onMouseDown = function() {
+					WireIt.Container.prototype.onMouseDown = function(e) {
 						//console.log('clicked on container')
+                        if (!e || e.which == 1) { return false; } // only catch non-left-clicks
 						if(!this.tracksConfigs)
 							this.tracksConfigs = [];
 						if(!this.tracksConfigs[editor.reductionInstance])
@@ -344,12 +347,14 @@
 						editor.clickedModuleID = editor.layer.containers.indexOf(this)
 						editor.displayClickedModuleConfig(this)
 						editor.generateConfigForm(editor.layer.containers.indexOf(this))
+						return false;
 					},
 					WireIt.Container.prototype.getConfig = function() {
-						configs = {}
-						configs['position'] = this.getXY()
+						configs = {};
+						var position = this.getXY();
+						configs['position'] = position;
 						//console.log('XY', this.getXY())
-						configs['xtype'] = this.xtype
+						configs['xtype'] = this.xtype;
 						module = {};
 						for(var index in CHOSEN_LANG.modules) {
 							if(CHOSEN_LANG.modules[index].name == this.title) {
@@ -358,7 +363,8 @@
 							}
 						}
 						fields = module.fields;
-						configs[editor.reductionInstance] = {}
+						configs[editor.reductionInstance] = {};
+						configs[editor.reductionInstance]['position'] = [position[0], position[1]];
 						for(var index in fields) {
 							field = fields[index];
 							configs[editor.reductionInstance][field.name] = field.value;
@@ -379,7 +385,6 @@
 							//	}
 							//}
 						}
-						console.log("New configs:", configs);
 						return configs
 					},
 					// setting up events for wires
@@ -397,14 +402,14 @@
 							'source': this.src,
 							'target':this.tgt
 						}
-						console.log(this)
 						//editor.wireClickSource = this.src.moduleId
 						//editor.wireClickTarget = this.tgt.moduleId
-						try {
+						//try {
 							editor.runReduction(editor.templateConfig[editor.reductionInstance])
-						} catch (ex) {
-							alert('Please enter file associations!')
-						}
+						//} catch (ex) {
+						//	alert('Please enter file associations!');
+						//	console.log(ex);
+						//}
 					}
 					editor.layer.eventAddWire.subscribe( function(event, layer) {
 						regex = /Load/
@@ -474,6 +479,7 @@
 				}
 			});
 			Ext.onReady( function() {
+			    Ext.getBody().on("contextmenu", Ext.emptyFn, null, {preventDefault: true});  
 				//$('html').removeClass('x-border-box');
 				//$('body').removeClass('x-reset');
 			});
