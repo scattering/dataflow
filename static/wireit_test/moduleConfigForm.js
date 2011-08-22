@@ -49,12 +49,15 @@ function configForm(headerList, moduleID) {
 	 items.push(item)
 	 }
 	 **/
-
-	Ext.create('Ext.form.Panel', {
-		renderTo: "instance-modules-input",
+    
+    var formPanel = new Ext.FormPanel( {
+		renderTo: Ext.getBody(),
+		//renderTo: "instance-modules-input",
 		bodyPadding: 5,
 		width: 400,
 		layout: 'anchor',
+		id: 'module_config_form',
+		autodestroy: true,
 		//defaultType: 'textfield',
 		items: items,
 		buttons: [{
@@ -120,4 +123,6 @@ function configForm(headerList, moduleID) {
 			}
 		},],
 	});
+	
+	return formPanel;
 }
