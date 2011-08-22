@@ -241,7 +241,7 @@
 			};
 			for (var i in this.tempSavedWiring.modules) {
 				//console.log(i, this.tempSavedWiring.modules[i].config)
-				this.tempSavedWiring.modules[i].config = this.tempSavedWiring.modules[i].config[this.reductionInstance]
+				this.tempSavedWiring.modules[i].config = this.tempSavedWiring.modules[i].config[this.reductionInstance];
 			}
 			this.tempSavedWiring.properties.name = wirename
 			this.adapter.saveWiring(this.tempSavedWiring, {
@@ -309,7 +309,7 @@
 				clickedOn: this.wireClickedOn
 			};
 			for (var j in this.toReduce.modules) {
-				this.toReduce.modules[j].config = this.toReduce.modules[j].config[this.reductionInstance]
+			    this.toReduce.modules[j].config = this.toReduce.modules[j].config[this.reductionInstance];
 				this.toReduce.modules[j].config['files'] = []
 			}
 			for (var i in file_associations) {
@@ -485,13 +485,11 @@
 
 			// Reset the internal structure
 			this.pipes = wirings;
-			console.log('wiring length: ' + this.pipes.length)
 			this.pipesByName = {};
 
 			// Build the "pipesByName" index
 			for(var i = 0 ; i < this.pipes.length ; i++) {
 				this.pipesByName[ this.pipes[i].name] = this.pipes[i];
-				console.log('adding ' + this.pipes[i].name + ' to pipesByName')
 			}
 
 			this.updateLoadPanelList();
@@ -558,7 +556,6 @@
 				// getPipeByName, we need TASWires.working
 				// Changed getPipeByName such that it returns the
 				// wiring rather than the .working
-				console.log('Getting wiring: ' + name)
 
 				if(!wiring) {
 					this.alert("The wiring '"+name+"' was not found.");
@@ -841,12 +838,37 @@
 			}
 			//console.log(configHeaders, configHeaders.length)
 			if (configHeaders.length != 0) {
-				configForm(configHeaders, moduleID)
+			    console.log('configHeaders:', configHeaders)
+			    
+			    if (!Ext.getCmp('module_config_popup')) {
+			        var win = new Ext.Window({
+			            title: 'Module configuration',
+			            closeable: true,
+			            closeAction: 'hide',
+			            id: 'module_config_popup',
+			            hidden: false,
+			            resizable: false,
+			            //autosize: true,
+			            modal: true,
+			            renderTo: Ext.getBody(),
+			            });
+			    } else {
+			        var win = Ext.getCmp('module_config_popup');
+			        if (win.items.length > 0) { win.removeAll(); };
+			    }
+			    
+			    var cF = configForm(configHeaders, moduleID);
+			    win.add(cF);
+			    win.alignTo(this.layer.containers[moduleID].el, 'br');
+			    win.doLayout();
+			    win.show();
+			        
 			} else {
 				YAHOO.util.Dom.get("instance-modules-input").innerHTML = "THIS MODULE HAS NO CONFIGURABLE INPUTS"
 			}
 		},
 		setModuleConfigsFromForm: function(configs, moduleID, instanceNumber) {
+		    console.log('setting module configs from form');
 			if (typeof instanceNumber == "number") {
 				for (var i in configs) {
 					splitConfig = i.split(',')
@@ -880,7 +902,7 @@
 					}
 				}
 			}
-			this.layer.containers[moduleID].onMouseDown()
+			//this.layer.containers[moduleID].onMouseDown()
 			//console.log(this.layer.containers[moduleID].tracksConfigs)
 		},
 	});
