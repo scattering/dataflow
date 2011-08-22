@@ -10,13 +10,14 @@ function configForm(headerList, moduleID) {
 			item2 = {
 				fieldLabel: headerList[i][1][j],
 				name: headerList[i][1][j],
-				decimalPrecision: 15,
+				decimalPrecision: 8,
+				value: headerList[i][2][j],
 			},
 			//console.log('i', i, 'j', j)
 			//console.log('adding item: ', item2)
 			items2.push(item2)
 		}
-		defaultType = headerList[i][2];
+		defaultType = typeof headerList[i][2][0];
 		if(defaultType == 'string' || defaultType == 'undefined') {
 			defaultType = 'textfield';
 		} else if(defaultType == 'number') {
