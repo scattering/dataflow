@@ -823,16 +823,17 @@
 				if (badHeaders.indexOf(j) == -1) {
 					//console.log(configs[j], typeof configs[j])
 					if (typeof configs[j] == 'string' || typeof configs[j] == 'number' || typeof configs[j] == 'boolean' || typeof configs[j] == 'undefined') {
-						configHeaders.push([j,[j],typeof configs[j]])
+						configHeaders.push([j,[j],[configs[j]]]);
 					}
 					if (typeof configs[j] == "object") {
 						fieldNames = []
+						fieldValues = []
 						defaultType = 'string'
 						for (var k in configs[j]) {
-							fieldNames.push(k)
-							defaultType = typeof configs[j][k];
+							fieldNames.push(k);
+							fieldValues.push(configs[j][k]);
 						}
-						configHeaders.push([j,fieldNames,defaultType])
+						configHeaders.push([j,fieldNames,fieldValues])
 					}
 				}
 			}
