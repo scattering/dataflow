@@ -10,3 +10,7 @@
 .wpu
 *.wpr
 *.wpu
+*.bbl
+*.aux
+*.blg
+*.log
