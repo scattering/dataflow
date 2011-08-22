@@ -330,12 +330,12 @@ which are also written in Python.
 
 There is no particular requirement that the reduction code be written in Python, just that
 the code be callable from Python.  However, because of the large available body of numerical libraries 
-in Python (\emph{http://numpy.scipy.org/}), 
+in Python (\emph{http://numpy.scipy.org/} \cite{oliphant:10}), 
 it was not necessary to use any other languages in the backend.
 \subsubsection{Web server}
 All dynamic content, including calls to run the reduction workflows and
 interactive forms in the user project manager environment,
-is served using the Django python library (\emph{http://www.djangoproject.com}).  
+is served using the Django python library \cite{django_website} (\emph{http://www.djangoproject.com}).  
 User information (project structure, sessions, experiments, uploaded data files, saved workflow instances...)
 is stored in a postgresql relational database on the server, (\emph{http://www.postgresql.org/})
 along with instrument definitions and default workflow templates
