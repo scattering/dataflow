@@ -15,6 +15,7 @@
 		<link rel="stylesheet" type="text/css" href="../../static/lib/wireit/plugins/editor/assets/WireItEditor.css" />
 		<!-- ExtJS CSS -->
 		<link rel="stylesheet" type="text/css" href="../../static/lib/ext/resources/css/ext-all.css" />
+		<link rel="stylesheet" type="text/css" href="../../static/lib/ext/examples/ux/css/ItemSelector.css" />
 		<!--<link rel="stylesheet" type="text/css" href="../../static/lib/ext/examples/shared/example.css" /-->
 		<link rel="stylesheet" type="text/css" href="../../static/lib/ext/examples/ux/css/CheckHeader.css" />
 		<!--<link rel="stylesheet" type="text/css" href="../../static/lib/ext/examples/button/button.css" />-->
@@ -103,6 +104,11 @@
 		-->
 		<!-- ExtJS -->
 		<script type="text/javascript" src="../../static/lib/ext/ext-all-debug.js"></script>
+		<script type="text/javascript" src="../../static/lib/ext/examples/ux/layout/component/form/MultiSelect.js"></script>
+		<script type="text/javascript" src="../../static/lib/ext/examples/ux/form/MultiSelect.js"></script>
+		<script type="text/javascript" src="../../static/lib/ext/examples/ux/layout/component/form/ItemSelector.js"></script>
+		<script type="text/javascript" src="../../static/lib/ext/examples/ux/form/ItemSelector.js"></script>
+		
 		<!-- JQPLOT -->
 		<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
 		<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery.jqplot.js"></script>
@@ -247,9 +253,9 @@
 		<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-composable.js"></script>
 		<script type="text/javascript" src="../../static/lib/wireit/build/wireit-inputex-editor-editor-grouping.js"></script>
 		<!-- File Associations Table -->
-		<script type="text/javascript" src="../../static/wireit_test/fileTable.js"></script>
+		<script type="text/javascript" src="../../static/wireit_test/fileTableObj.js"></script>
 		<!-- Module config form -->
-		<script type="text/javascript" src="../../static/wireit_test/moduleConfigForm.js"></script>
+		<script type="text/javascript" src="../../static/wireit_test/moduleSimpleConfigForm.js"></script>
 		<!-- editor -->
 		<script type="text/javascript" src="../../static/lib/wireit/plugins/editor/js/BaseEditor.js"></script>
 		<script type="text/javascript" src="../../static/lib/wireit/plugins/editor/js/ModuleProxy.js"></script>
@@ -313,6 +319,8 @@
 					// editor
 					editor = new WireIt.WiringEditor(CHOSEN_LANG);
 					// initial setting: for paging through multiple instances of the same reduction template
+					editor.reductionInstances = [1];
+					editor.reductionIndex = 0;
 					editor.reductionInstance = 1;
 					editor.maxReduction = 1;
 
@@ -331,7 +339,7 @@
 							this.tracksConfigs[editor.reductionInstance] = {}
 						this.tracksConfigs[editor.reductionInstance].position = this.getXY()
 						editor.clickedModuleID = editor.layer.containers.indexOf(this)
-						editor.displayClickedModuleConfig(this)
+						//editor.displayClickedModuleConfig(this)
 						editor.generateConfigForm(editor.layer.containers.indexOf(this))
 						holder = this;
 						return false;
@@ -345,7 +353,7 @@
 							this.tracksConfigs[editor.reductionInstance] = {}
 						this.tracksConfigs[editor.reductionInstance].position = this.getXY()
 						editor.clickedModuleID = editor.layer.containers.indexOf(this)
-						editor.displayClickedModuleConfig(this)
+						//editor.displayClickedModuleConfig(this)
 						editor.generateConfigForm(editor.layer.containers.indexOf(this))
 						return false;
 					},
@@ -353,6 +361,7 @@
 						configs = {};
 						var position = this.getXY();
 						configs['position'] = position;
+						if (this.target_id) { configs['target_id'] = this.target_id }
 						//console.log('XY', this.getXY())
 						configs['xtype'] = this.xtype;
 						module = {};
@@ -373,6 +382,7 @@
 						if (this.tracksConfigs) {
 							for(var index in this.tracksConfigs) {
 								fields = this.tracksConfigs[index];
+								if (!configs[index]) { configs[index] = {}; }
 								for(var field in fields) {
 									configs[index][field] = fields[field];
 								}
@@ -397,76 +407,120 @@
 						this.redraw();
 					}
 					WireIt.Wire.prototype.onWireClick = function(x,y) {
-						console.log('WIRE CLICK!')
+						console.log('WIRE CLICK!');
 						editor.wireClickedOn = {
 							'source': this.src,
 							'target':this.tgt
 						}
+						editor.runReduction();
 						//editor.wireClickSource = this.src.moduleId
 						//editor.wireClickTarget = this.tgt.moduleId
 						//try {
-							editor.runReduction(editor.templateConfig[editor.reductionInstance])
+						//	editor.runReduction(editor.templateConfig[editor.reductionInstance])
 						//} catch (ex) {
 						//	alert('Please enter file associations!');
 						//	console.log(ex);
 						//}
 					}
-					editor.layer.eventAddWire.subscribe( function(event, layer) {
-						regex = /Load/
-						console.log("in add wire")
-						console.log(layer[0].terminal1.container.title)
-						if(regex.test(layer[0].terminal1.container.title)){
-							console.log("UPDATING FAT")
-							while (YAHOO.util.Dom.get('FAT').hasChildNodes()) {
-								YAHOO.util.Dom.get('FAT').removeChild(YAHOO.util.Dom.get('FAT').lastChild);
-							}
-							console.log(editor.getFATHeaders())
-							makeFileTable(editor.getFATHeaders(),FILES, editor.getValue().working.modules)
-						}
+//					editor.layer.eventAddWire.subscribe( function(event, wires) {
+//						regex = /Load/
+//						console.log("in add wire")
+//						console.log(layer[0].terminal1.container.title)
+//						if(regex.test(layer[0].terminal1.container.title)){
+//							console.log("UPDATING FAT")
+//							while (YAHOO.util.Dom.get('FAT').hasChildNodes()) {
+//								YAHOO.util.Dom.get('FAT').removeChild(YAHOO.util.Dom.get('FAT').lastChild);
+//							}
+//							console.log(editor.getFATHeaders())
+//							makeFileTable(editor.getFATHeaders(),FILES, editor.getValue().working.modules)
+//						}
+//					}, editor.layer, true);
+					editor.layer.eventRemoveWire.subscribe( function(event, wires) {
+					    // this is a patch to correct the fact that the container 
+					    // doesn't get updated with new [wires] on Change.
+					    
+					    var wire = wires[0];
+					    var container1 = editor.layer.containers[wire.src.moduleId];
+					    container1.wires.splice(container1.wires.indexOf(wire), 1);
+					    var container2 = editor.layer.containers[wire.tgt.moduleId];
+					    container2.wires.splice(container2.wires.indexOf(wire), 1);
 					}, editor.layer, true);
-					editor.layer.eventRemoveWire.subscribe( function(event, layer) {
-						regex = /Load/
-						console.log("in remove wire")
-						console.log(layer[0].terminal1.container.title)
-						if(regex.test(layer[0].terminal1.container.title)){
-							console.log("UPDATING FAT")
-							while (YAHOO.util.Dom.get('FAT').hasChildNodes()) {
-								YAHOO.util.Dom.get('FAT').removeChild(YAHOO.util.Dom.get('FAT').lastChild);
-							}
-							console.log(editor.getFATHeaders())
-							makeFileTable(editor.getFATHeaders(),FILES, editor.getValue().working.modules)
-						}
-					}, editor.layer, true);
-					editor.layer.eventAddContainer.subscribe( function(event, layer) {
-						layer[0].onMouseDown()
-					}, editor.layer, true);
-					editor.layer.eventRemoveContainer.subscribe( function(event, layer) {
-						regex = /Load/
-						console.log("in remove")
-						if(regex.test(layer[0].title)){
-							console.log("UPDATING FAT")
-							while (YAHOO.util.Dom.get('FAT').hasChildNodes()) {
-								YAHOO.util.Dom.get('FAT').removeChild(YAHOO.util.Dom.get('FAT').lastChild);
-							}
-							console.log(editor.getFATHeaders())
-							makeFileTable(editor.getFATHeaders(),FILES, editor.getValue().working.modules)
-						}
-					}, editor.layer, true);
+//						regex = /Load/
+//						console.log("in remove wire")
+//						console.log(layer[0].terminal1.container.title)
+//						if(regex.test(layer[0].terminal1.container.title)){
+//							console.log("UPDATING FAT")
+//							while (YAHOO.util.Dom.get('FAT').hasChildNodes()) {
+//								YAHOO.util.Dom.get('FAT').removeChild(YAHOO.util.Dom.get('FAT').lastChild);
+//							}
+//							console.log(editor.getFATHeaders())
+//							makeFileTable(editor.getFATHeaders(),FILES, editor.getValue().working.modules)
+//						}
+//					}, editor.layer, true);
+//					editor.layer.eventAddContainer.subscribe( function(event, layer) {
+//						layer[0].onMouseDown()
+//					}, editor.layer, true);
+//					editor.layer.eventRemoveContainer.subscribe( function(event, layer) {
+//						regex = /Load/
+//						console.log("in remove")
+//						if(regex.test(layer[0].title)){
+//							console.log("UPDATING FAT")
+//							while (YAHOO.util.Dom.get('FAT').hasChildNodes()) {
+//								YAHOO.util.Dom.get('FAT').removeChild(YAHOO.util.Dom.get('FAT').lastChild);
+//							}
+//							console.log(editor.getFATHeaders())
+//							makeFileTable(editor.getFATHeaders(),FILES, editor.getValue().working.modules)
+//						}
+//					}, editor.layer, true);
 					editor.layer.eventChanged.subscribe( function(event, layer) {
-						console.log("REWIRING")
-						for (var i in editor.layer.wires) {
-							wire = editor.layer.wires[i]
-							var src = {}
-							var tgt = {}
-							src['moduleId'] = editor.layer.containers.indexOf(wire.terminal1.container)
-							src['terminal'] = wire.terminal1.name
-							tgt['moduleId'] = editor.layer.containers.indexOf(wire.terminal2.container)
-							tgt['terminal'] = wire.terminal1.name
+						console.log("REWIRING", this, this.wires.length)
+                        var layer = this;
+						for (var i in layer.wires) {
+							var wire = layer.wires[i];
+							var src = {};
+							var tgt = {};
+							src['moduleId'] = layer.containers.indexOf(wire.terminal1.container);
+							src['terminal'] = wire.terminal1.name;
+							tgt['moduleId'] = layer.containers.indexOf(wire.terminal2.container);
+							tgt['terminal'] = wire.terminal2.name;
 
-							wire['src'] = src
-							wire['tgt'] = tgt
+							wire['src'] = src;
+							wire['tgt'] = tgt;
+							
+														
 						}
+						// needed to make indexing loaders easier:  add pointer to what it is connected to
+						var regex = /Load/ 
+						for (var i in layer.containers) {
+						    var container = layer.containers[i];
+						    if(regex.test(container.title)){
+						        // take the first wire that is connected, and get the target_id from that:
+						        if (container.wires.length > 0) {
+						            var wire = container.wires[0];
+						            // set the target terminal to be the one at the other end of the wire...
+						            var tgt_terminal = (wire.terminal1.container == container) ? wire.terminal2 : wire.terminal1;
+						            var tgt_moduleId = layer.containers.indexOf(tgt_terminal.container);
+						            var target_id = tgt_terminal.container.title + ' ' + tgt_terminal.name + ': ' + tgt_moduleId;
+      						        container.target_id = target_id;
+     						        container.setBody(target_id);
+     						    } else {
+    						        console.log('deleting target_id');
+    						        delete container.target_id;
+    						        container.setBody('');
+ 						        }
+ 						    }
+    				    }    
 					}, editor.layer, true);
+					
+					var toolbar = YAHOO.util.Dom.get('toolbar');
+					// Buttons :
+					var FATButton = new YAHOO.widget.Button({ label:"File Associations", id:"WiringEditor-FATButton", container: toolbar });
+                    FATButton.on("click", editor.onFATButton, editor, true);
+                    var runButton = new YAHOO.widget.Button({ label:"Run this Reduction", id:"WiringEditor-RunButton", container: toolbar });
+                    runButton.on("click", editor.runReduction, editor, true);
+                    var runAllButton = new YAHOO.widget.Button({ label:"Run All Reductions", id:"WiringEditor-RunAllButton", container: toolbar });
+                    runButton.on("click", editor.runAllReductions, editor, true);
+                    
 					// Open the infos panel
 					//editor.accordionView.openPanel(2);
 					//editor.accordionView.closePanel(0);
@@ -525,34 +579,34 @@
 						</div>
 					</div>
 				</li>
-				<li>
-					<h2>File Associations Table</h2>
-					<div class="x-border-box">
-						<div id="FAT" style='position: relative;' class="x-reset">
-						</div>
-					</div>
-				</li>
-				<li>
-					<h2>Instance Info, Files</h2>
-					<div>
-						<div id ="instance-files-info" style="padding: 10px;">
-						</div>
-					</div>
-				</li>
-				<li>
-					<h2>Instance Info, Module Configs</h2>
-					<div>
-						<div id ="instance-modules-info" style="padding: 10px;">
-						</div>
-					</div>
-				</li>
-				<li>
-					<h2>Module Configs Input</h2>
-					<div>
-						<div id ="instance-modules-input" style="padding: 10px;">
-						</div>
-					</div>
-				</li>
+<!--				<li>-->
+<!--					<h2>File Associations Table</h2>-->
+<!--					<div class="x-border-box">-->
+<!--						<div id="FAT" style='position: relative;' class="x-reset">-->
+<!--						</div>-->
+<!--					</div>-->
+<!--				</li>-->
+<!--				<li>-->
+<!--					<h2>Instance Info, Files</h2>-->
+<!--					<div>-->
+<!--						<div id ="instance-files-info" style="padding: 10px;">-->
+<!--						</div>-->
+<!--					</div>-->
+<!--				</li>-->
+<!--				<li>-->
+<!--					<h2>Instance Info, Module Configs</h2>-->
+<!--					<div>-->
+<!--						<div id ="instance-modules-info" style="padding: 10px;">-->
+<!--						</div>-->
+<!--					</div>-->
+<!--				</li>-->
+<!--				<li>-->
+<!--					<h2>Module Configs Input</h2>-->
+<!--					<div>-->
+<!--						<div id ="instance-modules-input" style="padding: 10px;">-->
+<!--						</div>-->
+<!--					</div>-->
+<!--				</li>-->
 				<li>
 					<h2>General Info</h2>
 					<div>
