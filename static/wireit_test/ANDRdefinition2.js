@@ -54,7 +54,7 @@ var andr2 = {
           "name": "PolStates", 
           "type": "dict:string:string", 
           "value": {}
-        }
+        },
       ], 
       "name": "Load"
     }, 
