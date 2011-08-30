@@ -256,7 +256,7 @@
 		 */
 		saveModuleSuccess: function(o) {
 
-			//this.markSaved();
+			this.markSaved();
 
 			//this.alert("Saved !\n source code follows:\n" + JSON.stringify(this.tempSavedWiring));
 
@@ -293,8 +293,9 @@
 		 * @method runReduction
 		 */
 
-		runReduction: function(file_associations) {
+		runReduction: function(reductionInstance) {
 			var value = this.getValue()
+			var reductionInstance = reductionInstance ? reductionInstance : this.reductionInstance ;
 
 			//console.log(value)
 //			while (value.name === "") {
@@ -306,21 +307,23 @@
 				properties: value.working.properties,
 				wires: value.working.wires,
 				language: value.working.language,
-				clickedOn: this.wireClickedOn
+				clickedOn: this.wireClickedOn,
+				group: reductionInstance,
+				file_dict: FILE_DICT,
 			};
 			for (var j in this.toReduce.modules) {
-			    this.toReduce.modules[j].config = this.toReduce.modules[j].config[this.reductionInstance];
-				this.toReduce.modules[j].config['files'] = []
+			    this.toReduce.modules[j].config = this.toReduce.modules[j].config[reductionInstance];
+				//this.toReduce.modules[j].config['files'] = []
 			}
-			for (var i in file_associations) {
-				if (typeof file_associations[i] == "object") {
-					for (var k in file_associations[i]) {
-						this.toReduce.modules[i.split(": ").pop()].config['files'].push(FILE_DICT[file_associations[i][k]])
-					}
-				} else {
-					// not entering in a 'files' config if the module is not a loader
-				}
-			}
+//			for (var i in file_associations) {
+//				if (typeof file_associations[i] == "object") {
+//					for (var k in file_associations[i]) {
+//						this.toReduce.modules[i.split(": ").pop()].config['files'].push(FILE_DICT[file_associations[i][k]])
+//					}
+//				} else {
+//					// not entering in a 'files' config if the module is not a loader
+//				}
+//			}
 			//console.log(this.toReduce)
 			this.adapter.runReduction(this.toReduce, {
 				success: this.runModuleSuccess,
@@ -346,7 +349,7 @@
 			plottingAPI(toPlot, plotid)
 
 		},
-		runModuleFailture: function(error) {
+		runModuleFailure: function(error) {
 			this.alert("Unable to run the reduction: " + error)
 		},
 		/**
@@ -370,6 +373,50 @@
 
 			this.preventLayerChangedEvent = false;
 		},
+		/**
+		 * @method onFATButton
+		 */
+		onFATButton: function() {
+		    if (!this.FAT) {
+		        this.FAT = makeFileTable(FILES, this.getValue().working.modules);
+		    } else {
+		        this.FAT.update(FILES, this.getValue().working.modules);
+		    }
+		    
+		    if (!Ext.getCmp('FAT_popup')) {
+			        var win = new Ext.Window({
+			            
+			            title: 'File Associations Table',
+			            closeable: true,
+			            closeAction: 'hide',
+			            id: 'FAT_popup',
+			            hidden: false,
+			            resizable: true,
+			            //autosize: true,
+			            modal: true,
+			            renderTo: Ext.getBody(),
+			            align: 'center',
+			            });			        
+			        win.alignTo(document.getElementById('WiringEditor-FATButton'), 'bl');
+       		        win.add(this.FAT.mainPanel);
+			} else {
+			    var win = Ext.getCmp('FAT_popup');			        
+			}
+		    
+//			    var win_el = win.el.dom;
+//			    while (win_el.hasChildNodes()) {
+//			        win_el.removeChild(win_el.lastChild);
+//			    }
+//		        var FAT = makeFileTable(this.getFATHeaders(), FILES, this.getValue().working.modules);
+		        //console.log(FAT);
+			win.doLayout();
+			win.show();
+		},		
+		
+		runAllReductions: function () {
+		    alert("running all reductions...");
+		},
+		
 		/**
 		 * @method onDelete
 		 */
@@ -604,11 +651,16 @@
 				this.preventLayerChangedEvent = false;
 				// removes existing FAT
 				console.log('REPLACING FAT')
-				while (YAHOO.util.Dom.get('FAT').hasChildNodes()) {
-					YAHOO.util.Dom.get('FAT').removeChild(YAHOO.util.Dom.get('FAT').lastChild);
+				if (!this.FAT) {
+				    this.FAT = makeFileTable(FILES, this.getValue().working.modules);
+				} else {
+				    this.FAT.update(FILES, this.getValue().working.modules);
 				}
+				this.reductionInstances = this.FAT.generateFileGroups();
+				this.setReductionIndex();
+				console.log('done replacing FAT');
 				// Call the File Association Table with appropriate headers
-				makeFileTable(this.getFATHeaders(),FILES, this.getValue().working.modules)
+				//makeFileTable(this.getFATHeaders(),FILES, this.getValue().working.modules)
 				///console.log(this.getFATHeaders())
 
 			} catch(ex) {
@@ -618,6 +670,22 @@
 				}
 			}
 		},
+		
+		// sets the editor reduction instance to something within 
+		// the reductionInstances set.
+		setReductionIndex: function(index) {
+		    var new_index = index ? index : this.reductionIndex;
+		    if (new_index >= this.reductionInstances.length) {
+			    new_index = (this.reductionInstances.length - 1);
+		    }
+			if (new_index < 0) {
+			    new_index = 0;
+			}
+			this.reductionIndex = new_index;
+			this.reductionInstance = this.reductionInstances[this.reductionIndex];
+			document.getElementById('reductionInstance').innerHTML = String(this.reductionInstance);
+		},
+		
 		onLayerChanged: function() {
 			if(!this.preventLayerChangedEvent) {
 				this.markUnsaved();
@@ -669,17 +737,23 @@
 		 * This method returns a list of strings for the column headers in the FAT.
 		 * Runs through all existing wires and adds the target (Module name, terminal name) if the wire's source is Load
 		 * 7/8
+		 * 8/29 NOTE: this has been moved to inside the fileTable code.
 		 **/
 		getFATHeaders: function() {
+		    console.log("Am I really getting FATHeaders?");
 			var wiringDiagram = this.getValue().working
 			var wireList = wiringDiagram.wires
 			var moduleList = wiringDiagram.modules
 			var headersList = [] // actual list of headers
-			var loadCheck = /Load/ // regex for checking if a module is a load, matches "Load"
-			for (var i=0; i < wireList.length; i++) {
-				if (loadCheck.test(moduleList[wireList[i].src.moduleId].name)) {
-					headersList.push(moduleList[wireList[i].tgt.moduleId].name + ' ' + wireList[i].tgt.terminal + ': ' + wireList[i].src.moduleId)
-				}
+			for (var i in moduleList) {
+			    if (moduleList[i].config.target_id) {
+			        headersList.push(moduleList[i].config.target_id);
+			    }
+			//var loadCheck = /Load/ // regex for checking if a module is a load, matches "Load"
+			//for (var i=0; i < wireList.length; i++) {
+			//	if (loadCheck.test(moduleList[wireList[i].src.moduleId].name)) {
+			//		headersList.push(moduleList[wireList[i].tgt.moduleId].name + ' ' + wireList[i].tgt.terminal + ': ' + wireList[i].src.moduleId)
+			//	}
 			}
 			return headersList;
 		},
@@ -687,15 +761,17 @@
 		 * This method gets called every time there is an updateAll() call on the FAT.
 		 * Currently, it updates the number of reduction instances and the display for
 		 * Instance Info
+		 * 8/29/11 BBM: this is not used anymore.  Queue for deletion.
 		 **/
 
 		FATupdate: function(templateConfig) {
+		    // NOT USED ANYMORE
 			//console.log('in Editor', templateConfig)
 			setMax = 0;
 			for (i in templateConfig) {
 				setMax += 1
 			}
-			this.maxReduction = setMax;
+			//this.maxReduction = setMax;
 			this.templateConfig = templateConfig;
 			this.displayCurrentReduction();
 			this.extendModuleConfigs()
@@ -703,10 +779,14 @@
 
 		},
 		updateFileConfigs: function(file_associations) {
+		    // NOT USED ANYMORE
 			//console.log('ENTERING FILE CONFIGS')
 			for (var l in this.layer.containers) {
 				for (var j in this.layer.containers[l].tracksConfigs) {
-					this.layer.containers[l].tracksConfigs[j]['files'] = [];
+				    if (this.layer.containers[l].tracksConfigs[j]['files']) {
+				        // reset all the file configs to empty
+				        this.layer.containers[l].tracksConfigs[j]['files'] = [];
+				    }
 				}
 			}
 			for (var j = 1; j <= Object.size(file_associations); j++) {
@@ -714,9 +794,12 @@
 					if (typeof file_associations[j][i] == "object") {
 						for (var k in file_associations[j][i]) {
 							//console.log('j',j,'i',i,'k',k)
-							//console.log(this.layer.containers[i.split(": ").pop()].tracksConfigs[j]['files'])
+							console.log(this.layer.containers[i.split(": ").pop()].tracksConfigs[j]['files'])
 							var target_container = this.layer.containers[i.split(": ").pop()];
-							target_container.tracksConfigs[j]['files'].push([file_associations[j][i][k]]);
+							if (!target_container.tracksConfigs[j]['files']) {
+							    target_container.tracksConfigs[j]['files'] = [];
+							}
+							target_container.tracksConfigs[j]['files'].push(file_associations[j][i][k]);
 							if (target_container.hasOwnProperty('updateFiles')) {
 							    target_container.updateFiles();
 							}
@@ -734,21 +817,25 @@
 		 * prevReductionInstance and nextReductionInstance update the button display, set the value editor.reductionInstance and call displayCurrentReduction()
 		 **/
 		prevReductionInstance: function() {
-			if (this.reductionInstance>1) {
-				this.reductionInstance -= 1
-				YAHOO.util.Dom.get('reductionInstance').innerHTML = String(this.reductionInstance)
-				this.displayCurrentReduction()
+		    this.setReductionIndex(this.reductionIndex - 1);
+//			if (this.reductionIndex > 0) {
+//				this.reductionIndex -= 1;
+//				this.reductionInstance = this.reductionInstances[this.reductionIndex];
+//				YAHOO.util.Dom.get('reductionInstance').innerHTML = String(this.reductionInstance)
+				//this.displayCurrentReduction()
 				//this.setModuleConfigs()
-			}
+//			}
 
 		},
 		nextReductionInstance: function() {
-			if (this.reductionInstance < this.maxReduction) {
-				this.reductionInstance += 1
-				YAHOO.util.Dom.get('reductionInstance').innerHTML = this.reductionInstance
-				this.displayCurrentReduction()
+		    this.setReductionIndex(this.reductionIndex + 1);
+//			if (this.reductionIndex < (this.reductionInstances.length - 1)) {
+//				this.reductionIndex += 1;
+//				this.reductionInstance = this.reductionInstances[this.reductionIndex];
+//				YAHOO.util.Dom.get('reductionInstance').innerHTML = this.reductionInstance
+				//this.displayCurrentReduction()
 				//this.setModuleConfigs()
-			}
+//			}
 		},
 		displayCurrentReduction: function() {
 			//console.log('In DISPLAY')
@@ -812,11 +899,12 @@
 		},
 		generateConfigForm: function(moduleID) {
 			console.log('generating form')
-			while (YAHOO.util.Dom.get("instance-modules-input").hasChildNodes()) {
-				YAHOO.util.Dom.get("instance-modules-input").removeChild(YAHOO.util.Dom.get("instance-modules-input").lastChild);
-			}
+//			while (YAHOO.util.Dom.get("instance-modules-input").hasChildNodes()) {
+//				YAHOO.util.Dom.get("instance-modules-input").removeChild(YAHOO.util.Dom.get("instance-modules-input").lastChild);
+//			}
 			configHeaders = []
-			badHeaders = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
+			//badHeaders = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
+			badHeaders = ["position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
 			configs = this.layer.containers[moduleID].getConfig()[this.reductionInstance]
 			//console.log(configs)
 			for (var j in configs) {
@@ -865,7 +953,7 @@
 			    win.show();
 			        
 			} else {
-				YAHOO.util.Dom.get("instance-modules-input").innerHTML = "THIS MODULE HAS NO CONFIGURABLE INPUTS"
+				alert("This module has no configurable inputs");
 			}
 		},
 		setModuleConfigsFromForm: function(configs, moduleID, instanceNumber) {
