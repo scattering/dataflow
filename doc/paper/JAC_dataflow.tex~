@@ -77,7 +77,8 @@
      \journalaccepted{0 XXXXXXX 0000}
      \journalonline{0 XXXXXXX 0000}
 
-\usepackage{url, hyperref}
+%\usepackage{url, hyperref}
+\usepackage{graphicx}
 
 \begin{document}                  % DO NOT DELETE THIS LINE
 
@@ -104,11 +105,7 @@
 \author[a]{Elakian}{Kanakaraj}
 \author[a]{Brendan}{Rowan}
 \author[a]{Alex}{Yee}
-<<<<<<< HEAD
-\author[a]{Joseph}{Redmon}
-=======
 \author[c]{Joseph}{Redmon}
->>>>>>> 9781457d6a32764ecde0d31755336fbce2b0d565
 
 \aff[a]{National Institute of Standards and Technology, Gaithersburg, Maryland  20899 \country{USA}}
 \aff[b]{Princeton University, Princeton, NJ  08544 \country{USA}}
@@ -182,70 +179,124 @@ instrument.
 \section{Introduction}
 
 Every dataset that is produced at a neutron user facility must be reduced to physical coordinates,
-with artifacts removed and error bars added, before it can be analyzed or modeled.
-As a result, every instrument is typically equipped with a software routine for performing this 
-reduction.  In addition, if the reduction programs are to be distributed to the users so that
+with artifacts removed and uncertainties calculated, before it can be analyzed or modeled.
+As a result, every type of instrument must be equipped with a software routine for performing this 
+reduction.  In addition, if the reduction programs are to be distributed to users so that
 they might work with the raw data at their home institutions after the experiment is complete,
 each program must be compiled for multiple target platforms 
-(Microsoft Windows, Mac OS, Unix, Linux, etc.).  
+(Microsoft Windows, Mac OS, Unix, Linux, etc.) 
 At a large facility this requires the writing and maintenance of dozens of programs, with multiple
-target platforms for each program, just to perform reduction.
-Updates to software are also on a per-instrument basis, requiring
+target platforms for each program.
+The capability for self-update (through the internet) can be built into these programs, though typically
+the extra coding needed to achieve this is high.  More commonly, software updates are accomplished through
 notification of all the users who might have downloaded or copied the programs, requesting that they 
-download a newer version.
+download a newer version from a publicly-available repository.
 
-For this reason, the Dataflow framework was designed to consist of two parts: 
-the user interface which exists solely within the user's web browser, and a centralized server which
-is maintained by the facility staff.  Updates to the server are implemented without needing
-interaction from the user, and updates to the user interface code (in the browser) require only that 
-the user refresh their view of the reduction site.
- 
+We present an alternative system for providing data reduction services at a user facility: 
+the Dataflow framework, consisting of
+a user interface which exists solely within the user's web browser, and a centralized server which
+is maintained by the facility staff.  The core functionality of the system is the graphical representation
+of a reduction algorithm as a series of discrete operations on data in a user-editable workflow diagram,
+an example of which can be seen in Fig. \ref{figure:sample_workflow}.
 
-\section{Client}
+The coding required to add a new set of reduction routines
+(a new instrument) to the framework is much reduced compared to writing an entirely new program
+(user interface and underlying machinery) from scratch.  In addition to the workflow editing application, 
+a common library for plotting data, importing files from a public (FTP) server, 
+and creating and and associating files with existing reduction workflows is provided as part
+of the base system.
 
-By presenting the user interface in a web browser, the installation requirement for users is shifted to the
-browser providers.  All that is required of the user is that they run a modern browser.
-Current browser support is indicated in Table \ref{table_browsers}.
-The user interface is built in Javascript, mainly using the WireIt and ExtJS libraries.
-Plotting is accomplished through custom-built plugins for the jqPlot library 
-(\url{http://www.jqplot.com/}), which is built on another common Javascript library, jQuery.
+Software updates are no longer dependent on the user, as
+changes to the server are implemented without any user interaction,
+and updates to the user interface code (in the browser) require only that 
+the user refresh their view of the reduction site. 
+
+Also, by presenting the user interface in a web browser, the installation requirement for users is shifted to the
+browser providers.  All that is required of the user is that they run a modern browser (with Javascript
+enabled.)
+Current browser support is indicated in Table \ref{table:browsers}.
+
+\section{Dataflow system}
+
+In the client and server, every reduction session is associated with a specific, defined \emph{instrument}.
+The editor for workflows allows a user to add and delete nodes in the diagram from a pool
+of available modules (specific to the chosen \emph{instrument}), and attach the outputs of each node 
+to the inputs of another node as necessary with wires. Each module, visually represented with 
+a name and icon in the editor, corresponds to a subroutine in the 
+backend, running on the server.
+
+These modules have input and/or output terminals, which correspond to the 
+inputs and/or outputs of the underlying subroutine, and wiring two terminals together in the editor
+corresponds intuitively to linking those inputs and outputs in the underlying reduction chain.  In that sense 
+the editor is a very simple programming environment, in which the number of available operations (modules)
+is extremely limited and well-defined, as well as the number of variables (input and outputs).
+Each module can also have associated configuration parameters, e.g. the desired resolution of rebinned 
+data, or the magnitude of a scalar offset.  These are accessible in the editor as well, by 
+clicking on the module in question on the workflow.  Parameter values are stored as part of the 
+\emph{configuration} of the workflow instance when the session is saved.
+
+The set of reduction subroutines available for an instrument typically consists
+of one or more \emph{loaders} which import raw data from datafiles, and \emph{filters} which operate
+on the data.  It is necessary that the \emph{loaders} and \emph{filters}
+provide compatible objects within each
+instrument's namespace, but it is not required that the \emph{filters} for one instrument operate on the data
+of another instrument.  Thus every defined \emph{instrument} is independent of every other, and modifications
+to the algorithms, data types, etc. in one will not affect any other. 
+
+\subsection{Data management}
+
+Sessions in the workflow editor are initiated through another online tool, the user project manager.
+Users register with a unique id, and then they can log in to a personal work space.  
+In this environment, the user can create new \emph{projects}, which are collections of \emph{experiments},
+which are defined simply as the grouping of uploaded raw data files with a particular \emph{instrument} and
+associated workflows.  
+
+The list of associated workflows is empty when a user begins the reduction process for a new experiment,
+at which point standard workflow \emph{templates} can be loaded in the editor, and then saved as specific
+workflow instances associated with the \emph{experiment}.  Each reduction workflow may have more than one \emph{loader},
+and so in the editor there is also a tool for associating the files in a given \emph{experiment} with individual
+\emph{loaders}.  This assocation information is stored along with any user-supplied module \emph{configuration}
+when the workflow instance is saved to the \emph{experiment} workspace.
+
+\subsection{Plotting}
+
+Data reduction is often an interactive process, in which corrections are adjusted and regions of interest
+are defined midway in a reduction workflow.  Plotting of intermediate results in any workflow is possible 
+by clicking on the wires themselves, triggering an evaluation of the workflow as defined up to the point of
+the selected wire and plotting the result in a panel in editor window.  
+
+Currently, plotting is supported for two types of data: 2-dimensional arrays with defined dimensions
+(which are plotted as a colormap, similar to heat maps) as seen in Fig. \ref{figure:twod_plot},
+and multi-dimensional data where multiple sets
+of 1-d data (all of the same length) can be flexibly plotted, choosing any x- and y-axis from the sets
+ (see Fig \ref{figure:nd_plot}).
+
+\subsection{Caching}
+
+In many reduction processes, intermediate results can be costly to calculate.  In order to
+have a responsive, flexible system, small changes to the dataflow that do not require recalculation
+of previous steps should not force this to happen.
 
 
+\section{Implemented instruments}
 
+The process for implementing a particular instrument, involves porting existing algorithms for data reduction 
+to individual Python modules that act as filters, passing modified data to the next filter in the chain.  
 
-\section{Server}
+Currently, three classes of instrument-specific reduction are implemented at the host institution for this 
+project (NIST center for Neutron Research)
 
-The Dataflow system was designed with a backend server written in Python (Django, \url{http://www.djangoproject.com}),
-which makes the connection between the client (web browser) and the data reduction modules, which are written 
-in Python.  There is no particular requirement that the reduction code be written in Python, just that
-the code be callable from Python.  Because of the large available body of numerical libraries 
-in Python, it was not necessary to use any other languages in the project.  
-
-\subsection{Instrument-specific modules}
-
-In the client and server, every reduction pipeline is categorized in terms of a single ``instrument''.
-For each instrument, all the reduction subroutines and data formats are defined.  Typically this will
-consist of one or more ``loaders'' which import raw data from datafiles, and ``filters'' which operate
-on the data.  It is necessary that the loaders and filters provide compatible objects within each
-instrument's namespace, but it is not required that the filters for one instrument operate on the data
-of another instrument.  Thus every reduction problem is able to be addressed individually on the backend
-without requiring modification of the data or file types already in use.  
-
-All that is required is that
-existing algorithms for data reduction be ported to individual Python modules that act as filters, 
-passing modified data to the next filter in the chain.  
-
-\subsubsection{Triple-Axis Spectrometer}
+\subsection{Triple-Axis Spectrometer}
 
 Enter Alex Yee.
 
-\subsubsection{Small-Angle Neutron Scattering}
+\subsection{Small-Angle Neutron Scattering}
 
 By Elakian.
 For instance, in the Small-Angle Neutron Scattering (SANS) reduction, many of the algorithms used were 
 adapted from exisiting Igor Pro code \cite{Kline:do5025}.
 
-\subsubsection{Offspecular}
+\subsection{Offspecular}
 
 I imagine Brendan will contribute something here.
 
@@ -254,47 +305,64 @@ I imagine Brendan will contribute something here.
      % a single \appendix declaration, and are then structured just like the
      % body text.
 
-\subsection{Caching}
-
-In many reduction processes, intermediate results can be costly to calculate.  In order to
-have a responsive, flexible system, small changes to the dataflow that do not require recalculation
-of previous steps should not force this to happen.
 
 \appendix
 \section{Libraries used in Dataflow Application}
-
+ 
 \subsection{Client}
 
-\subsubsection{WireIt}
-
-\subsubsection{jqPlot}
-
-\subsubsection{extJS}
-
+The user interface is entirely implemented in Javascript, with added libraries as described below.
+ 
+\subsubsection{Editor}
+The main workflow (wiring) editor is implemented as a fork of the WireIt library (\emph{http://neyric.github.com/wireit/}), with added routines for running data reductions and configuring
+modules with user input.
+\subsubsection{Plotting}
+Plotting in the client is accomplished with the jqPlot library (\emph{http://www.jqplot.com/}).
+Additional plugins written as part of this project include one for handling 2-dimensional 
+plotting (colormaps), as well as one for handling multi-axis data with selectors.
+The jqPlot library itself depends on the jQuery library (\emph{http://jquery.com/}).
+\subsubsection{Layout}
+Menus and layout (exclusive of the wiring editor) were done in extJS (\emph{http://www.sencha.com/products/extjs/})
 \subsection{Server}
+The backend server is written in python (\emph{http://www.python.org}), 
+which makes the connection between the client (web browser) and the data reduction modules, 
+which are also written in Python.  
 
-\subsubsection{Django}
-
-\subsubsection{PostgreSQL}
-
-\subsubsection{Redis}
-
-\subsubsection{Numpy}
+There is no particular requirement that the reduction code be written in Python, just that
+the code be callable from Python.  However, because of the large available body of numerical libraries 
+in Python (\emph{http://numpy.scipy.org/} \cite{oliphant:10}), 
+it was not necessary to use any other languages in the backend.
+\subsubsection{Web server}
+All dynamic content, including calls to run the reduction workflows and
+interactive forms in the user project manager environment,
+is served using the Django python library \cite{django_website} (\emph{http://www.djangoproject.com}).  
+User information (project structure, sessions, experiments, uploaded data files, saved workflow instances...)
+is stored in a postgresql relational database on the server, (\emph{http://www.postgresql.org/})
+along with instrument definitions and default workflow templates
+for each instrument type.
+\subsubsection{Caching intermediate results}
+As mentioned in the text, intermediate results are cached 
+in memory on the server to minimize computation time and make the user interaction more responsive.  
+This is  accomplished using the Redis key-value store (\emph{http://redis.io/}).  This software allows 
+old entries to automatically expire after a configurable time.
 
 
 \ack{Acknowledgements}
 
 This work utilized facilities supported in part by the National Science Foundation under Agreement No. DMR-0944772.
-Andrew Tracer was supported as part of the Summer Undergraduate Research Fellowship (SURF);
+Andrew Tracer and Joseph Redmon were supported as part of the Summer Undergraduate Research Fellowship (SURF);
 Elakian Kanakaraj, Brendan Rowan and Alex Yee were supported by thed Summer High-school Internship Program (SHIP),
 both of which are also part of the above grant.
 
 The authors would like to thank Andrew Jackson, Steve Kline and Julie Borchers of the NIST Center for Neutron Research
 for their invaluable assistance on this work.
 
+%\begin{references}
+%\reference{Author, A. \& Author, B. (1984). \emph{Journal} \textbf{Vol}, 
+%first page--last page.}
+%\end{references}
 \bibliographystyle{iucr}
 \bibliography{JAC_bibliography}
-
      %-------------------------------------------------------------------------
      % TABLES AND FIGURES SHOULD BE INSERTED AFTER THE MAIN BODY OF THE TEXT
      %-------------------------------------------------------------------------
@@ -303,13 +371,13 @@ for their invaluable assistance on this work.
      % model
 
 \begin{table}
-\caption{Supported browsers, at time of publication}
-\label{table_browsers}
-\begin{tabular}{lll}      % Alignment for each cell: l=left, c=center, r=right
- Browser    & Min. Version  &Link     \\
+\caption{Supported browsers}
+\label{table:browsers}
+\begin{tabular}{ l l l }      % Alignment for each cell: l=left, c=center, r=right
+ Browser    &Version  &Link     \\
 \hline
- Firefox      & 5.0      & \url{http://www.firefox.com}      \\
- Chrome      & 13.0      & \url{http://www.google.com/chrome}    \\
+ Firefox      & 5.0      & \emph{http://www.firefox.com}      \\
+ Chrome      & 13.0      & \emph{http://www.google.com/chrome}    \\
  Internet Explorer      & None      & Not supported      \\
 \end{tabular}
 \end{table}
@@ -317,10 +385,21 @@ for their invaluable assistance on this work.
 
      % Postscript figures can be included with multiple figure blocks
 
-%\begin{figure}
-%\caption{Caption describing figure.}
-%\includegraphics{fig1.ps}
-%\end{figure}
+\begin{figure}\label{figure:sample_workflow}
+\caption{Sample data reduction workflow (off-specular neutron reflectometry)}
+\includegraphics[width=\linewidth]{sample_diagram.png}
+\end{figure}
+
+\begin{figure}\label{figure:twod_plot}
+\caption{Two-dimensional color map of data.  Log or linear mapping is selectable in
+the client}
+\includegraphics[width=\linewidth]{twod_plot.png}
+\end{figure}
+
+\begin{figure}\label{figure:nd_plot}
+\caption{N-dimension plotter, where x- and y-axes are chosen by the user with drop-down selection inputs seen below the graph}
+\includegraphics[width=\linewidth]{sample_nd.png}
+\end{figure}
 
 
 \end{document}                    % DO NOT DELETE THIS LINE
