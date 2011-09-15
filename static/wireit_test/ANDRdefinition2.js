@@ -581,8 +581,86 @@ var andr2 = {
           "value": 5.0
         }
       ], 
-      "name": "Two theta to qxqz"
-    }, 
+      "name": "Theta two theta to qxqz"
+    },
+    {
+      "container": {
+        "icon": "../../static/img/offspecular/qxqz.png", 
+        "image": "../../static/img/offspecular/qxqz_image.png", 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:out"
+              ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": -12, 
+              "top": 4
+            }, 
+            "required": true
+          }, 
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:out"
+              ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "output_grid", 
+            "offsetPosition": {
+              "left": -12, 
+              "top": 40
+            }, 
+            "required": false
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:in"
+              ], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "left": 48, 
+              "top": 16
+            }, 
+            "required": false
+          }
+        ], 
+        "xtype": "AutosizeImageContainer"
+      }, 
+      "fields": [
+        {
+          "label": "Sample angle (theta)", 
+          "name": "theta", 
+          "type": "float", 
+          "value": 0.0
+        }
+      ], 
+      "name": "Two theta lambda to qxqz"
+    },
     {
       "container": {
         "height": 16, 
