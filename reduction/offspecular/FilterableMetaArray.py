@@ -1,5 +1,5 @@
 from MetaArray import MetaArray
-from numpy import ndarray, amin, amax, alen, array, fromstring
+from numpy import ndarray, amin, amax, alen, array, fromstring, float, float64, float32
 import copy, simplejson, datetime
 #from ...dataflow.core import Data
 from cStringIO import StringIO
@@ -7,6 +7,7 @@ from cStringIO import StringIO
 class FilterableMetaArray(MetaArray):
     def __new__(*args, **kwargs):
         subarr = MetaArray.__new__(*args, **kwargs)
+        subarr.extrainfo = subarr._info[-1]
         return subarr
     
     def filter(self, filtername, *args, **kwargs):
@@ -78,16 +79,16 @@ class FilterableMetaArray(MetaArray):
         axis = ['x', 'y']
         for index, label in enumerate(axis):
             arr = self._info[index]['values']
-            dims[axis[index] + 'min'] = amin(arr)
-            dims[axis[index] + 'max'] = amax(arr)
-            dims[axis[index] + 'dim'] = alen(arr)
+            dims[axis[index] + 'min'] = arr.min()
+            dims[axis[index] + 'max'] = arr.max()
+            dims[axis[index] + 'dim'] = len(arr)
         xlabel = self._info[0]['name']
         ylabel = self._info[1]['name']
         zlabel = self._info[2]['cols'][0]['name']
         title = 'AND/R data' # That's creative enough, right?
-        type = '2d'
+        plot_type = '2d'
         transform = 'log' # this is nice by default
-        dump = dict(type=type, z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, transform=transform)
+        dump = dict(type=plot_type, z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, transform=transform)
         res = simplejson.dumps(dump, sort_keys=True, indent=2)
         return res
         
