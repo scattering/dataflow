@@ -102,7 +102,7 @@ backStore.insert(0,newFile)
 	}
 	generate_FileGroups()
 	console.log('TEMPLATE CONFIGS', template_configs)
-	editor.FATupdate(template_configs)
+	//editor.FATupdate(template_configs)
 	
 };
 
@@ -482,16 +482,31 @@ var panelTwo = Ext.create('Ext.Panel', {
 		},
 	bodyPadding: '2',
 	items: [displayPanel, 
-		{
-			xtype: 'button',
-			text: 'Run Reduction',
-			height: '30',
-			componentCls: 'big-button',
-			handler: run_reduction,
-		},
+//		{
+//			xtype: 'button',
+//			text: 'Run Reduction',
+//			height: '30',
+//			componentCls: 'big-button',
+//			handler: run_reduction,
+//		},
+        {
+            xtype: 'button',
+            text: 'Submit',
+            height: '30',
+            componentCls: 'big-button',
+            handler: submit,
+        },
 		],
-	renderTo: 'FAT',
+	//renderTo: 'FAT_popup',
+	renderTo: Ext.getBody(),
 	});
+
+function submit() {
+    generate_FileGroups();
+	console.log('TEMPLATE CONFIGS', template_configs);
+	window.editor.FATupdate(template_configs);
+    panelTwo.ownerCt.close();
+}
 
 ////////
 // Run Reduction
@@ -505,9 +520,9 @@ template_configs = {}
 function handleResult(identifier, result) {
 	if (result) {
 		for (var i in result.children) {
-			//console.log(send_to_Wireit[identifier])
+			console.log(send_to_Wireit[identifier])
 			if (!send_to_Wireit[identifier]) {
-				//console.log("IN UNDEFINED")
+				console.log("IN UNDEFINED")
 				send_to_Wireit[identifier] = [result.children[i].data.filename]
 				}
 			else {
@@ -628,6 +643,8 @@ contextMenu = new Ext.menu.Menu({
 	}
 	}],
 });
+
+return panelTwo;
 }
 
 
