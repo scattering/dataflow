@@ -1,7 +1,7 @@
 """
 Offspecular reflectometry reduction modules
 """
-import os, sys, simplejson, pickle
+import os, sys, simplejson, pickle, types
 
 # left here for testing purposes
 # python uses __name__ for relative imports so I cannot use
@@ -20,7 +20,8 @@ if SERVER:
     from DATAFLOW.dataflow.offspecular.modules.offset import offset_module
     from DATAFLOW.dataflow.offspecular.modules.wiggle import wiggle_module
     from DATAFLOW.dataflow.offspecular.modules.pixels_two_theta import pixels_two_theta_module
-    from DATAFLOW.dataflow.offspecular.modules.two_theta_qxqz import two_theta_qxqz_module
+    from DATAFLOW.dataflow.offspecular.modules.theta_two_theta_qxqz import theta_two_theta_qxqz_module
+    from DATAFLOW.dataflow.offspecular.modules.two_theta_lambda_qxqz import two_theta_lambda_qxqz_module
     from DATAFLOW.dataflow.offspecular.modules.load_he3_analyzer_collection import load_he3_module
     from DATAFLOW.dataflow.offspecular.modules.append_polarization_matrix import append_polarization_matrix_module
     from DATAFLOW.dataflow.offspecular.modules.combine_polarized import combine_polarized_module
@@ -45,7 +46,8 @@ elif TESTING:
     from dataflow.dataflow.offspecular.modules.offset import offset_module
     from dataflow.dataflow.offspecular.modules.wiggle import wiggle_module
     from dataflow.dataflow.offspecular.modules.pixels_two_theta import pixels_two_theta_module
-    from dataflow.dataflow.offspecular.modules.two_theta_qxqz import two_theta_qxqz_module
+    from dataflow.dataflow.offspecular.modules.theta_two_theta_qxqz import theta_two_theta_qxqz_module    
+    from dataflow.dataflow.offspecular.modules.two_theta_lambda_qxqz import two_theta_lambda_qxqz_module
     from dataflow.dataflow.offspecular.modules.load_he3_analyzer_collection import load_he3_module
     from dataflow.dataflow.offspecular.modules.append_polarization_matrix import append_polarization_matrix_module
     from dataflow.dataflow.offspecular.modules.combine_polarized import combine_polarized_module
@@ -67,7 +69,8 @@ else:
     from ..offspecular.modules.offset import offset_module
     from ..offspecular.modules.wiggle import wiggle_module
     from ..offspecular.modules.pixels_two_theta import pixels_two_theta_module
-    from ..offspecular.modules.two_theta_qxqz import two_theta_qxqz_module
+    from ..offspecular.modules.two_theta_lambda_qxqz import two_theta_lambda_qxqz_module
+    from ..offspecular.modules.theta_two_theta_qxqz import theta_two_theta_qxqz_module
     from ..offspecular.modules.load_he3_analyzer_collection import load_he3_module
     from ..offspecular.modules.append_polarization_matrix import append_polarization_matrix_module
     from ..offspecular.modules.combine_polarized import combine_polarized_module
@@ -105,13 +108,30 @@ datastamp = Data(OSPEC_DATA_TIMESTAMP, PlottableDict)
 # Load module
 def load_action(files=[], intent='', auto_PolState=False, PolStates={}, **kwargs):
     print "loading", files
+    
     PolStates = dict((file, state.replace(' ', '+')) for file, state in PolStates.items())
-    result = [_load_data(f, auto_PolState, PolStates.get(get_friendly_name(os.path.split(f)[-1]), '')) for f in files] # not bundles
+    result = []
+    for f in files:
+        subresult = _load_data(f, auto_PolState, PolStates.get(get_friendly_name(os.path.split(f)[-1]), ''))
+        if type(subresult) == types.ListType:
+            result.extend(subresult)
+        else:
+            result.append(subresult)   
+    #result = [_load_data(f, auto_PolState, PolStates.get(get_friendly_name(os.path.split(f)[-1]), '')) for f in files] # not bundles
     return dict(output=result)
+
 def _load_data(name, auto_PolState, PolState):
     (dirName, fileName) = os.path.split(name)
+    friendlyName = get_friendly_name(fileName)
     print "Loading:", name, PolState
-    return LoadICPData(fileName, path=dirName, auto_PolState=auto_PolState, PolState=PolState)
+    andr_endings = ['cg1', 'ca1', 'cb1', 'cc1', 'cd1']
+    if friendlyName[-3:] in andr_endings:
+        return LoadICPData(fileName, path=dirName, auto_PolState=auto_PolState, PolState=PolState)
+    elif friendlyName[-3:] == 'dat':
+        return LoadAsterixData(fileName, path=dirName)
+    elif friendlyName[-3:] == '.h5':
+        return SuperLoadAsterixHDF(fileName, path=dirName)
+
 auto_PolState_field = {
         "type":"boolean",
         "label": "Auto-polstate",
@@ -126,6 +146,7 @@ PolStates_field = {
 }
 load = load_module(id='ospec.load', datatype=OSPEC_DATA,
                    version='1.0', action=load_action, fields=[auto_PolState_field, PolStates_field])
+
 
 # Save module
 def save_action(input=[], ext=None, **kwargs):
@@ -179,15 +200,26 @@ def pixels_two_theta_action(input=[], pixels_per_degree=80.0, qzero_pixel=309, i
     return dict(output=result)
 pixels_two_theta = pixels_two_theta_module(id='ospec.twotheta', datatype=OSPEC_DATA, version='1.0', action=pixels_two_theta_action)
 
-# Two theta to qxqz module
-def two_theta_qxqz_action(input=[], output_grid=None, wavelength=5.0, **kwargs):
+# Two theta Lambda to qxqz module
+def two_theta_lambda_qxqz_action(input=[], output_grid=None, theta=None, **kwargs):
+    print "converting two theta and lambda to qx and qz"
+    grid = None
+    if output_grid != None:
+        grid = output_grid[0]
+    result = TwothetaLambdaToQxQz().apply(input, output_grid=grid, theta=theta)
+    return dict(output=result)
+two_theta_lambda_qxqz = two_theta_lambda_qxqz_module(id='ospec.tth_wl_qxqz', datatype=OSPEC_DATA, version='1.0', action=two_theta_lambda_qxqz_action)
+
+
+# Theta Two theta to qxqz module
+def theta_two_theta_qxqz_action(input=[], output_grid=None, wavelength=5.0, **kwargs):
     print "converting theta and two theta to qx and qz"
     grid = None
     if output_grid != None:
         grid = output_grid[0]
     result = ThetaTwothetaToQxQz().apply(input, output_grid=grid, wavelength=wavelength)
     return dict(output=result)
-two_theta_qxqz = two_theta_qxqz_module(id='ospec.qxqz', datatype=OSPEC_DATA, version='1.0', action=two_theta_qxqz_action)
+theta_two_theta_qxqz = theta_two_theta_qxqz_module(id='ospec.th_tth_qxqz', datatype=OSPEC_DATA, version='1.0', action=theta_two_theta_qxqz_action)
 
 def empty_qxqz_grid_action(qxmin= -0.003, qxmax=0.003, qxbins=201, qzmin=0.0, qzmax=0.1, qzbins=201, **kwargs):
     print "creating an empty QxQz grid"
@@ -257,7 +289,7 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                  name='NCNR ANDR',
                  archive=config.NCNR_DATA + '/andr',
                  menu=[('Input', [load, load_he3, load_stamp, save]),
-                       ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, two_theta_qxqz, empty_qxqz]),
+                       ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, theta_two_theta_qxqz, two_theta_lambda_qxqz, empty_qxqz]),
                        ('Polarization reduction', [timestamp, append_polarization, combine_polarized, correct_polarized]),
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],
@@ -281,7 +313,7 @@ if __name__ == '__main__':
             dict(module="ospec.offset", position=(321, 171), config={'offsets':{'theta':0, 'xpixel':10}}),
             dict(module="ospec.wiggle", position=(204, 92), config={}),
             dict(module="ospec.twotheta", position=(450, 250), config={}),
-            dict(module="ospec.qxqz", position=(560, 392), config={}),
+            dict(module="ospec.th_tth_qxqz", position=(560, 392), config={}),
             dict(module="ospec.grid", position=(350, 390), config={}),
             dict(module="ospec.emptyqxqz", position=(350, 470), config={}),
         ]
