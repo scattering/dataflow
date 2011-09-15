@@ -17,7 +17,8 @@ if __name__ == "__main__":
                   'python-scipy',
                   'python-matplotlib',
                   'python-dev',
-		          'python-psycopg2',
+		          #'python-psycopg2', # this is already being installed from easy_install below - conflicts!!
+		          'python-h5py',
                   'vim',
                   'subversion',
 		          'apache2',
