@@ -84,15 +84,16 @@ class EmptyQxQzGrid(MetaArray):
     def __new__(subtype, qxmin, qxmax, qxbins, qzmin, qzmax, qzbins):
         creation_story = subtype.__name__
         creation_story += "({0}, {1}, {2}, {3}, {4}, {5})".format(qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)
-        info = [{"name": "qz", "units": "inv. Angstroms", "values": linspace(qzmin, qzmax, qzbins) },
+        info = [
             {"name": "qx", "units": "inv. Angstroms", "values": linspace(qxmin, qxmax, qxbins) },
+            {"name": "qz", "units": "inv. Angstroms", "values": linspace(qzmin, qzmax, qzbins) },
             {"name": "Measurements", "cols": [
                     {"name": "counts"},
                     {"name": "pixels"},
                     {"name": "monitor"},
                     {"name": "count_time"}]},
             {'CreationStory': creation_story}]
-        data = MetaArray(zeros((qzbins, qxbins, 4)), info=info)
+        data = MetaArray(zeros((qxbins, qzbins, 4)), info=info)
         return data
     
 def th_2th_combined_dataobj():
@@ -1033,7 +1034,7 @@ class TwothetaLambdaToQxQz(Filter2D):
         for i, col in enumerate(outgrid_info[2]['cols']):
             values_to_bin = data[:,:,col['name']][target_mask]
             outshape = (output_grid.shape[0], output_grid.shape[1])
-            hist2d, xedges, yedges = histogram2d(target_qz_list,target_qx_list, bins = (outshape[0],outshape[1]), range=((0,outshape[0]),(0,outshape[1])), weights=values_to_bin)
+            hist2d, xedges, yedges = histogram2d(target_qx_list,target_qz_list, bins = (outshape[0],outshape[1]), range=((0,outshape[0]),(0,outshape[1])), weights=values_to_bin)
             output_grid[:,:,col['name']] += hist2d
             #framed_array[target_qz_list, target_qx_list, i] = data[:,:,col['name']][target_mask]
             
@@ -1095,7 +1096,7 @@ class ThetaTwothetaToQxQz(Filter2D):
         for i, col in enumerate(outgrid_info[2]['cols']):
             values_to_bin = data[:,:,col['name']][target_mask]
             outshape = (output_grid.shape[0], output_grid.shape[1])
-            hist2d, xedges, yedges = histogram2d(target_qz_list,target_qx_list, bins = (outshape[0],outshape[1]), range=((0,outshape[0]),(0,outshape[1])), weights=values_to_bin)
+            hist2d, xedges, yedges = histogram2d(target_qx_list,target_qz_list, bins = (outshape[0],outshape[1]), range=((0,outshape[0]),(0,outshape[1])), weights=values_to_bin)
             output_grid[:,:,col['name']] += hist2d
             #framed_array[target_qz_list, target_qx_list, i] = data[:,:,col['name']][target_mask]
      
