@@ -1053,9 +1053,10 @@ class TwothetaLambdaToQxQz(Filter2D):
         else:
             output_grid = deepcopy(output_grid)
             
-        if theta == None:
-            if 'theta' in data._info[-1]:
-                theta = data._info[-1]['theta']
+        if (theta == "") or (theta == None):
+            if 'state' in data._info[-1]:
+                theta = float(data._info[-1]['state']['A[1]'])
+                print 'theta:', theta
             else:
                 print "can't run without theta!"
                 return
