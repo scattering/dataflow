@@ -732,8 +732,9 @@ var andr2 = {
     },
         {
       "container": {
+        "icon": "../../static/img/offspecular/autogrid.png", 
+        "image": "../../static/img/offspecular/mask_image.png", 
         "height": 16, 
-        "image": "",
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -777,7 +778,7 @@ var andr2 = {
           }
         ],  
         "width": 80, 
-        "xtype": "WireIt.Container",
+        "xtype": "AutosizeImageContainer",
       }, 
       "fields": [
         {
@@ -933,8 +934,8 @@ var andr2 = {
     },
     {
       "container": {
-        "icon": "../../static/img/offspecular/app_polar_matrix.png", 
-        "image": "../../static/img/offspecular/app_polar_matrix_image.png", 
+        "icon": "../../static/img/offspecular/autogrid.png", 
+        "image": "../../static/img/offspecular/slice_image.png", 
         "terminals": [
           { "alwaysSrc": false, 
             "ddConfig": {
@@ -953,10 +954,10 @@ var andr2 = {
               "allowedTypes": ["data2d.ospec:in"], 
               "type": "data2d.ospec:out"
             }, 
-            "direction": [1,0], 
+            "direction": [0,1], 
             "multiple": true, 
             "name": "output_x", 
-            "offsetPosition": {"right": -16,"top": 4}, 
+            //"offsetPosition": {"right": -16,"top": 4}, 
             "required": false
           }, 
           {
