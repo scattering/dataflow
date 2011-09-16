@@ -187,6 +187,13 @@ def offset_action(input=[], offsets={}, **kwargs):
     return dict(output=CoordinateOffset().apply(input, offsets=offsets))
 offset = offset_module(id='ospec.offset', datatype=OSPEC_DATA, version='1.0', action=offset_action)
 
+# Offset module
+def mask_action(input=[], xmin="0", xmax="", ymin="0", ymax="", **kwargs):
+    print "masking"
+    return dict(output=MaskData().apply(input, xmin, xmax, ymin, ymax))
+mask_data = mask_data_module(id='ospec.mask', datatype=OSPEC_DATA, version='1.0', action=mask_action)
+
+
 # Wiggle module
 def wiggle_action(input=[], amp=0.14, **kwargs):
     print "wiggling"
@@ -289,7 +296,7 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                  name='NCNR ANDR',
                  archive=config.NCNR_DATA + '/andr',
                  menu=[('Input', [load, load_he3, load_stamp, save]),
-                       ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, theta_two_theta_qxqz, two_theta_lambda_qxqz, empty_qxqz]),
+                       ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, theta_two_theta_qxqz, two_theta_lambda_qxqz, empty_qxqz, mask_data]),
                        ('Polarization reduction', [timestamp, append_polarization, combine_polarized, correct_polarized]),
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],
