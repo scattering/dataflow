@@ -729,6 +729,83 @@ var andr2 = {
         }
       ], 
       "name": "Empty QxQz grid"
+    },
+        {
+      "container": {
+        "height": 16, 
+        "image": "",
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:out"
+              ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": -12, 
+              "top": 16
+            }, 
+            "required": true
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:in"
+              ], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "left": 48, 
+              "top": 16
+            }, 
+            "required": false
+          }
+        ],  
+        "width": 150, 
+        "xtype": "AutosizeImageContainer",
+      }, 
+      "fields": [
+        {
+          "label": "xmin pixel", 
+          "name": "xmin", 
+          "type": "string", 
+          "value": "0"
+        }, 
+        {
+          "label": "xmax pixel", 
+          "name": "xmax", 
+          "type": "string", 
+          "value": ""
+        }, 
+        {
+          "label": "ymin pixel", 
+          "name": "ymin", 
+          "type": "string", 
+          "value": "0"
+        }, 
+        {
+          "label": "ymax pixel", 
+          "name": "ymax", 
+          "type": "string", 
+          "value": ""
+        }, 
+      ], 
+      "name": "Mask Data"
     }, 
     {
       "container": {
