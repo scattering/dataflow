@@ -11,7 +11,7 @@ def mask_data_module(id=None, datatype=None, action=None,
 
     icon = {
         'URI': config.IMAGES + config.ANDR_FOLDER + 'autogrid.png',
-        'image': config.IMAGES + config.ANDR_FOLDER + 'autogrid_image.png',,
+        'image': config.IMAGES + config.ANDR_FOLDER + 'autogrid_image.png',
         'terminals': {
             'output': (20, 10, 1, 0),
         }
