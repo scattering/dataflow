@@ -256,7 +256,6 @@ class MaskData(Filter2D):
     @autoApplyToList
     @updateCreationStory
     def apply(self, data, xmin=None, xmax=None, ymin=None, ymax=None):
-        xmin, xmax, ymin, ymax = [s for s in [xmin, xmax, ymin, ymax] if s!="" else None]
         def sanitize (item):
             return int(item) if item != "" else None
         dataslice = (slice(sanitize(xmin), sanitize(xmax)), slice(sanitize(ymin), sanitize(ymax)))
