@@ -1,4 +1,4 @@
-from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin, allclose, zeros_like, linalg, dot, arctan2, float64, histogram2d
+from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin, allclose, zeros_like, linalg, dot, arctan2, float64, histogram2d, sum, sqrt
 import os, simplejson, datetime, sys, types, xml.dom.minidom
 from copy import deepcopy
 
@@ -263,7 +263,46 @@ class MaskData(Filter2D):
         new_data[dataslice] = 0
         return new_data
         
-              
+
+class SliceNormData(Filter2D):
+    """ Sum 2d data along both axes and return 1d datasets,
+    normalized to col named in normalization param """
+    
+    @autoApplyToList
+    def apply(self, data, normalization='monitor'):
+        new_info = data.infoCopy()
+        x_axis = new_info[0]
+        y_axis = new_info[1]
+        #meas_info = new_info[2]
+        #num_cols = len(meas_info['cols'])
+        #meas_info['cols'].append({"name": "error"})
+        
+        counts_array = data['Measurements':'counts'].view(ndarray)
+        norm_array = data['Measurements':normalization].view(ndarray)
+        y_out = zeros((data.shape[1], 2))
+        x_out = zeros((data.shape[0], 2))
+        
+        norm_y = sum(norm_array, axis=0)
+        sum_y = sum(counts_array, axis=0)
+        mask_y = (norm_y != 0)
+        y_out[:,0][mask_y] += sum_y[mask_y] / norm_y[mask_y]
+        y_out[:,1][mask_y] += sqrt(sum_y)[mask_y] / norm_y[mask_y]
+        
+        norm_x = sum(norm_array, axis=1)
+        sum_x = sum(counts_array, axis=1)
+        mask_x = (norm_x != 0)
+        x_out[:,0][mask_x] += sum_x[mask_x] / norm_x[mask_x]
+        x_out[:,1][mask_x] += sqrt(sum_x)[mask_x] / norm_x[mask_x]
+        
+        col_info = {"name": "Measurements", "cols": [
+                    {"name": "counts"},
+                    {"name": "error"} ]}
+        
+        x_data_obj = MetaArray( x_out, info=[x_axis, col_info, {}] )
+        y_data_obj = MetaArray( y_out, info=[y_axis, col_info, {}] )
+        
+        return [x_data_obj, y_data_obj]
+
 class WiggleCorrection(Filter2D):
     """ 
     Remove the oscillatory artifact from the Brookhaven 2D detector data
