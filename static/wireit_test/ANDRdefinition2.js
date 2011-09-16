@@ -770,13 +770,13 @@ var andr2 = {
             "multiple": true, 
             "name": "output", 
             "offsetPosition": {
-              "left": 48, 
+              "right": -12, 
               "top": 16
             }, 
             "required": false
           }
         ],  
-        "width": 150, 
+        "width": 80, 
         "xtype": "WireIt.Container",
       }, 
       "fields": [
@@ -890,64 +890,39 @@ var andr2 = {
         "icon": "../../static/img/offspecular/app_polar_matrix.png", 
         "image": "../../static/img/offspecular/app_polar_matrix_image.png", 
         "terminals": [
-          {
-            "alwaysSrc": false, 
+          { "alwaysSrc": false, 
             "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:out"
-              ], 
+              "allowedTypes": ["data2d.ospec:out" ], 
               "type": "data2d.ospec:in"
             }, 
-            "direction": [
-              -1, 
-              0
-            ], 
+            "direction": [-1,0], 
             "multiple": false, 
             "name": "input", 
-            "offsetPosition": {
-              "left": -12, 
-              "top": 4
-            }, 
+            "offsetPosition": {"left": -12, "top": 4}, 
             "required": true
           }, 
           {
             "alwaysSrc": false, 
             "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:out"
-              ], 
+              "allowedTypes": ["data2d.ospec:out"], 
               "type": "data2d.ospec:in"
             }, 
-            "direction": [
-              -1, 
-              0
-            ], 
+            "direction": [-1,0], 
             "multiple": false, 
             "name": "he3cell", 
-            "offsetPosition": {
-              "left": -12, 
-              "top": 40
-            }, 
+            "offsetPosition": {"left": -12,"top": 40}, 
             "required": true
           }, 
           {
             "alwaysSrc": true, 
             "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:in"
-              ], 
+              "allowedTypes": ["data2d.ospec:in"], 
               "type": "data2d.ospec:out"
             }, 
-            "direction": [
-              1, 
-              0
-            ], 
+            "direction": [1,0], 
             "multiple": true, 
             "name": "output", 
-            "offsetPosition": {
-              "left": 48, 
-              "top": 16
-            }, 
+            "offsetPosition": {"left": 48, "top": 16}, 
             "required": false
           }
         ], 
@@ -955,6 +930,52 @@ var andr2 = {
       }, 
       "fields": [], 
       "name": "Append polarization matrix"
+    },
+    {
+      "container": {
+        "icon": "../../static/img/offspecular/app_polar_matrix.png", 
+        "image": "../../static/img/offspecular/app_polar_matrix_image.png", 
+        "terminals": [
+          { "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": ["data2d.ospec:out" ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [-1,0], 
+            "multiple": false, 
+            "name": "input", 
+            "offsetPosition": {"left": -12, "top": 16}, 
+            "required": true
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": ["data2d.ospec:in"], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [1,0], 
+            "multiple": true, 
+            "name": "output_x", 
+            "offsetPosition": {"right": -16,"top": 4}, 
+            "required": false
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": ["data2d.ospec:in"], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [1,0], 
+            "multiple": true, 
+            "name": "output_y", 
+            "offsetPosition": {"right": -16, "top": 40}, 
+            "required": false
+          }
+        ], 
+        "xtype": "AutosizeImageContainer"
+      }, 
+      "fields": [], 
+      "name": "Slice Data"
     }, 
     {
       "container": {
