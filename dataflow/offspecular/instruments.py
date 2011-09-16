@@ -30,6 +30,7 @@ if SERVER:
     from DATAFLOW.dataflow.offspecular.modules.load_timestamps import load_timestamp_module
     from DATAFLOW.dataflow.offspecular.modules.empty_qxqz_grid import empty_qxqz_grid_module
     from DATAFLOW.dataflow.offspecular.modules.mask_data import mask_data_module
+    from DATAFLOW.dataflow.offspecular.modules.slice_data import slice_data_module
     from DATAFLOW.reduction.offspecular.filters import *
     from DATAFLOW.reduction.offspecular.he3analyzer import *
     from DATAFLOW.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
@@ -57,6 +58,7 @@ elif TESTING:
     from dataflow.dataflow.offspecular.modules.load_timestamps import load_timestamp_module
     from dataflow.dataflow.offspecular.modules.empty_qxqz_grid import empty_qxqz_grid_module
     from dataflow.dataflow.offspecular.modules.mask_data import mask_data_module
+    from dataflow.dataflow.offspecular.modules.slice_data import slice_data_module
     from dataflow.reduction.offspecular.filters import *
     from dataflow.reduction.offspecular.he3analyzer import *
     from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
@@ -81,6 +83,7 @@ else:
     from ..offspecular.modules.load_timestamps import load_timestamp_module
     from ..offspecular.modules.empty_qxqz_grid import empty_qxqz_grid_module
     from ..offspecular.modules.mask_data import mask_data_module
+    from ..offspecular.modules.slice_data import slice_data_module
     from ...reduction.offspecular.filters import *
     from ...reduction.offspecular.he3analyzer import *
     from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray
@@ -196,6 +199,21 @@ def mask_action(input=[], xmin="0", xmax="", ymin="0", ymax="", **kwargs):
     return dict(output=MaskData().apply(input, xmin, xmax, ymin, ymax))
 mask_data = mask_data_module(id='ospec.mask', datatype=OSPEC_DATA, version='1.0', action=mask_action)
 
+# Slice module
+def slice_action(input=[], **kwargs):
+    print "slicing"
+    output = SliceNormData().apply(input)
+    
+    if type(input) == types.ListType:
+        xslice = []
+        yslice = []
+        for i in xrange(len(input)):
+            xslice.append(output[i][0])
+            yslice.append(output[i][1])
+    else:
+        xslice, yslice = output
+    return dict(output_x = xslice, output_y = yslice)
+slice_data = slice_data_module(id='ospec.slice', datatype=OSPEC_DATA, version='1.0', action=slice_action) 
 
 # Wiggle module
 def wiggle_action(input=[], amp=0.14, **kwargs):
@@ -299,7 +317,7 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                  name='NCNR ANDR',
                  archive=config.NCNR_DATA + '/andr',
                  menu=[('Input', [load, load_he3, load_stamp, save]),
-                       ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, theta_two_theta_qxqz, two_theta_lambda_qxqz, empty_qxqz, mask_data]),
+                       ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, theta_two_theta_qxqz, two_theta_lambda_qxqz, empty_qxqz, mask_data, slice_data]),
                        ('Polarization reduction', [timestamp, append_polarization, combine_polarized, correct_polarized]),
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],
