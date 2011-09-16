@@ -85,7 +85,7 @@ class EmptyQxQzGrid(MetaArray):
         creation_story = subtype.__name__
         creation_story += "({0}, {1}, {2}, {3}, {4}, {5})".format(qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)
         info = [
-            {"name": "qX", "units": "inv. frakking Angstroms", "values": linspace(qxmin, qxmax, qxbins) },
+            {"name": "qx", "units": "inv. frakking Angstroms", "values": linspace(qxmin, qxmax, qxbins) },
             {"name": "qz", "units": "inv. Angstroms", "values": linspace(qzmin, qzmax, qzbins) },
             {"name": "Measurements", "cols": [
                     {"name": "counts"},
@@ -249,7 +249,22 @@ class CoordinateOffset(Filter2D):
                 pass
         new_data = MetaArray(data.view(ndarray).copy(), info=new_info)
         return new_data
-               
+
+class MaskData(Filter2D):
+    """ set all data, normalization to zero within mask """
+    
+    @autoApplyToList
+    @updateCreationStory
+    def apply(self, data, xmin=None, xmax=None, ymin=None, ymax=None):
+        for item in [xmin, xmax, ymin, ymax]:
+            if item == "": item = None
+            else: item = int(item)
+        dataslice = (slice(xmin, xmax), slice(ymin, ymax))
+        new_data = MetaArray(data.view(ndarray).copy(), info=data.infoCopy())
+        new_data[dataslice] = 0
+        return new_data
+        
+              
 class WiggleCorrection(Filter2D):
     """ 
     Remove the oscillatory artifact from the Brookhaven 2D detector data
