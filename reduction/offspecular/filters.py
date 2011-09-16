@@ -85,7 +85,7 @@ class EmptyQxQzGrid(MetaArray):
         creation_story = subtype.__name__
         creation_story += "({0}, {1}, {2}, {3}, {4}, {5})".format(qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)
         info = [
-            {"name": "qx", "units": "inv. Angstroms", "values": linspace(qxmin, qxmax, qxbins) },
+            {"name": "qX", "units": "inv. frakking Angstroms", "values": linspace(qxmin, qxmax, qxbins) },
             {"name": "qz", "units": "inv. Angstroms", "values": linspace(qzmin, qzmax, qzbins) },
             {"name": "Measurements", "cols": [
                     {"name": "counts"},
