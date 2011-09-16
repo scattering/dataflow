@@ -62,6 +62,54 @@ class FilterableMetaArray(MetaArray):
         return subarr
 
     def get_plottable(self):
+        if len(self.shape) == 3:
+            return self.get_plottable_2d()
+        elif len(self.shape) == 2:
+            return self.get_plottable_1d()
+        else:
+            print "can only handle 1d or 2d data"
+            return 
+            
+    def get_plottable_1d(self):
+        array_out = self['Measurements':'counts']
+        y = array_out.tolist()
+        cols = self._info[1]['cols']
+        error_col = next((i for i in xrange(len(cols)) if cols[i]['name'] == 'error'), -1)
+        if error_col > 0:
+            yerror = self['Measurements':'error'].tolist()
+        else:
+            yerror = [0,] * len(y)
+        x = self._info[0]['values'].tolist()
+        xlabel = self._info[0]['name']
+        ylabel = 'counts'
+        plottable_data = {
+            'type': 'nd',
+            'title': 'Offspecular summed Data',
+
+            'clear_existing': False,
+            'orderx': [{'key': xlabel, 'label': xlabel }],
+            'ordery': [{'key': ylabel, 'label': ylabel }],
+            'series': [
+                {
+                    'label': 'File 1',
+                    'data': {
+                        xlabel : {
+                            'values': x,
+                            'errors': [0,] * len(x),
+                            },
+                        ylabel : {
+                            'values': y,
+                            'errors': yerror,
+                            },
+                        },
+                    'color': 'Red',
+                    'style': 'line',
+                    },
+                ]
+            };
+        return simplejson.dumps(plottable_data,sort_keys=True, indent=2)
+            
+    def get_plottable_2d(self):
         array_out = self['Measurements':'counts']
         z = [array_out.tolist()]
         #zbin_base64 = base64.b64encode(array_out.tostring())
