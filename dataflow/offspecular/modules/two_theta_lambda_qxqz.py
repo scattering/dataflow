@@ -42,10 +42,10 @@ def two_theta_lambda_qxqz_module(id=None, datatype=None, action=None,
     ]
     
     theta_field = {
-        "type":"float",
+        "type":"string",
         "label": "Sample angle (theta)",
         "name": "theta",
-        "value": 5.0,
+        "value": "",
     }
 
     # Combine everything into a module.
