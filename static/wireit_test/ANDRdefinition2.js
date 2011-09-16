@@ -655,8 +655,8 @@ var andr2 = {
         {
           "label": "Sample angle (theta)", 
           "name": "theta", 
-          "type": "float", 
-          "value": 0.0
+          "type": "string", 
+          "value": ""
         }
       ], 
       "name": "Two theta lambda to qxqz"
