@@ -29,6 +29,7 @@ if SERVER:
     from DATAFLOW.dataflow.offspecular.modules.timestamps import timestamp_module
     from DATAFLOW.dataflow.offspecular.modules.load_timestamps import load_timestamp_module
     from DATAFLOW.dataflow.offspecular.modules.empty_qxqz_grid import empty_qxqz_grid_module
+    from DATAFLOW.dataflow.offspecular.modules.mask_data import mask_data_module
     from DATAFLOW.reduction.offspecular.filters import *
     from DATAFLOW.reduction.offspecular.he3analyzer import *
     from DATAFLOW.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
@@ -55,6 +56,7 @@ elif TESTING:
     from dataflow.dataflow.offspecular.modules.timestamps import timestamp_module
     from dataflow.dataflow.offspecular.modules.load_timestamps import load_timestamp_module
     from dataflow.dataflow.offspecular.modules.empty_qxqz_grid import empty_qxqz_grid_module
+    from dataflow.dataflow.offspecular.modules.mask_data import mask_data_module
     from dataflow.reduction.offspecular.filters import *
     from dataflow.reduction.offspecular.he3analyzer import *
     from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
@@ -78,6 +80,7 @@ else:
     from ..offspecular.modules.timestamps import timestamp_module
     from ..offspecular.modules.load_timestamps import load_timestamp_module
     from ..offspecular.modules.empty_qxqz_grid import empty_qxqz_grid_module
+    from ..offspecular.modules.mask_data import mask_data_module
     from ...reduction.offspecular.filters import *
     from ...reduction.offspecular.he3analyzer import *
     from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray
