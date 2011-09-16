@@ -190,7 +190,7 @@ def offset_action(input=[], offsets={}, **kwargs):
     return dict(output=CoordinateOffset().apply(input, offsets=offsets))
 offset = offset_module(id='ospec.offset', datatype=OSPEC_DATA, version='1.0', action=offset_action)
 
-# Offset module
+# Mask module
 def mask_action(input=[], xmin="0", xmax="", ymin="0", ymax="", **kwargs):
     print "masking"
     return dict(output=MaskData().apply(input, xmin, xmax, ymin, ymax))

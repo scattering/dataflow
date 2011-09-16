@@ -777,7 +777,7 @@ var andr2 = {
           }
         ],  
         "width": 150, 
-        "xtype": "AutosizeImageContainer",
+        "xtype": "WireIt.Container",
       }, 
       "fields": [
         {

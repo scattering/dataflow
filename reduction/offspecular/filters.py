@@ -256,10 +256,10 @@ class MaskData(Filter2D):
     @autoApplyToList
     @updateCreationStory
     def apply(self, data, xmin=None, xmax=None, ymin=None, ymax=None):
-        for item in [xmin, xmax, ymin, ymax]:
-            if item == "": item = None
-            else: item = int(item)
-        dataslice = (slice(xmin, xmax), slice(ymin, ymax))
+        xmin, xmax, ymin, ymax = [s for s in [xmin, xmax, ymin, ymax] if s!="" else None]
+        def sanitize (item):
+            return int(item) if item != "" else None
+        dataslice = (slice(sanitize(xmin), sanitize(xmax)), slice(sanitize(ymin), sanitize(ymax)))
         new_data = MetaArray(data.view(ndarray).copy(), info=data.infoCopy())
         new_data[dataslice] = 0
         return new_data
