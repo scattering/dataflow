@@ -58,6 +58,62 @@ var andr2 = {
       ], 
       "name": "Load"
     }, 
+    {"container": {
+        "height": 16, 
+        "image": "", 
+        "terminals": [
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:in"
+              ], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "right": -16, 
+              "top": 1
+            }, 
+            "required": false
+          }
+        ], 
+        "width": 120, 
+        "xtype": "WireIt.Container"
+      }, 
+      "fields": [
+        {
+          "label": "Files", 
+          "name": "files", 
+          "type": "[file]", 
+          "value": []
+        }, 
+        {
+          "label": "Center Pixel", 
+          "name": "center_pixel", 
+          "type": "float", 
+          "value": 145.0,
+        }, 
+        {
+          "label": "Wavelength over Time-of-Flight", 
+          "name": "wl_over_tof", 
+          "type": "scientific", 
+          "value": 1.9050372144288577e-5,
+        }, 
+        {
+          "label": "Pixel width/distance (to sample)", 
+          "name": "pixel_width_over_dist", 
+          "type": "float", 
+          "value":  0.00034113856493630764,
+        },
+      ], 
+      "name": "LoadAsterix"
+    }, 
     {
       "container": {
         "height": 16, 
@@ -607,27 +663,7 @@ var andr2 = {
               "top": 4
             }, 
             "required": true
-          }, 
-          {
-            "alwaysSrc": false, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:out"
-              ], 
-              "type": "data2d.ospec:in"
-            }, 
-            "direction": [
-              -1, 
-              0
-            ], 
-            "multiple": false, 
-            "name": "output_grid", 
-            "offsetPosition": {
-              "left": -12, 
-              "top": 40
-            }, 
-            "required": false
-          }, 
+          },  
           {
             "alwaysSrc": true, 
             "ddConfig": {
@@ -650,13 +686,49 @@ var andr2 = {
           }
         ], 
         "xtype": "AutosizeImageContainer"
-      }, 
+      },
       "fields": [
         {
           "label": "Sample angle (theta)", 
           "name": "theta", 
           "type": "string", 
           "value": ""
+        },
+        {
+          "label": "Qx min", 
+          "name": "qxmin", 
+          "type": "float", 
+          "value": -0.0030000000000000001
+        }, 
+        {
+          "label": "Qx max", 
+          "name": "qxmax", 
+          "type": "float", 
+          "value": 0.0030000000000000001
+        }, 
+        {
+          "label": "Qx bins", 
+          "name": "qxbins", 
+          "type": "int", 
+          "value": 201
+        }, 
+        {
+          "label": "Qz min", 
+          "name": "qzmin", 
+          "type": "float", 
+          "value": 0.0
+        }, 
+        {
+          "label": "Qz max", 
+          "name": "qzmax", 
+          "type": "float", 
+          "value": 0.10000000000000001
+        }, 
+        {
+          "label": "Qz bins", 
+          "name": "qzbins", 
+          "type": "int", 
+          "value": 201
         }
       ], 
       "name": "Two theta lambda to qxqz"
@@ -1132,22 +1204,89 @@ var andr2 = {
 
 SaveContainer = function(opts, layer) {
     SaveContainer.superclass.constructor.call(this, opts, layer);
-    var content = document.createElement('div')
-    content.innerHTML = 'Click here to save:';
-    var saveButton = document.createElement('img');
-    saveButton.src = this.image;
-    content.appendChild(saveButton);    
+    
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    var content = document.createElement('div');
+    content.innerHTML = '';
+    //var saveButton = document.createElement('img');
+    var saveButton = document.createElement('button');
+    saveButton.value = 'save';
+    saveButton.innerHTML = 'Save';
+    //saveButton.src = this.image;
+    content.appendChild(saveButton); 
+    
+//    var getCSVForm = document.createElement('form');
+//    getCSVForm.method = "post";
+//    getCSVForm.action="getCSV/";
+//    getCSVForm.id = 'narf';
+//    var csrf_div = document.createElement('div');
+//    csrf_div.style = "display:none";
+//    var csrf_input = document.createElement('input');
+//    csrf_input.type = "hidden";
+//    csrf_input.name = "csrfmiddlewaretoken";
+//    csrf_input.value = getCookie('csrftoken');
+//    csrf_div.appendChild(csrf_input);
+//    getCSVForm.appendChild(csrf_div);
+//    var data_input = document.createElement('input');
+//    data_input.type = 'hidden';
+//    data_input.id = 'data';
+//    data_input.name = 'data';
+//    getCSVForm.appendChild(data_input);
+//    var outfilename = document.createElement('input');
+//    outfilename.type='text';
+//    outfilename.id = 'outfilename';
+//    outfilename.value = 'data.csv';
+//    getCSVForm.appendChild(outfilename);
+    
+    var getCSVButton = document.createElement('button');
+    //getCSVButton.type = 'submit';
+    getCSVButton.value = 'getCSV';
+    getCSVButton.innerHTML = 'download CSV';
+    //saveButton.src = this.image;
+    //getCSVForm.appendChild(getCSVButton); 
+    //content.appendChild(getCSVForm);
+    content.appendChild(getCSVButton);
+      
     this.setBody(content);
+    this.CSVForm = getCSVForm;
 
     YAHOO.util.Event.addListener(saveButton, 'click', this.Save, this, true);
+    YAHOO.util.Event.addListener(getCSVButton, 'click', this.getCSV, this, true);
 };
 
 YAHOO.lang.extend(SaveContainer, WireIt.Container, {
     xtype: 'SaveContainer',
     Save: function(e) {
         console.log('save click:', e);
-        alert('I am saving!');
-    }
+        alert('save to server not yet implemented.  Try downloading CSV version of data');
+    },
+    getCSV: function(e, f) {
+        var reductionInstance = editor.reductionInstance;
+        var wires = f.wires;
+        if (wires.length == 0) {
+            alert('no data to get (no wires in)');
+            return
+        } else {
+            var wire_in = f.wires[0];
+            clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
+        }
+        editor.getCSV(reductionInstance, clickedOn)
+    },
 });
 
 AutosizeImageContainer = function(opts, layer) {

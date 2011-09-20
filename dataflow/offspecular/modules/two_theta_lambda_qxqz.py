@@ -47,6 +47,42 @@ def two_theta_lambda_qxqz_module(id=None, datatype=None, action=None,
         "name": "theta",
         "value": "",
     }
+    qxmin_field = {
+        "type":"float",
+        "label": "Qx min",
+        "name": "qxmin",
+        "value":-0.003,
+    }
+    qxmax_field = {
+        "type":"float",
+        "label": "Qx max",
+        "name": "qxmax",
+        "value": 0.003,
+    }
+    qxbins_field = {
+        "type":"int",
+        "label": "Qx bins",
+        "name": "qxbins",
+        "value": 201,
+    }
+    qzmin_field = {
+        "type":"float",
+        "label": "Qz min",
+        "name": "qzmin",
+        "value": 0.0,
+    }
+    qzmax_field = {
+        "type":"float",
+        "label": "Qz max",
+        "name": "qzmax",
+        "value": 0.1,
+    }
+    qzbins_field = {
+        "type":"int",
+        "label": "Qz bins",
+        "name": "qzbins",
+        "value": 201,
+    }
 
     # Combine everything into a module.
     module = Module(id=id,
@@ -55,7 +91,7 @@ def two_theta_lambda_qxqz_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[theta_field] + fields,
+                  fields=[theta_field, qxmin_field, qxmax_field, qxbins_field, qzmin_field, qzmax_field, qzbins_field] + fields,
                   action=action,
                   )
 

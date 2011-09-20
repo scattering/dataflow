@@ -287,6 +287,175 @@
 		    } 
 		},
 		
+		downloadFiles: function(files) {
+		    console.log('downloading files, someday');
+		},    
+		
+
+		textInputPopup: function(prompt) {
+		    var textInputForm = new Ext.FormPanel( {
+	            //renderTo: Ext.getBody(),
+	            bodyPadding: 5,
+	            width: 300,
+	            autoHeight: true,
+                layout: 'anchor',
+	            id: 'text_input_form',
+	            autodestroy: true,
+	            //defaultType: 'textfield',
+	            submitted: false,
+	            items: [{
+	                xtype: 'textfield',
+                    fieldLabel: prompt,
+                    name: 'text_value',
+                    allowblank: false,
+                }],
+	            buttons: [{
+	                text: 'Submit',
+	                //formBind: true, //only enabled once the form is valid
+	                //disabled: true,
+	                handler: function() {
+	                    var parent_popup = Ext.getCmp('text_input_popup');
+		                parent_popup.submitted = true;
+		                console.log('this inside popup_form', this);
+		                parent_popup.value = this.up().items.items[0].value;
+	                    parent_popup.close();
+		                 
+	                }
+                },{
+		            text: 'Cancel',
+		            handler: function() {
+		                Ext.getCmp('text_input_popup').submitted = false;
+		                Ext.getCmp('text_input_popup').close();
+		                }
+	            },],
+            });
+
+		    if (!Ext.getCmp('text_input_popup')) {
+		        var textPopup = new Ext.Window({
+                    title: 'Text input',
+                    closeable: true,
+                    closeAction: 'hide',
+                    id: 'text_input_popup',
+                    hidden: true,
+                    resizable: true,
+                    //autosize: true,
+                    modal: true,
+                    renderTo: Ext.getBody(),
+                    align: 'center',
+                    submitted: false,
+                    value: '',
+                    });
+            } else {
+                var textPopup = Ext.getCmp('text_input_popup');
+                if (textPopup.items.length > 0) { win.removeAll(); };
+            }
+            
+            textPopup.add(textInputForm);
+            textPopup.doLayout();
+            textPopup.show();
+            console.log(textPopup.submitted, textPopup.value);
+        },
+//            items: [ 
+//            
+//            {xtype: 'form',
+//                //new Ext.FormPanel( {
+//		            //renderTo: Ext.getBody(),
+//		            bodyPadding: 5,
+//		            width: 300,
+//		            autoHeight: true,
+//                    layout: 'anchor',
+//		            id: 'text_input_form',
+//		            autodestroy: true,
+//		            //defaultType: 'textfield',
+//		            submitted: false,
+//		            items: [{
+//		                xtype: 'textfield',
+//                        fieldLabel: 'Enter new value:',
+//                        name: 'text_value',
+//                        allowblank: false,
+//                    }],
+//		            buttons: [{
+//		                text: 'Submit',
+//		                //formBind: true, //only enabled once the form is valid
+//		                //disabled: true,
+//		                handler: function() {
+//		                    var parent_popup = Ext.getCmp('text_input_popup');
+//			                parent_popup.submitted = true;
+//			                parent_popup.value = Ext.getCmp('text_input_form').items.items[0].value;
+//		                    parent_popup.close();
+//			                 
+//		                }
+//	                },{
+//			            text: 'Cancel',
+//			            handler: function() {
+//			                Ext.getCmp('text_input_popup').submitted = false;
+//			                Ext.getCmp('text_input_popup').close();
+//			                }
+//		            },],
+//	            //});
+//	            },
+//            ]
+//            }),		        		
+		
+		
+		// added 9/20/11, Maranville
+		// sends current wiring diagram to server as POST, gets data in comma-separated-form as download
+		/**
+		 * @method getCSV
+		 */
+
+		getCSV: function(reductionInstance, clickedOn, outfilename) {
+			var value = this.getValue()
+			var reductionInstance = reductionInstance ? reductionInstance : this.reductionInstance ;
+            if (!outfilename) {
+                var result = {
+                    that: this,
+                    reductionInstance: reductionInstance,
+                    clickedOn: clickedOn,
+                }
+                
+                function process_result(btn, text) {
+                    if (btn == 'ok' && text != ""){
+                        this.that.getCSV(this.reductionInstance, this.clickedOn, text);
+                    } 
+                }
+                
+                Ext.Msg.prompt('Name', 'Filename:', process_result, result, false, '' );
+                return // getCSV ends here... will be called again by process_result if button "ok" pressed
+            }
+            
+			this.toReduce = {
+				name: value.name,
+				modules: value.working.modules,
+				properties: value.working.properties,
+				wires: value.working.wires,
+				language: value.working.language,
+				clickedOn: clickedOn,
+				group: reductionInstance,
+				file_dict: FILE_DICT,
+				outfilename: outfilename,
+			};
+			for (var j in this.toReduce.modules) {
+			    this.toReduce.modules[j].config = this.toReduce.modules[j].config[reductionInstance];
+				//this.toReduce.modules[j].config['files'] = []
+			}
+
+			this.adapter.getCSV(this.toReduce);
+		},
+		
+		getResult: function(result){
+		    tempResult = result;
+		},
+		// PASSING THE WIRE OVER TO THE SERVER, SO WE SHOULD GET BACK ONLY ONE PLOTTABLE OBJECT
+		// NO NEED TO CHECK THE WIRE SOURCE HERE, JUST PLOT WHATEVER YOU GET
+		//downloadResult: function(result) {
+		//	downloadURL = result.URL
+		//	plotid = 'plot';
+		//	toPlot = display
+		//	plottingAPI(toPlot, plotid)
+
+		//},
+		
 		// added 6/21/11, Tracer
 		// sends current wiring diagram to server as POST, gets data to display/plot as a response
 		/**
@@ -297,11 +466,8 @@
 			var value = this.getValue()
 			var reductionInstance = reductionInstance ? reductionInstance : this.reductionInstance ;
 
-			//console.log(value)
-//			while (value.name === "") {
-//				value.name = prompt("Please choose a name for this template:");
-//			}
 			this.toReduce = {
+			    returnType: 'plottable',
 				name: value.name,
 				modules: value.working.modules,
 				properties: value.working.properties,
@@ -326,26 +492,16 @@
 //			}
 			//console.log(this.toReduce)
 			this.adapter.runReduction(this.toReduce, {
-				success: this.runModuleSuccess,
+				success: this.displayResult,
 				failure: this.runModuleFailure,
 				scope: this,
 			});
 		},
 		// PASSING THE WIRE OVER TO THE SERVER, SO WE SHOULD GET BACK ONLY ONE PLOTTABLE OBJECT
 		// NO NEED TO CHECK THE WIRE SOURCE HERE, JUST PLOT WHATEVER YOU GET
-		runModuleSuccess: function(display) {
+		displayResult: function(display) {
 			plotid = 'plot';
 			toPlot = display
-			//console.log(toPlot)
-			//console.log(display)
-			//var toPlot = display[this.wireClickSource].output[0], zipped = [];
-			//if (this.wireClickSource) {
-			//	toPlot = display[this.wireClickSource].output
-			//	}
-			//else {
-			//	toPlot = display[0].output
-			//}
-			//console.log(toPlot)
 			plottingAPI(toPlot, plotid)
 
 		},

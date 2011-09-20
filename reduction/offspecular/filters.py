@@ -7,6 +7,8 @@ from he3analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
 from reduction.formats import load
 import reduction.rebin as reb
 import h5py
+import tempfile
+import subprocess
 
 class Supervisor():
     """ class to hold rebinned_data objects and increment their reference count """
@@ -94,6 +96,28 @@ class EmptyQxQzGrid(MetaArray):
                     {"name": "count_time"}]},
             {'CreationStory': creation_story}]
         data = MetaArray(zeros((qxbins, qzbins, 4)), info=info)
+        return data
+        
+class EmptyQxQzGridPolarized(MetaArray):
+    def __new__(subtype, qxmin, qxmax, qxbins, qzmin, qzmax, qzbins):
+        creation_story = subtype.__name__
+        creation_story += "({0}, {1}, {2}, {3}, {4}, {5})".format(qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)
+        info = [
+            {"name": "qx", "units": "inv. frakking Angstroms", "values": linspace(qxmin, qxmax, qxbins) },
+            {"name": "qz", "units": "inv. Angstroms", "values": linspace(qzmin, qzmax, qzbins) },
+            {"name": "Measurements", "cols": [
+                    {"name": "counts--"},
+                    {"name": "counts-+"},
+                    {"name": "counts+-"},
+                    {"name": "counts++"},
+                    {"name": "monitor--"},
+                    {"name": "monitor-+"},
+                    {"name": "monitor+-"},
+                    {"name": "monitor++"},
+                    {"name": "pixels"},
+                    {"name": "count_time"}]},
+            {'CreationStory': creation_story}]
+        data = MetaArray(zeros((qxbins, qzbins, 10)), info=info)
         return data
     
 def th_2th_combined_dataobj():
@@ -273,9 +297,6 @@ class SliceNormData(Filter2D):
         new_info = data.infoCopy()
         x_axis = new_info[0]
         y_axis = new_info[1]
-        #meas_info = new_info[2]
-        #num_cols = len(meas_info['cols'])
-        #meas_info['cols'].append({"name": "error"})
         
         counts_array = data['Measurements':'counts'].view(ndarray)
         norm_array = data['Measurements':normalization].view(ndarray)
@@ -298,10 +319,30 @@ class SliceNormData(Filter2D):
                     {"name": "counts"},
                     {"name": "error"} ]}
         
-        x_data_obj = MetaArray( x_out, info=[x_axis, col_info, {}] )
-        y_data_obj = MetaArray( y_out, info=[y_axis, col_info, {}] )
+        x_data_obj = MetaArray( x_out, info=[x_axis, col_info, new_info[-1]] )
+        y_data_obj = MetaArray( y_out, info=[y_axis, col_info, new_info[-1]] )
         
         return [x_data_obj, y_data_obj]
+
+class SliceData(Filter2D):
+    """ Sum 2d data along both axes and return 1d datasets """
+    
+    @autoApplyToList
+    def apply(self, data):
+        new_info = data.infoCopy()
+        x_axis = new_info[0]
+        y_axis = new_info[1]
+        col_info = new_info[2]
+        extra_info = new_info[3]
+        
+        x_out = sum(data.view(ndarray), axis=1)
+        y_out = sum(data.view(ndarray), axis=0)
+        
+        x_data_obj = MetaArray( x_out, info=[x_axis, col_info, extra_info] )
+        y_data_obj = MetaArray( y_out, info=[y_axis, col_info, extra_info] )
+        
+        return [x_data_obj, y_data_obj]
+
 
 class WiggleCorrection(Filter2D):
     """ 
@@ -636,10 +677,18 @@ def hdf_to_dict(hdf_obj, convert_i1_tostr=True):
             out_dict[key] = hdf_to_dict(val)
     return out_dict
 
-def LoadAsterixRawHDF(filename, path=None):
+def LoadAsterixRawHDF(filename, path=None, format="HDF5"):
     if path == None:
         path = os.getcwd()
-    hdf_obj = h5py.File(os.path.join(path, filename), mode='r')
+    if format == "HDF4":
+        print "converting hdf4 to hdf5"
+        (tmp_fd, tmp_path) = tempfile.mkstemp() #temporary file for converting to HDF5
+        print tmp_path
+        print 'h4toh5 %s %s' % (os.path.join(path, filename), tmp_path)
+        subprocess.call(['h4toh5',  os.path.join(path, filename), tmp_path])
+        hdf_obj = h5py.File(tmp_path, mode='r')
+    else:
+        hdf_obj = h5py.File(os.path.join(path, filename), mode='r')
     run_title = hdf_obj.keys()[0]
     run_obj = hdf_obj[run_title]
     state = hdf_to_dict(run_obj['ASTERIX'])
@@ -650,31 +699,42 @@ def LoadAsterixRawHDF(filename, path=None):
     creation_story = "LoadAsterixRawHDF('{fn}')".format(fn=filename)
     pol_states = {0:'--', 1:'-+', 2:'+-', 3:'++'}
     output_objs = []
-    for col in range(4):
-        info = [{"name": "tof", "units": "nanoseconds", "values": tof[:-1] },
-            {"name": "xpixel", "units": "pixels", "values": twotheta_pixel[:-1] },
-            {"name": "Measurements", "cols": [
-                    {"name": "counts"},
-                    {"name": "pixels"},
-                    {"name": "monitor"},
-                    {"name": "count_time"}]},
-            {"PolState": pol_states[col], "filename": filename, "start_datetime": None, 
-             "state": state, "CreationStory":creation_story, "path":path}]
-        data_array = zeros((500, 256, 4))
-        data_array[:,:,1] = 1.0 # pixels
-        data_array[:,:,2] = monitor['microamphours_p%d' % (col,)]
-        data_array[:,:,3] = 1.0 # count time
-        data_array[:,:,0] = data[col,:,:]
-        output_objs.append(MetaArray(data_array[:], dtype='float', info=info[:]))
+    #for col in range(4):
+    info = [{"name": "tof", "units": "nanoseconds", "values": tof[:-1] },
+        {"name": "xpixel", "units": "pixels", "values": twotheta_pixel[:-1] },
+        {"name": "Measurements", "cols": [
+                {"name": "counts--"},
+                {"name": "counts-+"},
+                {"name": "counts+-"},
+                {"name": "counts++"},
+                {"name": "monitor--"},
+                {"name": "monitor-+"},
+                {"name": "monitor+-"},
+                {"name": "monitor++"},
+                {"name": "pixels"},
+                {"name": "count_time"}]},
+        {"PolState": '', "filename": filename, "start_datetime": None, 
+         "state": state, "CreationStory":creation_story, "path":path}]
+    data_array = zeros((500, 256, 10))
+    data_array[:,:,-2] = 1.0 # pixels
+
+    data_array[:,:,-1] = 1.0 # count time
+    for i in range(4):
+        data_array[:,:,i] = data[i,:,:]
+        data_array[:,:,i+4] = monitor['microamphours_p%d' % (i,)]
+        #data_array[:,:,0] = data[col,:,:]
+        #output_objs.append(MetaArray(data_array[:], dtype='float', info=info[:]))
+
     hdf_obj.close()
-    return output_objs 
+    #return output_objs 
+    return MetaArray(data_array[:], dtype='float', info=info[:])
 
 
-def SuperLoadAsterixHDF(filename, path=None, center_pixel = 145.0, wl_over_tof=1.9050372144288577e-5, pixel_width_over_dist = 0.0195458*pi/180.):
+def SuperLoadAsterixHDF(filename, path=None, center_pixel = 145.0, wl_over_tof=1.9050372144288577e-5, pixel_width_over_dist = 0.0195458*pi/180., format="HDF5"):
     """ loads an Asterix file and does the most common reduction steps, 
     giving back a length-4 list of data objects in twotheta-wavelength space,
     with the low-tof region shifted to the high-tof region """
-    data_objs = LoadAsterixRawHDF(filename, path)
+    data_objs = LoadAsterixRawHDF(filename, path, format)
     tth_converted = AsterixPixelsToTwotheta().apply(data_objs, qzero_pixel=center_pixel, pw_over_d=pixel_width_over_dist)
     wl_converted = AsterixTOFToWavelength().apply(tth_converted, wl_over_tof=wl_over_tof)
     shifted = AsterixShiftData().apply(wl_converted, edge_bin=180)
@@ -1047,11 +1107,19 @@ class TwothetaLambdaToQxQz(Filter2D):
     
     @autoApplyToList
     #@updateCreationStory
-    def apply(self, data, output_grid=None, theta=None):
-        if output_grid == None:
-            output_grid = EmptyQxQzGrid(*self.default_qxqz_gridvals)
-        else:
-            output_grid = deepcopy(output_grid)
+    def apply(self, data, theta=None, qxmin=None, qxmax=None, qxbins=None, qzmin=None, qzmax=None, qzbins=None):
+        info = [{"name": "qx", "units": "inv. Angstroms", "values": linspace(qxmin, qxmax, qxbins) },
+                {"name": "qz", "units": "inv. Angstroms", "values": linspace(qzmin, qzmax, qzbins) },]
+        old_info = data.infoCopy()
+        info.append(old_info[2]) # column information!
+        info.append(old_info[3]) # creation story!
+        output_grid = MetaArray(zeros((qxbins, qzbins, data.shape[-1])), info=info)
+        
+        
+        #if output_grid == None:
+        #    output_grid = EmptyQxQzGrid(*self.default_qxqz_gridvals)
+        #else:
+        #    output_grid = deepcopy(output_grid)
             
         if (theta == "") or (theta == None):
             if 'state' in data._info[-1]:

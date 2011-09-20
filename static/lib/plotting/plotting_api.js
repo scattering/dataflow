@@ -821,7 +821,7 @@ function updateSeriesSelects(toPlot, plotid) {
                 if (!toPlot.series[s].data.hasOwnProperty(key))
                     throw "Quantity '" + key + "' is undefined in series '" + toPlot.series[s].label + "', but is expected from '" + order + "'";
             }
-            console.log(key,label);
+            console.log("updating series selects", key,label);
             // Append a new <option> for this quantity to the <select> element
             jQuery(orders[order]).append(jQuery('<option />', { value: key, text: label }));
         }

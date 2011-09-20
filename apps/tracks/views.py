@@ -26,7 +26,7 @@ from ...apps.fileview import testftp
 
 #from ...dataflow import wireit
 from ...dataflow.calc import run_template
-from ...dataflow.calc import calc_single, fingerprint_template, get_plottable
+from ...dataflow.calc import calc_single, fingerprint_template, get_plottable, get_csv
 from ...dataflow.offspecular.instruments import ANDR
 print "ANDR imported: ", ANDR.id
 from ...dataflow.SANS.novelinstruments import SANS_INS
@@ -180,6 +180,54 @@ def saveWiring(request):
 
 def get_filepath_by_hash(fh):
     return File.objects.get(name=str(fh)).location + str(fh)
+
+#import redis
+#server = redis.Redis()
+
+#@csrf_exempt
+#def getFromRedis(hashval):
+#    result = server.lrange(hashval, 0, -1)
+#    response = HttpResponse(result[0], mimetype='text/csv')
+#    response['Content-Disposition'] = 'attachment; filename=somefilename.csv'
+#    return response
+
+
+def getCSV(request):
+    print 'IN RUN REDUCTION: getting CSV'
+    data = simplejson.loads(request.POST['data'])
+    print 'IN RUN REDUCTION: getting CSV'
+    config = {}
+    bad_headers = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
+    for i, m in enumerate(data['modules']):
+        conf = {}
+        for key, value in m.get('config', {}).items():
+            if key == 'files':
+                file_hashes = [data['file_dict'][f] for f in m['config']['files']]
+                file_paths = [get_filepath_by_hash(fh) for fh in file_hashes]
+                conf.update({'files': file_paths})
+            elif key not in bad_headers:
+                conf.update({key: value})
+        config.update({i:conf})
+    context = RequestContext(request)
+    terminal_id = data['clickedOn']['source']['terminal']
+    nodenum = int(data['clickedOn']['source']['moduleId'])
+    print "calculating: terminal=%s, nodenum=%d" % (terminal_id, nodenum)
+    language = data['language']
+    instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS}
+    instrument = instrument_by_language.get(language, None)
+    result = ['{}']
+    if instrument is not None:
+        template = wireit.wireit_diagram_to_template(data, instrument)
+        # configuration for template is embedded
+        print "getting result"
+        result = get_csv(template, config, nodenum, terminal_id)[0]
+        #response = HttpResponse(simplejson.dumps({'redis_key': result}))
+    #print simplejson.dumps({'redis_key': result[0][:800]})
+    outfilename = data.get('outfilename', 'data.csv')
+    response = HttpResponse(result, mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=%s' % (outfilename,)
+    #response['Content-Disposition'] = 'attachment; filename=somefilename.csv'
+    return response
 
 #@csrf_exempt 
 def runReduction(request):

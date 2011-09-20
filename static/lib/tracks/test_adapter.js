@@ -37,6 +37,11 @@ WireIt.WiringEditor.adapters.tracks = {
 			method: 'POST',
 			url: 'runReduction/'
 		},
+		
+		getCSV: {
+		    method: 'POST',
+		    url: 'getCSV/',
+		},
 	},
 	
 	init: function() {
@@ -59,6 +64,39 @@ WireIt.WiringEditor.adapters.tracks = {
 		this._sendRequest("runReduction", val, callbacks);
 	},
 	
+	getCSV: function(val) {
+		var wiring = {};
+		YAHOO.lang.augmentObject(wiring, val);
+		var postData = 'data=' + YAHOO.lang.JSON.stringify(val);
+		var download_form = document.getElementById('getCSVForm');
+		download_form.data.value = YAHOO.lang.JSON.stringify(val);
+		download_form.submit()
+	},
+	
+	
+	_downloadRequest: function(action, value, callbacks) {
+	    var postData = 'data=' + YAHOO.lang.JSON.stringify(value);
+		
+		var url = "";
+		if( YAHOO.lang.isFunction(this.config[action].url) ) {
+			url = this.config[action].url(value);
+		}
+		else {
+			url = this.config[action].url;
+		}
+		var method = "";
+		if( YAHOO.lang.isFunction(this.config[action].url) ) {
+			method = this.config[action].method(value);
+		}
+		else {
+			method = this.config[action].method;
+		}
+		var download_form = document.getElementById('getCSVForm');
+		download_form.data.value = YAHOO.lang.JSON.stringify(value);
+		download_form.submit()
+        //YAHOO.util.Connect.initHeader('X-CSRFToken', getCookie('csrftoken'));
+		//YAHOO.util.Connect.asyncRequest(method, url, {}, postData);
+	},
 	
 	_sendRequest: function(action, value, callbacks) {
 		//value = {"hey":["++","+-"]}

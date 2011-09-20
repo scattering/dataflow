@@ -14,6 +14,7 @@ if SERVER:
     from DATAFLOW.dataflow.calc import run_template, get_plottable, calc_single
     from DATAFLOW.dataflow.core import Data, Instrument, Template, register_instrument
     from DATAFLOW.dataflow.modules.load import load_module
+    from DATAFLOW.dataflow.offspecular.modules.load_asterix import load_asterix_module
     from DATAFLOW.dataflow.modules.save import save_module
     from DATAFLOW.dataflow.offspecular.modules.combine import combine_module
     from DATAFLOW.dataflow.offspecular.modules.autogrid import autogrid_module
@@ -44,6 +45,7 @@ elif TESTING:
     from dataflow.dataflow.modules.load import load_module
     from dataflow.dataflow.modules.save import save_module
     from dataflow.dataflow.offspecular.modules.combine import combine_module
+    from dataflow.dataflow.offspecular.modules.load_asterix import load_asterix_module
     from dataflow.dataflow.offspecular.modules.autogrid import autogrid_module
     from dataflow.dataflow.offspecular.modules.offset import offset_module
     from dataflow.dataflow.offspecular.modules.wiggle import wiggle_module
@@ -67,6 +69,7 @@ else:
     from ..calc import run_template, get_plottable, calc_single
     from ..core import Data, Instrument, Template, register_instrument
     from ..modules.load import load_module
+    from ..offspecular.modules.load_asterix import load_asterix_module
     from ..modules.save import save_module
     from ..offspecular.modules.combine import combine_module
     from ..offspecular.modules.autogrid import autogrid_module
@@ -129,15 +132,29 @@ def load_action(files=[], intent='', auto_PolState=False, PolStates={}, **kwargs
 def _load_data(name, auto_PolState, PolState):
     (dirName, fileName) = os.path.split(name)
     friendlyName = get_friendly_name(fileName)
-    print "Loading:", name, PolState
-    andr_endings = ['cg1', 'ca1', 'cb1', 'cc1', 'cd1']
-    if friendlyName[-3:] in andr_endings:
-        return LoadICPData(fileName, path=dirName, auto_PolState=auto_PolState, PolState=PolState)
-    elif friendlyName[-3:] == 'dat':
-        return LoadAsterixData(fileName, path=dirName)
-    elif friendlyName[-3:] == '.h5':
-        return SuperLoadAsterixHDF(fileName, path=dirName)
+    return LoadICPData(fileName, path=dirName, auto_PolState=auto_PolState, PolState=PolState)
 
+
+def load_asterix_action(files=[], center_pixel = 145.0, wl_over_tof=1.9050372144288577e-5, pixel_width_over_dist =0.00034113856493630764, **kwargs):
+    result = []
+    for f in files:
+        subresult = _load_asterix_data(f, center_pixel, wl_over_tof, pixel_width_over_dist)
+        if type(subresult) == types.ListType:
+            result.extend(subresult)
+        else:
+            result.append(subresult)   
+    #result = [_load_data(f, auto_PolState, PolStates.get(get_friendly_name(os.path.split(f)[-1]), '')) for f in files] # not bundles
+    return dict(output=result)
+    
+def _load_asterix_data(name, center_pixel, wl_over_tof, pixel_width_over_dist):
+    (dirName, fileName) = os.path.split(name)
+    friendlyName = get_friendly_name(fileName)
+    if friendlyName.endswith('hdf'):
+        format = "HDF4"
+    else: #h5
+        format = "HDF5"
+    return SuperLoadAsterixHDF(fileName, path=dirName, center_pixel=center_pixel, wl_over_tof=wl_over_tof, pixel_width_over_dist=pixel_width_over_dist, format=format )
+    
 auto_PolState_field = {
         "type":"boolean",
         "label": "Auto-polstate",
@@ -153,6 +170,8 @@ PolStates_field = {
 load = load_module(id='ospec.load', datatype=OSPEC_DATA,
                    version='1.0', action=load_action, fields=[auto_PolState_field, PolStates_field])
 
+load_asterix = load_asterix_module(id='ospec.load_asterix', datatype=OSPEC_DATA,
+                   version='1.0', action=load_asterix_action)
 
 # Save module
 def save_action(input=[], ext=None, **kwargs):
@@ -202,7 +221,7 @@ mask_data = mask_data_module(id='ospec.mask', datatype=OSPEC_DATA, version='1.0'
 # Slice module
 def slice_action(input=[], **kwargs):
     print "slicing"
-    output = SliceNormData().apply(input)
+    output = SliceData().apply(input)
     
     if type(input) == types.ListType:
         xslice = []
@@ -229,12 +248,9 @@ def pixels_two_theta_action(input=[], pixels_per_degree=80.0, qzero_pixel=309, i
 pixels_two_theta = pixels_two_theta_module(id='ospec.twotheta', datatype=OSPEC_DATA, version='1.0', action=pixels_two_theta_action)
 
 # Two theta Lambda to qxqz module
-def two_theta_lambda_qxqz_action(input=[], output_grid=None, theta=None, **kwargs):
+def two_theta_lambda_qxqz_action(input=[], theta=None, qxmin= -0.003, qxmax=0.003, qxbins=201, qzmin=0.0, qzmax=0.1, qzbins=201,**kwargs):
     print "converting two theta and lambda to qx and qz"
-    grid = None
-    if output_grid != None:
-        grid = output_grid[0]
-    result = TwothetaLambdaToQxQz().apply(input, output_grid=grid, theta=theta)
+    result = TwothetaLambdaToQxQz().apply(input, theta, qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)
     return dict(output=result)
 two_theta_lambda_qxqz = two_theta_lambda_qxqz_module(id='ospec.tth_wl_qxqz', datatype=OSPEC_DATA, version='1.0', action=two_theta_lambda_qxqz_action)
 
@@ -251,7 +267,7 @@ theta_two_theta_qxqz = theta_two_theta_qxqz_module(id='ospec.th_tth_qxqz', datat
 
 def empty_qxqz_grid_action(qxmin= -0.003, qxmax=0.003, qxbins=201, qzmin=0.0, qzmax=0.1, qzbins=201, **kwargs):
     print "creating an empty QxQz grid"
-    return dict(output=[EmptyQxQzGrid(qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)])
+    return dict(output=[EmptyQxQzGridPolarized(qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)])
 empty_qxqz = empty_qxqz_grid_module(id='ospec.emptyqxqz', datatype=OSPEC_DATA, version='1.0', action=empty_qxqz_grid_action)
 
 
@@ -316,7 +332,7 @@ timestamp = timestamp_module(id='ospec.timestamp', datatype=OSPEC_DATA,
 ANDR = Instrument(id='ncnr.ospec.andr',
                  name='NCNR ANDR',
                  archive=config.NCNR_DATA + '/andr',
-                 menu=[('Input', [load, load_he3, load_stamp, save]),
+                 menu=[('Input', [load, load_asterix, load_he3, load_stamp, save]),
                        ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, theta_two_theta_qxqz, two_theta_lambda_qxqz, empty_qxqz, mask_data, slice_data]),
                        ('Polarization reduction', [timestamp, append_polarization, combine_polarized, correct_polarized]),
                        ],

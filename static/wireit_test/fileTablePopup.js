@@ -22,6 +22,8 @@ with multiple groups
 // list for holding the stores for each file type
 storeList = []
 gridList = []
+function cmp(a,b) { if (a[1] < b[1]) {return -1}; if (a[1] > b[1]) {return 1}; return 0}
+fileList.sort(cmp);
 
 if (moduleConfigs) {
 	console.log('TEMPLATE HAS FILE CONFIGS')

@@ -28,7 +28,8 @@ var andr2 = {
           }
         ], 
         "width": 120, 
-        "xtype": "WireIt.Container"
+        "xtype": "WireIt.Container",
+        //"xtype": "LoadContainer",
       }, 
       "fields": [
         {
@@ -138,7 +139,7 @@ var andr2 = {
     }, 
     {
       "container": {
-        "height": 16, 
+        "height": 16,
         "image": "../../static/img/offspecular/save_image.png", 
         "terminals": [
           {
@@ -161,8 +162,8 @@ var andr2 = {
             }, 
             "required": true
           }
-        ], 
-        "width": 120, 
+        ],
+        "width": 120,
         "xtype": "SaveContainer"
       }, 
       "fields": [
@@ -227,7 +228,7 @@ var andr2 = {
             "required": false
           }
         ], 
-        "xtype": "WireIt.ImageContainer"
+        "xtype": "AutosizeImageContainer"
       }, 
       "fields": [
         {
@@ -311,7 +312,7 @@ var andr2 = {
             "required": false
           }
         ], 
-        "xtype": "WireIt.ImageContainer"
+        "xtype": "AutosizeImageContainer"
       }, 
       "fields": [], 
       "name": "Combine"
@@ -362,7 +363,7 @@ var andr2 = {
             "required": false
           }
         ], 
-        "xtype": "WireIt.ImageContainer"
+        "xtype": "AutosizeImageContainer"
       }, 
       "fields": [
         {
@@ -423,7 +424,7 @@ var andr2 = {
             "required": false
           }
         ], 
-        "xtype": "WireIt.ImageContainer"
+        "xtype": "AutosizeImageContainer"
       }, 
       "fields": [
         {
@@ -481,7 +482,7 @@ var andr2 = {
             "required": false
           }
         ], 
-        "xtype": "WireIt.ImageContainer"
+        "xtype": "AutosizeImageContainer"
       }, 
       "fields": [
         {
@@ -571,7 +572,7 @@ var andr2 = {
             "required": false
           }
         ], 
-        "xtype": "WireIt.ImageContainer"
+        "xtype": "AutosizeImageContainer"
       }, 
       "fields": [
         {
@@ -718,7 +719,7 @@ var andr2 = {
             "required": false
           }
         ], 
-        "xtype": "WireIt.ImageContainer"
+        "xtype": "AutosizeImageContainer"
       }, 
       "fields": [
         {
@@ -796,10 +797,10 @@ var andr2 = {
             "required": false
           }
         ], 
-        "xtype": "WireIt.ImageContainer"
+        "xtype": "AutosizeImageContainer"
       }, 
       "fields": [], 
-      "name": "Append polarization matrix"
+      "name": "Append polarization matrix",
     }, 
     {
       "container": {
@@ -867,7 +868,7 @@ var andr2 = {
             "required": false
           }
         ], 
-        "xtype": "WireIt.ImageContainer"
+        "xtype": "AutosizeImageContainer"
       }, 
       "fields": [], 
       "name": "Combine polarized"
@@ -918,7 +919,7 @@ var andr2 = {
             "required": false
           }
         ], 
-        "xtype": "WireIt.ImageContainer"
+        "xtype": "AutosizeImageContainer"
       }, 
       "fields": [
         {
@@ -995,18 +996,22 @@ var andr2 = {
         
       	   {
 	      "name": "LoadContainer",
+	      "fields": [   {"label": "Intent", "name": "intent", "type": "string", "value": "" }, 
+                        {"label": "LoadContainer extension", "name": "ext", "type": "[string]", "value": "" } ],
 			"category": "form",
-	      "container": {
+	        "container": {
 	   		"xtype": "LoadContainer",
 	   		"width": 250,
+	   		"terminals": [{"alwaysSrc": true, "ddConfig": {"allowedTypes": ["data2d.ospec:in"],"type": "data2d.ospec:out"}, "direction": [1,0],"multiple": true, 
+            "name": "output", "offsetPosition": {"right": -16, "top": 1}, "required": false}], 
 	   		"title": "Files",    
 	   		"icon": "",
 
 	   		"collapsible": true,
-	   		"fields": [ 
-	   			{"type": "select", "label": "Files", "name": "files", "selectValues": [] },
-	   			{"type":"file", "label":"upload more files", "size": 25}
-	   		],
+	   		//"fields": [ 
+	   		//	{"type": "select", "label": "Files", "name": "files", "selectValues": [] },
+	   		//	{"type":"file", "label":"upload more files", "size": 25}
+	   		//],
 	   		"legend": "Associated files"
 	   	}
 	   },
@@ -1028,36 +1033,164 @@ var andr2 = {
   ]
 };
 
+AutosizeImageContainer = function(opts, layer) {
+    AutosizeImageContainer.superclass.constructor.call(this, opts, layer);
+    var that = this;
+
+    function auto_space(number, width) {
+        // takes a number and places it in the width evenly
+        var locs = [];
+        if (number == 1) {
+            locs.push(Math.round(width / 2));
+        } else {
+            var spacing = width / (number-1);
+            for (var i=0; i<number; i++) {
+                locs.push(Math.round(i*spacing));
+            }
+        }  
+        return locs;
+    }
+    
+    function distribute_terminals(terminals, width, height) {
+        var locs = [];
+        var directions = {
+            'left': {'fit_axis':'top', 'range': width, 'test': function(el) { return el.direction[0] < 0 } },
+            'right': {'fit_axis':'top', 'range': width, 'test': function(el) { return el.direction[0] > 0 } },
+            'top': {'fit_axis':'left', 'range': height, 'test': function(el) { return el.direction[1] < 0 } },
+            'bottom': {'fit_axis':'left', 'range': height, 'test': function(el) { return el.direction[1] > 0 } },
+        }
+        
+        for (var d in directions) {
+            var terms = terminals.filter( directions[d].test );
+            var padding = 4;
+            var term_size = 16;
+            var range = (directions[d].range - term_size) - (2*padding);
+            var locs = auto_space(terms.length, range);
+            for (var i in terms) {
+                var term = terms[i];
+                term.el.style.setProperty(d, (-1 * term_size));
+                term.offsetPosition[d] = (-1 * term_size);
+                term.el.style.setProperty(directions[d].fit_axis, (locs[i] - (term_size/2) + padding));
+                term.offsetPosition[directions[d].fit_axis] = (locs[i] - (term_size/2) + padding);
+            }
+        }
+    }
+    
+    this.image_obj = new Image();
+    var that = this;
+    this.image_obj.onload = function() {
+        // set the element size, and distribute terminals.
+        that.el.style.width = that.image_obj.width + "px";
+        that.el.style.height = that.image_obj.height + "px";
+        distribute_terminals(that.terminals, that.image_obj.width, that.image_obj.height);
+    }
+    this.image_obj.src = opts.image;
+}
+
+YAHOO.lang.extend(AutosizeImageContainer, WireIt.ImageContainer, {
+    xtype: 'AutosizeImageContainer',
+});
+
+
 LoadContainer = function(opts, layer) {
     LoadContainer.superclass.constructor.call(this, opts, layer);
-    this.form.inputs[0].el.multiple = true;
-    for (var i in FILES) {
-        this.form.inputs[0].addChoice(FILES[i][1])
+    this.body = document.createElement('div');
+    this.form_files = document.createElement('select');
+    this.form_files.setAttribute('multiple', 'true');
+    this.body.appendChild(this.form_files);
+    this.setBody(this.form_files);
+    
+    //this.form.inputs[0].el.multiple = true;
+//    for (var i in FILES) {
+//        this.form.inputs[0].addChoice(FILES[i][1])
+//    }
+    
+    this.updateFiles = function() {
+        
+        this.form_files.innerHTML = "";
+        for (var i in FILES) {
+            // then fill up with files from FILES
+            var newchoice = document.createElement('option');
+            newchoice.setAttribute('value', FILES[i][1]);
+            newchoice.innerText = FILES[i][1];
+            newchoice.selected = false;
+            this.form_files.appendChild(newchoice);
+        }
+        for (var j in this.tracksConfigs) {
+            var tracks_files = this.tracksConfigs[j]['files'];
+            for (var f in tracks_files) {
+                var filename = tracks_files[f][0];
+                var options = this.form_files.getElementsByTagName('option');
+                for (var o in options) {
+                    if (options[o].value == filename) { options[o].selected = true; }
+                }
+            }
+        }
     }
+    
+//    this.updateFiles = function() {
+//        var form_files = this.form.getFieldByName('files');
+//        var num_choices = form_files.choicesList.length;
+//        for (var i=0; i < num_choices; i++) {
+//            // clear out all the choices
+//            //var choice = form_files.choicesList[i];
+//            form_files.removeChoice(form_files.choicesList[0]);
+//        }
+//        console.log('form_files length: ', form_files.choicesList.length);
+//        for (var i in FILES) {
+//            // then fill up with files from FILES
+//            form_files.addChoice({"value": FILES[i][1], "selected": false}); 
+//        }
+//        for (var j in this.tracksConfigs) {
+//            var tracks_files = this.tracksConfigs[j]['files'];
+//            for (var f in tracks_files) {
+//                var filename = tracks_files[f][0];
+//                form_files.choicesList[form_files.getChoicePosition({'value': filename})].node.selected = true;                
+//            }
+//        }
+//    }
+
     //this.form.inputs.push(inputEx.Field({type: "file", name:"newfile"}));
 };
 
-YAHOO.lang.extend(LoadContainer, WireIt.FormContainer, {
+YAHOO.lang.extend(LoadContainer, WireIt.Container, {
     xtype: 'LoadContainer',
 });
 
 SaveContainer = function(opts, layer) {
     SaveContainer.superclass.constructor.call(this, opts, layer);
     var content = document.createElement('div')
-    content.innerHTML = 'Click here to save:';
-    var saveButton = document.createElement('img');
-    saveButton.src = this.image;
-    content.appendChild(saveButton);    
+    var name_input = document.createElement('input');
+    name_input.type = "text";
+    var save_button = document.createElement('button');
+    save_button.textContent = "save";
+    //content.appendChild(name_input);
+    content.appendChild(save_button);
+    //content.innerHTML = 'Click here to save:';
+    //var saveButton = document.createElement('img');
+    //saveButton.src = this.image;
+    //content.appendChild(saveButton);    
     this.setBody(content);
+    this.name_input = name_input;
 
-    YAHOO.util.Event.addListener(saveButton, 'click', this.Save, this, true);
+    YAHOO.util.Event.addListener(save_button, 'click', this.Save, this, true);
 };
 
 YAHOO.lang.extend(SaveContainer, WireIt.Container, {
     xtype: 'SaveContainer',
     Save: function(e) {
-        console.log('save click:', e);
-        alert('I am saving!');
+        var newname = prompt("Save file to:", "");
+        if (!newname || newname == "") {return;}
+        var locInFiles = -1;
+        for (var i in FILES) {
+            if (newname == FILES[i][1]) { locInFiles = i; }
+        }
+        console.log('locInFiles', locInFiles);
+        if (locInFiles >= 0) {
+            confirm('file ' + newname + ' exists.  Overwrite?')
+        } else {
+            alert('I am saving to ' + newname);
+        }
     }
 });
 

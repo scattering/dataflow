@@ -1,5 +1,5 @@
 from MetaArray import MetaArray
-from numpy import ndarray, amin, amax, alen, array, fromstring, float, float64, float32
+from numpy import ndarray, amin, amax, alen, array, fromstring, float, float64, float32, ones, empty, newaxis, savetxt, sqrt, mod
 import copy, simplejson, datetime
 #from ...dataflow.core import Data
 from cStringIO import StringIO
@@ -71,74 +71,132 @@ class FilterableMetaArray(MetaArray):
             return 
             
     def get_plottable_1d(self):
-        array_out = self['Measurements':'counts']
-        y = array_out.tolist()
+        colors = ['Blue', 'Red', 'Green', 'Yellow']
         cols = self._info[1]['cols']
-        error_col = next((i for i in xrange(len(cols)) if cols[i]['name'] == 'error'), -1)
-        if error_col > 0:
-            yerror = self['Measurements':'error'].tolist()
-        else:
-            yerror = [0,] * len(y)
+        data_cols = [col['name'] for col in cols if not col['name'].startswith('error')]
+        print data_cols
         x = self._info[0]['values'].tolist()
         xlabel = self._info[0]['name']
-        ylabel = 'counts'
         plottable_data = {
             'type': 'nd',
             'title': 'Offspecular summed Data',
 
             'clear_existing': False,
             'orderx': [{'key': xlabel, 'label': xlabel }],
-            'ordery': [{'key': ylabel, 'label': ylabel }],
-            'series': [
-                {
-                    'label': 'File 1',
-                    'data': {
-                        xlabel : {
-                            'values': x,
-                            'errors': [0,] * len(x),
-                            },
-                        ylabel : {
-                            'values': y,
-                            'errors': yerror,
-                            },
-                        },
-                    'color': 'Red',
-                    'style': 'line',
-                    },
-                ]
-            };
+            'ordery': [],
+            'series': [ {'label': self._info[-1].get('filename', '1d data'),
+                        'color': 'Red',
+                        'style': 'line',
+                        'data': { xlabel: {
+                                    'values': x,
+                                    'errors': [0,] * len(x),
+                                     },
+                                },
+                         },],
+        }
+        
+        for i, col in enumerate(data_cols):
+            y = self['Measurements':col].tolist()
+            error_col = next((i for i in xrange(len(cols)) if cols[i]['name'] == ('error'+col)), -1)
+            if error_col > 0:
+                yerror = self['Measurements':'error'+col].tolist()
+            else:
+                yerror = sqrt(self['Measurements':col]).tolist()
+            ordery = {'key': col, 'label': col}
+            series_y = {
+                'values': y,
+                'errors': yerror,
+            }
+            plottable_data['ordery'].append(ordery)
+            plottable_data['series'][0]['data'][col] = series_y
+            
         return simplejson.dumps(plottable_data,sort_keys=True, indent=2)
             
     def get_plottable_2d(self):
-        array_out = self['Measurements':'counts']
-        z = [array_out.tolist()]
-        #zbin_base64 = base64.b64encode(array_out.tostring())
-        #z = [arr[:, 0].tolist() for arr in self]
-        dims = {}
-        # can't display zeros effectively in log... set zmin to smallest non-zero
-        lowest = 1e-10
-        non_zeros = array_out[array_out > lowest]
-        if len(non_zeros) > 0:
-            dims['zmin'] = non_zeros.min()
-            dims['zmax'] = non_zeros.max()
+        # grab the first counts col:
+        cols = self._info[2]['cols']
+        data_cols = [col['name'] for col in cols if col['name'].startswith('counts')]
+        
+        result = []
+        for col in data_cols:      
+            array_out = self['Measurements':col]
+            z = [array_out.tolist()]
+            #zbin_base64 = base64.b64encode(array_out.tostring())
+            #z = [arr[:, 0].tolist() for arr in self]
+            dims = {}
+            # can't display zeros effectively in log... set zmin to smallest non-zero
+            lowest = 1e-10
+            non_zeros = array_out[array_out > lowest]
+            if len(non_zeros) > 0:
+                dims['zmin'] = non_zeros.min()
+                dims['zmax'] = non_zeros.max()
+            else:
+                dims['zmin'] = lowest
+                dims['zmax'] = lowest
+            axis = ['x', 'y']
+            for index, label in enumerate(axis):
+                arr = self._info[index]['values']
+                dims[axis[index] + 'min'] = arr.min()
+                dims[axis[index] + 'max'] = arr.max()
+                dims[axis[index] + 'dim'] = len(arr)
+            xlabel = self._info[0]['name']
+            ylabel = self._info[1]['name']
+            zlabel = self._info[2]['cols'][0]['name']
+            title = 'AND/R data' # That's creative enough, right?
+            plot_type = '2d'
+            transform = 'log' # this is nice by default
+            dump = dict(type=plot_type, z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, transform=transform)
+            result.append(simplejson.dumps(dump, sort_keys=True, indent=2))
+        return ",".join(result)
+    
+    def get_csv(self):
+        if len(self.shape) == 3:
+            num_cols = self.shape[2]
+            new_array = empty((self.shape[0] * self.shape[1], num_cols + 2))
+            new_array[:,0] = (self._info[0]['values'][:,newaxis] * ones((self.shape[0], self.shape[1]))).ravel()
+            new_array[:,1] = (self._info[1]['values'][newaxis,:] * ones((self.shape[0], self.shape[1]))).ravel()
+            data_names = []
+            data_names.append(self._info[0]['name']) # xlabel
+            data_names.append(self._info[1]['name']) # ylabel
+            
+            for i in range(num_cols):
+                new_array[:,i+2] = self[:,:,i].view(ndarray).ravel()
+                data_names.append(self._info[2]['cols'][i]['name'])
+            
+            outstr = StringIO()
+            outstr.write('#' + '\t'.join(data_names) + '\n')
+            savetxt(outstr, new_array, delimiter='\t', newline='\n')
+            
+            outstr.seek(0)
+            return_val = outstr.read()
+            outstr.close()
+            
+            return return_val
+
+        elif len(self.shape) == 2:
+            num_cols = self.shape[1]
+            new_array = empty((self.shape[0], num_cols + 1))
+            new_array[:,0] = (self._info[0]['values'])
+            data_names = []
+            data_names.append(self._info[0]['name']) # xlabel
+            
+            for i in range(num_cols):
+                new_array[:,i+1] = self[:,i].view(ndarray)
+                data_names.append(self._info[1]['cols'][i]['name'])
+            
+            outstr = StringIO()
+            outstr.write('#' + '\t'.join(data_names) + '\n')
+            savetxt(outstr, new_array, delimiter='\t', newline='\n')
+            
+            outstr.seek(0)
+            return_val = outstr.read()
+            outstr.close()
+            return return_val
+            
         else:
-            dims['zmin'] = lowest
-            dims['zmax'] = lowest
-        axis = ['x', 'y']
-        for index, label in enumerate(axis):
-            arr = self._info[index]['values']
-            dims[axis[index] + 'min'] = arr.min()
-            dims[axis[index] + 'max'] = arr.max()
-            dims[axis[index] + 'dim'] = len(arr)
-        xlabel = self._info[0]['name']
-        ylabel = self._info[1]['name']
-        zlabel = self._info[2]['cols'][0]['name']
-        title = 'AND/R data' # That's creative enough, right?
-        plot_type = '2d'
-        transform = 'log' # this is nice by default
-        dump = dict(type=plot_type, z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, transform=transform)
-        res = simplejson.dumps(dump, sort_keys=True, indent=2)
-        return res
+            print "can only handle 1d or 2d data"
+            return     
+        
         
 #    def get_plottable_new(self):
 #        array_out = self['Measurements':'counts']

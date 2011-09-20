@@ -39,6 +39,7 @@ AutosizeImageContainer = function(opts, layer) {
                 term.offsetPosition[d] = (-1 * term_size);
                 term.el.style.setProperty(directions[d].fit_axis, (locs[i] - (term_size/2) + padding));
                 term.offsetPosition[directions[d].fit_axis] = (locs[i] - (term_size/2) + padding);
+                for (var w in term.wires){ term.wires[w].redraw() }
             }
         }
     }
@@ -50,6 +51,7 @@ AutosizeImageContainer = function(opts, layer) {
         that.el.style.width = that.image_obj.width + "px";
         that.el.style.height = that.image_obj.height + "px";
         distribute_terminals(that.terminals, that.image_obj.width, that.image_obj.height);
+        
     }
     this.image_obj.src = opts.image;
 }

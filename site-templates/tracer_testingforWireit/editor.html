@@ -302,13 +302,13 @@
 					{% for variable in file_keys %}
 					FILES.push("{{ variable }}".split(',,,z,z,z,z,,,'))
 					{% endfor %}
-
+                    
 					// for converting from readable name to unique hash
 					FILE_DICT = {}
 					for (var i in FILES) {
 						FILE_DICT[FILES[i][1]]=FILES[i][0]
 					}
-
+                    
 					// setting up the WireEditor with the adapter 'tracks'
 					CHOSEN_LANG['adapter'] = WireIt.WiringEditor.adapters.tracks;
 
@@ -323,7 +323,7 @@
 					editor.reductionIndex = 0;
 					editor.reductionInstance = 1;
 					editor.maxReduction = 1;
-
+                    editor.FAT = makeFileTable(FILES, editor.getValue().working.modules);
 					// more initial settings
 					editor.launchedFromExperimentPage = launchedFromExperimentPage;
 
@@ -540,6 +540,10 @@
 		</script>
 	</head>
 	<body id="woot" class="yui-skin-sam">
+	    <form id="getCSVForm" method="post" action="getCSV/">
+	    {% csrf_token %}
+        <input type="hidden" id="data" name="data" />
+        </form>
 		<div id="top">
 			<div class="logo">
 				Dataflow pipeline editor

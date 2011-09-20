@@ -24,6 +24,7 @@ urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views',
 		('^editor/saveWiring/$', 'saveWiring'),
 		('^editor/runReduction/$', 'runReduction'),
 		('^editor/uploadFiles/$', 'uploadFiles'),
+		('^editor/getCSV/$', 'getCSV'),
 
 		# File loader display urls (testing, 7/6)
 		('^loadFiles/$', 'displayFileLoad'),

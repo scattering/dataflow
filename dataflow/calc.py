@@ -9,6 +9,7 @@ from inspect import getsource
 from .core import lookup_module, lookup_datatype
 import hashlib, redis, types, os
 from copy import deepcopy
+import numpy
 
 os.system("redis-server") # ensure redis is running
 server = redis.Redis("localhost")
@@ -159,6 +160,26 @@ def get_plottable(template, config, nodenum, terminal_id):
             
     return plottable
 
+def get_csv(template, config, nodenum, terminal_id):
+    # Find the modules
+    node = template.modules[nodenum]
+    module_id = node['module'] # template.modules[node]
+    module = lookup_module(module_id)
+    terminal = module.get_terminal_by_id(terminal_id)
+    
+    all_fp = fingerprint_template(template, config)
+    fp = all_fp[nodenum]
+    csv_fp = name_terminal(name_csv(fp), terminal_id)
+    if server.exists(csv_fp):
+        print "retrieving cached value: " + csv_fp
+        csv = server.lrange(csv_fp, 0, -1)
+    else:
+        data = calc_single(template, config, nodenum, terminal_id)
+        csv = convert_to_csv(data)
+        for item in csv:
+            server.rpush(csv_fp, item)   
+    return csv, csv_fp
+
 def fingerprint_template(template, config):
     """ run the fingerprint operation on the whole template, returning
     the dict of fingerprints (one per output terminal) """    
@@ -290,9 +311,21 @@ def format_ordered(value):
 def convert_to_plottable(result):
     print "Starting new converter"
     return [data.get_plottable() for data in result]
+    
+def convert_to_csv(result):
+    if numpy.all([hasattr(data, 'get_csv') for data in result]):
+        print "Starting CSV converter"
+        print len(result)
+        return [data.get_csv() for data in result]
+    else:
+        print "No CSV converter available for this datatype"
+        return [""]
+    
 def name_fingerprint(fp):
     return "Fingerprint:" + fp
 def name_plottable(fp):
     return "Plottable:" + fp
+def name_csv(fp):
+    return "CSV:" + fp
 def name_terminal(fp, terminal_id):
     return fp + ":" + terminal_id

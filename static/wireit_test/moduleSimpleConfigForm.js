@@ -1,48 +1,48 @@
-function makeFileSelector(files) {
-     var selector = new Ext.form.ComboBox({
-         xtype: 'combobox',
-         name: 'countries',
-        // Stop users being able to type in the combobox
-         editable: false,
-        // Even though the user cant type any more
-        // once they select one option it'll remove any
-        // others that don't start with the same letters
-        // unless we turn off filtering
-         disableKeyFilter: true,
-        // Only allow users to pick an option that exists
-        // in the list of options (not one of their own)
-         forceSelection: true,
-        // This isn't entirely necessary but the combox
-        // will start off blank otherwise
-         emptyText: '--select one--',
-        // This one's vital: when the user clicks on the
-        // drop-down show ALL options
-         triggerAction: 'all',
-        // By default it retrieves remote data,
-        // we're using local data
-         mode: 'local',
-        // ComboBox will only accept data from a Store
-        // so we have to create a basic one
-         store: new Ext.data.SimpleStore({
-          id: 0,
-          fields: ['value', 'text'],
-          data : [['1', 'UK'], ['2', 'US']]
-         }),
-        // Specify which fields in the store hold
-        // the value and the display text
-         valueField: 'value',
-         displayField: 'text',
-        // Important: by default the POST/GET data
-        // for this item will contain the display text
-        // not the value. This option creates a hidden field
-        // with the same name as the dropdown containing the
-        // selected value so it is that which gets returned
-         hiddenName: 'countries',
-         multiple: true,
-         size: 4,
-    });
-    return selector;
-}
+//function makeFileSelector(files) {
+//     var selector = new Ext.form.ComboBox({
+//         xtype: 'combobox',
+//         name: 'countries',
+//        // Stop users being able to type in the combobox
+//         editable: false,
+//        // Even though the user cant type any more
+//        // once they select one option it'll remove any
+//        // others that don't start with the same letters
+//        // unless we turn off filtering
+//         disableKeyFilter: true,
+//        // Only allow users to pick an option that exists
+//        // in the list of options (not one of their own)
+//         forceSelection: true,
+//        // This isn't entirely necessary but the combox
+//        // will start off blank otherwise
+//         emptyText: '--select one--',
+//        // This one's vital: when the user clicks on the
+//        // drop-down show ALL options
+//         triggerAction: 'all',
+//        // By default it retrieves remote data,
+//        // we're using local data
+//         mode: 'local',
+//        // ComboBox will only accept data from a Store
+//        // so we have to create a basic one
+//         store: new Ext.data.SimpleStore({
+//          id: 0,
+//          fields: ['value', 'text'],
+//          data : [['1', 'UK'], ['2', 'US']]
+//         }),
+//        // Specify which fields in the store hold
+//        // the value and the display text
+//         valueField: 'value',
+//         displayField: 'text',
+//        // Important: by default the POST/GET data
+//        // for this item will contain the display text
+//        // not the value. This option creates a hidden field
+//        // with the same name as the dropdown containing the
+//        // selected value so it is that which gets returned
+//         hiddenName: 'countries',
+//         multiple: true,
+//         size: 4,
+//    });
+//    return selector;
+//}
 
 
 function makeFileMultiSelect(src_files, selected_files) {
@@ -51,6 +51,8 @@ function makeFileMultiSelect(src_files, selected_files) {
 //    for (var i in FILES) {
 //        src_files.push(FILES[i][1]);
 //    }
+
+    src_files.sort()
     console.log('src_files', src_files);
     console.log('dest_files', files);
     var source_files_selector = {
@@ -118,7 +120,7 @@ function configForm(headerList, moduleID) {
 			    item2 = {
 				    fieldLabel: headerList[i][1][j],
 				    name: headerList[i][1][j],
-				    decimalPrecision: 6,
+				    decimalPrecision: 14,
 				    value: headerList[i][2][j],
 				    anchor: "-20", 
 				    allowblank: false,
@@ -143,6 +145,7 @@ function configForm(headerList, moduleID) {
 			    title: headerList[i][0],
 			    collapsible: true,
 			    defaultType: defaultType,
+			    decimalPrecision : 12,
 			    layout: 'anchor',
 			    anchor: '100%',
 			    autoHeight: true,
