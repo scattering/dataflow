@@ -27,15 +27,16 @@ AutosizeImageContainer = function(opts, layer) {
         
         for (var d in directions) {
             var terms = terminals.filter( directions[d].test );
+            console.log(d, terms)
             var padding = 4;
             var term_size = 16;
             var range = (directions[d].range - term_size) - (2*padding);
             var locs = auto_space(terms.length, range);
             for (var i in terms) {
                 var term = terms[i];
-                term.el.style.setProperty(d, (-1 * term_size));
+                term.el.style.setProperty(d, (-1 * term_size), null);
                 term.offsetPosition = {d: (-1 * term_size)};
-                term.el.style.setProperty(directions[d].fit_axis, (locs[i] - (term_size/2) + padding));
+                term.el.style.setProperty(directions[d].fit_axis, (locs[i] - (term_size/2) + padding), null);
                 term.offsetPosition[directions[d].fit_axis] = (locs[i] - (term_size/2) + padding);
             }
         }
