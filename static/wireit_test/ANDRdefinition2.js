@@ -642,7 +642,7 @@ var andr2 = {
     {
       "container": {
         "icon": "../../static/img/offspecular/qxqz.png", 
-        "image": "../../static/img/offspecular/qxqz_image.png", 
+        "image": "../../static/img/offspecular/twothetalambda_qxqz_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
