@@ -412,13 +412,14 @@ var andr2 = {
             "multiple": true, 
             "name": "output", 
             "offsetPosition": {
-              "left": 48, 
+              "right": -16, 
               "top": 16
             }, 
             "required": false
           }
-        ], 
-        "xtype": "AutosizeImageContainer"
+        ],
+        "width": 120,
+        "xtype": "OffsetContainer"
       }, 
       "fields": [
         {
@@ -430,7 +431,7 @@ var andr2 = {
             "xpixel": 0.0
           }
         }
-      ], 
+      ],
       "name": "Offset"
     }, 
     {
@@ -1202,6 +1203,79 @@ var andr2 = {
   ]
 };
 
+OffsetContainer = function(opts, layer) {
+    OffsetContainer.superclass.constructor.call(this, opts, layer);
+    var content = document.createElement('div');
+    content.innerHTML = '';
+    //var saveButton = document.createElement('img');
+    var getAxisInfoButton = document.createElement('button');
+    getAxisInfoButton.value = 'getaxisinfo';
+    getAxisInfoButton.innerHTML = 'Get axis info';
+    //saveButton.src = this.image;
+    content.appendChild(getAxisInfoButton);
+    this.axisDescription = document.createElement('div');
+    console.log(this.axisDescription);
+    this.axisDescription.innerHTML = '';
+    console.log(this.axisDescription, this);
+    content.appendChild(this.axisDescription)
+    
+    this.setBody(content);
+    YAHOO.util.Event.addListener(getAxisInfoButton, 'click', this.getAxisInfo, this, true);
+};
+
+YAHOO.lang.extend(OffsetContainer, WireIt.Container, {
+    getAxisInfo: function(e, f) {
+        var reductionInstance = editor.reductionInstance;
+        var wires = f.wires;
+        if (wires.length == 0) {
+            alert('no data to get (no wires in)');
+            return
+        } else {
+            var wire_in = f.wires[0];
+            clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
+        }
+        //editor.getPlottable(reductionInstance, clickedOn);
+		var toReduce = editor.generateReductionRecipe(reductionInstance, clickedOn);
+        //if (this.terminals[0].wires.length < 1) { alert('no wires'); return }
+		editor.adapter.runReduction(toReduce, {
+		    success: this.updateAxes,
+		    failure: editor.runModuleFailure,
+		    scope: this,
+		});		    		    
+	},
+    updateAxes: function(plottable_data) {
+        console.log('updating Axes');
+        if (Object.prototype.toString.call(plottable_data) === "[object Array]") {
+            var plottable_data = plottable_data[0];
+        }
+        if (plottable_data.type == "2d") {
+            var axes_labels = [plottable_data.xlabel, plottable_data.ylabel];
+        }
+        else if (plottable_data.typ == "nd") {
+            var axes_labels = [plottable_data.orderx[0].label];
+        }
+        var displayText = "";
+        for (var i in axes_labels) {
+            displayText += axes_labels[i] + '<br>';
+        }
+        var module = null;
+        //var CHOSEN_LANG = andr2;
+        for (var index in CHOSEN_LANG.modules) {
+		    if(CHOSEN_LANG.modules[index].name == this.title) {
+		        module = CHOSEN_LANG.modules[index];
+				break;
+			}
+		}
+        console.log(plottable_data, this, "displayText:", displayText, "fields:", module.fields);
+        this.axisDescription.innerHTML = displayText;
+        module.fields[0].value = {}
+        for (var i in axes_labels) {
+            module.fields[0].value[axes_labels[i]] = 0.0;
+        }
+    },
+});
+
+
 SaveContainer = function(opts, layer) {
     SaveContainer.superclass.constructor.call(this, opts, layer);
     
@@ -1285,7 +1359,7 @@ YAHOO.lang.extend(SaveContainer, WireIt.Container, {
             var wire_in = f.wires[0];
             clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
         }
-        editor.getCSV(reductionInstance, clickedOn)
+        editor.getCSV(reductionInstance, clickedOn);
     },
 });
 
