@@ -413,7 +413,7 @@
 							'source': this.src,
 							'target':this.tgt
 						}
-						editor.runReduction();
+						editor.runAndPlot();
 						//editor.wireClickSource = this.src.moduleId
 						//editor.wireClickTarget = this.tgt.moduleId
 						//try {
@@ -518,7 +518,7 @@
 					var FATButton = new YAHOO.widget.Button({ label:"File Associations", id:"WiringEditor-FATButton", container: toolbar });
                     FATButton.on("click", editor.onFATButton, editor, true);
                     var runButton = new YAHOO.widget.Button({ label:"Run this Reduction", id:"WiringEditor-RunButton", container: toolbar });
-                    runButton.on("click", editor.runReduction, editor, true);
+                    runButton.on("click", editor.runAndPlot, editor, true);
                     var runAllButton = new YAHOO.widget.Button({ label:"Run All Reductions", id:"WiringEditor-RunAllButton", container: toolbar });
                     runButton.on("click", editor.runAllReductions, editor, true);
                     
