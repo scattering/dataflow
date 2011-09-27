@@ -8,24 +8,27 @@
   canvas { border: 1px dotted #888; }
   .bk { float: left; margin-right: 4px; }
 </style>
+<!-- JQPLOT -->
+<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
+<script type="text/javascript" src="../../static/lib/plotting/jqplot/jquery.jqplot.js"></script>
 <script type="text/javascript" src="/static/lib/prototype.js"></script>
 <script type="text/javascript" src="/static/lib/plotting/asdf.js"></script>
-<script type="text/javascript" src="/static/lib/interactors/interactors.js"></script>
+<script type="text/javascript" src="/static/lib/interactors/interactors_nonprototype.js"></script>
 <script type="text/javascript">
 var c = [], interactors;
 window.onload = function() {
     interactors = [
-        SegmentInteractor,
-        QuadrangleInteractor,
-        CircleInteractor,
-        AnnulusInteractor,
-        ArcInteractor,
-        ParallelogramInteractor,
-        RectangleInteractor,
-        GaussianInteractor,
-        QuadraticInteractor,
-        LinearInteractor,
-        AnnulusInteractor,
+        jQuery.jqplot.SegmentInteractor,
+        jQuery.jqplot.QuadrangleInteractor,
+        jQuery.jqplot.CircleInteractor,
+        jQuery.jqplot.AnnulusInteractor,
+        //ArcInteractor,
+        jQuery.jqplot.ParallelogramInteractor,
+        jQuery.jqplot.RectangleInteractor,
+        //GaussianInteractor,
+        //QuadraticInteractor,
+        //LinearInteractor,
+        //AnnulusInteractor,
     ];
     for (var i  = 0; i < interactors.length; i ++) {
         var id = 'c' + (i + 1);
@@ -46,8 +49,9 @@ window.onload = function() {
         dv.appendChild(cv);
         document.body.appendChild(dv);
         
-        c[i + 1] = new inst(id);
-        if (i + 1 == 11) c[i + 1].showdata = true;
+        c[i + 1] = new inst();
+        c[i + 1].init(id);
+        if (c[i+1].name == 'Annulus') c[i + 1].showdata = true;
         lb.appendChild(document.createTextNode(c[i + 1].name + 'Interactor'));
     }
 }
