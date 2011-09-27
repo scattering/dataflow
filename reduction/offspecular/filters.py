@@ -1023,10 +1023,10 @@ class Combine(Filter2D):
         
         new_info = dataset.infoCopy()        
         for i, col in enumerate(new_info[2]['cols']):
-            if col['name'] in cols_to_add:
-                array_to_rebin = dataset[:, :, col['name']].view(ndarray) 
-                new_array = reb.rebin2d(data_edges[0], data_edges[1], array_to_rebin, bin_edges[0], bin_edges[1])
-                grid[:, :, col['name']] += new_array
+            #if col['name'] in cols_to_add:
+            array_to_rebin = dataset[:, :, col['name']].view(ndarray) 
+            new_array = reb.rebin2d(data_edges[0], data_edges[1], array_to_rebin, bin_edges[0], bin_edges[1])
+            grid[:, :, col['name']] += new_array
                 
         return grid
 
