@@ -595,7 +595,7 @@ class Autogrid(Filter2D):
         output_dims.append(len(new_info[2]['cols']))
         for dim in range(dims):
             new_info[dim]["values"] = (arange(output_dims[dim], dtype='float') * final_stepsizes[dim]) + absolute_min[dim]
-        output_grid = MetaArray(tuple(output_dims), info=new_info)
+        output_grid = MetaArray(zeros(tuple(output_dims)), info=new_info)
         return output_grid
         
     
