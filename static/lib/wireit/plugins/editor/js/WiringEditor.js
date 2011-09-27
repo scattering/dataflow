@@ -462,9 +462,10 @@
 		 * @method runReduction
 		 */
 
-		runReduction: function(reductionInstance) {
+		generateReductionRecipe: function(reductionInstance, clickedOn) {
 			var value = this.getValue()
 			var reductionInstance = reductionInstance ? reductionInstance : this.reductionInstance ;
+			var clickedOn = clickedOn ? clickedOn : this.wireClickedOn ;
 
 			this.toReduce = {
 			    returnType: 'plottable',
@@ -473,7 +474,7 @@
 				properties: value.working.properties,
 				wires: value.working.wires,
 				language: value.working.language,
-				clickedOn: this.wireClickedOn,
+				clickedOn: clickedOn,
 				group: reductionInstance,
 				file_dict: FILE_DICT,
 			};
@@ -481,22 +482,11 @@
 			    this.toReduce.modules[j].config = this.toReduce.modules[j].config[reductionInstance];
 				//this.toReduce.modules[j].config['files'] = []
 			}
-//			for (var i in file_associations) {
-//				if (typeof file_associations[i] == "object") {
-//					for (var k in file_associations[i]) {
-//						this.toReduce.modules[i.split(": ").pop()].config['files'].push(FILE_DICT[file_associations[i][k]])
-//					}
-//				} else {
-//					// not entering in a 'files' config if the module is not a loader
-//				}
-//			}
-			//console.log(this.toReduce)
-			this.adapter.runReduction(this.toReduce, {
-				success: this.displayResult,
-				failure: this.runModuleFailure,
-				scope: this,
-			});
-		},
+			
+			return this.toReduce;
+			
+        },
+
 		// PASSING THE WIRE OVER TO THE SERVER, SO WE SHOULD GET BACK ONLY ONE PLOTTABLE OBJECT
 		// NO NEED TO CHECK THE WIRE SOURCE HERE, JUST PLOT WHATEVER YOU GET
 		displayResult: function(display) {
@@ -508,6 +498,16 @@
 		runModuleFailure: function(error) {
 			this.alert("Unable to run the reduction: " + error)
 		},
+		
+		runAndPlot: function(reductionInstance) {
+		    var toReduce = this.generateReductionRecipe(reductionInstance);
+		    this.adapter.runReduction(toReduce, {
+				success: this.displayResult,
+				failure: this.runModuleFailure,
+				scope: this,
+			});		    
+		},
+		
 		/**
 		 * @method onNew
 		 */
@@ -1124,7 +1124,13 @@
 						}
 					} else {
 						if (typeof configs[i] != 'undefined') {
-							this.layer.containers[moduleID].tracksConfigs[this.reductionInstance][splitConfig[0]][splitConfig[1]] = configs[i]
+							//console.log(this.layer.containers[moduleID].tracksConfigs[this.reductionInstance], splitConfig[0], splitConfig[1], configs[i]);
+							if (this.layer.containers[moduleID].tracksConfigs[this.reductionInstance][splitConfig[0]]) {
+							    this.layer.containers[moduleID].tracksConfigs[this.reductionInstance][splitConfig[0]][splitConfig[1]] = configs[i]
+							} else {
+							    this.layer.containers[moduleID].tracksConfigs[this.reductionInstance][splitConfig[0]] = {}; //{splitConfig[1] : configs[i]}
+							    this.layer.containers[moduleID].tracksConfigs[this.reductionInstance][splitConfig[0]][splitConfig[1]] = configs[i]
+							}
 						}
 					}
 				}
