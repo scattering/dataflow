@@ -660,8 +660,8 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         console.log('target_id: ', target_id)
         var plotdiv = document.getElementById(target_id);
         plotdiv.innerHTML = "";
-        jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 450px; height: 350px;", id:"plotbox"}));
-        jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width:350px; height: 350px; ", id:"plot2d"}));
+        jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 650px; height: 350px;", id:"plotbox"}));
+        jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width:550px; height: 350px; ", id:"plot2d"}));
         jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width: 100; height: 350; ", id:"colorbar"}));
         jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 410px; height: 100px;", id:"plotbuttons"}));
         jQuery(document.getElementById('plotbuttons')).append(jQuery('<select />', {id:"plot_selectz"}));
