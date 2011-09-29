@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>WireIt - WiringEditor</title>
+		<!-- JQPLOT -->
+		<script type="text/javascript" src="../static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
+		<script type="text/javascript" src="../static/lib/plotting/jqplot/jquery.jqplot.js"></script>
+		<script type="text/javascript" src="../static/lib/plotting/jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
+		<script type="text/javascript" src="../static/lib/plotting/jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+		<script type="text/javascript" src="../static/lib/plotting/jqplot/plugins/jqplot.errorbarRenderer.js"></script>
+		<script type="text/javascript" src="../static/lib/plotting/jqplot/plugins/jqplot.pcolorRenderer.js"></script>
+		<script type="text/javascript" src="../static/lib/plotting/jqplot/plugins/jqplot.cursor.js"></script>
+		<script type="text/javascript" src="../static/lib/plotting/palettes.js"></script>
+		<script type="text/javascript" src="../static/lib/plotting/plotting_api.js"></script>
+		<script type="text/javascript" src="../static/lib/plotting/sansdata.js"></script>
+
+		<!-- Uniq Array -->
+		<script type="text/javascript" src="../static/lib/UniqArray.js"></script>
+		<script type="text/javascript" src="../static/lib/js-object-length.js"></script>
+		<style>
+			/* Comment Module */
+			div.WireIt-Container.WiringEditor-module-comment {
+				width: 200px;
+			}
+			div.WireIt-Container.WiringEditor-module-comment div.body {
+				background-color: #EEEE66;
+			}
+			div.WireIt-Container.WiringEditor-module-comment div.body textarea {
+				background-color: transparent;
+				font-weight: bold;
+				border: 0;
+			}
+		</style>
+		<script type="text/javascript">
+		    window.onload = function() {
+		        if (window.opener.toPlot) {
+		            plottingAPI(window.opener.toPlot, 'plot');
+		        }
+		    }
+		</script>
+	</head>
+	<body id="woot" class="yui-skin-sam">
+						<div id="plot">
+							I am a plot.
+						</div>
+	</body>
+</html>
