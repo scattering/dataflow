@@ -182,7 +182,8 @@
                
         var p1 = new Point(this, 100, 150);
         var p2 = new Point(this, 200, 150);
-        var l = new Segment(this, p1, p2, 4);
+        //var l = new Segment(this, p1, p2, 4);
+        var l = new $.jqplot.Segment(); l.initialize(this, p1, p2, 4);
         this.grobs.push(l, p1, p2);
         
         this.redraw();
@@ -340,14 +341,14 @@
     };
     
     $.jqplot.CircleInteractor = function() {
-        $.jqplot.PolygonInteractor.call(this)
+        $.jqplot.Interactor.call(this)
     };
     
-    $.jqplot.CircleInteractor.prototype = new $.jqplot.PolygonInteractor();
+    $.jqplot.CircleInteractor.prototype = new $.jqplot.Interactor();
     $.jqplot.CircleInteractor.prototype.constructor = $.jqplot.CircleInteractor;
     
     $.jqplot.CircleInteractor.prototype.init = function(canvasid) {
-        $.jqplot.PolygonInteractor.prototype.init.call(this, 'Circle', 'circ.png', 0, canvasid);
+        $.jqplot.Interactor.prototype.init.call(this, 'Circle', 'circ.png', 0, canvasid);
         var c = new Center(this, 150, 150);
         var p1 = new Point(this, 200, 150);
         var circ = new Circle(this, c, p1, 4);
@@ -357,14 +358,14 @@
     };
     
     $.jqplot.AnnulusInteractor = function() {
-        $.jqplot.PolygonInteractor.call(this)
+        $.jqplot.Interactor.call(this)
     };
     
-    $.jqplot.AnnulusInteractor.prototype = new $.jqplot.PolygonInteractor();
+    $.jqplot.AnnulusInteractor.prototype = new $.jqplot.Interactor();
     $.jqplot.AnnulusInteractor.prototype.constructor = $.jqplot.AnnulusInteractor;
     
     $.jqplot.AnnulusInteractor.prototype.init = function(canvasid) {
-        $.jqplot.PolygonInteractor.prototype.init.call(this, 'Annulus', 'annulus.png', 0, canvasid);
+        $.jqplot.Interactor.prototype.init.call(this, 'Annulus', 'annulus.png', 0, canvasid);
         this.showdata = false;
         this.c = new Center(this, 150, 150);
         this.p1 = new Point(this, 200, 150);
@@ -423,75 +424,15 @@
         }
     };
     
-})(jQuery);
-
-/*
-
-var AnnulusInteractor = new Class.create(Interactor, {
-    initialize: function($super, canvasid) {
-        $super('Annulus', 'annulus.png', 0, canvasid);
-        
-        this.showdata = false;
-        this.c = new Center(this, 150, 150);
-        this.p1 = new Point(this, 200, 150);
-        this.p2 = new Point(this, 250, 150);
-        this.circ1 = new Circle(this, this.c, this.p1, 4);
-        this.circ2 = new Circle(this, this.c, this.p2, 4);
-        this.grobs.push(this.circ1, this.circ2, this.c, this.p1, this.p2);
-        
-        this.p1.onDrag = this.p1.onDrag.wrap(function(callOriginal, e, pos) {
-            callOriginal(e, pos);
-            
-            var r = dist(this.parent.p2.pos, this.parent.c.pos),
-                t_ = this.parent.circ1.angleToXaxis(pos);
-            this.parent.p2.pos.x = this.parent.c.pos.x + Math.cos(t_) * r;
-            this.parent.p2.pos.y = this.parent.c.pos.y + Math.sin(t_) * r;
-        });
-        this.p2.onDrag = this.p2.onDrag.wrap(function(callOriginal, e, pos) {
-            callOriginal(e, pos);
-            
-            var r = dist(this.parent.p1.pos, this.parent.c.pos),
-                t_ = this.parent.circ1.angleToXaxis(pos);
-            this.parent.p1.pos.x = this.parent.c.pos.x + Math.cos(t_) * r;
-            this.parent.p1.pos.y = this.parent.c.pos.y + Math.sin(t_) * r;
-        });
-        this.circ1.filled = false;
-        this.circ1.connectortranslatable = false;
-        this.circ1.onDrag = this.circ1.onDrag.wrap(function (callOriginal, e, pos) {
-            callOriginal(e, pos);
-            
-            this.parent.translateBy(this.dpos);
-            this.c.translateBy(this.dpos);
-        });
-        this.circ2.filled = false;
-        this.circ2.connectortranslatable = false;
-        this.circ2.onDrag = this.circ2.onDrag.wrap(function (callOriginal, e, pos) {
-            callOriginal(e, pos);
-            
-            this.parent.translateBy(this.dpos);
-            this.c.translateBy(this.dpos);
-        });
-        
-        this.redraw();
-    },
+    $.jqplot.ArcInteractor = function() {
+        $.jqplot.Interactor.call(this)
+    };
     
-    redraw: function($super) {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        if (this.showdata) {
-            this.context.globalAlpha = 1;
-            this.context.drawImage(sansimg, 30, 30, 68, 68, 0, 0, this.canvas.width, this.canvas.height);
-            this.context.globalAlpha = 0.6;
-        }
-        for (var i = 0; i < this.grobs.length; i ++) {
-            var grob = this.grobs[i];
-            grob.render(this.context);
-        }
-    },
-});
-var ArcInteractor = new Class.create(Interactor, {
-    initialize: function($super, canvasid) {
-        $super('Arc', 'arc.png', 0, canvasid);
-        
+    $.jqplot.ArcInteractor.prototype = new $.jqplot.Interactor();
+    $.jqplot.ArcInteractor.prototype.constructor = $.jqplot.ArcInteractor;
+    
+    $.jqplot.ArcInteractor.prototype.init = function(canvasid) {
+        $.jqplot.Interactor.prototype.init.call(this, 'Arc', 'arc.png', 0, canvasid);
         var c = new Center(this, 150, 150);
         var p1 = new Point(this, 200, 150);
         var p2 = new Point(this, 150, 100);
@@ -503,24 +444,34 @@ var ArcInteractor = new Class.create(Interactor, {
         this.arc = arc;
         
         this.redraw();
-    },
-});
-var LinearInteractor = new Class.create(Interactor, {
-    initialize: function($super, canvasid) {
-        $super('Linear', 'linear.png', 0, canvasid);
-        
+    };
+    
+    $.jqplot.LinearInteractor = function() {
+        $.jqplot.Interactor.call(this)
+    };
+    
+    $.jqplot.LinearInteractor.prototype = new $.jqplot.Interactor();
+    $.jqplot.LinearInteractor.prototype.constructor = $.jqplot.LinearInteractor;
+    
+    $.jqplot.LinearInteractor.prototype.init = function(canvasid) {
+        $.jqplot.Interactor.prototype.init.call(this, 'Linear', 'linear.png', 0, canvasid);        
         var p1 = new Point(this, 200, 150);
         var p2 = new Point(this, 100, 100);
         this.linear = new Linear(this, p1, p2, 4);
         this.grobs.push(this.linear, p1, p2);
         
         this.redraw();
-    },
-});
-var QuadraticInteractor = new Class.create(Interactor, {
-    initialize: function($super, canvasid) {
-        $super('Quadratic', 'quadratic.png', 0, canvasid);
-        
+    };
+    
+    $.jqplot.QuadraticInteractor = function() {
+        $.jqplot.Interactor.call(this)
+    };
+    
+    $.jqplot.QuadraticInteractor.prototype = new $.jqplot.Interactor();
+    $.jqplot.QuadraticInteractor.prototype.constructor = $.jqplot.QuadraticInteractor;
+    
+    $.jqplot.QuadraticInteractor.prototype.init = function(canvasid) {
+        $.jqplot.Interactor.prototype.init.call(this, 'Quadratic', 'quadratic.png', 0, canvasid);
         var p1 = new Point(this, 200, 150);
         var p2 = new Point(this, 150, 100);
         var p3 = new Point(this, 100, 150);
@@ -528,28 +479,171 @@ var QuadraticInteractor = new Class.create(Interactor, {
         this.grobs.push(this.quadratic, p1, p2, p3);
         
         this.redraw();
-    },
-});
-var GaussianInteractor = new Class.create(Interactor, {
-    initialize: function($super, canvasid) {
-        $super('Gaussian', 'gaussian.png', 0, canvasid);
-        
-        var pw = new Point(this, 200, 200);
-        var pk = new Point(this, 150, 100);
-        var gaussian = new Gaussian(this, pk, pw, 4);
-        this.grobs.push(gaussian, pk, pw);
-        this.gaussian = gaussian;
-        
-        this.redraw();
-    },
+    };
     
-//    onMouseMove: function($super, e) {
-//        $super(e);
-//        pos = getMouse(e);
-//        this.gaussian.distanceTo(pos);
-//    },
-});
-*/
+    $.jqplot.GaussianInteractor = function() {
+        $.jqplot.Interactor.call(this)
+    };
+    
+    $.jqplot.GaussianInteractor.prototype = new $.jqplot.Interactor();
+    $.jqplot.GaussianInteractor.prototype.constructor = $.jqplot.GaussianInteractor;
+    
+    $.extend($.jqplot.GaussianInteractor.prototype, {
+        init: function(canvasid) {
+            $.jqplot.Interactor.prototype.init.call(this, 'Gaussian', 'gaussian.png', 0, canvasid);
+            var pw = new Point(this, 200, 200);
+            var pk = new Point(this, 150, 100);
+            var gaussian = new Gaussian(this, pk, pw, 4);
+            this.grobs.push(gaussian, pk, pw);
+            this.gaussian = gaussian;
+            
+            this.redraw();
+        },
+    });
+//    $.jqplot.GaussianInteractor.prototype.init = function(canvasid) {
+//        $.jqplot.Interactor.prototype.init.call(this, 'Gaussian', 'gaussian.png', 0, canvasid);
+//        var pw = new Point(this, 200, 200);
+//        var pk = new Point(this, 150, 100);
+//        var gaussian = new Gaussian(this, pk, pw, 4);
+//        this.grobs.push(gaussian, pk, pw);
+//        this.gaussian = gaussian;
+//        
+//        this.redraw();
+//    };
+    $.jqplot.Grob = function() {};
+    $.jqplot.Grob.prototype = {
+        initialize: function(parent, x, y) {
+            this.parent = parent;
+            this.pos = { x: x, y: y };
+
+            this.inside = false;
+            this.translatable = true;
+            this.prevpos = null;
+            this.dpos = null;
+            
+            var h = this.parent.rc * 360;
+            this.color1 = '#000';'hsl('+h+',100%,40%)'; //'#2C8139';
+            this.color2 = '#444';'hsl('+h+',100%,60%)'; //'#4CCC60';
+            this.color = this.color1;
+        },
+        
+        isInside: function(pos) {},
+        distanceTo: function(pos) {
+            return dist(this.pos, pos);
+        },
+        translateBy: function(dpos) {
+            this.pos.x += dpos.x;
+            this.pos.y += dpos.y;
+        },
+        render: function(ctx) {},
+        
+        onDrag: function(e, pos) {
+            if (!this.prevpos)
+                this.prevpos = this.parent.prevpos;
+            var dx = pos.x - this.prevpos.x,
+                dy = pos.y - this.prevpos.y;
+            this.dpos = { x: dx, y: dy };
+            //if (this.translatable)
+            //    this.translateBy(this.dpos);
+                
+            this.prevpos = pos;
+        },
+        onDrop: function(e, pos) {
+            this.prevpos = null;
+            this.dpos = null;
+        },
+        onMouseOver: function(e) { this.inside = true;  this.color = this.color2; },
+        onMouseOut: function(e)  { this.inside = false; this.color = this.color1; },
+    };
+    
+    $.jqplot.GrobConnector = function() {};
+    $.jqplot.GrobConnector.prototype = new $.jqplot.Grob();
+    $.jqplot.GrobConnector.prototype.constructor = $.jqplot.GrobConnector; 
+    $.extend($.jqplot.GrobConnector.prototype, {
+        initialize: function(parent, width) {
+            $.jqplot.Grob.prototype.initialize.call(this, parent, null, null);
+            this.name = 'grobconnector';
+            this.translatable = false;
+            this.connectortranslatable = true;
+            this.points = {};
+            this.width = width;
+        },
+        render: function(ctx) {
+            ctx.strokeStyle = this.color;
+            ctx.fillStyle = this.color;
+            ctx.lineWidth = this.width;
+        },
+        
+        isInside: function(pos) {
+            return this.distanceTo(pos) <= this.width + 1;
+        },
+        translateBy: function(dpos) {
+            for (var p in this.points)
+                this.points[p].translateBy(dpos);
+        },
+        onDrag: function(e, pos) {
+            $.jqplot.Grob.prototype.onDrag.call(this, e, pos);
+            
+            //console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ') dpos (', this.dpos.x, this.dpos.y, ')');
+            if (this.connectortranslatable)
+                this.translateBy(this.dpos);
+        },
+    });
+    
+    $.jqplot.Segment = function() {};
+    $.jqplot.Segment.prototype = new $.jqplot.GrobConnector();
+    $.jqplot.Segment.prototype.constructor = $.jqplot.Segment;    
+    $.extend($.jqplot.Segment.prototype, {        
+        initialize: function (parent, p1, p2, width) {
+            $.jqplot.GrobConnector.prototype.initialize.call(this, parent, width);
+            
+            this.name = 'segment';
+            this.points = { p1: p1, p2: p2 };
+            this.p1 = p1;
+            this.p2 = p2;
+        },
+        
+        render: function(ctx) {
+            $.jqplot.GrobConnector.prototype.render.call(this, ctx);
+
+            ctx.beginPath();
+            ctx.moveTo(this.p1.pos.x, this.p1.pos.y);
+            ctx.lineTo(this.p2.pos.x, this.p2.pos.y);
+            ctx.closePath();
+            ctx.stroke();
+        },
+        
+        cross: function(c) {
+            return (this.p2.pos.x - this.p1.pos.x) * (c.y - this.p1.pos.y) - (this.p2.pos.y - this.p1.pos.y) * (c.x - this.p1.pos.x);
+        },
+        dot: function(c) {
+            return (this.p2.pos.x - this.p1.pos.x) * (c.x - this.p1.pos.x) + (this.p2.pos.y - this.p1.pos.y) * (c.y - this.p1.pos.y);
+        },
+        distanceTo: function(c) {
+            var d = 0,
+                v1 = this.dot(c),
+                v2 = this.dot(this.p2.pos);
+                
+            if (v1 < 0)
+                d = dist(this.p1.pos, c);
+            else if (v1 > v2)
+                d = dist(this.p2.pos, c);
+            else
+                d = Math.abs(this.cross(c) / dist(this.p1.pos, this.p2.pos));
+            
+            return d;
+        },
+        
+        onMouseOver: function(e) {
+            $.jqplot.GrobConnector.prototype.onMouseOver.call(this, e);
+        },
+        onMouseOut: function(e) {
+            $.jqplot.GrobConnector.prototype.onMouseOut.call(this, e);
+        },
+    });
+    
+})(jQuery);
+
 
 function getMouse(e) {
 	var t = e.target;
@@ -599,8 +693,8 @@ var Grob = Class.create({
         var dx = pos.x - this.prevpos.x,
             dy = pos.y - this.prevpos.y;
         this.dpos = { x: dx, y: dy };
-        if (this.translatable)
-            this.translateBy(this.dpos);
+        //if (this.translatable)
+        //    this.translateBy(this.dpos);
             
         this.prevpos = pos;
     },
@@ -644,6 +738,8 @@ var Point = Class.create(Grob, {
     },
     onDrag: function($super, e, pos) {
         $super(e, pos);
+        if (this.translatable)
+            this.translateBy(this.dpos);
     },
 });
 var GrobConnector = Class.create(Grob, {
@@ -685,6 +781,7 @@ var Circle = Class.create(GrobConnector, {
         this.points = { p1: p1, c: c };
         this.p1 = p1;
         this.c = c;
+        //this.c.parent = this;
         this.filled = true;
     },
     
@@ -700,6 +797,7 @@ var Circle = Class.create(GrobConnector, {
             ctx.fill();
             ctx.globalAlpha = 0.6;
         }
+        
     },
     
     angleToXaxis: function(p) {
@@ -742,6 +840,7 @@ var Center = Class.create(Point, {
         this.parent.translateBy(this.dpos);
         this.translateBy(this.dpos);
     },
+    
 });
 var Arc = Class.create(GrobConnector, {
     initialize: function($super, parent, c, p1, p2, width) {
