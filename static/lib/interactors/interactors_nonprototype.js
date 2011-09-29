@@ -46,7 +46,7 @@
     points: function() {
         var points = [];
         for (var i = 0; i < this.grobs.length; i ++)
-            if (this.grobs[i] instanceof Point && !(this.grobs[i] instanceof Center))
+            if (this.grobs[i] instanceof $.jqplot.Point && !(this.grobs[i] instanceof $.jqplot.Center))
                 points.push(this.grobs[i]);
         return points;
     },
@@ -180,8 +180,8 @@
     $.jqplot.SegmentInteractor.prototype.init = function(canvasid) {
         $.jqplot.PolygonInteractor.prototype.init.call(this, 'Segment', 'segment.png', 0, canvasid);
                
-        var p1 = new Point(this, 100, 150);
-        var p2 = new Point(this, 200, 150);
+        var p1 = new $.jqplot.Point(); p1.initialize(this, 100, 150);
+        var p2 = new $.jqplot.Point(); p2.initialize(this, 200, 150);
         //var l = new Segment(this, p1, p2, 4);
         var l = new $.jqplot.Segment(); l.initialize(this, p1, p2, 4);
         this.grobs.push(l, p1, p2);
@@ -199,16 +199,16 @@
     $.jqplot.QuadrangleInteractor.prototype.init = function(canvasid) {
         $.jqplot.PolygonInteractor.prototype.init.call(this, 'Quadrangle', 'quad.png', 0, canvasid);
                
-        var p1 = new Point(this, 100, 100);
-        var p2 = new Point(this, 200, 150);
-        var p3 = new Point(this, 200, 200);
-        var p4 = new Point(this, 100, 200);
-        var l1 = new Segment(this, p1, p2, 4);
-        var l2 = new Segment(this, p2, p3, 4);
-        var l3 = new Segment(this, p3, p4, 4);
-        var l4 = new Segment(this, p4, p1, 4);
+        var p1 = new $.jqplot.Point(); p1.initialize(this, 100, 100);
+        var p2 = new $.jqplot.Point(); p2.initialize(this, 200, 150);
+        var p3 = new $.jqplot.Point(); p3.initialize(this, 200, 200);
+        var p4 = new $.jqplot.Point(); p4.initialize(this, 100, 200);
+        var l1 = new $.jqplot.Segment(); l1.initialize(this, p1, p2, 4);
+        var l2 = new $.jqplot.Segment(); l2.initialize(this, p2, p3, 4);
+        var l3 = new $.jqplot.Segment(); l3.initialize(this, p3, p4, 4);
+        var l4 = new $.jqplot.Segment(); l4.initialize(this, p4, p1, 4);
         this.grobs.push(l1, l2, l3, l4, p1, p2, p3, p4);
-        var c = new Center(this, 144 + 4/9, 161 + 1/9);
+        var c = new $.jqplot.Center(); c.initialize(this, 144 + 4/9, 161 + 1/9);
         this.grobs.push(c);
         this.c = c;
         
@@ -225,20 +225,22 @@
     $.jqplot.ParallelogramInteractor.prototype.init = function(canvasid) {
         $.jqplot.PolygonInteractor.prototype.init.call(this, 'Parallelogram', 'pgram.png', 0, canvasid);
                
-        this.p1 = new Point(this, 120, 100);
-        this.p2 = new Point(this, 220, 100);
-        this.p3 = new Point(this, 200, 200);
-        this.p4 = new Point(this, 100, 200);
-        this.c = new Center(this, 160, 150);
-        this.l1 = new Segment(this, this.p1, this.p2, 4);
-        this.l2 = new Segment(this, this.p2, this.p3, 4);
-        this.l3 = new Segment(this, this.p3, this.p4, 4);
-        this.l4 = new Segment(this, this.p4, this.p1, 4);
+        this.p1 = new $.jqplot.Point(); this.p1.initialize(this, 120, 100);
+        this.p2 = new $.jqplot.Point(); this.p2.initialize(this, 220, 100);
+        this.p3 = new $.jqplot.Point(); this.p3.initialize(this, 200, 200);
+        this.p4 = new $.jqplot.Point(); this.p4.initialize(this, 100, 200);
+        this.c = new $.jqplot.Center(); this.c.initialize(this, 160, 150);
+        this.l1 = new $.jqplot.Segment(); this.l1.initialize(this, this.p1, this.p2, 4);
+        this.l2 = new $.jqplot.Segment(); this.l2.initialize(this, this.p2, this.p3, 4);
+        this.l3 = new $.jqplot.Segment(); this.l3.initialize(this, this.p3, this.p4, 4);
+        this.l4 = new $.jqplot.Segment(); this.l4.initialize(this, this.p4, this.p1, 4);
         this.grobs.push(this.l1, this.l2, this.l3, this.l4, this.c, this.p1, this.p2, this.p3, this.p4);
         
-        this.p1.onDrag = this.p1.onDrag.wrap(function(callOriginal, e, pos) {
-            callOriginal(e, pos);
+//        this.p1.onDrag = function(e, pos) {
+//            $.jqplot.Point.prototype.onDrag.call(this, e, pos);
             
+        this.p1.onDrag.wrap(function(callOriginal, e, pos) {
+            callOriginal(e, pos);            
             this.parent.p3.pos.x -= this.dpos.x;
             this.parent.p3.pos.y -= this.dpos.y;
         });
@@ -273,15 +275,16 @@
     
     $.jqplot.RectangleInteractor.prototype.init = function(canvasid) {
         $.jqplot.PolygonInteractor.prototype.init.call(this, 'Rectangle', 'rect.png', 0, canvasid);
-        this.p1 = new Point(this, 100, 100);
-        this.p2 = new Point(this, 200, 100);
-        this.p3 = new Point(this, 200, 200);
-        this.p4 = new Point(this, 100, 200);
-        this.c = new Center(this, 150, 150);
-        this.l1 = new Segment(this, this.p1, this.p2, 4);
-        this.l2 = new Segment(this, this.p2, this.p3, 4);
-        this.l3 = new Segment(this, this.p3, this.p4, 4);
-        this.l4 = new Segment(this, this.p4, this.p1, 4);
+        this.p1 = new $.jqplot.Point(); this.p1.initialize(this, 100, 100);
+        this.p2 = new $.jqplot.Point(); this.p2.initialize(this, 200, 100);
+        this.p3 = new $.jqplot.Point(); this.p3.initialize(this, 200, 200);
+        this.p4 = new $.jqplot.Point(); this.p4.initialize(this, 100, 200);
+        //this.c = new Center(this, 150, 150);
+        this.c = new $.jqplot.Center(); this.c.initialize(this, 150, 150);
+        this.l1 = new $.jqplot.Segment(); this.l1.initialize(this, this.p1, this.p2, 4);
+        this.l2 = new $.jqplot.Segment(); this.l2.initialize(this, this.p2, this.p3, 4);
+        this.l3 = new $.jqplot.Segment(); this.l3.initialize(this, this.p3, this.p4, 4);
+        this.l4 = new $.jqplot.Segment(); this.l4.initialize(this, this.p4, this.p1, 4);
         this.grobs.push(this.l1, this.l2, this.l3, this.l4, this.c, this.p1, this.p2, this.p3, this.p4);
         
         this.p1.onDrag = this.p1.onDrag.wrap(function(callOriginal, e, pos) {
@@ -289,6 +292,8 @@
             
             this.parent.p4.pos.x += this.dpos.x;
             this.parent.p2.pos.y += this.dpos.y;
+            this.parent.c.pos.x += this.dpos.x / 2.0;
+            this.parent.c.pos.y += this.dpos.y / 2.0;
         });
         this.p2.onDrag = this.p2.onDrag.wrap(function(callOriginal, e, pos) {
             callOriginal(e, pos);
@@ -349,9 +354,9 @@
     
     $.jqplot.CircleInteractor.prototype.init = function(canvasid) {
         $.jqplot.Interactor.prototype.init.call(this, 'Circle', 'circ.png', 0, canvasid);
-        var c = new Center(this, 150, 150);
-        var p1 = new Point(this, 200, 150);
-        var circ = new Circle(this, c, p1, 4);
+        var c = new $.jqplot.Center(); c.initialize(this, 150, 150);
+        var p1 = new $.jqplot.Point(); p1.initialize(this, 200, 150);
+        var circ = new $.jqplot.Circle(); circ.initialize(this, c, p1, 4);
         this.grobs.push(circ, c, p1);
         
         this.redraw();
@@ -367,11 +372,11 @@
     $.jqplot.AnnulusInteractor.prototype.init = function(canvasid) {
         $.jqplot.Interactor.prototype.init.call(this, 'Annulus', 'annulus.png', 0, canvasid);
         this.showdata = false;
-        this.c = new Center(this, 150, 150);
-        this.p1 = new Point(this, 200, 150);
-        this.p2 = new Point(this, 250, 150);
-        this.circ1 = new Circle(this, this.c, this.p1, 4);
-        this.circ2 = new Circle(this, this.c, this.p2, 4);
+        this.c = new $.jqplot.Center(); this.c.initialize(this, 150, 150);
+        this.p1 = new $.jqplot.Point(); this.p1.initialize(this, 200, 150);
+        this.p2 = new $.jqplot.Point(); this.p2.initialize(this, 250, 150);
+        this.circ1 = new $.jqplot.Circle(); this.circ1.initialize(this, this.c, this.p1, 4);
+        this.circ2 = new $.jqplot.Circle(); this.circ2.initialize(this, this.c, this.p2, 4);
         this.grobs.push(this.circ1, this.circ2, this.c, this.p1, this.p2);
         
         this.p1.onDrag = this.p1.onDrag.wrap(function(callOriginal, e, pos) {
@@ -433,10 +438,10 @@
     
     $.jqplot.ArcInteractor.prototype.init = function(canvasid) {
         $.jqplot.Interactor.prototype.init.call(this, 'Arc', 'arc.png', 0, canvasid);
-        var c = new Center(this, 150, 150);
-        var p1 = new Point(this, 200, 150);
-        var p2 = new Point(this, 150, 100);
-        var arc = new Arc(this, c, p1, p2, 4);
+        var c = new $.jqplot.Center(); c.initialize(this, 150, 150);
+        var p1 = new $.jqplot.Point(); p1.initialize(this, 200, 150);
+        var p2 = new $.jqplot.Point(); p2.initialize(this, 150, 100);
+        var arc = new $.jqplot.Arc(); arc.initialize(this, c, p1, p2, 4);
         this.grobs.push(arc, c, p1, p2);
         this.c = c;
         this.p1 = p1;
@@ -455,9 +460,9 @@
     
     $.jqplot.LinearInteractor.prototype.init = function(canvasid) {
         $.jqplot.Interactor.prototype.init.call(this, 'Linear', 'linear.png', 0, canvasid);        
-        var p1 = new Point(this, 200, 150);
-        var p2 = new Point(this, 100, 100);
-        this.linear = new Linear(this, p1, p2, 4);
+        var p1 = new $.jqplot.Point(); p1.initialize(this, 200, 150);
+        var p2 = new $.jqplot.Point(); p2.initialize(this, 100, 100);
+        this.linear = new $.jqplot.Linear(); this.linear.initialize(this, p1, p2, 4);
         this.grobs.push(this.linear, p1, p2);
         
         this.redraw();
@@ -468,14 +473,13 @@
     };
     
     $.jqplot.QuadraticInteractor.prototype = new $.jqplot.Interactor();
-    $.jqplot.QuadraticInteractor.prototype.constructor = $.jqplot.QuadraticInteractor;
-    
+    $.jqplot.QuadraticInteractor.prototype.constructor = $.jqplot.QuadraticInteractor;    
     $.jqplot.QuadraticInteractor.prototype.init = function(canvasid) {
         $.jqplot.Interactor.prototype.init.call(this, 'Quadratic', 'quadratic.png', 0, canvasid);
-        var p1 = new Point(this, 200, 150);
-        var p2 = new Point(this, 150, 100);
-        var p3 = new Point(this, 100, 150);
-        this.quadratic = new Quadratic(this, p1, p2, p3, 4);
+        var p1 = new $.jqplot.Point(); p1.initialize(this, 200, 150);
+        var p2 = new $.jqplot.Point(); p2.initialize(this, 150, 100);
+        var p3 = new $.jqplot.Point(); p3.initialize(this, 100, 150);
+        this.quadratic = new $.jqplot.Quadratic(); this.quadratic.initialize(this, p1, p2, p3, 4);
         this.grobs.push(this.quadratic, p1, p2, p3);
         
         this.redraw();
@@ -486,30 +490,20 @@
     };
     
     $.jqplot.GaussianInteractor.prototype = new $.jqplot.Interactor();
-    $.jqplot.GaussianInteractor.prototype.constructor = $.jqplot.GaussianInteractor;
-    
+    $.jqplot.GaussianInteractor.prototype.constructor = $.jqplot.GaussianInteractor;    
     $.extend($.jqplot.GaussianInteractor.prototype, {
         init: function(canvasid) {
             $.jqplot.Interactor.prototype.init.call(this, 'Gaussian', 'gaussian.png', 0, canvasid);
-            var pw = new Point(this, 200, 200);
-            var pk = new Point(this, 150, 100);
-            var gaussian = new Gaussian(this, pk, pw, 4);
+            var pw = new $.jqplot.Point(); pw.initialize(this, 200, 200);
+            var pk = new $.jqplot.Point(); pk.initialize(this, 150, 100);
+            var gaussian = new $.jqplot.Gaussian(); gaussian.initialize(this, pk, pw, 4);
             this.grobs.push(gaussian, pk, pw);
             this.gaussian = gaussian;
             
             this.redraw();
         },
     });
-//    $.jqplot.GaussianInteractor.prototype.init = function(canvasid) {
-//        $.jqplot.Interactor.prototype.init.call(this, 'Gaussian', 'gaussian.png', 0, canvasid);
-//        var pw = new Point(this, 200, 200);
-//        var pk = new Point(this, 150, 100);
-//        var gaussian = new Gaussian(this, pk, pw, 4);
-//        this.grobs.push(gaussian, pk, pw);
-//        this.gaussian = gaussian;
-//        
-//        this.redraw();
-//    };
+
     $.jqplot.Grob = function() {};
     $.jqplot.Grob.prototype = {
         initialize: function(parent, x, y) {
@@ -543,8 +537,8 @@
             var dx = pos.x - this.prevpos.x,
                 dy = pos.y - this.prevpos.y;
             this.dpos = { x: dx, y: dy };
-            //if (this.translatable)
-            //    this.translateBy(this.dpos);
+            if (this.translatable)
+                this.translateBy(this.dpos);
                 
             this.prevpos = pos;
         },
@@ -639,6 +633,347 @@
         },
         onMouseOut: function(e) {
             $.jqplot.GrobConnector.prototype.onMouseOut.call(this, e);
+        },
+    });
+    
+    $.jqplot.Point = function() {};
+    $.jqplot.Point.prototype = new $.jqplot.Grob();
+    $.jqplot.Point.prototype.constructor = $.jqplot.Point;    
+    $.extend($.jqplot.Point.prototype, {        
+        initialize: function (parent, x, y, r) {
+            $.jqplot.Grob.prototype.initialize.call(this, parent, x, y);          
+            this.name = 'point';
+            this.r = r || 6;
+        },
+        
+        render: function(ctx) {
+	        ctx.fillStyle = this.color;
+	        ctx.strokeStyle = 'transparent';
+            ctx.beginPath();
+	        //ctx.moveTo(this.x, this.y);
+            ctx.fillText('(' + this.pos.x.toFixed(0) + ', ' + this.pos.y.toFixed(0) + ')', this.pos.x, this.pos.y - 5);
+	        ctx.arc(this.pos.x, this.pos.y, this.r, 0, Math.PI * 2, true);
+	        ctx.closePath();
+	        ctx.stroke();
+	        ctx.fill();
+        },
+
+        isInside: function(pos) {
+            return this.distanceTo(pos) <= this.r;
+        },
+        
+        onMouseOver: function(e) {
+            $.jqplot.Grob.prototype.onMouseOver.call(this, e);
+        },
+        onMouseOut: function(e) {
+            $.jqplot.Grob.prototype.onMouseOut.call(this, e);
+        },
+        onDrag: function(e, pos) {
+            $.jqplot.Grob.prototype.onDrag.call(this, e, pos);
+            //if (this.translatable)
+            //    this.translateBy(this.dpos);
+        },
+    });
+    
+    $.jqplot.Circle = function() {};
+    $.jqplot.Circle.prototype = new $.jqplot.GrobConnector();
+    $.jqplot.Circle.prototype.constructor = $.jqplot.Circle;    
+    $.extend($.jqplot.Circle.prototype, {        
+        initialize: function(parent, c, p1, width) {
+            $.jqplot.GrobConnector.prototype.initialize.call(this, parent, width);
+            this.name = 'circle';
+            this.points = { p1: p1, c: c };
+            this.p1 = p1;
+            this.c = c;
+            //this.c.parent = this;
+            this.filled = true;
+        },
+        
+        render: function(ctx) {
+            $.jqplot.GrobConnector.prototype.render.call(this, ctx);
+            
+            ctx.beginPath();
+            ctx.arc(this.c.pos.x, this.c.pos.y, dist(this.c.pos, this.p1.pos), 0, 2 * Math.PI, true);
+            ctx.closePath();
+            ctx.stroke();
+            if (this.filled) {
+                ctx.globalAlpha = 0.15;
+                ctx.fill();
+                ctx.globalAlpha = 0.6;
+            }
+            
+        },
+        
+        angleToXaxis: function(p) {
+            return Math.atan2(p.y - this.c.pos.y, p.x - this.c.pos.x);
+        },
+        isInside: function(pos) {
+            var dd = dist(this.c.pos, pos) - dist(this.c.pos, this.p1.pos);
+            if (!this.filled)
+                dd = Math.abs(dd);
+            return dd <= this.width + 1;
+        },
+    });
+    
+    $.jqplot.Center = function() {};
+    $.jqplot.Center.prototype = new $.jqplot.Point();
+    $.jqplot.Center.prototype.constructor = $.jqplot.Center;    
+    $.extend($.jqplot.Center.prototype, {        
+        initialize: function(parent, x, y, r) {
+            $.jqplot.Point.prototype.initialize.call(this, parent, x, y, r || 6);
+            this.name = 'center';
+            this.translatable = false;
+        },
+        
+        render: function(ctx) {
+	        ctx.fillStyle = this.color;
+	        ctx.strokeStyle = 'transparent';
+            ctx.beginPath();
+	        //ctx.moveTo(this.x, this.y);
+            ctx.fillText('(' + this.pos.x.toFixed(0) + ', ' + this.pos.y.toFixed(0) + ')', this.pos.x, this.pos.y - 5);
+	        ctx.moveTo(this.pos.x + this.r, this.pos.y);
+	        ctx.lineTo(this.pos.x, this.pos.y + this.r);
+	        ctx.lineTo(this.pos.x - this.r, this.pos.y);
+	        ctx.lineTo(this.pos.x, this.pos.y - this.r);
+	        ctx.closePath();
+	        ctx.stroke();
+	        ctx.fill();
+        },
+
+        onDrag: function(e, pos) {
+            $.jqplot.Point.prototype.onDrag.call(this, e, pos);
+            
+            //console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ')', this.dpos.dx, this.dpos.dy, dist(this.parent.p1.pos, this.pos), dist(this.parent.p2.pos, this.pos));
+            this.parent.translateBy(this.dpos);
+            this.translateBy(this.dpos);
+        },
+        
+    });
+    
+    $.jqplot.Arc = function() {};
+    $.jqplot.Arc.prototype = new $.jqplot.GrobConnector();
+    $.jqplot.Arc.prototype.constructor = $.jqplot.Arc;    
+    $.extend($.jqplot.Arc.prototype, {        
+        initialize: function(parent, c, p1, p2, width) {
+            $.jqplot.GrobConnector.prototype.initialize.call(this, parent, width);
+            
+            p1.onDrag = p1.onDrag.wrap(function(callOriginal, e, pos) {
+                callOriginal(e, pos);
+                
+                var r = dist(this.pos, this.parent.c.pos),
+                    t_ = this.parent.arc.angleToXaxis(this.parent.p2.pos);
+                this.parent.p2.pos.x = this.parent.c.pos.x + Math.cos(t_) * r;
+                this.parent.p2.pos.y = this.parent.c.pos.y + Math.sin(t_) * r;
+            });
+            p2.onDrag = p2.onDrag.wrap(function(callOriginal, e, pos) {
+                callOriginal(e, pos);
+                
+                var r = dist(this.pos, this.parent.c.pos),
+                    t_ = this.parent.arc.angleToXaxis(this.parent.p1.pos);
+                this.parent.p1.pos.x = this.parent.c.pos.x + Math.cos(t_) * r;
+                this.parent.p1.pos.y = this.parent.c.pos.y + Math.sin(t_) * r;
+            });
+            
+            this.name = 'arc';
+            this.points = { c: c, p1: p1, p2: p2 };
+            this.p1 = p1;
+            this.p2 = p2;
+            this.c = c;
+        },
+        render: function(ctx) {
+            $.jqplot.GrobConnector.prototype.render.call(this, ctx);
+            
+            ctx.beginPath();
+            var t_1 = this.angleToXaxis(this.p1.pos),
+                t_2 = this.angleToXaxis(this.p2.pos);
+            //console.log(t_1, t_2);
+            //ctx.moveTo(this.c.pos.x, this.c.pos.y);
+            ctx.arc(this.c.pos.x, this.c.pos.y, dist(this.c.pos, this.p1.pos), t_1, t_2, true);
+            //ctx.closePath();
+            ctx.stroke();
+            //ctx.globalAlpha = 0.15;
+            //ctx.fill();
+            //ctx.globalAlpha = 0.6;
+        },
+        
+        angleToXaxis: function(p) {
+            return Math.atan2(p.y - this.c.pos.y, p.x - this.c.pos.x);
+        },
+        angleBetweenAngles: function(n, a, b) {
+            n = (360 + (n % 360)) % 360;
+            a = (3600000 + a) % 360;
+            b = (3600000 + b) % 360;
+
+            if (a < b)
+                return a <= n && n <= b;
+            return 0 <= n && n <= b || a <= n && n < 360;
+        },
+        distanceTo: function(pos) {
+            var d = 0,
+                t_1 = this.angleToXaxis(this.p1.pos),
+                t_2 = this.angleToXaxis(this.p2.pos),
+                t_  = this.angleToXaxis(pos);
+            var between = this.angleBetweenAngles(t_, t_2, t_1);
+            //console.log(t_, t_1, t_2, between);
+                
+            if (between)
+                d = Math.abs(dist(this.c.pos, pos) - dist(this.c.pos, this.p1.pos));
+            else
+                d = Math.min(dist(this.p1.pos, pos), dist(this.p2.pos, pos));
+            
+            return d;
+        },
+    });
+    
+    $.jqplot.FunctionConnector = function() {};
+    $.jqplot.FunctionConnector.prototype = new $.jqplot.GrobConnector();
+    $.jqplot.FunctionConnector.prototype.constructor = $.jqplot.FunctionConnector;    
+    $.extend($.jqplot.FunctionConnector.prototype, {        
+        initialize: function(parent, width) {
+            $.jqplot.GrobConnector.prototype.initialize.call(this, parent, width);            
+            this.f = null;
+        },
+        distanceTo: function(pos) {
+            var f = (function(x) { return dist(pos, { x: x, y: this.c.pos.y - this.f(x) }); }).bind(this),
+                df = nDeriv(f),
+                d2f = nDeriv(df),
+                x0 = pos.x,
+                prevxs = [],
+                min = [],
+                minx = null;
+            
+            for (x0 = 0; x0 < this.parent.canvas.width; x0 += 1)
+              if (minx == null || f(x0) < f(minx))
+                minx = x0;
+            min = root_bisect(df, minx - 4, minx + 4, 0.1);
+            
+            /*
+            //console.log(min[0], f(min[0]));
+            min = root_bisect(df, 0, this.parent.canvas.width);
+            min = root_newtons(df, d2f, min[0]);*/
+            var x = min[0], prevxs = min[1];
+            
+            var fpos = { x: x, y: this.c.pos.y - this.f(x) };
+            var d = dist(pos, fpos);
+            //console.log('pos (',pos.x, pos.y,') fpos (',fpos.x.toFixed(2), fpos.y.toFixed(2), ') x =',x ,'d =', d);
+            return d;
+        },        
+    });
+    
+    $.jqplot.Linear = function() {};
+    $.jqplot.Linear.prototype = new $.jqplot.FunctionConnector();
+    $.jqplot.Linear.prototype.constructor = $.jqplot.Linear;    
+    $.extend($.jqplot.Linear.prototype, {        
+        initialize: function(parent, p1, p2, width) {
+            $.jqplot.FunctionConnector.prototype.initialize.call(this, parent, width);
+
+            this.name = 'Linear';
+            this.f = this.linear;
+            this.points = { p1: p1, p2: p2 };
+            this.p1 = p1;
+            this.p2 = p2;
+            this.c = p1;
+        },
+        render: function(ctx) {
+            $.jqplot.FunctionConnector.prototype.render.call(this, ctx);
+            
+            // Vertical lines
+            if (this.p1.pos.x == this.p2.pos.x) {
+                ctx.beginPath();
+                ctx.moveTo(this.p1.pos.x, 0);
+                ctx.lineTo(this.p2.pos.x, this.parent.canvas.height);
+                ctx.closePath();
+                ctx.stroke();
+            }
+            else
+                drawEq(ctx, this.f.bind(this), 0, this.c.pos.y, 0, this.parent.canvas.width);
+        },
+        
+        linear: function(x) {
+            var X1 = this.p1.pos.x, X2 = this.p2.pos.x,
+                Y1 = this.c.pos.y - this.p1.pos.y, Y2 = this.c.pos.y - this.p2.pos.y;
+            var a = (Y2-Y1) / (X2-X1),
+                b = Y1 - a*X1;
+                
+            return a*x+b;
+        },
+        // Overriding super because the computation here is much simpler
+        distanceTo: function(pos) {
+            var X1 = this.p1.pos.x, X2 = this.p2.pos.x,
+                Y1 = this.c.pos.y - this.p1.pos.y, Y2 = this.c.pos.y - this.p2.pos.y;
+            
+            var d = 0;
+            // Vertical lines
+            if (X1 == X2)
+                d = Math.abs(pos.x - X1);
+            else {
+                var a = (Y2-Y1) / (X2-X1),
+                    b = Y1 - a*X1;
+                
+                d = Math.abs(-a * pos.x + this.c.pos.y - pos.y - b) / Math.sqrt(a * a);
+            }
+            return d;
+        },
+    });
+    
+    $.jqplot.Quadratic = function() {};
+    $.jqplot.Quadratic.prototype = new $.jqplot.FunctionConnector();
+    $.jqplot.Quadratic.prototype.constructor = $.jqplot.Quadratic;    
+    $.extend($.jqplot.Quadratic.prototype, {        
+        initialize: function(parent, p1, p2, p3, width) {
+            $.jqplot.FunctionConnector.prototype.initialize.call(this, parent, width);
+            this.name = 'quadratic';
+            this.f = this.quadratic;
+            this.points = { p1: p1, p2: p2, p3: p3 };
+            this.p1 = p1;
+            this.p2 = p2;
+            this.p3 = p3;
+            this.c = p1;
+        },
+        render: function(ctx) {
+            $.jqplot.FunctionConnector.prototype.render.call(this, ctx);
+            
+            drawEq(ctx, this.f.bind(this), 0, this.c.pos.y, 0, this.parent.canvas.width);
+        },
+        
+        quadratic: function(x) {
+            var X1 = this.p1.pos.x, X2 = this.p2.pos.x, X3 = this.p3.pos.x,
+                Y1 = this.c.pos.y - this.p1.pos.y, Y2 = this.c.pos.y - this.p2.pos.y, Y3 = this.c.pos.y - this.p3.pos.y;
+            var a = ((Y2-Y1)*(X1-X3) + (Y3-Y1)*(X2-X1))/((X1-X3)*(X2*X2-X1*X1) + (X2-X1)*(X3*X3-X1*X1)),
+                b = ((Y2-Y1) - a*(X2*X2-X1*X1)) / (X2-X1),
+                c = Y1 - a*X1*X1 - b*X1;
+                
+            return a*x*x+b*x+c;
+        },
+    });
+    
+    $.jqplot.Gaussian = function() {};
+    $.jqplot.Gaussian.prototype = new $.jqplot.FunctionConnector();
+    $.jqplot.Gaussian.prototype.constructor = $.jqplot.Gaussian;    
+    $.extend($.jqplot.Gaussian.prototype, {        
+        initialize: function(parent, pk, pw, width) {
+            $.jqplot.FunctionConnector.prototype.initialize.call(this, parent, width);
+            
+            this.name = 'gaussian';
+            this.f = this.gaussian;
+            this.points = { pk: pk, pw: pw };
+            this.pk = pk;
+            this.pw = pw;
+            this.c = pw;
+        },
+        render: function(ctx) {
+            $.jqplot.FunctionConnector.prototype.render.call(this, ctx);
+            drawEq(ctx, this.f.bind(this), 0, this.c.pos.y, 0, this.parent.canvas.width);
+        },
+        
+        gaussian: function(x) {
+            var peakX = this.pk.pos.x,
+                peakY = this.c.pos.y - this.pk.pos.y,
+                FWHM = Math.abs(this.c.pos.x - peakX),
+                bkgdY = 0;
+            var stdDev = FWHM / 2 / Math.sqrt(2 * Math.log(2));
+            //return - peakY + Math.pow(x - 150, 2) / 100;
+            return bkgdY + (peakY - bkgdY) * Math.exp(- Math.pow((x - peakX), 2) / 2 / Math.pow(stdDev, 2));
         },
     });
     
