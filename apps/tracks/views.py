@@ -56,6 +56,9 @@ def xhr_test(request):
 def showInteractors(request):
 	return render_to_response('interactors.html')
 
+def showPlotWindow(request):
+	return render_to_response('plotwindow.html')
+
 def mytest(request):
    return render_to_response('tracer_testingforWireit/xhr_temp.html')
 

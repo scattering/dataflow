@@ -14,6 +14,7 @@ urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views',
 		#('^login/$', 'django.contrib.auth.views.login'),
 		('^listWirings/$', 'listWirings'),
 		('^interactors/$', 'showInteractors'),
+		('^plotWindow/$', 'showPlotWindow'),
 		
 		# Wiring editor display urls
 		('^editor/$', 'displayEditor'),

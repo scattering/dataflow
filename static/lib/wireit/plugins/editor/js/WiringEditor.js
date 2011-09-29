@@ -492,7 +492,10 @@
 		displayResult: function(display) {
 			plotid = 'plot';
 			toPlot = display
-			plottingAPI(toPlot, plotid)
+			if (!this.plotWindow || !this.plotWindow.window) {
+			    this.plotWindow = window.open("/plotWindow/", "", "status=1,width=650,height=500");
+			}
+			this.plotWindow.plottingAPI(toPlot, plotid)
 
 		},
 		runModuleFailure: function(error) {

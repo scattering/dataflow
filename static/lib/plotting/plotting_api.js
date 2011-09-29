@@ -711,7 +711,8 @@ var toPlots_input = null;
 
 function plottingAPI(toPlots, plotid_prefix) {
     toPlots_input = toPlots;
-    if (toPlots.constructor != Array) {
+    console.log(toPlots.constructor.name)
+    if (toPlots.constructor.name != "Array") {
         toPlots = [toPlots];
         if (debug)
             console.log('changing singleton data to length-1 array')
