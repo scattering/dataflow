@@ -508,13 +508,14 @@ var asterix = {
             "multiple": true, 
             "name": "output", 
             "offsetPosition": {
-              "left": 48, 
+              "right": -16, 
               "top": 16
             }, 
             "required": false
           }
-        ], 
-        "xtype": "AutosizeImageContainer"
+        ],
+        "width": 120,
+        "xtype": "OffsetContainer"
       }, 
       "fields": [
         {
@@ -526,9 +527,9 @@ var asterix = {
             "xpixel": 0.0
           }
         }
-      ], 
+      ],
       "name": "Offset"
-    }, 
+    },
     
     {
       "container": {
@@ -613,7 +614,7 @@ var asterix = {
             "direction": [-1,0], 
             "multiple": false, 
             "name": "input", 
-            "offsetPosition": {"left": -12, "top": 16}, 
+            //"offsetPosition": {"left": -12, "top": 16}, 
             "required": true
           }, 
           {
@@ -625,7 +626,7 @@ var asterix = {
             "direction": [0,1], 
             "multiple": true, 
             "name": "output_x", 
-            "offsetPosition": {"right": -16,"top": 4}, 
+            //"offsetPosition": {"right": -16,"top": 4}, 
             "required": false
           }, 
           {
@@ -637,7 +638,7 @@ var asterix = {
             "direction": [1,0], 
             "multiple": true, 
             "name": "output_y", 
-            "offsetPosition": {"right": -16, "top": 40}, 
+            //"offsetPosition": {"right": -16, "top": 40}, 
             "required": false
           }
         ], 
@@ -791,80 +792,162 @@ var asterix = {
   ]
 };
 
+OffsetContainer = function(opts, layer) {
+    OffsetContainer.superclass.constructor.call(this, opts, layer);
+    var content = document.createElement('div');
+    content.innerHTML = '';
+    //var saveButton = document.createElement('img');
+    var getAxisInfoButton = document.createElement('button');
+    getAxisInfoButton.value = 'getaxisinfo';
+    getAxisInfoButton.innerHTML = 'Get axis info';
+    //saveButton.src = this.image;
+    content.appendChild(getAxisInfoButton);
+    this.axisDescription = document.createElement('div');
+    console.log(this.axisDescription);
+    this.axisDescription.innerHTML = '';
+    console.log(this.axisDescription, this);
+    content.appendChild(this.axisDescription)
+    
+    this.setBody(content);
+    YAHOO.util.Event.addListener(getAxisInfoButton, 'click', this.getAxisInfo, this, true);
+};
+
+YAHOO.lang.extend(OffsetContainer, WireIt.Container, {
+    getAxisInfo: function(e, f) {
+        var reductionInstance = editor.reductionInstance;
+        var wires = f.wires;
+        if (wires.length == 0) {
+            alert('no data to get (no wires in)');
+            return
+        } else {
+            var wire_in = f.wires[0];
+            clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
+        }
+        //editor.getPlottable(reductionInstance, clickedOn);
+		var toReduce = editor.generateReductionRecipe(reductionInstance, clickedOn);
+        //if (this.terminals[0].wires.length < 1) { alert('no wires'); return }
+		editor.adapter.runReduction(toReduce, {
+		    success: this.updateAxes,
+		    failure: editor.runModuleFailure,
+		    scope: this,
+		});		    		    
+	},
+    updateAxes: function(plottable_data) {
+        console.log('updating Axes');
+        if (Object.prototype.toString.call(plottable_data) === "[object Array]") {
+            var plottable_data = plottable_data[0];
+        }
+        if (plottable_data.type == "2d") {
+            var axes_labels = [plottable_data.xlabel, plottable_data.ylabel];
+        }
+        else if (plottable_data.typ == "nd") {
+            var axes_labels = [plottable_data.orderx[0].label];
+        }
+        var displayText = "";
+        for (var i in axes_labels) {
+            displayText += axes_labels[i] + '<br>';
+        }
+        var module = null;
+        //var CHOSEN_LANG = andr2;
+        for (var index in CHOSEN_LANG.modules) {
+		    if(CHOSEN_LANG.modules[index].name == this.title) {
+		        module = CHOSEN_LANG.modules[index];
+				break;
+			}
+		}
+        console.log(plottable_data, this, "displayText:", displayText, "fields:", module.fields);
+        this.axisDescription.innerHTML = displayText;
+        module.fields[0].value = {}
+        for (var i in axes_labels) {
+            module.fields[0].value[axes_labels[i]] = 0.0;
+        }
+    },
+});
+
 SaveContainer = function(opts, layer) {
     SaveContainer.superclass.constructor.call(this, opts, layer);
-    var content = document.createElement('div')
-    content.innerHTML = 'Click here to save:';
-    var saveButton = document.createElement('img');
-    saveButton.src = this.image;
-    content.appendChild(saveButton);    
+    
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    var content = document.createElement('div');
+    content.innerHTML = '';
+    //var saveButton = document.createElement('img');
+    var saveButton = document.createElement('button');
+    saveButton.value = 'save';
+    saveButton.innerHTML = 'Save';
+    //saveButton.src = this.image;
+    content.appendChild(saveButton); 
+    
+//    var getCSVForm = document.createElement('form');
+//    getCSVForm.method = "post";
+//    getCSVForm.action="getCSV/";
+//    getCSVForm.id = 'narf';
+//    var csrf_div = document.createElement('div');
+//    csrf_div.style = "display:none";
+//    var csrf_input = document.createElement('input');
+//    csrf_input.type = "hidden";
+//    csrf_input.name = "csrfmiddlewaretoken";
+//    csrf_input.value = getCookie('csrftoken');
+//    csrf_div.appendChild(csrf_input);
+//    getCSVForm.appendChild(csrf_div);
+//    var data_input = document.createElement('input');
+//    data_input.type = 'hidden';
+//    data_input.id = 'data';
+//    data_input.name = 'data';
+//    getCSVForm.appendChild(data_input);
+//    var outfilename = document.createElement('input');
+//    outfilename.type='text';
+//    outfilename.id = 'outfilename';
+//    outfilename.value = 'data.csv';
+//    getCSVForm.appendChild(outfilename);
+    
+    var getCSVButton = document.createElement('button');
+    //getCSVButton.type = 'submit';
+    getCSVButton.value = 'getCSV';
+    getCSVButton.innerHTML = 'download CSV';
+    //saveButton.src = this.image;
+    //getCSVForm.appendChild(getCSVButton); 
+    //content.appendChild(getCSVForm);
+    content.appendChild(getCSVButton);
+      
     this.setBody(content);
+    this.CSVForm = getCSVForm;
 
     YAHOO.util.Event.addListener(saveButton, 'click', this.Save, this, true);
+    YAHOO.util.Event.addListener(getCSVButton, 'click', this.getCSV, this, true);
 };
 
 YAHOO.lang.extend(SaveContainer, WireIt.Container, {
     xtype: 'SaveContainer',
     Save: function(e) {
         console.log('save click:', e);
-        alert('I am saving!');
-    }
-});
-
-AutosizeImageContainer = function(opts, layer) {
-    AutosizeImageContainer.superclass.constructor.call(this, opts, layer);
-    var that = this;
-
-    function auto_space(number, width) {
-        // takes a number and places it in the width evenly
-        var locs = [];
-        if (number == 1) {
-            locs.push(Math.round(width / 2));
+        alert('save to server not yet implemented.  Try downloading CSV version of data');
+    },
+    getCSV: function(e, f) {
+        var reductionInstance = editor.reductionInstance;
+        var wires = f.wires;
+        if (wires.length == 0) {
+            alert('no data to get (no wires in)');
+            return
         } else {
-            var spacing = width / (number-1);
-            for (var i=0; i<number; i++) {
-                locs.push(Math.round(i*spacing));
-            }
-        }  
-        return locs;
-    }
-    
-    function distribute_terminals(terminals, width, height) {
-        var locs = [];
-        var directions = {
-            'left': {'fit_axis':'top', 'range': width, 'test': function(el) { return el.direction[0] < 0 } },
-            'right': {'fit_axis':'top', 'range': width, 'test': function(el) { return el.direction[0] > 0 } },
-            'top': {'fit_axis':'left', 'range': height, 'test': function(el) { return el.direction[1] < 0 } },
-            'bottom': {'fit_axis':'left', 'range': height, 'test': function(el) { return el.direction[1] > 0 } },
+            var wire_in = f.wires[0];
+            clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
         }
-        
-        for (var d in directions) {
-            var terms = terminals.filter( directions[d].test );
-            var padding = 4;
-            var term_size = 16;
-            var range = (directions[d].range - term_size) - (2*padding);
-            var locs = auto_space(terms.length, range);
-            for (var i in terms) {
-                var term = terms[i];
-                term.el.style.setProperty(d, (-1 * term_size));
-                term.offsetPosition[d] = (-1 * term_size);
-                term.el.style.setProperty(directions[d].fit_axis, (locs[i] - (term_size/2) + padding));
-                term.offsetPosition[directions[d].fit_axis] = (locs[i] - (term_size/2) + padding);
-            }
-        }
-    }
-    
-    this.image_obj = new Image();
-    var that = this;
-    this.image_obj.onload = function() {
-        // set the element size, and distribute terminals.
-        that.el.style.width = that.image_obj.width + "px";
-        that.el.style.height = that.image_obj.height + "px";
-        distribute_terminals(that.terminals, that.image_obj.width, that.image_obj.height);
-    }
-    this.image_obj.src = opts.image;
-}
-
-YAHOO.lang.extend(AutosizeImageContainer, WireIt.ImageContainer, {
-    xtype: 'AutosizeImageContainer',
+        editor.getCSV(reductionInstance, clickedOn);
+    },
 });
+
