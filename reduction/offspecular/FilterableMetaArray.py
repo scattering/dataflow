@@ -141,7 +141,8 @@ class FilterableMetaArray(MetaArray):
                 dims[axis[index] + 'dim'] = len(arr)
             xlabel = self._info[0]['name']
             ylabel = self._info[1]['name']
-            zlabel = self._info[2]['cols'][0]['name']
+            zlabel = col
+            #zlabel = self._info[2]['cols'][0]['name']
             title = 'AND/R data' # That's creative enough, right?
             plot_type = '2d'
             transform = 'log' # this is nice by default

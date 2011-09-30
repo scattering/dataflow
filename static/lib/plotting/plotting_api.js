@@ -674,23 +674,26 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         plot2d_colorbar = null;
     }
     
-    document.getElementById('plot_selectnum').innerHTML = "";
-    for (var i=0; i<toPlots.length; i++) {
-        jQuery(document.getElementById('plot_selectnum')).append(jQuery('<option />', { value: i, text: 'dataset: ' + i }));
-    }
-    
     var plotnum = plotnum || 0;
     var toPlot = toPlots[plotnum];
     var toPlots = toPlots;
     var transform = toPlot.transform || 'lin';
     console.log('starting 2d plot');
+    
+    document.getElementById('plot_selectnum').innerHTML = "";
+    for (var i=0; i<toPlots.length; i++) {
+        var zlabel = toPlots[i].zlabel || '';
+        jQuery(document.getElementById('plot_selectnum')).append(jQuery('<option />', { value: i, text: 'dataset: ' + i + " " + zlabel }));
+    }
+    
+    
     plot = renderImageData(toPlot, transform, 'plot2d');
     colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
     var selectedIndex;
     if ( transform == 'log') { selectedIndex = 1 }
     else { selectedIndex = 0 }
     document.getElementById('plot_selectz').selectedIndex = selectedIndex;
-
+    
     
     function onchange(e) {
         console.log(e);
