@@ -666,7 +666,7 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 410px; height: 100px;", id:"plotbuttons"}));
         jQuery(document.getElementById('plotbuttons')).append(jQuery('<select />', {id:"plot_selectz"}));
         jQuery(document.getElementById('plotbuttons')).append(jQuery('<select />', {id:"plot_selectnum"}));
-        jQuery(document.getElementById('plotbuttons')).append(jQuery('<input />', {id:"plot_update", type:"submit", value:"Update plot"}));
+        //jQuery(document.getElementById('plotbuttons')).append(jQuery('<input />', {id:"plot_update", type:"submit", value:"Update plot"}));
         jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'lin', text: 'lin' }));
         jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'log', text: 'log' }));
         plot = null;
@@ -686,10 +686,13 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
     console.log('starting 2d plot');
     plot = renderImageData(toPlot, transform, 'plot2d');
     colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
+    var selectedIndex;
+    if ( transform == 'log') { selectedIndex = 1 }
+    else { selectedIndex = 0 }
+    document.getElementById('plot_selectz').selectedIndex = selectedIndex;
 
     
-    jQuery('#plot_update').unbind('click');
-    jQuery('#plot_update').click({ plot: plot, colorbar: colorbar, toPlots: toPlots }, function(e) {
+    function onchange(e) {
         console.log(e);
         var plot = e.data.plot; var toPlots = e.data.toPlots; var colorbar = e.data.colorbar;
         var selectz = document.getElementById('plot_selectz');
@@ -700,7 +703,25 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         console.log('replot: ', plotnum, transform, toPlot, toPlots)
         plot = renderImageData(toPlot, transform, 'plots');
         colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
-    });
+    }
+    
+    jQuery('#plot_selectnum').change({ plot: plot, colorbar: colorbar, toPlots: toPlots }, onchange);
+    jQuery('#plot_selectz').change({ plot: plot, colorbar: colorbar, toPlots: toPlots }, onchange);
+    jQuery('#plot_update').unbind('click');
+//    jQuery('#plot_update').click({ plot: plot, colorbar: colorbar, toPlots: toPlots }, onchange
+//        function(e) {
+//            console.log(e);
+//            var plot = e.data.plot; var toPlots = e.data.toPlots; var colorbar = e.data.colorbar;
+//            var selectz = document.getElementById('plot_selectz');
+//            var selectnum = document.getElementById('plot_selectnum');
+//            var transform = selectz[selectz.selectedIndex].value;
+//            var plotnum = selectnum[selectnum.selectedIndex].value;
+//            var toPlot = toPlots[plotnum];
+//            console.log('replot: ', plotnum, transform, toPlot, toPlots)
+//            plot = renderImageData(toPlot, transform, 'plots');
+//            colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
+//        }
+//    );
     
     return plot; 
 }

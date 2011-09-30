@@ -4,6 +4,9 @@
 */*.pyc
 */*/*.pyc
 */*/*/*.pyc
+django-profiles
+django-registration
+OOSuite
 .project
 .pydevproject
 .wpr

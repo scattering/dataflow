@@ -1,6 +1,9 @@
-// ###############
-// # INTERACTORS #
-// ###############
+// #####################
+// # INTERACTORS       #
+// # by Ophir Lifshitz #
+// # Aug, 2011         #
+// #####################
+
 (function($) {
     $.jqplot.Interactor = function(){
     };
