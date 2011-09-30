@@ -803,7 +803,7 @@ var andr2 = {
       ], 
       "name": "Empty QxQz grid"
     },
-        {
+    {
       "container": {
         "icon": "../../static/img/offspecular/autogrid.png", 
         "image": "../../static/img/offspecular/mask_image.png", 

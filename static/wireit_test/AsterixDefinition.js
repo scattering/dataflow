@@ -101,11 +101,11 @@ var asterix = {
         }
       ], 
       "name": "Save"
-    }, 
+    },
     {
       "container": {
-        "icon": "../../static/img/offspecular/autogrid.png", 
-        "image": "../../static/img/offspecular/autogrid_image.png", 
+        "icon": "../../static/img/offspecular/tof_lambda_icon.png", 
+        "image": "../../static/img/offspecular/tof_lambda_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -152,20 +152,251 @@ var asterix = {
       }, 
       "fields": [
         {
-          "label": "extra grid point", 
-          "name": "extra_grid_point", 
-          "type": "bool", 
-          "value": true
+          "label": "Wavelength over Time-of-Flight", 
+          "name": "wl_over_tof", 
+          "type": "scientific", 
+          "value": 1.9050372144288577e-5,
+        }, 
+      ], 
+      "name": "TOF to Wavelength"
+    },
+    {
+      "container": {
+        "icon": "../../static/img/offspecular/shift_icon.png", 
+        "image": "../../static/img/offspecular/shift_image.png", 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:out"
+              ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": -12, 
+              "top": 16
+            }, 
+            "required": true
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:in"
+              ], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "left": 48, 
+              "top": 16
+            }, 
+            "required": false
+          }
+        ], 
+        "xtype": "AutosizeImageContainer"
+      }, 
+      "fields": [
+        {
+          "label": "Edge Bin", 
+          "name": "edge_bin", 
+          "type": "int", 
+          "value": 180,
+        },
+        {
+          "label": "Axis",
+          "name": "axis",
+          "type": "int",
+          "value": 0,
+        },
+      ], 
+      "name": "Shift Data"
+    },
+    {
+      "container": {
+        "icon": "../../static/img/offspecular/qxqz.png", 
+        "image": "../../static/img/offspecular/twothetalambda_qxqz_image.png", 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:out"
+              ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": -12, 
+              "top": 4
+            }, 
+            "required": true
+          },  
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:in"
+              ], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "left": 48, 
+              "top": 16
+            }, 
+            "required": false
+          }
+        ], 
+        "xtype": "AutosizeImageContainer"
+      },
+      "fields": [
+        {
+          "label": "Sample angle (theta)", 
+          "name": "theta", 
+          "type": "string", 
+          "value": ""
+        },
+        {
+          "label": "Qx min", 
+          "name": "qxmin", 
+          "type": "float", 
+          "value": -0.0030000000000000001
         }, 
         {
-          "label": "minimum step", 
-          "name": "min_step", 
+          "label": "Qx max", 
+          "name": "qxmax", 
           "type": "float", 
-          "value": 1e-10
+          "value": 0.0030000000000000001
+        }, 
+        {
+          "label": "Qx bins", 
+          "name": "qxbins", 
+          "type": "int", 
+          "value": 201
+        }, 
+        {
+          "label": "Qz min", 
+          "name": "qzmin", 
+          "type": "float", 
+          "value": 0.0
+        }, 
+        {
+          "label": "Qz max", 
+          "name": "qzmax", 
+          "type": "float", 
+          "value": 0.10000000000000001
+        }, 
+        {
+          "label": "Qz bins", 
+          "name": "qzbins", 
+          "type": "int", 
+          "value": 201
         }
       ], 
-      "name": "Autogrid"
+      "name": "Two theta lambda to qxqz"
+    },
+    {
+      "container": {
+        "icon": "../../static/img/offspecular/autogrid.png", 
+        "image": "../../static/img/offspecular/mask_image.png", 
+        "height": 16, 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:out"
+              ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": -12, 
+              "top": 16
+            }, 
+            "required": true
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:in"
+              ], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "right": -12, 
+              "top": 16
+            }, 
+            "required": false
+          }
+        ],  
+        "width": 80, 
+        "xtype": "AutosizeImageContainer",
+      }, 
+      "fields": [
+        {
+          "label": "xmin pixel", 
+          "name": "xmin", 
+          "type": "string", 
+          "value": "0"
+        }, 
+        {
+          "label": "xmax pixel", 
+          "name": "xmax", 
+          "type": "string", 
+          "value": ""
+        }, 
+        {
+          "label": "ymin pixel", 
+          "name": "ymin", 
+          "type": "string", 
+          "value": "0"
+        }, 
+        {
+          "label": "ymax pixel", 
+          "name": "ymax", 
+          "type": "string", 
+          "value": ""
+        }, 
+      ], 
+      "name": "Mask Data"
     }, 
+    
     {
       "container": {
         "icon": "../../static/img/offspecular/sum.png", 
@@ -298,64 +529,7 @@ var asterix = {
       ], 
       "name": "Offset"
     }, 
-    {
-      "container": {
-        "icon": "../../static/img/offspecular/wiggle.png", 
-        "image": "../../static/img/offspecular/wiggle_image.png", 
-        "terminals": [
-          {
-            "alwaysSrc": false, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:out"
-              ], 
-              "type": "data2d.ospec:in"
-            }, 
-            "direction": [
-              -1, 
-              0
-            ], 
-            "multiple": false, 
-            "name": "input", 
-            "offsetPosition": {
-              "left": -12, 
-              "top": 16
-            }, 
-            "required": true
-          }, 
-          {
-            "alwaysSrc": true, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:in"
-              ], 
-              "type": "data2d.ospec:out"
-            }, 
-            "direction": [
-              1, 
-              0
-            ], 
-            "multiple": true, 
-            "name": "output", 
-            "offsetPosition": {
-              "left": 48, 
-              "top": 16
-            }, 
-            "required": false
-          }
-        ], 
-        "xtype": "AutosizeImageContainer"
-      }, 
-      "fields": [
-        {
-          "label": "amplitude", 
-          "name": "scale", 
-          "type": "float", 
-          "value": 0.14000000000000001
-        }
-      ], 
-      "name": "Wiggle"
-    }, 
+    
     {
       "container": {
         "icon": "../../static/img/offspecular/twotheta.png", 
@@ -406,177 +580,76 @@ var asterix = {
       }, 
       "fields": [
         {
-          "label": "pixels per degree", 
-          "name": "pixels_per_degree", 
+          "label": "pixel width over d", 
+          "name": "pw_over_d", 
           "type": "float", 
-          "value": 80.0
+          "value": 0.0003411385649,
         }, 
         {
           "label": "qzero pixel", 
           "name": "qzero_pixel", 
-          "type": "int", 
-          "value": 309
+          "type": "float", 
+          "value": 145.0,
         }, 
         {
-          "label": "instrument resolution", 
-          "name": "instr_resolution", 
+          "label": "twotheta offset", 
+          "name": "twotheta_offset", 
           "type": "float", 
-          "value": 9.9999999999999995e-07
+          "value": 0.0,
         }
       ], 
-      "name": "Pixels to two theta"
-    }, 
+      "name": "Asterix Pixels to two theta"
+    },
     {
       "container": {
-        "icon": "../../static/img/offspecular/qxqz.png", 
-        "image": "../../static/img/offspecular/qxqz_image.png", 
+        "icon": "../../static/img/offspecular/autogrid.png", 
+        "image": "../../static/img/offspecular/slice_image.png", 
         "terminals": [
-          {
-            "alwaysSrc": false, 
+          { "alwaysSrc": false, 
             "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:out"
-              ], 
+              "allowedTypes": ["data2d.ospec:out" ], 
               "type": "data2d.ospec:in"
             }, 
-            "direction": [
-              -1, 
-              0
-            ], 
+            "direction": [-1,0], 
             "multiple": false, 
             "name": "input", 
-            "offsetPosition": {
-              "left": -12, 
-              "top": 4
-            }, 
+            "offsetPosition": {"left": -12, "top": 16}, 
             "required": true
           }, 
           {
-            "alwaysSrc": false, 
+            "alwaysSrc": true, 
             "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:out"
-              ], 
-              "type": "data2d.ospec:in"
+              "allowedTypes": ["data2d.ospec:in"], 
+              "type": "data2d.ospec:out"
             }, 
-            "direction": [
-              -1, 
-              0
-            ], 
-            "multiple": false, 
-            "name": "output_grid", 
-            "offsetPosition": {
-              "left": -12, 
-              "top": 40
-            }, 
+            "direction": [0,1], 
+            "multiple": true, 
+            "name": "output_x", 
+            "offsetPosition": {"right": -16,"top": 4}, 
             "required": false
           }, 
           {
             "alwaysSrc": true, 
             "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:in"
-              ], 
+              "allowedTypes": ["data2d.ospec:in"], 
               "type": "data2d.ospec:out"
             }, 
-            "direction": [
-              1, 
-              0
-            ], 
+            "direction": [1,0], 
             "multiple": true, 
-            "name": "output", 
-            "offsetPosition": {
-              "left": 48, 
-              "top": 16
-            }, 
+            "name": "output_y", 
+            "offsetPosition": {"right": -16, "top": 40}, 
             "required": false
           }
         ], 
         "xtype": "AutosizeImageContainer"
       }, 
-      "fields": [
-        {
-          "label": "wavelength", 
-          "name": "wavelength", 
-          "type": "float", 
-          "value": 5.0
-        }
-      ], 
-      "name": "Two theta to qxqz"
-    }, 
+      "fields": [], 
+      "name": "Slice Data"
+    },
     {
       "container": {
-        "height": 16, 
-        "image": "", 
-        "terminals": [
-          {
-            "alwaysSrc": true, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:in"
-              ], 
-              "type": "data2d.ospec:out"
-            }, 
-            "direction": [
-              1, 
-              0
-            ], 
-            "multiple": true, 
-            "name": "output", 
-            "offsetPosition": {
-              "right": -16, 
-              "top": 1
-            }, 
-            "required": false
-          }
-        ], 
-        "width": 150, 
-        "xtype": "WireIt.Container"
-      }, 
-      "fields": [
-        {
-          "label": "Qx min", 
-          "name": "qxmin", 
-          "type": "float", 
-          "value": -0.0030000000000000001
-        }, 
-        {
-          "label": "Qx max", 
-          "name": "qxmax", 
-          "type": "float", 
-          "value": 0.0030000000000000001
-        }, 
-        {
-          "label": "Qx bins", 
-          "name": "qxbins", 
-          "type": "int", 
-          "value": 201
-        }, 
-        {
-          "label": "Qz min", 
-          "name": "qzmin", 
-          "type": "float", 
-          "value": 0.0
-        }, 
-        {
-          "label": "Qz max", 
-          "name": "qzmax", 
-          "type": "float", 
-          "value": 0.10000000000000001
-        }, 
-        {
-          "label": "Qz bins", 
-          "name": "qzbins", 
-          "type": "int", 
-          "value": 201
-        }
-      ], 
-      "name": "Empty QxQz grid"
-    }, 
-    {
-      "container": {
-        "icon": "../../static/img/offspecular/timestamp.png", 
-        "image": "../../static/img/offspecular/timestamp_image.png", 
+        "icon": "../../static/img/offspecular/autogrid.png", 
+        "image": "../../static/img/offspecular/autogrid_image.png", 
         "terminals": [
           {
             "alwaysSrc": false, 
@@ -594,27 +667,7 @@ var asterix = {
             "name": "input", 
             "offsetPosition": {
               "left": -12, 
-              "top": 4
-            }, 
-            "required": true
-          }, 
-          {
-            "alwaysSrc": false, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec.timestamp:out"
-              ], 
-              "type": "data2d.ospec.timestamp:in"
-            }, 
-            "direction": [
-              -1, 
-              0
-            ], 
-            "multiple": false, 
-            "name": "stamps", 
-            "offsetPosition": {
-              "left": -12, 
-              "top": 40
+              "top": 16
             }, 
             "required": true
           }, 
@@ -643,156 +696,20 @@ var asterix = {
       }, 
       "fields": [
         {
-          "label": "Override existing?", 
-          "name": "override_existing", 
+          "label": "extra grid point", 
+          "name": "extra_grid_point", 
           "type": "bool", 
-          "value": false
+          "value": true
+        }, 
+        {
+          "label": "minimum step", 
+          "name": "min_step", 
+          "type": "float", 
+          "value": 1e-10
         }
       ], 
-      "name": "Timestamp"
-    }, 
-    {
-      "container": {
-        "icon": "../../static/img/offspecular/app_polar_matrix.png", 
-        "image": "../../static/img/offspecular/app_polar_matrix_image.png", 
-        "terminals": [
-          {
-            "alwaysSrc": false, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:out"
-              ], 
-              "type": "data2d.ospec:in"
-            }, 
-            "direction": [
-              -1, 
-              0
-            ], 
-            "multiple": false, 
-            "name": "input", 
-            "offsetPosition": {
-              "left": -12, 
-              "top": 4
-            }, 
-            "required": true
-          }, 
-          {
-            "alwaysSrc": false, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:out"
-              ], 
-              "type": "data2d.ospec:in"
-            }, 
-            "direction": [
-              -1, 
-              0
-            ], 
-            "multiple": false, 
-            "name": "he3cell", 
-            "offsetPosition": {
-              "left": -12, 
-              "top": 40
-            }, 
-            "required": true
-          }, 
-          {
-            "alwaysSrc": true, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:in"
-              ], 
-              "type": "data2d.ospec:out"
-            }, 
-            "direction": [
-              1, 
-              0
-            ], 
-            "multiple": true, 
-            "name": "output", 
-            "offsetPosition": {
-              "left": 48, 
-              "top": 16
-            }, 
-            "required": false
-          }
-        ], 
-        "xtype": "AutosizeImageContainer"
-      }, 
-      "fields": [], 
-      "name": "Append polarization matrix"
-    }, 
-    {
-      "container": {
-        "icon": "../../static/img/offspecular/sum_polar.png", 
-        "image": "../../static/img/offspecular/sum_polar_image.png", 
-        "terminals": [
-          {
-            "alwaysSrc": false, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:out"
-              ], 
-              "type": "data2d.ospec:in"
-            }, 
-            "direction": [
-              -1, 
-              0
-            ], 
-            "multiple": false, 
-            "name": "input", 
-            "offsetPosition": {
-              "left": -12, 
-              "top": 4
-            }, 
-            "required": true
-          }, 
-          {
-            "alwaysSrc": false, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:out"
-              ], 
-              "type": "data2d.ospec:in"
-            }, 
-            "direction": [
-              -1, 
-              0
-            ], 
-            "multiple": false, 
-            "name": "grid", 
-            "offsetPosition": {
-              "left": -12, 
-              "top": 40
-            }, 
-            "required": false
-          }, 
-          {
-            "alwaysSrc": true, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:in"
-              ], 
-              "type": "data2d.ospec:out"
-            }, 
-            "direction": [
-              1, 
-              0
-            ], 
-            "multiple": true, 
-            "name": "output", 
-            "offsetPosition": {
-              "left": 48, 
-              "top": 16
-            }, 
-            "required": false
-          }
-        ], 
-        "xtype": "AutosizeImageContainer"
-      }, 
-      "fields": [], 
-      "name": "Combine polarized"
-    }, 
+      "name": "Autogrid"
+    },   
     {
       "container": {
         "icon": "../../static/img/offspecular/polar_correct.png", 

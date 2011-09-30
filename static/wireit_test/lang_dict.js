@@ -4,4 +4,5 @@ var languageDictionary = {
 	'sans' : sans,
 	'andr2' : andr2,
 	'refl': tas,
+	'asterix': asterix,
 }

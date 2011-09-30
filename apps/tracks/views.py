@@ -27,8 +27,10 @@ from ...apps.fileview import testftp
 #from ...dataflow import wireit
 from ...dataflow.calc import run_template
 from ...dataflow.calc import calc_single, fingerprint_template, get_plottable, get_csv
-from ...dataflow.offspecular.instruments import ANDR
+from ...dataflow.offspecular.instruments import ANDR, ASTERIX
 print "ANDR imported: ", ANDR.id
+#from ...dataflow.offspecular.instruments import ASTERIX
+print "ASTERIX imported: ", ASTERIX.id
 from ...dataflow.SANS.novelinstruments import SANS_INS
 print "SANS imported: ", SANS_INS.id
 from ...dataflow.tas.instruments import BT7 as TAS_INS
@@ -216,7 +218,7 @@ def getCSV(request):
     nodenum = int(data['clickedOn']['source']['moduleId'])
     print "calculating: terminal=%s, nodenum=%d" % (terminal_id, nodenum)
     language = data['language']
-    instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS}
+    instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX}
     instrument = instrument_by_language.get(language, None)
     result = ['{}']
     if instrument is not None:
@@ -253,7 +255,7 @@ def runReduction(request):
     nodenum = int(data['clickedOn']['source']['moduleId'])
     print "calculating: terminal=%s, nodenum=%d" % (terminal_id, nodenum)
     language = data['language']
-    instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS}
+    instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX }
     instrument = instrument_by_language.get(language, None)
     result = ['{}']
     if instrument is not None:

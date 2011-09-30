@@ -414,11 +414,12 @@ class AsterixPixelsToTwotheta(Filter2D):
             print "error: no xpixel axis in this dataset"
             return
         
-        new_info[xpixel_axis]['name'] = 'twotheta'    
+        new_info[xpixel_axis]['name'] = 'twotheta'
+        twotheta_motor = 0.0
         if data._info[-1].has_key('state'):
-            twotheta_offset = float(data._info[-1]['state']['A[0]'])
+            twotheta_motor = float(data._info[-1]['state']['A[0]'])
         pixels = data.axisValues('xpixel')
-        twotheta = arctan2((pixels - qzero_pixel) * pw_over_d, 1.0) * 180./pi + twotheta_offset
+        twotheta = arctan2((pixels - qzero_pixel) * pw_over_d, 1.0) * 180./pi + twotheta_offset + twotheta_motor
         new_info[xpixel_axis]['values'] = twotheta
         new_data = MetaArray(data.view(ndarray).copy(), info=new_info)
         
@@ -455,13 +456,15 @@ class AsterixShiftData(Filter2D):
 
     @autoApplyToList
     @updateCreationStory
-    def apply(self, data, edge_bin = 180):
+    def apply(self, data, edge_bin = 180, axis=0):
         """ Shift 2D dataset along axis 0, also shifting the axisValues
         along that edge (assuming linear behaviour) 
         This is useful for time-of-flight data where the low-t data is empty due
         to spectrum shape, and can be interpreted as the high-t data from the
         previous pulse.""" 
-        axis = 0
+        #axis = 0
+        if axis > 1:
+            axis = 1
         new_info = data.infoCopy()
         old_axis_values = new_info[axis]['values']
         
@@ -677,7 +680,7 @@ def hdf_to_dict(hdf_obj, convert_i1_tostr=True):
             out_dict[key] = hdf_to_dict(val)
     return out_dict
 
-def LoadAsterixRawHDF(filename, path=None, format="HDF5"):
+def LoadAsterixRawHDF(filename, path=None, format="HDF5", **kwargs):
     if path == None:
         path = os.getcwd()
     if format == "HDF4":

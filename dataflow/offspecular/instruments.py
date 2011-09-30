@@ -20,7 +20,10 @@ if SERVER:
     from DATAFLOW.dataflow.offspecular.modules.autogrid import autogrid_module
     from DATAFLOW.dataflow.offspecular.modules.offset import offset_module
     from DATAFLOW.dataflow.offspecular.modules.wiggle import wiggle_module
+    from DATAFLOW.dataflow.offspecular.modules.tof_lambda import tof_lambda_module
+    from DATAFLOW.dataflow.offspecular.modules.shift_data import shift_data_module    
     from DATAFLOW.dataflow.offspecular.modules.pixels_two_theta import pixels_two_theta_module
+    from DATAFLOW.dataflow.offspecular.modules.asterix_pixels_two_theta import asterix_pixels_two_theta_module
     from DATAFLOW.dataflow.offspecular.modules.theta_two_theta_qxqz import theta_two_theta_qxqz_module
     from DATAFLOW.dataflow.offspecular.modules.two_theta_lambda_qxqz import two_theta_lambda_qxqz_module
     from DATAFLOW.dataflow.offspecular.modules.load_he3_analyzer_collection import load_he3_module
@@ -49,7 +52,10 @@ elif TESTING:
     from dataflow.dataflow.offspecular.modules.autogrid import autogrid_module
     from dataflow.dataflow.offspecular.modules.offset import offset_module
     from dataflow.dataflow.offspecular.modules.wiggle import wiggle_module
+    from dataflow.dataflow.offspecular.modules.tof_lambda import tof_lambda_module
+    from dataflow.dataflow.offspecular.modules.shift_data import shift_data_module
     from dataflow.dataflow.offspecular.modules.pixels_two_theta import pixels_two_theta_module
+    from dataflow.dataflow.offspecular.modules.asterix_pixels_two_theta import asterix_pixels_two_theta_module
     from dataflow.dataflow.offspecular.modules.theta_two_theta_qxqz import theta_two_theta_qxqz_module    
     from dataflow.dataflow.offspecular.modules.two_theta_lambda_qxqz import two_theta_lambda_qxqz_module
     from dataflow.dataflow.offspecular.modules.load_he3_analyzer_collection import load_he3_module
@@ -75,7 +81,10 @@ else:
     from ..offspecular.modules.autogrid import autogrid_module
     from ..offspecular.modules.offset import offset_module
     from ..offspecular.modules.wiggle import wiggle_module
+    from ..offspecular.modules.tof_lambda import tof_lambda_module
+    from ..offspecular.modules.shift_data import shift_data_module
     from ..offspecular.modules.pixels_two_theta import pixels_two_theta_module
+    from ..offspecular.modules.asterix_pixels_two_theta import asterix_pixels_two_theta_module
     from ..offspecular.modules.two_theta_lambda_qxqz import two_theta_lambda_qxqz_module
     from ..offspecular.modules.theta_two_theta_qxqz import theta_two_theta_qxqz_module
     from ..offspecular.modules.load_he3_analyzer_collection import load_he3_module
@@ -153,7 +162,8 @@ def _load_asterix_data(name, center_pixel, wl_over_tof, pixel_width_over_dist):
         format = "HDF4"
     else: #h5
         format = "HDF5"
-    return SuperLoadAsterixHDF(fileName, path=dirName, center_pixel=center_pixel, wl_over_tof=wl_over_tof, pixel_width_over_dist=pixel_width_over_dist, format=format )
+    return LoadAsterixRawHDF(fileName, path=dirName, center_pixel=center_pixel, wl_over_tof=wl_over_tof, pixel_width_over_dist=pixel_width_over_dist, format=format )
+    #return SuperLoadAsterixHDF(fileName, path=dirName, center_pixel=center_pixel, wl_over_tof=wl_over_tof, pixel_width_over_dist=pixel_width_over_dist, format=format )
     
 auto_PolState_field = {
         "type":"boolean",
@@ -170,7 +180,7 @@ PolStates_field = {
 load = load_module(id='ospec.load', datatype=OSPEC_DATA,
                    version='1.0', action=load_action, fields=[auto_PolState_field, PolStates_field])
 
-load_asterix = load_asterix_module(id='ospec.load_asterix', datatype=OSPEC_DATA,
+load_asterix = load_asterix_module(id='ospec.asterix.load', datatype=OSPEC_DATA,
                    version='1.0', action=load_asterix_action)
 
 # Save module
@@ -212,6 +222,12 @@ def offset_action(input=[], offsets={}, **kwargs):
     return dict(output=CoordinateOffset().apply(input, offsets=offsets))
 offset = offset_module(id='ospec.offset', datatype=OSPEC_DATA, version='1.0', action=offset_action)
 
+# Shift data module
+def shift_action(input=[], edge_bin = 180, axis=0, **kwargs):
+    print "shifting data"
+    return dict(output=AsterixShiftData().apply(input, edge_bin=edge_bin, axis=axis))
+shift_data = shift_data_module(id='ospec.asterix.shift', datatype=OSPEC_DATA, version='1.0', action=shift_action)
+
 # Mask module
 def mask_action(input=[], xmin="0", xmax="", ymin="0", ymax="", **kwargs):
     print "masking"
@@ -240,12 +256,25 @@ def wiggle_action(input=[], amp=0.14, **kwargs):
     return dict(output=WiggleCorrection().apply(input, amp=amp))
 wiggle = wiggle_module(id='ospec.wiggle', datatype=OSPEC_DATA, version='1.0', action=wiggle_action)
 
+# Time of Flight to wavelength module
+def tof_lambda_action(input=[], wl_over_tof=1.9050372144288577e-5, **kwargs):
+    print "TOF to wavelength"
+    return dict(output=AsterixTOFToWavelength().apply(input, wl_over_tof=wl_over_tof))
+tof_to_wavelength = tof_lambda_module(id='ospec.tof_lambda', datatype=OSPEC_DATA, version='1.0', action=tof_lambda_action)
+
 # Pixels to two theta module
 def pixels_two_theta_action(input=[], pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6, **kwargs):
     print "converting pixels to two theta"
     result = PixelsToTwotheta().apply(input, pixels_per_degree=pixels_per_degree, qzero_pixel=qzero_pixel, instr_resolution=instr_resolution)
     return dict(output=result)
 pixels_two_theta = pixels_two_theta_module(id='ospec.twotheta', datatype=OSPEC_DATA, version='1.0', action=pixels_two_theta_action)
+
+# Asterix Pixels to two theta module
+def asterix_pixels_two_theta_action(input=[], qzero_pixel = 145., twotheta_offset=0.0, pw_over_d=0.0003411385649, **kwargs):
+    print "converting pixels to two theta (Asterix)"
+    result = AsterixPixelsToTwotheta().apply(input, pw_over_d=pw_over_d, qzero_pixel=qzero_pixel, twotheta_offset=twotheta_offset)
+    return dict(output=result)
+asterix_pixels_two_theta = asterix_pixels_two_theta_module(id='ospec.asterix.twotheta', datatype=OSPEC_DATA, version='1.0', action=asterix_pixels_two_theta_action)
 
 # Two theta Lambda to qxqz module
 def two_theta_lambda_qxqz_action(input=[], theta=None, qxmin= -0.003, qxmax=0.003, qxbins=201, qzmin=0.0, qzmax=0.1, qzbins=201,**kwargs):
@@ -339,10 +368,22 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                  requires=[config.JSCRIPT + '/ospecplot.js'],
                  datatypes=[data2d, datahe3, datastamp],
                  )
-instrmnts = [ANDR]
+
+ASTERIX = Instrument(id='lansce.ospec.asterix',
+                 name='LANSCE ASTERIX',
+                 archive=config.NCNR_DATA + '/andr',
+                 menu=[('Input', [load_asterix, save]),
+                       ('Reduction', [autogrid, combine, offset, shift_data, tof_to_wavelength, asterix_pixels_two_theta, two_theta_lambda_qxqz, mask_data, slice_data]),
+                       ('Polarization reduction', [correct_polarized]),
+                       ],
+                 requires=[],
+                 datatypes=[data2d],
+                 )
+                 
+instrmnts = [ANDR,ASTERIX]
 for instrument in instrmnts:
     register_instrument(instrument)
-
+    
 # Testing
 if __name__ == '__main__':
     polarized = False

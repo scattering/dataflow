@@ -23,8 +23,10 @@ def register_module(module):
 Register a new calculation module.
 """
     if module.id in _registry and module != _registry[module.id]:
-        raise TypeError("Module already registered")
+        return
+        #raise TypeError("Module already registered")
     _registry[module.id] = module
+    
 def lookup_module(id):
     """
 Lookup a module in the registry.
