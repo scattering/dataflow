@@ -406,7 +406,7 @@ def editExperiment(request, experiment_id):
             file_sha1 = hashlib.sha1()
             for line in f.read():
                 file_sha1.update(line)
-            write_here = '/tmp/FILES/' + file_sha1.hexdigest()
+            write_here = '/var/www/FILES/' + file_sha1.hexdigest()
             write_here = open(write_here, 'w')
             for line in f:
                 write_here.write(line)
@@ -415,7 +415,7 @@ def editExperiment(request, experiment_id):
             if len(new_files) > 0:
                 new_file = new_files[0]
             else:
-		        new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location='/tmp/FILES/')
+		        new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location='/var/www/FILES/')
             experiment.Files.add(new_file)
     if request.POST.has_key('instrument_name'):
         if request.POST['instrument_name']:
