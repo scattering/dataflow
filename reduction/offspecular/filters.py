@@ -1,4 +1,6 @@
-from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin, allclose, zeros_like, linalg, dot, arctan2, float64, histogram2d, sum, sqrt
+from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin, allclose, zeros_like, linalg, dot, arctan2, float64, histogram2d, sum, sqrt, loadtxt
+import numpy
+from numpy.ma import MaskedArray
 import os, simplejson, datetime, sys, types, xml.dom.minidom
 from copy import deepcopy
 
@@ -160,6 +162,7 @@ class Filter2D:
     """ takes MetaArray with 2 dims (2 cols) as input
     and outputs the same thing """ 
     default_path = None
+    polarizations = ["down_down", "down_up", "up_down", "up_up"]
     
     def __init__(self, *args, **kwargs):
         self.valid_column_labels = [['', '']]
@@ -279,14 +282,30 @@ class MaskData(Filter2D):
     
     @autoApplyToList
     @updateCreationStory
-    def apply(self, data, xmin=None, xmax=None, ymin=None, ymax=None):
+    def apply(self, data, xmin=None, xmax=None, ymin=None, ymax=None, invert_mask=False):
         def sanitize (item):
             return int(item) if item != "" else None
+        mask = zeros(data.shape, dtype=bool) # array of False
         dataslice = (slice(sanitize(xmin), sanitize(xmax)), slice(sanitize(ymin), sanitize(ymax)))
+        mask[dataslice] = True # set the masked portions to False
+        if invert_mask:
+            mask *= -1            
         new_data = MetaArray(data.view(ndarray).copy(), info=data.infoCopy())
-        new_data[dataslice] = 0
+        new_data[mask] = 0
         return new_data
-        
+
+#class MaskData(Filter2D):
+#    """ set all data, normalization to zero within mask """
+#    
+#    @autoApplyToList
+#    @updateCreationStory
+#    def apply(self, data, xmin=None, xmax=None, ymin=None, ymax=None):
+#        def sanitize (item):
+#            return int(item) if item != "" else None
+#        dataslice = (slice(sanitize(xmin), sanitize(xmax)), slice(sanitize(ymin), sanitize(ymax)))
+#        new_data = MetaArray(data.view(ndarray).copy(), info=data.infoCopy())
+#        new_data[dataslice] = 0
+#        return new_data
 
 class SliceNormData(Filter2D):
     """ Sum 2d data along both axes and return 1d datasets,
@@ -479,6 +498,60 @@ class AsterixShiftData(Filter2D):
         new_info[axis]['values'] = shifted_axis
         new_data = MetaArray(shifted_data, info=new_info)
         return new_data
+
+class AsterixCorrectSpectrum(Filter2D):
+    
+    def apply(self, data, spectrum):
+        ##polarizations = ["down_down", "down_up", "up_down", "up_up"]
+        # inherit polarizations list from Filter2D:
+        passthrough_cols = ["counts_%s" % (pol,) for pol in self.polarizations]
+        passthrough_cols.extend(["pixels", "count_time"])
+        #expressions = [{"name":col, "expression":"data1_%s" % (col,)} for col in passthrough_cols]
+        expressions = []
+        spectrum_cols = [col['name'] for col in spectrum._info[-2]['cols']]
+        for pol in self.polarizations:
+            if ("spectrum_%s" % (pol,) in spectrum_cols):
+                spec_id = "data2_spectrum_%s" % (pol,)
+            else:
+                spec_id = "data2_spectrum"
+            expressions.append({"name":"monitor_%s" % (pol,), "expression":"data1_monitor_%s * %s[:,newaxis]" % (pol,spec_id)})
+        result = Algebra().apply(data, spectrum, expressions, passthrough_cols)
+        return result
+
+class NormalizeToMonitor(Filter2D):
+    """ divide all the counts columns by monitor and output as normcounts, with stat. error """
+    
+    @autoApplyToList
+    def apply(self, data):
+        cols = [col['name'] for col in data._info[-2]['cols']]
+        passthrough_cols = [col for col in cols if (not col.startswith('counts') and not col.startswith('monitor'))]
+        counts_cols = [col for col in cols if col.startswith('counts')]
+        monitor_cols = [col for col in cols if col.startswith('monitor')]
+        info = data.infoCopy()
+        info[-2]['cols'] = []
+        output_array = zeros( data.shape[:-1] + (len(counts_cols) + len(passthrough_cols),), dtype=float)
+        expressions = []
+        for i, col in enumerate(passthrough_cols):
+            info[-2]['cols'].append({"name":col})
+            output_array[..., i] = data["Measurements":col]
+            
+        for i, col in enumerate(counts_cols):
+            j = i + len(passthrough_cols)
+            col_suffix = col[len('counts'):]
+            monitor_id = 'monitor'
+            if ('monitor'+col_suffix) in monitor_cols:
+                monitor_id += col_suffix
+            info[-2]['cols'].append({"name":"counts_norm%s" % (col_suffix,)})
+            mask = data["Measurements":monitor_id].nonzero()
+            print mask
+            output_array[..., j][mask] = data["Measurements":col][mask] / data["Measurements":monitor_id][mask]
+            #expression = "data1_counts%s / data1_%s" % (col_suffix, monitor_id)
+            #error_expression = "sqrt(data1_counts%s) / data1_%s" % (col_suffix, monitor_id)
+            #expressions.append({"name": "counts_norm%s" % (col_suffix,), "expression":expression})
+            #expressions.append({"name": "error_counts_norm%s" % (col_suffix,), "expression":error_expression})
+        #result = Algebra().apply(data, None, expressions, passthrough_cols)
+        result = MetaArray(output_array, info=info)
+        return result
 
 class PixelsToTwotheta(Filter2D):
     """ input array has axes theta and pixels:
@@ -700,20 +773,19 @@ def LoadAsterixRawHDF(filename, path=None, format="HDF5", **kwargs):
     twotheta_pixel = run_obj['ordela_tof_pz']['X'].value.astype(float64)
     data = run_obj['ordela_tof_pz']['data'].value.astype(float64)
     creation_story = "LoadAsterixRawHDF('{fn}')".format(fn=filename)
-    pol_states = {0:'--', 1:'-+', 2:'+-', 3:'++'}
     output_objs = []
     #for col in range(4):
     info = [{"name": "tof", "units": "nanoseconds", "values": tof[:-1] },
         {"name": "xpixel", "units": "pixels", "values": twotheta_pixel[:-1] },
         {"name": "Measurements", "cols": [
-                {"name": "counts--"},
-                {"name": "counts-+"},
-                {"name": "counts+-"},
-                {"name": "counts++"},
-                {"name": "monitor--"},
-                {"name": "monitor-+"},
-                {"name": "monitor+-"},
-                {"name": "monitor++"},
+                {"name": "counts_down_down"},
+                {"name": "counts_down_up"},
+                {"name": "counts_up_down"},
+                {"name": "counts_up_up"},
+                {"name": "monitor_down_down"},
+                {"name": "monitor_down_up"},
+                {"name": "monitor_up_down"},
+                {"name": "monitor_up_up"},
                 {"name": "pixels"},
                 {"name": "count_time"}]},
         {"PolState": '', "filename": filename, "start_datetime": None, 
@@ -820,6 +892,39 @@ def LoadAsterixData(filename, path = None):
         data_array[:,:,0] = data_in[:,:,col]
         output_objs.append(MetaArray(data_array[:], dtype='float', info=info[:]))
     return output_objs    
+
+def LoadText(filename, path=None, first_as_x=True):
+    if path == None:
+        path = os.getcwd()
+    creation_story = "LoadText('{fn}')".format(fn=filename)
+    data_in = loadtxt(os.path.join(path, filename))
+    info = []
+    first_y_col = 0
+    if first_as_x:
+        info.append({"name":"xaxis", "units":"unknown", "values": data_in[:,0]})
+        first_y_col = 1
+    else:
+        info.append({"name":"rownumber", "units":"index", "values": range(data_in.shape[1])})
+    
+    info.append({"name":"Measurements", "cols":[]})
+    for col in range(first_y_col, data_in.shape[1]):
+        info[1]["cols"].append({"name": "column%d" % (col,)})
+        
+    info.append({"filename": filename, "start_datetime": None, 
+             "CreationStory":creation_story, "path":path}) 
+    output_obj = MetaArray(data_in[:,first_y_col:], dtype='float', info=info[:])
+    return output_obj 
+
+def LoadAsterixSpectrum(filename, path=None):
+    spec = LoadText(filename, path, first_as_x = True)
+    spec._info[0]["name"] = "tof"
+    spec._info[0]["units"] = "microseconds"
+    if spec.shape[1] == 1:
+        spec._info[1]['cols'][0]['name'] = 'spectrum'
+    elif spec.shape[1] == 4:
+        for i, pol in enumerate(Filter2D.polarizations):
+            spec._info[1]['cols'][i]['name'] = 'spectrum_%' % (pol,)            
+    return spec
 
 def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     """ 
@@ -1418,6 +1523,62 @@ class Subtract(Filter2D):
     def apply(self, data1, data2):
         new_grid = Autogrid().apply([data1, data2])
         # need to figure out overlap somehow
+
+class Algebra(Filter2D):
+    """ generic algebraic manipulations """
+    def get_safe_operations_namespace(self):
+        #make a list of safe functions 
+        safe_list = ['math', 'acos', 'asin', 'atan', 'atan2', 'ceil', 'cos', 'cosh', 'degrees', 'e', 'exp', 'fabs', 'floor', 'fmod', 'frexp', 'hypot', 'ldexp', 'log', 'log10', 'modf', 'pi', 'pow', 'radians', 'sin', 'sinh', 'sqrt', 'tan', 'tanh','newaxis'] 
+        #use the list to filter the local namespace 
+        safe_dict = dict([ (k, numpy.__dict__.get(k, None)) for k in safe_list ])
+        return safe_dict
+        
+    def add_to_namespace(self, data, prefix, namespace, automask=True):
+        cols = data._info[-2]['cols']
+        #if automask and ("pixels" in cols):
+        #    mask = ( data["Measurements":"pixels"] > 0 )
+        #else:
+        #    mask = ones(data.shape[:2], dtype=bool)
+        for col in cols:
+            new_name = str(prefix) + col['name']
+            data_view = data['Measurements':col['name']].view(ndarray)
+            if automask and ("pixels" in cols):
+                data_view = MaskedArray(data_view)
+                data_view.mask = ( data["Measurements":"pixels"] > 0 )
+            #namespace[new_name] = data['Measurements':col['name']].view(ndarray)[mask]
+            namespace[new_name] = data_view
+    
+    @autoApplyToList         
+    def apply(self, data1=None, data2=None, output_cols=[], passthrough_cols=[], automask=True):
+        """ can operate on columns within data1 if needed 
+        output_cols is in form 
+        [{"name":"output_col_name", "expression":"data1_counts + data2_counts"},...]
+        
+        automask=True means operations are only applied to places where pixels column is > 0.
+        """
+        local_namespace = self.get_safe_operations_namespace()
+        safe_globals = {"__builtins__":None}
+        data_shape = data1.shape
+        output_info = data1.infoCopy()
+        output_colinfo = []
+        self.add_to_namespace(data1, "data1_", local_namespace, automask)
+        if data2 is not None:
+#            if len(data2.shape) > len(data_shape):
+#                data_shape = data2.shape
+            self.add_to_namespace(data2, "data2_", local_namespace, automask)
+        output_array = zeros( data_shape[:-1] + (len(output_cols) + len(passthrough_cols),), dtype=float)
+        for i, o in enumerate(output_cols):
+            print o['expression'], data1.shape, output_array[..., i].shape
+            output_array[..., i] = eval(o['expression'], safe_globals, local_namespace)
+            output_colinfo.append({'name':o['name']})
+        
+        for i, p in enumerate(passthrough_cols):
+            output_array[..., i+len(output_cols)] = data1["Measurements":p]
+            output_colinfo.append({'name':p})
+            
+        output_info[-2]['cols'] = output_colinfo
+        output_obj = MetaArray(output_array, info=output_info)
+        return output_obj     
         
           
 class CombinePolcorrect(Filter2D):

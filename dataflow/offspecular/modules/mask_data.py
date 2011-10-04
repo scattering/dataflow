@@ -35,30 +35,38 @@ def mask_data_module(id=None, datatype=None, action=None,
 
     # qxmin, qxmax, qxbins, qzmin, qzmax, qzbins
     # (-0.003, 0.003, 201, 0, 0.1, 201)
-    xmin_field = {
-        "type":"string",
-        "label": "xmin pixel",
-        "name": "xmin",
-        "value": "0",
-    }
-    xmax_field = {
-        "type":"string",
-        "label": "xmax pixel",
-        "name": "xmax",
-        "value": "",
-    }
-    ymin_field = {
-        "type":"string",
-        "label": "ymin pixel",
-        "name": "ymin",
-        "value": "0",
-    }
-    ymax_field = {
-        "type":"string",
-        "label": "ymax pixel",
-        "name": "ymax",
-        "value": "",
-    }
+    fields.extend([
+        {
+            "label": "invert mask (true sets values outside range to zero, false acts on values inside)", 
+            "name": "invert_mask", 
+            "type": "boolean", 
+            "value": False,
+        },
+        {
+            "type":"string",
+            "label": "xmin pixel",
+            "name": "xmin",
+            "value": "0",
+        },
+        {
+            "type":"string",
+            "label": "xmax pixel",
+            "name": "xmax",
+            "value": "",
+        },
+        {
+            "type":"string",
+            "label": "ymin pixel",
+            "name": "ymin",
+            "value": "0",
+        },
+        {
+            "type":"string",
+            "label": "ymax pixel",
+            "name": "ymax",
+            "value": "",
+        },
+    ])
    
     
     # Combine everything into a module.
@@ -68,7 +76,7 @@ def mask_data_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   #icon=icon,
                   terminals=terminals,
-                  fields=[xmin_field, xmax_field, ymin_field, ymax_field] + fields,
+                  fields=fields,
                   action=action,
                   )
     module.LABEL_WIDTH = 150

@@ -49,6 +49,7 @@ AutosizeImageContainer = function(opts, layer) {
         that.el.style.width = that.image_obj.width + "px";
         that.el.style.height = that.image_obj.height + "px";
         distribute_terminals(that.terminals, that.image_obj.width, that.image_obj.height);
+        that.redrawAllWires();
     }
     this.image_obj.src = opts.image;
 }

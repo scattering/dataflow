@@ -855,6 +855,12 @@ var andr2 = {
       }, 
       "fields": [
         {
+          "label": "invert mask (true sets values outside range to zero, false acts on values inside)", 
+          "name": "invert_mask", 
+          "type": "boolean", 
+          "value": false,
+        },
+        {
           "label": "xmin pixel", 
           "name": "xmin", 
           "type": "string", 

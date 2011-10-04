@@ -56,7 +56,45 @@ var asterix = {
         },
       ], 
       "name": "LoadAsterix"
-    }, 
+    },
+    {"container": {
+        "height": 16, 
+        "image": "", 
+        "terminals": [
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:in"
+              ], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "output", 
+            "offsetPosition": {
+              "right": -16, 
+              "top": 1
+            }, 
+            "required": false
+          }
+        ], 
+        "width": 120, 
+        "xtype": "WireIt.Container"
+      }, 
+      "fields": [
+        {
+          "label": "Files", 
+          "name": "files", 
+          "type": "[file]", 
+          "value": []
+        }, 
+      ], 
+      "name": "LoadAsterixSpectrum"
+    },
     {
       "container": {
         "height": 16, 
@@ -101,6 +139,77 @@ var asterix = {
         }
       ], 
       "name": "Save"
+    },
+    {
+      "container": {
+        "icon": "../../static/img/offspecular/correct_spectrum_icon.png", 
+        "image": "../../static/img/offspecular/correct_spectrum_image.png", 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:out"
+              ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": -12, 
+              "top": 4
+            }, 
+            "required": true
+          }, 
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:out"
+              ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "spectrum", 
+            "offsetPosition": {
+              "left": -12, 
+              "top": 40
+            }, 
+            "required": false
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:in"
+              ], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "left": 48, 
+              "top": 16
+            }, 
+            "required": false
+          }
+        ], 
+        "xtype": "AutosizeImageContainer"
+      }, 
+      "fields": [], 
+      "name": "Correct Spectrum"
     },
     {
       "container": {
@@ -710,7 +819,58 @@ var asterix = {
         }
       ], 
       "name": "Autogrid"
-    },   
+    },
+    {"container": {
+        "icon": "../../static/img/offspecular/normalize_icon.png",
+        "image": "../../static/img/offspecular/normalize_image.png", 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:out"
+              ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": -12, 
+              "top": 16
+            }, 
+            "required": true
+          },
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:in"
+              ], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "output", 
+            "offsetPosition": {
+              "right": -16, 
+              "top": 1
+            }, 
+            "required": false
+          }
+        ], 
+        "width": 120, 
+        "xtype": "AutosizeImageContainer"
+      }, 
+      "fields": [], 
+      "name": "Normalize to Monitor"
+    },  
     {
       "container": {
         "icon": "../../static/img/offspecular/polar_correct.png", 

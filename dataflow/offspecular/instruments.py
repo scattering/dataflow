@@ -8,97 +8,64 @@ import os, sys, simplejson, pickle, types
 # the ... in place of dataflow when testing
 TESTING = 0
 SERVER = 0
+# modules = [ (source, module), ... ]
+module_imports = [
+    #("dataflow.wireit", ["template_to_wireit_diagram", "instrument_to_wireit_language"]),
+    ("dataflow", "config"),
+    ("dataflow.calc", ["run_template", "get_plottable", "calc_single"]),
+    ("dataflow.core", ["Data", "Instrument", "Template", "register_instrument"]),
+    ("dataflow.modules.load", "load_module"),
+    ("dataflow.offspecular.modules.load_asterix", "load_asterix_module"),
+    ("dataflow.offspecular.modules.load_asterix_spectrum", "load_asterix_spectrum_module"),
+    ("dataflow.modules.save", "save_module"),
+    ("dataflow.offspecular.modules.normalize_to_monitor", "normalize_to_monitor_module"),
+    ("dataflow.offspecular.modules.asterix_correct_spectrum", "asterix_correct_spectrum_module"),
+    ("dataflow.offspecular.modules.combine", "combine_module"),
+    ("dataflow.offspecular.modules.autogrid", "autogrid_module"),
+    ("dataflow.offspecular.modules.offset", "offset_module"),
+    ("dataflow.offspecular.modules.wiggle", "wiggle_module"),
+    ("dataflow.offspecular.modules.tof_lambda", "tof_lambda_module"),
+    ("dataflow.offspecular.modules.shift_data", "shift_data_module"), 
+    ("dataflow.offspecular.modules.pixels_two_theta", "pixels_two_theta_module"),
+    ("dataflow.offspecular.modules.asterix_pixels_two_theta", "asterix_pixels_two_theta_module"),
+    ("dataflow.offspecular.modules.theta_two_theta_qxqz", "theta_two_theta_qxqz_module"),
+    ("dataflow.offspecular.modules.two_theta_lambda_qxqz", "two_theta_lambda_qxqz_module"),
+    ("dataflow.offspecular.modules.load_he3_analyzer_collection", "load_he3_module"),
+    ("dataflow.offspecular.modules.append_polarization_matrix", "append_polarization_matrix_module"),
+    ("dataflow.offspecular.modules.combine_polarized", "combine_polarized_module"),
+    ("dataflow.offspecular.modules.polarization_correct", "polarization_correct_module"),
+    ("dataflow.offspecular.modules.timestamps", "timestamp_module"),
+    ("dataflow.offspecular.modules.load_timestamps", "load_timestamp_module"),
+    ("dataflow.offspecular.modules.empty_qxqz_grid", "empty_qxqz_grid_module"),
+    ("dataflow.offspecular.modules.mask_data", "mask_data_module"),
+    ("dataflow.offspecular.modules.slice_data", "slice_data_module"),
+    ("reduction.offspecular.filters", ["LoadICPData", "LoadAsterixRawHDF", "LoadAsterixSpectrum", "Autogrid", "Combine", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "WiggleCorrection", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz"]),
+    ("reduction.offspecular.he3analyzer", "He3AnalyzerCollection"),
+    ("reduction.offspecular.FilterableMetaArray", "FilterableMetaArray"),
+]
 if SERVER:
     from DATAFLOW.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
-    from DATAFLOW.dataflow import config
-    from DATAFLOW.dataflow.calc import run_template, get_plottable, calc_single
-    from DATAFLOW.dataflow.core import Data, Instrument, Template, register_instrument
-    from DATAFLOW.dataflow.modules.load import load_module
-    from DATAFLOW.dataflow.offspecular.modules.load_asterix import load_asterix_module
-    from DATAFLOW.dataflow.modules.save import save_module
-    from DATAFLOW.dataflow.offspecular.modules.combine import combine_module
-    from DATAFLOW.dataflow.offspecular.modules.autogrid import autogrid_module
-    from DATAFLOW.dataflow.offspecular.modules.offset import offset_module
-    from DATAFLOW.dataflow.offspecular.modules.wiggle import wiggle_module
-    from DATAFLOW.dataflow.offspecular.modules.tof_lambda import tof_lambda_module
-    from DATAFLOW.dataflow.offspecular.modules.shift_data import shift_data_module    
-    from DATAFLOW.dataflow.offspecular.modules.pixels_two_theta import pixels_two_theta_module
-    from DATAFLOW.dataflow.offspecular.modules.asterix_pixels_two_theta import asterix_pixels_two_theta_module
-    from DATAFLOW.dataflow.offspecular.modules.theta_two_theta_qxqz import theta_two_theta_qxqz_module
-    from DATAFLOW.dataflow.offspecular.modules.two_theta_lambda_qxqz import two_theta_lambda_qxqz_module
-    from DATAFLOW.dataflow.offspecular.modules.load_he3_analyzer_collection import load_he3_module
-    from DATAFLOW.dataflow.offspecular.modules.append_polarization_matrix import append_polarization_matrix_module
-    from DATAFLOW.dataflow.offspecular.modules.combine_polarized import combine_polarized_module
-    from DATAFLOW.dataflow.offspecular.modules.polarization_correct import polarization_correct_module
-    from DATAFLOW.dataflow.offspecular.modules.timestamps import timestamp_module
-    from DATAFLOW.dataflow.offspecular.modules.load_timestamps import load_timestamp_module
-    from DATAFLOW.dataflow.offspecular.modules.empty_qxqz_grid import empty_qxqz_grid_module
-    from DATAFLOW.dataflow.offspecular.modules.mask_data import mask_data_module
-    from DATAFLOW.dataflow.offspecular.modules.slice_data import slice_data_module
-    from DATAFLOW.reduction.offspecular.filters import *
-    from DATAFLOW.reduction.offspecular.he3analyzer import *
-    from DATAFLOW.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
+    root_import = "DATAFLOW."
+    
 elif TESTING:
     dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     sys.path.append(dir)
     from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
-    from dataflow.dataflow import config
-    from dataflow.dataflow.calc import run_template, get_plottable, calc_single
-    from dataflow.dataflow.core import Data, Instrument, Template, register_instrument
-    from dataflow.dataflow.modules.load import load_module
-    from dataflow.dataflow.modules.save import save_module
-    from dataflow.dataflow.offspecular.modules.combine import combine_module
-    from dataflow.dataflow.offspecular.modules.load_asterix import load_asterix_module
-    from dataflow.dataflow.offspecular.modules.autogrid import autogrid_module
-    from dataflow.dataflow.offspecular.modules.offset import offset_module
-    from dataflow.dataflow.offspecular.modules.wiggle import wiggle_module
-    from dataflow.dataflow.offspecular.modules.tof_lambda import tof_lambda_module
-    from dataflow.dataflow.offspecular.modules.shift_data import shift_data_module
-    from dataflow.dataflow.offspecular.modules.pixels_two_theta import pixels_two_theta_module
-    from dataflow.dataflow.offspecular.modules.asterix_pixels_two_theta import asterix_pixels_two_theta_module
-    from dataflow.dataflow.offspecular.modules.theta_two_theta_qxqz import theta_two_theta_qxqz_module    
-    from dataflow.dataflow.offspecular.modules.two_theta_lambda_qxqz import two_theta_lambda_qxqz_module
-    from dataflow.dataflow.offspecular.modules.load_he3_analyzer_collection import load_he3_module
-    from dataflow.dataflow.offspecular.modules.append_polarization_matrix import append_polarization_matrix_module
-    from dataflow.dataflow.offspecular.modules.combine_polarized import combine_polarized_module
-    from dataflow.dataflow.offspecular.modules.polarization_correct import polarization_correct_module
-    from dataflow.dataflow.offspecular.modules.timestamps import timestamp_module
-    from dataflow.dataflow.offspecular.modules.load_timestamps import load_timestamp_module
-    from dataflow.dataflow.offspecular.modules.empty_qxqz_grid import empty_qxqz_grid_module
-    from dataflow.dataflow.offspecular.modules.mask_data import mask_data_module
-    from dataflow.dataflow.offspecular.modules.slice_data import slice_data_module
-    from dataflow.reduction.offspecular.filters import *
-    from dataflow.reduction.offspecular.he3analyzer import *
-    from dataflow.reduction.offspecular.FilterableMetaArray import FilterableMetaArray
+    root_import = "dataflow."
+    
 else:
-    from .. import config
-    from ..calc import run_template, get_plottable, calc_single
-    from ..core import Data, Instrument, Template, register_instrument
-    from ..modules.load import load_module
-    from ..offspecular.modules.load_asterix import load_asterix_module
-    from ..modules.save import save_module
-    from ..offspecular.modules.combine import combine_module
-    from ..offspecular.modules.autogrid import autogrid_module
-    from ..offspecular.modules.offset import offset_module
-    from ..offspecular.modules.wiggle import wiggle_module
-    from ..offspecular.modules.tof_lambda import tof_lambda_module
-    from ..offspecular.modules.shift_data import shift_data_module
-    from ..offspecular.modules.pixels_two_theta import pixels_two_theta_module
-    from ..offspecular.modules.asterix_pixels_two_theta import asterix_pixels_two_theta_module
-    from ..offspecular.modules.two_theta_lambda_qxqz import two_theta_lambda_qxqz_module
-    from ..offspecular.modules.theta_two_theta_qxqz import theta_two_theta_qxqz_module
-    from ..offspecular.modules.load_he3_analyzer_collection import load_he3_module
-    from ..offspecular.modules.append_polarization_matrix import append_polarization_matrix_module
-    from ..offspecular.modules.combine_polarized import combine_polarized_module
-    from ..offspecular.modules.polarization_correct import polarization_correct_module
-    from ..offspecular.modules.timestamps import timestamp_module
-    from ..offspecular.modules.load_timestamps import load_timestamp_module
-    from ..offspecular.modules.empty_qxqz_grid import empty_qxqz_grid_module
-    from ..offspecular.modules.mask_data import mask_data_module
-    from ..offspecular.modules.slice_data import slice_data_module
-    from ...reduction.offspecular.filters import *
-    from ...reduction.offspecular.he3analyzer import *
-    from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray
+    root_import = "..."
+
+
+for item in module_imports:
+    loc = item[0]
+    mods = item[1]
+    print root_import + item[0], item[1]
+    if type(mods) != types.ListType:
+        mods = [mods]
+    for mod in mods:
+        exec("from %s import %s" % (root_import + loc, mod))
+    #__import__(root_import + item[0], globals=globals(), fromlist=item[1], level=-1)
 
 class PlottableDict(dict):
     def get_plottable(self):
@@ -164,6 +131,11 @@ def _load_asterix_data(name, center_pixel, wl_over_tof, pixel_width_over_dist):
         format = "HDF5"
     return LoadAsterixRawHDF(fileName, path=dirName, center_pixel=center_pixel, wl_over_tof=wl_over_tof, pixel_width_over_dist=pixel_width_over_dist, format=format )
     #return SuperLoadAsterixHDF(fileName, path=dirName, center_pixel=center_pixel, wl_over_tof=wl_over_tof, pixel_width_over_dist=pixel_width_over_dist, format=format )
+
+def load_asterix_spectrum_action(files=[], **kwargs):
+    filename = files[0]
+    (dirName, fileName) = os.path.split(filename)
+    return dict(output=[LoadAsterixSpectrum(filename, path=dirName)])
     
 auto_PolState_field = {
         "type":"boolean",
@@ -182,6 +154,9 @@ load = load_module(id='ospec.load', datatype=OSPEC_DATA,
 
 load_asterix = load_asterix_module(id='ospec.asterix.load', datatype=OSPEC_DATA,
                    version='1.0', action=load_asterix_action)
+                   
+load_asterix_spectrum = load_asterix_spectrum_module(id='ospec.asterix.load_spectrum', datatype=OSPEC_DATA,
+                    version='1.0', action=load_asterix_spectrum_action)
 
 # Save module
 def save_action(input=[], ext=None, **kwargs):
@@ -222,16 +197,34 @@ def offset_action(input=[], offsets={}, **kwargs):
     return dict(output=CoordinateOffset().apply(input, offsets=offsets))
 offset = offset_module(id='ospec.offset', datatype=OSPEC_DATA, version='1.0', action=offset_action)
 
+# Correct spectrum module
+def asterix_correct_spectrum_action(input=[], spectrum=[], **kwargs):
+    print "correcting spectrum"
+    # There should only be one entry into spectrum... more than that doesn't make sense
+    # grabbing the first item from the spectrum list:
+    return dict(output=AsterixCorrectSpectrum().apply(input, spectrum=spectrum[0]))
+asterix_correct_spectrum = asterix_correct_spectrum_module(id='ospec.asterix.corr_spectrum', datatype=OSPEC_DATA, 
+                                            version='1.0', action=asterix_correct_spectrum_action)
+
 # Shift data module
 def shift_action(input=[], edge_bin = 180, axis=0, **kwargs):
     print "shifting data"
     return dict(output=AsterixShiftData().apply(input, edge_bin=edge_bin, axis=axis))
 shift_data = shift_data_module(id='ospec.asterix.shift', datatype=OSPEC_DATA, version='1.0', action=shift_action)
 
+# Normalize to Monitor module
+def normalize_to_monitor_action(input=[], **kwargs):
+    print "normalizing to monitor"
+    return_val = dict(output=NormalizeToMonitor().apply(input))
+    print return_val
+    return return_val
+    
+normalize_to_monitor = normalize_to_monitor_module(id='ospec.normalize_monitor', datatype=OSPEC_DATA, version='1.0', action=normalize_to_monitor_action)
+
 # Mask module
-def mask_action(input=[], xmin="0", xmax="", ymin="0", ymax="", **kwargs):
+def mask_action(input=[], xmin="0", xmax="", ymin="0", ymax="", invert_mask=False, **kwargs):
     print "masking"
-    return dict(output=MaskData().apply(input, xmin, xmax, ymin, ymax))
+    return dict(output=MaskData().apply(input, xmin, xmax, ymin, ymax, invert_mask))
 mask_data = mask_data_module(id='ospec.mask', datatype=OSPEC_DATA, version='1.0', action=mask_action)
 
 # Slice module
@@ -268,6 +261,18 @@ def pixels_two_theta_action(input=[], pixels_per_degree=80.0, qzero_pixel=309, i
     result = PixelsToTwotheta().apply(input, pixels_per_degree=pixels_per_degree, qzero_pixel=qzero_pixel, instr_resolution=instr_resolution)
     return dict(output=result)
 pixels_two_theta = pixels_two_theta_module(id='ospec.twotheta', datatype=OSPEC_DATA, version='1.0', action=pixels_two_theta_action)
+
+# Asterix Correct Spectrum Module
+def correct_spectrum_action(data=[], spectrum=None):
+    print "multiplying monitor counts by spectrum"
+    polarizations = ["down_down", "down_up", "up_down", "up_up"]
+    passthrough_cols = ["counts_%s" % (pol,) for pol in polarizations]
+    passthrough_cols.extend(["pixels", "count_time"])
+    expressions = [{"name":col, "expression":"data1_%s" % (col,)} for col in passthrough_cols]
+
+    expressions.extend([{"name":"monitor_%s" % (pol,), "expression":"data1_monitor_%s * data2_column0" % (pol,)} for pol in polarizations])
+    expressions.extend([{"name":"pixels", "expression":"data1_pixels"} for pol in polarizations])
+    result = Algebra()
 
 # Asterix Pixels to two theta module
 def asterix_pixels_two_theta_action(input=[], qzero_pixel = 145., twotheta_offset=0.0, pw_over_d=0.0003411385649, **kwargs):
@@ -372,8 +377,8 @@ ANDR = Instrument(id='ncnr.ospec.andr',
 ASTERIX = Instrument(id='lansce.ospec.asterix',
                  name='LANSCE ASTERIX',
                  archive=config.NCNR_DATA + '/andr',
-                 menu=[('Input', [load_asterix, save]),
-                       ('Reduction', [autogrid, combine, offset, shift_data, tof_to_wavelength, asterix_pixels_two_theta, two_theta_lambda_qxqz, mask_data, slice_data]),
+                 menu=[('Input', [load_asterix, load_asterix_spectrum, save]),
+                       ('Reduction', [autogrid, combine, offset, shift_data, tof_to_wavelength, asterix_pixels_two_theta, two_theta_lambda_qxqz, mask_data, slice_data, normalize_to_monitor, asterix_correct_spectrum]),
                        ('Polarization reduction', [correct_polarized]),
                        ],
                  requires=[],
