@@ -22,7 +22,7 @@ from models import * #add models by name
 from ... import fillDB
 
 
-from ...apps.fileview import testftp
+#from ...apps.fileview import testftp
 
 #from ...dataflow import wireit
 from ...dataflow.calc import run_template
@@ -63,6 +63,9 @@ def showPlotWindow(request):
 
 def mytest(request):
    return render_to_response('tracer_testingforWireit/xhr_temp.html')
+   
+def uploadtest(request):
+    return render_to_response('upload.html')
 
 def home(request):
     context = RequestContext(request)
@@ -280,11 +283,48 @@ def runReduction(request):
     return response
     #return HttpResponse(JSON_result) #, context_instance=context
 
+def filesExist(request):
+    data = simplejson.loads(request.POST['data'])
+    if data.has_key('filehashes'):
+        filehashes = data['filehashes']
+        existences = {}
+        for filehash in filehashes:
+            existing_file = File.objects.filter(name=filehash)
+            if len(existing_file) > 0: file_exists = True
+            else: file_exists = False
+            existences[filehash] = file_exists
+        print existences
+    return HttpResponse(simplejson.dumps(existences))
+
 def uploadFiles(request):
-    print request.POST
-    print request.FILES
-    return HttpResponse('{"result": "success"}')    
-    #print FILES
+    location = '/var/www/FILES/'
+    if request.POST.has_key(u'experiment_id'):
+        experiment_id = request.POST[u'experiment_id']
+        experiment = Experiment.objects.get(id=experiment_id)
+    else:
+        experiment = None
+    
+    if request.FILES.has_key('FILES'):
+        file_data = request.FILES.getlist('FILES')
+        for f in file_data:
+            file_data = f.read()
+            file_sha1 = hashlib.sha1(file_data)
+
+            write_here = location + file_sha1.hexdigest()
+            open(write_here, 'w').write(file_data)
+
+            new_files = File.objects.filter(name=file_sha1.hexdigest())
+            if len(new_files) > 0:
+                new_file = new_files[0]
+            else:
+		        new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location)
+		        
+            if experiment is not None:
+                #print "experiment id: ", request.POST[u'experiment_id']
+                experiment.Files.add(new_file)
+
+    return HttpResponse('OK')    
+
 ###### BT7 TESTING
 #    register_instrument(BT7)
 #    instruments.init_data()
@@ -403,9 +443,10 @@ def editExperiment(request, experiment_id):
     if request.FILES.has_key('new_files'):
         file_data = request.FILES.getlist('new_files')
         for f in file_data:
-            file_sha1 = hashlib.sha1()
-            for line in f.read():
-                file_sha1.update(line)
+            file_sha1 = hashlib.sha1(f.read())
+            #file_sha1 = hashlib.sha1()
+            #for line in f.read():
+            #    file_sha1.update(line)
             write_here = '/var/www/FILES/' + file_sha1.hexdigest()
             write_here = open(write_here, 'w')
             for line in f:

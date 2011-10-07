@@ -38,7 +38,7 @@ div.WireIt-Terminal {
    height: 30px;
    cursor: pointer;   
    position: absolute;
-   background: transparent url(terminals.png) no-repeat scroll 0 0;
+   background: transparent url(terminals_flash.gif) no-repeat scroll 0 0;
    z-index: 6;
 }
 
@@ -48,6 +48,10 @@ div.WireIt-Terminal-connected {
 
 div.WireIt-Terminal-dropinvite {
    background-position: 0 -60px;
+}
+
+div.WireIt-Terminal-dataRequested {
+   background-position: 0 -90px;
 }
 
 /**

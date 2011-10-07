@@ -36,24 +36,24 @@ var asterix = {
           "type": "[file]", 
           "value": []
         }, 
-        {
-          "label": "Center Pixel", 
-          "name": "center_pixel", 
-          "type": "float", 
-          "value": 145.0,
-        }, 
-        {
-          "label": "Wavelength over Time-of-Flight", 
-          "name": "wl_over_tof", 
-          "type": "scientific", 
-          "value": 1.9050372144288577e-5,
-        }, 
-        {
-          "label": "Pixel width/distance (to sample)", 
-          "name": "pixel_width_over_dist", 
-          "type": "float", 
-          "value":  0.00034113856493630764,
-        },
+//        {
+//          "label": "Center Pixel", 
+//          "name": "center_pixel", 
+//          "type": "float", 
+//          "value": 145.0,
+//        }, 
+//        {
+//          "label": "Wavelength over Time-of-Flight", 
+//          "name": "wl_over_tof", 
+//          "type": "scientific", 
+//          "value": 1.9050372144288577e-5,
+//        }, 
+//        {
+//          "label": "Pixel width/distance (to sample)", 
+//          "name": "pixel_width_over_dist", 
+//          "type": "float", 
+//          "value":  0.00034113856493630764,
+//        },
       ], 
       "name": "LoadAsterix"
     },

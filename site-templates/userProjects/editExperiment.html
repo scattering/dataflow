@@ -1,5 +1,162 @@
 {% extends "base.html" %}
 {% block title %}Edit experiment{% endblock %}
+{% block head %}
+    <style type="text/css">
+        * {
+            font-family: Verdana, Helvetica, sans-serif;
+            font-size: 8pt;
+        }
+        div {
+            margin-top: 4px;
+        }
+        .progress {
+            width: 100px;
+            border: 1px solid #BBB;
+            background-color: #FFF;
+            padding: 0;
+        }
+        .progress span {
+            display: block;
+            width: 0px;
+            height: 10px;
+            background-color: #DDD;
+        }
+        #from {
+            position: absolute;
+            top: 120px;
+        }
+    </style>
+    <!-- YUI -->
+	<script type="text/javascript" src="/static/lib/yui/yahoo/yahoo.js"></script>
+	<script type="text/javascript" src="/static/lib/yui/yahoo/yahoo-debug.js"></script>
+	<script type="text/javascript" src="/static/lib/yui/utilities/utilities.js"></script>
+	<script type="text/javascript" src="/static/lib/yui/json/json-debug.js"></script>
+    <!-- adapter for talking to server -->
+    <script type="text/javascript" src="/static/lib/tracks/test_adapter.js"></script>
+    <script type="text/javascript" src="/static/lib/sha1.js"></script>
+    <script type="text/javascript" src="/static/lib/sendFile.js"></script>
+    
+    <script type="text/javascript">
+    
+        experiment_id = {{ experiment.id }};
+        function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie != '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        // remove whitespace from beginning and end: (like jQuery.trim)
+                        var cookie = cookies[i].replace(/(^[\s\xA0]+|[\s\xA0]+$)/g, '');
+                        //var cookie = jQuery.trim(cookies[i]);
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+        };
+        
+        function size(bytes){   // simple function to show a friendly size
+            var i = 0;
+            while(1023 < bytes){
+                bytes /= 1024;
+                ++i;
+            };
+            return  i ? bytes.toFixed(2) + ["", " Kb", " Mb", " Gb", " Tb"][i] : bytes + " bytes";
+        };
+        
+        window.onload = function() {
+            var input = document.getElementById('new_files');
+            input.disabled = false;
+            var progress_div = document.getElementById('progress_div');
+            
+            check_existence = function(files) {
+                var filehashes = [];
+                var hash_lookup = {};
+                num_files = files.length;
+                function add_filehash(filename, result, filehashes, num_files) {
+                    var filehash = SHA1(result);
+                    hash_lookup[filename] = filehash;
+                    var new_length = filehashes.push(filehash);
+                    console.log(filehashes, hash_lookup);
+                    if (new_length >= num_files) {
+                        test_adapter.filesExist(filehashes);
+                    }
+                    return
+                }
+                    
+                for (var i=0; i<files.length; i++) {
+	                var reader = new FileReader();
+	                reader.onload = (function(theFile) {
+                        return function(e) {
+                            add_filehash(theFile.name, e.target.result, filehashes, num_files)
+                        };
+                    })(files[i]);
+	                reader.readAsBinaryString(files[i]);
+	            }
+            };
+            
+            input.addEventListener("change", function(){
+                
+                // disable the input
+                input.setAttribute("disabled", "true");
+                
+                progress_div.innerHTML="";
+                progress_bars = {};
+                for (var i=0; i<input.files.length; i++) {
+                    var new_div = progress_div.appendChild(document.createElement("div"));
+                    new_div.textContent = input.files[i].name;
+                    var new_bar = new_div.appendChild(document.createElement("progress"));
+                    new_bar.value = 0;
+                    new_bar.max = input.files[i].size;
+                    progress_bars[input.files[i].name] = new_bar;
+                }
+                
+                sendMultipleFiles({
+                    url: '/uploadFiles/',
+                    // list of files to upload
+                    files:input.files,
+                    
+                    extra_data: {"experiment_id": experiment_id},
+                    
+                    csrf_token: getCookie('csrftoken'),
+                    
+                    // clear the container 
+                    onloadstart:function(){
+                    },
+                    
+                    // do something during upload ...
+                    onprogress:function(rpe, xhr){
+                        var fn = this.file.name;
+                        progress_bars[fn].value = rpe.loaded;
+                    },
+                    
+                    // fired when last file has been uploaded
+                    onload:function(rpe, xhr){
+                        // enable the input again
+                        input.removeAttribute("disabled");
+                        // reload the page without reposting any data:
+                        window.location.href = window.location.pathname;
+                        
+                        // this would reload the window, but includes last POST data:
+                        //window.location.reload();
+                    },
+                    
+                    // if something is wrong ... (from native instance or because of size)
+                    onerror:function(){
+                        var fn = this.file.name;
+                        progress_bars[fn].textContent = "The file " + fn + " is too big [" + size(this.file.size) + "]";
+                        
+                        // enable the input again
+                        input.removeAttribute("disabled");
+                    }
+                });
+            }, false);         
+            
+        };
+    </script>
+{% endblock %}
 {% block content %}
 			<h1 class="alt span-16">Experiment <span class="proposalnum">{{ experiment.ProposalNum }}</span></h1>
 			<form action="/editor/" method="post" class="span-8 last">
@@ -50,7 +207,8 @@
 	        	    {% endif %}
 	        	    <h3 class="alt">{{ form2.new_files.label }}</h3>
 	        	    <p>{{ form2.new_files }}</p>
-	        	    <p><input type="submit" value="Add selected files" /></p>
+	        	    <div id='progress_div'></div>
+<!-- 	        	    <p><input type="button" onclick="check_existence(document.getElementById('new_files').files)" value="Add selected files" /></p>  -->
 	            </div>
 			    </div>
 			</form>
