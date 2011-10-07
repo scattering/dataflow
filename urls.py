@@ -15,6 +15,8 @@ urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views',
 		('^listWirings/$', 'listWirings'),
 		('^interactors/$', 'showInteractors'),
 		('^plotWindow/$', 'showPlotWindow'),
+		('^uploadFiles/$', 'uploadFiles'),
+		('^filesExist/$', 'filesExist'),
 		
 		# Wiring editor display urls
 		('^editor/$', 'displayEditor'),

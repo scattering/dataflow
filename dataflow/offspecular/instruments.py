@@ -111,10 +111,10 @@ def _load_data(name, auto_PolState, PolState):
     return LoadICPData(fileName, path=dirName, auto_PolState=auto_PolState, PolState=PolState)
 
 
-def load_asterix_action(files=[], center_pixel = 145.0, wl_over_tof=1.9050372144288577e-5, pixel_width_over_dist =0.00034113856493630764, **kwargs):
+def load_asterix_action(files=[], **kwargs):
     result = []
     for f in files:
-        subresult = _load_asterix_data(f, center_pixel, wl_over_tof, pixel_width_over_dist)
+        subresult = _load_asterix_data(f)
         if type(subresult) == types.ListType:
             result.extend(subresult)
         else:
@@ -122,14 +122,14 @@ def load_asterix_action(files=[], center_pixel = 145.0, wl_over_tof=1.9050372144
     #result = [_load_data(f, auto_PolState, PolStates.get(get_friendly_name(os.path.split(f)[-1]), '')) for f in files] # not bundles
     return dict(output=result)
     
-def _load_asterix_data(name, center_pixel, wl_over_tof, pixel_width_over_dist):
+def _load_asterix_data(name):
     (dirName, fileName) = os.path.split(name)
     friendlyName = get_friendly_name(fileName)
     if friendlyName.endswith('hdf'):
         format = "HDF4"
     else: #h5
         format = "HDF5"
-    return LoadAsterixRawHDF(fileName, path=dirName, center_pixel=center_pixel, wl_over_tof=wl_over_tof, pixel_width_over_dist=pixel_width_over_dist, format=format )
+    return LoadAsterixRawHDF(fileName, path=dirName, format=format )
     #return SuperLoadAsterixHDF(fileName, path=dirName, center_pixel=center_pixel, wl_over_tof=wl_over_tof, pixel_width_over_dist=pixel_width_over_dist, format=format )
 
 def load_asterix_spectrum_action(files=[], **kwargs):

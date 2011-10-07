@@ -311,6 +311,7 @@
 						FILE_DICT[FILES[i][1]]=FILES[i][0]
 					}
                     
+                    WireIt.WiringEditor.adapters.tracks = test_adapter; // from static/lib/tracks/test_adapter.js
 					// setting up the WireEditor with the adapter 'tracks'
 					CHOSEN_LANG['adapter'] = WireIt.WiringEditor.adapters.tracks;
 
@@ -328,10 +329,17 @@
                     editor.FAT = makeFileTable(FILES, editor.getValue().working.modules);
 					// more initial settings
 					editor.launchedFromExperimentPage = launchedFromExperimentPage;
-
+                    
+                    WireIt.Terminal.prototype.onClick = function(e, f) {
+                        console.log('terminal clicked', e, f);
+                        //YAHOO.util.Dom.addClass(this.el, "WireIt-Terminal-dataRequested");
+                        console.log(this.el.style);
+                    }                    
 					// imagecontainer initial height, width
-					WireIt.ImageContainer.prototype.height = 40;
-					WireIt.ImageContainer.prototype.width = 40;
+					WireIt.ImageContainer.prototype.height = 64;
+					WireIt.ImageContainer.prototype.width = 64;
+					
+					
 					WireIt.ImageContainer.prototype.onMouseDown = function(e) {
 						//console.log('clicked on imageContainer')
 						if (!e || e.which == 1) { return false; }
@@ -346,6 +354,27 @@
 						holder = this;
 						return false;
 					}
+					
+                    WireIt.Container.prototype.addTerminal = function(terminalConfig) {
+                        // THIS IS A COPY of the original from wireit.js, but with activation for terminals
+                        // Terminal type
+                        var type = eval(terminalConfig.xtype || "WireIt.Terminal");
+                        // Instanciate the terminal
+                        var term = new type(this.el, terminalConfig, this);
+                        // Add the terminal to the list
+                        this.terminals.push( term );
+                        // Event listeners
+                        term.eventAddWire.subscribe(this.onAddWire, this, true);
+                        term.eventRemoveWire.subscribe(this.onRemoveWire, this, true);
+                        YAHOO.util.Event.addListener(term.el, "click", term.onClick, term, true);
+                        return term;
+                    },
+                    
+					//WireIt.Container.prototype.addTerminal = function(terminalConfig) {
+					//    var term = WireIt.Container.prototype.addTerminal.call(this, terminalConfig);
+					//    YAHOO.util.Event.addListener(term.el, "click", term.onClick, this, true);
+					//    return term;
+					//}
 					WireIt.Container.prototype.onMouseDown = function(e) {
 						//console.log('clicked on container')
                         if (!e || e.which == 1) { return false; } // only catch non-left-clicks

@@ -45,6 +45,7 @@ class experimentForm2(forms.Form):
         self.fields['new_templates'].length = len(new_templates)
         self.fields['new_files'] = forms.FileField(label='Add files')
         self.fields['new_files'].widget.attrs['multiple'] = 'true'
+        self.fields['new_files'].widget.attrs['id'] = 'new_files'
         self.fields['cur_templates'] = forms.ModelMultipleChoiceField(queryset=cur_templates, label='Current templates', widget=forms.CheckboxSelectMultiple)
         self.fields['cur_files'] = forms.ModelMultipleChoiceField(queryset=experiment.Files.all(), label='Current files', widget=forms.CheckboxSelectMultiple)
         

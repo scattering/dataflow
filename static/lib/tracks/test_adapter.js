@@ -5,7 +5,9 @@ function getCookie(name) {
         if (document.cookie && document.cookie != '') {
             var cookies = document.cookie.split(';');
             for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
+                // remove whitespace from beginning and end: (like jQuery.trim)
+                var cookie = cookies[i].replace(/(^[\s\xA0]+|[\s\xA0]+$)/g, '');
+                //var cookie = jQuery.trim(cookies[i]);
                 // Does this cookie string begin with the name we want?
                 if (cookie.substring(0, name.length + 1) == (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
@@ -16,7 +18,9 @@ function getCookie(name) {
         return cookieValue;
     }
 
-WireIt.WiringEditor.adapters.tracks = {
+
+test_adapter = {
+//WireIt.WiringEditor.adapters.tracks = {
 	
 	/**
 	 * You can configure this adapter to different schemas.
@@ -42,6 +46,11 @@ WireIt.WiringEditor.adapters.tracks = {
 		    method: 'POST',
 		    url: 'getCSV/',
 		},
+		
+		filesExist: {
+		    method: 'POST', 
+		    url: '/filesExist/',
+		}, 
 	},
 	
 	init: function() {
@@ -73,6 +82,13 @@ WireIt.WiringEditor.adapters.tracks = {
 		download_form.submit()
 	},
 	
+	filesExist: function(filehashes, callbacks) {
+	    var callbacks = callbacks || { 
+	        success: function(o) { console.log('success', o ); },
+	        failure: function(o) { console.log('failure', o ); },
+	        };
+	    this._sendRequest("filesExist", {filehashes:filehashes}, callbacks);
+	},	
 	
 	_downloadRequest: function(action, value, callbacks) {
 	    var postData = 'data=' + YAHOO.lang.JSON.stringify(value);
@@ -127,8 +143,8 @@ WireIt.WiringEditor.adapters.tracks = {
 		else {
 			method = this.config[action].method;
 		}
-                YAHOO.util.Connect.initHeader('X-CSRFToken', getCookie('csrftoken'));
-		YAHOO.util.Connect.asyncRequest(method, url, {
+        YAHOO.util.Connect.initHeader('X-CSRFToken', getCookie('csrftoken'));
+        YAHOO.util.Connect.asyncRequest(method, url, {
 			success: function(o) {
 				var s = o.responseText;
 				         // CHANGED (7/5/11), JSON parsing was not working
