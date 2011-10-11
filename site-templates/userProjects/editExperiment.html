@@ -97,6 +97,14 @@
 	            }
             };
             
+            checkAll = function(formname, checked) {
+                if (checked == undefined) var checked = true;
+                items = document.getElementsByName(formname);
+                for (var i in items) {
+                    items[i].checked = checked;
+                };
+            };
+            
             input.addEventListener("change", function(){
                 
                 // disable the input
@@ -201,7 +209,12 @@
 	        	    <h3 class="alt">{{ form2.cur_files.label }}</h3>
 	        	    {% if experiment.Files.all %}
 	        	        {{ form2.cur_files }}
-        			    <p><input type="submit" value="Remove checked files" /></p>
+        			    <p>
+        			    <input type="button" value="Select all" onclick="checkAll('cur_files', true)" />
+        			    <input type="button" value="Clear all"  onclick="checkAll('cur_files', false)" />
+        			    <input type="submit" value="Remove checked files" />
+        			    </p>
+        			    
 	        	    {% else %}
 		        	    <p>There are currently 0 files. Please add files below.</p>
 	        	    {% endif %}
