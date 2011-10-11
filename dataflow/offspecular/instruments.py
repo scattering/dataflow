@@ -12,8 +12,7 @@ SERVER = 0
 module_imports = [
     #("dataflow.wireit", ["template_to_wireit_diagram", "instrument_to_wireit_language"]),
     ("dataflow", "config"),
-    ("dataflow.calc", ["run_template", "get_plottable", "calc_single"]),
-    ("dataflow.core", ["Data", "Instrument", "Template", "register_instrument"]),
+   
     ("dataflow.modules.load", "load_module"),
     ("dataflow.offspecular.modules.load_asterix", "load_asterix_module"),
     ("dataflow.offspecular.modules.load_asterix_spectrum", "load_asterix_spectrum_module"),
@@ -39,6 +38,8 @@ module_imports = [
     ("dataflow.offspecular.modules.empty_qxqz_grid", "empty_qxqz_grid_module"),
     ("dataflow.offspecular.modules.mask_data", "mask_data_module"),
     ("dataflow.offspecular.modules.slice_data", "slice_data_module"),
+    ("dataflow.calc", ["run_template", "get_plottable", "calc_single"]),
+    ("dataflow.core", ["Data", "Instrument", "Template", "register_instrument"]),
     ("reduction.offspecular.filters", ["LoadICPData", "LoadAsterixRawHDF", "LoadAsterixSpectrum", "Autogrid", "Combine", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "WiggleCorrection", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz"]),
     ("reduction.offspecular.he3analyzer", "He3AnalyzerCollection"),
     ("reduction.offspecular.FilterableMetaArray", "FilterableMetaArray"),
@@ -56,16 +57,22 @@ elif TESTING:
 else:
     root_import = "..."
 
+lib = {}
+dataflow = __import__("dataflow", level=3, globals=globals())
 
 for item in module_imports:
     loc = item[0]
     mods = item[1]
-    print root_import + item[0], item[1]
+    #print root_import + item[0], item[1]
     if type(mods) != types.ListType:
         mods = [mods]
     for mod in mods:
-        exec("from %s import %s" % (root_import + loc, mod))
+        #print root_import + item[0]
+        lib[mod] = getattr(__import__(item[0], level=3, globals=globals(), fromlist=[mod]), mod)
+        globals()[mod] = lib[mod]
+    #    exec("from %s import %s" % (root_import + loc, mod))
     #__import__(root_import + item[0], globals=globals(), fromlist=item[1], level=-1)
+
 
 class PlottableDict(dict):
     def get_plottable(self):
