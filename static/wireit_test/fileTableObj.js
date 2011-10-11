@@ -278,6 +278,7 @@ with multiple groups
         me.fileList = fileList;
         me.moduleConfigs = moduleConfigs;
         me.refreshStore();
+        me.contextMenu = me.newContextMenu();
     }
 
     // grid display panel
@@ -313,6 +314,7 @@ with multiple groups
 	                if (!(groups[g] == '')) {
 	                    var groupnum = Number(groups[g]);
 	                    console.log('groupnum:', groupnum, groups);
+	                    if (!container.tracksConfigs) { container.tracksConfigs = {} }
 	                    if (!container.tracksConfigs[groupnum]) { container.tracksConfigs[groupnum] = {} }
 	                    if (!container.tracksConfigs[groupnum]['files']) { container.tracksConfigs[groupnum]['files'] = [] }
 	                    if (f.data.filetype == me.headerList[i]) {
@@ -353,49 +355,57 @@ with multiple groups
 
 
     // context menu for group/type editing
-    this.contextMenu = new Ext.menu.Menu({
-	    items: [{
-	        text: 'Set Type',
-	        menu: function() { 
-	            var setTypeMenu = [];
-	            for (var i in me.headerList) {
-	                var entry = { 
-	                    text: me.headerList[i],  
-	                    handler: me.return_handler(me.headerList[i]),
+    this.newContextMenu = function() {
+        var newMenu = new Ext.menu.Menu({
+	        items: [{
+	            text: 'Set Type',
+	            menu: function() {
+	                console.log('menu', me);
+	                var setTypeMenu = [];
+	                for (var i in me.headerList) {
+	                    console.log(me, headerList[i]);
+	                    var entry = { 
+	                        text: me.headerList[i],  
+	                        handler: me.return_handler(me.headerList[i]),
+	                    }
+	                    setTypeMenu.push(entry);
 	                }
-	                setTypeMenu.push(entry);
+	                return setTypeMenu;    
+                }(),
+            },
+	        { 
+	            text: 'Clear Type',
+	            handler: function() {
+		            me.setRecords(me.grid.getSelectionModel().getSelection(), 'filetype', 'Unassigned')
+		        },
+	        },
+	        {
+	            text: 'Set Group',
+	            handler: function() {
+		            Ext.Msg.prompt('Set Group?', 'Please enter the group value:', function(btn, grpnm) {
+		                if (btn == 'ok' && me.acceptable_entry.test(grpnm)){
+		                    me.setRecords(me.grid.getSelectionModel().getSelection(), 'group', grpnm);
+                		}
+		                else if (btn == 'ok') {
+			                alert("Invalid entry for field 'group'. Please enter comma separated integers.");
+			            }
+		            });
 	            }
-	            return setTypeMenu;    
-            }(),
-        },
-	    { 
-	        text: 'Clear Type',
-	        handler: function() {
-		        me.setRecords(me.grid.getSelectionModel().getSelection(), 'filetype', 'Unassigned')
-		    },
-	    },
-	    {
-	        text: 'Set Group',
-	        handler: function() {
-		        Ext.Msg.prompt('Set Group?', 'Please enter the group value:', function(btn, grpnm) {
-		            if (btn == 'ok' && me.acceptable_entry.test(grpnm)){
-		                me.setRecords(me.grid.getSelectionModel().getSelection(), 'group', grpnm);
-            		}
-		            else if (btn == 'ok') {
-			            alert("Invalid entry for field 'group'. Please enter comma separated integers.");
-			        }
-		        });
-	        }
-        }, 
-        {
-	        text: 'Clear Group',
-	        handler: function() {
-		        me.setRecords(me.grid.getSelectionModel().getSelection(), 'group', '')
-	        }
-	    }],
-    });
+            }, 
+            {
+	            text: 'Clear Group',
+	            handler: function() {
+		            me.setRecords(me.grid.getSelectionModel().getSelection(), 'group', '')
+	            }
+	        }],
+        });
     
-    return this;
+        return newMenu;
+    };
+    
+    this.contextMenu = this.newContextMenu();
+    
+    return this
 }
 
 
