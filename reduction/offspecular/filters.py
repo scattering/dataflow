@@ -802,7 +802,10 @@ def LoadAsterixRawHDF(filename, path=None, format="HDF5", **kwargs):
 
     hdf_obj.close()
     if format == "HDF4":
+        print "removing temporary file"
         os.remove(tmp_path)
+        print "temp file removed"
+        
     #return output_objs 
     return MetaArray(data_array[:], dtype='float', info=info[:])
 

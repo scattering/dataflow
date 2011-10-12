@@ -492,7 +492,7 @@
 		displayResult: function(display) {
 			plotid = 'plot';
 			toPlot = display
-			if (!this.plotWindow || !this.plotWindow.window) {
+			if (!this.plotWindow || !this.plotWindow.window || this.plotWindow.window.closed) {
 			    this.plotWindow = window.open("/plotWindow/", "", "status=1,width=650,height=500");
 			}
 			this.plotWindow.plottingAPI(toPlot, plotid)
