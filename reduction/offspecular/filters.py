@@ -801,6 +801,8 @@ def LoadAsterixRawHDF(filename, path=None, format="HDF5", **kwargs):
         #output_objs.append(MetaArray(data_array[:], dtype='float', info=info[:]))
 
     hdf_obj.close()
+    if format == "HDF4":
+        os.remove(tmp_path)
     #return output_objs 
     return MetaArray(data_array[:], dtype='float', info=info[:])
 
