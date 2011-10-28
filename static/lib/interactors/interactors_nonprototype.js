@@ -5,9 +5,18 @@
 // #####################
 
 (function($) {
-    $.jqplot.Interactor = function(){
+    function toArray(obj) {
+        return Array.prototype.slice.call(obj);
     };
     
+    function bind(scope, fn) {
+        return function () {
+            return fn.apply(scope, toArray(arguments));
+        };
+    };
+
+    $.jqplot.Interactor = function(){
+    };
     
     // called with scope of a series
     $.jqplot.Interactor.prototype = {
@@ -16,6 +25,7 @@
         this.name = name;
         this.icon = icon;
         this.state = state;
+        this.translatable = true;
         
         this.canvas = document.getElementById(canvasid);
         this.context = this.getContext(canvasid);
@@ -32,9 +42,10 @@
         this.rc = 1;//Math.random();
         
         //this.canvas.onmouseover = this.onMouseOver.bind(this);
-        this.canvas.onmousemove = this.onMouseMove.bind(this);
-        this.canvas.onmousedown = this.onMouseDown.bind(this);
-        this.canvas.onmouseup   = this.onMouseUp.bind(this);
+        //this.canvas.onmousemove = this.onMouseMove.bind(this);
+        this.canvas.onmousemove = bind(this, this.onMouseMove);
+        this.canvas.onmousedown = bind(this, this.onMouseDown);
+        this.canvas.onmouseup   = bind(this, this.onMouseUp);
     },
 
     getMouse: function(e) {
@@ -48,7 +59,7 @@
 	
 	    return { x: x, y: y };
     },
-
+    
     getContext: function(id) {
         var elem = document.getElementById(id);
         if (!elem || !elem.getContext) {
@@ -68,6 +79,32 @@
         for (var i = 0; i < this.grobs.length; i ++) {
             var grob = this.grobs[i];
             grob.render(this.context);
+        }
+    },
+    
+    dupdate: function(maxmoves, movenum) {
+        // take current state and update until self-consistent, 
+        // up to a maximum number of moves = maxmoves.
+        var maxmoves = maxmoves || 10;
+        var movenum = movenum || 0;
+        var moves = [];
+        for (var i = 0; i < this.grobs.length; i++) {
+            var dpos = this.grobs[i].calc_update();
+            moves.push(Math.pow(dpos.x, 2) + Math.pow(dpos.y, 2));
+        }
+        movenum++;
+        if ((Math.max(moves) == 0) || (movenum >= maxmoves)) {
+            for (var i = 0; i < this.grobs.length; i++) {
+                this.grobs[i].translateBy({});
+            }
+        }
+        // recurse;
+    },
+    
+    update: function() {
+        for (var i = 0; i < this.grobs.length; i ++) {
+            var grob = this.grobs[i];
+            grob.update();
         }
     },
     
@@ -113,11 +150,12 @@
             if (this.mousedown && i == this.curgrob) {
                 g.onDrag(e, pos);
                 this.onDrag(e, pos);
-            }
+            } 
             else {
                 if (inside) {
                     g.onMouseOver(e);
                     this.onMouseOver(e);
+                    
                 }
                 else if (!inside && g.inside) {
                     g.onMouseOut(e);
@@ -126,17 +164,21 @@
             }
             i ++;
         }
+        if (this.mousedown && this.curgrob == null) {
+            this.onEmptyDrag(pos);
+        };
         this.redraw();
     },
     onMouseDown: function(e) {
         this.mousedown = true;
         var pos = this.getMouse(e);
+        this.prevpos = pos;
         for (var i = 0; i < this.grobs.length; i ++) {
             var g = this.grobs[i];
             var inside = g.isInside(pos);
             
             if (inside) {
-                this.prevpos = pos;
+                //this.prevpos = pos;
                 this.curgrob = i;
             }
         }
@@ -155,12 +197,17 @@
         this.redraw();
     },
     onDrag: function(pos) {
-        if (this.c)
-            this.c.pos = this.center();
+        if (this.c) {
+            var new_c = this.center();
+            var dpos = {x: new_c.x - this.c.pos.x, y: new_c.y - this.c.pos.y}
+            this.c.translateBy(dpos);
+        }
     },
+    onEmptyDrag: function(pos) {},
     onDrop: function(e, pos) {
     
-    },
+    }
+    
 };
 
 
@@ -441,7 +488,6 @@
     };
     
     $.jqplot.AnnulusInteractor.prototype.redraw = function() {
-        console.log(this);
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         if (this.showdata) {
             this.context.globalAlpha = 1;
@@ -526,7 +572,7 @@
             this.gaussian = gaussian;
             
             this.redraw();
-        },
+        }
     });
 
     $.jqplot.Grob = function() {};
@@ -544,6 +590,30 @@
             this.color1 = '#000';'hsl('+h+',100%,40%)'; //'#2C8139';
             this.color2 = '#444';'hsl('+h+',100%,60%)'; //'#4CCC60';
             this.color = this.color1;
+            this.listeners = [];
+        },
+        
+        calc_update: function() {
+            // make self-consistent with other grobs
+            // overload in children, returning the calculated
+            // dpos.
+            this.dpos = {x:0, y:0};
+            return {x:0, y:0}
+        },
+           
+        move: function(dpos) {
+            this.translateBy(dpos);
+        },
+        
+        update: function(pos, fix_x, fix_y) {
+            var newpos = this.putCoords ? this.putCoords(pos) : pos;
+            var mypos = this.pos;
+            var dpos = {x: newpos.x-mypos.x, y: newpos.y-mypos.y};
+
+            if (fix_x) { dpos.x = 0; };
+            if (fix_y) { dpos.y = 0; };
+            this.translateBy(dpos);
+            this.parent.redraw();
         },
         
         isInside: function(pos) {},
@@ -551,9 +621,20 @@
             return dist(this.pos, pos);
         },
         translateBy: function(dpos) {
-            this.pos.x += dpos.x;
-            this.pos.y += dpos.y;
+            if (dpos.x) 
+                this.pos.x += dpos.x;
+            if (dpos.y)
+                this.pos.y += dpos.y;
+            this.updateListeners();
         },
+        
+        updateListeners: function() {
+            for (var i in this.listeners) {
+                var pos = this.getCoords? this.getCoords() : this.pos;
+                this.listeners[i].update(pos);
+            }
+        },
+        
         render: function(ctx) {},
         
         onDrag: function(e, pos) {
@@ -562,9 +643,15 @@
             var dx = pos.x - this.prevpos.x,
                 dy = pos.y - this.prevpos.y;
             this.dpos = { x: dx, y: dy };
-            if (this.translatable)
-                this.translateBy(this.dpos);
-                
+            if (this.translatable) {
+                this.move(this.dpos);
+//                var alreadyUpdated = [this];
+//                this.translateBy(this.dpos);
+//                var update_pos = this.getCoords ? this.getCoords() : this.pos;
+//                console.log('update_pos:', update_pos);
+//                this.updateListeners(alreadyUpdated, false, false);
+                this.parent.redraw()
+            }    
             this.prevpos = pos;
         },
         onDrop: function(e, pos) {
@@ -572,7 +659,7 @@
             this.dpos = null;
         },
         onMouseOver: function(e) { this.inside = true;  this.color = this.color2; },
-        onMouseOut: function(e)  { this.inside = false; this.color = this.color1; },
+        onMouseOut: function(e)  { this.inside = false; this.color = this.color1; }
     };
     
     $.jqplot.GrobConnector = function() {};
@@ -606,7 +693,7 @@
             //console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ') dpos (', this.dpos.x, this.dpos.y, ')');
             if (this.connectortranslatable)
                 this.translateBy(this.dpos);
-        },
+        }
     });
     
     $.jqplot.Segment = function() {};
@@ -658,7 +745,7 @@
         },
         onMouseOut: function(e) {
             $.jqplot.GrobConnector.prototype.onMouseOut.call(this, e);
-        },
+        }
     });
     
     $.jqplot.Point = function() {};
@@ -669,6 +756,7 @@
             $.jqplot.Grob.prototype.initialize.call(this, parent, x, y);          
             this.name = 'point';
             this.r = r || 6;
+            this.show_pos = true;
         },
         
         render: function(ctx) {
@@ -676,7 +764,9 @@
 	        ctx.strokeStyle = 'transparent';
             ctx.beginPath();
 	        //ctx.moveTo(this.x, this.y);
-            ctx.fillText('(' + this.pos.x.toFixed(0) + ', ' + this.pos.y.toFixed(0) + ')', this.pos.x, this.pos.y - 5);
+	        if (this.show_pos) {
+                ctx.fillText('(' + this.pos.x.toFixed(0) + ', ' + this.pos.y.toFixed(0) + ')', this.pos.x, this.pos.y - 5);
+	        }
 	        ctx.arc(this.pos.x, this.pos.y, this.r, 0, Math.PI * 2, true);
 	        ctx.closePath();
 	        ctx.stroke();
@@ -697,7 +787,7 @@
             $.jqplot.Grob.prototype.onDrag.call(this, e, pos);
             //if (this.translatable)
             //    this.translateBy(this.dpos);
-        },
+        }
     });
     
     $.jqplot.Circle = function() {};
@@ -737,7 +827,75 @@
             if (!this.filled)
                 dd = Math.abs(dd);
             return dd <= this.width + 1;
+        }
+    });
+    
+    $.jqplot.Rectangle = function() {};
+    $.jqplot.Rectangle.prototype = new $.jqplot.GrobConnector();
+    $.jqplot.Rectangle.prototype.constructor = $.jqplot.Rectangle;    
+    $.extend($.jqplot.Rectangle.prototype, {        
+        initialize: function(parent, p1, p2, p3, p4, width) {
+            $.jqplot.GrobConnector.prototype.initialize.call(this, parent, width);
+            this.name = 'rectangle';
+            this.points = { p1: p1, p2: p2, p3: p3, p4: p4 };
+            // this assumes that p1 and p3 are opposite corners! 
+            this.p1 = p1;
+            this.p3 = p3;
+            //this.c.parent = this;
+            this.filled = true;
         },
+        
+        findOppositeCorner: function(point) {
+            var d = 0;
+            var opp = point;
+            for (var i in this.points) {
+                var newd = dist(this.points[i], point);
+                if (newd > d) {
+                    d = newd;
+                    opp = this.points[i];
+                }
+            }
+            return opp
+        },
+        
+        render: function(ctx) {
+            $.jqplot.GrobConnector.prototype.render.call(this, ctx);
+            
+            ctx.beginPath();
+            ctx.moveTo(this.p1.pos.x, this.p1.pos.y);
+            ctx.lineTo(this.p3.pos.x, this.p1.pos.y);
+            ctx.lineTo(this.p3.pos.x, this.p3.pos.y);
+            ctx.lineTo(this.p1.pos.x, this.p3.pos.y);
+            ctx.lineTo(this.p1.pos.x, this.p1.pos.y);
+            ctx.closePath();
+            ctx.stroke();
+            if (this.filled) {
+                ctx.globalAlpha = 0.15;
+                ctx.fill();
+                ctx.globalAlpha = 0.6;
+            }
+            
+        },
+        
+        isInside: function(pos) {
+            var sizex = this.p1.pos.x - this.p3.pos.x;
+            var sizey = this.p1.pos.y - this.p3.pos.y;
+            var dx = this.p1.pos.x - pos.x;
+            var dy = this.p1.pos.y - pos.y;
+            var betweenx = (dx == 0) || (sizex / dx > 1.0);
+            var betweeny = (dy == 0) || (sizey / dy > 1.0);
+            if (this.filled && betweenx && betweeny)
+                return true;
+            if (betweenx) {
+                if (Math.abs(pos.y - this.p1.pos.y) <= this.width + 1) return true;
+                if (Math.abs(pos.y - this.p3.pos.y) <= this.width + 1) return true;
+            }
+            if (betweeny) {
+                if (Math.abs(pos.x - this.p1.pos.x) <= this.width + 1) return true;
+                if (Math.abs(pos.x - this.p3.pos.x) <= this.width + 1) return true;
+            }
+            return false;
+        }
     });
     
     $.jqplot.Center = function() {};
@@ -769,9 +927,11 @@
             $.jqplot.Point.prototype.onDrag.call(this, e, pos);
             
             //console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ')', this.dpos.dx, this.dpos.dy, dist(this.parent.p1.pos, this.pos), dist(this.parent.p2.pos, this.pos));
-            this.parent.translateBy(this.dpos);
-            this.translateBy(this.dpos);
-        },
+            if (this.parent.translatable) {
+                this.parent.translateBy(this.dpos);
+                this.translateBy(this.dpos);
+            };
+        }
         
     });
     
@@ -847,7 +1007,7 @@
                 d = Math.min(dist(this.p1.pos, pos), dist(this.p2.pos, pos));
             
             return d;
-        },
+        }
     });
     
     $.jqplot.FunctionConnector = function() {};
@@ -859,8 +1019,9 @@
             this.f = null;
         },
         distanceTo: function(pos) {
-            var f = (function(x) { return dist(pos, { x: x, y: this.c.pos.y - this.f(x) }); }).bind(this),
-                df = nDeriv(f),
+            
+            var f = bind(this, (function(x) { return dist(pos, { x: x, y: this.c.pos.y - this.f(x) }); }));
+            var df = nDeriv(f),
                 d2f = nDeriv(df),
                 x0 = pos.x,
                 prevxs = [],
@@ -914,7 +1075,7 @@
             ctx.stroke();
             //ctx.lineWidth = 1; ctx.moveTo(0,y0); ctx.lineTo(ctx.canvas.width,y0); ctx.stroke();
             ctx.strokeStyle = tmp;
-        },       
+        }      
     });
     
     $.jqplot.Linear = function() {};
@@ -943,7 +1104,7 @@
                 ctx.stroke();
             }
             else
-                this.drawEq(ctx, this.f.bind(this), 0, this.c.pos.y, 0, this.parent.canvas.width);
+                this.drawEq(ctx, bind(this, this.f), 0, this.c.pos.y, 0, this.parent.canvas.width);
         },
         
         linear: function(x) {
@@ -970,7 +1131,7 @@
                 d = Math.abs(-a * pos.x + this.c.pos.y - pos.y - b) / Math.sqrt(a * a);
             }
             return d;
-        },
+        }
     });
     
     $.jqplot.Quadratic = function() {};
@@ -990,7 +1151,7 @@
         render: function(ctx) {
             $.jqplot.FunctionConnector.prototype.render.call(this, ctx);
             
-            this.drawEq(ctx, this.f.bind(this), 0, this.c.pos.y, 0, this.parent.canvas.width);
+            this.drawEq(ctx, bind(this, this.f), 0, this.c.pos.y, 0, this.parent.canvas.width);
         },
         
         quadratic: function(x) {
@@ -1001,7 +1162,7 @@
                 c = Y1 - a*X1*X1 - b*X1;
                 
             return a*x*x+b*x+c;
-        },
+        }
     });
     
     $.jqplot.Gaussian = function() {};
@@ -1020,7 +1181,7 @@
         },
         render: function(ctx) {
             $.jqplot.FunctionConnector.prototype.render.call(this, ctx);
-            this.drawEq(ctx, this.f.bind(this), 0, this.c.pos.y, 0, this.parent.canvas.width);
+            this.drawEq(ctx, bind(this, this.f), 0, this.c.pos.y, 0, this.parent.canvas.width);
         },
         
         gaussian: function(x) {
@@ -1031,7 +1192,7 @@
             var stdDev = FWHM / 2 / Math.sqrt(2 * Math.log(2));
             //return - peakY + Math.pow(x - 150, 2) / 100;
             return bkgdY + (peakY - bkgdY) * Math.exp(- Math.pow((x - peakX), 2) / 2 / Math.pow(stdDev, 2));
-        },
+        }
     });
     
     $.jqplot.dist = function(a, b) {
