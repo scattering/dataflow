@@ -1,5 +1,7 @@
 # Create your views here.
 
+FILES_DIR = '/home/dataflow/FILES/'
+
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
@@ -297,7 +299,7 @@ def filesExist(request):
     return HttpResponse(simplejson.dumps(existences))
 
 def uploadFiles(request):
-    location = '/var/www/FILES/'
+    location = FILES_DIR
     if request.POST.has_key(u'experiment_id'):
         experiment_id = request.POST[u'experiment_id']
         experiment = Experiment.objects.get(id=experiment_id)
@@ -447,7 +449,7 @@ def editExperiment(request, experiment_id):
             #file_sha1 = hashlib.sha1()
             #for line in f.read():
             #    file_sha1.update(line)
-            write_here = '/var/www/FILES/' + file_sha1.hexdigest()
+            write_here = FILES_DIR + file_sha1.hexdigest()
             write_here = open(write_here, 'w')
             for line in f:
                 write_here.write(line)
@@ -456,7 +458,7 @@ def editExperiment(request, experiment_id):
             if len(new_files) > 0:
                 new_file = new_files[0]
             else:
-		        new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location='/var/www/FILES/')
+		        new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=FILES_DIR)
             experiment.Files.add(new_file)
     if request.POST.has_key('instrument_name'):
         if request.POST['instrument_name']:
