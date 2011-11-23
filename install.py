@@ -17,7 +17,8 @@ if __name__ == "__main__":
                   'python-scipy',
                   'python-matplotlib',
                   'python-dev',
-		          #'python-psycopg2', # this is already being installed from easy_install below - conflicts!!
+                  'python-simplejson', # no need for easy-install on this one.
+		          'python-psycopg2', # this is already being installed from easy_install below - conflicts!!
 		          'python-h5py',
                   'vim',
                   'subversion',
@@ -27,7 +28,8 @@ if __name__ == "__main__":
 		          'pgadmin3',
 		          'mercurial',
                   ]
-    easy_commands = ['simplejson', 'stompservice', 'orbited', '-U Django', '-U psycopg2', 'South', 'django-registration', 'django-profiles']
+    #easy_commands = ['stompservice', 'orbited', '-U Django', '-U psycopg2', 'South', 'django-registration', 'django-profiles']
+    easy_commands = ['stompservice', 'orbited', '-U Django', 'South', 'django-registration', 'django-profiles']
     merc_commands = ['https://bitbucket.org/ubernostrum/django-registration', 'https://bitbucket.org/ubernostrum/django-profiles']
     
     for command in apt_commands:
