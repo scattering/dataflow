@@ -22,14 +22,15 @@ if __name__ == "__main__":
 		          'python-h5py',
                   'vim',
                   'subversion',
-		          'apache2',
-		          'libapache2-mod-wsgi',
+		          #'apache2',
+		          #'libapache2-mod-wsgi',
 		          'postgresql',
 		          'pgadmin3',
 		          'mercurial',
+		          'python-imaging' # not installed by default on UTK server.  go figure.
                   ]
-    #easy_commands = ['stompservice', 'orbited', '-U Django', '-U psycopg2', 'South', 'django-registration', 'django-profiles']
-    easy_commands = ['stompservice', 'orbited', '-U Django', 'South', 'django-registration', 'django-profiles']
+    easy_commands = ['stompservice', 'orbited', '-U Django', '-U psycopg2', 'South', 'django-registration', 'django-profiles']
+    #easy_commands = ['stompservice', 'orbited', '-U Django', 'South', 'django-registration', 'django-profiles']
     merc_commands = ['https://bitbucket.org/ubernostrum/django-registration', 'https://bitbucket.org/ubernostrum/django-profiles']
     
     for command in apt_commands:

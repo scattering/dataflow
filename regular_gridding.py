@@ -1,5 +1,7 @@
 import numpy as N
 from matplotlib.mlab import griddata
+import matplotlib
+import matplotlib.cbook
 import matplotlib.pyplot as plt
 from numpy.random import uniform
 
