@@ -19,7 +19,9 @@ if __name__ == "__main__":
                   'python-dev',
                   'python-simplejson', # no need for easy-install on this one.
 		          'python-psycopg2', # this is already being installed from easy_install below - conflicts!!
-		          'python-h5py',
+		          #'python-h5py', #need newer version than is in Ubuntu 10.04
+		          'libhdf5-serial-dev',
+		          'build-essential',
                   'vim',
                   'subversion',
 		          #'apache2',
@@ -29,7 +31,7 @@ if __name__ == "__main__":
 		          'mercurial',
 		          'python-imaging' # not installed by default on UTK server.  go figure.
                   ]
-    easy_commands = ['stompservice', 'orbited', '-U Django', '-U psycopg2', 'South', 'django-registration', 'django-profiles']
+    easy_commands = ['stompservice', 'orbited', '-U Django', '-U psycopg2', 'South', 'django-registration', 'django-profiles', 'h5py']
     #easy_commands = ['stompservice', 'orbited', '-U Django', 'South', 'django-registration', 'django-profiles']
     merc_commands = ['https://bitbucket.org/ubernostrum/django-registration', 'https://bitbucket.org/ubernostrum/django-profiles']
     
@@ -47,8 +49,13 @@ if __name__ == "__main__":
     call('cd OOSuite; python install_all.py; cd ..', shell=True)
     for command in merc_commands:
     	call('hg clone %s' % (command,), shell=True) # Default: clones into directory where you're running install.py
+    	
+    # install the two modules downloaded from mercurial above:
+    call('cd django-registration; python setup.py install; cd ..', shell=True)
+    call('cd django-profiles; python setup.py install; cd ..', shell=True)
     for command in easy_commands:
         call('pip install %s' % (command,), shell=True)
+        
 
 #NOTE: Also install matplotlib and download and install natgrid (https://github.com/matplotlib/natgrid)
 #PNOTE: psycopg2 might give you a bit of trouble
