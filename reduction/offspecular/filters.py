@@ -756,6 +756,7 @@ def hdf_to_dict(hdf_obj, convert_i1_tostr=True):
 def LoadAsterixRawHDF(filename, path=None, format="HDF5", **kwargs):
     if path == None:
         path = os.getcwd()
+    print "format:", format
     if format == "HDF4":
         print "converting hdf4 to hdf5"
         (tmp_fd, tmp_path) = tempfile.mkstemp() #temporary file for converting to HDF5

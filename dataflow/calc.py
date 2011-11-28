@@ -152,7 +152,7 @@ def get_plottable(template, config, nodenum, terminal_id):
     fp = all_fp[nodenum]
     plottable_fp = name_terminal(name_plottable(fp), terminal_id)
     if server.exists(plottable_fp):
-        print "retrieving cached value: " + plottable_fp
+        print "retrieving cached plottable: " + plottable_fp
         plottable = server.lrange(plottable_fp, 0, -1)
     else:
         print "no cached plottable: calculating..."
