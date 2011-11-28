@@ -10,5 +10,6 @@ sys.path = [DIR_PATH,DIR_PATH+PROJ_NAM, DIR_PATH+PROJ_NAM +'/apps/tracks'] + sys
 sys.stdout = sys.stderr
 
 os.environ['DJANGO_SETTINGS_MODULE'] = PROJ_NAM + '.settings'
+os.environ['MPLCONFIGDIR'] = DIR_PATH + PROJ_NAM + '/.matplotlib/'
 import django.core.handlers.wsgi
 application = django.core.handlers.wsgi.WSGIHandler()
