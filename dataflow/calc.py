@@ -139,6 +139,7 @@ def calc_single(template, config, nodenum, terminal_id):
             for data in arr:
                 server.rpush(terminal_fp, data.dumps())
         result = calc_value[terminal_id]
+    print "result calculated: ", fp
     return result
 
 def get_plottable(template, config, nodenum, terminal_id):
