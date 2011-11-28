@@ -111,6 +111,7 @@ def calc_single(template, config, nodenum, terminal_id):
         result = [cls.loads(str) for str in server.lrange(terminal_fp, 0, -1)]
     else:
         # get inputs from parents
+        print "no cached calc value: calculating..."
         parents = template.get_parents(nodenum)
         # this is a list of wires that terminate on this module
         kwargs = {}
@@ -154,7 +155,7 @@ def get_plottable(template, config, nodenum, terminal_id):
         print "retrieving cached value: " + plottable_fp
         plottable = server.lrange(plottable_fp, 0, -1)
     else:
-        print "no cached value: calculating..."
+        print "no cached plottable: calculating..."
         data = calc_single(template, config, nodenum, terminal_id)
         plottable = convert_to_plottable(data)
         for item in plottable:
