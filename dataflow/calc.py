@@ -154,6 +154,7 @@ def get_plottable(template, config, nodenum, terminal_id):
         print "retrieving cached value: " + plottable_fp
         plottable = server.lrange(plottable_fp, 0, -1)
     else:
+        print "no cached value: calculating..."
         data = calc_single(template, config, nodenum, terminal_id)
         plottable = convert_to_plottable(data)
         for item in plottable:
