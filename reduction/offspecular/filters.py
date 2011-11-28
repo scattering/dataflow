@@ -808,7 +808,6 @@ def LoadAsterixRawHDF(filename, path=None, format="HDF5", **kwargs):
         print "temp file removed"
         
     #return output_objs
-    print data_array.shape
     return MetaArray(data_array[:], dtype='float', info=info[:])
 
 

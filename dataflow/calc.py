@@ -13,7 +13,7 @@ import numpy
 
 os.system("redis-server") # ensure redis is running
 server = redis.Redis("localhost")
-if not hasattr(server, 'rpush'): server.rpush = server.push
+#if not hasattr(server, 'rpush'): server.rpush = server.push
 
 def run_template(template, config):
     """
