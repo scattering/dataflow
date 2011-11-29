@@ -21,7 +21,7 @@
     // called with scope of a series
     $.jqplot.Interactor.prototype = {
     init: function(name, icon, state, canvasid) {
-        console.log("nInteractor init", this, name, icon, state, canvasid)
+        //console.log("nInteractor init", this, name, icon, state, canvasid)
         this.name = name;
         this.icon = icon;
         this.state = state;
@@ -204,9 +204,8 @@
         }
     },
     onEmptyDrag: function(pos) {},
-    onDrop: function(e, pos) {
-    
-    }
+    onDrop: function(e, pos) {},
+    onDoubleClick: function(pos) {}
     
 };
 
@@ -577,7 +576,7 @@
 
     $.jqplot.Grob = function() {};
     $.jqplot.Grob.prototype = {
-        initialize: function(parent, x, y) {
+        initialize: function(parent, x, y, color1, color2) {
             this.parent = parent;
             this.pos = { x: x, y: y };
 
@@ -587,8 +586,8 @@
             this.dpos = null;
             
             var h = this.parent.rc * 360;
-            this.color1 = '#000';'hsl('+h+',100%,40%)'; //'#2C8139';
-            this.color2 = '#444';'hsl('+h+',100%,60%)'; //'#4CCC60';
+            this.color1 = color1 || this.parent.color1 || '#000';'hsl('+h+',100%,40%)'; //'#2C8139';
+            this.color2 = color2 || this.parent.color2 || '#444';'hsl('+h+',100%,60%)'; //'#4CCC60';
             this.color = this.color1;
             this.listeners = [];
         },
@@ -645,6 +644,7 @@
             this.dpos = { x: dx, y: dy };
             if (this.translatable) {
                 this.move(this.dpos);
+                this.parent.onDrag(this.dpos);
 //                var alreadyUpdated = [this];
 //                this.translateBy(this.dpos);
 //                var update_pos = this.getCoords ? this.getCoords() : this.pos;
@@ -693,6 +693,8 @@
             //console.log('pos (', pos.x, pos.y ,') prev (', this.prevpos.x, this.prevpos.y, ') dpos (', this.dpos.x, this.dpos.y, ')');
             if (this.connectortranslatable)
                 this.translateBy(this.dpos);
+            this.parent.onDrag(this.dpos);
+            this.parent.redraw();
         }
     });
     
@@ -738,6 +740,75 @@
                 d = Math.abs(this.cross(c) / dist(this.p1.pos, this.p2.pos));
             
             return d;
+        },
+        
+        onMouseOver: function(e) {
+            $.jqplot.GrobConnector.prototype.onMouseOver.call(this, e);
+        },
+        onMouseOut: function(e) {
+            $.jqplot.GrobConnector.prototype.onMouseOut.call(this, e);
+        }
+    });
+    
+    $.jqplot.VerticalLine = function() {};
+    $.jqplot.VerticalLine.prototype = new $.jqplot.GrobConnector();
+    $.jqplot.VerticalLine.prototype.constructor = $.jqplot.VerticalLine;    
+    $.extend($.jqplot.VerticalLine.prototype, {        
+        initialize: function (parent, p1, width) {
+            $.jqplot.GrobConnector.prototype.initialize.call(this, parent, width);
+            
+            this.name = 'vertline';
+            this.points = { p1: p1 };
+            this.p1 = p1;
+        },
+        
+        render: function(ctx) {
+            $.jqplot.GrobConnector.prototype.render.call(this, ctx);
+            var height = ctx.canvas.height;
+            ctx.beginPath();
+            ctx.moveTo(this.p1.pos.x, 0);
+            ctx.lineTo(this.p1.pos.x, height);
+            ctx.closePath();
+            ctx.stroke();
+        },
+        
+        distanceTo: function(c) {
+            return (Math.abs(this.pos.x - c.x));
+        },
+        
+        onMouseOver: function(e) {
+            $.jqplot.GrobConnector.prototype.onMouseOver.call(this, e);
+        },
+        onMouseOut: function(e) {
+            $.jqplot.GrobConnector.prototype.onMouseOut.call(this, e);
+        }
+    });
+    
+    $.jqplot.HorizontalLine = function() {};
+    $.jqplot.HorizontalLine.prototype = new $.jqplot.GrobConnector();
+    $.jqplot.HorizontalLine.prototype.constructor = $.jqplot.HorizontalLine;    
+    $.extend($.jqplot.HorizontalLine.prototype, {        
+        initialize: function (parent, p1, width) {
+            $.jqplot.GrobConnector.prototype.initialize.call(this, parent, width);
+            
+            this.name = 'horizline';
+            this.points = { p1: p1 };
+            this.p1 = p1;
+        },
+        
+        render: function(ctx) {
+            $.jqplot.GrobConnector.prototype.render.call(this, ctx);
+            var height = ctx.canvas.height;
+            var width = ctx.canvas.width;
+            ctx.beginPath();
+            ctx.moveTo(0, this.p1.pos.y);
+            ctx.lineTo(width, this.p1.pos.y);
+            ctx.closePath();
+            ctx.stroke();
+        },
+        
+        distanceTo: function(c) {
+            return (Math.abs(this.pos.y - c.y));
         },
         
         onMouseOver: function(e) {
