@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-		<title>WireIt - WiringEditor</title>
+		<title>Plot from Dataflow</title>
 		<!-- JQPLOT -->
 		<script type="text/javascript" src="../static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
 		<script type="text/javascript" src="../static/lib/plotting/jqplot/jquery.jqplot.js"></script>
@@ -12,10 +12,10 @@
 		<script type="text/javascript" src="../static/lib/plotting/jqplot/plugins/jqplot.cursor.js"></script>
 		<script type="text/javascript" src="../static/lib/plotting/palettes.js"></script>
 		<script type="text/javascript" src="../static/lib/plotting/plotting_api.js"></script>
-		<script type="text/javascript" src="../static/lib/plotting/sansdata.js"></script>
 		<!-- Interactors -->
-        <script type="text/javascript" src="../static/lib/plotting/asdf.js"></script>
         <script type="text/javascript" src="../static/lib/interactors/interactors_nonprototype.js"></script>
+        <script type="text/javascript" src="../static/lib/interactors/interactor_plugin_base.js"></script>
+        <script type="text/javascript" src="../static/lib/interactors/rectangle_interactor_plugin.js"></script>
 
 		<!-- Uniq Array -->
 		<script type="text/javascript" src="../static/lib/UniqArray.js"></script>
@@ -43,8 +43,8 @@
 		</script>
 	</head>
 	<body id="woot" class="yui-skin-sam">
-						<div id="plot">
-							I am a plot.
-						</div>
+	    <div id="plot">
+		    I am a plot.
+	    </div>
 	</body>
 </html>
