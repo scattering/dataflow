@@ -381,7 +381,7 @@
     $.jqplot.InteractorPlugin.postDraw = function() {
         var ec = this.eventCanvas._ctx.canvas;
         var master = this.plugins._interactor;
-        if (master.interactors.length > 0) {
+        if (master && master.interactors && master.interactors.length > 0) {
             master.Canvas = new $.jqplot.GenericCanvas();
             this.eventCanvas._elem.before(master.Canvas.createElement(this._gridPadding, 'jqplot-interactor-canvas', this._plotDimensions));
             master.Canvas.setContext();

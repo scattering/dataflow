@@ -326,7 +326,7 @@ function renderImageData(data, transform, plotid) {
   if (!plot2d) {
       //plot2 = $.jqplot(plotid+'_target', [edges], {
       plot2d = $.jqplot(plotid, [corners], {
-          series:series,
+        series:series,
         axes:{
           xaxis:{
             label: data.xlabel,
@@ -355,8 +355,8 @@ function renderImageData(data, transform, plotid) {
             useAxesFormatters: false,
       },
         grid: {shadow: false},
-        type: '2d',
-        interactors: [{type: 'Rectangle', name: 'rectangle'}]
+        interactors: [ {type: 'Rectangle', name: 'rectangle'} ],
+        type: '2d'
     });
     plot2d.type = '2d';
   }
