@@ -349,13 +349,14 @@ function renderImageData(data, transform, plotid) {
         },
         cursor: {
             show: true,
-            zoom: true,
+            zoom: false,
             tooltipLocation:'se',
             tooltipOffset: -60,
             useAxesFormatters: false,
       },
         grid: {shadow: false},
         type: '2d',
+        interactors: [{type: 'Rectangle', name: 'rectangle'}]
     });
     plot2d.type = '2d';
   }

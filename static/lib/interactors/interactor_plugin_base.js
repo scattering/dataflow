@@ -43,6 +43,7 @@
             this.color = this.color1;
             
             this.rc = 1;//Math.random();
+            this.show = true;
             $.extend(true, this, options);
         },
         
@@ -213,9 +214,13 @@
         },
         
         redraw: function() {
+            this.grobs = [];
             for (var i in this.interactors) {
                 var I = this.interactors[i];
-                I.redraw();
+                if (I.show) {
+                    this.grobs = this.grobs.concat(I.grobs);
+                    I.redraw();
+                }
             }
         },
         
@@ -453,7 +458,7 @@
     $.jqplot.InteractorPlugin.pluginit = function (target, data, opts) {
         // add an interactor attribute to the plot
         var options = opts || {};
-        if (options) {
+        if (options.interactors) {
             if (!this.plugins.interactors) this.plugins.interactors = {};
             this.plugins._interactor = new $.jqplot.MasterInteractorPlugin();
             this.plugins._interactor.init();
@@ -469,9 +474,9 @@
                 this.plugins.interactors[name] = newi;
                 newi.init(iopts);
                 newi.plot = this;
-                for (var j in newi.grobs) {
-                    this.plugins._interactor.grobs.push(newi.grobs[j]);
-                }
+                //for (var j in newi.grobs) {
+                //    this.plugins._interactor.grobs.push(newi.grobs[j]);
+                //}
                 this.plugins._interactor.interactors.push(newi);
             }
         }    
