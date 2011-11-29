@@ -5,26 +5,40 @@
 <title>Interactor test</title>
 <style type="text/css">
   label { display: block; font-family: consolas, monospace; text-align: center; }
-  canvas { border: 1px dotted #888; }
+  //canvas { border: 1px dotted #888; }
   .bk { float: left; margin-right: 4px; }
 </style>
-<script type="text/javascript" src="../prototype.js"></script>
-<script type="text/javascript" src="interactors_nonprototype.js"></script>
+<!-- JQPLOT -->
+<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="excanvas.js"></script><![endif]-->
+<script type="text/javascript" src="/static/lib/plotting/jqplot/jquery-1.5.1.min.js"></script>
+<script type="text/javascript" src="/static/lib/plotting/jqplot/jquery.jqplot.min.js"></script>
+<script type="text/javascript" src="/static/lib/plotting/jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
+<script type="text/javascript" src="/static/lib/plotting/jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+<script type="text/javascript" src="/static/lib/plotting/jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
+<script type="text/javascript" src="/static/lib/plotting/jqplot/plugins/jqplot.cursor.js"></script>
+<script type="text/javascript" src="/static/lib/interactors/asdf.js"></script>
+<script type="text/javascript" src="/static/lib/interactors/interactors_nonprototype.js"></script>
+<script type="text/javascript" src="/static/lib/interactors/magik_sim.js"></script>
 <script type="text/javascript">
 var c = [], interactors;
+//window.onload = function() {
 window.onload = function() {
     interactors = [
-        SegmentInteractor,
-        QuadrangleInteractor,
-        CircleInteractor,
-        AnnulusInteractor,
-        ArcInteractor,
-        ParallelogramInteractor,
-        RectangleInteractor,
-        GaussianInteractor,
-        QuadraticInteractor,
-        LinearInteractor,
+        jQuery.jqplot.SegmentInteractor,
+        jQuery.jqplot.QuadrangleInteractor,
+        jQuery.jqplot.CircleInteractor,
+        jQuery.jqplot.AnnulusInteractor,
+        jQuery.jqplot.ArcInteractor,
+        jQuery.jqplot.ParallelogramInteractor,
+        jQuery.jqplot.RectangleInteractor,
+        jQuery.jqplot.GaussianInteractor,
+        jQuery.jqplot.QuadraticInteractor,
+        jQuery.jqplot.LinearInteractor,
+        jQuery.jqplot.ArrowInteractor,
+        jQuery.jqplot.SpinorInteractor,
+        jQuery.jqplot.GratingInteractor,
     ];
+
     for (var i  = 0; i < interactors.length; i ++) {
         var id = 'c' + (i + 1);
         if (interactors[i].length)
@@ -44,13 +58,19 @@ window.onload = function() {
         dv.appendChild(cv);
         document.body.appendChild(dv);
         
-        c[i + 1] = new inst(id);
+        c[i + 1] = new inst();
+        c[i + 1].init(id);
+        if (c[i+1].name == 'Annulus') c[i + 1].showdata = true;
         lb.appendChild(document.createTextNode(c[i + 1].name + 'Interactor'));
     }
     
-}
+};
+
+//window.onresize = function() {window.location.href = window.location.href;}
 </script>
 </head>
-<body>
+<body bgColor='#eeffdd'>
+    <div id='mydiv'>
+    </div>
 </body>
 </html>

@@ -132,6 +132,7 @@ def load_asterix_action(files=[], **kwargs):
 def _load_asterix_data(name):
     (dirName, fileName) = os.path.split(name)
     friendlyName = get_friendly_name(fileName)
+    print "friendlyName:", friendlyName
     if friendlyName.endswith('hdf'):
         format = "HDF4"
     else: #h5
