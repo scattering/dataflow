@@ -149,17 +149,18 @@
           }
         context.putImageData(myImageData, 0, 0);
         this.imgData = myImageData;
-        var img = new Image();
+        //var img = new Image();
+        this.img = {width: width, height:height};
         //img.style.setProperty("image-rendering", "-webkit-optimize-contrast", "important");
-        img.src = canvas.toDataURL('image/png');
+        //img.src = canvas.toDataURL('image/png');
        
-        var that = this;
+        //var that = this;
         
-        img.onload = function(){
-            that.img = img;
+        //img.onload = function(){
+        //  that.img = img;
             //that.postDrawHooks.add(that.draw_image);
-            that.draw(that._ctx);         
-        } 
+            //that.draw(that._ctx);         
+        //} 
     };
     
     // called with scope of series
@@ -200,6 +201,8 @@
             var sxdx = this.getOrigin();
             var xzoom = sxdx.dw / sxdx.sw;
             var yzoom = sxdx.dh / sxdx.sh;
+            var xstep = Math.min(xzoom, 1);
+            var ystep = Math.min(yzoom, 1);
             var x0, y0, oldx0, oldy0;
             //console.log(img, sxdx);
             if (sxdx.sw > 0 && sxdx.sh > 0) {
@@ -207,8 +210,8 @@
                 //ctx.drawImage(img, sxdx.sx, sxdx.sy, sxdx.sw, sxdx.sh, sxdx.dx, sxdx.dy, sxdx.dw, sxdx.dh);
                 var zoom = 24;
                 ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
-                for (var x=0;x<img.width;++x){
-			        for (var y=0;y<img.height;++y){
+                for (var x=0;x<img.width;x+=xstep){
+			        for (var y=0;y<img.height;y+=ystep){
 				        var i = (y*img.width + x)*4;
 				        var r = this.imgData.data[i  ];
 				        var g = this.imgData.data[i+1];
