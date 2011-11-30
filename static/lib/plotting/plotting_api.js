@@ -312,6 +312,7 @@ function renderImageData2(data, transform, plotid) {
             rendererOptions: {
                 dims: data.dims,
                 xlabel: data.xlabel
+                },
         },
         series: [{showMarker:false, showLine:false}],
         axes:{
