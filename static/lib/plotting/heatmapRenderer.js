@@ -18,8 +18,6 @@
         this.transform = 'lin';
         // put series options in options.series (dims, etc.)
         this.dims = {xmin:0, xmax:1, ymin:0, ymax:1};
-        this.xlabel = 'x';
-        this.ylabel = 'y';
         $.extend(true, this, options);
 
         this.canvas = new $.jqplot.GenericCanvas();
@@ -30,10 +28,10 @@
         this._xaxis.min = display_dims.xmin;
         this._xaxis.max = display_dims.xmax;
         // don't ask me why we can't use xaxis.label directly. Is it a bug in jqPlot?
-        this._xaxis.label = this.xlabel;
+        //this._xaxis.label = this.xlabel;
         this._yaxis.min = display_dims.ymin;
         this._yaxis.max = display_dims.ymax;
-        this._yaxis.label = this.ylabel;
+        //this._yaxis.label = this.ylabel;
         
         // group: Methods 
         //
