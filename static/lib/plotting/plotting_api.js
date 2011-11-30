@@ -290,43 +290,30 @@ function renderImageColorbar(data, transform, plotid) {
   
 }
 
-function renderImageData(data, transform, plotid) {
-  var dims = data.dims;
-  var display_dims = data.display_dims || dims; // plot_dims = data_dims if not specified
-  
-  function roundToNearest(val, dmax, dmin, ddim){
-    // round a value to the nearest whole value in the range
-     var step = (dmax - dmin) / (ddim - 1);
-     var index = Math.floor((val - dmin) / step);
-     return (index * step) + dmin;
-  }
-  
-  display_dims.xmin = roundToNearest(display_dims.xmin, dims.xmax, dims.xmin, dims.xdim);
-  display_dims.xmax = roundToNearest(display_dims.xmax, dims.xmax, dims.xmin, dims.xdim);
-  display_dims.ymin = roundToNearest(display_dims.ymin, dims.ymax, dims.ymin, dims.ydim);
-  display_dims.ymax = roundToNearest(display_dims.ymax, dims.ymax, dims.ymin, dims.ydim);
-  
-  
-  var corners = [[dims.xmin, dims.ymin],[dims.xmax, dims.ymax]];
-  var series = [{showMarker:false, showLine:false}];
-  function t(datum) {
-        if (transform=='log'){
-            if (datum >=0) {
-                return Math.log(datum)/Math.LN10
-            }
-            else {
-                return NaN
-            }
-        }
-        else if (transform=='lin'){
-            return datum
-        }
+function renderImageData2(data, transform, plotid) {
+    var dims = data.dims;
+    var display_dims = data.display_dims || dims; // plot_dims = data_dims if not specified
+    function roundToNearest(val, dmax, dmin, ddim){
+        // round a value to the nearest whole value in the range
+         var step = (dmax - dmin) / (ddim - 1);
+         var index = Math.floor((val - dmin) / step);
+         return (index * step) + dmin;
     }
-  
-  if (!plot2d) {
-      //plot2 = $.jqplot(plotid+'_target', [edges], {
-      plot2d = $.jqplot(plotid, [corners], {
-        series:series,
+
+    display_dims.xmin = roundToNearest(display_dims.xmin, dims.xmax, dims.xmin, dims.xdim);
+    display_dims.xmax = roundToNearest(display_dims.xmax, dims.xmax, dims.xmin, dims.xdim);
+    display_dims.ymin = roundToNearest(display_dims.ymin, dims.ymax, dims.ymin, dims.ydim);
+    display_dims.ymax = roundToNearest(display_dims.ymax, dims.ymax, dims.ymin, dims.ydim);
+    
+    var options = {
+        renderer: $.jqplot.heatmapRender,
+        seriesDefaults:{
+            renderer:$.jqplot.heatmapRenderer,
+            rendererOptions: {
+                dims: data.dims,
+                xlabel: data.xlabel
+        },
+        series: [{showMarker:false, showLine:false}],
         axes:{
           xaxis:{
             label: data.xlabel,
@@ -353,11 +340,87 @@ function renderImageData(data, transform, plotid) {
             tooltipLocation:'se',
             tooltipOffset: -60,
             useAxesFormatters: false,
-      },
+        },
         grid: {shadow: false},
-        interactors: [ {type: 'Rectangle', name: 'rectangle'} ],
+        //interactors: [ {type: 'Rectangle', name: 'rectangle'} ],
         type: '2d'
-    });
+    };
+    
+    plot2d = $.jqplot(plotid, data.z, options);
+    plot2d.type = '2d';
+};
+
+function renderImageData(data, transform, plotid, opts) {
+  var dims = data.dims;
+  var display_dims = data.display_dims || dims; // plot_dims = data_dims if not specified
+  
+  function roundToNearest(val, dmax, dmin, ddim){
+    // round a value to the nearest whole value in the range
+     var step = (dmax - dmin) / (ddim - 1);
+     var index = Math.floor((val - dmin) / step);
+     return (index * step) + dmin;
+  }
+  
+  display_dims.xmin = roundToNearest(display_dims.xmin, dims.xmax, dims.xmin, dims.xdim);
+  display_dims.xmax = roundToNearest(display_dims.xmax, dims.xmax, dims.xmin, dims.xdim);
+  display_dims.ymin = roundToNearest(display_dims.ymin, dims.ymax, dims.ymin, dims.ydim);
+  display_dims.ymax = roundToNearest(display_dims.ymax, dims.ymax, dims.ymin, dims.ydim);
+  
+  
+  var corners = [[dims.xmin, dims.ymin],[dims.xmax, dims.ymax]];
+  function t(datum) {
+        if (transform=='log'){
+            if (datum >=0) {
+                return Math.log(datum)/Math.LN10
+            }
+            else {
+                return NaN
+            }
+        }
+        else if (transform=='lin'){
+            return datum
+        }
+    }
+  
+  var options = {
+        series: [{showMarker:false, showLine:false}],
+        axes:{
+          xaxis:{
+            label: data.xlabel,
+            labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+            tickOptions: {
+                formatString: "%.2g"
+            }
+          },
+          yaxis:{
+            label: data.ylabel,
+            labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+            tickOptions: {
+                formatString: "%.2g",
+                // fix for ticks drifting to the left in accordionview!
+                _styles: {right: 0},
+            }
+          }
+        },
+        cursor: {
+            show: true,
+            zoom: false,
+            tooltipLocation:'se',
+            tooltipOffset: -60,
+            useAxesFormatters: false,
+        },
+        grid: {shadow: false},
+        //interactors: [ {type: 'Rectangle', name: 'rectangle'} ],
+        type: '2d'
+    };
+    
+  $.extend(options, opts); // add any extra options from arguments list
+  
+  if (!plot2d) {
+    //plot2 = $.jqplot(plotid+'_target', [edges], {
+    plot2d = $.jqplot(plotid, [corners], options);
     plot2d.type = '2d';
   }
 
@@ -688,7 +751,7 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
     }
     
     
-    plot = renderImageData(toPlot, transform, 'plot2d');
+    plot = renderImageData2(toPlot, transform, 'plot2d');
     colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
     var selectedIndex;
     if ( transform == 'log') { selectedIndex = 1 }
@@ -702,7 +765,7 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         var plotnum = selectnum[selectnum.selectedIndex].value;
         var toPlot = toPlots[plotnum];
         console.log('replot: ', plotnum, transform, toPlot, toPlots)
-        plot = renderImageData(toPlot, transform, 'plot2d');
+        plot = renderImageData2(toPlot, transform, 'plot2d');
         colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
     }
     
