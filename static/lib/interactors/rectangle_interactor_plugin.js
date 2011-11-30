@@ -28,15 +28,19 @@
         $.jqplot.PolygonInteractorPlugin.prototype.init.call(this, options);
         this.showcenter = true;
         this.showrect = true;
-        this.p1pos = {x: 0, y: 4.0};
-        this.p2pos = {x: 6, y: 4.0};
-        this.p3pos = {x: 6, y: -4.0};
-        this.p4pos = {x: 0, y: -4.0};
+        this.xmin = 0;
+        this.xmax = 6.0;
+        this.ymin = -4.0;
+        this.ymax = 4.0;
+        //this.p1pos = {x: 0, y: 4.0};
+        //this.p2pos = {x: 6, y: 4.0};
+        //this.p3pos = {x: 6, y: -4.0};
+        //this.p4pos = {x: 0, y: -4.0};
         $.extend(this, options);
-        this.p1 = new $.jqplot.PluginPoint(); this.p1.initialize(this, this.p1pos.x, this.p1pos.y);
-        this.p2 = new $.jqplot.PluginPoint(); this.p2.initialize(this, this.p2pos.x, this.p2pos.y);
-        this.p3 = new $.jqplot.PluginPoint(); this.p3.initialize(this, this.p3pos.x, this.p3pos.y);
-        this.p4 = new $.jqplot.PluginPoint(); this.p4.initialize(this, this.p4pos.x, this.p4pos.y);
+        this.p1 = new $.jqplot.PluginPoint(); this.p1.initialize(this, this.xmin, this.ymax);
+        this.p2 = new $.jqplot.PluginPoint(); this.p2.initialize(this, this.xmax, this.ymax);
+        this.p3 = new $.jqplot.PluginPoint(); this.p3.initialize(this, this.xmax, this.ymin);
+        this.p4 = new $.jqplot.PluginPoint(); this.p4.initialize(this, this.xmin, this.ymin);
         //this.c = new Center(this, 150, 150);
         
         //this.rect = new $.jqplot.Rectangle(); this.rect.initialize(this, this.p1, this.p3);
@@ -47,14 +51,15 @@
         
         if (this.showrect) {
             this.rect = new $.jqplot.Rectangle(); this.rect.initialize(this, this.p1, this.p2, this.p3, this.p4);
+            this.rect.connectortranslatable = true;
             this.grobs.push(this.rect);
         }
         
         this.grobs.push(this.l1, this.l2, this.l3, this.l4, this.p1, this.p2, this.p3, this.p4);
         
         if (this.showcenter) {
-            var center = {x: (this.p1pos.x + this.p2pos.x + this.p3pos.x + this.p4pos.x) / 4.0, 
-                         y: (this.p1pos.y + this.p2pos.y + this.p3pos.y + this.p4pos.y) / 4.0 }
+            var center = {x: (this.xmin + this.xmax) / 2.0, 
+                         y: (this.ymin + this.ymax) / 2.0 }
             this.c = new $.jqplot.PluginCenter(); this.c.initialize(this, center.x, center.y);
             this.grobs.push(this.c);
         }

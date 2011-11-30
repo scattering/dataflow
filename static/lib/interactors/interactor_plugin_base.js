@@ -241,7 +241,7 @@
             //console.log('move', this.grobs, pos.x, pos.y, this.mousedown);
             var i = 0, inside = false;
             if (this.mousedown) {
-                if (this.curgrob) {
+                if (this.curgrob != null) {
                     var cg = this.grobs[this.curgrob];
                     cg.onDrag(e, pos);
                     cg.parent.redraw();
@@ -266,6 +266,7 @@
             }
             this.redraw();    
         },
+        
         onEmptyDrag: function(pos) {
             this.panPlot(pos);
         },
