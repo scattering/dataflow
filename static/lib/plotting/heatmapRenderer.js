@@ -201,8 +201,8 @@
             var sxdx = this.getOrigin();
             var xzoom = sxdx.dw / sxdx.sw;
             var yzoom = sxdx.dh / sxdx.sh;
-            var xstep = Math.min(xzoom, 1);
-            var ystep = Math.min(yzoom, 1);
+            var xstep = Math.max(1/xzoom, 1);
+            var ystep = Math.max(1/yzoom, 1);
             var x0, y0, oldx0, oldy0;
             //console.log(img, sxdx);
             if (sxdx.sw > 0 && sxdx.sh > 0) {
@@ -219,10 +219,10 @@
 				        var a = this.imgData.data[i+3];
 				        x0 = parseInt(sxdx.dx + x*xzoom);
 				        y0 = parseInt(sxdx.dy + y*yzoom);
-				        if (x0 != oldx0 || y0 != oldy0) {
+				        //if (x0 != oldx0 || y0 != oldy0) {
 				            ctx.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
 				            ctx.fillRect(x0,y0,Math.ceil(xzoom),Math.ceil(yzoom));
-				        }
+				        //}
 				        oldx0 = x0;
 				        oldy0 = y0;
 			        }
