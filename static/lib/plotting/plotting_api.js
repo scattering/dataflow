@@ -276,7 +276,7 @@ function renderImageColorbar(data, transform, plotid) {
   var context = canvas.getContext('2d');
     
   var grid = plot2d_colorbar.grid;
-  console.log('cbargrid',plot2d_colorbar.grid)
+  if (debug) console.log('cbargrid',plot2d_colorbar.grid);
   var palette = palettes.jet(256);
   var imgd = colorbar_context(context, palette);
   
@@ -338,13 +338,13 @@ function renderImageData2(data, transform, plotid) {
         },
         cursor: {
             show: true,
-            zoom: false,
+            zoom: true,
             tooltipLocation:'se',
             tooltipOffset: -60,
             useAxesFormatters: false,
         },
         grid: {shadow: false},
-        interactors: [ {type: 'Rectangle', name: 'rectangle'} ],
+        //interactors: [ {type: 'Rectangle', name: 'rectangle'} ],
         type: '2d'
     };
     
@@ -479,7 +479,6 @@ function renderImageData(data, transform, plotid, opts) {
         if (sxdx.sw > 0 && sxdx.sh > 0) {
             grid._ctx.mozImageSmoothingEnabled = false;
             grid._ctx.drawImage(img, sxdx.sx, sxdx.sy, sxdx.sw, sxdx.sh, sxdx.dx, sxdx.dy, sxdx.dw, sxdx.dh);
-            console.log('draw_image')
         }
     }
     
@@ -723,7 +722,6 @@ function createPlotObject(plotid) {
 
 function update2dPlot(plot, toPlots, target_id, plotnum) {
     if (!plot || !plot.hasOwnProperty("type") || plot.type!='2d'){
-        console.log('target_id: ', target_id)
         var plotdiv = document.getElementById(target_id);
         plotdiv.innerHTML = "";
         jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 650px; height: 350px;", id:"plotbox"}));
@@ -744,7 +742,6 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
     var toPlot = toPlots[plotnum];
     var toPlots = toPlots;
     var transform = toPlot.transform || 'lin';
-    console.log('starting 2d plot');
     
     document.getElementById('plot_selectnum').innerHTML = "";
     for (var i=0; i<toPlots.length; i++) {
@@ -766,7 +763,6 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         var transform = selectz[selectz.selectedIndex].value;
         var plotnum = selectnum[selectnum.selectedIndex].value;
         var toPlot = toPlots[plotnum];
-        console.log('replot: ', plotnum, transform, toPlot, toPlots)
         plot = renderImageData2(toPlot, transform, 'plot2d');
         colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
     }
@@ -798,7 +794,7 @@ var toPlots_input = null;
 
 function plottingAPI(toPlots, plotid_prefix) {
     toPlots_input = toPlots;
-    console.log(toPlots.constructor.name)
+    if (debug) console.log(toPlots.constructor.name);
     if (toPlots.constructor.name != "Array") {
         toPlots = [toPlots];
         if (debug)
@@ -826,7 +822,6 @@ function plottingAPI(toPlots, plotid_prefix) {
                     console.log('plotid:', plotid);
                 
                 plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, true);
-                console.log(123);
                 
                 jQuery(document.getElementById(plotid + '_update')).unbind('click');
                 jQuery(document.getElementById(plotid + '_update')).click({ 
@@ -836,7 +831,6 @@ function plottingAPI(toPlots, plotid_prefix) {
                     plotid_prefix: plotid_prefix
                     }, 
                         function(e) {
-                            console.log(e);
                             var plot = e.data.plot; 
                             var toPlot = e.data.toPlot;
                             var plotid = e.data.plotid;
@@ -909,7 +903,7 @@ function updateSeriesSelects(toPlot, plotid) {
                 if (!toPlot.series[s].data.hasOwnProperty(key))
                     throw "Quantity '" + key + "' is undefined in series '" + toPlot.series[s].label + "', but is expected from '" + order + "'";
             }
-            console.log("updating series selects", key,label);
+            if (debug) console.log("updating series selects", key,label);
             // Append a new <option> for this quantity to the <select> element
             jQuery(orders[order]).append(jQuery('<option />', { value: key, text: label }));
         }
@@ -952,17 +946,17 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
     var options = plot.options;
     //var series = plot.series;
     //var options = plot.options;
-    console.log(100, plotid, toPlot);
+    if (debug) console.log(100, plotid, toPlot);
     
     var quantityx = document.getElementById(plotid + '_selectx').value,
         quantityy = document.getElementById(plotid + '_selecty').value;
-    console.log(200, plotid+'_selectx', quantityx, quantityy);
+    if (debug) console.log(200, plotid+'_selectx', quantityx, quantityy);
     
     for (var s = 0; s < toPlot.series.length; s++) {
         // Prototype.js's Enumerable.zip() is handy here
         var datax = toPlot.series[s].data[quantityx],
             datay = toPlot.series[s].data[quantityy];
-        console.log(300, toPlot.series[s], quantityx, quantityy, datax, datay);
+        if (debug) console.log(300, toPlot.series[s], quantityx, quantityy, datax, datay);
         // I know, I know: "series" is both singular and plural... go blame the English language, not me!
         //var serie = $A(datax.values).zip(datay.values, datax.errors, datay.errors, function(a) { return [a[0], a[1], { xerr: a[2], yerr: a[3] }]; });
         var serie = new Array();
@@ -971,7 +965,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
                 serie[i] = [datax.values[i], datay.values[i], {xerr: get(datax.errors, i), yerr: get(datay.errors, i)}];
             }
         }
-        console.log('serie '+s, serie);
+        if (debug) console.log('serie '+s, serie);
         if (!series[s] || !series[s].hasOwnProperty('data'))
             series[s] = serie;
         else
@@ -979,7 +973,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
         
         //options.series[s] = { renderer: jQuery.jqplot.errorbarRenderer, rendererOptions: { errorBar: true, /*bodyWidth: 1, wickColor: 'red', openColor: 'yellow', closeColor: 'blue'*/ } };
     }
-    console.log('series', series, 'options', options);
+    if (debug) console.log('series', series, 'options', options);
     
     if (stage == 1) {
         var empty = (series.length == 0);

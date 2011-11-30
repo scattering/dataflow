@@ -245,8 +245,6 @@
             var x0, y0, oldx0, oldy0;
             //console.log(img, sxdx);
             if (sxdx.sw > 0 && sxdx.sh > 0) {
-                //ctx.mozImageSmoothingEnabled = false;
-                //ctx.drawImage(img, sxdx.sx, sxdx.sy, sxdx.sw, sxdx.sh, sxdx.dx, sxdx.dy, sxdx.dw, sxdx.dh);
                 var zoom = 24;
                 ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
                 for (var x=sx;x<(sxdx.sw + sxdx.sx);x+=xstep){
