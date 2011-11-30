@@ -194,7 +194,7 @@
 //    };
     
     // called with scope of series
-    $.jqplot.heatmapRenderer.prototype.draw = function (ctx, gd, options) {
+    $.jqplot.heatmapRenderer.prototype.draw_old = function (ctx, gd, options) {
         // do stuff
         var img = this.img;
         if (img) {
@@ -225,6 +225,40 @@
 				        //}
 				        oldx0 = x0;
 				        oldy0 = y0;
+			        }
+		        }
+                //console.log('draw_image')
+            }
+        }
+    };
+    
+    $.jqplot.heatmapRenderer.prototype.draw = function (ctx, gd, options) {
+        // do stuff
+        var img = this.img;
+        if (img) {
+            var sxdx = this.get_sxdx();
+            var xzoom = sxdx.dw / sxdx.sw;
+            var yzoom = sxdx.dh / sxdx.sh;
+            var xstep = Math.max(1/xzoom, 1);
+            var ystep = Math.max(1/yzoom, 1);
+            var x0, y0, oldx0, oldy0;
+            //console.log(img, sxdx);
+            if (sxdx.sw > 0 && sxdx.sh > 0) {
+                //ctx.mozImageSmoothingEnabled = false;
+                //ctx.drawImage(img, sxdx.sx, sxdx.sy, sxdx.sw, sxdx.sh, sxdx.dx, sxdx.dy, sxdx.dw, sxdx.dh);
+                var zoom = 24;
+                ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
+                for (var x=parseInt(sxdx.sx);x<(sxdx.sw + sxdx.sx);x+=xstep){
+			        for (var y=parseInt(sxdx.sy);y<(sxdx.sh + sxdx.sy);y+=ystep){
+				        var i = (parseInt(y)*img.width + parseInt(x))*4;
+				        var r = this.imgData.data[i  ];
+				        var g = this.imgData.data[i+1];
+				        var b = this.imgData.data[i+2];
+				        var a = this.imgData.data[i+3];
+				        x0 = parseInt(sxdx.dx + (x-sxdx.sx)*xzoom);
+				        y0 = parseInt(sxdx.dy + (y-sxdx.sy)*yzoom);
+			            ctx.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
+			            ctx.fillRect(x0,y0,Math.ceil(xzoom),Math.ceil(yzoom));
 			        }
 		        }
                 //console.log('draw_image')
