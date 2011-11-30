@@ -274,7 +274,7 @@
         zoomPlot: function(dzoom, centerpos) {
             var center = this.getCoords(centerpos);
             // make a zoom of 120 = 10% change in axis limits
-            var conv = dzoom * 0.1/120;
+            var conv = dzoom * 0.2/120;
             function mod(a,b) {
                 return a % b < 0 ? b + a % b : a % b
             }
