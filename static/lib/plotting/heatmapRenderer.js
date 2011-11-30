@@ -212,7 +212,7 @@
                 ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
                 for (var x=0;x<img.width;x+=xstep){
 			        for (var y=0;y<img.height;y+=ystep){
-				        var i = (y*img.width + x)*4;
+				        var i = (parseInt(y)*img.width + parseInt(x))*4;
 				        var r = this.imgData.data[i  ];
 				        var g = this.imgData.data[i+1];
 				        var b = this.imgData.data[i+2];
