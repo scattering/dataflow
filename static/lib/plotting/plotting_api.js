@@ -343,7 +343,7 @@ function renderImageData2(data, transform, plotid) {
             useAxesFormatters: false,
         },
         grid: {shadow: false},
-        //interactors: [ {type: 'Rectangle', name: 'rectangle'} ],
+        interactors: [ {type: 'Rectangle', name: 'rectangle'} ],
         type: '2d'
     };
     
