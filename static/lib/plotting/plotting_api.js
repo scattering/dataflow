@@ -311,7 +311,6 @@ function renderImageData2(data, transform, plotid) {
             renderer:$.jqplot.heatmapRenderer,
             rendererOptions: {
                 dims: data.dims,
-                xlabel: data.xlabel,
                 transform: transform
                 },
         },
