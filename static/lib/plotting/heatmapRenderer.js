@@ -210,6 +210,7 @@
                 //ctx.mozImageSmoothingEnabled = false;
                 //ctx.drawImage(img, sxdx.sx, sxdx.sy, sxdx.sw, sxdx.sh, sxdx.dx, sxdx.dy, sxdx.dw, sxdx.dh);
                 var zoom = 24;
+                ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
                 for (var x=0;x<img.width;++x){
 			        for (var y=0;y<img.height;++y){
 				        var i = (y*img.width + x)*4;
@@ -219,7 +220,7 @@
 				        var a = this.imgData.data[i+3];
 				        ctx.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
 				        ctx.lineWidth = 0;
-				        ctx.fillRect(sxdx.dx + x*xzoom,sxdx.dy + y*yzoom,xzoom,yzoom);
+				        ctx.fillRect(sxdx.dx + x*xzoom,sxdx.dy + y*yzoom,Math.ceil(xzoom),Math.ceil(yzoom));
 			        }
 		        }
                 //console.log('draw_image')
