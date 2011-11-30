@@ -459,7 +459,6 @@
     $.jqplot.InteractorPlugin.pluginit = function (target, data, opts) {
         // add an interactor attribute to the plot
         var options = opts || {};
-        console.log('options:', options);
         if (options.interactors) {
             if (!this.plugins.interactors) this.plugins.interactors = {};
             this.plugins._interactor = new $.jqplot.MasterInteractorPlugin();
