@@ -20,7 +20,6 @@
         this.dims = {xmin:0, xmax:1, ymin:0, ymax:1};
         this.xlabel = 'x';
         this.ylabel = 'y';
-        console.log(options);
         $.extend(true, this, options);
 
         this.canvas = new $.jqplot.GenericCanvas();
@@ -116,17 +115,14 @@
         var palette_array = jet(256).array;
         var canvas = document.createElement('canvas');
         canvas.hidden = true;
-        console.log(this.dims);
         var width = this.dims.xdim;
         var height = this.dims.ydim;
         var context = canvas.getContext('2d');
-        console.log(width, height);
         var myImageData = context.createImageData(width, height);
         canvas.width = width;
         canvas.height = height;
         var tzmax = this.t(this.dims.zmax);
         var data = this.data;
-        console.log('data:', data);
         
           for (var r = 0; r < width; r++) {
             for (var c = 0; c < height; c++) {
@@ -199,13 +195,12 @@
     // called with scope of series
     $.jqplot.heatmapRenderer.prototype.draw = function (ctx, gd, options) {
         // do stuff
-        console.log('I am your context:', ctx);
         var img = this.img;
         if (img) {
             var sxdx = this.getOrigin();
             var xzoom = sxdx.dw / sxdx.sw;
             var yzoom = sxdx.dh / sxdx.sh;
-            console.log(img, sxdx);
+            //console.log(img, sxdx);
             if (sxdx.sw > 0 && sxdx.sh > 0) {
                 //ctx.mozImageSmoothingEnabled = false;
                 //ctx.drawImage(img, sxdx.sx, sxdx.sy, sxdx.sw, sxdx.sh, sxdx.dx, sxdx.dy, sxdx.dw, sxdx.dh);
@@ -219,8 +214,7 @@
 				        var b = this.imgData.data[i+2];
 				        var a = this.imgData.data[i+3];
 				        ctx.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
-				        ctx.lineWidth = 0;
-				        ctx.fillRect(sxdx.dx + x*xzoom,sxdx.dy + y*yzoom,Math.ceil(xzoom),Math.ceil(yzoom));
+				        ctx.fillRect(Math.floor(sxdx.dx + x*xzoom),Math.floor(sxdx.dy + y*yzoom),Math.ceil(xzoom),Math.ceil(yzoom));
 			        }
 		        }
                 //console.log('draw_image')
