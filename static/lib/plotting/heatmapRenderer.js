@@ -94,15 +94,18 @@
         canvas.height = height;
         var tzmax = this.t(this.dims.zmax);
         var data = this.data;
+        var plotdata = [], col;
         
-          for (var r = 0; r < width; r++) {
-            for (var c = 0; c < height; c++) {
-                var offset = 4*((c*width) + r);
-                var z = data[r][height-c-1];
+          for (var c = 0; c < width; c++) {
+            col = [];
+            for (var r = 0; r < height; r++) {
+                var offset = 4*((r*width) + c);
+                var z = data[c][height-r-1];
                 var plotz = Math.floor((this.t(z) / tzmax) * 255.0);
 
                 plotz = ((plotz>255)? 255 : plotz);
                 plotz = ((plotz<0)? 0 : plotz);
+                col.push(plotz);
                 if (isNaN(plotz)) {
                     var rgb = [0,0,0];
                     var alpha = 0;
@@ -117,7 +120,9 @@
                 myImageData.data[offset + 2] = rgb[2];
                 myImageData.data[offset + 3] = alpha;
             }
+            plotdata.push(col);
           }
+        this.plotdata = plotdata;
         //context.putImageData(myImageData, 0, 0);
         this.imgData = myImageData;
         this.img = {width: width, height:height};
@@ -177,8 +182,9 @@
 				        //var g = this.imgData.data[i+1];
 				        //var b = this.imgData.data[i+2];
 				        //var a = this.imgData.data[i+3];
-				        var z = this.data[this.dims.xdim - 1 - parseInt(x)][this.dims.ydim - 1 - parseInt(y)];
-				        plotz = Math.floor((this.t(z) / tzmax) * 255.0);
+				        //var z = this.data[this.dims.xdim - 1 - parseInt(x)][this.dims.ydim - 1 - parseInt(y)];
+				        plotz = this.plotdata[parseInt(x)][parseInt(y)]
+				        //plotz = Math.floor((this.t(z) / tzmax) * 255.0);
 				        x0 = Math.round(sxdx.dx + (x-sxdx.sx)*xzoom);
 				        y0 = Math.round(sxdx.dy + (y-sxdx.sy)*yzoom);
 			            //ctx.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
