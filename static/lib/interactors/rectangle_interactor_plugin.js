@@ -68,25 +68,29 @@
         var me = this;
         
 
-        this.p1.move = function(dpos) {
+        this.p1.move = function(dp) {
+            var dpos = {x: dp.x || 0, y: dp.y || 0 };
             this.translateBy(dpos);
             this.parent.p4.translateBy( {x: dpos.x, y:0} );
             this.parent.p2.translateBy( {x: 0, y: dpos.y} );
         };
         
-        this.p2.move = function(dpos) {
+        this.p2.move = function(dp) {
+            var dpos = {x: dp.x || 0, y: dp.y || 0 };
             this.translateBy(dpos);
             this.parent.p3.translateBy( {x: dpos.x, y:0} );
             this.parent.p1.translateBy( {x: 0, y: dpos.y} );
         }; 
         
-        this.p3.move = function(dpos) {
+        this.p3.move = function(dp) {
+            var dpos = {x: dp.x || 0, y: dp.y || 0 };
             this.translateBy(dpos);
             this.parent.p2.translateBy( {x: dpos.x, y:0} );
             this.parent.p4.translateBy( {x: 0, y: dpos.y} );
         }; 
         
-        this.p4.move = function(dpos) {
+        this.p4.move = function(dp) {
+            var dpos = {x: dp.x || 0, y: dp.y || 0 };
             this.translateBy(dpos);
             this.parent.p1.translateBy( {x: dpos.x, y:0} );
             this.parent.p3.translateBy( {x: 0, y: dpos.y} );

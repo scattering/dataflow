@@ -509,6 +509,8 @@
         update: function(coords, fix_x, fix_y) {
             var coords = coords || this.coords;
             var newpos = this.putCoords(coords);
+            if ('x' in newpos) this.pos.x = newpos.x;
+            if ('y' in newpos) this.pos.y = newpos.y;
             this.coords = coords;
             this.updateListeners();
 //            var mypos = this.pos;
@@ -525,7 +527,7 @@
                 this.pos.x += dpos.x;
             if (dpos.y)
                 this.pos.y += dpos.y;
-            this.getCoords();
+            this.coords = this.getCoords();
             this.updateListeners();
         },
         
@@ -546,7 +548,6 @@
                 pos.y = this.parent.plot.axes.yaxis.u2p(coords.y);
                 pos.y -= this.parent.canvas.offsetTop;
             }
-            this.pos = pos;
             return pos     
         },
         
@@ -555,7 +556,7 @@
 	        ctx.strokeStyle = 'transparent';
             ctx.beginPath();
 	        //var coords = this.getCoords();
-	        this.putCoords();
+	        this.pos = this.putCoords();
 	        ctx.fillText('(' + this.coords.x.toFixed(3) + ', ' + this.coords.y.toFixed(3) + ')', this.pos.x, this.pos.y - 5);
 	        ctx.arc(this.pos.x, this.pos.y, this.r, 0, Math.PI * 2, true);
 	        ctx.closePath();
@@ -580,7 +581,7 @@
             ctx.beginPath();
 	        //ctx.moveTo(this.x, this.y);
 	        var coords = this.coords;
-	        this.putCoords();
+	        this.pos = this.putCoords();
 	        ctx.fillText('(' + coords.x.toFixed(3) + ', ' + coords.y.toFixed(3) + ')', this.pos.x, this.pos.y - 5);
             //ctx.fillText('(' + this.pos.x.toFixed(0) + ', ' + this.pos.y.toFixed(0) + ')', this.pos.x, this.pos.y - 5);
 	        ctx.moveTo(this.pos.x + this.r, this.pos.y);
