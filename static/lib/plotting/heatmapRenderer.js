@@ -88,16 +88,16 @@
         canvas.hidden = true;
         var width = this.dims.xdim;
         var height = this.dims.ydim;
-        var context = canvas.getContext('2d');
-        var myImageData = context.createImageData(width, height);
-        canvas.width = width;
-        canvas.height = height;
+//        var context = canvas.getContext('2d');
+//        var myImageData = context.createImageData(width, height);
+//        canvas.width = width;
+//        canvas.height = height;
         var tzmax = this.t(this.dims.zmax);
         var data = this.data;
-        var plotdata = [], col;
+        var plotdata = [], col;      
         
           for (var c = 0; c < width; c++) {
-            col = [];
+            datacol = [];
             for (var r = 0; r < height; r++) {
                 var offset = 4*((r*width) + c);
                 var z = data[c][height-r-1];
@@ -105,29 +105,49 @@
 
                 plotz = ((plotz>255)? 255 : plotz);
                 plotz = ((plotz<0)? 0 : plotz);
-                col.push(plotz);
-                if (isNaN(plotz)) {
-                    var rgb = [0,0,0];
-                    var alpha = 0;
-                }
-                else {
-                    var rgb = this.palette_array[plotz];
-                    var alpha = 255;
-                }
-                //console.log(plotz, rgb)
-                myImageData.data[offset + 0] = rgb[0];
-                myImageData.data[offset + 1] = rgb[1];
-                myImageData.data[offset + 2] = rgb[2];
-                myImageData.data[offset + 3] = alpha;
+                datacol.push(plotz);
+//                if (isNaN(plotz)) {
+//                    var rgb = [0,0,0];
+//                    var alpha = 0;
+//                }
+//                else {
+//                    var rgb = this.palette_array[plotz];
+//                    var alpha = 255;
+//                }
+//                //console.log(plotz, rgb)
+//                myImageData.data[offset + 0] = rgb[0];
+//                myImageData.data[offset + 1] = rgb[1];
+//                myImageData.data[offset + 2] = rgb[2];
+//                myImageData.data[offset + 3] = alpha;
             }
-            plotdata.push(col);
+            plotdata.push(datacol);
           }
         this.plotdata = plotdata;
         //context.putImageData(myImageData, 0, 0);
-        this.imgData = myImageData;
-        this.img = {width: width, height:height};
+        //this.imgData = myImageData;
+        //this.img = {width: width, height:height};
     };
     
+    $.jqplot.heatmapRenderer.prototype.generate_cumsums = function () {
+        var width = this.dims.xdim;
+        var height = this.dims.ydim;
+        var cumsum_x = [], cumsum_x_col;
+        var cumsum_y = [], cumsum_y_col;
+        for (var c = 0; c < width; c++) {
+            cumsum_x_col = []; xsum = 0;
+            cumsum_y_col = [];
+            for (var r = 0; r < height; r++) {
+                var offset = 4*((r*width) + c);
+                var z = data[c][height-r-1];
+                xsum += z;
+                cumsum_x_col.push(xsum);
+                
+            }
+            cumsum_x.push(cumsum_x_col);
+        }
+        this.cumsum_x = cumsum_x;
+        
+    };
     // called with scope of series
 //    $.jqplot.heatmapRenderer.prototype.get_sxdx = function(){
 //            var xp = this._xaxis.u2p;
@@ -161,8 +181,8 @@
     // called with scope of series
     $.jqplot.heatmapRenderer.prototype.draw = function (ctx, gd, options) {
         // do stuff
-        var img = this.img;
-        if (img) {
+        //var img = this.img;
+        //if (img) {
             var sxdx = this.get_sxdx();
             var xzoom = sxdx.dw / sxdx.sw;
             var yzoom = sxdx.dh / sxdx.sh;
@@ -194,7 +214,7 @@
 		        }
                 //console.log('draw_image')
             }
-        }
+        //}
     };
     
     function add_image(data) {

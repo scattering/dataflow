@@ -436,8 +436,8 @@ function renderImageData(data, transform, plotid, opts) {
     plot2d.plugins.cursor.tooltipFormatString = data.xlabel + ': %.4P \n' + data.ylabel + ': %.4P'
     plot2d.img = null;
     //plot2d.grid._offsets.left = 75;
-    plot2d.replot()
-    plot2d.grid._offsets.left = plot2d.axes.yaxis._elem.width() 
+    plot2d.replot();
+    plot2d.grid._offsets.left = plot2d.axes.yaxis._elem.width();
     // move the grid over so that the axes fit!
     plot2d.replot()
     plot2d.source_data = data;
