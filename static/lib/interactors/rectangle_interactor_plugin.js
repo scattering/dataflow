@@ -102,6 +102,7 @@
             
             this.dpos.x = 0;
             this.translateBy(this.dpos);
+            this.parent.onDrag(this.dpos);
         };
         this.l2.connectortranslatable = false;
         this.l2.onDrag = function(e, pos) {
@@ -109,6 +110,7 @@
             
             this.dpos.y = 0;
             this.translateBy(this.dpos);
+            this.parent.onDrag(this.dpos);
         };
         this.l3.connectortranslatable = false;
         this.l3.onDrag = function(e, pos) {
@@ -116,6 +118,7 @@
             
             this.dpos.x = 0;
             this.translateBy(this.dpos);
+            this.parent.onDrag(this.dpos);
         };
         this.l4.connectortranslatable = false;
         this.l4.onDrag = function(e, pos) {
@@ -123,6 +126,7 @@
             
             this.dpos.y = 0;
             this.translateBy(this.dpos);
+            this.parent.onDrag(this.dpos);
         };
         
         //this.redraw();

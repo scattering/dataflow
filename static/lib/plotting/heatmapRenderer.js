@@ -19,9 +19,13 @@
         this.transform = 'lin';
         // put series options in options.series (dims, etc.)
         this.dims = {xmin:0, xmax:1, ymin:0, ymax:1};
-        this.sortData = false;
+        this.transform = 'lin';
         $.extend(true, this, options);
-
+        
+        if (!this.dims.dx){ this.dims.dx = (this.dims.xmax - this.dims.xmin)/(this.dims.xdim); }
+        if (!this.dims.dy){ this.dims.dy = (this.dims.ymax - this.dims.ymin)/(this.dims.ydim); }
+        
+        // need to create a canvas to draw on...
         this.canvas = new $.jqplot.GenericCanvas();
         this.canvas._plotDimensions = this._plotDimensions;
         this._type = 'heatmap';
@@ -29,105 +33,56 @@
         var display_dims = options.display_dims || this.dims; // plot_dims = data_dims if not specified
         this._xaxis.min = display_dims.xmin;
         this._xaxis.max = display_dims.xmax;
-        // don't ask me why we can't use xaxis.label directly. Is it a bug in jqPlot?
-        //this._xaxis.label = this.xlabel;
         this._yaxis.min = display_dims.ymin;
         this._yaxis.max = display_dims.ymax;
-        //this._yaxis.label = this.ylabel;
+        // kind of a hack, but prevents jqplot from messing with the data 
+        // (if sortData=true were turned on, for instance);
+        this.source_data = [];
+        for (var i=0; i<this.dims.xdim; i++) {
+            this.source_data.push(this.data[i].slice());
+        }
         
         // group: Methods 
         //
-        this.get_sxdx = function(){
-            var xp = this._xaxis.u2p;
-            var yp = this._yaxis.u2p;
-            var dims = this.dims;
-            if (!dims.dx){ dims.dx = (dims.xmax - dims.xmin)/(dims.xdim); }
-            if (!dims.dy){ dims.dy = (dims.ymax - dims.ymin)/(dims.ydim); }
-            
-            var xmin = Math.max(this._xaxis.min, dims.xmin), xmax = Math.min(this._xaxis.max, dims.xmax);
-            var ymin = Math.max(this._yaxis.min, dims.ymin), ymax = Math.min(this._yaxis.max, dims.ymax);
-            if (debug) {
-                console.log('x', xmin,xmax, 'y', ymin,ymax, 'w', (xmax-xmin), 'h', (ymax-ymin));
-                console.log('dims', dims);
-            }
-            
-            var sx  = (xmin - dims.xmin)/dims.dx, sy  = (dims.ymax - ymax)/dims.dy,
-                sx2 = (xmax - dims.xmin)/dims.dx, sy2 = (dims.ymax - ymin)/dims.dy,
-                sw = sx2 - sx, sh = sy2 - sy;
-            if (debug)
-                console.log('sx', sx, 'sy', sy, 'sw', sw, 'sh', sh, '   sx2 ', sx2, 'sy2 ', sy2);
-            
-            var dx = xp.call(this._xaxis, xmin) - this.canvas._offsets.left, 
-                dy = yp.call(this._yaxis, ymax) - this.canvas._offsets.top,
-                dw = xp.call(this._xaxis, xmax) - xp.call(this._xaxis, xmin), 
-                dh = yp.call(this._yaxis, ymin) - yp.call(this._yaxis, ymax);
-            if (debug)
-                console.log('dx', dx, 'dy', dy, 'dw', dw, 'dh', dh);
-            return {sx:sx, sy:sy, sw:sw, sh:sh, dx:dx, dy:dy, dw:dw, dh:dh}
-        };
         
-        var transform = options.transform || 'lin';
-        this.t = function(tform) {
-            if (tform=='log'){
-                return function(datum) {
-                    if (datum >=0) { return Math.log(datum)/Math.LN10 }
-                    else { return NaN }
-                }   
-            } 
-            else { // transform defaults to 'lin' if unrecognized
-                return function(datum) { return datum }
-            }
-        }(transform);
-        
-        //this.add_image(this.data[0]);
-        this.img = null;
-        
-        //var jet = palettes.jet;
-        //var palette_array = jet(256).array;
-        var canvas = document.createElement('canvas');
-        canvas.hidden = true;
-        var width = this.dims.xdim;
-        var height = this.dims.ydim;
-//        var context = canvas.getContext('2d');
-//        var myImageData = context.createImageData(width, height);
-//        canvas.width = width;
-//        canvas.height = height;
-        var tzmax = this.t(this.dims.zmax);
-        var data = this.data;
-        var plotdata = [], col;      
-        
-          for (var c = 0; c < width; c++) {
-            datacol = [];
-            for (var r = 0; r < height; r++) {
-                var offset = 4*((r*width) + c);
-                var z = data[c][height-r-1];
-                var plotz = Math.floor((this.t(z) / tzmax) * 255.0);
-
-                plotz = ((plotz>255)? 255 : plotz);
-                plotz = ((plotz<0)? 0 : plotz);
-                datacol.push(plotz);
-//                if (isNaN(plotz)) {
-//                    var rgb = [0,0,0];
-//                    var alpha = 0;
-//                }
-//                else {
-//                    var rgb = this.palette_array[plotz];
-//                    var alpha = 255;
-//                }
-//                //console.log(plotz, rgb)
-//                myImageData.data[offset + 0] = rgb[0];
-//                myImageData.data[offset + 1] = rgb[1];
-//                myImageData.data[offset + 2] = rgb[2];
-//                myImageData.data[offset + 3] = alpha;
-            }
-            plotdata.push(datacol);
-          }
-        this.plotdata = plotdata;
-        //context.putImageData(myImageData, 0, 0);
-        //this.imgData = myImageData;
-        //this.img = {width: width, height:height};
+        this.update_plotdata = update_plotdata;
+        this.set_transform = set_transform;
+        this.set_transform(this.transform);
+        this.update_plotdata();
     };
     
+            
+    // call with scope of series    
+    $.jqplot.heatmapRenderer.prototype.get_sxdx = function(){
+        var xp = this._xaxis.u2p;
+        var yp = this._yaxis.u2p;
+        var dims = this.dims;
+        if (!dims.dx){ dims.dx = (dims.xmax - dims.xmin)/(dims.xdim); }
+        if (!dims.dy){ dims.dy = (dims.ymax - dims.ymin)/(dims.ydim); }
+        
+        var xmin = Math.max(this._xaxis.min, dims.xmin), xmax = Math.min(this._xaxis.max, dims.xmax);
+        var ymin = Math.max(this._yaxis.min, dims.ymin), ymax = Math.min(this._yaxis.max, dims.ymax);
+        if (debug) {
+            console.log('x', xmin,xmax, 'y', ymin,ymax, 'w', (xmax-xmin), 'h', (ymax-ymin));
+            console.log('dims', dims);
+        }
+        
+        var sx  = (xmin - dims.xmin)/dims.dx, sy  = (dims.ymax - ymax)/dims.dy,
+            sx2 = (xmax - dims.xmin)/dims.dx, sy2 = (dims.ymax - ymin)/dims.dy,
+            sw = sx2 - sx, sh = sy2 - sy;
+        if (debug)
+            console.log('sx', sx, 'sy', sy, 'sw', sw, 'sh', sh, '   sx2 ', sx2, 'sy2 ', sy2);
+        
+        var dx = xp.call(this._xaxis, xmin) - this.canvas._offsets.left, 
+            dy = yp.call(this._yaxis, ymax) - this.canvas._offsets.top,
+            dw = xp.call(this._xaxis, xmax) - xp.call(this._xaxis, xmin), 
+            dh = yp.call(this._yaxis, ymin) - yp.call(this._yaxis, ymax);
+        if (debug)
+            console.log('dx', dx, 'dy', dy, 'dw', dw, 'dh', dh);
+        return {sx:sx, sy:sy, sw:sw, sh:sh, dx:dx, dy:dy, dw:dw, dh:dh}
+    };
+    
+    // call with scope of series
     $.jqplot.heatmapRenderer.prototype.generate_cumsums = function () {
         var width = this.dims.xdim;
         var height = this.dims.ydim;
@@ -148,74 +103,76 @@
         this.cumsum_x = cumsum_x;
         
     };
+        
     // called with scope of series
-//    $.jqplot.heatmapRenderer.prototype.get_sxdx = function(){
-//            var xp = this._xaxis.u2p;
-//            var yp = this._yaxis.u2p;
-//            var dims = this.dims;
-//            if (!dims.dx){ dims.dx = (dims.xmax - dims.xmin)/(dims.xdim-1); }
-//            if (!dims.dy){ dims.dy = (dims.ymax - dims.ymin)/(dims.ydim-1); }
-//            
-//            var xmin = Math.max(this._xaxis.min, dims.xmin), xmax = Math.min(this._xaxis.max, dims.xmax);
-//            var ymin = Math.max(this._yaxis.min, dims.ymin), ymax = Math.min(this._yaxis.max, dims.ymax);
-//            if (debug) {
-//                console.log('x', xmin,xmax, 'y', ymin,ymax, 'w', (xmax-xmin), 'h', (ymax-ymin));
-//                console.log('dims', dims);
-//            }
-//            
-//            var sx  = (xmin - dims.xmin)/dims.dx, sy  = (dims.ymax - ymax)/dims.dy,
-//                sx2 = (xmax - dims.xmin)/dims.dx, sy2 = (dims.ymax - ymin)/dims.dy,
-//                sw = sx2 - sx, sh = sy2 - sy;
-//            if (debug)
-//                console.log('sx', sx, 'sy', sy, 'sw', sw, 'sh', sh, '   sx2 ', sx2, 'sy2 ', sy2);
-//            
-//            var dx = xp.call(this._xaxis, xmin), 
-//                dy = yp.call(this._yaxis, ymax),
-//                dw = xp.call(this._xaxis, xmax) - xp.call(this._xaxis, xmin), 
-//                dh = yp.call(this._yaxis, ymin) - yp.call(this._yaxis, ymax);
-//            if (debug)
-//                console.log('dx', dx, 'dy', dy, 'dw', dw, 'dh', dh);
-//            return {sx:sx, sy:sy, sw:sw, sh:sh, dx:dx, dy:dy, dw:dw, dh:dh}
-//    };
-    
-    // called with scope of series
-    $.jqplot.heatmapRenderer.prototype.draw = function (ctx, gd, options) {
+    // place rectangle of zoom-appropriate size for elements in source data.  
+    // steps are big enough to skip completely-overlapping rectangles (saving time);
+    $.jqplot.heatmapRenderer.prototype.draw_rect = function (ctx, gd, options) {
         // do stuff
-        //var img = this.img;
-        //if (img) {
-            var sxdx = this.get_sxdx();
-            var xzoom = sxdx.dw / sxdx.sw;
-            var yzoom = sxdx.dh / sxdx.sh;
-            var xstep = Math.max(1/xzoom, 1);
-            var ystep = Math.max(1/yzoom, 1);
-            var sx = parseInt(sxdx.sx), sy = parseInt(sxdx.sy);
-            var x0, y0, oldx0, oldy0, plotz;
-            //console.log(img, sxdx);
-            var tzmax = this.t(this.dims.zmax);
-            if (sxdx.sw > 0 && sxdx.sh > 0) {
-                var zoom = 24;
-                ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
-                for (var x=sx;x<(sxdx.sw + sxdx.sx);x+=xstep){
-			        for (var y=sy;y<(sxdx.sh + sxdx.sy);y+=ystep){
-				        //var i = (parseInt(y)*img.width + parseInt(x))*4;
-				        //var r = this.imgData.data[i  ];
-				        //var g = this.imgData.data[i+1];
-				        //var b = this.imgData.data[i+2];
-				        //var a = this.imgData.data[i+3];
-				        //var z = this.data[this.dims.xdim - 1 - parseInt(x)][this.dims.ydim - 1 - parseInt(y)];
-				        plotz = this.plotdata[parseInt(x)][parseInt(y)]
-				        //plotz = Math.floor((this.t(z) / tzmax) * 255.0);
-				        x0 = Math.round(sxdx.dx + (x-sxdx.sx)*xzoom);
-				        y0 = Math.round(sxdx.dy + (y-sxdx.sy)*yzoom);
-			            //ctx.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
-			            ctx.fillStyle = this.palette_str[plotz];
-			            ctx.fillRect(x0,y0,Math.ceil(xzoom),Math.ceil(yzoom));
-			        }
+        var sxdx = this.get_sxdx();
+        var xzoom = sxdx.dw / sxdx.sw;
+        var yzoom = sxdx.dh / sxdx.sh;
+        var xstep = Math.max(1/xzoom, 1);
+        var ystep = Math.max(1/yzoom, 1);
+        var sx = parseInt(sxdx.sx), sy = parseInt(sxdx.sy);
+        var x0, y0, oldx0, oldy0, plotz;
+        var width = ctx.canvas.width;
+        var height = ctx.canvas.height;
+        var tzmax = this.t(this.dims.zmax);
+        if (sxdx.sw > 0 && sxdx.sh > 0) {
+            var zoom = 24;
+            ctx.clearRect(0,0, width, height);
+            var xmax = (sxdx.sw + sxdx.sx);
+            var ymax = (sxdx.sh + sxdx.sy);
+            var xw = Math.ceil(xzoom);
+            var yw = Math.ceil(yzoom);
+            for (var x=sx;x<xmax;x+=xstep){
+                var xindex = parseInt(x);
+                var scol = this.plotdata[xindex];
+                x0 = Math.round(sxdx.dx + (x-sxdx.sx)*xzoom);
+		        for (var y=sy;y<ymax;y+=ystep){
+			        plotz = scol[parseInt(y)];
+			        y0 = Math.round(sxdx.dy + (y-sxdx.sy)*yzoom);
+		            //ctx.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
+		            ctx.fillStyle = this.palette_str[plotz];
+		            ctx.fillRect(x0,y0,xw,yw);
 		        }
-                //console.log('draw_image')
-            }
-        //}
+	        }
+        }
     };
+    
+    // draw directly on pixel buffer, then blit to screen:
+    // uses reverse-lookup to grab z-value in source data. (no interpolation or averaging).
+    $.jqplot.heatmapRenderer.prototype.draw_blit = function (ctx, gd, options) {
+        var width = ctx.canvas.width;
+        var height = ctx.canvas.height;
+        ctx.clearRect(0,0, width, height);
+        var myImageData = ctx.createImageData(width, height);
+        var dxu = this._xaxis.p2u(1) - this._xaxis.p2u(0);
+        var dyu = this._yaxis.p2u(1) - this._yaxis.p2u(0);
+        
+        var sx0 = this._xaxis.p2u(0 + this.canvas._offsets.left);
+        var sy0 = this._yaxis.p2u(0 + this.canvas._offsets.top);
+        for (var y=0; y<height; y++) {
+            var syu = sy0 + y * dyu;
+            for (var x=0; x<width; x++) {
+                var sxu = sx0 + x * dxu;
+                var offset = (y*width + x)*4; 
+                if (sxu < this.dims.xmax && sxu >= this.dims.xmin && syu < this.dims.ymax && syu >= this.dims.ymin) {
+                    var sx = Math.floor((sxu - this.dims.xmin) / this.dims.dx);
+                    var sy = Math.floor((syu - this.dims.ymin) / this.dims.dy);
+                    var fillstyle = this.palette_array[this.plotdata[sx][sy]];
+                    myImageData.data[offset    ] = fillstyle[0];
+                    myImageData.data[offset + 1] = fillstyle[1];
+                    myImageData.data[offset + 2] = fillstyle[2];
+                    myImageData.data[offset + 3] = 255;
+                }
+            }
+        }
+        ctx.putImageData(myImageData, 0,0);
+    }
+    
+    $.jqplot.heatmapRenderer.prototype.draw = $.jqplot.heatmapRenderer.prototype.draw_blit;
     
     function add_image(data) {
         var canvas = document.createElement('canvas');
@@ -255,6 +212,46 @@
         context.putImageData(myImageData, 0, 0);
         this.imgData = myImageData;
         this.img = {width: width, height:height};
+    };
+    
+    function set_transform(tform) {
+        // only knows log and lin for now
+        this.transform = tform;
+        if (tform=='log'){
+            this.t = function(datum) {
+                if (datum >=0) { return Math.log(datum)/Math.LN10 }
+                else { return NaN }
+            }   
+        } else { // transform defaults to 'lin' if unrecognized
+            this.t = function(datum) { return datum }
+        }
+        
+        if (this.source_data && this.dims) this.update_plotdata();
+    };
+    
+    // call after setting transform
+    function update_plotdata() {
+        var width = this.dims.xdim;
+        var height = this.dims.ydim;
+        var tzmax = this.t(this.dims.zmax);
+        var data = this.source_data; 
+        var plotdata = [], datacol;      
+        
+        for (var c = 0; c < width; c++) {
+            datacol = [];
+            for (var r = 0; r < height; r++) {
+                var offset = 4*((r*width) + c);
+                //var z = data[c][height-r-1];
+                var z = data[c][r];
+                var plotz = Math.floor((this.t(z) / tzmax) * 255.0);
+
+                plotz = ((plotz>255)? 255 : plotz);
+                plotz = ((plotz<0)? 0 : plotz);
+                datacol.push(plotz);
+            }
+            plotdata.push(datacol.slice());
+        }
+        this.plotdata = plotdata;
     };
        
 })(jQuery);

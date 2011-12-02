@@ -57,6 +57,7 @@
 		        data = testdata;
 		        plot = $.jqplot('plot', data.z, {
 		            cursor: {show: true, zoom: false},
+		            sortData: false,
 		            interactors: [{ type:'Rectangle', 
 		                            name:'rectangle',
 		                            xmin: data.dims.xmin, 
@@ -209,7 +210,7 @@
                     var newpos = p.putCoords ? p.putCoords(mypos) : mypos;
                     var dpos = {}; dpos[coord] = newpos[coord] - p.pos[coord];
                     p.move(dpos);
-                    p.parent.center();
+                    p.parent.onDrag();  // centers
                     p.parent.redraw();
                 }
                 
