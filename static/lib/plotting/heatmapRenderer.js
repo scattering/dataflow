@@ -227,7 +227,6 @@
     };
     
     function set_data(new_data, new_dims) {
-        console.log('new data, dims: ', new_data, new_dims);
         this.dims = new_dims;
         this.data = new_data;
         if (!this.dims.dx){ this.dims.dx = (this.dims.xmax - this.dims.xmin)/(this.dims.xdim); }

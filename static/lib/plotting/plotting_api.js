@@ -343,6 +343,7 @@ function renderImageData2(data, transform, plotid) {
             useAxesFormatters: false,
         },
         grid: {shadow: false},
+        sortData: false,
         //interactors: [ {type: 'Rectangle', name: 'rectangle'} ],
         type: '2d'
     };
@@ -764,6 +765,7 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         var toPlot = toPlots[plotnum];
         //plot = renderImageData2(toPlot, transform, 'plot2d');
         plot2d.series[0].set_data(toPlot.z[0], toPlot.dims);
+        plot2d.series[0].set_transform(transform);
         plot2d.replot();
         colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
     }
