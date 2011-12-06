@@ -221,6 +221,7 @@
         for (var i=0; i<this.dims.xdim; i++) {
             this.source_data.push(this.new_data[i].slice());
         }
+        this.update_plotdata();
     };
     
     function set_transform(tform) {
@@ -236,6 +237,16 @@
         }
         
         if (this.source_data && this.dims) this.update_plotdata();
+    };
+    
+    function zoom_to(limits) {
+        // sets limits of plot to specified limits
+        // defaults to data limits!
+        var limits = limits || this.dims;
+        if (xmin in limits) this._xaxis.min = limits.xmin;
+        if (xmax in limits) this._xaxis.max = limits.xmax;
+        if (ymin in limits) this._yaxis.min = limits.ymin;
+        if (ymax in limits) this._yaxis.max = limits.ymax;
     };
     
     // call after setting transform
