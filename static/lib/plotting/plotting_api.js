@@ -763,7 +763,7 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         var plotnum = selectnum[selectnum.selectedIndex].value;
         var toPlot = toPlots[plotnum];
         //plot = renderImageData2(toPlot, transform, 'plot2d');
-        plot2d.set_data(toPlot.z, toPlot.dims);
+        plot2d.series[0].set_data(toPlot.z, toPlot.dims);
         plot2d.replot();
         colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
     }
