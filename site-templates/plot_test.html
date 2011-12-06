@@ -60,12 +60,16 @@
 		            sortData: false,
 		            interactors: [{ type:'Rectangle', 
 		                            name:'rectangle',
+		                            showrect: false,
 		                            xmin: data.dims.xmin, 
 		                            ymin: data.dims.ymin,
 		                            xmax: data.dims.xmax, 
 		                            ymax: data.dims.ymax}],
 		            renderer: $.jqplot.heatmapRender,
+		            series: [ {shadow: false, padding: 0} ],
+                    grid: {shadow: false},
 		            seriesDefaults:{
+		                shadow: false,
                         renderer:$.jqplot.heatmapRenderer,
                         rendererOptions: {
                             dims: data.dims,

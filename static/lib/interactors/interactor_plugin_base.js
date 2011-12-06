@@ -38,8 +38,8 @@
             this.mousedown = false;
             this.curgrob = null;
             
-            this.color1 = '#69f';
-            this.color2 = '#f69';
+            this.color1 = '#6699ff';
+            this.color2 = '#ff6699';
             this.color = this.color1;
             
             this.rc = 1;//Math.random();
@@ -53,6 +53,13 @@
                 if (this.grobs[i] instanceof $.jqplot.PluginPoint && !(this.grobs[i] instanceof $.jqplot.PluginCenter))
                     points.push(this.grobs[i]);
             return points;
+        },
+        
+        reset: function() {
+            for (var i=0; i<this.grobs.length; i++) {
+                var g = this.grobs[i];
+                if (g.reset) g.reset();
+            }
         },
         
         getCoords: function(pos) {
@@ -112,8 +119,8 @@
             this.mousedown = false;
             this.curgrob = null;
             
-            this.color1 = '#69f';
-            this.color2 = '#f69';
+            this.color1 = '#6699ff';
+            this.color2 = '#ff6699';
             this.color = this.color1;
             
             this.rc = 1;//Math.random();
@@ -199,8 +206,11 @@
         },
         
         onDoubleClick: function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
             var pos = this.getMouse(e);
-            var sel_grob;
+            var sel_grob = null;
             for (var i = 0; i < this.grobs.length; i ++) {
                 var g = this.grobs[i];
                 var inside = g.isInside(pos);
@@ -211,6 +221,23 @@
                 }
             }
             //console.log("double-clicked:", sel_grob);
+            if (sel_grob == null) {
+                // then we're double-clicking outside all the interactors
+                this.zoomMax();
+            } else {
+                g.parent.reset();
+                this.redraw();
+                this.redraw();
+            }
+                
+            return false;
+        },
+        
+        reset: function() {
+            for (var i=0; i<this.grobs.length; i++) {
+                var g = this.grobs[i];
+                if (g.reset) g.reset();
+            }
         },
         
         redraw: function() {
@@ -244,7 +271,8 @@
                 if (this.curgrob != null) {
                     var cg = this.grobs[this.curgrob];
                     cg.onDrag(e, pos);
-                    cg.parent.redraw();
+                    //cg.parent.redraw();
+                    this.redraw();
                 } else {
                     this.onEmptyDrag(pos);
                 }
@@ -255,84 +283,53 @@
                     if (inside) {
                         g.onMouseOver(e);
                         g.parent.onMouseOver(e);
+                        this.redraw();
                     } else {
                         if (g.inside) {
                             g.onMouseOut(e);
                             g.parent.onMouseOut(e);
+                            this.redraw();
                         }
                     }
                     i++;
                 }
             }
-            this.redraw();    
+            //this.redraw();    
         },
         
         onEmptyDrag: function(pos) {
             this.panPlot(pos);
         },
         
+        zoomMax: function() {
+            // zoom to the limits of the data, with good tick locations
+            var xmin = this.plot.axes.xaxis._dataBounds.min;
+            var xmax = this.plot.axes.xaxis._dataBounds.max;
+            var ymin = this.plot.axes.yaxis._dataBounds.min;
+            var ymax = this.plot.axes.yaxis._dataBounds.max;
+
+            var new_ticks = generate_ticks({xmin:xmin, xmax:xmax, ymin:ymin, ymax:ymax});
+            this.plot.axes.xaxis.ticks = new_ticks.xticks;
+            this.plot.axes.yaxis.ticks = new_ticks.yticks;
+            this.plot.replot();
+        },
+        
         zoomPlot: function(dzoom, centerpos) {
             var center = this.getCoords(centerpos);
             // make a zoom of 120 = 10% change in axis limits
             var conv = dzoom * 0.2/120;
-            function mod(a,b) {
-                return a % b < 0 ? b + a % b : a % b
-            }
-
-            // x zoom
-            var xticks = [];
-            var xtickInterval = this.plot.axes.xaxis.tickInterval;
-            var numxticks = this.plot.axes.xaxis.numberTicks;
             var xmin = this.plot.axes.xaxis.min;
             var xmax = this.plot.axes.xaxis.max;
             xmin += (center.x - xmin) * conv;
             xmax += (center.x - xmax) * conv;
-            if (Math.abs(xmax-xmin)/xtickInterval < 5) {
-                xtickInterval *= 0.5;
-            }
-            if (Math.abs(xmax-xmin)/xtickInterval > 10) {
-                xtickInterval *= 2.0;
-            }
-            xticks.push(xmin);
-            var tickx = xticks[0] - mod(xticks[0], xtickInterval) + xtickInterval;
-            while (tickx < xmax) {
-                if (Math.abs(tickx) < 1e-13) tickx = 0;            
-                xticks.push(tickx);
-                tickx += xtickInterval;
-            }
-            xticks.push(xmax);
-            
-            // y zoom
-            var yticks = [];
-            var ytickInterval = this.plot.axes.yaxis.tickInterval;
-            var numyticks = this.plot.axes.yaxis.numberTicks;
             var ymin = this.plot.axes.yaxis.min;
             var ymax = this.plot.axes.yaxis.max;
             ymin += (center.y - ymin) * conv;
             ymax += (center.y - ymax) * conv;
-            if (Math.abs(ymax-ymin)/ytickInterval < 5) {
-                ytickInterval *= 0.5;
-            }
-            if (Math.abs(ymax-ymin)/ytickInterval > 10) {
-                ytickInterval *= 2.0;
-            }
-            yticks.push(ymin);
-            var ticky = yticks[0] - mod(yticks[0], ytickInterval) + ytickInterval;
-            while (ticky < ymax) {
-                if (Math.abs(ticky) < 1e-13) ticky = 0;
-                yticks.push(ticky);
-                ticky += ytickInterval;
-            }
-            yticks.push(ymax);
-            
-            //this.plot.axes.yaxis.min += (center.y - this.plot.axes.yaxis.min) * conv;
-            //this.plot.axes.yaxis.max += (center.y - this.plot.axes.yaxis.max) * conv;
-            this.plot.axes.xaxis.ticks = xticks;
-            this.plot.axes.yaxis.ticks = yticks;
+            var new_ticks = generate_ticks({xmin:xmin, xmax:xmax, ymin:ymin, ymax:ymax});
+            this.plot.axes.xaxis.ticks = new_ticks.xticks;
+            this.plot.axes.yaxis.ticks = new_ticks.yticks;
             this.plot.replot();
-            this.plot.axes.xaxis.tickInterval = xtickInterval;
-            this.plot.axes.yaxis.tickInterval = ytickInterval;
-            
         },
         
         panPlot: function(pos) {
@@ -341,40 +338,14 @@
             this.prevpos = pos;
             var dx = newcoords.x - prevcoords.x;
             var dy = newcoords.y - prevcoords.y;
-            this.plot.axes.xaxis.min -= dx;
-            this.plot.axes.xaxis.max -= dx;
-            this.plot.axes.yaxis.min -= dy;
-            this.plot.axes.yaxis.max -= dy;
-            function mod(a,b) {
-                return a % b < 0 ? b + a % b : a % b
-            }
-            
-            var xticks = [];
-            var xtickInterval = this.plot.axes.xaxis.tickInterval;
-            xticks.push(this.plot.axes.xaxis.min);
-            var tickx = xticks[0] - mod(xticks[0], xtickInterval) + xtickInterval;
-            while (tickx < this.plot.axes.xaxis.max) {
-                if (Math.abs(tickx) < 1e-13) tickx = 0;
-                xticks.push(tickx);
-                tickx += this.plot.axes.xaxis.tickInterval;                
-            }
-            xticks.push(this.plot.axes.xaxis.max);
-            var yticks = [];
-            var ytickInterval = this.plot.axes.yaxis.tickInterval;
-            yticks.push(this.plot.axes.yaxis.min);
-            var ticky = yticks[0] - mod(yticks[0], ytickInterval) + ytickInterval;
-            while (ticky < this.plot.axes.yaxis.max) {
-                if (Math.abs(ticky) < 1e-13) ticky = 0;
-                yticks.push(ticky);
-                ticky += this.plot.axes.yaxis.tickInterval;               
-            }
-            yticks.push(this.plot.axes.yaxis.max);
-            
-            this.plot.axes.xaxis.ticks = xticks;
-            this.plot.axes.yaxis.ticks = yticks;
+            var xmin = this.plot.axes.xaxis.min - dx;
+            var xmax = this.plot.axes.xaxis.max - dx;
+            var ymin = this.plot.axes.yaxis.min - dy;
+            var ymax = this.plot.axes.yaxis.max - dy;
+            var new_ticks = generate_ticks({xmin:xmin, xmax:xmax, ymin:ymin, ymax:ymax});
+            this.plot.axes.xaxis.ticks = new_ticks.xticks;
+            this.plot.axes.yaxis.ticks = new_ticks.yticks;
             this.plot.replot();
-            this.plot.axes.xaxis.tickInterval = xtickInterval;
-            this.plot.axes.yaxis.tickInterval = ytickInterval;
         }
     });
     
@@ -396,6 +367,7 @@
             ec.onmouseup = bind(master, master.onMouseUp);
             ec.onmousewheel = bind(master, master.onMouseWheel);
             ec.ondblclick = bind(master, master.onDoubleClick);
+            ec.onselectstart = function() { return false; };
             
             if (!ec._touchstartregistered && ec.addEventListener) {
                 ec.addEventListener('touchstart', function(event) {
@@ -497,7 +469,14 @@
     $.extend($.jqplot.PluginPoint.prototype, { 
         initialize: function (parent, xcoord, ycoord, r) {
             $.jqplot.Point.prototype.initialize.call(this, parent, 0, 0, r);
+            this._x0 = xcoord;
+            this._y0 = ycoord;
             this.coords = {x: xcoord, y: ycoord};
+        },
+        
+        reset: function() {
+            this.coords = {x: this._x0, y: this._y0};
+            this.updateListeners();
         },
         
         getCoords: function(pos) {
@@ -612,6 +591,53 @@
     $.jqplot.PolygonInteractorPlugin.prototype.center = $.jqplot.PolygonInteractor.prototype.center;
 
     
+    function bestLinearInterval(range) {
+        var expv = Math.floor(Math.log(range)/Math.LN10);
+        var magnitude = Math.pow(10, expv);
+        var f = range / magnitude;
+
+        if (f<=1.6) {return 0.2*magnitude;}
+        if (f<=4.0) {return 0.5*magnitude;}
+        if (f<=8.0) {return magnitude;}
+        return 2*magnitude; 
+    };
     
+    function mod(a,b) {
+        return a % b < 0 ? b + a % b : a % b
+    };
+    
+    function generate_ticks(ticklimits) {
+        var xmin = ticklimits.xmin,
+            xmax = ticklimits.xmax,
+            ymin = ticklimits.ymin,
+            ymax = ticklimits.ymax;
+        
+
+        // x zoom
+        var xticks = [];
+        var xtickInterval = bestLinearInterval(xmax-xmin);
+        xticks.push([xmin,' ']);
+        var tickx = xmin - mod(xmin, xtickInterval) + xtickInterval;
+        while (tickx < xmax) {
+            if (Math.abs(tickx) < 1e-13) tickx = 0;            
+            xticks.push(tickx);
+            tickx += xtickInterval;
+        }
+        xticks.push([xmax,' ']);
+        
+        // y zoom
+        var yticks = [];
+        var ytickInterval = bestLinearInterval(ymax-ymin);
+        yticks.push([ymin, ' ']);
+        var ticky = ymin - mod(ymin, ytickInterval) + ytickInterval;
+        while (ticky < ymax) {
+            if (Math.abs(ticky) < 1e-13) ticky = 0;
+            yticks.push(ticky);
+            ticky += ytickInterval;
+        }
+        yticks.push([ymax, ' ']);
+        
+        return {xticks: xticks, yticks: yticks}
+    };
     
 })(jQuery);
