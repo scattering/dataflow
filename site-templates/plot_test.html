@@ -69,6 +69,10 @@
                         renderer:$.jqplot.heatmapRenderer,
                         rendererOptions: {
                             dims: data.dims,
+                            display_dims: { xmin: data.dims.xmin-1,
+                                            ymin: data.dims.ymin-1,
+                                            ymax: data.dims.ymax+1,
+                                            xmax: data.dims.xmax+1}
                         },
                     }, 
 		            

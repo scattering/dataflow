@@ -214,6 +214,15 @@
         this.img = {width: width, height:height};
     };
     
+    function set_data(new_data, new_dims) {
+        this.dims = new_dims;
+        this.data = new_data;
+        this.source_data = [];
+        for (var i=0; i<this.dims.xdim; i++) {
+            this.source_data.push(this.new_data[i].slice());
+        }
+    };
+    
     function set_transform(tform) {
         // only knows log and lin for now
         this.transform = tform;
