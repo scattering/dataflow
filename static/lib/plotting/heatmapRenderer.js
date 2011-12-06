@@ -227,12 +227,14 @@
     };
     
     function set_data(new_data, new_dims) {
-        console.log('new data, dims: ', new_data, dims);
+        console.log('new data, dims: ', new_data, new_dims);
         this.dims = new_dims;
         this.data = new_data;
+        if (!this.dims.dx){ this.dims.dx = (this.dims.xmax - this.dims.xmin)/(this.dims.xdim); }
+        if (!this.dims.dy){ this.dims.dy = (this.dims.ymax - this.dims.ymin)/(this.dims.ydim); }
         this.source_data = [];
         for (var i=0; i<this.dims.xdim; i++) {
-            this.source_data.push(this.new_data[i].slice());
+            this.source_data.push(new_data[i].slice());
         }
         this.update_plotdata();
     };
