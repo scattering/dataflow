@@ -227,6 +227,7 @@
     };
     
     function set_data(new_data, new_dims) {
+        console.log('new data, dims: ', new_data, dims);
         this.dims = new_dims;
         this.data = new_data;
         this.source_data = [];
