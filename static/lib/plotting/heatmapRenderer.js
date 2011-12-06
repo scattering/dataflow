@@ -182,7 +182,7 @@
             }
         }
         ctx.putImageData(myImageData, 0,0);
-    }
+    };
     
     $.jqplot.heatmapRenderer.prototype.draw = $.jqplot.heatmapRenderer.prototype.draw_blit;
     
