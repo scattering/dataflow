@@ -13,6 +13,7 @@
 		<script type="text/javascript" src="../static/lib/plotting/palettes.js"></script>
 		<script type="text/javascript" src="../static/lib/plotting/plotting_api.js"></script>
 		<script type="text/javascript" src="../static/lib/plotting/heatmapRenderer.js"></script>
+		<script type="text/javascript" src="../static/lib/plotting/colorbarRenderer.js"></script>
 		<!-- Interactors -->
         <script type="text/javascript" src="../static/lib/interactors/interactors_nonprototype.js"></script>
         <script type="text/javascript" src="../static/lib/interactors/interactor_plugin_base.js"></script>
@@ -81,7 +82,66 @@
                     }, 
 		            
 		        });
-		        		        
+		        
+		        colorbar = $.jqplot('colorbar', data.z, {
+		            //cursor: {show: true, zoom: true},
+		            sortData: false,
+		            interactors: [{ type:'standard', name: 'standard'}],
+		            series: [ {shadow: false, padding: 0} ],
+                    grid: {shadow: false},
+		            seriesDefaults:{
+		                yaxis: 'y2axis',
+		                shadow: false,
+                        renderer:$.jqplot.colorbarRenderer,
+                        rendererOptions: {
+                            dims: data.dims,
+                            transform: 'log',
+                            display_dims: { xmin: data.dims.xmin-1,
+                                            ymin: data.dims.ymin-1,
+                                            ymax: data.dims.ymax+1,
+                                            xmax: data.dims.xmax+1,
+                                            zmin: data.dims.zmin,
+                                            zmax: data.dims.zmax}
+                        },
+                    },
+                    axes:{ 
+                        xaxis:{ tickOptions: {show: false} },
+                        y2axis:{
+                            //label: 'Intensity',
+                            labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                            tickOptions: {
+                                formatString: "%.4P",
+                                _styles: {left: 10},
+                            }
+                        }
+                    }, 
+                });
+		        
+		        function matchPlotToColorbar() {
+		            var new_dims = {};
+		            //$.extend(new_dims, plot.series[0].dims);
+		            new_dims.zmax = colorbar.series[0]._yaxis.max;
+		            new_dims.zmin = colorbar.series[0]._yaxis.min;
+		            $.extend(plot.series[0].dims, new_dims, true);
+		            plot.series[0].update_plotdata();
+		            plot.replot();	
+		        };
+		        colorbar.plugins._interactor.zoomPlot = function(dzoom, centerpos) {
+		            $.jqplot.MasterInteractorPlugin.prototype.zoomPlot.call(colorbar.plugins._interactor, dzoom, centerpos);
+		            matchPlotToColorbar();		            
+		        };
+		        
+		        colorbar.plugins._interactor.zoomMax = function() {
+		            $.jqplot.MasterInteractorPlugin.prototype.zoomMax.call(colorbar.plugins._interactor);
+		            matchPlotToColorbar();	            
+		        };
+		        
+		        colorbar.plugins._interactor.panPlot = function(pos) {
+		            $.jqplot.MasterInteractorPlugin.prototype.panPlot.call(colorbar.plugins._interactor, pos);
+		            matchPlotToColorbar();
+		        };
+		        
 		        generate_cumsums = function() {
                     var width = plot.series[0].dims.xdim;
                     var height = plot.series[0].dims.ydim;
@@ -121,18 +181,18 @@
 		        var slicebox = plot.plugins.interactors.rectangle;
 		        var ymaxctl = new pointTextControl(slicebox.p1, 'y', 'y<sub>max</sub>', 5);
                 ymaxctl.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
-                document.getElementById('controls').appendChild(ymaxctl.div);
+                document.getElementById('slicecontrols').appendChild(ymaxctl.div);
 		        var xminctl = new pointTextControl(slicebox.p1, 'x', 'x<sub>min</sub>', 5);
 		        xminctl.div.setAttribute('style', 'display: inline; text-align: center; width: 100%; padding: 5px 10px;');
-                document.getElementById('controls').appendChild(xminctl.div);
+                document.getElementById('slicecontrols').appendChild(xminctl.div);
                 var xmaxctl = new pointTextControl(slicebox.p3, 'x', 'x<sub>max</sub>', 5);
                 xmaxctl.div.setAttribute('style', 'display: inline; text-align: center; width: 100%; padding: 5px 10px;');
-                document.getElementById('controls').appendChild(xmaxctl.div);
+                document.getElementById('slicecontrols').appendChild(xmaxctl.div);
                 var yminctl = new pointTextControl(slicebox.p3, 'y', 'y<sub>min</sub>', 5);
                 yminctl.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
-                document.getElementById('controls').appendChild(yminctl.div);
+                document.getElementById('slicecontrols').appendChild(yminctl.div);
                 var hr = document.createElement('div'); hr.innerHTML = "<hr>";
-                document.getElementById('controls').appendChild(hr);
+                document.getElementById('slicecontrols').appendChild(hr);
                 var maxbutton = document.createElement('input');
                 maxbutton.setAttribute('type', 'button');
                 maxbutton.setAttribute('value', 'Maximize to data');
@@ -148,7 +208,7 @@
                 }
                 maxbutton.onclick = maximize;
                 
-                document.getElementById('controls').appendChild(maxbutton);
+                document.getElementById('slicecontrols').appendChild(maxbutton);
                 
                 slice_listener = function() {
 		            slicebox.p1.listeners.push(this);
@@ -231,12 +291,16 @@
 	</head>
 	<body id="woot" class="yui-skin-sam">
 	    <div id="upper" style="display: block; width: 100%; height: 350px;">
-	        <div id="plot" style="display: inline-block; width: 59%; height: 350px;"></div>
+	        <div id="plotbox" style="display: inline-block; width: 59%; height: 350px;">
+	            <div id="plot" style="display: inline-block; width: 79%; height: 350px;"></div>
+	            <div id="colorbar" style="display: inline-block; width: 19%; height: 350px;"></div>
+	        </div>
 	        <div id="yslice" style="display: inline-block; width: 39%; height: 350px;"></div>
 	    </div>
+	    <div id="controls" style="display: block; width: 100%;"></div>
 	    <div id="lower" style="display: block; width: 100%; height: 350px;">
 	        <div id="xslice"   style="display: inline-block; width: 59%;"></div>
-	        <div id="controls" style="display: inline-block; width: 39%; text-align: center;">Slice Region:<hr></div>
+	        <div id="slicecontrols" style="display: inline-block; width: 39%; text-align: center;">Slice Region:<hr></div>
 	    </div>
 	</body>
 </html>

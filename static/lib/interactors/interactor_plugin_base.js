@@ -170,19 +170,19 @@
             // not the actual graph canvas...
             var xpixel = pos.x + this.canvas.offsetLeft;
             var ypixel = pos.y + this.canvas.offsetTop;
-            var coords = { x: this.plot.axes.xaxis.p2u(xpixel),
-                           y: this.plot.axes.yaxis.p2u(ypixel) }
+            var coords = { x: this.plot.series[0]._xaxis.p2u(xpixel),
+                           y: this.plot.series[0]._yaxis.p2u(ypixel) }
             return coords
         },
         
         putCoords: function(coords) {
             var pos = {};
             if ('x' in coords) {
-                pos.x = this.plot.axes.xaxis.u2p(coords.x);
+                pos.x = this.plot.series[0]._xaxis.u2p(coords.x);
                 pos.x -= this.canvas.offsetLeft;
             }
             if ('y' in coords) {
-                pos.y = this.plot.axes.yaxis.u2p(coords.y);
+                pos.y = this.plot.series[0]._yaxis.u2p(coords.y);
                 pos.y -= this.canvas.offsetTop;
             }
             return pos     
@@ -203,6 +203,24 @@
                 }
             }
             //console.log('down', /*this.grobs,*/ pos.x, pos.y, 'mousedown=',this.mousedown);
+        },
+        
+        handleMouseDown: function(ev, gridpos, datapos, neighbor, plot) {
+            console.log(this);
+            this.mousedown = true;
+            var pos = gridpos;
+            var coords = datapos;
+            this.prevpos = pos;
+            for (var i = 0; i < this.grobs.length; i ++) {
+                var g = this.grobs[i];
+                var inside = g.isInside(pos);
+                
+                if (inside) {
+                    //this.prevpos = pos;
+                    this.curgrob = i;
+                    g.prevpos = pos;
+                }
+            }
         },
         
         onDoubleClick: function(e) {
@@ -303,14 +321,13 @@
         
         zoomMax: function() {
             // zoom to the limits of the data, with good tick locations
-            var xmin = this.plot.axes.xaxis._dataBounds.min;
-            var xmax = this.plot.axes.xaxis._dataBounds.max;
-            var ymin = this.plot.axes.yaxis._dataBounds.min;
-            var ymax = this.plot.axes.yaxis._dataBounds.max;
+            var xmin = this.plot.series[0]._xaxis._dataBounds.min;
+            var xmax = this.plot.series[0]._xaxis._dataBounds.max;
+            var ymin = this.plot.series[0]._yaxis._dataBounds.min;
+            var ymax = this.plot.series[0]._yaxis._dataBounds.max;
 
-            var new_ticks = generate_ticks({xmin:xmin, xmax:xmax, ymin:ymin, ymax:ymax});
-            this.plot.axes.xaxis.ticks = new_ticks.xticks;
-            this.plot.axes.yaxis.ticks = new_ticks.yticks;
+            this.plot.series[0]._xaxis.ticks = generate_ticks({min:xmin, max:xmax}, 'lin');
+            this.plot.series[0]._yaxis.ticks = generate_ticks({min:ymin, max:ymax}, 'lin');
             this.plot.replot();
         },
         
@@ -318,17 +335,21 @@
             var center = this.getCoords(centerpos);
             // make a zoom of 120 = 10% change in axis limits
             var conv = dzoom * 0.2/120;
-            var xmin = this.plot.axes.xaxis.min;
-            var xmax = this.plot.axes.xaxis.max;
-            xmin += (center.x - xmin) * conv;
-            xmax += (center.x - xmax) * conv;
-            var ymin = this.plot.axes.yaxis.min;
-            var ymax = this.plot.axes.yaxis.max;
+            
+            var xmin = this.plot.series[0]._xaxis.min;
+            var xmax = this.plot.series[0]._xaxis.max;
+            if (!this.fix_x) {
+                xmin += (center.x - xmin) * conv;
+                xmax += (center.x - xmax) * conv;
+            }
+            if (!this.fix_y) {
+                var ymin = this.plot.series[0]._yaxis.min;
+                var ymax = this.plot.series[0]._yaxis.max;
+            }
             ymin += (center.y - ymin) * conv;
             ymax += (center.y - ymax) * conv;
-            var new_ticks = generate_ticks({xmin:xmin, xmax:xmax, ymin:ymin, ymax:ymax});
-            this.plot.axes.xaxis.ticks = new_ticks.xticks;
-            this.plot.axes.yaxis.ticks = new_ticks.yticks;
+            this.plot.series[0]._xaxis.ticks = generate_ticks({min:xmin, max:xmax}, 'lin');
+            this.plot.series[0]._yaxis.ticks = generate_ticks({min:ymin, max:ymax}, 'lin');
             this.plot.replot();
         },
         
@@ -338,19 +359,19 @@
             this.prevpos = pos;
             var dx = newcoords.x - prevcoords.x;
             var dy = newcoords.y - prevcoords.y;
-            var xmin = this.plot.axes.xaxis.min - dx;
-            var xmax = this.plot.axes.xaxis.max - dx;
-            var ymin = this.plot.axes.yaxis.min - dy;
-            var ymax = this.plot.axes.yaxis.max - dy;
-            var new_ticks = generate_ticks({xmin:xmin, xmax:xmax, ymin:ymin, ymax:ymax});
-            this.plot.axes.xaxis.ticks = new_ticks.xticks;
-            this.plot.axes.yaxis.ticks = new_ticks.yticks;
+            var xmin = this.plot.series[0]._xaxis.min - dx;
+            var xmax = this.plot.series[0]._xaxis.max - dx;
+            var ymin = this.plot.series[0]._yaxis.min - dy;
+            var ymax = this.plot.series[0]._yaxis.max - dy;
+            this.plot.series[0]._xaxis.ticks = generate_ticks({min:xmin, max:xmax}, 'lin');
+            this.plot.series[0]._yaxis.ticks = generate_ticks({min:ymin, max:ymax}, 'lin');
             this.plot.replot();
         }
     });
     
     // called with context of plot
     $.jqplot.InteractorPlugin.postDraw = function() {
+        
         var ec = this.eventCanvas._ctx.canvas;
         var master = this.plugins._interactor;
         if (master && master.interactors && master.interactors.length > 0) {
@@ -364,6 +385,7 @@
             
             ec.onmousemove = bind(master, master.onMouseMove);
             ec.onmousedown = bind(master, master.onMouseDown);
+            
             ec.onmouseup = bind(master, master.onMouseUp);
             ec.onmousewheel = bind(master, master.onMouseWheel);
             ec.ondblclick = bind(master, master.onDoubleClick);
@@ -427,6 +449,7 @@
 //    };
     
     $.jqplot.InteractorPluginSubtypes = {}; // fill as child classes are declared.
+    $.jqplot.InteractorPluginSubtypes.standard = $.jqplot.InteractorPlugin;
     
     $.jqplot.InteractorPlugin.pluginit = function (target, data, opts) {
         // add an interactor attribute to the plot
@@ -437,6 +460,8 @@
             this.plugins._interactor.init();
             this.plugins._interactor.plot = this;
             this.plugins._interactor.name = "master";
+            //var master = this.plugins._interactor;
+            //this.eventListenerHooks.addOnce('jqplotMouseDown', bind(master, master.handleMouseDown));
             
             
             for (var i in options.interactors) {
@@ -602,42 +627,74 @@
         return 2*magnitude; 
     };
     
+    function nextLogTick(val) {
+        // finds the next log tick above the current value,
+        // using 1, 2, 5, 10, 20, ... scaling
+        var expv = Math.floor(Math.log(val)/Math.LN10);
+        var magnitude = Math.pow(10, expv);
+        var f = val / magnitude;
+
+        if (f<1.0) {return 1.0*magnitude;}
+        if (f<2.0) {return 2.0*magnitude;}
+        if (f<5.0) {return 5.0*magnitude;}
+        return 10*magnitude; 
+    };
+    
     function mod(a,b) {
         return a % b < 0 ? b + a % b : a % b
     };
     
-    function generate_ticks(ticklimits) {
-        var xmin = ticklimits.xmin,
-            xmax = ticklimits.xmax,
-            ymin = ticklimits.ymin,
-            ymax = ticklimits.ymax;
-        
-
-        // x zoom
-        var xticks = [];
-        var xtickInterval = bestLinearInterval(xmax-xmin);
-        xticks.push([xmin,' ']);
-        var tickx = xmin - mod(xmin, xtickInterval) + xtickInterval;
-        while (tickx < xmax) {
-            if (Math.abs(tickx) < 1e-13) tickx = 0;            
-            xticks.push(tickx);
-            tickx += xtickInterval;
+    function generate_ticks(ticklimits, transform) {
+        var transform = transform || 'lin';
+        var min = ticklimits.min,
+            max = ticklimits.max;
+        var ticks = [];
+        if (transform == 'lin') {
+            var tickInterval = bestLinearInterval(max-min);
+            ticks.push([min, ' ']);
+            var tick = min - mod(min, tickInterval) + tickInterval;
+            while (tick < max) {
+                if (Math.abs(tick) < 1e-13) tick = 0;            
+                ticks.push(tick);
+                tick += tickInterval;
+            }
+            ticks.push([max,' ']);
+        } 
+        else if (transform == 'log') {
+            var lmax = Math.log(max)/Math.LN10;
+            ticks.push([Math.log(min)/Math.LN10, ' ']);
+            var tick = nextLogTick(min);
+            while( tick < max ) {
+                ticks.push([Math.log(tick)/Math.LN10, tick]);
+                tick = nextLogTick(tick);
+            }
+            ticks.push([Math.log(max)/Math.LN10, ' ']);
+        } 
+        else {
+            // unknown transform - return max and min
+            ticks.push(min);
+            ticks.push(max);
         }
-        xticks.push([xmax,' ']);
         
-        // y zoom
-        var yticks = [];
-        var ytickInterval = bestLinearInterval(ymax-ymin);
-        yticks.push([ymin, ' ']);
-        var ticky = ymin - mod(ymin, ytickInterval) + ytickInterval;
-        while (ticky < ymax) {
-            if (Math.abs(ticky) < 1e-13) ticky = 0;
-            yticks.push(ticky);
-            ticky += ytickInterval;
-        }
-        yticks.push([ymax, ' ']);
-        
-        return {xticks: xticks, yticks: yticks}
+        return ticks; 
     };
     
+    function handleMouseDown(ev, gridpos, datapos, neighbor, plot) {
+//            if (neighbor) {
+//                var si = neighbor.seriesIndex;
+//                var pi = neighbor.pointIndex;
+//                var ins = [si, pi, neighbor.data, plot.series[si].gridData[pi][2]];
+//                if (plot.series[ins[0]].highlightMouseDown && !(ins[0] == plot.plugins.bubbleRenderer.highlightedSeriesIndex && ins[1] == plot.series[ins[0]]._highlightedPoint)) {
+//                    var evt = jQuery.Event('jqplotDataHighlight');
+//                    evt.pageX = ev.pageX;
+//                    evt.pageY = ev.pageY;
+//                    plot.target.trigger(evt, ins);
+//                    highlight (plot, ins[0], ins[1]);
+//                }
+//            }
+//            else if (neighbor == null) {
+//                unhighlight (plot);
+//            }
+            console.log(ev, gridpos, datapos, plot);
+        };
 })(jQuery);
