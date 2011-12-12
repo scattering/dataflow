@@ -1178,9 +1178,9 @@ YAHOO.lang.extend(SliceContainer, WireIt.Container, {
         toReduce.clickedOn = clickedOn;
         editor.adapter.runReduction(toReduce, {
             success: function(result) { 
-                console.log('success... so far');
-                toPlot = result;
-                var sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768"); 
+                //toPlot = result;
+                var sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768");
+                sliceWindow.toPlot = result;
                 //else {
                 //    sliceWindow.update_plot(result[0]);
                 //    sliceWindow.update_selectors(result);
