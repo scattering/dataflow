@@ -1209,12 +1209,13 @@ YAHOO.lang.extend(SliceContainer, WireIt.Container, {
             clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
         }
         var toReduce = editor.generateReductionRecipe(reductionInstance, clickedOn);
+        f.getConfig();
         editor.adapter.runReduction(toReduce, {
             success: function(result) { 
                 //toPlot = result;
                 var sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768");
                 sliceWindow.toPlot = result;
-                sliceWindow.activeContainer = f;
+                sliceWindow.tracksConfig = f.tracksConfigs[reductionInstance];
                 //else {
                 //    sliceWindow.update_plot(result[0]);
                 //    sliceWindow.update_selectors(result);
