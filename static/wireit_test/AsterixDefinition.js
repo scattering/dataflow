@@ -1158,6 +1158,7 @@ SliceContainer = function(opts, layer) {
     sliceButton.innerHTML = 'Slice';
     //saveButton.src = this.image;
     content.appendChild(sliceButton);
+    this.setBody(content);
     YAHOO.util.Event.addListener(sliceButton, 'click', this.openSliceWindow, this, true);
 };
 
