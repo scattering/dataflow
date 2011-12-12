@@ -7,6 +7,7 @@
 		<script type="text/javascript" src="../static/lib/plotting/jqplot/jquery.jqplot.js"></script>
 		<script type="text/javascript" src="../static/lib/plotting/jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
 		<script type="text/javascript" src="../static/lib/plotting/jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+		<script type="text/javascript" src="../static/lib/plotting/jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
 		<script type="text/javascript" src="../static/lib/plotting/jqplot/plugins/jqplot.errorbarRenderer.js"></script>
 		<script type="text/javascript" src="../static/lib/plotting/jqplot/plugins/jqplot.pcolorRenderer.js"></script>
 		<script type="text/javascript" src="../static/lib/plotting/jqplot/plugins/jqplot.cursor.js"></script>
@@ -44,211 +45,248 @@
 			}   
 		</style>
 		<script type="text/javascript">
+		    plot = null;
+		    colorbar = null;
 		    window.onload = function() {
-		        debug = false;
-		        olddata = {z: [[6,5,4,3,2,1],[6,2,3,4,5,6],[1,2,3,4,5,6],[1,2,3,4,5,6],[1,2,3,4,5,6],[1,2,3,4,5,6],[1,2,3,4,5,6],[1,2,3,4,5,6],[1,2,3,4,5,6],[1,2,3,4,5,6],[1,2,3,4,5,6],[0,0,0,0,0,0]],
-		                dims: {xmin: 0, 
-		                       xmax: 13,
-		                       xdim: 12,
-		                       ymin: 0,
-		                       ymax: 3.3,
-		                       ydim: 6,
-		                       zmax: 6},
-		                xlabel: 'x'};
-		        data = testdata;
-		        plot = $.jqplot('plot', data.z, {
-		            cursor: {show: true, zoom: false},
-		            sortData: false,
-		            interactors: [{ type:'Rectangle', 
-		                            name:'rectangle',
-		                            showrect: false,
-		                            xmin: data.dims.xmin, 
-		                            ymin: data.dims.ymin,
-		                            xmax: data.dims.xmax, 
-		                            ymax: data.dims.ymax}],
-		            renderer: $.jqplot.heatmapRender,
-		            series: [ {shadow: false, padding: 0} ],
-                    grid: {shadow: false},
-		            seriesDefaults:{
-		                shadow: false,
-                        renderer:$.jqplot.heatmapRenderer,
-                        rendererOptions: {
-                            dims: data.dims,
-                            display_dims: { xmin: data.dims.xmin-1,
-                                            ymin: data.dims.ymin-1,
-                                            ymax: data.dims.ymax+1,
-                                            xmax: data.dims.xmax+1}
-                        },
-                    }, 
-		            
-		        });
-		        
-		        colorbar = $.jqplot('colorbar', data.z, {
-		            //cursor: {show: true, zoom: true},
-		            sortData: false,
-		            interactors: [{ type:'standard', name: 'standard'}],
-		            series: [ {shadow: false, padding: 0} ],
-                    grid: {shadow: false},
-		            seriesDefaults:{
-		                yaxis: 'y2axis',
-		                shadow: false,
-                        renderer:$.jqplot.colorbarRenderer,
-                        rendererOptions: {
-                            dims: data.dims,
-                            transform: 'log',
-                            display_dims: { xmin: data.dims.xmin-1,
-                                            ymin: data.dims.ymin-1,
-                                            ymax: data.dims.ymax+1,
-                                            xmax: data.dims.xmax+1,
-                                            zmin: data.dims.zmin,
-                                            zmax: data.dims.zmax}
-                        },
-                    },
-                    axes:{ 
-                        xaxis:{ tickOptions: {show: false} },
-                        y2axis:{
-                            //label: 'Intensity',
-                            labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
-                            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
-                            tickOptions: {
-                                formatString: "%.4P",
-                                _styles: {left: 10},
-                            }
-                        }
-                    }, 
-                });
-		        
-		        function matchPlotToColorbar() {
-		            var new_dims = {};
-		            //$.extend(new_dims, plot.series[0].dims);
-		            new_dims.zmax = colorbar.series[0]._yaxis.max;
-		            new_dims.zmin = colorbar.series[0]._yaxis.min;
-		            $.extend(plot.series[0].dims, new_dims, true);
-		            plot.series[0].update_plotdata();
-		            plot.replot();	
-		        };
-		        colorbar.plugins._interactor.zoomPlot = function(dzoom, centerpos) {
-		            $.jqplot.MasterInteractorPlugin.prototype.zoomPlot.call(colorbar.plugins._interactor, dzoom, centerpos);
-		            matchPlotToColorbar();		            
-		        };
-		        
-		        colorbar.plugins._interactor.zoomMax = function() {
-		            $.jqplot.MasterInteractorPlugin.prototype.zoomMax.call(colorbar.plugins._interactor);
-		            matchPlotToColorbar();	            
-		        };
-		        
-		        colorbar.plugins._interactor.panPlot = function(pos) {
-		            $.jqplot.MasterInteractorPlugin.prototype.panPlot.call(colorbar.plugins._interactor, pos);
-		            matchPlotToColorbar();
-		        };
-		        
-		        generate_cumsums = function() {
-                    var width = plot.series[0].dims.xdim;
-                    var height = plot.series[0].dims.ydim;
-                    var data = plot.data[0];
-                    var cumsum_x = [], cumsum_x_col;
-                    var cumsum_y = [], cumsum_y_col;
-                    var ysum = [];
-                    // initialize the y-sum:
-                    for (var r = 0; r<height; r++) ysum.push(0);
-                    cumsum_y.push(ysum.slice());
-                    
-                    
-                    for (var c = 0; c < width; c++) {
-                        cumsum_x_col = [0]; xsum = 0;
-                        cumsum_y_col = [];
-                        for (var r = 0; r < height; r++) {
-                            var offset = 4*((r*width) + c);
-                            //var z = data[c][height-r-1];
-                            var z = data[c][r];
-                            xsum += z;
-                            ysum[r] += z;
-                            cumsum_x_col.push(xsum);
-                            cumsum_y_col.push(ysum[r]);
-                            
-                        }
-                        cumsum_x.push(cumsum_x_col);
-                        cumsum_y.push(cumsum_y_col);
-                    }
-                    plot.series[0].cumsum_x = cumsum_x;
-                    plot.series[0].cumsum_y = cumsum_y;
-                };
-		        
-		        yslice = $.jqplot('yslice', [[[1,1],[1,2],[0.5,3],[2,4]]], {grid: {shadow: false}, sortData: false, series: [ {shadow: false, color: 'red', markerOptions: {shadow: false, size: 4}} ]});
-		        xslice = $.jqplot('xslice', [[1,2,3,4]], {grid: {shadow: false}, sortData: false, series: [ {shadow: false, color: 'blue', markerOptions: {shadow: false, size: 4}} ]});
-		        
-		        
-		        var slicebox = plot.plugins.interactors.rectangle;
-		        var ymaxctl = new pointTextControl(slicebox.p1, 'y', 'y<sub>max</sub>', 5);
-                ymaxctl.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
-                document.getElementById('slicecontrols').appendChild(ymaxctl.div);
-		        var xminctl = new pointTextControl(slicebox.p1, 'x', 'x<sub>min</sub>', 5);
-		        xminctl.div.setAttribute('style', 'display: inline; text-align: center; width: 100%; padding: 5px 10px;');
-                document.getElementById('slicecontrols').appendChild(xminctl.div);
-                var xmaxctl = new pointTextControl(slicebox.p3, 'x', 'x<sub>max</sub>', 5);
-                xmaxctl.div.setAttribute('style', 'display: inline; text-align: center; width: 100%; padding: 5px 10px;');
-                document.getElementById('slicecontrols').appendChild(xmaxctl.div);
-                var yminctl = new pointTextControl(slicebox.p3, 'y', 'y<sub>min</sub>', 5);
-                yminctl.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
-                document.getElementById('slicecontrols').appendChild(yminctl.div);
-                var hr = document.createElement('div'); hr.innerHTML = "<hr>";
-                document.getElementById('slicecontrols').appendChild(hr);
-                var maxbutton = document.createElement('input');
-                maxbutton.setAttribute('type', 'button');
-                maxbutton.setAttribute('value', 'Maximize to data');
-                var maximize = function () {
-                    xminctl.update({x: data.dims.xmin});
-                    xminctl.update_external();
-                    ymaxctl.update({y: data.dims.ymax});
-                    ymaxctl.update_external();
-                    xmaxctl.update({x: data.dims.xmax});
-                    xmaxctl.update_external();
-                    yminctl.update({y: data.dims.ymin});
-                    yminctl.update_external();
-                }
-                maxbutton.onclick = maximize;
-                
-                document.getElementById('slicecontrols').appendChild(maxbutton);
-                
-                slice_listener = function() {
-		            slicebox.p1.listeners.push(this);
-		            slicebox.p3.listeners.push(this);
-		            var p0 = plot.series[0];
-		            this.update = function(pos) {
-		                var width = p0.dims.xdim;
-                        var height = p0.dims.ydim;
-		                //console.log(slicebox.p1.coords.x, p0.dims.xmin, p0.dims.xdim);
-		                i_min = Math.floor((slicebox.p1.coords.x - p0.dims.xmin) / p0.dims.dx);
-		                i_min = Math.min(Math.max(i_min, 0), p0.dims.xdim);
-		                i_max = Math.ceil((slicebox.p3.coords.x - p0.dims.xmin) / p0.dims.dx);
-		                i_max = Math.max(Math.min(i_max, p0.dims.xdim), 0);
-		                j_min = Math.floor((slicebox.p3.coords.y - p0.dims.ymin) / p0.dims.dy);
-		                j_min = Math.min(Math.max(j_min, 0), p0.dims.ydim);
-		                j_max = Math.ceil((slicebox.p1.coords.y - p0.dims.ymin) / p0.dims.dy);
-		                j_max = Math.max(Math.min(j_max, p0.dims.ydim), 0);
-		                var xdata = [], ydata = [];
-		                for (var c=i_min; c <=i_max-1; c++) {
-		                    xdata.push([p0.dims.xmin + c*p0.dims.dx, p0.cumsum_x[c][j_max] - p0.cumsum_x[c][j_min]]);
-		                }
-		                for (var r=j_min; r<=j_max-1; r++) {
-		                    ydata.push([p0.cumsum_y[i_max][r] - p0.cumsum_y[i_min][r], p0.dims.ymin + r*p0.dims.dy]);
-		                }
-		                xslice.series[0].data = xdata;
-		                xslice.resetAxesScale();
-		                xslice.grid._offsets.left = xslice.axes.yaxis._elem.width();
-		                xslice.replot();
-		                yslice.series[0].data = ydata;
-		                yslice.resetAxesScale();
-		                yslice.grid._offsets.left = yslice.axes.yaxis._elem.width();
-		                yslice.replot();
-		            };
-		            return this;  
-		        };
-		        var sl = slice_listener();
-		        generate_cumsums();
-		        maximize();
+		        update_plot(testdata);
 		    }
-		    
+		    update_selectors = function(toPlots) {
+		        document.getElementById('plot_selectnum').innerHTML = "";
+                for (var i=0; i<toPlots.length; i++) {
+                    var zlabel = toPlots[i].zlabel || '';
+                    jQuery(document.getElementById('plot_selectnum')).append(jQuery('<option />', { value: i, text: 'dataset: ' + i + " " + zlabel }));
+                };
+                function onchange(e) {
+                    var selectz = document.getElementById('plot_selectz');
+                    var selectnum = document.getElementById('plot_selectnum');
+                    var transform = selectz[selectz.selectedIndex].value;
+                    var plotnum = selectnum[selectnum.selectedIndex].value;
+                    var toPlot = toPlots[plotnum];
+                    //plot = renderImageData2(toPlot, transform, 'plot2d');
+                    plot.series[0].set_data(toPlot.z[0], toPlot.dims);
+                    plot.series[0].set_transform(transform);
+                    plot.plugins._interactor.zoomMax();
+                    colorbar.series[0].dims = toPlot.dims;
+                    colorbar.series[0].set_ztransform(transform);
+                    colorbar.plugins._interactor.zoomMax();
+                }
+                
+                jQuery('#plot_selectnum').change({}, onchange);
+                jQuery('#plot_selectz').change({}, onchange);
+		    }
+		    update_plot = function(toPlot) {
+		        debug = false;
+		        data = toPlot;
+		        if (plot == null) {
+		            // then initialize all the plot objects
+		            plot = $.jqplot('plot', data.z, {
+		                //cursor: {show: true, zoom: false},
+		                sortData: false,
+		                interactors: [{ type:'Rectangle', 
+		                                name:'rectangle',
+		                                showrect: false,
+		                                xmin: data.dims.xmin, 
+		                                ymin: data.dims.ymin,
+		                                xmax: data.dims.xmax, 
+		                                ymax: data.dims.ymax}],
+		                renderer: $.jqplot.heatmapRender,
+		                series: [ {shadow: false, padding: 0} ],
+                        grid: {shadow: false},
+                        axesDefaults: {
+		                    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                            tickOptions: {formatString: "%.3g", _styles: {right: 0}}
+                        },
+                        axes:{ 
+                            xaxis:{ label: 'x' },
+                            yaxis:{ label: 'y' }
+                        },
+		                seriesDefaults:{
+		                    shadow: false,
+                            renderer:$.jqplot.heatmapRenderer,
+                            rendererOptions: {
+                                transform: 'lin',
+                                dims: data.dims,
+                                //display_dims: { xmin: data.dims.xmin-1,
+                                //                ymin: data.dims.ymin-1,
+                                //                ymax: data.dims.ymax+1,
+                                //                xmax: data.dims.xmax+1}
+                            },
+                        }
+		                
+		            });
+		        
+		        
+		            colorbar = $.jqplot('colorbar', data.z, {
+		                //cursor: {show: true, zoom: true},
+		                sortData: false,
+		                interactors: [{ type:'standard', name: 'standard'}],
+		                series: [ {shadow: false, padding: 0} ],
+                        grid: {shadow: false},
+		                seriesDefaults:{
+		                    yaxis: 'y2axis',
+		                    shadow: false,
+                            renderer:$.jqplot.colorbarRenderer,
+                            rendererOptions: {
+                                dims: data.dims,
+                                transform: 'lin',
+                                display_dims: { xmin: data.dims.xmin-1,
+                                                ymin: data.dims.ymin-1,
+                                                ymax: data.dims.ymax+1,
+                                                xmax: data.dims.xmax+1,
+                                                zmin: data.dims.zmin,
+                                                zmax: data.dims.zmax}
+                            },
+                        },
+                        axes:{ 
+                            xaxis:{ tickOptions: {show: false} },
+                            y2axis:{
+                                //label: 'Intensity',
+                                labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                                tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                                tickOptions: {
+                                    formatString: "%.3g",
+                                    _styles: {left: 5},
+                                }
+                            }
+                        }, 
+                    });
+		        
+		            function matchPlotToColorbar() {
+		                var new_dims = {};
+		                var cb = colorbar.series[0];
+		                //$.extend(new_dims, plot.series[0].dims);
+		                new_dims.zmax = cb.tinv(cb._yaxis.max);
+		                new_dims.zmin = cb.tinv(cb._yaxis.min);
+		                $.extend(plot.series[0].dims, new_dims, true);
+		                plot.series[0].set_transform(cb.transform);
+		                plot.series[0].update_plotdata();
+		                plot.replot();	
+		            };
+		            colorbar.plugins._interactor.zoomPlot = function(dzoom, centerpos) {
+		                $.jqplot.MasterInteractorPlugin.prototype.zoomPlot.call(colorbar.plugins._interactor, dzoom, centerpos);
+		                matchPlotToColorbar();		            
+		            };
+		            
+		            colorbar.plugins._interactor.zoomMax = function() {
+		                $.jqplot.MasterInteractorPlugin.prototype.zoomMax.call(colorbar.plugins._interactor);
+		                matchPlotToColorbar();	            
+		            };
+		            
+		            colorbar.plugins._interactor.panPlot = function(pos) {
+		                $.jqplot.MasterInteractorPlugin.prototype.panPlot.call(colorbar.plugins._interactor, pos);
+		                matchPlotToColorbar();
+		            };
+		        
+		        
+		        
+		            yslice = $.jqplot('yslice', [[[1,1],[1,2],[0.5,3],[2,4]]], {
+		                cursor: {show: true, zoom: true}, 
+		                grid: {shadow: false}, 
+		                sortData: false, 
+		                series: [ {shadow: false, color: 'red', markerOptions: {shadow: false, size: 4}} ],
+		                axesDefaults: {
+		                    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                            tickOptions: {formatString: "%.3g", _styles: {right: 10}}
+                        },
+                        axes: {xaxis: {label: 'sum along x'}}
+		            });
+		            xslice = $.jqplot('xslice', [[1,2,3,4]], {
+		                cursor: {show: true, zoom: true},
+		                grid: {shadow: false}, 
+		                sortData: false, 
+		                series: [ {shadow: false, color: 'blue', markerOptions: {shadow: false, size: 4}} ],
+		                axesDefaults: {
+		                    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                            tickOptions: {formatString: "%.3g", _styles: {right: 0}}
+                        },
+                        axes: {yaxis: {label: 'sum along y'}}
+		            });
+		            
+		            
+		            var slicebox = plot.plugins.interactors.rectangle;
+		            var ymaxctl = new pointTextControl(slicebox.p1, 'y', 'y<sub>max</sub>', 5);
+                    ymaxctl.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
+                    document.getElementById('slicecontrols').appendChild(ymaxctl.div);
+		            var xminctl = new pointTextControl(slicebox.p1, 'x', 'x<sub>min</sub>', 5);
+		            xminctl.div.setAttribute('style', 'display: inline; text-align: center; width: 100%; padding: 5px 10px;');
+                    document.getElementById('slicecontrols').appendChild(xminctl.div);
+                    var xmaxctl = new pointTextControl(slicebox.p3, 'x', 'x<sub>max</sub>', 5);
+                    xmaxctl.div.setAttribute('style', 'display: inline; text-align: center; width: 100%; padding: 5px 10px;');
+                    document.getElementById('slicecontrols').appendChild(xmaxctl.div);
+                    var yminctl = new pointTextControl(slicebox.p3, 'y', 'y<sub>min</sub>', 5);
+                    yminctl.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
+                    document.getElementById('slicecontrols').appendChild(yminctl.div);
+                    var hr = document.createElement('div'); hr.innerHTML = "<hr>";
+                    document.getElementById('slicecontrols').appendChild(hr);
+                    var maxbutton = document.createElement('input');
+                    maxbutton.setAttribute('type', 'button');
+                    maxbutton.setAttribute('value', 'Maximize to data');
+                    var maximize = function () {
+                        xminctl.update({x: data.dims.xmin});
+                        xminctl.update_external();
+                        ymaxctl.update({y: data.dims.ymax});
+                        ymaxctl.update_external();
+                        xmaxctl.update({x: data.dims.xmax});
+                        xmaxctl.update_external();
+                        yminctl.update({y: data.dims.ymin});
+                        yminctl.update_external();
+                    }
+                    maxbutton.onclick = maximize;
+                    
+                    document.getElementById('slicecontrols').appendChild(maxbutton);
+                    
+                    slice_listener = function() {
+		                slicebox.p1.listeners.push(this);
+		                slicebox.p3.listeners.push(this);
+		                var p0 = plot.series[0];
+		                this.update = function(pos) {
+		                    var width = p0.dims.xdim;
+                            var height = p0.dims.ydim;
+		                    //console.log(slicebox.p1.coords.x, p0.dims.xmin, p0.dims.xdim);
+		                    i_min = Math.floor((slicebox.p1.coords.x - p0.dims.xmin) / p0.dims.dx);
+		                    i_min = Math.min(Math.max(i_min, 0), p0.dims.xdim);
+		                    i_max = Math.ceil((slicebox.p3.coords.x - p0.dims.xmin) / p0.dims.dx);
+		                    i_max = Math.max(Math.min(i_max, p0.dims.xdim), 0);
+		                    j_min = Math.floor((slicebox.p3.coords.y - p0.dims.ymin) / p0.dims.dy);
+		                    j_min = Math.min(Math.max(j_min, 0), p0.dims.ydim);
+		                    j_max = Math.ceil((slicebox.p1.coords.y - p0.dims.ymin) / p0.dims.dy);
+		                    j_max = Math.max(Math.min(j_max, p0.dims.ydim), 0);
+		                    var xdata = [], ydata = [];
+		                    for (var c=i_min; c <=i_max-1; c++) {
+		                        xdata.push([p0.dims.xmin + c*p0.dims.dx, p0.cumsum_x[c][j_max] - p0.cumsum_x[c][j_min]]);
+		                    }
+		                    for (var r=j_min; r<=j_max-1; r++) {
+		                        ydata.push([p0.cumsum_y[i_max][r] - p0.cumsum_y[i_min][r], p0.dims.ymin + r*p0.dims.dy]);
+		                    }
+		                    xslice.series[0].data = xdata;
+		                    xslice.resetAxesScale();
+		                    xslice.grid._offsets.left = xslice.axes.yaxis._elem.width();
+		                    xslice.replot();
+		                    yslice.series[0].data = ydata;
+		                    yslice.resetAxesScale();
+		                    yslice.grid._offsets.left = yslice.axes.yaxis._elem.width();
+		                    yslice.replot();
+		                };
+		                return this;  
+		            };
+		            var sl = slice_listener();
+		            generate_cumsums(plot.series[0]);
+		            maximize();
+		        }
+		        else {
+		            // no need to recreate everything... just update the data.
+		            console.log('replotting');
+		            plot.series[0].set_data(toPlot.z[0], toPlot.dims);
+		            plot.series[0].set_transform(toPlot.transform);
+		            plot.plugins._interactor.zoomMax();
+                    colorbar.series[0].dims = toPlot.dims;
+                    colorbar.series[0].set_ztransform(transform);
+                    colorbar.plugins._interactor.zoomMax();
+		        }
+		    }
 		    pointTextControl = function(p, coord, label, precision) {
                 // coord should be 'x' or 'y'
                 var precision = precision || 3;
@@ -287,6 +325,39 @@
                 this.update(p.getCoords());
                 return this;
             }
+            
+            generate_cumsums = function(plotseries) {
+		            
+                var width = plotseries.dims.xdim;
+                var height = plotseries.dims.ydim;
+                var data = plotseries.source_data;
+                var cumsum_x = [], cumsum_x_col;
+                var cumsum_y = [], cumsum_y_col;
+                var ysum = [];
+                // initialize the y-sum:
+                for (var r = 0; r<height; r++) ysum.push(0);
+                cumsum_y.push(ysum.slice());
+                
+                
+                for (var c = 0; c < width; c++) {
+                    cumsum_x_col = [0]; xsum = 0;
+                    cumsum_y_col = [];
+                    for (var r = 0; r < height; r++) {
+                        var offset = 4*((r*width) + c);
+                        //var z = data[c][height-r-1];
+                        var z = data[c][r];
+                        xsum += z;
+                        ysum[r] += z;
+                        cumsum_x_col.push(xsum);
+                        cumsum_y_col.push(ysum[r]);
+                        
+                    }
+                    cumsum_x.push(cumsum_x_col);
+                    cumsum_y.push(cumsum_y_col);
+                }
+                plotseries.cumsum_x = cumsum_x;
+                plotseries.cumsum_y = cumsum_y;
+            };
 		</script>
 	</head>
 	<body id="woot" class="yui-skin-sam">
@@ -297,7 +368,13 @@
 	        </div>
 	        <div id="yslice" style="display: inline-block; width: 39%; height: 350px;"></div>
 	    </div>
-	    <div id="controls" style="display: block; width: 100%;"></div>
+	    <div id="controls" style="display: block; width: 100%;">
+	        <select id="plot_selectz">
+	            <option value='lin'>lin</option>
+	            <option value='log'>log</option>
+	        </select>
+	        <select id="plot_selectnum"></select>
+	    </div>
 	    <div id="lower" style="display: block; width: 100%; height: 350px;">
 	        <div id="xslice"   style="display: inline-block; width: 59%;"></div>
 	        <div id="slicecontrols" style="display: inline-block; width: 39%; text-align: center;">Slice Region:<hr></div>

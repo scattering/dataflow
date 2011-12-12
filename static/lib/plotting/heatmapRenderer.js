@@ -18,12 +18,9 @@
         this.palette_str = ["rgb(0,0,127)", "rgb(0,0,132)", "rgb(0,0,136)", "rgb(0,0,141)", "rgb(0,0,145)", "rgb(0,0,150)", "rgb(0,0,154)", "rgb(0,0,159)", "rgb(0,0,163)", "rgb(0,0,168)", "rgb(0,0,172)", "rgb(0,0,177)", "rgb(0,0,181)", "rgb(0,0,186)", "rgb(0,0,190)", "rgb(0,0,195)", "rgb(0,0,199)", "rgb(0,0,204)", "rgb(0,0,208)", "rgb(0,0,213)", "rgb(0,0,218)", "rgb(0,0,222)", "rgb(0,0,227)", "rgb(0,0,231)", "rgb(0,0,236)", "rgb(0,0,240)", "rgb(0,0,245)", "rgb(0,0,249)", "rgb(0,0,254)", "rgb(0,0,255)", "rgb(0,0,255)", "rgb(0,0,255)", "rgb(0,0,255)", "rgb(0,3,255)", "rgb(0,7,255)", "rgb(0,11,255)", "rgb(0,15,255)", "rgb(0,19,255)", "rgb(0,23,255)", "rgb(0,27,255)", "rgb(0,31,255)", "rgb(0,35,255)", "rgb(0,39,255)", "rgb(0,43,255)", "rgb(0,47,255)", "rgb(0,51,255)", "rgb(0,55,255)", "rgb(0,59,255)", "rgb(0,63,255)", "rgb(0,67,255)", "rgb(0,71,255)", "rgb(0,75,255)", "rgb(0,79,255)", "rgb(0,83,255)", "rgb(0,87,255)", "rgb(0,91,255)", "rgb(0,95,255)", "rgb(0,99,255)", "rgb(0,103,255)", "rgb(0,107,255)", "rgb(0,111,255)", "rgb(0,115,255)", "rgb(0,119,255)", "rgb(0,123,255)", "rgb(0,127,255)", "rgb(0,131,255)", "rgb(0,135,255)", "rgb(0,139,255)", "rgb(0,143,255)", "rgb(0,147,255)", "rgb(0,151,255)", "rgb(0,155,255)", "rgb(0,159,255)", "rgb(0,163,255)", "rgb(0,167,255)", "rgb(0,171,255)", "rgb(0,175,255)", "rgb(0,179,255)", "rgb(0,183,255)", "rgb(0,187,255)", "rgb(0,191,255)", "rgb(0,195,255)", "rgb(0,199,255)", "rgb(0,203,255)", "rgb(0,207,255)", "rgb(0,211,255)", "rgb(0,215,255)", "rgb(0,219,255)", "rgb(0,223,251)", "rgb(0,227,248)", "rgb(1,231,245)", "rgb(4,235,242)", "rgb(7,239,239)", "rgb(10,243,235)", "rgb(14,247,232)", "rgb(17,251,229)", "rgb(20,255,226)", "rgb(23,255,222)", "rgb(26,255,219)", "rgb(30,255,216)", "rgb(33,255,213)", "rgb(36,255,210)", "rgb(39,255,206)", "rgb(43,255,203)", "rgb(46,255,200)", "rgb(49,255,197)", "rgb(52,255,194)", "rgb(55,255,190)", "rgb(59,255,187)", "rgb(62,255,184)", "rgb(65,255,181)", "rgb(68,255,178)", "rgb(71,255,174)", "rgb(75,255,171)", "rgb(78,255,168)", "rgb(81,255,165)", "rgb(84,255,161)", "rgb(88,255,158)", "rgb(91,255,155)", "rgb(94,255,152)", "rgb(97,255,149)", "rgb(100,255,145)", "rgb(104,255,142)", "rgb(107,255,139)", "rgb(110,255,136)", "rgb(113,255,133)", "rgb(116,255,129)", "rgb(120,255,126)", "rgb(123,255,123)", "rgb(126,255,120)", "rgb(129,255,116)", "rgb(133,255,113)", "rgb(136,255,110)", "rgb(139,255,107)", "rgb(142,255,104)", "rgb(145,255,100)", "rgb(149,255,97)", "rgb(152,255,94)", "rgb(155,255,91)", "rgb(158,255,88)", "rgb(161,255,84)", "rgb(165,255,81)", "rgb(168,255,78)", "rgb(171,255,75)", "rgb(174,255,71)", "rgb(178,255,68)", "rgb(181,255,65)", "rgb(184,255,62)", "rgb(187,255,59)", "rgb(190,255,55)", "rgb(194,255,52)", "rgb(197,255,49)", "rgb(200,255,46)", "rgb(203,255,43)", "rgb(206,255,39)", "rgb(210,255,36)", "rgb(213,255,33)", "rgb(216,255,30)", "rgb(219,255,26)", "rgb(222,255,23)", "rgb(226,255,20)", "rgb(229,255,17)", "rgb(232,255,14)", "rgb(235,255,10)", "rgb(239,254,7)", "rgb(242,250,4)", "rgb(245,247,1)", "rgb(248,243,0)", "rgb(251,239,0)", "rgb(255,235,0)", "rgb(255,232,0)", "rgb(255,228,0)", "rgb(255,224,0)", "rgb(255,221,0)", "rgb(255,217,0)", "rgb(255,213,0)", "rgb(255,210,0)", "rgb(255,206,0)", "rgb(255,202,0)", "rgb(255,199,0)", "rgb(255,195,0)", "rgb(255,191,0)", "rgb(255,188,0)", "rgb(255,184,0)", "rgb(255,180,0)", "rgb(255,176,0)", "rgb(255,173,0)", "rgb(255,169,0)", "rgb(255,165,0)", "rgb(255,162,0)", "rgb(255,158,0)", "rgb(255,154,0)", "rgb(255,151,0)", "rgb(255,147,0)", "rgb(255,143,0)", "rgb(255,140,0)", "rgb(255,136,0)", "rgb(255,132,0)", "rgb(255,128,0)", "rgb(255,125,0)", "rgb(255,121,0)", "rgb(255,117,0)", "rgb(255,114,0)", "rgb(255,110,0)", "rgb(255,106,0)", "rgb(255,103,0)", "rgb(255,99,0)", "rgb(255,95,0)", "rgb(255,92,0)", "rgb(255,88,0)", "rgb(255,84,0)", "rgb(255,81,0)", "rgb(255,77,0)", "rgb(255,73,0)", "rgb(255,69,0)", "rgb(255,66,0)", "rgb(255,62,0)", "rgb(255,58,0)", "rgb(255,55,0)", "rgb(255,51,0)", "rgb(255,47,0)", "rgb(255,44,0)", "rgb(255,40,0)", "rgb(255,36,0)", "rgb(255,33,0)", "rgb(255,29,0)", "rgb(255,25,0)", "rgb(255,21,0)", "rgb(254,18,0)", "rgb(249,14,0)", "rgb(245,10,0)", "rgb(240,7,0)", "rgb(236,3,0)", "rgb(231,0,0)", "rgb(227,0,0)", "rgb(222,0,0)", "rgb(218,0,0)", "rgb(213,0,0)", "rgb(208,0,0)", "rgb(204,0,0)", "rgb(199,0,0)", "rgb(195,0,0)", "rgb(190,0,0)", "rgb(186,0,0)", "rgb(181,0,0)", "rgb(177,0,0)", "rgb(172,0,0)", "rgb(168,0,0)", "rgb(163,0,0)", "rgb(159,0,0)", "rgb(154,0,0)", "rgb(150,0,0)", "rgb(145,0,0)", "rgb(141,0,0)", "rgb(136,0,0)", "rgb(132,0,0)"];
         this.transform = 'lin';
         // put series options in options.series (dims, etc.)
-        this.dims = {xmin:0, xmax:1, ymin:0, ymax:1};
+        this.dims = {xmin:0, xmax:1, ymin:0, ymax:1, zmin: 0, zmax: 1};
         this.transform = 'lin';
         $.extend(true, this, options);
-        
-        if (!this.dims.dx){ this.dims.dx = (this.dims.xmax - this.dims.xmin)/(this.dims.xdim); }
-        if (!this.dims.dy){ this.dims.dy = (this.dims.ymax - this.dims.ymin)/(this.dims.ydim); }
         
         // need to create a canvas to draw on...
         this.canvas = new $.jqplot.GenericCanvas();
@@ -35,31 +32,17 @@
         this._xaxis.max = display_dims.xmax;
         this._yaxis.min = display_dims.ymin;
         this._yaxis.max = display_dims.ymax;
-        // kind of a hack, but prevents jqplot from messing with the data 
-        // (if sortData=true were turned on, for instance);
-        this.source_data = [];
-        for (var i=0; i<this.dims.xdim; i++) {
-            this.source_data.push(this.data[i].slice());
-        }
-        
-        this.data = [[this.dims.xmin, this.dims.ymin],
-                    [this.dims.xmax, this.dims.ymin],
-                    [this.dims.xmax, this.dims.ymax],
-                    [this.dims.xmin, this.dims.ymax]];
-        
-        this._plotData = [[this.dims.xmin, this.dims.ymin],
-                    [this.dims.xmax, this.dims.ymin],
-                    [this.dims.xmax, this.dims.ymax],
-                    [this.dims.xmin, this.dims.ymax]];
                     
         // group: Methods 
         //
         
         this.update_plotdata = update_plotdata;
         this.set_transform = set_transform;
+        this.generate_histogram = generate_histogram;
         this.set_data = set_data;
         this.zoom_to = zoom_to;
         this.set_transform(this.transform);
+        this.set_data(this.data, this.dims);
         this.update_plotdata();
     };
     
@@ -235,7 +218,18 @@
         for (var i=0; i<this.dims.xdim; i++) {
             this.source_data.push(new_data[i].slice());
         }
+        this.data = [[this.dims.xmin, this.dims.ymin],
+                        [this.dims.xmax, this.dims.ymin],
+                        [this.dims.xmax, this.dims.ymax],
+                        [this.dims.xmin, this.dims.ymax]];
+        this._plotData = [[this.dims.xmin, this.dims.ymin],
+                        [this.dims.xmax, this.dims.ymin],
+                        [this.dims.xmax, this.dims.ymax],
+                        [this.dims.xmin, this.dims.ymax]];
         this.update_plotdata();
+        var hists = this.generate_histogram();
+        this.hist = hists.hist;
+        this.fullhist = hists.fullhist;
     };
     
     function set_transform(tform) {
@@ -263,6 +257,22 @@
         if ('ymax' in limits) this._yaxis.max = limits.ymax;
     };
     
+    function generate_histogram() {
+        // create a histogram of the data...
+        var hist = [], fullhist={}, plotz;
+        for (var i=0; i<256; i++) hist.push(0);    
+        for (var c=0; c<this.plotdata.length; c++) {
+            datacol = this.plotdata[c];
+            for (var r=0; r<datacol.length; r++) {
+                plotz = datacol[r];
+                hist[plotz] += 1;
+                if (plotz in fullhist) { fullhist[plotz] += 1; }
+                else { fullhist[plotz] = 1; }
+            }
+        }
+        return {hist: hist, fullhist: fullhist}
+    };
+    
     // call after setting transform
     function update_plotdata() {
         var width = this.dims.xdim;
@@ -271,7 +281,9 @@
         var tzmin = this.t(this.dims.zmin);
         if (isNaN(tzmin)) tzmin = 0;
         var data = this.source_data; 
-        var plotdata = [], datacol;      
+        var plotdata = [], datacol;
+        //var hist=[], fullhist={};
+        //for (var i=0; i<256; i++) hist.push(0);    
         
         for (var c = 0; c < width; c++) {
             datacol = [];
@@ -284,10 +296,15 @@
                 plotz = ((plotz>255)? 255 : plotz);
                 plotz = ((plotz<0)? 0 : plotz);
                 datacol.push(plotz);
+                //hist[plotz] += 1;
+                //if (plotz in fullhist) { fullhist[plotz] += 1; }
+                //else { fullhist[plotz] = 1; }
             }
             plotdata.push(datacol.slice());
         }
         this.plotdata = plotdata;
+        //this.hist = hist;
+        //this.fullhist = fullhist;
     };
        
 })(jQuery);

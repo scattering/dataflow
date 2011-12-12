@@ -141,6 +141,43 @@ var asterix = {
       "name": "Save"
     },
     {
+      "container": { 
+        "height": 16, 
+        "terminals": [
+        {  "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:out"
+              ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": -16, 
+              "top": 1
+            }, 
+            "required": true
+          }
+        ], 
+        "width": 120, 
+        "xtype": "SliceContainer"
+      }, 
+      "fields": [
+        {
+          "label": "Intent", 
+          "name": "intent", 
+          "type": "string", 
+          "value": ""
+        }
+      ], 
+      "name": "Slice Data"
+    },
+    {
       "container": {
         "icon": "../../static/img/offspecular/correct_spectrum_icon.png", 
         "image": "../../static/img/offspecular/correct_spectrum_image.png", 
@@ -710,52 +747,52 @@ var asterix = {
       ], 
       "name": "Asterix Pixels to two theta"
     },
-    {
-      "container": {
-        "icon": "../../static/img/offspecular/autogrid.png", 
-        "image": "../../static/img/offspecular/slice_image.png", 
-        "terminals": [
-          { "alwaysSrc": false, 
-            "ddConfig": {
-              "allowedTypes": ["data2d.ospec:out" ], 
-              "type": "data2d.ospec:in"
-            }, 
-            "direction": [-1,0], 
-            "multiple": false, 
-            "name": "input", 
-            //"offsetPosition": {"left": -12, "top": 16}, 
-            "required": true
-          }, 
-          {
-            "alwaysSrc": true, 
-            "ddConfig": {
-              "allowedTypes": ["data2d.ospec:in"], 
-              "type": "data2d.ospec:out"
-            }, 
-            "direction": [0,1], 
-            "multiple": true, 
-            "name": "output_x", 
-            //"offsetPosition": {"right": -16,"top": 4}, 
-            "required": false
-          }, 
-          {
-            "alwaysSrc": true, 
-            "ddConfig": {
-              "allowedTypes": ["data2d.ospec:in"], 
-              "type": "data2d.ospec:out"
-            }, 
-            "direction": [1,0], 
-            "multiple": true, 
-            "name": "output_y", 
-            //"offsetPosition": {"right": -16, "top": 40}, 
-            "required": false
-          }
-        ], 
-        "xtype": "AutosizeImageContainer"
-      }, 
-      "fields": [], 
-      "name": "Slice Data"
-    },
+//    {
+//      "container": {
+//        "icon": "../../static/img/offspecular/autogrid.png", 
+//        "image": "../../static/img/offspecular/slice_image.png", 
+//        "terminals": [
+//          { "alwaysSrc": false, 
+//            "ddConfig": {
+//              "allowedTypes": ["data2d.ospec:out" ], 
+//              "type": "data2d.ospec:in"
+//            }, 
+//            "direction": [-1,0], 
+//            "multiple": false, 
+//            "name": "input", 
+//            //"offsetPosition": {"left": -12, "top": 16}, 
+//            "required": true
+//          }, 
+//          {
+//            "alwaysSrc": true, 
+//            "ddConfig": {
+//              "allowedTypes": ["data2d.ospec:in"], 
+//              "type": "data2d.ospec:out"
+//            }, 
+//            "direction": [0,1], 
+//            "multiple": true, 
+//            "name": "output_x", 
+//            //"offsetPosition": {"right": -16,"top": 4}, 
+//            "required": false
+//          }, 
+//          {
+//            "alwaysSrc": true, 
+//            "ddConfig": {
+//              "allowedTypes": ["data2d.ospec:in"], 
+//              "type": "data2d.ospec:out"
+//            }, 
+//            "direction": [1,0], 
+//            "multiple": true, 
+//            "name": "output_y", 
+//            //"offsetPosition": {"right": -16, "top": 40}, 
+//            "required": false
+//          }
+//        ], 
+//        "xtype": "AutosizeImageContainer"
+//      }, 
+//      "fields": [], 
+//      "name": "Slice Data"
+//    },
     {
       "container": {
         "icon": "../../static/img/offspecular/autogrid.png", 
@@ -1108,6 +1145,30 @@ YAHOO.lang.extend(SaveContainer, WireIt.Container, {
             clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
         }
         editor.getCSV(reductionInstance, clickedOn);
-    },
+    }
 });
+
+SliceContainer = function(opts, layer) {
+    SliceContainer.superclass.constructor.call(this, opts, layer);
+    var content = document.createElement('div');
+    content.innerHTML = '';
+    //var saveButton = document.createElement('img');
+    var sliceButton = document.createElement('button');
+    sliceButton.value = 'slice';
+    sliceButton.innerHTML = 'Slice';
+    //saveButton.src = this.image;
+    content.appendChild(sliceButton);
+    YAHOO.util.Event.addListener(getCSVButton, 'click', this.openSliceWindow, this, true);
+};
+
+YAHOO.lang.extend(SliceContainer, WireIt.Container, {
+    xtype: 'SliceContainer',
+    openSliceWindow: function(e) {
+        //console.log('save click:', e);
+        //alert('save to server not yet implemented.  Try downloading CSV version of data');
+        this.sliceWindow = window.open("/plotWindow/", "", "status=1,width=650,height=500");
+        this.sliceWindow.update_plot(editor.toPlots);
+    }
+});
+
 
