@@ -1181,6 +1181,7 @@ YAHOO.lang.extend(SliceContainer, WireIt.Container, {
                 //toPlot = result;
                 var sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768");
                 sliceWindow.toPlot = result;
+                sliceWindow.activeContainer = f;
                 //else {
                 //    sliceWindow.update_plot(result[0]);
                 //    sliceWindow.update_selectors(result);
