@@ -63,6 +63,9 @@ def showInteractors(request):
 def showPlotWindow(request):
 	return render_to_response('plotwindow.html')
 
+def showSliceWindow(request):
+	return render_to_response('slicewindow.html')
+
 def mytest(request):
    return render_to_response('tracer_testingforWireit/xhr_temp.html')
    
