@@ -1175,6 +1175,7 @@ YAHOO.lang.extend(SliceContainer, WireIt.Container, {
             clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
         }
         var toReduce = editor.generateReductionRecipe(reductionInstance);
+        toReduce.clickedOn = clickedOn;
         editor.adapter.runReduction(toReduce, {
             success: function(result) { 
                 console.log('success... so far');
