@@ -50,7 +50,8 @@
 		    
 		    window.onload = function() {
 		        if (window.opener.toPlot) {
-		            update_plot(window.opener.toPlot);
+		            update_plot(window.opener.toPlot[0]);
+		            update_selectors(window.opener.toPlot);
 		        }
 		        //update_plot(testdata);
 		    }
