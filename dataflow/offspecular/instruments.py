@@ -38,6 +38,7 @@ module_imports = [
     ("dataflow.offspecular.modules.empty_qxqz_grid", "empty_qxqz_grid_module"),
     ("dataflow.offspecular.modules.mask_data", "mask_data_module"),
     ("dataflow.offspecular.modules.slice_data", "slice_data_module"),
+    ("dataflow.offspecular.modules.collapse_data", "collapse_data_module"),
     ("dataflow.calc", ["run_template", "get_plottable", "calc_single"]),
     ("dataflow.core", ["Data", "Instrument", "Template", "register_instrument"]),
     ("reduction.offspecular.filters", ["LoadICPData", "LoadAsterixRawHDF", "LoadAsterixSpectrum", "Autogrid", "Combine", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "WiggleCorrection", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz"]),
