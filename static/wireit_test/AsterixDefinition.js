@@ -1177,9 +1177,10 @@ YAHOO.lang.extend(SliceContainer, WireIt.Container, {
         var toReduce = editor.generateReductionRecipe(reductionInstance);
         editor.adapter.runReduction(toReduce, {
             success: function(result) { 
+                console.log('success... so far');
                 var sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768");
                 sliceWindow.update_plot(result[0]);
-                sliceWindow.update_selectors(results);
+                sliceWindow.update_selectors(result);
             },
             failure: editor.runModuleFailure,
             scope: editor}
