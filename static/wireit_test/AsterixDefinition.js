@@ -1158,7 +1158,7 @@ SliceContainer = function(opts, layer) {
     sliceButton.innerHTML = 'Slice';
     //saveButton.src = this.image;
     content.appendChild(sliceButton);
-    YAHOO.util.Event.addListener(sliceCSVButton, 'click', this.openSliceWindow, this, true);
+    YAHOO.util.Event.addListener(sliceButton, 'click', this.openSliceWindow, this, true);
 };
 
 YAHOO.lang.extend(SliceContainer, WireIt.Container, {
