@@ -45,6 +45,7 @@
             this.rc = 1;//Math.random();
             this.show = true;
             $.extend(true, this, options);
+            
         },
         
         points: function() {
@@ -126,6 +127,7 @@
             this.rc = 1;//Math.random();
             $.extend(true, this, options);
             this.interactors = []; // number of interactors
+            this.generate_ticks = generate_ticks;
         },
         
         points: function() {
@@ -325,9 +327,10 @@
             var xmax = this.plot.series[0]._xaxis._dataBounds.max;
             var ymin = this.plot.series[0]._yaxis._dataBounds.min;
             var ymax = this.plot.series[0]._yaxis._dataBounds.max;
-
-            this.plot.series[0]._xaxis.ticks = generate_ticks({min:xmin, max:xmax}, 'lin');
-            this.plot.series[0]._yaxis.ticks = generate_ticks({min:ymin, max:ymax}, 'lin');
+            var xtransf = this.plot.series[0]._xaxis.transform || 'lin';
+            var ytransf = this.plot.series[0]._yaxis.transform || 'lin';
+            this.plot.series[0]._xaxis.ticks = generate_ticks({min:xmin, max:xmax}, xtransf);
+            this.plot.series[0]._yaxis.ticks = generate_ticks({min:ymin, max:ymax}, ytransf);
             this.plot.replot();
         },
         
@@ -336,6 +339,8 @@
             // make a zoom of 120 = 10% change in axis limits
             var conv = dzoom * 0.2/120;
             
+            var xtransf = this.plot.series[0]._xaxis.transform || 'lin';
+            var ytransf = this.plot.series[0]._yaxis.transform || 'lin';
             var xmin = this.plot.series[0]._xaxis.min;
             var xmax = this.plot.series[0]._xaxis.max;
             if (!this.fix_x) {
@@ -348,24 +353,26 @@
             }
             ymin += (center.y - ymin) * conv;
             ymax += (center.y - ymax) * conv;
-            this.plot.series[0]._xaxis.ticks = generate_ticks({min:xmin, max:xmax}, 'lin');
-            this.plot.series[0]._yaxis.ticks = generate_ticks({min:ymin, max:ymax}, 'lin');
-            this.plot.replot();
+            this.plot.series[0]._xaxis.ticks = generate_ticks({min:xmin, max:xmax}, xtransf);
+            this.plot.series[0]._yaxis.ticks = generate_ticks({min:ymin, max:ymax}, ytransf);
+            this.plot.redraw();
         },
         
         panPlot: function(pos) {
             var newcoords = this.getCoords(pos);
             var prevcoords = this.getCoords(this.prevpos);
             this.prevpos = pos;
+            var xtransf = this.plot.series[0]._xaxis.transform || 'lin';
+            var ytransf = this.plot.series[0]._yaxis.transform || 'lin';
             var dx = newcoords.x - prevcoords.x;
             var dy = newcoords.y - prevcoords.y;
             var xmin = this.plot.series[0]._xaxis.min - dx;
             var xmax = this.plot.series[0]._xaxis.max - dx;
             var ymin = this.plot.series[0]._yaxis.min - dy;
             var ymax = this.plot.series[0]._yaxis.max - dy;
-            this.plot.series[0]._xaxis.ticks = generate_ticks({min:xmin, max:xmax}, 'lin');
-            this.plot.series[0]._yaxis.ticks = generate_ticks({min:ymin, max:ymax}, 'lin');
-            this.plot.replot();
+            this.plot.series[0]._xaxis.ticks = generate_ticks({min:xmin, max:xmax}, xtransf);
+            this.plot.series[0]._yaxis.ticks = generate_ticks({min:ymin, max:ymax}, ytransf);
+            this.plot.redraw();
         }
     });
     
@@ -631,18 +638,21 @@
         // finds the next log tick above the current value,
         // using 1, 2, 5, 10, 20, ... scaling
         var expv = Math.floor(Math.log(val)/Math.LN10);
+        //var expv = Math.floor(val);
         var magnitude = Math.pow(10, expv);
         var f = val / magnitude;
 
         if (f<1.0) {return 1.0*magnitude;}
         if (f<2.0) {return 2.0*magnitude;}
         if (f<5.0) {return 5.0*magnitude;}
-        return 10*magnitude; 
+        if (f<10.) {return 10.0*magnitude;}
+        return 20*magnitude; 
     };
     
     function mod(a,b) {
         return a % b < 0 ? b + a % b : a % b
     };
+    
     
     function generate_ticks(ticklimits, transform) {
         var transform = transform || 'lin';
@@ -661,14 +671,18 @@
             ticks.push([max,' ']);
         } 
         else if (transform == 'log') {
-            var lmax = Math.log(max)/Math.LN10;
-            ticks.push([Math.log(min)/Math.LN10, ' ']);
-            var tick = nextLogTick(min);
-            while( tick < max ) {
-                ticks.push([Math.log(tick)/Math.LN10, tick]);
+            var emax = Math.pow(10, max);
+            ticks.push([min, ' ']); // ticks are positioned with log 
+            var tick = nextLogTick(Math.pow(10, min));
+            var tickpos = Math.log(tick)/Math.LN10;
+            var i = 0;
+            while( tickpos < max && i < 100 ) {
+                ticks.push([tickpos, tick]);
                 tick = nextLogTick(tick);
+                tickpos = Math.log(tick)/Math.LN10;
+                i++;
             }
-            ticks.push([Math.log(max)/Math.LN10, ' ']);
+            ticks.push([max, ' ']);
         } 
         else {
             // unknown transform - return max and min

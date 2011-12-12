@@ -43,25 +43,25 @@
             this.source_data.push(this.data[i].slice());
         }
         
-        this.data = [[this.dims.xmin, this.dims.zmin],
-                    [this.dims.xmax, this.dims.zmin],
-                    [this.dims.xmax, this.dims.zmax],
-                    [this.dims.xmin, this.dims.zmax]];
+//        this.data = [[this.dims.xmin, this.dims.zmin],
+//                    [this.dims.xmax, this.dims.zmin],
+//                    [this.dims.xmax, this.dims.zmax],
+//                    [this.dims.xmin, this.dims.zmax]];
         
-        this._plotData = [[this.dims.xmin, this.dims.zmin],
-                    [this.dims.xmax, this.dims.zmin],
-                    [this.dims.xmax, this.dims.zmax],
-                    [this.dims.xmin, this.dims.zmax]];
+//        this._plotData = [[this.dims.xmin, this.dims.zmin],
+//                    [this.dims.xmax, this.dims.zmin],
+//                    [this.dims.xmax, this.dims.zmax],
+//                    [this.dims.xmin, this.dims.zmax]];
                     
         // group: Methods 
         //
         
         this.update_plotdata = update_plotdata;
-        this.set_transform = set_transform;
+        this.set_ztransform = set_ztransform;
         this.set_data = set_data;
         this.zoom_to = zoom_to;
-        this.set_transform(this.transform);
-        this.update_plotdata();
+        this.set_ztransform(this.transform);
+        //this.update_plotdata();
         
     };
     
@@ -219,19 +219,42 @@
         this.update_plotdata();
     };
     
-    function set_transform(tform) {
+    function set_ztransform(tform) {
         // only knows log and lin for now
-        this.transform = tform;
-        if (tform=='log'){
-            this.t = function(datum) {
-                if (datum >=0) { return Math.log(datum)/Math.LN10 }
-                else { return NaN }
-            }   
-        } else { // transform defaults to 'lin' if unrecognized
-            this.t = function(datum) { return datum }
-        }
+        //if (tform != this.transform) {
+            this.transform = tform;
+            this._yaxis.transform = tform;
+            
+            if (tform=='log'){
+                this.t = function(datum) {
+                    if (datum >=0) { return Math.log(datum)/Math.LN10 }
+                    else { return NaN }
+                }
+                this.tinv = function(datum) {
+                    return Math.pow(10, datum);
+                }
+            } else { // transform defaults to 'lin' if unrecognized
+                this.t = function(datum) { return datum }
+                this.tinv = this.t;
+            }
+            
+            var tmin = this.t(this.dims.zmin);
+            var tmax = this.t(this.dims.zmax);
+            this._yaxis.min = tmin;
+            this._yaxis.max = tmax;
+            this._yaxis._dataBounds = {min: tmin, max: tmax};
+            this.data = [[this.dims.xmin, tmin],
+                    [this.dims.xmax, tmin],
+                    [this.dims.xmax, tmax],
+                    [this.dims.xmin, tmax]];
+            this._plotData = [[this.dims.xmin, tmin],
+                    [this.dims.xmax, tmin],
+                    [this.dims.xmax, tmax],
+                    [this.dims.xmin, tmax]];
+            
+        //}
         
-        if (this.source_data && this.dims) this.update_plotdata();
+        //if (this.source_data && this.dims) this.update_plotdata();
     };
     
     function zoom_to(limits) {
@@ -269,67 +292,67 @@
         this.plotdata = plotdata;
     };
     
-    function bestLinearInterval(range) {
-        var expv = Math.floor(Math.log(range)/Math.LN10);
-        var magnitude = Math.pow(10, expv);
-        var f = range / magnitude;
+//    function bestLinearInterval(range) {
+//        var expv = Math.floor(Math.log(range)/Math.LN10);
+//        var magnitude = Math.pow(10, expv);
+//        var f = range / magnitude;
 
-        if (f<=1.6) {return 0.2*magnitude;}
-        if (f<=4.0) {return 0.5*magnitude;}
-        if (f<=8.0) {return magnitude;}
-        return 2*magnitude; 
-    };
-    
-    function nextLogTick(val) {
-        // finds the next log tick above the current value,
-        // using 1, 2, 5, 10, 20, ... scaling
-        var expv = Math.floor(Math.log(val)/Math.LN10);
-        var magnitude = Math.pow(10, expv);
-        var f = val / magnitude;
+//        if (f<=1.6) {return 0.2*magnitude;}
+//        if (f<=4.0) {return 0.5*magnitude;}
+//        if (f<=8.0) {return magnitude;}
+//        return 2*magnitude; 
+//    };
+//    
+//    function nextLogTick(val) {
+//        // finds the next log tick above the current value,
+//        // using 1, 2, 5, 10, 20, ... scaling
+//        var expv = Math.floor(Math.log(val)/Math.LN10);
+//        var magnitude = Math.pow(10, expv);
+//        var f = val / magnitude;
 
-        if (f<1.0) {return 1.0*magnitude;}
-        if (f<2.0) {return 2.0*magnitude;}
-        if (f<5.0) {return 5.0*magnitude;}
-        return 10*magnitude; 
-    };
-    
-    function mod(a,b) {
-        return a % b < 0 ? b + a % b : a % b
-    };
-    
-    function generate_ticks(ticklimits, transform) {
-        var transform = transform || 'lin';
-        var min = ticklimits.min,
-            max = ticklimits.max;
-        var ticks = [];
-        if (transform == 'lin') {
-            var tickInterval = bestLinearInterval(max-min);
-            ticks.push([min, ' ']);
-            var tick = min - mod(min, tickInterval) + tickInterval;
-            while (tick < max) {
-                if (Math.abs(tick) < 1e-13) tick = 0;            
-                ticks.push(tick);
-                tick += tickInterval;
-            }
-            ticks.push([max,' ']);
-        } 
-        else if (transform == 'log') {
-            var lmax = Math.log(max)/Math.LN10;
-            ticks.push([Math.log(min)/Math.LN10, ' ']);
-            var tick = nextLogTick(min);
-            while( tick < max ) {
-                ticks.push([Math.log(tick)/Math.LN10, tick]);
-                tick = nextLogTick(tick);
-            }
-            ticks.push([Math.log(max)/Math.LN10, ' ']);
-        } 
-        else {
-            // unknown transform - return max and min
-            ticks.push(min);
-            ticks.push(max);
-        }
-        
-        return ticks; 
-    };
+//        if (f<1.0) {return 1.0*magnitude;}
+//        if (f<2.0) {return 2.0*magnitude;}
+//        if (f<5.0) {return 5.0*magnitude;}
+//        return 10*magnitude; 
+//    };
+//    
+//    function mod(a,b) {
+//        return a % b < 0 ? b + a % b : a % b
+//    };
+//    
+//    function generate_ticks(ticklimits, transform) {
+//        var transform = transform || 'lin';
+//        var min = ticklimits.min,
+//            max = ticklimits.max;
+//        var ticks = [];
+//        if (transform == 'lin') {
+//            var tickInterval = bestLinearInterval(max-min);
+//            ticks.push([min, ' ']);
+//            var tick = min - mod(min, tickInterval) + tickInterval;
+//            while (tick < max) {
+//                if (Math.abs(tick) < 1e-13) tick = 0;            
+//                ticks.push(tick);
+//                tick += tickInterval;
+//            }
+//            ticks.push([max,' ']);
+//        } 
+//        else if (transform == 'log') {
+//            var lmax = Math.log(max)/Math.LN10;
+//            ticks.push([Math.log(min)/Math.LN10, ' ']);
+//            var tick = nextLogTick(min);
+//            while( tick < max ) {
+//                ticks.push([Math.log(tick)/Math.LN10, tick]);
+//                tick = nextLogTick(tick);
+//            }
+//            ticks.push([Math.log(max)/Math.LN10, ' ']);
+//        } 
+//        else {
+//            // unknown transform - return max and min
+//            ticks.push(min);
+//            ticks.push(max);
+//        }
+//        
+//        return ticks; 
+//    };
        
 })(jQuery);
