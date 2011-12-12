@@ -1164,11 +1164,22 @@ SliceContainer = function(opts, layer) {
 
 YAHOO.lang.extend(SliceContainer, WireIt.Container, {
     xtype: 'SliceContainer',
-    openSliceWindow: function(e) {
+    openSliceWindow: function(e, f) {
+        var reductionInstance = editor.reductionInstance;
+        var wires = f.wires;
+        if (wires.length == 0) {
+            alert('no data to get (no wires in)');
+            return
+        } else {
+            var wire_in = f.wires[0];
+            clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
+        }
+        editor.runAndPlot(reductionInstance, clickedOn);
         //console.log('save click:', e);
         //alert('save to server not yet implemented.  Try downloading CSV version of data');
         this.sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768");
-        this.sliceWindow.update_plot(editor.toPlots);
+        this.sliceWindow.update_plot(editor.toPlots[0]);
+        this.sliceWindow.update_selectors(editor.toPlots);
     }
 });
 
