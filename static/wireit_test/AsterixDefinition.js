@@ -142,38 +142,72 @@ var asterix = {
     },
     {
       "container": { 
-        "height": 16, 
+        "height": 16,
         "terminals": [
-        {  "alwaysSrc": false, 
+          { "alwaysSrc": false, 
             "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:out"
-              ], 
+              "allowedTypes": ["data2d.ospec:out" ], 
               "type": "data2d.ospec:in"
             }, 
-            "direction": [
-              -1, 
-              0
-            ], 
+            "direction": [-1,0], 
             "multiple": false, 
             "name": "input", 
-            "offsetPosition": {
-              "left": -16, 
-              "top": 1
-            }, 
+            //"offsetPosition": {"left": -12, "top": 16}, 
             "required": true
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": ["data2d.ospec:in"], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [0,1], 
+            "multiple": true, 
+            "name": "output_x", 
+            //"offsetPosition": {"right": -16,"top": 4}, 
+            "required": false
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": ["data2d.ospec:in"], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [1,0], 
+            "multiple": true, 
+            "name": "output_y", 
+            //"offsetPosition": {"right": -16, "top": 40}, 
+            "required": false
           }
-        ], 
+        ],  
         "width": 120, 
         "xtype": "SliceContainer"
       }, 
       "fields": [
         {
-          "label": "Intent", 
-          "name": "intent", 
+          "label": "xmin pixel", 
+          "name": "xmin", 
+          "type": "string", 
+          "value": "0"
+        }, 
+        {
+          "label": "xmax pixel", 
+          "name": "xmax", 
           "type": "string", 
           "value": ""
-        }
+        }, 
+        {
+          "label": "ymin pixel", 
+          "name": "ymin", 
+          "type": "string", 
+          "value": "0"
+        }, 
+        {
+          "label": "ymax pixel", 
+          "name": "ymax", 
+          "type": "string", 
+          "value": ""
+        }, 
       ], 
       "name": "Slice Data"
     },
@@ -747,52 +781,52 @@ var asterix = {
       ], 
       "name": "Asterix Pixels to two theta"
     },
-//    {
-//      "container": {
-//        "icon": "../../static/img/offspecular/autogrid.png", 
-//        "image": "../../static/img/offspecular/slice_image.png", 
-//        "terminals": [
-//          { "alwaysSrc": false, 
-//            "ddConfig": {
-//              "allowedTypes": ["data2d.ospec:out" ], 
-//              "type": "data2d.ospec:in"
-//            }, 
-//            "direction": [-1,0], 
-//            "multiple": false, 
-//            "name": "input", 
-//            //"offsetPosition": {"left": -12, "top": 16}, 
-//            "required": true
-//          }, 
-//          {
-//            "alwaysSrc": true, 
-//            "ddConfig": {
-//              "allowedTypes": ["data2d.ospec:in"], 
-//              "type": "data2d.ospec:out"
-//            }, 
-//            "direction": [0,1], 
-//            "multiple": true, 
-//            "name": "output_x", 
-//            //"offsetPosition": {"right": -16,"top": 4}, 
-//            "required": false
-//          }, 
-//          {
-//            "alwaysSrc": true, 
-//            "ddConfig": {
-//              "allowedTypes": ["data2d.ospec:in"], 
-//              "type": "data2d.ospec:out"
-//            }, 
-//            "direction": [1,0], 
-//            "multiple": true, 
-//            "name": "output_y", 
-//            //"offsetPosition": {"right": -16, "top": 40}, 
-//            "required": false
-//          }
-//        ], 
-//        "xtype": "AutosizeImageContainer"
-//      }, 
-//      "fields": [], 
-//      "name": "Slice Data"
-//    },
+    {
+      "container": {
+        "icon": "../../static/img/offspecular/autogrid.png", 
+        "image": "../../static/img/offspecular/slice_image.png", 
+        "terminals": [
+          { "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": ["data2d.ospec:out" ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [-1,0], 
+            "multiple": false, 
+            "name": "input", 
+            //"offsetPosition": {"left": -12, "top": 16}, 
+            "required": true
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": ["data2d.ospec:in"], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [0,1], 
+            "multiple": true, 
+            "name": "output_x", 
+            //"offsetPosition": {"right": -16,"top": 4}, 
+            "required": false
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": ["data2d.ospec:in"], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [1,0], 
+            "multiple": true, 
+            "name": "output_y", 
+            //"offsetPosition": {"right": -16, "top": 40}, 
+            "required": false
+          }
+        ], 
+        "xtype": "AutosizeImageContainer"
+      }, 
+      "fields": [], 
+      "name": "Collapse Data"
+    },
     {
       "container": {
         "icon": "../../static/img/offspecular/autogrid.png", 
@@ -1174,8 +1208,7 @@ YAHOO.lang.extend(SliceContainer, WireIt.Container, {
             var wire_in = f.wires[0];
             clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
         }
-        var toReduce = editor.generateReductionRecipe(reductionInstance);
-        toReduce.clickedOn = clickedOn;
+        var toReduce = editor.generateReductionRecipe(reductionInstance, clickedOn);
         editor.adapter.runReduction(toReduce, {
             success: function(result) { 
                 //toPlot = result;

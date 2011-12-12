@@ -1,19 +1,21 @@
 """
-Slice the data, according to internally defined mask
+Collapse the data
 """
 
 from ... import config
 from ...core import Module
 
-def slice_data_module(id=None, datatype=None, action=None,
+def collapse_data_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[]):
-    """Module for masking 2D data"""
+    """Module for collapsing 2D data to 1D"""
 
     icon = {
         'URI': config.IMAGES + config.ANDR_FOLDER + 'autogrid.png',
         'image': config.IMAGES + config.ANDR_FOLDER + 'autogrid_image.png',
         'terminals': {
-            'output': (20, 10, 1, 0),
+            'input' : (-16, 10, -1, 0),
+            'output_x' : (48, 4, 1, 0),
+            'output_y': (48, 40, 1, 0),
         }
     }
     
@@ -34,49 +36,17 @@ def slice_data_module(id=None, datatype=None, action=None,
              datatype=datatype,
              use='out',
              description='y data sum',
-             )
+             ),
     ]
   
 
     # qxmin, qxmax, qxbins, qzmin, qzmax, qzbins
     # (-0.003, 0.003, 201, 0, 0.1, 201)
-    fields.extend([
-        {
-            "label": "invert mask (true sets values outside range to zero, false acts on values inside)", 
-            "name": "invert_mask", 
-            "type": "boolean", 
-            "value": False,
-        },
-        {
-            "type":"string",
-            "label": "xmin pixel",
-            "name": "xmin",
-            "value": "0",
-        },
-        {
-            "type":"string",
-            "label": "xmax pixel",
-            "name": "xmax",
-            "value": "",
-        },
-        {
-            "type":"string",
-            "label": "ymin pixel",
-            "name": "ymin",
-            "value": "0",
-        },
-        {
-            "type":"string",
-            "label": "ymax pixel",
-            "name": "ymax",
-            "value": "",
-        },
-    ])
    
     
     # Combine everything into a module.
     module = Module(id=id,
-                  name='Slice Data',
+                  name='Collapse Data',
                   version=version,
                   description=action.__doc__,
                   #icon=icon,
@@ -84,5 +54,5 @@ def slice_data_module(id=None, datatype=None, action=None,
                   fields=fields,
                   action=action,
                   )
-    module.LABEL_WIDTH = 150
+    module.LABEL_WIDTH = 80
     return module
