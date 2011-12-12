@@ -1180,7 +1180,7 @@ YAHOO.lang.extend(SliceContainer, WireIt.Container, {
             success: function(result) { 
                 console.log('success... so far');
                 editor.toPlot = result;
-                var sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768"); }
+                var sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768"); 
                 //else {
                 //    sliceWindow.update_plot(result[0]);
                 //    sliceWindow.update_selectors(result);
