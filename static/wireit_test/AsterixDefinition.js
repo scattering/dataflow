@@ -152,7 +152,7 @@ var asterix = {
             "direction": [-1,0], 
             "multiple": false, 
             "name": "input", 
-            //"offsetPosition": {"left": -12, "top": 16}, 
+            "offsetPosition": {"left": -12, "top": 16}, 
             "required": true
           }, 
           {
@@ -164,7 +164,7 @@ var asterix = {
             "direction": [0,1], 
             "multiple": true, 
             "name": "output_x", 
-            //"offsetPosition": {"right": -16,"top": 4}, 
+            "offsetPosition": {"right": -16,"top": 4}, 
             "required": false
           }, 
           {
@@ -176,7 +176,7 @@ var asterix = {
             "direction": [1,0], 
             "multiple": true, 
             "name": "output_y", 
-            //"offsetPosition": {"right": -16, "top": 40}, 
+            "offsetPosition": {"right": -16, "top": 40}, 
             "required": false
           }
         ],  
