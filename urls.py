@@ -15,6 +15,7 @@ urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views',
 		('^listWirings/$', 'listWirings'),
 		('^interactors/$', 'showInteractors'),
 		('^plotWindow/$', 'showPlotWindow'),
+		('^sliceWindow/$', 'showSliceWindow'),
 		('^uploadFiles/$', 'uploadFiles'),
 		('^filesExist/$', 'filesExist'),
 		

@@ -1167,7 +1167,7 @@ YAHOO.lang.extend(SliceContainer, WireIt.Container, {
     openSliceWindow: function(e) {
         //console.log('save click:', e);
         //alert('save to server not yet implemented.  Try downloading CSV version of data');
-        this.sliceWindow = window.open("/plotWindow/", "", "status=1,width=650,height=500");
+        this.sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768");
         this.sliceWindow.update_plot(editor.toPlots);
     }
 });
