@@ -237,8 +237,25 @@ def mask_action(input=[], xmin="0", xmax="", ymin="0", ymax="", invert_mask=Fals
 mask_data = mask_data_module(id='ospec.mask', datatype=OSPEC_DATA, version='1.0', action=mask_action)
 
 # Slice module
-def slice_action(input=[], **kwargs):
+def slice_action(input=[], xmin="0", xmax="", ymin="0", ymax="", invert_mask=False, **kwargs):
     print "slicing"
+    output = SliceData().apply(MaskData().apply(input, xmin, xmax, ymin, ymax, invert_mask))
+    
+    if type(input) == types.ListType:
+        xslice = []
+        yslice = []
+        for i in xrange(len(input)):
+            xslice.append(output[i][0])
+            yslice.append(output[i][1])
+    else:
+        xslice, yslice = output
+    return dict(output_x = xslice, output_y = yslice)
+slice_data = slice_data_module(id='ospec.mask', datatype=OSPEC_DATA, version='1.0', action=slice_action)
+
+
+# Slice module
+def collapse_action(input=[], **kwargs):
+    print "collapsing"
     output = SliceData().apply(input)
     
     if type(input) == types.ListType:
@@ -250,7 +267,7 @@ def slice_action(input=[], **kwargs):
     else:
         xslice, yslice = output
     return dict(output_x = xslice, output_y = yslice)
-slice_data = slice_data_module(id='ospec.slice', datatype=OSPEC_DATA, version='1.0', action=slice_action) 
+collapse_data = collapse_data_module(id='ospec.collapse', datatype=OSPEC_DATA, version='1.0', action=collapse_action) 
 
 # Wiggle module
 def wiggle_action(input=[], amp=0.14, **kwargs):
