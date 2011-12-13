@@ -52,6 +52,7 @@
 		        if (toPlot) {
 		            update_plot(toPlot[0]);
 		            update_selectors(toPlot);
+		            config = container.getConfig()[reductionInstance];
 		        } else {
 		            alert('no data to plot!');
 		        }
@@ -369,11 +370,11 @@
 	</head>
 	<body id="woot" class="yui-skin-sam">
 	    <div id="upper" style="display: block; width: 100%; height: 350px;">
-	        <div id="plotbox" style="display: inline-block; width: 59%; height: 350px;">
+	        <div id="plotbox" style="display: inline-block; width: 59%; height: 351px;">
 	            <div id="plot" style="display: inline-block; width: 79%; height: 350px;"></div>
 	            <div id="colorbar" style="display: inline-block; width: 19%; height: 350px;"></div>
 	        </div>
-	        <div id="yslice" style="display: inline-block; width: 39%; height: 350px;"></div>
+	        <div id="yslice" style="display: inline-block; width: 39%; height: 351px;"></div>
 	    </div>
 	    <div id="controls" style="display: block; width: 100%;">
 	        <select id="plot_selectz">
