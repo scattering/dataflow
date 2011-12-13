@@ -1301,7 +1301,12 @@ class ThetaTwothetaToQxQz(Filter2D):
         if output_grid == None:
             output_grid = EmptyQxQzGrid(*self.default_qxqz_gridvals)
         
-        output_grid._info[2] = data._info[2].copy()
+        #outgrid_info = data._info.copy()
+        #outgrid_info[0] = {"name": "qx", "units": "inv. frakking Angstroms", "values": linspace(qxmin, qxmax, qxbins) }
+        #outgrid_info[1] = {"name": "qz", "units": "inv. Angstroms", "values": linspace(qzmin, qzmax, qzbins) }
+        outgrid_info = deepcopy(output_grid._info) # take axes and creation story from emptyqxqz...
+        outgrid_info[2] = deepcopy(data._info[2]) # take column number and names from dataset
+        output_grid = MetaArray(zeros((output_grid.shape[0], output_grid.shape[1], data.shape[2])), info=outgrid_info)
         
         qLength = 2.0 * pi / wavelength
         th_array = data.axisValues('theta').copy()

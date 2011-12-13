@@ -58,62 +58,6 @@ var andr2 = {
       ], 
       "name": "Load"
     }, 
-    {"container": {
-        "height": 16, 
-        "image": "", 
-        "terminals": [
-          {
-            "alwaysSrc": true, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:in"
-              ], 
-              "type": "data2d.ospec:out"
-            }, 
-            "direction": [
-              1, 
-              0
-            ], 
-            "multiple": true, 
-            "name": "output", 
-            "offsetPosition": {
-              "right": -16, 
-              "top": 1
-            }, 
-            "required": false
-          }
-        ], 
-        "width": 120, 
-        "xtype": "WireIt.Container"
-      }, 
-      "fields": [
-        {
-          "label": "Files", 
-          "name": "files", 
-          "type": "[file]", 
-          "value": []
-        }, 
-        {
-          "label": "Center Pixel", 
-          "name": "center_pixel", 
-          "type": "float", 
-          "value": 145.0,
-        }, 
-        {
-          "label": "Wavelength over Time-of-Flight", 
-          "name": "wl_over_tof", 
-          "type": "scientific", 
-          "value": 1.9050372144288577e-5,
-        }, 
-        {
-          "label": "Pixel width/distance (to sample)", 
-          "name": "pixel_width_over_dist", 
-          "type": "float", 
-          "value":  0.00034113856493630764,
-        },
-      ], 
-      "name": "LoadAsterix"
-    }, 
     {
       "container": {
         "height": 16, 
@@ -642,100 +586,6 @@ var andr2 = {
     },
     {
       "container": {
-        "icon": "../../static/img/offspecular/qxqz.png", 
-        "image": "../../static/img/offspecular/twothetalambda_qxqz_image.png", 
-        "terminals": [
-          {
-            "alwaysSrc": false, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:out"
-              ], 
-              "type": "data2d.ospec:in"
-            }, 
-            "direction": [
-              -1, 
-              0
-            ], 
-            "multiple": false, 
-            "name": "input", 
-            "offsetPosition": {
-              "left": -12, 
-              "top": 4
-            }, 
-            "required": true
-          },  
-          {
-            "alwaysSrc": true, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:in"
-              ], 
-              "type": "data2d.ospec:out"
-            }, 
-            "direction": [
-              1, 
-              0
-            ], 
-            "multiple": true, 
-            "name": "output", 
-            "offsetPosition": {
-              "left": 48, 
-              "top": 16
-            }, 
-            "required": false
-          }
-        ], 
-        "xtype": "AutosizeImageContainer"
-      },
-      "fields": [
-        {
-          "label": "Sample angle (theta)", 
-          "name": "theta", 
-          "type": "string", 
-          "value": ""
-        },
-        {
-          "label": "Qx min", 
-          "name": "qxmin", 
-          "type": "float", 
-          "value": -0.0030000000000000001
-        }, 
-        {
-          "label": "Qx max", 
-          "name": "qxmax", 
-          "type": "float", 
-          "value": 0.0030000000000000001
-        }, 
-        {
-          "label": "Qx bins", 
-          "name": "qxbins", 
-          "type": "int", 
-          "value": 201
-        }, 
-        {
-          "label": "Qz min", 
-          "name": "qzmin", 
-          "type": "float", 
-          "value": 0.0
-        }, 
-        {
-          "label": "Qz max", 
-          "name": "qzmax", 
-          "type": "float", 
-          "value": 0.10000000000000001
-        }, 
-        {
-          "label": "Qz bins", 
-          "name": "qzbins", 
-          "type": "int", 
-          "value": 201
-        }
-      ], 
-      "name": "Two theta lambda to qxqz"
-    },
-    {
-      "container": {
         "height": 16, 
         "image": "", 
         "terminals": [
@@ -1056,6 +906,77 @@ var andr2 = {
       }, 
       "fields": [], 
       "name": "Collapse Data"
+    },
+    {
+      "container": { 
+        "height": 16,
+        "terminals": [
+          { "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": ["data2d.ospec:out" ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [-1,0], 
+            "multiple": false, 
+            "name": "input", 
+            "offsetPosition": {"left": -16, "top": 16}, 
+            "required": true
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": ["data2d.ospec:in"], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [0,1], 
+            "multiple": true, 
+            "name": "output_x", 
+            "offsetPosition": {"left": 44,"bottom": -52}, 
+            "required": false
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": ["data2d.ospec:in"], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [1,0], 
+            "multiple": true, 
+            "name": "output_y", 
+            "offsetPosition": {"right": -16, "top": 16}, 
+            "required": false
+          }
+        ],  
+        "width": 120, 
+        "xtype": "SliceContainer"
+      }, 
+      "fields": [
+        {
+          "label": "xmin pixel", 
+          "name": "xmin", 
+          "type": "string", 
+          "value": "0"
+        }, 
+        {
+          "label": "xmax pixel", 
+          "name": "xmax", 
+          "type": "string", 
+          "value": ""
+        }, 
+        {
+          "label": "ymin pixel", 
+          "name": "ymin", 
+          "type": "string", 
+          "value": "0"
+        }, 
+        {
+          "label": "ymax pixel", 
+          "name": "ymax", 
+          "type": "string", 
+          "value": ""
+        }, 
+      ], 
+      "name": "Slice Data"
     }, 
     {
       "container": {
@@ -1423,6 +1344,56 @@ YAHOO.lang.extend(SaveContainer, WireIt.Container, {
 //    }
 //    this.image_obj.src = opts.image;
 //}
+
+SliceContainer = function(opts, layer) {
+    SliceContainer.superclass.constructor.call(this, opts, layer);
+    var content = document.createElement('div');
+    content.innerHTML = '';
+    //var saveButton = document.createElement('img');
+    var sliceButton = document.createElement('button');
+    sliceButton.value = 'slice';
+    sliceButton.innerHTML = 'Slice';
+    //saveButton.src = this.image;
+    content.appendChild(sliceButton);
+    this.setBody(content);
+    YAHOO.util.Event.addListener(sliceButton, 'click', this.openSliceWindow, this, true);
+};
+
+YAHOO.lang.extend(SliceContainer, WireIt.Container, {
+    xtype: 'SliceContainer',
+    openSliceWindow: function(e, f) {
+        var reductionInstance = editor.reductionInstance;
+        var wires = f.wires;
+        if (wires.length == 0) {
+            alert('no data to get (no wires in)');
+            return
+        } else {
+            var wire_in = f.wires[0];
+            clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
+        }
+        var toReduce = editor.generateReductionRecipe(reductionInstance, clickedOn);
+        f.getConfig();
+        editor.adapter.runReduction(toReduce, {
+            success: function(result) { 
+                //toPlot = result;
+                var sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768");
+                sliceWindow.toPlot = result;
+                sliceWindow.container = f;
+                sliceWindow.reductionInstance = reductionInstance;
+                //else {
+                //    sliceWindow.update_plot(result[0]);
+                //    sliceWindow.update_selectors(result);
+                //}
+            },
+            failure: editor.runModuleFailure,
+            scope: editor}
+        );
+        
+        //console.log('save click:', e);
+        //alert('save to server not yet implemented.  Try downloading CSV version of data');
+        
+    }
+});
 
 //YAHOO.lang.extend(AutosizeImageContainer, WireIt.ImageContainer, {
 //    xtype: 'AutosizeImageContainer',
