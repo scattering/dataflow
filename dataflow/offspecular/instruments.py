@@ -41,7 +41,7 @@ module_imports = [
     ("dataflow.offspecular.modules.collapse_data", "collapse_data_module"),
     ("dataflow.calc", ["run_template", "get_plottable", "calc_single"]),
     ("dataflow.core", ["Data", "Instrument", "Template", "register_instrument"]),
-    ("reduction.offspecular.filters", ["LoadICPData", "LoadAsterixRawHDF", "LoadAsterixSpectrum", "Autogrid", "Combine", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "WiggleCorrection", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz"]),
+    ("reduction.offspecular.filters", ["LoadICPData", "LoadAsterixRawHDF", "LoadAsterixSpectrum", "Autogrid", "Combine", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "WiggleCorrection", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz"]),
     ("reduction.offspecular.he3analyzer", "He3AnalyzerCollection"),
     ("reduction.offspecular.FilterableMetaArray", "FilterableMetaArray"),
 ]

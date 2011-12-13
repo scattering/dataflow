@@ -89,7 +89,7 @@ class EmptyQxQzGrid(MetaArray):
         creation_story = subtype.__name__
         creation_story += "({0}, {1}, {2}, {3}, {4}, {5})".format(qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)
         info = [
-            {"name": "qx", "units": "inv. frakking Angstroms", "values": linspace(qxmin, qxmax, qxbins) },
+            {"name": "qx", "units": "inv. Angstroms", "values": linspace(qxmin, qxmax, qxbins) },
             {"name": "qz", "units": "inv. Angstroms", "values": linspace(qzmin, qzmax, qzbins) },
             {"name": "Measurements", "cols": [
                     {"name": "counts"},
@@ -1300,6 +1300,8 @@ class ThetaTwothetaToQxQz(Filter2D):
     def apply(self, data, output_grid=None, wavelength=5.0):
         if output_grid == None:
             output_grid = EmptyQxQzGrid(*self.default_qxqz_gridvals)
+        
+        output_grid._info[2] = data._info[2].copy()
         
         qLength = 2.0 * pi / wavelength
         th_array = data.axisValues('theta').copy()

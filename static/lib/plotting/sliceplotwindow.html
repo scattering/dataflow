@@ -25,39 +25,52 @@
 		<script type="text/javascript" src="/static/lib/js-object-length.js"></script>
 		
 		<!-- <script type="text/javascript" src="test_data2.js"></script> -->
-		<style>
-			/* Comment Module */
-			div.WireIt-Container.WiringEditor-module-comment {
-				width: 200px;
-			}
-			div.WireIt-Container.WiringEditor-module-comment div.body {
-				background-color: #EEEE66;
-			}
-			div.WireIt-Container.WiringEditor-module-comment div.body textarea {
-				background-color: transparent;
-				font-weight: bold;
-				border: 0;
-			}
-			img {
-			    image-rendering: -moz-crisp-edges;
-			    image-rendering: -webkit-optimize-contrast;
-			    -ms-interpolation-mode: nearest-neighbor;
-			}   
-		</style>
 		<script type="text/javascript">
-		    plot = null;
-		    colorbar = null;
+		    var plot, colorbar, yslice, xslice;
+
+            fit_plots = function() {
+		        var width = document.body.offsetWidth;
+		        var height = document.body.offsetHeight;
+		        document.getElementById('plot').style.width = ((width-100) * 0.59).toString() + "px";
+		        document.getElementById('colorbar').style.width = "100px";
+		        document.getElementById('yslice').style.width = ((width-100) * 0.39).toString() + "px";
+		        document.getElementById('xslice').style.width = ((width-100) * 0.59).toString() + "px";
+		        
+		        var plotheight = ((height-50) * 0.49).toString() + "px";
+		        document.getElementById('upper').style.height = plotheight;
+		        document.getElementById('lower').style.height = plotheight;
+		        document.getElementById('plot').style.height = plotheight;
+		        document.getElementById('colorbar').style.height = plotheight;
+		        document.getElementById('yslice').style.height = plotheight;
+		        document.getElementById('xslice').style.height = plotheight;
+		    };
 		    
+		    replot_all = function() {
+  		        plot.replot(); 
+  		        colorbar.replot(); 
+  		        yslice.replot(); 
+  		        xslice.replot();
+  		    };
+		        
 		    window.onload = function() {
+		        fit_plots();
 		        if (toPlot) {
 		            update_plot(toPlot[0]);
 		            update_selectors(toPlot);
-		            config = container.getConfig()[reductionInstance];
+		            if (container.tracksConfigs && reductionInstance in container.tracksConfigs) {
+		                config = container.tracksConfigs[reductionInstance];
+		            } else if (reductionInstance in container.getConfig()) { 
+		                config = container.getConfig()[reductionInstance];
+		            }
 		        } else {
 		            alert('no data to plot!');
 		        }
 		        //update_plot(testdata);
+		        
 		    }
+		    
+		    window.onresize = function() { fit_plots(); replot_all(); };
+		    
 		    update_selectors = function(toPlots) {
 		        document.getElementById('plot_selectnum').innerHTML = "";
                 for (var i=0; i<toPlots.length; i++) {
@@ -368,13 +381,11 @@
             };
 		</script>
 	</head>
-	<body id="woot" class="yui-skin-sam">
-	    <div id="upper" style="width: 100%; height: 352px;">
-	        <div id="plotbox" style="display: inline-block; width: 59%; height: 351px;">
-	            <div id="plot" style="display: inline-block; width: 79%; height: 350px;"></div>
-	            <div id="colorbar" style="display: inline-block; width: 19%; height: 350px;"></div>
-	        </div>
-	        <div id="yslice" style="display: inline-block; width: 39%; height: 351px;"></div>
+	<body>
+	    <div id="upper" style="display: block; width: 100%; height: 352px;">
+	            <div id="plot" style="display: inline-block; width: 500px; height: 350px; padding: 0; margin:0;"></div>
+	            <div id="colorbar" style="display: inline-block; width: 99px; height: 350px; padding: 0; margin:0;"></div>
+	        <div id="yslice" style="display: inline-block; width: 399px; height: 350px; padding: 0; margin:0;"></div>
 	    </div>
 	    <div id="controls" style="display: block; width: 100%;">
 	        <select id="plot_selectz">
