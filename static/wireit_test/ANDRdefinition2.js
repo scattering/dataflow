@@ -1055,7 +1055,7 @@ var andr2 = {
         "xtype": "AutosizeImageContainer"
       }, 
       "fields": [], 
-      "name": "Slice Data"
+      "name": "Collapse Data"
     }, 
     {
       "container": {
