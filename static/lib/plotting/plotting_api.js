@@ -752,8 +752,8 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
     
     plot = renderImageData2(toPlot, transform, 'plot2d');
     colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
-    plot.series[0].zoom_to();
-    plot.replot();
+    //plot2d.series[0].zoom_to();
+    //plot2d.replot();
     var selectedIndex;
     if ( transform == 'log') { selectedIndex = 1 }
     else { selectedIndex = 0 }

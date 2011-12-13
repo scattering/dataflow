@@ -212,8 +212,8 @@
     function set_data(new_data, new_dims) {
         this.dims = new_dims;
         this.data = new_data;
-        if (!this.dims.dx){ this.dims.dx = (this.dims.xmax - this.dims.xmin)/(this.dims.xdim); }
-        if (!this.dims.dy){ this.dims.dy = (this.dims.ymax - this.dims.ymin)/(this.dims.ydim); }
+        if (!('dx' in this.dims)){ this.dims.dx = (this.dims.xmax - this.dims.xmin)/(this.dims.xdim -1); }
+        if (!('dy' in this.dims)){ this.dims.dy = (this.dims.ymax - this.dims.ymin)/(this.dims.ydim -1); }
         this.source_data = [];
         for (var i=0; i<this.dims.xdim; i++) {
             this.source_data.push(new_data[i].slice());
