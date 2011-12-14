@@ -669,7 +669,7 @@
 		 * @method load
 		 */
 		load: function() {
-			console.log('LOADING') //debugging
+			//console.log('LOADING') //debugging
 			this.adapter.listWirings({
 				language: this.options.languageName,
 				experiment_id: this.launchedFromExperimentPage
@@ -809,15 +809,17 @@
 
 				this.preventLayerChangedEvent = false;
 				// removes existing FAT
-				console.log('REPLACING FAT')
+				//console.log('REPLACING FAT')
 				if (!this.FAT) {
 				    this.FAT = makeFileTable(FILES, this.getValue().working.modules);
 				} else {
 				    this.FAT.update(FILES, this.getValue().working.modules);
 				}
 				this.reductionInstances = this.FAT.generateFileGroups();
+				if (this.reductionInstances.length == 0) this.reductionInstances = [1];
+				// if this.FAT.generateFileGroups returns empty group, set default to 1;
 				this.setReductionIndex();
-				console.log('done replacing FAT');
+				//console.log('done replacing FAT');
 				// Call the File Association Table with appropriate headers
 				//makeFileTable(this.getFATHeaders(),FILES, this.getValue().working.modules)
 				///console.log(this.getFATHeaders())

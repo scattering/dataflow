@@ -55,13 +55,20 @@
 		    window.onload = function() {
 		        fit_plots();
 		        if (toPlot) {
+		            
+		            var dims = toPlot[0].dims;
+		            // configuration from tracksConfigs supersedes the default from getConfig()
+		            var cfg = container.getConfig();
+		            if (reductionInstance in cfg) {
+		                var cfgi = cfg[reductionInstance];
+		                if ("xmax" in cfgi) xmax = cfgi.xmax;
+		                if ("xmin" in cfgi) xmin = cfgi.xmin;
+		                if ("ymax" in cfgi) ymax = cfgi.ymax;
+		                if ("ymin" in cfgi) ymin = cfgi.ymin;
+		            }
+		                
 		            update_plot(toPlot[0]);
 		            update_selectors(toPlot);
-		            if (container.tracksConfigs && reductionInstance in container.tracksConfigs) {
-		                config = container.tracksConfigs[reductionInstance];
-		            } else if (reductionInstance in container.getConfig()) { 
-		                config = container.getConfig()[reductionInstance];
-		            }
 		        } else {
 		            alert('no data to plot!');
 		        }
@@ -299,7 +306,6 @@
 		        }
 		        else {
 		            // no need to recreate everything... just update the data.
-		            console.log('replotting');
 		            plot.series[0].set_data(toPlot.z[0], toPlot.dims);
 		            plot.series[0].set_transform(toPlot.transform);
 		            plot.plugins._interactor.zoomMax();

@@ -331,9 +331,9 @@
 					editor.launchedFromExperimentPage = launchedFromExperimentPage;
                     
                     WireIt.Terminal.prototype.onClick = function(e, f) {
-                        console.log('terminal clicked', e, f);
+                        //console.log('terminal clicked', e, f);
                         //YAHOO.util.Dom.addClass(this.el, "WireIt-Terminal-dataRequested");
-                        console.log(this.el.style);
+                        //console.log(this.el.style);
                     }                    
 					// imagecontainer initial height, width
 					WireIt.ImageContainer.prototype.height = 64;
@@ -408,7 +408,7 @@
 						for(var index in fields) {
 							field = fields[index];
 							configs[editor.reductionInstance][field.name] = field.value;
-							console.log(field.name,field.value);
+							//console.log(field.name,field.value);
 						}
 						if (this.tracksConfigs) {
 							for(var index in this.tracksConfigs) {
@@ -438,7 +438,7 @@
 						this.redraw();
 					}
 					WireIt.Wire.prototype.onWireClick = function(x,y) {
-						console.log('WIRE CLICK!');
+						//console.log('WIRE CLICK!');
 						editor.wireClickedOn = {
 							'source': this.src,
 							'target':this.tgt
@@ -504,7 +504,7 @@
 //						}
 //					}, editor.layer, true);
 					editor.layer.eventChanged.subscribe( function(event, layer) {
-						console.log("REWIRING", this, this.wires.length)
+						//console.log("REWIRING", this, this.wires.length)
                         var layer = this;
 						for (var i in layer.wires) {
 							var wire = layer.wires[i];
@@ -535,7 +535,7 @@
       						        container.target_id = target_id;
      						        container.setBody(target_id);
      						    } else {
-    						        console.log('deleting target_id');
+    						        //console.log('deleting target_id');
     						        delete container.target_id;
     						        container.setBody('');
  						        }

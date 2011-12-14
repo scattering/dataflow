@@ -1034,9 +1034,9 @@ OffsetContainer = function(opts, layer) {
     //saveButton.src = this.image;
     content.appendChild(getAxisInfoButton);
     this.axisDescription = document.createElement('div');
-    console.log(this.axisDescription);
+    //console.log(this.axisDescription);
     this.axisDescription.innerHTML = '';
-    console.log(this.axisDescription, this);
+    //console.log(this.axisDescription, this);
     content.appendChild(this.axisDescription)
     
     this.setBody(content);

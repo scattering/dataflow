@@ -27,7 +27,7 @@ AutosizeImageContainer = function(opts, layer) {
         
         for (var d in directions) {
             var terms = terminals.filter( directions[d].test );
-            console.log(d, terms)
+            //console.log(d, terms)
             var padding = 4;
             var term_size = 16;
             var range = (directions[d].range - term_size) - (2*padding);

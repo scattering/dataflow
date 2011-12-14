@@ -313,13 +313,13 @@ with multiple groups
 	            for (var g in groups) {
 	                if (!(groups[g] == '')) {
 	                    var groupnum = Number(groups[g]);
-	                    console.log('groupnum:', groupnum, groups);
+	                    //console.log('groupnum:', groupnum, groups);
 	                    if (!container.tracksConfigs) { container.tracksConfigs = {} }
 	                    if (!container.tracksConfigs[groupnum]) { container.tracksConfigs[groupnum] = {} }
 	                    if (!container.tracksConfigs[groupnum]['files']) { container.tracksConfigs[groupnum]['files'] = [] }
 	                    if (f.data.filetype == me.headerList[i]) {
 	                        container.tracksConfigs[groupnum].files.push(f.data.filename);
-	                        console.log('pushing ' + f.data.filename + ' to container ' + i);
+	                        //console.log('pushing ' + f.data.filename + ' to container ' + i);
 	                    }
 	                }
 	            }
@@ -360,10 +360,10 @@ with multiple groups
 	        items: [{
 	            text: 'Set Type',
 	            menu: function() {
-	                console.log('menu', me);
+	                //console.log('menu', me);
 	                var setTypeMenu = [];
 	                for (var i in me.headerList) {
-	                    console.log(me, headerList[i]);
+	                    //console.log(me, headerList[i]);
 	                    var entry = { 
 	                        text: me.headerList[i],  
 	                        handler: me.return_handler(me.headerList[i]),
