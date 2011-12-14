@@ -53,8 +53,7 @@ function makeFileMultiSelect(src_files, selected_files) {
 //    }
 
     src_files.sort()
-    console.log('src_files', src_files);
-    console.log('dest_files', files);
+
     var source_files_selector = {
 		xtype: 'multiselect',
 		name              :  'multiselect',
@@ -103,7 +102,6 @@ function configForm(headerList, moduleID) {
 	// headerList should contain a list of [fieldset title ("theta"), [list field names ["x","y"] (dict will have multiple, list and float only one) ]
 	items = []
 
-	console.log(headerList)
 	for (var i in headerList) {
 	    var header = headerList[i];
 	    if (header[0] == 'files') {
@@ -187,9 +185,8 @@ function configForm(headerList, moduleID) {
 			handler: function() {
 				var moduleConfigs = {}
 				var form = this.up('form').getForm();
-				console.log("submitting")
+
 				if (form.isValid()) {
-					console.log("valid")
 					//console.log("FORM FIELDS", form.getFields())
 					//console.log('FORM VALUES', form.getFieldValues())
 					//console.log('FORM FIELD ITEMS', form._fields.items)
@@ -242,6 +239,5 @@ function configForm(headerList, moduleID) {
 			}
 		},],
 	});
-	console.log('formPanel:', formPanel);
 	return formPanel;
 }

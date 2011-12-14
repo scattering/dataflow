@@ -1059,7 +1059,6 @@
 			YAHOO.util.Dom.get('instance-modules-info').innerHTML = HTML
 		},
 		generateConfigForm: function(moduleID) {
-			console.log('generating form')
 //			while (YAHOO.util.Dom.get("instance-modules-input").hasChildNodes()) {
 //				YAHOO.util.Dom.get("instance-modules-input").removeChild(YAHOO.util.Dom.get("instance-modules-input").lastChild);
 //			}
@@ -1088,7 +1087,7 @@
 			}
 			//console.log(configHeaders, configHeaders.length)
 			if (configHeaders.length != 0) {
-			    console.log('configHeaders:', configHeaders)
+			    //console.log('configHeaders:', configHeaders)
 			    
 			    if (!Ext.getCmp('module_config_popup')) {
 			        var win = new Ext.Window({
@@ -1118,7 +1117,6 @@
 			}
 		},
 		setModuleConfigsFromForm: function(configs, moduleID, instanceNumber) {
-		    console.log('setting module configs from form');
 			if (typeof instanceNumber == "number") {
 				for (var i in configs) {
 					splitConfig = i.split(',')
