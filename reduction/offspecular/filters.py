@@ -1,4 +1,4 @@
-from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin, allclose, zeros_like, linalg, dot, arctan2, float64, histogram2d, sum, sqrt, loadtxt
+from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin, allclose, zeros_like, linalg, dot, arctan2, float64, histogram2d, sum, sqrt, loadtxt, searchsorted
 import numpy
 from numpy.ma import MaskedArray
 import os, simplejson, datetime, sys, types, xml.dom.minidom
@@ -286,7 +286,22 @@ class MaskData(Filter2D):
         def sanitize (item):
             return int(item) if item != "" else None
         mask = zeros(data.shape, dtype=bool) # array of False
-        dataslice = (slice(sanitize(xmin), sanitize(xmax)), slice(sanitize(ymin), sanitize(ymax)))
+        # convert to data coordinates
+        x_array = data._info[0]['values']
+        y_array = data._info[1]['values']
+        
+        def get_index(t, x):
+            if (x == "" or x == None): 
+                return None
+            if float(x) > t.max(): 
+                return None
+            if float(x) < t.min(): 
+                return None
+            return searchsorted(t, float(x))
+            
+        dataslice = (slice(get_index(x_array, xmin), get_index(x_array, xmax)), slice(get_index(y_array, ymin), get_index(y_array, ymax)))
+        #print "indexing:", get_index(x_array, xmin), get_index(x_array, xmax, get_index(y_array, ymin), get_index(y_array, ymax)
+        print dataslice
         mask[dataslice] = True # set the masked portions to False
         if invert_mask:
             mask *= -1            
@@ -343,7 +358,7 @@ class SliceNormData(Filter2D):
         
         return [x_data_obj, y_data_obj]
 
-class SliceData(Filter2D):
+class CollapseData(Filter2D):
     """ Sum 2d data along both axes and return 1d datasets """
     
     @autoApplyToList
@@ -356,6 +371,43 @@ class SliceData(Filter2D):
         
         x_out = sum(data.view(ndarray), axis=1)
         y_out = sum(data.view(ndarray), axis=0)
+        
+        x_data_obj = MetaArray( x_out, info=[x_axis, col_info, extra_info] )
+        y_data_obj = MetaArray( y_out, info=[y_axis, col_info, extra_info] )
+        
+        return [x_data_obj, y_data_obj]
+
+class SliceData(Filter2D):
+    """ Sum 2d data along both axes and return 1d datasets """
+    
+    @autoApplyToList
+    def apply(self, data, xmin=None, xmax=None, ymin=None, ymax=None):
+        new_info = data.infoCopy()
+        x_axis = new_info[0]
+        y_axis = new_info[1]
+        col_info = new_info[2]
+        extra_info = new_info[3]
+        
+        x_array = data._info[0]['values']
+        y_array = data._info[1]['values']
+        
+        def get_index(t, x):
+            if (x == "" or x == None): 
+                return None
+            if float(x) > t.max(): 
+                return None
+            if float(x) < t.min(): 
+                return None
+            return searchsorted(t, float(x))
+            
+        xslice = slice(get_index(x_array, xmin), get_index(x_array, xmax))
+        yslice = slice(get_index(y_array, ymin), get_index(y_array, ymax))
+        dataslice = (xslice, yslice)
+        
+        x_out = sum(data.view(ndarray)[dataslice], axis=1)
+        y_out = sum(data.view(ndarray)[dataslice], axis=0)
+        x_axis['values'] = x_axis['values'][xslice]
+        y_axis['values'] = y_axis['values'][yslice]
         
         x_data_obj = MetaArray( x_out, info=[x_axis, col_info, extra_info] )
         y_data_obj = MetaArray( y_out, info=[y_axis, col_info, extra_info] )

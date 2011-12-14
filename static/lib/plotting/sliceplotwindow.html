@@ -51,22 +51,26 @@
   		        yslice.replot(); 
   		        xslice.replot();
   		    };
-		        
+  		    
+  		    parseConfig = function(cfg) {
+  		      // nothing yet 
+		    };
+		       
 		    window.onload = function() {
 		        fit_plots();
 		        if (toPlot) {
 		            
 		            var dims = toPlot[0].dims;
 		            // configuration from tracksConfigs supersedes the default from getConfig()
-		            var cfg = container.getConfig();
-		            if (reductionInstance in cfg) {
-		                var cfgi = cfg[reductionInstance];
-		                if ("xmax" in cfgi) xmax = cfgi.xmax;
-		                if ("xmin" in cfgi) xmin = cfgi.xmin;
-		                if ("ymax" in cfgi) ymax = cfgi.ymax;
-		                if ("ymin" in cfgi) ymin = cfgi.ymin;
-		            }
+		            cfg = {}; //{xmin: dims.xmin, xmax: dims.xmax, ymin: dims.ymin, ymax: dims.ymax};
+		            var all_cfg = container.getConfig();
+		            if (reductionInstance in all_cfg) jQuery.extend(cfg, all_cfg[reductionInstance]);
+		            var lims = {xmin: dims.xmin, xmax: dims.xmax, ymin: dims.ymin, ymax: dims.ymax};
+		            for (var lim in lims) {
 		                
+		                if (!(lim in cfg) || cfg[lim].trim().length == 0) cfg[lim] = lims[lim].toString();
+		            } 
+
 		            update_plot(toPlot[0]);
 		            update_selectors(toPlot);
 		        } else {
@@ -85,6 +89,7 @@
                     jQuery(document.getElementById('plot_selectnum')).append(jQuery('<option />', { value: i, text: 'dataset: ' + i + " " + zlabel }));
                 };
                 function onchange(e) {
+                    console.log('changing');
                     var selectz = document.getElementById('plot_selectz');
                     var selectnum = document.getElementById('plot_selectnum');
                     var transform = selectz[selectz.selectedIndex].value;
@@ -93,10 +98,14 @@
                     //plot = renderImageData2(toPlot, transform, 'plot2d');
                     plot.series[0].set_data(toPlot.z[0], toPlot.dims);
                     plot.series[0].set_transform(transform);
-                    plot.plugins._interactor.zoomMax();
+                    //generate_cumsums(plot.series[0]);
                     colorbar.series[0].dims = toPlot.dims;
                     colorbar.series[0].set_ztransform(transform);
                     colorbar.plugins._interactor.zoomMax();
+                    plot.plugins._interactor.zoomMax();
+                    sl = slice_listener(plot.series[0]);
+		            generate_cumsums(plot.series[0]);
+		            sl.update();
                 }
                 
                 jQuery('#plot_selectnum').change({}, onchange);
@@ -113,10 +122,10 @@
 		                interactors: [{ type:'Rectangle', 
 		                                name:'rectangle',
 		                                showrect: false,
-		                                xmin: data.dims.xmin, 
-		                                ymin: data.dims.ymin,
-		                                xmax: data.dims.xmax, 
-		                                ymax: data.dims.ymax}],
+		                                xmin: Number(cfg.xmin), 
+		                                ymin: Number(cfg.ymin),
+		                                xmax: Number(cfg.xmax), 
+		                                ymax: Number(cfg.ymax)}],
 		                renderer: $.jqplot.heatmapRender,
 		                series: [ {shadow: false, padding: 0} ],
                         grid: {shadow: false},
@@ -253,23 +262,42 @@
                     maxbutton.setAttribute('type', 'button');
                     maxbutton.setAttribute('value', 'Maximize to data');
                     var maximize = function () {
-                        xminctl.update({x: data.dims.xmin});
+                        xminctl.update({x: plot.series[0].dims.xmin});
                         xminctl.update_external();
-                        ymaxctl.update({y: data.dims.ymax});
+                        ymaxctl.update({y: plot.series[0].dims.ymax});
                         ymaxctl.update_external();
-                        xmaxctl.update({x: data.dims.xmax});
+                        xmaxctl.update({x: plot.series[0].dims.xmax});
                         xmaxctl.update_external();
-                        yminctl.update({y: data.dims.ymin});
+                        yminctl.update({y: plot.series[0].dims.ymin});
                         yminctl.update_external();
                     }
                     maxbutton.onclick = maximize;
                     
                     document.getElementById('slicecontrols').appendChild(maxbutton);
                     
-                    slice_listener = function() {
+                    var submitbutton = document.createElement('input');
+                    submitbutton.setAttribute('type', 'button');
+                    submitbutton.setAttribute('value', 'Submit Changes');
+                    var submitChanges = function() {
+                        cfg.xmax = xmaxctl.textbox.value;
+                        cfg.xmin = xminctl.textbox.value;
+                        cfg.ymin = yminctl.textbox.value;
+                        cfg.ymax = ymaxctl.textbox.value;
+                        
+                        if (!('tracksConfigs' in container)) container.tracksConfigs = {};
+                        if (!(reductionInstance in container.tracksConfigs)) container.tracksConfigs[reductionInstance] = {};
+                        jQuery.extend(container.tracksConfigs[reductionInstance], cfg);
+                    };
+                    submitbutton.onclick = submitChanges;
+                    
+                    document.getElementById('slicecontrols').appendChild(submitbutton);
+                    
+                    
+                    
+                    slice_listener = function(series) {
 		                slicebox.p1.listeners.push(this);
 		                slicebox.p3.listeners.push(this);
-		                var p0 = plot.series[0];
+		                var p0 = series;
 		                this.update = function(pos) {
 		                    var width = p0.dims.xdim;
                             var height = p0.dims.ydim;
@@ -300,9 +328,10 @@
 		                };
 		                return this;  
 		            };
-		            var sl = slice_listener();
+		            sl = slice_listener(plot.series[0]);
 		            generate_cumsums(plot.series[0]);
-		            maximize();
+		            sl.update();
+		            //maximize();
 		        }
 		        else {
 		            // no need to recreate everything... just update the data.
@@ -354,7 +383,7 @@
             }
             
             generate_cumsums = function(plotseries) {
-		            
+		        console.log('generating cumsum');
                 var width = plotseries.dims.xdim;
                 var height = plotseries.dims.ydim;
                 var data = plotseries.source_data;

@@ -41,7 +41,7 @@ module_imports = [
     ("dataflow.offspecular.modules.collapse_data", "collapse_data_module"),
     ("dataflow.calc", ["run_template", "get_plottable", "calc_single"]),
     ("dataflow.core", ["Data", "Instrument", "Template", "register_instrument"]),
-    ("reduction.offspecular.filters", ["LoadICPData", "LoadAsterixRawHDF", "LoadAsterixSpectrum", "Autogrid", "Combine", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "WiggleCorrection", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz"]),
+    ("reduction.offspecular.filters", ["LoadICPData", "LoadAsterixRawHDF", "LoadAsterixSpectrum", "Autogrid", "Combine", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "CollapseData", "WiggleCorrection", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz"]),
     ("reduction.offspecular.he3analyzer", "He3AnalyzerCollection"),
     ("reduction.offspecular.FilterableMetaArray", "FilterableMetaArray"),
 ]
@@ -237,9 +237,9 @@ def mask_action(input=[], xmin="0", xmax="", ymin="0", ymax="", invert_mask=Fals
 mask_data = mask_data_module(id='ospec.mask', datatype=OSPEC_DATA, version='1.0', action=mask_action)
 
 # Slice module
-def slice_action(input=[], xmin="0", xmax="", ymin="0", ymax="", invert_mask=False, **kwargs):
+def slice_action(input=[], xmin="", xmax="", ymin="", ymax="", **kwargs):
     print "slicing"
-    output = SliceData().apply(MaskData().apply(input, xmin, xmax, ymin, ymax, invert_mask))
+    output = SliceData().apply(input, xmin, xmax, ymin, ymax)
     
     if type(input) == types.ListType:
         xslice = []
@@ -250,13 +250,13 @@ def slice_action(input=[], xmin="0", xmax="", ymin="0", ymax="", invert_mask=Fal
     else:
         xslice, yslice = output
     return dict(output_x = xslice, output_y = yslice)
-slice_data = slice_data_module(id='ospec.mask', datatype=OSPEC_DATA, version='1.0', action=slice_action)
+slice_data = slice_data_module(id='ospec.slice', datatype=OSPEC_DATA, version='1.0', action=slice_action)
 
 
 # Slice module
 def collapse_action(input=[], **kwargs):
     print "collapsing"
-    output = SliceData().apply(input)
+    output = CollapseData().apply(input)
     
     if type(input) == types.ListType:
         xslice = []
@@ -393,7 +393,7 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                  name='NCNR ANDR',
                  archive=config.NCNR_DATA + '/andr',
                  menu=[('Input', [load, load_asterix, load_he3, load_stamp, save]),
-                       ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, theta_two_theta_qxqz, two_theta_lambda_qxqz, empty_qxqz, mask_data, slice_data, collapse_data]),
+                       ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, theta_two_theta_qxqz, two_theta_lambda_qxqz, empty_qxqz, mask_data, slice_data, collapse_data, normalize_to_monitor]),
                        ('Polarization reduction', [timestamp, append_polarization, combine_polarized, correct_polarized]),
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],

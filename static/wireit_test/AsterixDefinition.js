@@ -188,7 +188,7 @@ var asterix = {
           "label": "xmin pixel", 
           "name": "xmin", 
           "type": "string", 
-          "value": "0"
+          "value": ""
         }, 
         {
           "label": "xmax pixel", 
@@ -200,7 +200,7 @@ var asterix = {
           "label": "ymin pixel", 
           "name": "ymin", 
           "type": "string", 
-          "value": "0"
+          "value": ""
         }, 
         {
           "label": "ymax pixel", 

@@ -907,6 +907,57 @@ var andr2 = {
       "fields": [], 
       "name": "Collapse Data"
     },
+    {"container": {
+        "icon": "../../static/img/offspecular/normalize_icon.png",
+        "image": "../../static/img/offspecular/normalize_image.png", 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:out"
+              ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": -12, 
+              "top": 16
+            }, 
+            "required": true
+          },
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:in"
+              ], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "output", 
+            "offsetPosition": {
+              "right": -16, 
+              "top": 1
+            }, 
+            "required": false
+          }
+        ], 
+        "width": 120, 
+        "xtype": "AutosizeImageContainer"
+      }, 
+      "fields": [], 
+      "name": "Normalize to Monitor"
+    },
     {
       "container": { 
         "height": 16,
@@ -955,7 +1006,7 @@ var andr2 = {
           "label": "xmin pixel", 
           "name": "xmin", 
           "type": "string", 
-          "value": "0"
+          "value": ""
         }, 
         {
           "label": "xmax pixel", 
@@ -967,7 +1018,7 @@ var andr2 = {
           "label": "ymin pixel", 
           "name": "ymin", 
           "type": "string", 
-          "value": "0"
+          "value": ""
         }, 
         {
           "label": "ymax pixel", 

@@ -291,7 +291,7 @@
                 var offset = 4*((r*width) + c);
                 //var z = data[c][height-r-1];
                 var z = data[c][r];
-                var plotz = Math.floor(((this.t(z) - tzmin) / tzmax) * 255.0);
+                var plotz = Math.floor(((this.t(z) - tzmin) / (tzmax - tzmin)) * 255.0);
 
                 plotz = ((plotz>255)? 255 : plotz);
                 plotz = ((plotz<0)? 0 : plotz);
