@@ -86,7 +86,11 @@
 		        document.getElementById('plot_selectnum').innerHTML = "";
                 for (var i=0; i<toPlots.length; i++) {
                     var zlabel = toPlots[i].zlabel || '';
-                    jQuery(document.getElementById('plot_selectnum')).append(jQuery('<option />', { value: i, text: 'dataset: ' + i + " " + zlabel }));
+                    var opt = document.createElement('option');
+                    opt.setAttribute('value', i);
+                    opt.innerHTML = 'dataset: ' + i + " " + zlabel;
+                    document.getElementById('plot_selectnum').appendChild(opt);
+                    //jQuery(document.getElementById('plot_selectnum')).append(jQuery("<option / > ", { value: i, text: 'dataset: ' + i + " " + zlabel }));
                 };
                 function onchange(e) {
                     console.log('changing');
@@ -95,16 +99,15 @@
                     var transform = selectz[selectz.selectedIndex].value;
                     var plotnum = selectnum[selectnum.selectedIndex].value;
                     var toPlot = toPlots[plotnum];
-                    //plot = renderImageData2(toPlot, transform, 'plot2d');
+
                     plot.series[0].set_data(toPlot.z[0], toPlot.dims);
                     plot.series[0].set_transform(transform);
-                    //generate_cumsums(plot.series[0]);
-                    colorbar.series[0].dims = toPlot.dims;
-                    colorbar.series[0].set_ztransform(transform);
-                    colorbar.plugins._interactor.zoomMax();
+                    plot.series[0]._xaxis.labelOptions.label = toPlot.xlabel;
+                    plot.series[0]._yaxis.labelOptions.label = toPlot.ylabel;
                     plot.plugins._interactor.zoomMax();
                     sl = slice_listener(plot.series[0]);
-		            generate_cumsums(plot.series[0]);
+		            plot.series[0].generate_cumsums();
+		            //generate_cumsums(plot.series[0]);
 		            sl.update();
                 }
                 
@@ -135,8 +138,8 @@
                             tickOptions: {formatString: "%.3g", _styles: {right: 0}}
                         },
                         axes:{ 
-                            xaxis:{ label: 'x' },
-                            yaxis:{ label: 'y' }
+                            xaxis:{ label: toPlot.xlabel },
+                            yaxis:{ label: toPlot.ylabel }
                         },
 		                seriesDefaults:{
 		                    shadow: false,
@@ -156,6 +159,7 @@
 		        
 		            colorbar = $.jqplot('colorbar', data.z, {
 		                //cursor: {show: true, zoom: true},
+		                paddingLeft: 0,
 		                sortData: false,
 		                interactors: [{ type:'standard', name: 'standard'}],
 		                series: [ {shadow: false, padding: 0} ],
@@ -164,16 +168,7 @@
 		                    yaxis: 'y2axis',
 		                    shadow: false,
                             renderer:$.jqplot.colorbarRenderer,
-                            rendererOptions: {
-                                dims: data.dims,
-                                transform: 'lin',
-                                display_dims: { xmin: data.dims.xmin-1,
-                                                ymin: data.dims.ymin-1,
-                                                ymax: data.dims.ymax+1,
-                                                xmax: data.dims.xmax+1,
-                                                zmin: data.dims.zmin,
-                                                zmax: data.dims.zmax}
-                            },
+                            rendererOptions: { parent_plot: plot.series[0] }
                         },
                         axes:{ 
                             xaxis:{ tickOptions: {show: false} },
@@ -188,33 +183,6 @@
                             }
                         }, 
                     });
-		        
-		            function matchPlotToColorbar() {
-		                var new_dims = {};
-		                var cb = colorbar.series[0];
-		                //$.extend(new_dims, plot.series[0].dims);
-		                new_dims.zmax = cb.tinv(cb._yaxis.max);
-		                new_dims.zmin = cb.tinv(cb._yaxis.min);
-		                $.extend(plot.series[0].dims, new_dims, true);
-		                plot.series[0].set_transform(cb.transform);
-		                plot.series[0].update_plotdata();
-		                plot.replot();	
-		            };
-		            colorbar.plugins._interactor.zoomPlot = function(dzoom, centerpos) {
-		                $.jqplot.MasterInteractorPlugin.prototype.zoomPlot.call(colorbar.plugins._interactor, dzoom, centerpos);
-		                matchPlotToColorbar();		            
-		            };
-		            
-		            colorbar.plugins._interactor.zoomMax = function() {
-		                $.jqplot.MasterInteractorPlugin.prototype.zoomMax.call(colorbar.plugins._interactor);
-		                matchPlotToColorbar();	            
-		            };
-		            
-		            colorbar.plugins._interactor.panPlot = function(pos) {
-		                $.jqplot.MasterInteractorPlugin.prototype.panPlot.call(colorbar.plugins._interactor, pos);
-		                matchPlotToColorbar();
-		            };
-		        
 		        
 		        
 		            yslice = $.jqplot('yslice', [[[1,1],[1,2],[0.5,3],[2,4]]], {
@@ -329,7 +297,8 @@
 		                return this;  
 		            };
 		            sl = slice_listener(plot.series[0]);
-		            generate_cumsums(plot.series[0]);
+		            plot.series[0].generate_cumsums()
+		            //generate_cumsums(plot.series[0]);
 		            sl.update();
 		            //maximize();
 		        }
@@ -382,39 +351,7 @@
                 return this;
             }
             
-            generate_cumsums = function(plotseries) {
-		        console.log('generating cumsum');
-                var width = plotseries.dims.xdim;
-                var height = plotseries.dims.ydim;
-                var data = plotseries.source_data;
-                var cumsum_x = [], cumsum_x_col;
-                var cumsum_y = [], cumsum_y_col;
-                var ysum = [];
-                // initialize the y-sum:
-                for (var r = 0; r<height; r++) ysum.push(0);
-                cumsum_y.push(ysum.slice());
-                
-                
-                for (var c = 0; c < width; c++) {
-                    cumsum_x_col = [0]; xsum = 0;
-                    cumsum_y_col = [];
-                    for (var r = 0; r < height; r++) {
-                        var offset = 4*((r*width) + c);
-                        //var z = data[c][height-r-1];
-                        var z = data[c][r];
-                        xsum += z;
-                        ysum[r] += z;
-                        cumsum_x_col.push(xsum);
-                        cumsum_y_col.push(ysum[r]);
-                        
-                    }
-                    cumsum_x.push(cumsum_x_col);
-                    cumsum_y.push(cumsum_y_col);
-                }
-                plotseries.cumsum_x = cumsum_x;
-                plotseries.cumsum_y = cumsum_y;
-            };
-		</script>
+        </script>
 	</head>
 	<body>
 	    <div id="upper" style="display: block; width: 100%; height: 352px;">

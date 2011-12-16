@@ -18,3 +18,5 @@ OOSuite
 *.blg
 *.log
 *.tex~
+*.js~
+*.html~
