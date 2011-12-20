@@ -622,7 +622,6 @@
     $.jqplot.PolygonInteractorPlugin.prototype.constructor = $.jqplot.PolygonInteractorPlugin;        
     $.jqplot.PolygonInteractorPlugin.prototype.center = $.jqplot.PolygonInteractor.prototype.center;
 
-    
     function bestLinearInterval(range) {
         var expv = Math.floor(Math.log(range)/Math.LN10);
         var magnitude = Math.pow(10, expv);
@@ -634,7 +633,58 @@
         return 2*magnitude; 
     };
     
-    function nextLogTick(val) {
+    function generateLinearTicks(min, max) {
+        var ticks = [];
+        var tickInterval = bestLinearInterval(max-min);
+        var expv = Math.floor(Math.log(tickInterval)/Math.LN10);
+        var magnitude = Math.pow(10, expv);
+
+        ticks.push([min, ' ']);
+        var tick = min - mod(min, tickInterval) + tickInterval;
+        while (tick < max) {
+            if (Math.abs(tick) < 1e-13) tick = 0;
+            var sigdigits = Math.ceil(Math.log(Math.abs(tick)/magnitude)/Math.LN10) - 1;
+            var numdigits = Math.floor(Math.log(Math.abs(tick))/Math.LN10) + 1;
+            if (sigdigits > 20) sigdigits = 20;
+            if (sigdigits < 0) sigdigits = 0;
+            if (numdigits < 4 && numdigits >= -2) {
+                var fixeddigits;
+                if (sigdigits < numdigits) { fixeddigits = 0; }
+                else { fixeddigits = sigdigits - numdigits + 1; }
+                ticks.push([tick, tick.toFixed(fixeddigits)]);
+            } else {
+                ticks.push([tick, tick.toExponential(sigdigits)]);
+            }
+            tick += tickInterval;
+        }
+        ticks.push([max,' ']);
+        return ticks
+    };
+    
+    function nextLogTick(val, round) {
+        // finds the next log tick above the current value,
+        // using 1, 2, 5, 10, 20, ... scaling
+        var expv = Math.floor(Math.log(val)/Math.LN10);
+        //var expv = Math.floor(val);
+        var magnitude = Math.pow(10, expv);
+        var f = val / magnitude;
+        if (round) f = Math.round(f);
+        
+        var newf;
+        if      (f<1.0) { newf = 1 }
+        else if (f<2.0) { newf = 2 }
+        else if (f<5.0) { newf = 5 }
+        else if (f<10.0) { newf = 10 }
+        else { newf = 20 };
+        return {value: newf * magnitude, label: newf.toFixed() + 'e' + expv.toFixed()}
+        
+//        if (f<2.0) {return 2.0*magnitude;}
+//        if (f<5.0) {return 5.0*magnitude;}
+//        if (f<10.) {return 10.0*magnitude;}
+//        return 20*magnitude; 
+    };
+    
+    function prevLogTick(val) {
         // finds the next log tick above the current value,
         // using 1, 2, 5, 10, 20, ... scaling
         var expv = Math.floor(Math.log(val)/Math.LN10);
@@ -642,15 +692,60 @@
         var magnitude = Math.pow(10, expv);
         var f = val / magnitude;
 
-        if (f<1.0) {return 1.0*magnitude;}
-        if (f<2.0) {return 2.0*magnitude;}
-        if (f<5.0) {return 5.0*magnitude;}
-        if (f<10.) {return 10.0*magnitude;}
-        return 20*magnitude; 
+        if (f>10.0) {return 10.0*magnitude;}
+        if (f>5.0) {return 5.0*magnitude;}
+        if (f>2.0) {return 2.0*magnitude;}
+        if (f>1.0) {return 1.0*magnitude;}
+        return 0.5*magnitude;
     };
     
     function mod(a,b) {
         return a % b < 0 ? b + a % b : a % b
+    };
+    
+    function generate12510ticks(min, max) {
+        var ticks = [];
+        ticks.push([min, ' ']); // ticks are positioned with log
+        var tick = nextLogTick(Math.pow(10, min), false);
+        console.log(tick);
+        //var tickpos = tick.value;
+        var tickpos = Math.log(tick.value)/Math.LN10;
+        var i = 0;
+        while( tickpos < max && i < 100 ) {
+            
+            ticks.push([tickpos, tick.label]);
+            tick = nextLogTick(tick.value, true);
+            tickpos = Math.log(tick.value)/Math.LN10;
+            i++;
+        }
+        ticks.push([max, ' ']);
+        if (ticks.length < 4) {
+            var newticks = generateLinearTicks(Math.pow(10, min), Math.pow(10, max));
+            newticks[0] = [min, ' '];
+            for (var i=1; i<(newticks.length-1); i++) {
+                newticks[i][0] = Math.log(newticks[i][0])/Math.LN10;
+            }
+            newticks[newticks.length-1] = [max, ' '];
+            ticks = newticks;
+        }
+        return ticks
+    };
+    
+    
+    function generateMagTicks(min, max, magdiff) {
+        var ticks = [];
+        ticks.push([min, ' ']); // ticks are positioned with log
+        var tick = Math.pow(10, Math.ceil(min/magdiff) * magdiff);
+        var tickpos = Math.round(Math.log(tick)/Math.LN10);
+        var i = 0;
+        while( tickpos < max && i < 100 ) {
+            ticks.push([tickpos, '1e'+tickpos.toFixed()]);
+            //tick *= Math.pow(10, magdiff);
+            tickpos = Math.round(tickpos + magdiff);
+            i++;
+        }
+        ticks.push([max, ' ']);
+        return ticks
     };
     
     
@@ -660,36 +755,20 @@
             max = ticklimits.max;
         var ticks = [];
         if (transform == 'lin') {
-            var tickInterval = bestLinearInterval(max-min);
-            ticks.push([min, ' ']);
-            var tick = min - mod(min, tickInterval) + tickInterval;
-            while (tick < max) {
-                if (Math.abs(tick) < 1e-13) tick = 0;            
-                ticks.push(tick);
-                tick += tickInterval;
-            }
-            ticks.push([max,' ']);
+            ticks = generateLinearTicks(min, max);
         } 
         else if (transform == 'log') {
-            var emax = Math.pow(10, max);
-            ticks.push([min, ' ']); // ticks are positioned with log 
-            var tick = nextLogTick(Math.pow(10, min));
-            var tickpos = Math.log(tick)/Math.LN10;
-            var i = 0;
-            while( tickpos < max && i < 100 ) {
-                ticks.push([tickpos, tick]);
-                tick = nextLogTick(tick);
-                tickpos = Math.log(tick)/Math.LN10;
-                i++;
-            }
-            ticks.push([max, ' ']);
+            var scalespan = max - min;
+            if (scalespan >= 3) { 
+                var magdiff = Math.ceil((scalespan / 5)); // more than five, divide by two.
+                ticks = generateMagTicks(min, max, magdiff); 
+            } else { ticks = generate12510ticks(min, max); }
         } 
         else {
             // unknown transform - return max and min
             ticks.push(min);
             ticks.push(max);
         }
-        
         return ticks; 
     };
     

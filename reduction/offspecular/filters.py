@@ -108,14 +108,14 @@ class EmptyQxQzGridPolarized(MetaArray):
             {"name": "qx", "units": "inv. frakking Angstroms", "values": linspace(qxmin, qxmax, qxbins) },
             {"name": "qz", "units": "inv. Angstroms", "values": linspace(qzmin, qzmax, qzbins) },
             {"name": "Measurements", "cols": [
-                    {"name": "counts--"},
-                    {"name": "counts-+"},
-                    {"name": "counts+-"},
-                    {"name": "counts++"},
-                    {"name": "monitor--"},
-                    {"name": "monitor-+"},
-                    {"name": "monitor+-"},
-                    {"name": "monitor++"},
+                    {"name": "counts_down_down"},
+                    {"name": "counts_down_up"},
+                    {"name": "counts_up_down"},
+                    {"name": "counts_up_up"},
+                    {"name": "monitor_down_down"},
+                    {"name": "monitor_down_up"},
+                    {"name": "monitor_up_down"},
+                    {"name": "monitor_up_up"},
                     {"name": "pixels"},
                     {"name": "count_time"}]},
             {'CreationStory': creation_story}]
@@ -991,7 +991,7 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     
     Need to rebin and regrid if the detector is moving...
     """
-    lookup = {"a":"--", "b":"+-", "c":"-+", "d":"++", "g": ""}
+    lookup = {"a":"_down_down", "b":"_up_down", "c":"_down_up", "d":"_up_up", "g": ""}
     if path == None:
         path = os.getcwd()
     file_obj = load(os.path.join(path, filename), format='NCNR NG-1')
@@ -1084,7 +1084,7 @@ class AppendPolarizationMatrix(Filter2D):
             # extra info changed
             he3cell = He3AnalyzerCollection(path=data._info[-1]['path'])
         new_info = data.infoCopy()
-        if not new_info[-1]['PolState'] in  ["--", "+-", "-+", "++"]:
+        if not new_info[-1]['PolState'] in  ["_down_down", "_up_down", "_down_up", "_up_up"]:
             print "polarization state not defined: can't get correction matrix"
             return
         start_datetime = new_info[-1]['start_datetime']
@@ -1106,8 +1106,10 @@ class AppendPolarizationMatrix(Filter2D):
         new_data_array = zeros(data_array.shape[:-1] + (data_array.shape[-1] + 4,))
         new_data_array[:, :, 0:-4] = data_array[:]
         PolState = new_info[-1]['PolState']
-        flipper_on = (PolState[0] == '-') # check for flipper on in incoming polarization state
-        He3_up = (PolState[1] == '+')
+        #flipper_on = (PolState[0] == '-') # check for flipper on in incoming polarization state
+        flipper_on = PolState.startswith("_down") # check for flipper on in incoming polarization state
+        #He3_up = (PolState[1] == '+')
+        He3_up = PolState.endswith("up")
         for i in range(datalen):
             t = start_datetime + delta_t * i
             #print 't: ', t
@@ -1134,7 +1136,7 @@ class AppendPolarizationMatrix(Filter2D):
         
         # the order of columns here is determined by the order coming out of He3Analyer NTRow:
         # (++, +-, --, -+)
-        pol_columns = [{"name": 'NT++'}, {"name": 'NT+-'}, {"name": 'NT--'}, {"name": 'NT-+'}]
+        pol_columns = [{"name": 'NT_up_up'}, {"name": 'NT_up_down'}, {"name": 'NT_down_down'}, {"name": 'NT_down_up'}]
         new_info[2]["cols"] = new_info[2]["cols"][:4] + pol_columns
         new_data = MetaArray(new_data_array, info=new_info)
         
@@ -1184,8 +1186,8 @@ class Combine(Filter2D):
             edges[-1] = av[-1] + dspacing
             data_edges.append(edges)
         
-        cols_to_add = ['counts', 'pixels', 'monitor', 'count_time'] # standard data columns
-        cols_to_add += ['NT++', 'NT+-', 'NT-+', 'NT--'] # add in all the polarization correction matrices too!
+        #cols_to_add = ['counts', 'pixels', 'monitor', 'count_time'] # standard data columns
+        #cols_to_add += ['NT++', 'NT+-', 'NT-+', 'NT--'] # add in all the polarization correction matrices too!
         
         new_info = dataset.infoCopy()        
         for i, col in enumerate(new_info[2]['cols']):
@@ -1250,7 +1252,7 @@ class CombinePolarized(Filter2D):
             combined_datasets.append(csingle)
         # we end up with a dictionary set of datasets (e.g. {"++": data1, "--": data2} )
         
-        return combined_datasets
+        return   d_datasets
 
 class TwothetaLambdaToQxQz(Filter2D):
     """ Figures out the Qx, Qz values of each datapoint
@@ -1418,7 +1420,7 @@ class PolarizationCorrect(Filter2D):
     and that at least "++" and "--" PolStates are present.
     """
     
-    polstate_order = {'++':0, '+-':1, '-+':2, '--':3}
+    polstate_order = {'_up_up':0, '_up_down':1, '_down_up':2, '_down_down':3}
     
     def progress_update(self, percent_done):
         print '{0}% done'.format(percent_done)
@@ -1437,13 +1439,13 @@ class PolarizationCorrect(Filter2D):
     def guess_assumptions(self, datasets):
         assumptions = None
         polstates = [datum._info[-1]['PolState'] for datum in datasets]
-        if set(polstates) == set(["++", "+-", "-+", "--"]):
+        if set(polstates) == set(['_up_up', '_up_down', '_down_up', '_down_down']):
             assumptions = 0
-        elif set(polstates) == set(["++", "-+", "--"]):
+        elif set(polstates) == set(['_up_up', '_down_up', '_down_down']):
             assumptions = 1
-        elif set(polstates) == set(["++", "+-", "--"]):
+        elif set(polstates) == set(['_up_up', '_up_down', '_down_down']):
             assumptions = 2
-        elif set(polstates) == set(["++", "--"]):
+        elif set(polstates) == set(['_up_up', '_down_down']):
             assumptions = 3
         return assumptions
         
@@ -1467,7 +1469,7 @@ class PolarizationCorrect(Filter2D):
         #['NT++','NT+-','NT--','NT-+']
         for dataset in combined_data:
             PolState = dataset._info[-1]['PolState']
-            NT[:, :, self.polstate_order[PolState]] = dataset[:, :, ['NT++', 'NT+-', 'NT-+', 'NT--']]
+            NT[:, :, self.polstate_order[PolState]] = dataset[:, :, ['NT_up_up', 'NT_up_down', 'NT_down_up', 'NT_down_down']]
             alldata[:, :, self.polstate_order[PolState]] = dataset[:, :, ['counts', 'pixels', 'monitor', 'count_time']]
             #alldata[:,:,self.polstate_order[PolState]] = combined_data[PolState][:,:,['counts','pixels','monitor','count_time']]
         # should result in: 
@@ -1482,27 +1484,27 @@ class PolarizationCorrect(Filter2D):
         # by arranging this new NT matrix as above, I'm undoing the weird arrangement in
         # the He3Analyzer module.  now the order is: 
         # [Iuu, Iud, Idu, Idd] AND [Ruu, Rud, Rdu, Rdd] !!!
-        output_columns = {'++':0, '+-':1, '-+':2, '--':3}        
+        output_columns = self.polstate_order #{'++':0, '+-':1, '-+':2, '_down_down':3}        
         
         if assumptions == 1:
             NT = NT[:, :, [0, 2, 3], :] #remove +- (second) row
             NT[:, :, :, 1] += NT[:, :, :, 2] # add -+(column 3) to +- (column 2), (cols. 1 and 2 in zero-indexed)
             NT = NT[:, :, :, [0, 1, 4]] # drop column 3 (2 in zero-indexing)
             # should now be (th_len, 2th_len, 3, 3) matrix
-            output_columns = {'++':0, '-+':1, '--':2} 
+            output_columns = {'_up_up':0, '_down_up':1, '_down_down':2} 
         
         elif assumptions == 2:
             NT = NT[:, :, [0, 1, 3], :] #remove -+ (third) row
             NT[:, :, :, 1] += NT[:, :, :, 2] # add -+ column 3 to +- column 2 (zero-indexed)
             NT = NT[:, :, :, [0, 1, 4]] # drop column 3 (2 in zero-indexing)
             # should now be (th_len, 2th_len, 3, 3) matrix
-            output_columns = {'++':0, '+-':1, '--':2} 
+            output_columns = {'_up_up':0, '_up_down':1, '_down_down':2} 
             
         elif assumptions == 3:
             NT = NT[:, :, [0, 3], :] #remove both middle rows
             NT = NT[:, :, :, [0, 3]] # remove both middle columns (1,2 in zero-indexing)
             # should now be (th_len, 2th_len, 2, 2) matrix
-            output_columns = {'++':0, '--':1} 
+            output_columns = {'_up_up':0, '_down_down':1} 
  
         R = deepcopy(alldata)
         # output will have the same shape as input... just with different values!
@@ -1563,7 +1565,7 @@ class PolarizationCorrect(Filter2D):
             data_edges.append(edges)
         
         cols_to_add = ['counts', 'pixels', 'monitor', 'count_time'] # standard data columns
-        cols_to_add += ['NT++', 'NT+-', 'NT-+', 'NT--'] # add in all the polarization correction matrices too!
+        cols_to_add += ['NT_up_up', 'NT_up_down', 'NT_down_up', 'NT_down_down'] # add in all the polarization correction matrices too!
         
         new_info = dataset.infoCopy()        
         for i, col in enumerate(new_info[2]['cols']):
@@ -1584,10 +1586,139 @@ class wxPolarizationCorrect(PolarizationCorrect):
         self.progress_meter.Update(int(percent_done), "Polarization Correction Progress:\n{0}% done".format(percent_done))
 
 class Subtract(Filter2D):
-    """ takes two data objects and subtracts them. """
-    def apply(self, data1, data2):
-        new_grid = Autogrid().apply([data1, data2])
-        # need to figure out overlap somehow
+    """ takes two data objects and subtracts them.   
+    If no grid is provided, use Autogrid filter to generate one.
+    """
+    #@updateCreationStory
+    #@autoApplyToList
+    def apply(self, minuend, subtrahend):
+        #subtrahend = subtrahend[0] # can only subtract one thing... but from many.
+        print len(minuend), len(subtrahend)
+        if len(minuend) == len(subtrahend): pass # go with it.
+        elif len(subtrahend) == 1: subtrahend = [subtrahend[0] for m in minuend] # broadcast
+        else: raise Exception("I don't know what to do with unmatched argument lengths")
+        results = []
+        for m, s in zip(minuend, subtrahend):    
+            dim_m = len(m.shape) - 1
+            dim_s = len(s.shape) - 1
+            if dim_m == 2 and dim_s == 1:
+                print "subtract vector from matrix (broadcast subtrahend)"
+                s_units = s._info[0]['units']
+                m1_units = m._info[0]['units']
+                m2_units = m._info[1]['units']
+                if s_units == m1_units: active_axis = 0
+                elif s_units == m2_units: active_axis = 1
+                else: raise Exception("no matching units to subtract from") # bail out!
+                
+                new_axisvals = [m._info[0]['values'].copy(), m._info[1]['values'].copy()]
+                update_axisvals = new_axisvals[active_axis]
+                s_axisvals = s._info[0]['values']
+                overlap = slice(get_index(update_axisvals, s_axisvals[0]), get_index(update_axisvals, s_axisvals[-1]))
+                print overlap
+                new_axisvals[active_axis] = update_axisvals[overlap]
+                full_overlap = [slice(None, None), slice(None, None)]
+                full_overlap[active_axis] = overlap
+                full_overlap = tuple(full_overlap)                
+                
+                output_array = []
+                
+                dims = 2
+                data_edges = []
+                for dim in range(dims):
+                    av = new_axisvals[dim].copy()
+                    dspacing = (av.max() - av.min()) / (len(av) - 1)
+                    edges = resize(av, len(av) + 1)
+                    edges[-1] = av[-1] + dspacing
+                    data_edges.append(edges)
+                
+                
+                    
+                #bin_edges = [[data_edges[0][0], data_edges[0][-1]],[data_edges[1][0], data_edges[1][-1]]]
+                av = s_axisvals #give the same treatment to the subtrahend asixvals
+                dspacing = (av.max() - av.min()) / (len(av) - 1)
+                edges = resize(av, len(av) + 1)
+                edges[-1] = av[-1] + dspacing
+                #bin_edges[active_axis] = edges
+                
+                #new_s = reb.rebin(edges, s['Measurements':col], data_edges[active_axis])
+                
+                #new_sshape = [1,1]
+                #new_sshape[active_axis] = len(new_saxisvals)
+                #new_saxisvals.shape = tuple(new_sshape)
+                
+                #new_array = reb.rebin2d(data_edges[0], data_edges[1], array_to_rebin, bin_edges[0], bin_edges[1])
+                             
+                print m._info[0]['units'], m._info[1]['units'], s._info[0]['units']
+                data_array = m.view(ndarray).copy()[full_overlap]
+                new_info = m.infoCopy()
+                new_info[0]['values'] = new_axisvals[0]
+                new_info[1]['values'] = new_axisvals[1]
+                print data_array.shape, new_axisvals[0].shape, new_axisvals[1].shape
+                new_data = MetaArray(data_array, info=new_info)
+                subtractable_columns = [c['name'] for c in s._info[1]['cols'] if c['name'].startswith('counts')]
+                #subtractable_columns = dict(subtractable_columns)
+                print "sc:", subtractable_columns 
+                for i, col in enumerate(new_info[2]['cols']):
+                    if col['name'].startswith('counts') and col['name'] in subtractable_columns:
+                        new_s = reb.rebin(edges, s['Measurements':col['name']], data_edges[active_axis])
+                        new_sshape = [1,1]
+                        new_sshape[active_axis] = len(new_s)
+                        new_s.shape = tuple(new_sshape)
+                        new_data['Measurements':col['name']] -= new_s
+                results.append(new_data)
+            elif dim_m == 2 and dim_s == 2:
+                print "subtract matrix from matrix (in overlap)"
+                print m._info[0]['units'], m._info[1]['units'], s._info[0]['units'], s._info[1]['units']
+                results.append(m)
+            elif dim_m == 1 and dim_s == 2:
+                print "can't do this."
+                print m._info[0]['units'], s._info[0]['units'], s._info[1]['units']
+                results.append(m)
+            elif dim_m == 1 and dim_s == 1:
+                print "subtract vector from vector (in overlap)"
+                print m._info[0]['units'], s._info[0]['units']
+                results.append(m)
+                
+        return results
+        # extra info changed
+#        old_creation_stories = "[" + "".join([data._info[-1]['CreationStory'] + ", " for data in list_of_datasets]) + "]"
+#        name = self.__class__.__name__
+#        new_creation_story = "{fname}().apply({oldcs})".format(fname=name, oldcs=old_creation_stories)
+#        grid._info[-1]['CreationStory'] = new_creation_story
+#        # strip info that is meaningless in combined dataset: (filename, start_time, end_time)
+#        for key in ['filename', 'start_datetime', 'end_datetime']:
+#            if grid._info[-1].has_key(key): grid._info[-1].pop(key)
+#        return grid
+        
+    def add_to_grid(self, dataset, grid):
+        dims = 2
+        bin_edges = []
+        for dim in range(dims):
+            av = grid.axisValues(dim).copy()
+            dspacing = (av.max() - av.min()) / (len(av) - 1)
+            edges = resize(av, len(av) + 1)
+            edges[-1] = av[-1] + dspacing
+            bin_edges.append(edges)
+        
+        data_edges = []
+        for dim in range(dims):
+            av = dataset.axisValues(dim).copy()
+            dspacing = (av.max() - av.min()) / (len(av) - 1)
+            edges = resize(av, len(av) + 1)
+            edges[-1] = av[-1] + dspacing
+            data_edges.append(edges)
+        
+        cols_to_add = ['counts', 'pixels', 'monitor', 'count_time'] # standard data columns
+        cols_to_add += ['NT++', 'NT+-', 'NT-+', 'NT--'] # add in all the polarization correction matrices too!
+        
+        new_info = dataset.infoCopy()        
+        for i, col in enumerate(new_info[2]['cols']):
+            #if col['name'] in cols_to_add:
+            array_to_rebin = dataset[:, :, col['name']].view(ndarray) 
+            new_array = reb.rebin2d(data_edges[0], data_edges[1], array_to_rebin, bin_edges[0], bin_edges[1])
+            grid[:, :, col['name']] += new_array
+                
+        return grid
 
 class Algebra(Filter2D):
     """ generic algebraic manipulations """
@@ -1650,6 +1781,15 @@ class CombinePolcorrect(Filter2D):
     """ combine and polarization-correct """
     def apply(self, list_of_datasets, grid=None):
         pass
+        
+def get_index(t, x):
+    if (x == "" or x == None): 
+        return None
+    if float(x) > t.max(): 
+        return None
+    if float(x) < t.min(): 
+        return None
+    return searchsorted(t, float(x))
 
 # rowan tests
 if __name__ == '__main__':

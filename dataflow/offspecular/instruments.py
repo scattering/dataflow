@@ -20,6 +20,7 @@ module_imports = [
     ("dataflow.offspecular.modules.normalize_to_monitor", "normalize_to_monitor_module"),
     ("dataflow.offspecular.modules.asterix_correct_spectrum", "asterix_correct_spectrum_module"),
     ("dataflow.offspecular.modules.combine", "combine_module"),
+    ("dataflow.offspecular.modules.subtract", "subtract_module"),
     ("dataflow.offspecular.modules.autogrid", "autogrid_module"),
     ("dataflow.offspecular.modules.offset", "offset_module"),
     ("dataflow.offspecular.modules.wiggle", "wiggle_module"),
@@ -41,7 +42,7 @@ module_imports = [
     ("dataflow.offspecular.modules.collapse_data", "collapse_data_module"),
     ("dataflow.calc", ["run_template", "get_plottable", "calc_single"]),
     ("dataflow.core", ["Data", "Instrument", "Template", "register_instrument"]),
-    ("reduction.offspecular.filters", ["LoadICPData", "LoadAsterixRawHDF", "LoadAsterixSpectrum", "Autogrid", "Combine", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "CollapseData", "WiggleCorrection", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz"]),
+    ("reduction.offspecular.filters", ["LoadICPData", "LoadAsterixRawHDF", "LoadAsterixSpectrum", "Autogrid", "Combine", "Subtract", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "CollapseData", "WiggleCorrection", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz"]),
     ("reduction.offspecular.he3analyzer", "He3AnalyzerCollection"),
     ("reduction.offspecular.FilterableMetaArray", "FilterableMetaArray"),
 ]
@@ -199,6 +200,12 @@ def combine_action(input_data=[], input_grid=None, **kwargs):
         output_grid = input_grid[0]
     return dict(output=[Combine().apply(input_data, grid=output_grid)])
 combine = combine_module(id='ospec.combine', datatype=OSPEC_DATA, version='1.0', action=combine_action)
+
+# Subtract module
+def subtract_action(minuend=[], subtrahend=None, **kwargs):
+    print "subtracting"
+    return dict(output=Subtract().apply(minuend, subtrahend))
+subtract = subtract_module(id='ospec.subtract', datatype=OSPEC_DATA, version='1.0', action=subtract_action)
 
 # Offset module
 def offset_action(input=[], offsets={}, **kwargs):
@@ -393,7 +400,7 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                  name='NCNR ANDR',
                  archive=config.NCNR_DATA + '/andr',
                  menu=[('Input', [load, load_asterix, load_he3, load_stamp, save]),
-                       ('Reduction', [autogrid, combine, offset, wiggle, pixels_two_theta, theta_two_theta_qxqz, two_theta_lambda_qxqz, empty_qxqz, mask_data, slice_data, collapse_data, normalize_to_monitor]),
+                       ('Reduction', [autogrid, combine, subtract, offset, wiggle, pixels_two_theta, theta_two_theta_qxqz, two_theta_lambda_qxqz, empty_qxqz, mask_data, slice_data, collapse_data, normalize_to_monitor]),
                        ('Polarization reduction', [timestamp, append_polarization, combine_polarized, correct_polarized]),
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],

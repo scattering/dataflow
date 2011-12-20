@@ -315,7 +315,78 @@ var andr2 = {
       }, 
       "fields": [], 
       "name": "Combine"
-    }, 
+    },
+    {
+      "container": {
+        "icon": "../../static/img/offspecular/diff.png", 
+        "image": "../../static/img/offspecular/diff_image.png", 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:out"
+              ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "minuend", 
+            "offsetPosition": {
+              "left": -12, 
+              "top": 4
+            }, 
+            "required": true
+          }, 
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:out"
+              ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "subtrahend", 
+            "offsetPosition": {
+              "left": -12, 
+              "top": 40
+            }, 
+            "required": false
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:in"
+              ], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "left": 48, 
+              "top": 16
+            }, 
+            "required": false
+          }
+        ], 
+        "xtype": "AutosizeImageContainer"
+      }, 
+      "fields": [], 
+      "name": "Subtract"
+    },
     {
       "container": {
         "icon": "../../static/img/offspecular/offset.png", 
@@ -864,7 +935,7 @@ var andr2 = {
     {
       "container": {
         "icon": "../../static/img/offspecular/autogrid.png", 
-        "image": "../../static/img/offspecular/slice_image.png", 
+        "image": "../../static/img/offspecular/collapse_image.png", 
         "terminals": [
           { "alwaysSrc": false, 
             "ddConfig": {

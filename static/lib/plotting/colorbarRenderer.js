@@ -59,7 +59,7 @@
         for (var i=0; i<256; i++) {
             var y0 = Math.floor(i*rh);
             var rgba = this.palette_array[255-i];
-		    ctx.fillStyle = "rgba("+rgba[0]+","+rgba[1]+","+rgba[2]+", 255)";
+		    ctx.fillStyle = "rgba("+rgba[0]+","+rgba[1]+","+rgba[2]+", 1.0)";
             //ctx.fillStyle = this.palette_str[255-i];
             ctx.fillRect(0, y0, width, Math.ceil(rh));
         };
@@ -82,13 +82,30 @@
     function set_data(new_data, new_dims) {
         this.dims = new_dims;
         this.data = new_data;
-        if (!this.dims.dx){ this.dims.dx = (this.dims.xmax - this.dims.xmin)/(this.dims.xdim); }
-        if (!this.dims.dy){ this.dims.dy = (this.dims.ymax - this.dims.ymin)/(this.dims.ydim); }
+        if (!this.dims.dx){ this.dims.dx = (this.dims.xmax - this.dims.xmin)/(this.dims.xdim -1); }
+        if (!this.dims.dy){ this.dims.dy = (this.dims.ymax - this.dims.ymin)/(this.dims.ydim -1); }
         this.source_data = [];
         for (var i=0; i<this.dims.xdim; i++) {
             this.source_data.push(new_data[i].slice());
         }
         this.update_plotdata();
+    };
+    
+    function get_minimum(array, transform, existing_min) {
+        var new_min;
+        for (var i in array) {
+            var subarr = array[i];
+            if (subarr.length == undefined) {
+                var t_el = transform(subarr);
+                if (isFinite(t_el)) new_min = t_el;
+            } else {
+                new_min = get_minimum(subarr, transform, existing_min);
+            }
+            if (existing_min == undefined || new_min < existing_min) {
+                var existing_min = new_min;
+            }
+        }
+        return existing_min
     };
     
     function set_transform(tform) {
@@ -111,6 +128,8 @@
             }
             
             var tmin = this.t(this.dims.zmin);
+            if (!isFinite(tmin)) tmin = get_minimum(this.parent_plot.source_data, this.t);
+            this.dims.zmin = this.tinv(tmin);
             var tmax = this.t(this.dims.zmax);
             this._yaxis.min = tmin;
             this._yaxis.max = tmax;

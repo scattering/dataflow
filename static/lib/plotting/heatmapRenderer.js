@@ -41,7 +41,9 @@
         
         // prop: palette
         // palette to convert values to colors: default is "jet" (defined below in this file)
-        this.palette_array = jet_array;         
+        this.palette_array = jet_array;
+        this.overflowColor = [0,0,0,0];
+        this.palette_array.push(this.overflowColor);     
         this.transform = 'lin';
         // put series options in options.series (dims, etc.)
         var xdim = this.data.length;
@@ -170,11 +172,12 @@
                     var dxp = Math.floor(dx0p + x * sxp);
                     if (dxp >=0 && dxp < this.dims.xdim) {
                         var offset = (y*width + x)*4;
+                        //console.log(offset, this.plotdata);
                         var fillstyle = this.palette_array[this.plotdata[dxp][dyp]];
                         myImageData.data[offset    ] = fillstyle[0];
                         myImageData.data[offset + 1] = fillstyle[1];
                         myImageData.data[offset + 2] = fillstyle[2];
-                        myImageData.data[offset + 3] = 255;
+                        myImageData.data[offset + 3] = (fillstyle[3] == undefined) ? 255 : fillstyle[3];
                     }
                 }
             }
@@ -258,6 +261,40 @@
         this.img = {width: width, height:height};
     };
     
+    function get_minimum(array, transform, existing_min) {
+        var new_min;
+        for (var i in array) {
+            var subarr = array[i];
+            if (subarr.length == undefined) {
+                var t_el = transform(subarr);
+                if (isFinite(t_el)) new_min = t_el;
+            } else {
+                new_min = get_minimum(subarr, transform, existing_min);
+            }
+            if (existing_min == undefined || new_min < existing_min) {
+                var existing_min = new_min;
+            }
+        }
+        return existing_min
+    };
+    
+    function get_maximum(array, transform, existing_max) {
+        var new_max;
+        for (var i in array) {
+            var subarr = array[i];
+            if (subarr.length == undefined) {
+                var t_el = transform(subarr);
+                if (isFinite(t_el)) new_max = t_el;
+            } else {
+                new_max = get_maximum(subarr, transform, existing_max);
+            }
+            if (existing_max == undefined || new_max > existing_max) {
+                var existing_max = new_max;
+            }
+        }
+        return existing_max
+    };
+    
     function set_data(new_data, new_dims) {
         this.dims = new_dims;
         this.data = new_data;
@@ -288,13 +325,25 @@
             this.t = function(datum) {
                 if (datum >=0) { return Math.log(datum)/Math.LN10 }
                 else { return NaN }
-            }   
+            }
+            this.tinv = function(datum) {
+                    return Math.pow(10, datum);
+            }  
         } else { // transform defaults to 'lin' if unrecognized
-            this.t = function(datum) { return datum }
+            this.t = function(datum) { return datum };
+            this.tinv = this.t;
         }
         
-        if (this.source_data && this.dims) this.update_plotdata();
-        if (this._colorbar && this._colorbar.set_transform) this._colorbar.set_transform(tform);
+        if (this.source_data && this.dims) {
+            if (!isFinite(this.t(this.dims.zmin))) {
+                this.dims.zmin = get_minimum(this.source_data, this.t);
+            }
+            this.update_plotdata();
+        }
+        if (this._colorbar && this._colorbar.set_transform) { 
+            this._colorbar.set_transform(tform);
+            this._colorbar.draw();
+        }
     };
     
     function zoom_to(limits) {
@@ -322,14 +371,21 @@
         }
         return {hist: hist, fullhist: fullhist}
     };
-    
+
     // call after setting transform
     function update_plotdata() {
+        var maxColorIndex = 255;
+        var overflowIndex = 256;
         var width = this.dims.xdim;
         var height = this.dims.ydim;
         var tzmax = this.t(this.dims.zmax);
         var tzmin = this.t(this.dims.zmin);
-        if (isNaN(tzmin)) tzmin = 0;
+        //var tzmax = get_maximum(this.source_data, this.t);
+        //var tzmin = get_minimum(this.source_data, this.t);
+        //if (isNaN(tzmin)) tzmin = 0;
+        
+        if (isNaN(tzmin)) tzmin = get_minimum(this.source_data, this.t);
+        this.dims.zmin = this.tinv(tzmin);
         var data = this.source_data; 
         var plotdata = [], datacol;
         
@@ -338,10 +394,11 @@
             for (var r = 0; r < height; r++) {
                 var offset = 4*((r*width) + c);
                 var z = data[c][r];
-                var plotz = Math.floor(((this.t(z) - tzmin) / (tzmax - tzmin)) * 255.0);
-
-                plotz = ((plotz>255)? 255 : plotz);
-                plotz = ((plotz<0)? 0 : plotz);
+                var plotz = Math.floor(((this.t(z) - tzmin) / (tzmax - tzmin)) * maxColorIndex);
+                
+                if (isNaN(plotz)) { plotz = overflowIndex }
+                else if (plotz > maxColorIndex) { plotz = maxColorIndex }
+                else if (plotz < 0) { plotz = 0 }
                 datacol.push(plotz);
             }
             plotdata.push(datacol.slice());

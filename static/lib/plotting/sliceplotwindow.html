@@ -105,6 +105,7 @@
                     plot.series[0]._xaxis.labelOptions.label = toPlot.xlabel;
                     plot.series[0]._yaxis.labelOptions.label = toPlot.ylabel;
                     plot.plugins._interactor.zoomMax();
+                    colorbar.plugins._interactor.zoomMax();
                     sl = slice_listener(plot.series[0]);
 		            plot.series[0].generate_cumsums();
 		            //generate_cumsums(plot.series[0]);
