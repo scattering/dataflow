@@ -126,17 +126,17 @@ class FilterableMetaArray(MetaArray):
             dims = {}
             # can't display zeros effectively in log... set zmin to smallest non-zero
             
-#            lowest = 1e-10
-#            non_zeros = array_out[array_out > lowest]
-#            if len(non_zeros) > 0:
-#                dims['zmin'] = non_zeros.min()
-#                dims['zmax'] = non_zeros.max()
-#            else:
-#                dims['zmin'] = lowest
-#                dims['zmax'] = lowest
+            lowest = 1e-10
+            non_zeros = array_out[array_out > lowest]
+            if len(non_zeros) > 0:
+                dims['zmin'] = non_zeros.min()
+                dims['zmax'] = non_zeros.max()
+            else:
+                dims['zmin'] = lowest
+                dims['zmax'] = lowest
                 
-            dims['zmin'] = array_out.min()
-            dims['zmax'] = array_out.max()
+            #dims['zmin'] = array_out.min()
+            #dims['zmax'] = array_out.max()
             axis = ['x', 'y']
             for index, label in enumerate(axis):
                 arr = self._info[index]['values']
