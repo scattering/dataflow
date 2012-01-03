@@ -2,7 +2,7 @@
 
 FILES_DIR = '/home/dataflow/FILES/'
 
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
 from apps.tracks.forms import languageSelectForm, titleOnlyForm, experimentForm1, experimentForm2, titleOnlyFormExperiment
@@ -42,6 +42,7 @@ print "TAS imported: ", TAS_INS.id
 from ...dataflow import wireit
 
 import random
+from numpy import NaN
 
 def xhr_test(request):
     if request.is_ajax():
