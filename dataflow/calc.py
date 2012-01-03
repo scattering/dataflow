@@ -4,6 +4,7 @@ Run a reduction workflow.
 The function run_template
 """
 
+import sys
 from pprint import pprint
 from inspect import getsource
 from .core import lookup_module, lookup_datatype
