@@ -6,7 +6,8 @@ import ROOT_URL
 
 HOMEDIR = __file__[:-12]
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+#TEMPLATE_DEBUG = DEBUG
+TEMPLATE_DEBUG = True
 template_dir = os.path.join(HOMEDIR, r'site-templates')
 static_dir = os.path.join(HOMEDIR, r'static')
 #print 'template', template_dir
@@ -199,4 +200,3 @@ if 1:
     EMAIL_HOST_PASSWORD = r'NCNR12345!'
     EMAIL_PORT = 587
     DEFAULT_FROM_EMAIL = 'accounts@drneutron.org <accounts@drneutron.org>'
-
