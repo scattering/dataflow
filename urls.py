@@ -18,6 +18,8 @@ urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views',
 		('^sliceWindow/$', 'showSliceWindow'),
 		('^uploadFiles/$', 'uploadFiles'),
 		('^filesExist/$', 'filesExist'),
+        ('^json/$','return_data'),
+        ('^test_table/$','testTable'),
 		
 		# Wiring editor display urls
 		('^editor/$', 'displayEditor'),
