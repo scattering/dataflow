@@ -47,7 +47,7 @@ if 1:
 	    }
 	}
 	
-if sys.platform=='win32'::
+if sys.platform=='win32':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
@@ -143,8 +143,14 @@ MIDDLEWARE_CLASSES = (
     #'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-REPO_ROOT = HOMEDIR.split('/')[-2]
+#REPO_ROOT = HOMEDIR.split('/')[-2]
 #ROOT_URLCONF = REPO_ROOT + '.urls'
+
+if sys.platform=='win32':
+    REPO_ROOT = os.path.split(HOMEDIR)[-1] 
+else:
+    REPO_ROOT = HOMEDIR.split('/')[-2]
+
 
 ROOT_URLCONF = ROOT_URL.ROOT_URLCONF
 
