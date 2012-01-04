@@ -1,0 +1,3 @@
+.woot { border: 1px black solid; }
+.woot div { border: 1px black solid; background-color: black; height: 0.75em; }
+.woot.empty { height: 1em; }

@@ -1,12 +1,16 @@
 # Django settings for dataflow project.
-import os
+import os,sys
 import ROOT_URL
 
 
+if sys.platform=='win32':
+    HOMEDIR=r'c:\dataflow'
+else:
+    HOMEDIR = __file__[:-12]
 
-HOMEDIR = __file__[:-12]
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+#TEMPLATE_DEBUG = DEBUG
+TEMPLATE_DEBUG = True
 template_dir = os.path.join(HOMEDIR, r'site-templates')
 static_dir = os.path.join(HOMEDIR, r'static')
 #print 'template', template_dir
@@ -42,6 +46,18 @@ if 1:
 		'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
 	    }
 	}
+	
+if sys.platform=='win32':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+            'NAME': os.path.join(HOMEDIR,'testdb'),                      # Or path to database file if using sqlite3.
+            'USER': '',                      # Not used with sqlite3.
+            'PASSWORD': '',                  # Not used with sqlite3.
+            'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+            'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        }
+    }
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -127,8 +143,14 @@ MIDDLEWARE_CLASSES = (
     #'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-REPO_ROOT = HOMEDIR.split('/')[-2]
+#REPO_ROOT = HOMEDIR.split('/')[-2]
 #ROOT_URLCONF = REPO_ROOT + '.urls'
+
+if sys.platform=='win32':
+    REPO_ROOT = os.path.split(HOMEDIR)[-1] 
+else:
+    REPO_ROOT = HOMEDIR.split('/')[-2]
+
 
 ROOT_URLCONF = ROOT_URL.ROOT_URLCONF
 
@@ -199,4 +221,3 @@ if 1:
     EMAIL_HOST_PASSWORD = r'NCNR12345!'
     EMAIL_PORT = 587
     DEFAULT_FROM_EMAIL = 'accounts@drneutron.org <accounts@drneutron.org>'
-
