@@ -191,7 +191,7 @@ class FilterableMetaArray(MetaArray):
             
             outstr = StringIO()
             outstr.write('#' + '\t'.join(data_names) + '\n')
-            savetxt(outstr, new_array, delimiter='\t', newline='\n')
+            savetxt(outstr, new_array, delimiter='\t')
             
             outstr.seek(0)
             return_val = outstr.read()
