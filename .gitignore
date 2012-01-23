@@ -20,3 +20,5 @@ OOSuite
 *.tex~
 *.js~
 *.html~
+settings.py
+
