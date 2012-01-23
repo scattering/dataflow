@@ -2,7 +2,7 @@
 
 FILES_DIR = '/home/dataflow/FILES/'
 
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
 from apps.tracks.forms import languageSelectForm, titleOnlyForm, experimentForm1, experimentForm2, titleOnlyFormExperiment
@@ -42,6 +42,7 @@ print "TAS imported: ", TAS_INS.id
 from ...dataflow import wireit
 
 import random
+from numpy import NaN
 
 def xhr_test(request):
     if request.is_ajax():
@@ -58,19 +59,27 @@ def xhr_test(request):
     return HttpResponse(message)
 
 def showInteractors(request):
-	return render_to_response('interactors.html')
+    return render_to_response('interactors.html')
 
 def showPlotWindow(request):
-	return render_to_response('plotwindow.html')
+    return render_to_response('plotwindow.html')
 
 def showSliceWindow(request):
-	return render_to_response('slicewindow.html')
+    return render_to_response('slicewindow.html')
 
 def mytest(request):
-   return render_to_response('tracer_testingforWireit/xhr_temp.html')
+    return render_to_response('tracer_testingforWireit/xhr_temp.html')
    
 def uploadtest(request):
     return render_to_response('upload.html')
+
+def testTable(request):
+    return render(request,'testTable.html')
+
+def return_data(request):
+    dataArray=[['file name','database id','sha1','x','y','z'],[NaN,NaN,NaN,10,10,10],[NaN,NaN,NaN,-10,-10,-10],['file3','1','sh1','1,9','2,3','3,4'],['file2','1','sh2','4,5','2,3','5,5']]    
+    return HttpResponse(simplejson.dumps(dataArray))  
+
 
 def home(request):
     context = RequestContext(request)

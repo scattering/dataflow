@@ -290,6 +290,38 @@ function renderImageColorbar(data, transform, plotid) {
   
 }
 
+function renderImageColorbar2(parent_plot, plotid) {
+    if (!plot2d_colorbar) {
+        plot2d_colorbar = $.jqplot('colorbar', [[1,1]], {
+            //cursor: {show: true, zoom: true},
+            paddingLeft: 0,
+            sortData: false,
+            interactors: [{ type:'standard', name: 'standard'}],
+            series: [ {shadow: false, padding: 0} ],
+            grid: {shadow: false},
+            seriesDefaults:{
+                yaxis: 'y2axis',
+                shadow: false,
+                renderer:$.jqplot.colorbarRenderer,
+                rendererOptions: { parent_plot: parent_plot }
+            },
+            axes:{ 
+                xaxis:{ tickOptions: {show: false} },
+                y2axis:{
+                    //label: 'Intensity',
+                    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                    tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                    tickOptions: {
+                        formatString: "%.3g",
+                        _styles: {left: 5},
+                    }
+                }
+            }, 
+        });
+    };
+    return plot2d_colorbar
+}
+
 function renderImageData2(data, transform, plotid) {
     var dims = data.dims;
     var display_dims = data.display_dims || dims; // plot_dims = data_dims if not specified
@@ -350,6 +382,7 @@ function renderImageData2(data, transform, plotid) {
     
     plot2d = $.jqplot(plotid, data.z, options);
     plot2d.type = '2d';
+    return plot2d
 };
 
 function renderImageData(data, transform, plotid, opts) {
@@ -751,7 +784,7 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
     
     
     plot = renderImageData2(toPlot, transform, 'plot2d');
-    colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
+    colorbar = renderImageColorbar2(plot.series[0], 'colorbar');
     plot2d.series[0].zoom_to();
     plot2d.replot();
     var selectedIndex;
@@ -770,7 +803,7 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         plot2d.series[0].set_transform(transform);
         plot2d.series[0].zoom_to();
         plot2d.replot();
-        colorbar = renderImageColorbar(toPlot, transform, 'colorbar');
+        colorbar = renderImageColorbar2(plot.series[0], 'colorbar');
     }
     
     jQuery('#plot_selectnum').change({}, onchange);

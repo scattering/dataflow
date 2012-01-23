@@ -4,6 +4,7 @@ Run a reduction workflow.
 The function run_template
 """
 
+import sys
 from pprint import pprint
 from inspect import getsource
 from .core import lookup_module, lookup_datatype
@@ -11,7 +12,8 @@ import hashlib, redis, types, os
 from copy import deepcopy
 import numpy
 
-os.system("redis-server") # ensure redis is running
+if not sys.platform=='win32':
+    os.system("redis-server") # ensure redis is running
 server = redis.Redis("localhost")
 #if not hasattr(server, 'rpush'): server.rpush = server.push
 

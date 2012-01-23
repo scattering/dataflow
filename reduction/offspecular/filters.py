@@ -1657,7 +1657,7 @@ class Subtract(Filter2D):
                 new_data = MetaArray(data_array, info=new_info)
                 subtractable_columns = [c['name'] for c in s._info[1]['cols'] if c['name'].startswith('counts')]
                 #subtractable_columns = dict(subtractable_columns)
-                print "sc:", subtractable_columns 
+                print "subtractable columns:", subtractable_columns 
                 for i, col in enumerate(new_info[2]['cols']):
                     if col['name'].startswith('counts') and col['name'] in subtractable_columns:
                         new_s = reb.rebin(edges, s['Measurements':col['name']], data_edges[active_axis])
