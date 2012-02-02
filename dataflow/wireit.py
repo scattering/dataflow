@@ -87,10 +87,25 @@ def _module_to_wireit(module):
     """
     terminals = [_terminal_to_wireit(t) for t in module.terminals]
 
-    # Map terminals to the container    
+    # Map terminals to the container
+#    if hasattr(module, 'xtype') and module.xtype == 'AutosizeImageContainer':
+#        """ automatic placement of terminals, so don't include info for that """
+#        container = dict()
+#        if hasattr(module, 'icon') and hasattr(module.icon, 'get') :
+#            container['icon'] = module.icon.get('URI')
+#            container['image'] = module.icon.get('image', container['icon'])
+#        container['xtype'] = module.xtype
+#        for i, t in enumerate(module.terminals):
+#            x, y, dx, dy = terminal_locations[t['id']]
+#        container['terminals'] = terminals
+#        container['id'] = module.id
+                         
     if module.icon:
         icon = module.icon['URI']
         image = module.icon.get('image', icon)
+        xtype = 'WireIt.ImageContainer'
+        if hasattr(module, 'xtype'): 
+            xtype = module.xtype
         terminal_locations = module.icon['terminals']
         
         # Check that icon has spots for all terminals
@@ -102,13 +117,16 @@ def _module_to_wireit(module):
         # Assign positions to terminals
         for i, t in enumerate(module.terminals):
             x, y, dx, dy = terminal_locations[t['id']]
-            terminals[i]['offsetPosition'] = dict(left=x, top=y)
+            if xtype != 'AutosizeImageContainer':
+                # don't set terminal positions for this xtype - they get automatically set
+                terminals[i]['offsetPosition'] = dict(left=x, top=y)
             terminals[i]['direction'] = (dx, dy)
             
-        container = dict(xtype='WireIt.ImageContainer',
+        container = dict(xtype=xtype,
                          icon=icon,
                          image=image,
-                         terminals=terminals)
+                         terminals=terminals,
+                         modulename=module.name)
     else:
         step = config.TERMINAL_SPACING
         in_offset = out_offset = 1
@@ -137,9 +155,10 @@ def _module_to_wireit(module):
                          height=height,
                          image=image,
                          width=label_width,
-                         terminals=terminals)
+                         terminals=terminals,
+                         modulename=module.name)
 
-    return dict(name=module.name, container=container, fields=module.fields)
+    return dict(name=module.name, container=container, fields=module.fields, source=module.get_source_code())
 
 def _terminal_to_wireit(terminal):
     """

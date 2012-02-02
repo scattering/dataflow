@@ -6,7 +6,7 @@ from ... import config
 from ...core import Module
 
 def load_asterix_spectrum_module(id=None, datatype=None, action=None,
-                version='0.0', fields=[]):
+                version='0.0', fields=[], xtype=None):
     """Module for loading an Asterix spectrum dataset"""
 
     icon = {
@@ -16,6 +16,7 @@ def load_asterix_spectrum_module(id=None, datatype=None, action=None,
         }
     }
     
+    xtype = 'WireIt.Container'
     terminals = [
         dict(id='output',
              datatype=datatype,
@@ -24,14 +25,13 @@ def load_asterix_spectrum_module(id=None, datatype=None, action=None,
              ),
     ]
 
-    fields.extend([
-    {
+    fields = {"files": {
         "type":"[file]",
         "label": "Files",
         "name": "files",
         "value": [],
-    },
-    ])
+        }
+    }
     
     # Combine everything into a module.
     module = Module(id=id,
@@ -42,6 +42,7 @@ def load_asterix_spectrum_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  xtype=xtype
                   )
 
     return module

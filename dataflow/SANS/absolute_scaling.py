@@ -6,7 +6,7 @@ from .. import config
 from ..core import Module
 from ..SANS.map_pics import map_pics
 def absolute_scaling_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields={}, **kwargs):
     """Abs"""
 
     icon = {
@@ -53,19 +53,20 @@ def absolute_scaling_module(id=None, datatype=None, action=None,
              description='Absolute Scaling',
              ),
     ]
-    ins_name_field = {
+    
+    fields['ins_name'] = {
         'type' :'string',
         'label':'Instrument Name (NG3,NG5,or NG7)',
         'name' :'ins_name',
         'value':'',
         }
-    bottomLeftCoord_field = {
+    fields['bottomLeftCoord'] = {
         'type' :'dict',
         'label':'Bottom Left Coordinate',
         'name' :'bottomLeftCoord',
         'value':{'X':0, 'Y':0},
         }
-    topRightCoord_field = {
+    fields['topRightCoord'] = {
         'type' :'dict',
         'label':'Top Right Coordinate',
         'name' :'topRightCoord',
@@ -78,8 +79,9 @@ def absolute_scaling_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[ins_name_field,bottomLeftCoord_field,topRightCoord_field]+fields,
+                  fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

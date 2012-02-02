@@ -4,14 +4,18 @@ Module to convert two theta to QxQz
 
 from ... import config
 from ...core import Module
+try: 
+    from collections import OrderedDict
+except:
+    from ...ordered_dict import OrderedDict
 
 def two_theta_lambda_qxqz_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields={}, xtype=None, **kwargs):
     """Creates a module for converting two theta and lambda to qx and qz"""
 
     icon = {
-        'URI': config.IMAGES + config.ANDR_FOLDER + "qxqz.png",
-        'image': config.IMAGES + config.ANDR_FOLDER + "qxqz_image.png",
+        'URI': config.IMAGES + config.ANDR_FOLDER + "qxqz.png", 
+        'image': config.IMAGES + config.ANDR_FOLDER + "twothetalambda_qxqz_image.png",
         'terminals': {
             'input': (-12, 4, -1, 0),
             'output_grid': (-12, 40, -1, 0),
@@ -19,6 +23,7 @@ def two_theta_lambda_qxqz_module(id=None, datatype=None, action=None,
         }
     }
     
+    xtype = 'AutosizeImageContainer'
     terminals = [
         dict(id='input',
              datatype=datatype,
@@ -41,48 +46,49 @@ def two_theta_lambda_qxqz_module(id=None, datatype=None, action=None,
              ),
     ]
     
-    theta_field = {
-        "type":"string",
-        "label": "Sample angle (theta)",
-        "name": "theta",
-        "value": "",
-    }
-    qxmin_field = {
-        "type":"float",
-        "label": "Qx min",
-        "name": "qxmin",
-        "value":-0.003,
-    }
-    qxmax_field = {
-        "type":"float",
-        "label": "Qx max",
-        "name": "qxmax",
-        "value": 0.003,
-    }
-    qxbins_field = {
-        "type":"int",
-        "label": "Qx bins",
-        "name": "qxbins",
-        "value": 201,
-    }
-    qzmin_field = {
-        "type":"float",
-        "label": "Qz min",
-        "name": "qzmin",
-        "value": 0.0,
-    }
-    qzmax_field = {
-        "type":"float",
-        "label": "Qz max",
-        "name": "qzmax",
-        "value": 0.1,
-    }
-    qzbins_field = {
-        "type":"int",
-        "label": "Qz bins",
-        "name": "qzbins",
-        "value": 201,
-    }
+    fields = OrderedDict()
+    fields["theta"] = {
+            "type":"string",
+            "label": "Sample angle (theta)",
+            "name": "theta",
+            "value": "",
+        }
+    fields["qxmin"] = {
+            "type":"float",
+            "label": "Qx min",
+            "name": "qxmin",
+            "value":-0.003,
+        }
+    fields["qxmax"] = {
+            "type":"float",
+            "label": "Qx max",
+            "name": "qxmax",
+            "value": 0.003,
+        }
+    fields["qxbins"] = {
+            "type":"int",
+            "label": "Qx bins",
+            "name": "qxbins",
+            "value": 201,
+        }
+    fields["qzmin"] = {
+            "type":"float",
+            "label": "Qz min",
+            "name": "qzmin",
+            "value": 0.0,
+        }
+    fields["qzmax"] = {
+            "type":"float",
+            "label": "Qz max",
+            "name": "qzmax",
+            "value": 0.1,
+        }
+    fields["qzbins"] = {
+            "type":"int",
+            "label": "Qz bins",
+            "name": "qzbins",
+            "value": 201,
+        }
 
     # Combine everything into a module.
     module = Module(id=id,
@@ -91,8 +97,10 @@ def two_theta_lambda_qxqz_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[theta_field, qxmin_field, qxmax_field, qxbins_field, qzmin_field, qzmax_field, qzbins_field] + fields,
+                  fields=fields,
                   action=action,
+                  xtype=xtype,
+                  **kwargs
                   )
 
     return module

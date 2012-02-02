@@ -6,7 +6,7 @@ from .. import config
 from ..core import Module
 
 def correct_blocked_beam_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields={}, **kwargs):
     """[Tsam/Temp](EMP - BGD)"""
 
     icon = {
@@ -41,6 +41,7 @@ def correct_blocked_beam_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

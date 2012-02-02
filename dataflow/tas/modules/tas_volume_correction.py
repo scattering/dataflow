@@ -6,8 +6,8 @@ from ... import config
 from ...core import Module
 
 def volume_correction_module(id=None, datatype=None, action=None,
-                             version='0.0', fields=[],
-                             description="apply TripleAxis volume correction"):
+                             version='0.0', fields={},
+                             description="apply TripleAxis volume correction", **kwargs):
     """
     Return a module for correcting TripleAxis volume
     """
@@ -48,6 +48,7 @@ def volume_correction_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

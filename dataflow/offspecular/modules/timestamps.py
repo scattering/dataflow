@@ -7,7 +7,7 @@ from ... import config
 from ...core import Module
 
 def timestamp_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[], stamp_datatype=None):
+                 version='0.0', fields=[], stamp_datatype=None, xtype=None):
     """Module for adding timestamps to a dataset"""
 
     icon = {
@@ -20,6 +20,7 @@ def timestamp_module(id=None, datatype=None, action=None,
         }
     }
     
+    xtype = 'AutosizeImageContainer'
     terminals = [
         dict(id='input',
              datatype=datatype,
@@ -48,6 +49,8 @@ def timestamp_module(id=None, datatype=None, action=None,
         "name": "override_existing",
         "value": False,
     }
+    
+    fields = {"override_existing": override_field}
 
     # Combine everything into a module.
     module = Module(id=id,
@@ -56,8 +59,9 @@ def timestamp_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[override_field] + fields,
+                  fields=fields,
                   action=action,
+                  xtype=xtype
                   )
 
     return module

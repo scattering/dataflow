@@ -6,6 +6,7 @@ from .deps import processing_order
 
 from collections import deque
 import simplejson
+import inspect
 
 _registry = {}
 _registry_data = {}
@@ -117,9 +118,14 @@ true if an input is required; ignored on output terminals.
 multiple : boolean
 true if multiple inputs are accepted; ignored on output
 terminals.
+
+xtype : string
+name of the xtype to be used for this container.
+Common ones include WireIt.Container, WireIt.ImageContainer
+and the locally-defined AutosizeImageContainer (see lang_common.js)
 """
     def __init__(self, id, version, name, description, icon=None,
-                 terminals=None, fields=None, action=None):
+                 terminals=None, fields=None, action=None, xtype=None, filterModule=None):
         self.id = id
         self.version = version
         self.name = name
@@ -128,6 +134,8 @@ terminals.
         self.fields = fields
         self.terminals = terminals
         self.action = action
+        self.xtype = xtype
+        self.filterModule = filterModule
 
     def get_terminal_by_id(self, id):
         """ 
@@ -137,6 +145,16 @@ Returns None if id does not exist.
         terminal_lookup = dict((t['id'], t) for t in self.terminals)
         return terminal_lookup[id]
         
+    def get_source_code(self):
+        """
+Retrieves the source code for the identified module that
+does the actual calculation.  If no module is identified
+it returns an empty string
+"""
+        source = ""
+        if self.filterModule is not None:
+            source = "".join(inspect.getsourcelines(self.filterModule)[0])
+        return source        
         
 class Template(object):
     """

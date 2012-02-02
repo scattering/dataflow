@@ -6,7 +6,7 @@ from .. import config
 from ..core import Module
 
 def load_module(id=None, datatype=None, action=None,
-                version='0.0', fields=[]):
+                version='0.0', fields={}, **kwargs):
     """Module for loading a dataset"""
 
     icon = {
@@ -37,6 +37,8 @@ def load_module(id=None, datatype=None, action=None,
         "value": '',
     }
     
+    fields.update({'files': files_field, 'intent': intent_field})
+    
     # Combine everything into a module.
     module = Module(id=id,
                   name='Load',
@@ -44,8 +46,9 @@ def load_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   #icon=icon,
                   terminals=terminals,
-                  fields=[files_field, intent_field] + fields,
+                  fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

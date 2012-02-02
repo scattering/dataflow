@@ -6,8 +6,8 @@ from ... import config
 from ...core import Module
 
 def normalize_monitor_module(id=None, datatype=None, action=None,
-                             version='0.0', fields=[],
-                             description="apply TripleAxis monitor normalization"):
+                             version='0.0', fields={},
+                             description="apply TripleAxis monitor normalization", **kwargs):
     """
     Return a module for normalizing a TripleAxis monitor
     """
@@ -38,7 +38,7 @@ def normalize_monitor_module(id=None, datatype=None, action=None,
              ),
     ]
     
-    target_monitor_field = {
+    fields['target_monitor'] = {
         "type":"float",
         "label": "Target monitor",
         "name": "target_monitor",
@@ -52,8 +52,9 @@ def normalize_monitor_module(id=None, datatype=None, action=None,
                   description=description,
                   icon=icon,
                   terminals=terminals,
-                  fields=[target_monitor_field] + fields,
+                  fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

@@ -6,7 +6,7 @@ from .. import config
 from ..core import Module
 from ..SANS.map_pics import map_pics
 def correct_dead_time_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields={}, **kwargs):
     """Deadtime corrections - has a parameter"""
 
     icon = {
@@ -80,7 +80,7 @@ def correct_dead_time_module(id=None, datatype=None, action=None,
              description='Dead Time',
              ),
     ]
-    deadtimeConstant_field = {
+    fields['deadtimeConstant'] = {
         'type' :'float',
         'label':'Deadtime Constant (default=3.4e-6)',
         'name' :'deadtimeConstant',
@@ -93,8 +93,9 @@ def correct_dead_time_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[deadtimeConstant_field]+fields,
+                  fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

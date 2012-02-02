@@ -7,7 +7,7 @@ from ...core import Module
 
 def subtract_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[],
-                description="Combine multiple datasets"):
+                description="Combine multiple datasets", xtype=None):
     """
     Return a module for combining multiple datasets
     """
@@ -22,7 +22,7 @@ def subtract_module(id=None, datatype=None, action=None,
         }
     }
     
-    
+    xtype = 'AutosizeImageContainer'
     terminals = [
         dict(id='minuend',
              datatype=datatype,
@@ -54,6 +54,7 @@ def subtract_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  xtype=xtype
                   )
 
     return module

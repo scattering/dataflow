@@ -6,7 +6,7 @@ from ... import config
 from ...core import Module
 
 def wiggle_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields=[], xtype=None, **kwargs):
     """Module for wiggle correction"""
 
     icon = {
@@ -18,6 +18,7 @@ def wiggle_module(id=None, datatype=None, action=None,
         }
     }
     
+    xtype = 'AutosizeImageContainer'
     terminals = [
         dict(id='input',
              datatype=datatype,
@@ -33,11 +34,12 @@ def wiggle_module(id=None, datatype=None, action=None,
              ),
     ]
 
-    amp_field = {
-        "type":"float",
-        "label": "amplitude",
-        "name": "scale",
-        "value": 0.14,
+    fields = {"amplitude": {
+            "type":"float",
+            "label": "amplitude",
+            "name": "amplitude",
+            "value": 0.14,
+        }
     }
 
     # Combine everything into a module.
@@ -47,8 +49,10 @@ def wiggle_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[amp_field] + fields,
+                  fields=fields,
                   action=action,
+                  xtype=xtype,
+                  **kwargs
                   )
 
     return module

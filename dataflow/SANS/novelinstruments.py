@@ -110,7 +110,9 @@ datadiv = Data(SANS_DATA, div)
 #dictionary = Datatype(id='dictionary', 
                         #name = 'dictionary',
                         #plot = None)
- 
+
+xtype="AutosizeImageContainer"
+
 # Load module
 def load_action(files=[], intent='', **kwargs):
     print "loading", files
@@ -140,7 +142,7 @@ def _save_one(input, ext):
     with open(outname, 'w') as f:
         f.write(str(input.__str__()))
 save = save_module(id='sans.save', datatype=SANS_DATA,
-                   version='1.0', action=save_action)
+                   version='1.0', action=save_action, xtype="SaveContainer")
 
 
 # Modules
@@ -155,7 +157,7 @@ def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in, dea
     deadtime = [correct_dead_time(f, deadtimeConstant) for f in det_eff]
     result = deadtime
     return dict(sample_out=[result[0]], empty_cell_out=[result[1]], empty_out=[result[2]], blocked_out=[result[3]])
-deadtime = correct_dead_time_module(id='sans.correct_dead_time', datatype=SANS_DATA, version='1.0', action=correct_dead_time_action)
+deadtime = correct_dead_time_module(id='sans.correct_dead_time', datatype=SANS_DATA, version='1.0', action=correct_dead_time_action, xtype=xtype)
 
 def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Temp_in, monitorNormalize=1e8, bottomLeftCoord={}, topRightCoord={}, **kwargs):
     coord_left = (int(bottomLeftCoord['X']), int(bottomLeftCoord['Y']))
@@ -177,7 +179,7 @@ def generate_transmission_action(sample_in, empty_cell_in, empty_in, Tsam_in, Te
     sam.Tsam = Tsam
     sam.Temp = Temp
     return dict(sample_out=[sam], empty_cell_out=[result[1]])#,=[result[3]])
-generate_trans = generate_transmission_module(id='sans.generate_transmission', datatype=SANS_DATA, version='1.0', action=generate_transmission_action)        
+generate_trans = generate_transmission_module(id='sans.generate_transmission', datatype=SANS_DATA, version='1.0', action=generate_transmission_action, xtype=xtype, filterModule=generate_transmission)        
 def initial_correction_action(sample, empty_cell, blocked, **kwargs):
     print type(sample)
     lis = [sample[0], empty_cell[0], blocked[0]]
@@ -188,7 +190,7 @@ def initial_correction_action(sample, empty_cell, blocked, **kwargs):
     CORR.Tsam = SAM.Tsam
     result = CORR
     return dict(COR=[result])
-initial_corr = initial_correction_module(id='sans.initial_correction', datatype=SANS_DATA, version='1.0', action=initial_correction_action)
+initial_corr = initial_correction_module(id='sans.initial_correction', datatype=SANS_DATA, version='1.0', action=initial_correction_action, xtype=xtype, filterModule=initial_correction)
 
 def correct_detector_sensitivity_action(COR, DIV_in, **kwargs):
     lis = [COR[0], DIV_in[0]]
@@ -200,7 +202,7 @@ def correct_detector_sensitivity_action(COR, DIV_in, **kwargs):
     DIVV.Tsam = COR[0].Tsam
     result = DIVV
     return dict(DIV_out=[result])
-correct_det_sens = correct_detector_sensitivity_module(id='sans.correct_detector_sensitivity', datatype=SANS_DATA, version='1.0', action=correct_detector_sensitivity_action)
+correct_det_sens = correct_detector_sensitivity_module(id='sans.correct_detector_sensitivity', datatype=SANS_DATA, version='1.0', action=correct_detector_sensitivity_action, xtype=xtype, filterModule=correct_detector_sensitivity)
 def convert_qxqy_action():
     global correctVer, qx, qy
     correctVer, qx, qy = convert_qxqy(correctVer)
@@ -221,22 +223,22 @@ def absolute_scaling_action(DIV, empty, sensitivity, ins_name='',bottomLeftCoord
     result = [ABS]
    
     return dict(ABS=result)
-absolute = absolute_scaling_module(id='sans.absolute_scaling', datatype=SANS_DATA, version='1.0', action=absolute_scaling_action)
+absolute = absolute_scaling_module(id='sans.absolute_scaling', datatype=SANS_DATA, version='1.0', action=absolute_scaling_action, xtype=xtype, filterModule=absolute_scaling)
 def annular_av_action(ABS, **kwargs):
     correct = convert_q(ABS[0])
     AVG = annular_av(correct)
     result = [AVG]
     print "Done Red"
     return dict(OneD=result)
-annul_av = annular_av_module(id='sans.annular_av', datatype=SANS_DATA, version='1.0', action=annular_av_action)
+annul_av = annular_av_module(id='sans.annular_av', datatype=SANS_DATA, version='1.0', action=annular_av_action, xtype=xtype, filterModule=annular_av)
 def correct_background_action(input=None, **kwargs):
     result = [correct_background(bundle[-1], bundle[0]) for bundle in input]
     return dict(output=result)
-correct_back = correct_background_module(id='sans.correct_background', datatype=SANS_DATA, version='1.0', action=correct_background_action)
+correct_back = correct_background_module(id='sans.correct_background', datatype=SANS_DATA, version='1.0', action=correct_background_action, xtype=xtype, filterModule=correct_background)
 
 #Instrument definitions
-SANS_INS = Instrument(id='ncnr.sans.ins',
-                 name='NCNR SANS INS',
+SANS_NG3 = Instrument(id='ncnr.sans.ins',
+                 name='ng3',
                  archive=config.NCNR_DATA + '/sansins',
                  menu=[('Input', [load, save]),
                        ('Reduction', [deadtime, generate_trans, correct_det_sens, initial_corr, annul_av, absolute]),
@@ -244,7 +246,8 @@ SANS_INS = Instrument(id='ncnr.sans.ins',
                  requires=[config.JSCRIPT + '/sansplot.js'],
                  datatypes=[data2d],
                  )
-instruments = [SANS_INS]
+                 
+instruments = [SANS_NG3]
 for instrument in instruments:
     register_instrument(instrument)
 

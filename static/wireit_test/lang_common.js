@@ -1,3 +1,5 @@
+// changed!
+
 AutosizeImageContainer = function(opts, layer) {
     AutosizeImageContainer.superclass.constructor.call(this, opts, layer);
     var that = this;
@@ -57,3 +59,152 @@ AutosizeImageContainer = function(opts, layer) {
 YAHOO.lang.extend(AutosizeImageContainer, WireIt.ImageContainer, {
     xtype: 'AutosizeImageContainer',
 });
+
+SaveContainer = function(opts, layer) {
+    SaveContainer.superclass.constructor.call(this, opts, layer);
+    
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    var content = document.createElement('div');
+    content.innerHTML = '';
+    var saveButton = document.createElement('button');
+    saveButton.value = 'save';
+    saveButton.innerHTML = 'Save';
+    content.appendChild(saveButton); 
+    
+    var getCSVButton = document.createElement('button');
+    getCSVButton.value = 'getCSV';
+    getCSVButton.innerHTML = 'download CSV';
+    content.appendChild(getCSVButton);
+      
+    this.setBody(content);
+    this.CSVForm = getCSVForm;
+
+    YAHOO.util.Event.addListener(saveButton, 'click', this.Save, this, true);
+    YAHOO.util.Event.addListener(getCSVButton, 'click', this.getCSV, this, true);
+};
+
+YAHOO.lang.extend(SaveContainer, WireIt.Container, {
+    xtype: 'SaveContainer',
+    Save: function(e) {
+        console.log('save click:', e);
+        alert('save to server not yet implemented.  Try downloading CSV version of data');
+    },
+    getCSV: function(e, f) {
+        var reductionInstance = editor.reductionInstance;
+        var wires = f.wires;
+        if (wires.length == 0) {
+            alert('no data to get (no wires in)');
+            return
+        } else {
+            var wire_in = f.wires[0];
+            clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
+        }
+        editor.getCSV(reductionInstance, clickedOn);
+    },
+});
+
+SliceContainer = function(opts, layer) {
+    jQuery.extend(true, opts, {
+        'height': 16,
+        'width': 120,
+        'terminals': [{
+            "name": "input", 
+            "offsetPosition": {"left": -16, "top": 16}, 
+          }, 
+          {
+            "name": "output_x", 
+            "offsetPosition": {"left": 44,"bottom": -52}, 
+          }, 
+          {
+            "name": "output_y", 
+            "offsetPosition": {"right": -16, "top": 16}, 
+          }
+        ]
+    });  
+    SliceContainer.superclass.constructor.call(this, opts, layer);
+
+    var content = document.createElement('div');
+    content.innerHTML = '';
+    //var saveButton = document.createElement('img');
+    var sliceButton = document.createElement('button');
+    sliceButton.value = 'slice';
+    sliceButton.innerHTML = 'Slice';
+    //saveButton.src = this.image;
+    content.appendChild(sliceButton);
+    this.setBody(content);
+    YAHOO.util.Event.addListener(sliceButton, 'click', this.openSliceWindow, this, true);
+    
+    /*
+    var directions = {
+        'left': {'offsets': {'left': -16, 'top': 16}, 'test': function(el) { return el.direction[0] < 0 } },
+        'right': {'offsets': {'right': -16, 'top': 16}, 'test': function(el) { return el.direction[0] > 0 } },
+        'bottom': {'offsets': {'left': 44, 'bottom': -52}, 'test': function(el) { return el.direction[1] > 0 } },
+    }
+    var terminals = this.terminals;
+    for (var d in directions) {
+        var terms = terminals.filter( directions[d].test );
+        for (var i in terms) {
+            var term = terms[i];
+            for (var j in directions[d].offsets) {
+                term.el.style.setProperty(j, directions[d].offsets[j], null);
+                
+            }
+            term.offsetPosition = directions[d].offsets;
+        }
+    }
+    */
+    //this.redrawAllWires();
+};
+
+YAHOO.lang.extend(SliceContainer, WireIt.Container, {
+    xtype: 'SliceContainer',
+    openSliceWindow: function(e, f) {
+        var reductionInstance = editor.reductionInstance;
+        var wires = f.wires;
+        if (wires.length == 0) {
+            alert('no data to get (no wires in)');
+            return
+        } else {
+            var wire_in = f.wires[0];
+            clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
+        }
+        var toReduce = editor.generateReductionRecipe(reductionInstance, clickedOn);
+        f.getConfig();
+        editor.adapter.runReduction(toReduce, {
+            success: function(result) { 
+                //toPlot = result;
+                var sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768");
+                sliceWindow.toPlot = result;
+                sliceWindow.container = f;
+                sliceWindow.reductionInstance = reductionInstance;
+                //else {
+                //    sliceWindow.update_plot(result[0]);
+                //    sliceWindow.update_selectors(result);
+                //}
+            },
+            failure: editor.runModuleFailure,
+            scope: editor}
+        );
+        
+        //console.log('save click:', e);
+        //alert('save to server not yet implemented.  Try downloading CSV version of data');
+        
+    }
+});
+
+

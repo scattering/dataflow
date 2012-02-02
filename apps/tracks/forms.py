@@ -11,11 +11,11 @@ language_choices = (
 			('asterix', 'asterix'),
 )
 
-instrument_class_list = []
+instrument_class_list = set()
 for i in Instrument.objects.all():
 	ins_class = str(i.instrument_class)
-	if not instrument_class_list.count(ins_class):
-		instrument_class_list.append(tuple([ins_class, ins_class]))
+	instrument_class_list.add(tuple([ins_class, ins_class]))
+	
 instrument_class_choices = tuple(instrument_class_list)
 
 class languageSelectForm(forms.Form):

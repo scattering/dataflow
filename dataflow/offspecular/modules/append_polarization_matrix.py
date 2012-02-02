@@ -7,8 +7,8 @@ from ... import config
 from ...core import Module
 
 def append_polarization_matrix_module(id=None, datatype=None, cell_datatype=None, action=None,
-                version='0.0', fields=[],
-                description="Append polarization matrix"):
+                version='0.0', fields={},
+                description="Append polarization matrix", xtype=None):
     """
     Return a module for appending polarization matrices
     """
@@ -23,7 +23,7 @@ def append_polarization_matrix_module(id=None, datatype=None, cell_datatype=None
         }
     }
     
-    
+    xtype = 'AutosizeImageContainer'
     terminals = [
         dict(id='input',
              datatype=datatype,
@@ -55,6 +55,7 @@ def append_polarization_matrix_module(id=None, datatype=None, cell_datatype=None
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  xtype=xtype
                   )
 
     return module

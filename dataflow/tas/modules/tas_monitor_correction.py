@@ -6,8 +6,8 @@ from ... import config
 from ...core import Module
 
 def monitor_correction_module(id=None, datatype=None, action=None,
-                             version='0.0', fields=[],
-                             description="apply TripleAxis monitor correction"):
+                             version='0.0', fields={},
+                             description="apply TripleAxis monitor correction", **kwargs):
     """
     Return a module for correcting a TripleAxis monitor
     """
@@ -38,7 +38,7 @@ def monitor_correction_module(id=None, datatype=None, action=None,
              ),
     ]
     
-    instrument_name_field = {
+    fields['instrument_name'] = {
         "type":"string",
         "label": "Instrument name",
         "name": "instrument_name",
@@ -52,8 +52,9 @@ def monitor_correction_module(id=None, datatype=None, action=None,
                   description=description,
                   icon=icon,
                   terminals=terminals,
-                  fields=[instrument_name_field] + fields,
+                  fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

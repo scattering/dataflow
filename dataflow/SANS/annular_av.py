@@ -6,7 +6,7 @@ from .. import config
 from ..core import Module
 from ..SANS.map_pics import map_pics
 def annular_av_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields={}, **kwargs):
     """Using Annular averaging, make 1D sans data (Q vs I)"""
 
     icon = {
@@ -47,6 +47,7 @@ def annular_av_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

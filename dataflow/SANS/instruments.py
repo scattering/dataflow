@@ -10,7 +10,7 @@ from pprint import pprint
 from .. import config
 from .. import wireit
 from ..calc import run_template
-from ..core import Datatype, Instrument, Template, register_instrument
+from ..core import Data, Instrument, Template, register_instrument
 from ..modules.load import load_module
 from ..modules.save import save_module
 from ...reduction.sans.filters import *
@@ -57,11 +57,13 @@ qy = {}
 global fileList 
 global correctVer 
 # Datatype
-SANS_DATA = 'data1d.sans'
-data2d = Datatype(id=SANS_DATA,
-                  name='SANS Data',
-                  plot='sansplot')
+SANS_DATA = 'data2d.sans'
+DIV_DATA = 'data2d.sans.div'
+                  
+data2d = Data(SANS_DATA, SansData)
+divdata = Data(DIV_DATA, div)
 
+xtype = "AutosizeImageContainer"
  
 # Load module
 def load_action(files=None, intent=None):
@@ -118,7 +120,7 @@ def monitor_normalize_action(input=None):
     result = [monitor_normalize(f) for f in input[0]]
     print "result: ", result
     return dict(output=result)
-mon_norm = monitor_normalize_module(id='sans.monitor_normalize', datatype=SANS_DATA, version='1.0', action=monitor_normalize_action)
+mon_norm = monitor_normalize_module(id='sans.monitor_normalize', datatype=SANS_DATA, version='1.0', action=monitor_normalize_action, xtype=xtype)
 
 def generate_transmission_action(input=None):
     
@@ -135,7 +137,7 @@ def generate_transmission_action(input=None):
     return dict(output=result)
     #result = [generate_transmission(f) for f in flat]
     #return dict(output=result)
-gen_trans = generate_transmission_module(id='sans.generate_transmission', datatype=SANS_DATA, version='1.0', action=generate_transmission_action)
+gen_trans = generate_transmission_module(id='sans.generate_transmission', datatype=SANS_DATA, version='1.0', action=generate_transmission_action, xtype=xtype)
 def initial_correction_action(input=None):
     #SAM,BGD,EMP,Trans
     global Tsam,Temp
@@ -145,25 +147,25 @@ def initial_correction_action(input=None):
     result = [COR]
     print "result: ", result
     return dict(output=result)
-initial_corr = initial_correction_module(id='sans.initial_correction', datatype=SANS_DATA, version='1.0', action=initial_correction_action)
+initial_corr = initial_correction_module(id='sans.initial_correction', datatype=SANS_DATA, version='1.0', action=initial_correction_action, xtype=xtype)
 
 def convertq_action(input=None):
     result = [convert_q(input[0][0])]
     return dict(output=result)
-convq = convertq_module(id='sans.convertq', datatype=SANS_DATA, version='1.0', action=convertq_action)
+convq = convertq_module(id='sans.convertq', datatype=SANS_DATA, version='1.0', action=convertq_action, xtype=xtype)
 def correct_solid_angle_action(input=None):
     
     print "input#########: ",input
     result = [correct_solid_angle(input[0][0])]
     return dict(output=result)
-solid_angle = correct_solid_angle_module(id='sans.correct_solid_angle', datatype=SANS_DATA, version='1.0', action=correct_solid_angle_action)
+solid_angle = correct_solid_angle_module(id='sans.correct_solid_angle', datatype=SANS_DATA, version='1.0', action=correct_solid_angle_action, xtype=xtype)
 def correct_detector_efficiency_action(input=None):
     print "input: ",input
     sensitivity = read_div(map_files('div'))
     DIV = correct_detector_efficiency(input[0][0],sensitivity)
     result = [DIV]
     return dict(output=result)
-correct_det_eff = correct_detector_efficiency_module(id='sans.correct_detector_efficiency', datatype=SANS_DATA, version='1.0', action=correct_detector_efficiency_action)
+correct_det_eff = correct_detector_efficiency_module(id='sans.correct_detector_efficiency', datatype=SANS_DATA, version='1.0', action=correct_detector_efficiency_action, xtype=xtype)
 def convert_qxqy_action(input=None):
     print "input: ",input
     global qx,qy
@@ -171,14 +173,14 @@ def convert_qxqy_action(input=None):
     result = [CON]
     print "Convertqxqy: ", result
     return dict(output=result)
-qxqy = convert_qxqy_module(id='sans.convert_qxqy', datatype=SANS_DATA, version='1.0', action=convert_qxqy_action)
+qxqy = convert_qxqy_module(id='sans.convert_qxqy', datatype=SANS_DATA, version='1.0', action=convert_qxqy_action, xtype=xtype)
 def annular_av_action(input=None):
     input = input[0]
     AVG = annular_av(input[0])
     result = AVG
     print "AVG: ",result
     return dict(output=result)
-annul_av = annular_av_module(id='sans.annular_av', datatype=SANS_DATA, version='1.0', action=annular_av_action)
+annul_av = annular_av_module(id='sans.annular_av', datatype=SANS_DATA, version='1.0', action=annular_av_action, xtype=xtype)
 def absolute_scaling_action(input=None):
     #sample,empty,DIV,Tsam,instrument
     global fileList
@@ -189,16 +191,16 @@ def absolute_scaling_action(input=None):
     result = [ABS]
     print "abs: ",result
     return dict(output=result);
-absolute = absolute_scaling_module(id='sans.absolute_scaling', datatype=SANS_DATA, version='1.0', action=absolute_scaling_action)
+absolute = absolute_scaling_module(id='sans.absolute_scaling', datatype=SANS_DATA, version='1.0', action=absolute_scaling_action, xtype=xtype)
 
 def correct_background_action(input=None):
     result = [correct_background(bundle[-1], bundle[0]) for bundle in input]
     return dict(output=result)
-correct_back = correct_background_module(id='sans.correct_background', datatype=SANS_DATA, version='1.0', action=correct_background_action)
+correct_back = correct_background_module(id='sans.correct_background', datatype=SANS_DATA, version='1.0', action=correct_background_action, xtype=xtype)
 
 #Instrument definitions
 SANS_INS = Instrument(id='ncnr.sans.ins',
-                 name='NCNR SANS INS',
+                 name='ng3',
                  archive=config.NCNR_DATA + '/sansins',
                  menu=[('Input', [load, save]),
                        ('Reduction', [convq,correct_det_eff,mon_norm,correct_back,gen_trans,initial_corr,solid_angle,qxqy,annul_av,absolute])

@@ -436,6 +436,64 @@ var andr2 = {
       ], 
       "name": "Wiggle"
     }, 
+        {
+      "container": {
+        "icon": "../../static/img/offspecular/wiggle.png", 
+        "image": "../../static/img/offspecular/wiggle_image.png", 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:out"
+              ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": -12, 
+              "top": 16
+            }, 
+            "required": true
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:in"
+              ], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "left": 48, 
+              "top": 16
+            }, 
+            "required": false
+          }
+        ], 
+        "xtype": "WireIt.Container"
+      }, 
+      "fields": [
+        {
+          "label": "0: hanning, 1: hamming\n2:boxcar", 
+          "name": "window", 
+          "type": "integer", 
+          "value": 0
+        }
+      ], 
+      "name": "Smooth"
+    },
     {
       "container": {
         "icon": "../../static/img/offspecular/twotheta.png", 

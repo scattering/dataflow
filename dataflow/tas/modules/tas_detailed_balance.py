@@ -6,8 +6,8 @@ from ... import config
 from ...core import Module
 
 def detailed_balance_module(id=None, datatype=None, action=None,
-                             version='0.0', fields=[],
-                             description="apply TripleAxis detailed balance"):
+                             version='0.0', fields={},
+                             description="apply TripleAxis detailed balance", **kwargs):
     """
     Return a module for performing a detailed balance on a TripleAxis object
     """
@@ -47,6 +47,7 @@ def detailed_balance_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

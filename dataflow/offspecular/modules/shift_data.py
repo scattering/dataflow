@@ -6,18 +6,19 @@ from ... import config
 from ...core import Module
 
 def shift_data_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields=[], xtype=None, **kwargs):
     """Creates a module for shifting a block of 2d data from beginning to end"""
 
     icon = {
-        'URI': config.IMAGES + config.ANDR_FOLDER + "twotheta.png",
-        'image': config.IMAGES + config.ANDR_FOLDER + "twotheta_image.png",
+        'URI': config.IMAGES + config.ANDR_FOLDER + "shift_icon.png",
+        'image': config.IMAGES + config.ANDR_FOLDER + "shift_image.png",
         'terminals': {
             'input': (-12, 16, -1, 0),
             'output': (48, 16, 1, 0),
         }
     }
     
+    xtype = 'AutosizeImageContainer'
     terminals = [
         dict(id='input',
              datatype=datatype,
@@ -36,20 +37,20 @@ def shift_data_module(id=None, datatype=None, action=None,
     
 
     # pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6
-    fields.extend([
-        {
+    fields = {
+        "edge_bin": {
           "label": "Edge Bin", 
           "name": "edge_bin", 
-          "type": "int", 
+          "type": "float", 
           "value": 180,
         },
-        {
+        "axis": {
           "label": "Axis",
           "name": "axis",
-          "type": "int",
+          "type": "float",
           "value": 0,
-        },
-      ])
+        }
+      }
 
 
     # Combine everything into a module.
@@ -61,6 +62,8 @@ def shift_data_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  xtype=xtype,
+                  **kwargs
                   )
 
     return module

@@ -30,32 +30,32 @@ var andr2 = {
         "width": 120, 
         "xtype": "WireIt.Container"
       }, 
-      "fields": [
-        {
+      "fields": {
+        "files": {
           "label": "Files", 
           "name": "files", 
           "type": "[file]", 
           "value": []
         }, 
-        {
+        "intent": {
           "label": "Intent", 
           "name": "intent", 
           "type": "string", 
           "value": ""
         }, 
-        {
+        "auto_PolState": {
           "label": "Auto-polstate", 
           "name": "auto_PolState", 
           "type": "boolean", 
           "value": false
         }, 
-        {
+        "PolStates": {
           "label": "PolStates", 
           "name": "PolStates", 
-          "type": "dict:string:string", 
-          "value": {}
-        },
-      ], 
+          "type": "Array", 
+          "value": { "uu": {"label": "++", "value": false, "type": "boolean"}}
+        }
+      }, 
       "name": "Load"
     }, 
     {
@@ -506,6 +506,70 @@ var andr2 = {
         }
       ], 
       "name": "Wiggle"
+    },
+    {
+      "container": {
+        "icon": "../../static/img/offspecular/smooth_icon.png", 
+        "image": "../../static/img/offspecular/smooth_image.png", 
+        "terminals": [
+          {
+            "alwaysSrc": false, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:out"
+              ], 
+              "type": "data2d.ospec:in"
+            }, 
+            "direction": [
+              -1, 
+              0
+            ], 
+            "multiple": false, 
+            "name": "input", 
+            "offsetPosition": {
+              "left": -12, 
+              "top": 16
+            }, 
+            "required": true
+          }, 
+          {
+            "alwaysSrc": true, 
+            "ddConfig": {
+              "allowedTypes": [
+                "data2d.ospec:in"
+              ], 
+              "type": "data2d.ospec:out"
+            }, 
+            "direction": [
+              1, 
+              0
+            ], 
+            "multiple": true, 
+            "name": "output", 
+            "offsetPosition": {
+              "left": 48, 
+              "top": 16
+            }, 
+            "required": false
+          }
+        ], 
+        "xtype": "AutosizeImageContainer"
+      }, 
+      "fields": {
+          "window": {
+              "label": "0:hanning 1:hamming 2:boxcar", 
+              "name": "window", 
+              "type": "float", 
+              "value": 0
+          },
+          "width": {
+              "label": "smoothing width (data points)",
+              "name": "width",
+              "type": "float",
+              "value": 5
+          }
+      },
+      "name": "Smooth"
     }, 
     {
       "container": {
@@ -774,38 +838,38 @@ var andr2 = {
         "width": 80, 
         "xtype": "AutosizeImageContainer",
       }, 
-      "fields": [
-        {
-          "label": "invert mask (true sets values outside range to zero, false acts on values inside)", 
-          "name": "invert_mask", 
-          "type": "boolean", 
-          "value": false,
+      "fields": {
+        "invert_mask": {
+            "label": "invert mask (true sets values outside range to zero, false acts on values inside)", 
+            "name": "invert_mask", 
+            "type": "boolean", 
+            "value": false,
         },
-        {
-          "label": "xmin pixel", 
-          "name": "xmin", 
-          "type": "string", 
-          "value": "0"
-        }, 
-        {
-          "label": "xmax pixel", 
-          "name": "xmax", 
-          "type": "string", 
-          "value": ""
-        }, 
-        {
-          "label": "ymin pixel", 
-          "name": "ymin", 
-          "type": "string", 
-          "value": "0"
-        }, 
-        {
-          "label": "ymax pixel", 
-          "name": "ymax", 
-          "type": "string", 
-          "value": ""
-        }, 
-      ], 
+        "xmin": {
+            "type":"string",
+            "label": "xmin pixel",
+            "name": "xmin",
+            "value": "0",
+        },
+        "xmax": {
+            "type":"string",
+            "label": "xmax pixel",
+            "name": "xmax",
+            "value": "",
+        },
+        "ymin": {
+            "type":"string",
+            "label": "ymin pixel",
+            "name": "ymin",
+            "value": "0",
+        },
+        "ymax": {
+            "type":"string",
+            "label": "ymax pixel",
+            "name": "ymax",
+            "value": "",
+        },
+    }, 
       "name": "Mask Data"
     }, 
     {

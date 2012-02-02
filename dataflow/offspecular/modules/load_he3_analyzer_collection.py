@@ -6,7 +6,7 @@ from ... import config
 from ...core import Module
 
 def load_he3_module(id=None, datatype=None, action=None,
-                version='0.0', fields=[]):
+                version='0.0', fields=[], xtype=None):
     """Module for loading an he3 analyzer collection"""
 
     icon = {
@@ -17,6 +17,7 @@ def load_he3_module(id=None, datatype=None, action=None,
         }
     }
     
+    xtype = "WireIt.Container"
     terminals = [
         dict(id='output',
              datatype=datatype,
@@ -25,11 +26,12 @@ def load_he3_module(id=None, datatype=None, action=None,
              ),
     ]
 
-    filename_field = {
-        "type":"list:str",
+    fields = {"files": {
+        "type":"[file]",
         "label": "Files",
         "name": "files",
-        "value": [],
+        "value": []
+        }
     }
     
     # uses user define types - not acceptable
@@ -47,8 +49,9 @@ def load_he3_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   #icon=icon,
                   terminals=terminals,
-                  fields=[filename_field] + fields,
+                  fields=fields,
                   action=action,
+                  xtype=xtype
                   )
 
     return module

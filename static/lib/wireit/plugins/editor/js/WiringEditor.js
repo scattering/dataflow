@@ -219,13 +219,73 @@
 				}
 			}
 		},
+		
+		onSave: function() {
+		    this.renderSavePanel();
+		    this.savePanel.show();
+		},
+		/**
+		 * @method renderSavePanel
+		 */
+		renderSavePanel: function() {
+			if( !this.savePanel) {
+				this.savePanel = new widget.Panel('WiringEditor-savePanel', {
+					fixedcenter: true,
+					draggable: true,
+					width: '500px',
+					visible: false,
+					modal: true
+				});
+				this.savePanel.setHeader("Save current wiring");
+				var body = "<input type='text' id='saveName' />";
+				body += "<div><input type='button' value='Save to this Experiment' id='WiringEditor-saveNormal' /><br>";
+				body += "<input type='button' value='Save as Standard Template' id='WiringEditor-saveToInstrument' /><br>";
+				body += "<input type='button' value='Cancel' id='WiringEditor-saveCancel' /></div>";
+				this.savePanel.setBody(body)
+				//"Filter: <input type='text' id='loadFilter' /><div id='loadPanelBody'></div><div id='loadPanelButtons'></div>");
+				this.savePanel.render(document.body);
+                
+				
+				// Listen to the button press to upload a new file
+				Event.onAvailable('WiringEditor-saveCancel', function() {
+				    document.getElementById('WiringEditor-saveCancel').onclick = function() { editor.savePanel.hide() }
+				}, this, true);
+				Event.onAvailable('WiringEditor-saveNormal', function() {
+				    document.getElementById('WiringEditor-saveNormal').onclick = function() { 
+				        var wirename = document.getElementById('saveName').value;
+				        editor.save(wirename, false);
+				        editor.savePanel.hide();
+				    }
+				}, this, true);
+				Event.onAvailable('WiringEditor-saveToInstrument', function() {
+				    document.getElementById('WiringEditor-saveToInstrument').onclick = function() { 
+				        var wirename = document.getElementById('saveName').value;
+				        editor.save(wirename, true);
+				        editor.savePanel.hide();
+				    }
+				}, this, true);
+			}
+		},
 		/**
 		 * save the current module
 		 */
-		save: function() {
-
+		save: function(wirename, saveToInstrument) {
+		    // if this flag is set, the server will save the template to the 
+		    // Instrument space instead of the current Experiment, making it
+		    // available to all users (a default template)
+            var saveToInstrument = saveToInstrument || false; // defaults to false
+           
 			var value = this.getValue();
-			var wirename = prompt("Please set the name for this wiring template (or hit cancel to leave the name unchanged)", value.name)
+			//var wirename;
+			//this.renderSavePanel();
+			//this.savePanel.show();
+			//var promptname = prompt("Please set the name for this wiring template (or hit cancel to leave the name unchanged)", value.name)
+			//if (promptname != null) { 
+			//    wirename = promptname;
+			//} else {
+			//    wirename = value.name;
+			//}
+			
 			if(wirename === "") {
 				this.alert("Please choose a name");
 				return;
@@ -243,8 +303,10 @@
 				//console.log(i, this.tempSavedWiring.modules[i].config)
 				this.tempSavedWiring.modules[i].config = this.tempSavedWiring.modules[i].config[this.reductionInstance];
 			}
-			this.tempSavedWiring.properties.name = wirename
-			this.adapter.saveWiring(this.tempSavedWiring, {
+			var data = { saveToInstrument: saveToInstrument, 
+			                 new_wiring:  this.tempSavedWiring }
+			                   
+			this.adapter.saveWiring(data, {
 				success: this.saveModuleSuccess,
 				failure: this.saveModuleFailure,
 				scope: this
@@ -266,9 +328,12 @@
 		 * saveModule failure callback
 		 * @method saveModuleFailure
 		 */
-		saveModuleFailure: function(errorStr) {
+		saveModuleFailure: function(errorStr, b) {
+		    if (b && b.errorStr) { var errorStr = b.errorStr; }
 			this.alert("Unable to save the wiring : "+errorStr);
 		},
+	
+		    
 		// added 8/10/11, Maranville
 		// uploads files to server as POST
 		/**
@@ -611,12 +676,18 @@
 					modal: true
 				});
 				this.loadPanel.setHeader("Select the wiring to load");
-				this.loadPanel.setBody("Filter: <input type='text' id='loadFilter' /><div id='loadPanelBody'></div>");
+				var body = "Filter: <input type='text' id='loadFilter' /><input type='button' value='Upload wiring' id='WiringEditor-uploadPipe' /><div id='loadPanelBody'></div>"
+				this.loadPanel.setBody(body)
+				//"Filter: <input type='text' id='loadFilter' /><div id='loadPanelBody'></div><div id='loadPanelButtons'></div>");
 				this.loadPanel.render(document.body);
-
+                
 				// Listen the keyup event to filter the module list
 				Event.onAvailable('loadFilter', function() {
 					Event.addListener('loadFilter', "keyup", this.inputFilterTimer, this, true);
+				}, this, true);
+				// Listen to the button press to upload a new file
+				Event.onAvailable('WiringEditor-uploadPipe', function() {
+				    Event.addListener('WiringEditor-uploadPipe', 'click', function(){ this.alert('not implemented yet...'); }, this, true);
 				}, this, true);
 			}
 		},
@@ -659,6 +730,7 @@
 
 			panelBody.innerHTML = "";
 			panelBody.appendChild(list);
+			panelBody.appendChild(document.createElement('button'));
 
 			Event.addListener(list, 'click', function(e,args) {
 				this.loadPipe(Event.getTarget(e).innerHTML);
@@ -1062,29 +1134,33 @@
 //			while (YAHOO.util.Dom.get("instance-modules-input").hasChildNodes()) {
 //				YAHOO.util.Dom.get("instance-modules-input").removeChild(YAHOO.util.Dom.get("instance-modules-input").lastChild);
 //			}
-			configHeaders = []
+			configHeaders = [];
 			//badHeaders = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
-			badHeaders = ["position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
-			configs = this.layer.containers[moduleID].getConfig()[this.reductionInstance]
-			//console.log(configs)
-			for (var j in configs) {
-				if (badHeaders.indexOf(j) == -1) {
-					//console.log(configs[j], typeof configs[j])
-					if (typeof configs[j] == 'string' || typeof configs[j] == 'number' || typeof configs[j] == 'boolean' || typeof configs[j] == 'undefined') {
-						configHeaders.push([j,[j],[configs[j]]]);
-					}
-					if (typeof configs[j] == "object") {
-						fieldNames = []
-						fieldValues = []
-						defaultType = 'string'
-						for (var k in configs[j]) {
-							fieldNames.push(k);
-							fieldValues.push(configs[j][k]);
-						}
-						configHeaders.push([j,fieldNames,fieldValues])
-					}
+			excludeNames = ["position", "xtype", "width", "terminals", "height", "title", "image", "icon"];
+			var container = this.layer.containers[moduleID];
+			var configs = container.getConfig()[this.reductionInstance];
+			for (var n in excludeNames) {
+			    var en = excludeNames[n];
+			    if (en in configs) { delete configs[en] };
+			}
+			var module;
+			for(var index in CHOSEN_LANG.modules) {
+				if(CHOSEN_LANG.modules[index].name == container.title) {
+					module = CHOSEN_LANG.modules[index];
+					break;
 				}
 			}
+			//console.log(configs)
+			// !!! EXPLICIT JQUERY DEPENDENCY HERE !!!
+			// this creates an empty object, fills with fields from module definition, 
+			// then updates that object based on what is in configs
+			
+			configHeaders = jQuery.extend({}, module.fields, configs);
+			if (!('tracksConfigs' in container)) { container.tracksConfigs = {}; }
+			// now we link the tracksConfigs object to the newly created object - so when it is
+			// updated in the form, it will update directly to the object config
+			container.tracksConfigs[this.reductionInstance] = configHeaders;
+			   
 			//console.log(configHeaders, configHeaders.length)
 			if (configHeaders.length != 0) {
 			    //console.log('configHeaders:', configHeaders)

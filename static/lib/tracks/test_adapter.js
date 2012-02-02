@@ -62,15 +62,15 @@ test_adapter = {
 	},
 	
 	saveWiring: function(val, callbacks) {
-		var wiring = {};
-		YAHOO.lang.augmentObject(wiring, val);	
-		this._sendRequest("saveWiring", wiring, callbacks);
+		//var wiring = {};
+		//YAHOO.lang.augmentObject(wiring, val);	
+		this._sendRequest("saveWiring", val, callbacks);
 	},
 	
 	runReduction: function(val, callbacks) {
 		var wiring = {};
 		YAHOO.lang.augmentObject(wiring, val);
-		this._sendRequest("runReduction", val, callbacks);
+		this._sendRequest("runReduction", wiring, callbacks);
 	},
 	
 	getCSV: function(val) {
@@ -127,7 +127,7 @@ test_adapter = {
 		var postData = params.join('&');
 		**/
 		
-		var postData = 'data=' + YAHOO.lang.JSON.stringify(value);
+		var postData = 'data=' + encodeURIComponent(YAHOO.lang.JSON.stringify(value));
 		
 		var url = "";
 		if( YAHOO.lang.isFunction(this.config[action].url) ) {
@@ -153,6 +153,9 @@ test_adapter = {
 			 	callbacks.success.call(callbacks.scope, r);
 			},
 			failure: function(o) {
+			    //var s = o.responseText;
+				//         // CHANGED (7/5/11), JSON parsing was not working
+				//	 r = YAHOO.lang.JSON.parse(s)
 				var error = o.status + " " + o.statusText;
 				callbacks.failure.call(callbacks.scope, error);
 			}
