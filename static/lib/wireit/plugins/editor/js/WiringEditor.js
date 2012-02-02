@@ -907,7 +907,7 @@
 		// sets the editor reduction instance to something within 
 		// the reductionInstances set.
 		setReductionIndex: function(index) {
-		    var new_index = index ? index : this.reductionIndex;
+		    var new_index = (index != null) ? index : this.reductionIndex;
 		    if (new_index >= this.reductionInstances.length) {
 			    new_index = (this.reductionInstances.length - 1);
 		    }
