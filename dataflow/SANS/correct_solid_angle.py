@@ -6,7 +6,7 @@ from .. import config
 from ..core import Module
 
 def correct_solid_angle_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields={}, **kwargs):
     """(cos(sansdata.theta)**3)"""
 
     icon = {
@@ -41,6 +41,7 @@ def correct_solid_angle_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

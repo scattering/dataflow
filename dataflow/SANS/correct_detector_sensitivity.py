@@ -7,7 +7,7 @@ from ..core import Module
 from ..SANS.map_pics import map_pics
 
 def correct_detector_sensitivity_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields={}, **kwargs):
     """Uses .DIV to peform division in reduction steps"""
 
     icon = {
@@ -56,6 +56,7 @@ def correct_detector_sensitivity_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

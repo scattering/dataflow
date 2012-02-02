@@ -7,7 +7,7 @@ from ...core import Module
 
 def autogrid_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[],
-                description="Autogrid multiple datasets"):
+                description="Autogrid multiple datasets", xtype=None):
     """
     Return a module for that makes a grid to cover all of the data sets
     """
@@ -21,7 +21,7 @@ def autogrid_module(id=None, datatype=None, action=None,
         }
     }
     
-    
+    xtype = 'AutosizeImageContainer'
     terminals = [
         dict(id='input',
              datatype=datatype,
@@ -38,18 +38,19 @@ def autogrid_module(id=None, datatype=None, action=None,
     ]
     
     # extra_grid_point=True, min_step=1e-10
-    grid_point_field = {
-        "type":"bool",
-        "label": "extra grid point",
-        "name": "extra_grid_point",
-        "value": True,
-    }
-    
-    step_field = {
-        "type":"float",
-        "label": "minimum step",
-        "name": "min_step",
-        "value": 1e-10,
+    fields = {
+        "grid_point": {
+            "type":"boolean",
+            "label": "extra grid point",
+            "name": "extra_grid_point",
+            "value": True,
+        },
+        "step": {
+            "type":"float",
+            "label": "minimum step",
+            "name": "min_step",
+            "value": 1e-10,
+        }
     }
     
     # Combine everything into a module.
@@ -59,8 +60,9 @@ def autogrid_module(id=None, datatype=None, action=None,
                   description=description,
                   icon=icon,
                   terminals=terminals,
-                  fields=[grid_point_field, step_field] + fields,
+                  fields=fields,
                   action=action,
+                  xtype=xtype
                   )
 
     return module

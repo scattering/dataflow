@@ -6,7 +6,7 @@ from ... import config
 from ...core import Module
 
 def load_timestamp_module(id=None, datatype=None, action=None,
-                version='0.0', fields=[]):
+                version='0.0', fields=[], xtype=None):
     """Module for loading a timestamp file"""
 
     icon = {
@@ -17,6 +17,7 @@ def load_timestamp_module(id=None, datatype=None, action=None,
         }
     }
     
+    xtype = 'WireIt.Container'
     terminals = [
         dict(id='output',
              datatype=datatype,
@@ -41,6 +42,7 @@ def load_timestamp_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=[filename_field] + fields,
                   action=action,
+                  xtype=xtype
                   )
 
     return module

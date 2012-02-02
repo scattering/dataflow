@@ -92,7 +92,7 @@ def get_friendly_name(fh):
         return File.objects.get(name=str(fh)).friendly_name
     return fh
 
-OSPEC_DATA = 'data2d.ospec'
+OSPEC_DATA = 'ospec.data2d'
 data2d = Data(OSPEC_DATA, FilterableMetaArray)
 OSPEC_DATA_HE3 = OSPEC_DATA + '.he3'
 datahe3 = Data(OSPEC_DATA_HE3, He3AnalyzerCollection)
@@ -100,13 +100,12 @@ OSPEC_DATA_TIMESTAMP = OSPEC_DATA + '.timestamp'
 datastamp = Data(OSPEC_DATA_TIMESTAMP, PlottableDict)
 
 # Load module
-def load_action(files=[], intent='', auto_PolState=False, PolStates={}, **kwargs):
+def load_action(files=[], intent='', auto_PolState=False, PolStates=[], **kwargs):
     print "loading", files
     
-    PolStates = dict((file, state.replace(' ', '+')) for file, state in PolStates.items())
     result = []
-    for f in files:
-        subresult = _load_data(f, auto_PolState, PolStates.get(get_friendly_name(os.path.split(f)[-1]), ''))
+    for i, f in enumerate(files):
+        subresult = _load_data(f, auto_PolState, (PolStates[i] if i<len(PolStates) else ""))
         if type(subresult) == types.ListType:
             result.extend(subresult)
         else:
@@ -154,16 +153,16 @@ auto_PolState_field = {
         "value": False,
 }
 PolStates_field = {
-        "type":"dict:string:string",
+        "type":"string",
         "label": "PolStates",
         "name": "PolStates",
-        "value": {},
+        "value": "",
 }
 load = load_module(id='ospec.load', datatype=OSPEC_DATA,
-                   version='1.0', action=load_action, fields=[auto_PolState_field, PolStates_field])
+                   version='1.0', action=load_action, fields={'auto_PolState': auto_PolState_field, 'PolStates': PolStates_field}, filterModule=LoadICPData)
 
 load_asterix = load_asterix_module(id='ospec.asterix.load', datatype=OSPEC_DATA,
-                   version='1.0', action=load_asterix_action)
+                   version='1.0', action=load_asterix_action, filterModule=LoadAsterixRawHDF)
                    
 load_asterix_spectrum = load_asterix_spectrum_module(id='ospec.asterix.load_spectrum', datatype=OSPEC_DATA,
                     version='1.0', action=load_asterix_spectrum_action)
@@ -226,7 +225,7 @@ asterix_correct_spectrum = asterix_correct_spectrum_module(id='ospec.asterix.cor
 def shift_action(input=[], edge_bin = 180, axis=0, **kwargs):
     print "shifting data"
     return dict(output=AsterixShiftData().apply(input, edge_bin=edge_bin, axis=axis))
-shift_data = shift_data_module(id='ospec.asterix.shift', datatype=OSPEC_DATA, version='1.0', action=shift_action)
+shift_data = shift_data_module(id='ospec.asterix.shift', datatype=OSPEC_DATA, version='1.0', action=shift_action, filterModule=AsterixShiftData)
 
 # Normalize to Monitor module
 def normalize_to_monitor_action(input=[], **kwargs):
@@ -235,13 +234,13 @@ def normalize_to_monitor_action(input=[], **kwargs):
     print return_val
     return return_val
     
-normalize_to_monitor = normalize_to_monitor_module(id='ospec.normalize_monitor', datatype=OSPEC_DATA, version='1.0', action=normalize_to_monitor_action)
+normalize_to_monitor = normalize_to_monitor_module(id='ospec.normalize_monitor', datatype=OSPEC_DATA, version='1.0', action=normalize_to_monitor_action, filterModule=NormalizeToMonitor)
 
 # Mask module
 def mask_action(input=[], xmin="0", xmax="", ymin="0", ymax="", invert_mask=False, **kwargs):
     print "masking"
     return dict(output=MaskData().apply(input, xmin, xmax, ymin, ymax, invert_mask))
-mask_data = mask_data_module(id='ospec.mask', datatype=OSPEC_DATA, version='1.0', action=mask_action)
+mask_data = mask_data_module(id='ospec.mask', datatype=OSPEC_DATA, version='1.0', action=mask_action, filterModule=MaskData)
 
 # Slice module
 def slice_action(input=[], xmin="", xmax="", ymin="", ymax="", **kwargs):
@@ -257,10 +256,10 @@ def slice_action(input=[], xmin="", xmax="", ymin="", ymax="", **kwargs):
     else:
         xslice, yslice = output
     return dict(output_x = xslice, output_y = yslice)
-slice_data = slice_data_module(id='ospec.slice', datatype=OSPEC_DATA, version='1.0', action=slice_action)
+slice_data = slice_data_module(id='ospec.slice', datatype=OSPEC_DATA, version='1.0', action=slice_action, filterModule=SliceData)
 
 
-# Slice module
+# Collapse module
 def collapse_action(input=[], **kwargs):
     print "collapsing"
     output = CollapseData().apply(input)
@@ -274,26 +273,26 @@ def collapse_action(input=[], **kwargs):
     else:
         xslice, yslice = output
     return dict(output_x = xslice, output_y = yslice)
-collapse_data = collapse_data_module(id='ospec.collapse', datatype=OSPEC_DATA, version='1.0', action=collapse_action) 
+collapse_data = collapse_data_module(id='ospec.collapse', datatype=OSPEC_DATA, version='1.0', action=collapse_action,filterModule=CollapseData) 
 
 # Wiggle module
 def wiggle_action(input=[], amp=0.14, **kwargs):
     print "wiggling"
     return dict(output=WiggleCorrection().apply(input, amp=amp))
-wiggle = wiggle_module(id='ospec.wiggle', datatype=OSPEC_DATA, version='1.0', action=wiggle_action)
+wiggle = wiggle_module(id='ospec.wiggle', datatype=OSPEC_DATA, version='1.0', action=wiggle_action, filterModule=WiggleCorrection)
 
 # Time of Flight to wavelength module
 def tof_lambda_action(input=[], wl_over_tof=1.9050372144288577e-5, **kwargs):
     print "TOF to wavelength"
     return dict(output=AsterixTOFToWavelength().apply(input, wl_over_tof=wl_over_tof))
-tof_to_wavelength = tof_lambda_module(id='ospec.tof_lambda', datatype=OSPEC_DATA, version='1.0', action=tof_lambda_action)
+tof_to_wavelength = tof_lambda_module(id='ospec.tof_lambda', datatype=OSPEC_DATA, version='1.0', action=tof_lambda_action, filterModule=AsterixTOFToWavelength)
 
 # Pixels to two theta module
 def pixels_two_theta_action(input=[], pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6, **kwargs):
     print "converting pixels to two theta"
     result = PixelsToTwotheta().apply(input, pixels_per_degree=pixels_per_degree, qzero_pixel=qzero_pixel, instr_resolution=instr_resolution)
     return dict(output=result)
-pixels_two_theta = pixels_two_theta_module(id='ospec.twotheta', datatype=OSPEC_DATA, version='1.0', action=pixels_two_theta_action)
+pixels_two_theta = pixels_two_theta_module(id='ospec.twotheta', datatype=OSPEC_DATA, version='1.0', action=pixels_two_theta_action, filterModule=PixelsToTwotheta)
 
 # Asterix Correct Spectrum Module
 def correct_spectrum_action(data=[], spectrum=None):
@@ -397,10 +396,10 @@ timestamp = timestamp_module(id='ospec.timestamp', datatype=OSPEC_DATA,
 
 #Instrument definitions
 ANDR = Instrument(id='ncnr.ospec.andr',
-                 name='NCNR ANDR',
+                 name='andr',
                  archive=config.NCNR_DATA + '/andr',
-                 menu=[('Input', [load, load_asterix, load_he3, load_stamp, save]),
-                       ('Reduction', [autogrid, combine, subtract, offset, wiggle, pixels_two_theta, theta_two_theta_qxqz, two_theta_lambda_qxqz, empty_qxqz, mask_data, slice_data, collapse_data, normalize_to_monitor]),
+                 menu=[('Input', [load, load_he3, load_stamp, save]),
+                       ('Reduction', [autogrid, combine, subtract, offset, wiggle, pixels_two_theta, theta_two_theta_qxqz, empty_qxqz, mask_data, slice_data, collapse_data, normalize_to_monitor]),
                        ('Polarization reduction', [timestamp, append_polarization, combine_polarized, correct_polarized]),
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],
@@ -408,7 +407,7 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                  )
 
 ASTERIX = Instrument(id='lansce.ospec.asterix',
-                 name='LANSCE ASTERIX',
+                 name='asterix',
                  archive=config.NCNR_DATA + '/andr',
                  menu=[('Input', [load_asterix, load_asterix_spectrum, save]),
                        ('Reduction', [autogrid, combine, offset, shift_data, tof_to_wavelength, asterix_pixels_two_theta, two_theta_lambda_qxqz, mask_data, collapse_data, slice_data, normalize_to_monitor, asterix_correct_spectrum]),

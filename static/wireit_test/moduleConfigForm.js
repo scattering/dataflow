@@ -3,7 +3,7 @@ function configForm(headerList, moduleID) {
 	// headerList should contain a list of [fieldset title ("theta"), [list field names ["x","y"] (dict will have multiple, list and float only one) ]
 	items = []
 
-	console.log(headerList)
+	if (debug) { console.log(headerList); }
 	for (var i in headerList) {
 		items2 = []
 		for (var j in headerList[i][1]) {

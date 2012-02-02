@@ -6,7 +6,7 @@ from ... import config
 from ...core import Module
 
 def offset_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields=[], xtype=None):
     """Module for shifting a dataset"""
 
     icon = {
@@ -18,6 +18,7 @@ def offset_module(id=None, datatype=None, action=None,
         }
     }
     
+    xtype = 'AutosizeImageContainer'
     terminals = [
         dict(id='input',
              datatype=datatype,
@@ -33,11 +34,23 @@ def offset_module(id=None, datatype=None, action=None,
              ),
     ]
 
-    offset_field = {
-        "type":"dict:str:float", # maps a name to the offset
-        "label": "Offset amount",
-        "name": "offsets",
-        "value": {'xpixel':0.0, 'theta':0.0},
+    fields = { 
+        "offsets": {
+            "type":"Object", # maps a name to the offset
+            "label": "Offset amount",
+            "name": "offsets",
+            "value": {'axis1': {
+                    "type": "float",
+                    "label": "Axis 1 offset", 
+                    "value": 0.0
+                }, 
+                "axis2": { 
+                    "type": "float",
+                    "label": "Axis 2 offset",
+                    "value": 0.0
+                }
+            }
+        }
     }
 
     # Combine everything into a module.
@@ -47,8 +60,9 @@ def offset_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[offset_field] + fields,
+                  fields=fields,
                   action=action,
+                  xtype=xtype
                   )
 
     return module

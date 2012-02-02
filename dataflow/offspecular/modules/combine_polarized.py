@@ -6,8 +6,8 @@ from ... import config
 from ...core import Module
 
 def combine_polarized_module(id=None, datatype=None, action=None,
-                version='0.0', fields=[],
-                description="Combine multiple polarized datasets"):
+                version='0.0', fields={},
+                description="Combine multiple polarized datasets", xtype=None):
     """
     Return a module for combining multiple polarized datasets
     """
@@ -22,7 +22,7 @@ def combine_polarized_module(id=None, datatype=None, action=None,
         }
     }
     
-    
+    xtype = 'AutosizeImageContainer'
     terminals = [
         dict(id='input',
              datatype=datatype,
@@ -54,6 +54,7 @@ def combine_polarized_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  xtype=xtype
                   )
 
     return module

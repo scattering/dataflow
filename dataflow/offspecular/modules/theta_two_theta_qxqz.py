@@ -6,7 +6,7 @@ from ... import config
 from ...core import Module
 
 def theta_two_theta_qxqz_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields=[], xtype=None):
     """Creates a module for converting theta and two theta to qx and qz"""
 
     icon = {
@@ -41,11 +41,12 @@ def theta_two_theta_qxqz_module(id=None, datatype=None, action=None,
              ),
     ]
     
-    wavelength_field = {
-        "type":"float",
-        "label": "wavelength",
-        "name": "wavelength",
-        "value": 5.0,
+    fields = {"wavelength": {
+            "type":"float",
+            "label": "wavelength",
+            "name": "wavelength",
+            "value": 5.0,
+        }
     }
 
     # Combine everything into a module.
@@ -55,7 +56,7 @@ def theta_two_theta_qxqz_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[wavelength_field] + fields,
+                  fields=fields,
                   action=action,
                   )
 

@@ -6,7 +6,7 @@ from .. import config
 from ..core import Module
 from ..SANS.map_pics import map_pics
 def generate_transmission_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields={}, **kwargs):
     """Return transmission based on bottom left and top right coordinates"""
 
     icon = {
@@ -86,24 +86,30 @@ def generate_transmission_module(id=None, datatype=None, action=None,
              #description='correct',
              #),
     ]
-    monitorNormalize_field ={
+    fields['monitorNormalize'] ={
         'type' :'float',
         'label':'Monitor Normalization Count (default=1e8)',
         'name' :'monitorNormalize',
         'value':1e8,
         
         }
-    bottomLeftCoord_field = {
-        'type' :'dict',
+    fields['bottomLeftCoord'] = {
+        'type' :'object',
         'label':'Bottom Left Coordinate',
         'name' :'bottomLeftCoord',
-        'value':{'X':0, 'Y':0},
+        'value':{'X': 
+                    {'type': 'float', 'value': 0, 'label': 'X'}, 
+                 'Y':
+                    {'type': 'float', 'value': 0, 'label': 'Y'}}
         }
-    topRightCoord_field = {
-        'type' :'dict',
+    fields['topRightCoord'] = {
+        'type' :'object',
         'label':'Top Right Coordinate',
         'name' :'topRightCoord',
-        'value':{'X':0, 'Y':0},
+        'value':{'X': 
+                    {'type': 'float', 'value': 0, 'label': 'X'}, 
+                 'Y':
+                    {'type': 'float', 'value': 0, 'label': 'Y'}}
         }
     # Combine everything into a module.
     module = Module(id=id,
@@ -112,8 +118,9 @@ def generate_transmission_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[monitorNormalize_field,bottomLeftCoord_field,topRightCoord_field]+fields,
+                  fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

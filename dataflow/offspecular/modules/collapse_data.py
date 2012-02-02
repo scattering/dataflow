@@ -6,19 +6,20 @@ from ... import config
 from ...core import Module
 
 def collapse_data_module(id=None, datatype=None, action=None,
-                version='0.0', fields=[]):
+                version='0.0', fields={}, xtype=None, **kwargs):
     """Module for collapsing 2D data to 1D"""
 
     icon = {
         'URI': config.IMAGES + config.ANDR_FOLDER + 'autogrid.png',
-        'image': config.IMAGES + config.ANDR_FOLDER + 'autogrid_image.png',
+        'image': config.IMAGES + config.ANDR_FOLDER + 'collapse_image.png',
         'terminals': {
             'input' : (-16, 10, -1, 0),
-            'output_x' : (48, 4, 1, 0),
+            'output_x' : (48, 4, 0, 1),
             'output_y': (48, 40, 1, 0),
         }
     }
     
+    xtype  = 'AutosizeImageContainer'
     terminals = [
         dict(id='input',
              datatype=datatype,
@@ -49,10 +50,12 @@ def collapse_data_module(id=None, datatype=None, action=None,
                   name='Collapse Data',
                   version=version,
                   description=action.__doc__,
-                  #icon=icon,
+                  icon=icon,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  xtype=xtype,
+                  **kwargs
                   )
     module.LABEL_WIDTH = 80
     return module

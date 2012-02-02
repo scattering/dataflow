@@ -6,8 +6,8 @@ from ... import config
 from ...core import Module
 
 def join_module(id=None, datatype=None, action=None,
-                version='0.0', fields=[],
-                description="Combine multiple datasets"):
+                version='0.0', fields={},
+                description="Combine multiple datasets", **kwargs):
     """
     Return a module for combining multiple datasets
     """
@@ -48,6 +48,7 @@ def join_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

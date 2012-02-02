@@ -26,15 +26,15 @@ from ... import fillDB
 
 #from ...apps.fileview import testftp
 
-#from ...dataflow import wireit
+from ...dataflow import wireit
 from ...dataflow.calc import run_template
 from ...dataflow.calc import calc_single, fingerprint_template, get_plottable, get_csv
 from ...dataflow.offspecular.instruments import ANDR, ASTERIX
 print "ANDR imported: ", ANDR.id
 #from ...dataflow.offspecular.instruments import ASTERIX
 print "ASTERIX imported: ", ASTERIX.id
-from ...dataflow.SANS.novelinstruments import SANS_INS
-print "SANS imported: ", SANS_INS.id
+from ...dataflow.SANS.novelinstruments import SANS_NG3
+print "SANS imported: ", SANS_NG3.id
 from ...dataflow.tas.instruments import BT7 as TAS_INS
 print "TAS imported: ", TAS_INS.id
 
@@ -164,23 +164,32 @@ TAS_TEMPLATE_FROM_WIREIT = {"modules":[{"config":{"position":[50, 50], "xtype":"
 # this is a temporary option until wirings are stored in the database:
 # they can be stored in a local list:
 wirings_list = offspec + a + SANS + TAS_2 + SANS_4
+instrument_class_by_language = {}
+for instr in [ANDR, SANS_NG3, TAS_INS, ASTERIX]:
+    instrument_class_by_language[instr.name] = instr
+    
+#instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX }
+print 'instrument_class_by_language:', instrument_class_by_language
 
 #@csrf_exempt 
 def listWirings(request):
     context = RequestContext(request)
     print 'I am loading'
     data = simplejson.loads(request.POST['data'])
-    if data['experiment_id'] == -1:
-    	return HttpResponse(simplejson.dumps(wirings_list)) #, context_instance=context
-    else:
-    	wires = []
-    	experiments = Experiment.objects.get(id=data['experiment_id']).templates.all()
-    	for i in experiments:
-    		wires += [simplejson.loads(i.Representation)]
-    	if len(wires) == 0:
-    		return HttpResponse(simplejson.dumps(wirings_list))
-    	else:
-    		return HttpResponse(simplejson.dumps(wires)) 
+    instr = Instrument.objects.get(instrument_class = data['language'])
+    wirings = [] # start from scratch
+    default_templates = instr.Templates.all()
+    for t in default_templates:
+        wirings.append(simplejson.loads(t.Representation))
+        
+    experiment_templates = Experiment.objects.get(id=data['experiment_id']).templates.all()
+    for t in experiment_templates:
+        wirings.append(simplejson.loads(t.Representation))
+        
+    #if data['experiment_id'] == -1:
+    # 	return HttpResponse(simplejson.dumps(wirings_list)) #, context_instance=context
+    
+    return HttpResponse(simplejson.dumps(wirings)) 
 
 #    return HttpResponse(simplejson.dumps(a)) #andr vs bt7 testing
 
@@ -189,16 +198,28 @@ def saveWiring(request):
     #context = RequestContext(request)
     print 'I am saving'
     print request.POST
-    new_wiring = simplejson.loads(request.POST['data'])
+    postData = simplejson.loads(request.POST['data'])
+    new_wiring = postData['new_wiring']
     # this stores the wires in a simple list, in memory on the django server.
     # replace this with a call to storing the wiring in a real database.
     #print 'TEMPLATE NAME: ', new_wiring['name']
     #print 'TEMPLATE REPR: ', new_wiring
-    #print 'USER: ',request.user
+    print 'USER: ',request.user
     print new_wiring
-    Template.objects.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring), user=request.user)
+    user = User.objects.get(username=request.user)
+    if postData['saveToInstrument'] == True:
+        if user.is_staff:
+            instr = Instrument.objects.get(instrument_class = new_wiring['language'])
+            instr.Templates.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring), user=request.user)
+        else:
+            reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'you are not staff!'}))
+            reply.status_code = 500
+            return reply
+    else:
+        Template.objects.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring), user=request.user)
+    # this puts the Template into the pool of existing Templates.
     #wirings_list.append(new_wiring)
-    return HttpResponse(simplejson.dumps(b)) #, context_instance=context
+    return HttpResponse(simplejson.dumps({'save':'successful'})) #, context_instance=context
 
 def get_filepath_by_hash(fh):
     return File.objects.get(name=str(fh)).location + str(fh)
@@ -224,11 +245,11 @@ def getCSV(request):
         conf = {}
         for key, value in m.get('config', {}).items():
             if key == 'files':
-                file_hashes = [data['file_dict'][f] for f in m['config']['files']]
+                file_hashes = [data['file_dict'][f] for f in m['config']['files']['value']]
                 file_paths = [get_filepath_by_hash(fh) for fh in file_hashes]
                 conf.update({'files': file_paths})
             elif key not in bad_headers:
-                conf.update({key: value})
+                conf.update({key: value['value']})
         config.update({i:conf})
     context = RequestContext(request)
     terminal_id = data['clickedOn']['source']['terminal']
@@ -255,25 +276,26 @@ def getCSV(request):
 def runReduction(request):
     data = simplejson.loads(request.POST['data'])
     print 'IN RUN REDUCTION'
+    print data
     config = {}
     bad_headers = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
     for i, m in enumerate(data['modules']):
         conf = {}
         for key, value in m.get('config', {}).items():
             if key == 'files':
-                file_hashes = [data['file_dict'][f] for f in m['config']['files']]
+                file_hashes = [data['file_dict'][f] for f in m['config']['files']['value']]
                 file_paths = [get_filepath_by_hash(fh) for fh in file_hashes]
                 conf.update({'files': file_paths})
             elif key not in bad_headers:
-                conf.update({key: value})
+                conf.update({key: value['value']}) # mod for detailed confs coming from javascript
         config.update({i:conf})
     context = RequestContext(request)
     terminal_id = data['clickedOn']['source']['terminal']
     nodenum = int(data['clickedOn']['source']['moduleId'])
     print "calculating: terminal=%s, nodenum=%d" % (terminal_id, nodenum)
     language = data['language']
-    instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX }
-    instrument = instrument_by_language.get(language, None)
+    #instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX }
+    instrument = instrument_class_by_language.get(language, None)
     result = ['{}']
     if instrument is not None:
         template = wireit.wireit_diagram_to_template(data, instrument)
@@ -391,13 +413,16 @@ def displayEditor(request):
     	for i in range(len(file_list)):
     		file_context[file_list[i].name + ',,,z,z,z,z,,,' + file_list[i].friendly_name] = ''
     	file_context['file_keys'] = file_context.keys()
-	file_context['lang'] = request.POST['language']
-	file_context['experiment_id'] = experiment_id
+    	language_name = request.POST['language']
+        file_context['language_name'] = language_name
+        file_context['experiment_id'] = experiment_id
+        file_context['language_actual'] = simplejson.dumps(wireit.instrument_to_wireit_language(instrument_class_by_language[language_name]))
         return render_to_response('tracer_testingforWireit/editor.html', file_context, context_instance=context)
     else:
         return HttpResponseRedirect('/editor/langSelect/')
 
 #@csrf_exempt 
+# this is now deprecated - because languages are sent directly in displayEditor
 def languageSelect(request):
     context = RequestContext(request)
     if request.POST.has_key('instruments'):

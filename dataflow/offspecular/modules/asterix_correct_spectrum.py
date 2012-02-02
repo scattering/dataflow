@@ -6,21 +6,22 @@ from ... import config
 from ...core import Module
 
 def asterix_correct_spectrum_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields={}, xtype=None, **kwargs):
     """Multiplies the monitor counts in the raw data by the spectrum values
     data must be aligned along TOF axis, so this correction should be done
     first."""
 
     icon = {
-        'URI': config.IMAGES + config.ANDR_FOLDER + "qxqz.png",
-        'image': config.IMAGES + config.ANDR_FOLDER + "qxqz_image.png",
+        'URI': config.IMAGES + config.ANDR_FOLDER + "correct_spectrum_icon.png", 
+        'image': config.IMAGES + config.ANDR_FOLDER + "correct_spectrum_image.png",
         'terminals': {
             'input': (-12, 4, -1, 0),
-            'output_grid': (-12, 40, -1, 0),
+            'spectrum': (-12, 40, -1, 0),
             'output': (48, 16, 1, 0),
         }
     }
     
+    xtype = 'AutosizeImageContainer'
     terminals = [
         dict(id='input',
              datatype=datatype,
@@ -52,6 +53,8 @@ def asterix_correct_spectrum_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  xtype=xtype,
+                  **kwargs
                   )
 
     return module

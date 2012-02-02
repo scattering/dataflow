@@ -289,42 +289,20 @@ var asterix = {
         "terminals": [
           {
             "alwaysSrc": false, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:out"
-              ], 
-              "type": "data2d.ospec:in"
-            }, 
-            "direction": [
-              -1, 
-              0
-            ], 
+            "ddConfig": { "allowedTypes": ["data2d.ospec:out"], "type": "data2d.ospec:in" }, 
+            "direction": [-1,0], 
             "multiple": false, 
             "name": "input", 
-            "offsetPosition": {
-              "left": -12, 
-              "top": 16
-            }, 
+            "offsetPosition": {"left": -12,"top": 16}, 
             "required": true
           }, 
           {
             "alwaysSrc": true, 
-            "ddConfig": {
-              "allowedTypes": [
-                "data2d.ospec:in"
-              ], 
-              "type": "data2d.ospec:out"
-            }, 
-            "direction": [
-              1, 
-              0
-            ], 
+            "ddConfig": { "allowedTypes": ["data2d.ospec:in"], "type": "data2d.ospec:out" }, 
+            "direction": [1,0], 
             "multiple": true, 
             "name": "output", 
-            "offsetPosition": {
-              "left": 48, 
-              "top": 16
-            }, 
+            "offsetPosition": {"left": 48,"top": 16}, 
             "required": false
           }
         ], 
@@ -1182,6 +1160,7 @@ YAHOO.lang.extend(SaveContainer, WireIt.Container, {
     }
 });
 
+/* Moved to lang_common.js
 SliceContainer = function(opts, layer) {
     SliceContainer.superclass.constructor.call(this, opts, layer);
     var content = document.createElement('div');
@@ -1232,4 +1211,4 @@ YAHOO.lang.extend(SliceContainer, WireIt.Container, {
     }
 });
 
-
+*/

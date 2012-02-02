@@ -49,6 +49,7 @@ if 0:
     #from dataflow.apps.tracks.models import File
 
 TAS_DATA = 'data1d.tas'
+xtype = 'AutosizeImageContainer'
 data1d = Data(TAS_DATA, data_abstraction.TripleAxis)
 # Reduction operations may refer to data from other objects, but may not
 # modify it.  Instead of modifying, first copy the data and then work on
@@ -107,15 +108,17 @@ def _save_one(input, ext):
         outname = ".".join([os.path.splitext(outname)[0], ext])
     print "saving", input['name'], 'as', outname
     save_data(input, name=outname)
-save_ext = {
-    "type":"[string]",
+    
+fields = {'ext': {
+    "type":"string",
     "label": "Save extension",
     "name": "ext",
-    "value": "",
+    "value": ""
+    }
 }
 save = save_module(id='tas.save', datatype=TAS_DATA,
                    version='1.0', action=save_action,
-                   fields=[save_ext])
+                   fields=fields)
     
 def join_action(input, xaxis='', yaxis='', **kwargs):
     # This is confusing because load returns a bundle and join, which can
@@ -133,20 +136,22 @@ def join_action(input, xaxis='', yaxis='', **kwargs):
     joinedtas.xaxis = xaxis
     joinedtas.yaxis = yaxis
     return dict(output=[joinedtas])
-xaxis_field = {
-        "type":"string",
-        "label": "X axis for 2D plotting",
-        "name": "xaxis",
-        "value": '',
-}
-yaxis_field = {
+fields = {'xaxis': {
+    "type":"string",
+    "label": "X axis for 2D plotting",
+    "name": "xaxis",
+    "value": '',
+}, 
+    'yaxis': {
         "type":"string",
         "label": "Y axis for 2D plotting",
         "name": "yaxis",
         "value": '',
+    }
 }
 join = join_module(id='tas.join', datatype=TAS_DATA,
-                   version='1.0', action=join_action,fields = [xaxis_field,yaxis_field])
+                   version='1.0', action=join_action,fields=fields, xtype=xtype, 
+                                            filterModule=data_abstraction.join)
 
 #All TripleAxis reductions below require that:
 #  'input' be a TripleAxis object (see data_abstraction.py)
@@ -183,22 +188,28 @@ def volume_correction_action(input, **kwargs):
         tasinstrument.resolution_volume_correction()
     return dict(output=input)
 
+
+
 normalizemonitor = normalize_monitor_module(id='tas.normalize_monitor', datatype=TAS_DATA,
-                                            version='1.0', action=normalize_monitor_action)
+                                            version='1.0', action=normalize_monitor_action, xtype=xtype, 
+                                            filterModule=data_abstraction.TripleAxis.normalize_monitor)
 
 detailedbalance = detailed_balance_module(id='tas.detailed_balance', datatype=TAS_DATA,
-                                          version='1.0', action=detailed_balance_action)
+                                          version='1.0', action=detailed_balance_action, xtype=xtype, 
+                                            filterModule=data_abstraction.TripleAxis.detailed_balance)
 
 monitorcorrection = monitor_correction_module(id='tas.monitor_correction', datatype=TAS_DATA,
-                                              version='1.0', action=monitor_correction_action)
+                                              version='1.0', action=monitor_correction_action, xtype=xtype, 
+                                            filterModule=data_abstraction.TripleAxis.harmonic_monitor_correction)
 
 volumecorrection = volume_correction_module(id='tas.volume_correction', datatype=TAS_DATA,
-                                            version='1.0', action=volume_correction_action)
+                                            version='1.0', action=volume_correction_action, xtype=xtype, 
+                                            filterModule=data_abstraction.TripleAxis.resolution_volume_correction)
 
 
 # ==== Instrument definitions ====
 BT7 = Instrument(id='ncnr.tas.bt7',
-                 name='NCNR BT7',
+                 name='tas',
                  archive=config.NCNR_DATA + '/bt7',
                  menu=[('Input', [load, save]),
                        ('Reduction', [join, normalizemonitor, detailedbalance,

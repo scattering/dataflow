@@ -391,6 +391,8 @@ class SliceData(Filter2D):
         x_array = data._info[0]['values']
         y_array = data._info[1]['values']
         
+        print xmin, xmax, ymin, ymax
+        
         def get_index(t, x):
             if (x == "" or x == None): 
                 return None
@@ -503,7 +505,7 @@ class AsterixTOFToWavelength(Filter2D):
     @autoApplyToList
     @updateCreationStory
     def apply(self, data, wl_over_tof=1.9050372144288577e-5):
-        """ pw_over_d is pixel width divided by distance (sample to detector) """
+        """ wl_over_tof is wavelength divided by time-of-flight """
         new_info = data.infoCopy()
         # find pixels axis, and replace with two-theta
         # assuming there are only 2 dimensions of data, looking only at indices 0, 1
@@ -534,15 +536,31 @@ class AsterixShiftData(Filter2D):
         to spectrum shape, and can be interpreted as the high-t data from the
         previous pulse.""" 
         #axis = 0
-        if axis > 1:
+        axis = int(axis)
+        if axis > 1:  
             axis = 1
+        if axis < 0: 
+            axis = 0
         new_info = data.infoCopy()
         old_axis_values = new_info[axis]['values']
+        src_data = data.view(ndarray).copy()
         
-        shifted_data = empty(data.shape)
-        shifted_data[:-edge_bin,:,:] = data[edge_bin:,:,:]
-        shifted_data[-edge_bin:,:,:] = data[:edge_bin,:,:]
-        shifted_axis = zeros(data.shape[axis])
+        shifted_data = empty(src_data.shape)
+        
+        #start with empty slices over first two axes
+        output_slice = [slice(None, None)] * len(src_data.shape)
+        input_slice = [slice(None, None)] * len(src_data.shape)
+        
+        # move data from edge_bin to end to beginning:
+        input_slice[axis] = slice(edge_bin, None)
+        output_slice[axis] = slice(None, -edge_bin)
+        shifted_data[output_slice] = src_data[input_slice]
+        # move data from beginning to edge bin to the end of the new dataset
+        input_slice[axis] = slice(None, edge_bin)
+        output_slice[axis] = slice(-edge_bin, None)
+        shifted_data[output_slice] = src_data[input_slice]
+
+        shifted_axis = zeros(src_data.shape[axis])
         dx = old_axis_values[1] - old_axis_values[0]
         shifted_axis[:-edge_bin] = old_axis_values[edge_bin:]
         shifted_axis[-edge_bin:] = old_axis_values[:edge_bin] + (old_axis_values[-1] - old_axis_values[0]) + dx

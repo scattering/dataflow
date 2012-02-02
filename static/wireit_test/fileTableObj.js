@@ -21,11 +21,11 @@ with multiple groups
     var me = this;
     this.fileList = fileList;
     this.moduleConfigs = moduleConfigs;
-    this.headerList = {};
+    this.loaderModules = {};
     for (var i in moduleConfigs) {
         // grab the modules that have a target (Loaders)
         if ('target_id' in moduleConfigs[i].config) {
-            this.headerList[i] = moduleConfigs[i].config.target_id; 
+            this.loaderModules[i] = moduleConfigs[i].config.target_id; 
         }
     }
     
@@ -98,7 +98,7 @@ with multiple groups
             for (var g in groups) {
                 var group = parseInt(groups[g]);
                 //if (group == reductionInstance && f.data.type != 'Unassigned') { associated_files.push(f.data.filename) }  
-                if (group == reductionInstance && f.data.type != 'Unassigned') { associated = true; }
+                if (group == reductionInstance && f.data.type != 'Unassigned') { associated = true; }      
             }
             if (!associated) {
                 unassociated_files.push(f.data.filename);
@@ -137,8 +137,8 @@ with multiple groups
     
     // combobox options for file type editing
     this.combo = []
-    for (var i in this.headerList) {
-	    this.combo.push([me.headerList[i],me.headerList[i]]);
+    for (var i in this.loaderModules) {
+	    this.combo.push([me.loaderModules[i],me.loaderModules[i]]);
     }
 
     // create the grid
@@ -224,8 +224,8 @@ with multiple groups
     
     this.refreshStore = function() {
         me.store.removeAll();
-        //console.log('refreshing store:', me.headerList, me.fileList, me.moduleConfigs);
-        // grab all the modules that are loaders (they're in the headerList)
+        //console.log('refreshing store:', me.loaderModules, me.fileList, me.moduleConfigs);
+        // grab all the modules that are loaders (they're in the loaderModules)
        
         if (me.fileList.length != 0) {
 	        //// PULLS IN APPROPRIATE FILE TYPES FROM CONFIGS, CAN ONLY SAVE ONE REDUCTION INSTANCE (GROUP) CURRENTLY
@@ -235,14 +235,15 @@ with multiple groups
 		        fileNames.push(me.fileList[q][1])
 		        files[me.fileList[q][1]] = {'hash': me.fileList[q][0], 'type': 'Unassigned', 'group': []};
 		    }
-	        for (var i in me.headerList) {
+	        for (var i in me.loaderModules) {
 	            var module = me.moduleConfigs[i];
 	            for (var j in module.config) {
-	                if (module.config[j].files) {
-	                    for (var k in module.config[j].files) {
-	                        var fn = module.config[j].files[k];
+	                if (module.config[j] && module.config[j].files && module.config[j].files.value) {
+	                    for (var k in module.config[j].files.value) {
+	                        var fn = module.config[j].files.value[k];
 	                        if (fn in files) {
-			                    files[fn].type = module.config.target_id;
+			                    //files[fn].type = module.config.target_id;
+			                    files[fn].type = me.loaderModules[i];
 			                    files[fn].group.push(j);
 			                }
 	                    }
@@ -266,15 +267,22 @@ with multiple groups
     this.refreshStore();
     
     this.update = function(fileList, moduleConfigs) {
-        //console.log('updating: ', headerList, fileList, moduleConfigs);
-        //me.headerList = headerList;
-        me.headerList = {};
+        //console.log('updating: ', loaderModules, fileList, moduleConfigs);
+        //me.loaderModules = loaderModules;
+        me.loaderModules = {};
         for (var i in moduleConfigs) {
-            if (moduleConfigs[i].config.target_id) {
-                me.headerList[i] = moduleConfigs[i].config.target_id; 
+            var modname = moduleConfigs[i].name;
+            var module = editor.modulesByName[modname];
+            if ('files' in module.fields) {
+            //if ('files'moduleConfigs[i].config.target_id) {
+                var label = modname + ' ' + i.toString();
+                if ('target_id' in moduleConfigs[i].config) {
+                    label += ': ' + moduleConfigs[i].config.target_id;
+                }
+                me.loaderModules[i] = label; 
             }
         }
-        //console.log('new headerlist: ', me.headerList);
+        //console.log('new loaderModules: ', me.loaderModules);
         me.fileList = fileList;
         me.moduleConfigs = moduleConfigs;
         me.refreshStore();
@@ -284,7 +292,7 @@ with multiple groups
     // grid display panel
     this.displayPanel = Ext.create('Ext.Panel', {
         id: 'FAT_popup_displayPanel',
-        //width : (this.headerList.length)*200+8+400,
+        //width : (this.loaderModules.length)*200+8+400,
         //width: 408,
         //height : 500,
         autoHeight: true,
@@ -300,7 +308,7 @@ with multiple groups
     
     this.submit_changes = function() {
         // alter the containers in the editor... change this to a passback of configs?
-	    for (var i in me.headerList) {
+	    for (var i in me.loaderModules) {
 	        var module = me.moduleConfigs[i];
 	        var container = editor.layer.containers[i];
 	        for (var n in container.tracksConfigs) {
@@ -316,9 +324,10 @@ with multiple groups
 	                    //console.log('groupnum:', groupnum, groups);
 	                    if (!container.tracksConfigs) { container.tracksConfigs = {} }
 	                    if (!container.tracksConfigs[groupnum]) { container.tracksConfigs[groupnum] = {} }
-	                    if (!container.tracksConfigs[groupnum]['files']) { container.tracksConfigs[groupnum]['files'] = [] }
-	                    if (f.data.filetype == me.headerList[i]) {
-	                        container.tracksConfigs[groupnum].files.push(f.data.filename);
+	                    if (!container.tracksConfigs[groupnum]['files']) { container.tracksConfigs[groupnum]['files'] = {} }
+	                    if (!container.tracksConfigs[groupnum]['files']['value']) { container.tracksConfigs[groupnum]['files']['value'] = [] }
+	                    if (f.data.filetype == me.loaderModules[i]) {
+	                        container.tracksConfigs[groupnum].files.value.push(f.data.filename);
 	                        //console.log('pushing ' + f.data.filename + ' to container ' + i);
 	                    }
 	                }
@@ -362,11 +371,11 @@ with multiple groups
 	            menu: function() {
 	                //console.log('menu', me);
 	                var setTypeMenu = [];
-	                for (var i in me.headerList) {
-	                    //console.log(me, headerList[i]);
+	                for (var i in me.loaderModules) {
+	                    //console.log(me, loaderModules[i]);
 	                    var entry = { 
-	                        text: me.headerList[i],  
-	                        handler: me.return_handler(me.headerList[i]),
+	                        text: me.loaderModules[i],  
+	                        handler: me.return_handler(me.loaderModules[i]),
 	                    }
 	                    setTypeMenu.push(entry);
 	                }

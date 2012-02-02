@@ -68,7 +68,8 @@
 		            var lims = {xmin: dims.xmin, xmax: dims.xmax, ymin: dims.ymin, ymax: dims.ymax};
 		            for (var lim in lims) {
 		                
-		                if (!(lim in cfg) || cfg[lim].trim().length == 0) cfg[lim] = lims[lim].toString();
+		                if (!(lim in cfg)) { cfg[lim] = {} };
+                        if (!('value' in cfg[lim]) || cfg[lim]['value'].trim().length == 0) { cfg[lim]['value'] = lims[lim].toString(); };
 		            } 
 
 		            update_plot(toPlot[0]);
@@ -126,10 +127,10 @@
 		                interactors: [{ type:'Rectangle', 
 		                                name:'rectangle',
 		                                showrect: false,
-		                                xmin: Number(cfg.xmin), 
-		                                ymin: Number(cfg.ymin),
-		                                xmax: Number(cfg.xmax), 
-		                                ymax: Number(cfg.ymax)}],
+		                                xmin: Number(cfg.xmin.value), 
+		                                ymin: Number(cfg.ymin.value),
+		                                xmax: Number(cfg.xmax.value), 
+		                                ymax: Number(cfg.ymax.value)}],
 		                renderer: $.jqplot.heatmapRender,
 		                series: [ {shadow: false, padding: 0} ],
                         grid: {shadow: false},
@@ -248,10 +249,10 @@
                     submitbutton.setAttribute('type', 'button');
                     submitbutton.setAttribute('value', 'Submit Changes');
                     var submitChanges = function() {
-                        cfg.xmax = xmaxctl.textbox.value;
-                        cfg.xmin = xminctl.textbox.value;
-                        cfg.ymin = yminctl.textbox.value;
-                        cfg.ymax = ymaxctl.textbox.value;
+                        cfg.xmax.value = xmaxctl.textbox.value;
+                        cfg.xmin.value = xminctl.textbox.value;
+                        cfg.ymin.value = yminctl.textbox.value;
+                        cfg.ymax.value = ymaxctl.textbox.value;
                         
                         if (!('tracksConfigs' in container)) container.tracksConfigs = {};
                         if (!(reductionInstance in container.tracksConfigs)) container.tracksConfigs[reductionInstance] = {};

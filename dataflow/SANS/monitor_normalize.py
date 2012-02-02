@@ -6,7 +6,7 @@ from .. import config
 from ..core import Module
 
 def monitor_normalize_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields={}, **kwargs):
     """Normalize Monitors"""
 
     icon = {
@@ -41,6 +41,7 @@ def monitor_normalize_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

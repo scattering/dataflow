@@ -6,7 +6,7 @@ from .. import config
 from ..core import Module
 
 def convert_qxqy_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields={}, **kwargs):
     """Convert qx and qy for javascript plotting"""
 
     icon = {
@@ -41,6 +41,7 @@ def convert_qxqy_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

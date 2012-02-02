@@ -265,16 +265,7 @@
 		<script type="text/javascript" src="../../static/lib/tracks/test_adapter.js"></script>
 		<!-- Languages -->
 		<script type="text/javascript" src="../../static/wireit_test/lang_common.js"></script>
-		<script type="text/javascript" src="../../static/wireit_test/language.js"></script>
-		<script type="text/javascript" src="../../static/wireit_test/ANDRdefinition.js"></script>
-		<script type="text/javascript" src="../../static/wireit_test/ANDRdefinition2.js"></script>
-		<script type="text/javascript" src="../../static/wireit_test/AsterixDefinition.js"></script>
-		<!--<script type="text/javascript" src="../../static/wireit_test/SANSdefinition.js"></script>
-		<script type="text/javascript" src="../../static/wireit_test/SANSnewdefinition.js"></script> -->
-		<script type="text/javascript" src="../../static/wireit_test/SANSnewnewdef.js"></script>
-		<script type="text/javascript" src="../../static/wireit_test/TASlang.js"></script>
-		<!-- language dictionary -->
-		<script type="text/javascript" src="../../static/wireit_test/lang_dict.js"></script>
+<!--		<script type="text/javascript" src="../../static/wireit_test/language.js"></script>-->
 		<style>
 			/* Comment Module */
 			div.WireIt-Container.WiringEditor-module-comment {
@@ -297,9 +288,11 @@
 
 			YAHOO.util.Event.onDOMReady( function() {
 				try {
-					CHOSEN_LANG_NAME = "{{ lang }}" // this is the language that is set as a template's language in
+					CHOSEN_LANG_NAME = "{{ language_name }}" // this is the language that is set as a template's language in
 					// WiringEditor.js getValue()
-					CHOSEN_LANG = languageDictionary["{{ lang }}"] // converts language string to language object
+					//CHOSEN_LANG = languageDictionary["{{ lang }}"] // converts language string to language object
+					// Jumping into the deep end...
+					CHOSEN_LANG = {{ language_actual|safe }} // get language from server!
 					FILES = []
 					{% for variable in file_keys %}
 					FILES.push("{{ variable }}".split(',,,z,z,z,z,,,'))
@@ -407,9 +400,10 @@
 						configs[editor.reductionInstance]['position'] = [position[0], position[1]];
 						for(var index in fields) {
 							field = fields[index];
-							configs[editor.reductionInstance][field.name] = field.value;
+							configs[editor.reductionInstance][field.name] = field;
 							//console.log(field.name,field.value);
 						}
+						// if tracksConfigs exists, overwrite values with it.
 						if (this.tracksConfigs) {
 							for(var index in this.tracksConfigs) {
 								fields = this.tracksConfigs[index];
@@ -552,6 +546,13 @@
                     var runAllButton = new YAHOO.widget.Button({ label:"Run All Reductions", id:"WiringEditor-RunAllButton", container: toolbar });
                     runButton.on("click", editor.runAllReductions, editor, true);
                     
+                    //editor.renderSavePanel();
+                    
+                    //var loadPanelButtons = YAHOO.util.Dom.get('loadPanelButtons');
+                    //var loadExternalPipeButton = new YAHOO.widget.Button({ label:"Load from file", id:"WiringEditor-loadExternalPipe", container: loadPanelButtons });
+                    //loadExternalPipeButton.on("click", editor.runAllReductions, editor, true);
+                    //console.log(loadPanelButtons, loadExternalPipeButton);
+                    
 					// Open the infos panel
 					//editor.accordionView.openPanel(2);
 					//editor.accordionView.closePanel(0);
@@ -665,7 +666,7 @@
 							</p>
 							<br />
 							<p>
-								<a href="/static/lib/language.js" target=
+								<a href="javascript: window.open('/static/wireit_test/testandr.js')" target=
 								"_new">Click here to view the language
 								definition for this editor.</a>
 							</p>

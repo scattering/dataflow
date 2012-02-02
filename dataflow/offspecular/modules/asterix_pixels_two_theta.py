@@ -6,7 +6,7 @@ from ... import config
 from ...core import Module
 
 def asterix_pixels_two_theta_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields=[], xtype=None, **kwargs):
     """Creates a module for converting to two theta"""
 
     icon = {
@@ -18,6 +18,7 @@ def asterix_pixels_two_theta_module(id=None, datatype=None, action=None,
         }
     }
     
+    xtype = 'AutosizeImageContainer'
     terminals = [
         dict(id='input',
              datatype=datatype,
@@ -36,25 +37,27 @@ def asterix_pixels_two_theta_module(id=None, datatype=None, action=None,
     
 
     # pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6
-    pw_over_d_field = {
-        "label": "pixel width over d", 
-        "name": "pw_over_d", 
-        "type": "float", 
-        "value": 0.0003411385649,
-    }
+    fields = { 
+        "pw_over_d": {
+            "label": "pixel width over d", 
+            "name": "pw_over_d", 
+            "type": "float", 
+            "value": 0.0003411385649,
+        },
     
-    qzero_pixel_field = {
-        "label": "qzero pixel", 
-        "name": "qzero_pixel", 
-        "type": "float", 
-        "value": 145.0,
-    }
+        "qzero_pixel": {
+            "label": "qzero pixel", 
+            "name": "qzero_pixel", 
+            "type": "float", 
+            "value": 145.0,
+        },
     
-    twotheta_offset_field = {
-        "label": "twotheta offset", 
-        "name": "twotheta_offset", 
-        "type": "float", 
-        "value": 0.0,
+        "twotheta_offset": {
+            "label": "twotheta offset", 
+            "name": "twotheta_offset", 
+            "type": "float", 
+            "value": 0.0,
+        }
     }
 
     # Combine everything into a module.
@@ -64,8 +67,10 @@ def asterix_pixels_two_theta_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[pw_over_d_field, qzero_pixel_field, twotheta_offset_field] + fields,
+                  fields=fields,
                   action=action,
+                  xtype=xtype,
+                  **kwargs
                   )
 
     return module

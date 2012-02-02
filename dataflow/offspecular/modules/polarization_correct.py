@@ -6,7 +6,7 @@ from ... import config
 from ...core import Module
 
 def polarization_correct_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields=[], xtype=None):
     """Module for correcting polarization"""
 
     icon = {
@@ -18,6 +18,7 @@ def polarization_correct_module(id=None, datatype=None, action=None,
         }
     }
     
+    xtype = 'AutosizeImageContainer'
     terminals = [
         dict(id='input',
              datatype=datatype,
@@ -32,19 +33,19 @@ def polarization_correct_module(id=None, datatype=None, action=None,
              description='corrected data',
              ),
     ]
-
-    assumptions_field = {
-        "type":"int",
-        "label": "Polarization assumptions",
-        "name": "assumptions",
-        "value": 0,
-    }
-    
-    auto_assumptions_field = {
-        "type":"bool", # maps a name to the offset
-        "label": "Auto assumptions",
-        "name": "auto_assumptions",
-        "value": True,
+    fields = {
+        "assumptions": {
+            "type":"int",
+            "label": "Polarization assumptions",
+            "name": "assumptions",
+            "value": 0,
+        },
+        "auto_assumptions": {
+            "type":"bool", # maps a name to the offset
+            "label": "Auto assumptions",
+            "name": "auto_assumptions",
+            "value": True,
+        }
     }
 
     # Combine everything into a module.
@@ -54,8 +55,9 @@ def polarization_correct_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[assumptions_field, auto_assumptions_field] + fields,
+                  fields=fields,
                   action=action,
+                  xtype=xtype
                   )
 
     return module

@@ -6,7 +6,7 @@ from .. import config
 from ..core import Module
 
 def save_module(id=None, datatype=None, action=None,
-                version='0.0', fields=[]):
+                version='0.0', fields={}, **kwargs):
     """Module for saving a dataset"""
 
     icon = {
@@ -27,15 +27,15 @@ def save_module(id=None, datatype=None, action=None,
              ),
     ]
 
-    intent_field = {
+    fields['intent'] = {
         "type":"string",
         "label":"Intent",
         "name": "intent",
         "value": '',
     }
     
-    save_ext = {
-    "type":"[string]",
+    fields['ext'] = {
+    "type":"string",
     "label": "Save extension",
     "name": "ext",
     "value": "",
@@ -48,8 +48,9 @@ def save_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   #icon=icon,
                   terminals=terminals,
-                  fields=[intent_field, save_ext] + fields,
+                  fields=fields,
                   action=action,
+                  **kwargs
                   )
 
     return module

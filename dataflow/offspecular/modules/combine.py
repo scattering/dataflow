@@ -6,8 +6,8 @@ from ... import config
 from ...core import Module
 
 def combine_module(id=None, datatype=None, action=None,
-                version='0.0', fields=[],
-                description="Combine multiple datasets"):
+                version='0.0', fields={},
+                description="Combine multiple datasets", xtype='WireIt.ImageContainer'):
     """
     Return a module for combining multiple datasets
     """
@@ -22,6 +22,7 @@ def combine_module(id=None, datatype=None, action=None,
         }
     }
     
+    xtype = 'AutosizeImageContainer'
     
     terminals = [
         dict(id='input_data',
@@ -54,6 +55,7 @@ def combine_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  xtype=xtype
                   )
 
     return module

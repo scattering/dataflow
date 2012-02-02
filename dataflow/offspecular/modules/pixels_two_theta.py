@@ -6,7 +6,7 @@ from ... import config
 from ...core import Module
 
 def pixels_two_theta_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[]):
+                 version='0.0', fields=[], xtype=None, **kwargs):
     """Creates a module for converting to two theta"""
 
     icon = {
@@ -18,6 +18,7 @@ def pixels_two_theta_module(id=None, datatype=None, action=None,
         }
     }
     
+    xtype = 'AutosizeImageContainer'
     terminals = [
         dict(id='input',
              datatype=datatype,
@@ -34,25 +35,25 @@ def pixels_two_theta_module(id=None, datatype=None, action=None,
     ]
     
     # pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6
-    pixs_per_degree_field = {
-        "type":"float",
-        "label": "pixels per degree",
-        "name": "pixels_per_degree",
-        "value": 80.0,
-    }
-    
-    qzero_pixel_field = {
-        "type":"int",
-        "label": "qzero pixel",
-        "name": "qzero_pixel",
-        "value": 309,
-    }
-    
-    resolution_field = {
-        "type":"float",
-        "label": "instrument resolution",
-        "name": "instr_resolution",
-        "value": 1e-6,
+    fields = {
+        "pixels_per_degree": {
+            "type":"float",
+            "label": "pixels per degree",
+            "name": "pixels_per_degree",
+            "value": 80.0,
+        },
+        "qzero_pixel": {
+            "type":"int",
+            "label": "qzero pixel",
+            "name": "qzero_pixel",
+            "value": 309,
+        }, 
+        "instr_resolution": {
+            "type":"float",
+            "label": "instrument resolution",
+            "name": "instr_resolution",
+            "value": 1e-6,
+        }
     }
 
     # Combine everything into a module.
@@ -62,8 +63,10 @@ def pixels_two_theta_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   icon=icon,
                   terminals=terminals,
-                  fields=[pixs_per_degree_field, qzero_pixel_field, resolution_field] + fields,
+                  fields=fields,
                   action=action,
+                  xtype=xtype,
+                  **kwargs
                   )
 
     return module
