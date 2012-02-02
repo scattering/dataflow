@@ -24,6 +24,7 @@ module_imports = [
     ("dataflow.offspecular.modules.autogrid", "autogrid_module"),
     ("dataflow.offspecular.modules.offset", "offset_module"),
     ("dataflow.offspecular.modules.wiggle", "wiggle_module"),
+    ("dataflow.offspecular.modules.smooth", "smooth_module"),
     ("dataflow.offspecular.modules.tof_lambda", "tof_lambda_module"),
     ("dataflow.offspecular.modules.shift_data", "shift_data_module"), 
     ("dataflow.offspecular.modules.pixels_two_theta", "pixels_two_theta_module"),
@@ -42,7 +43,7 @@ module_imports = [
     ("dataflow.offspecular.modules.collapse_data", "collapse_data_module"),
     ("dataflow.calc", ["run_template", "get_plottable", "calc_single"]),
     ("dataflow.core", ["Data", "Instrument", "Template", "register_instrument"]),
-    ("reduction.offspecular.filters", ["LoadICPData", "LoadAsterixRawHDF", "LoadAsterixSpectrum", "Autogrid", "Combine", "Subtract", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "CollapseData", "WiggleCorrection", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz"]),
+    ("reduction.offspecular.filters", ["LoadICPData", "LoadAsterixRawHDF", "LoadAsterixSpectrum", "Autogrid", "Combine", "Subtract", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "CollapseData", "WiggleCorrection", "SmoothData", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz"]),
     ("reduction.offspecular.he3analyzer", "He3AnalyzerCollection"),
     ("reduction.offspecular.FilterableMetaArray", "FilterableMetaArray"),
 ]
@@ -158,6 +159,7 @@ PolStates_field = {
         "name": "PolStates",
         "value": "",
 }
+
 load = load_module(id='ospec.load', datatype=OSPEC_DATA,
                    version='1.0', action=load_action, fields={'auto_PolState': auto_PolState_field, 'PolStates': PolStates_field}, filterModule=LoadICPData)
 
@@ -236,6 +238,9 @@ def normalize_to_monitor_action(input=[], **kwargs):
     
 normalize_to_monitor = normalize_to_monitor_module(id='ospec.normalize_monitor', datatype=OSPEC_DATA, version='1.0', action=normalize_to_monitor_action, filterModule=NormalizeToMonitor)
 
+# smooth module
+window_field = {'name': 'window', 'type': 'List', 'value': 0, 'choices': ['hanning', 'hamming', 'boxcar']}
+
 # Mask module
 def mask_action(input=[], xmin="0", xmax="", ymin="0", ymax="", invert_mask=False, **kwargs):
     print "masking"
@@ -280,6 +285,13 @@ def wiggle_action(input=[], amp=0.14, **kwargs):
     print "wiggling"
     return dict(output=WiggleCorrection().apply(input, amp=amp))
 wiggle = wiggle_module(id='ospec.wiggle', datatype=OSPEC_DATA, version='1.0', action=wiggle_action, filterModule=WiggleCorrection)
+
+# smooth module
+window_field = {'name': 'window', 'type': 'List', 'value': 0, 'choices': ['hanning', 'hamming', 'boxcar']}
+def smooth_action(input=[], window='flat', window_len=5, axis=0, **kwargs):
+    print "smoothing"
+    return dict(output=SmoothData().apply(input, window=window, width=window_len, axis=axis))
+smooth = smooth_module(id='ospec.smooth', datatype=OSPEC_DATA, version='1.0', action=smooth_action, filterModule=SmoothData)
 
 # Time of Flight to wavelength module
 def tof_lambda_action(input=[], wl_over_tof=1.9050372144288577e-5, **kwargs):
@@ -399,7 +411,7 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                  name='andr',
                  archive=config.NCNR_DATA + '/andr',
                  menu=[('Input', [load, load_he3, load_stamp, save]),
-                       ('Reduction', [autogrid, combine, subtract, offset, wiggle, pixels_two_theta, theta_two_theta_qxqz, empty_qxqz, mask_data, slice_data, collapse_data, normalize_to_monitor]),
+                       ('Reduction', [autogrid, combine, subtract, offset, wiggle, smooth, pixels_two_theta, theta_two_theta_qxqz, empty_qxqz, mask_data, slice_data, collapse_data, normalize_to_monitor]),
                        ('Polarization reduction', [timestamp, append_polarization, combine_polarized, correct_polarized]),
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],

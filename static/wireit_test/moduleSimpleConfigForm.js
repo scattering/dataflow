@@ -188,6 +188,53 @@ function configForm(headerList, moduleID) {
 		    }
         }
         
+        else if (header.type == "List") {
+            item = 12;
+            
+            var data = [];
+            for (var i in header.choices) {
+                data.push({'value':header.choices[i]});
+            }
+            
+            // The data store containing the list of states
+            var choices = Ext.create('Ext.data.Store', {
+                fields: ['value'],
+                data : data
+            });
+
+            // Create the combo box, attached to the states data store
+            item =  {
+                xtype: 'combo', 
+                fieldLabel: header.label,
+                store: choices,
+                queryMode: 'local',
+                displayField: 'value',
+                valueField: 'value',
+                reverse_lookup_id: reverse_lookup_id,
+                allowBlank: false,
+                editable: false,
+                triggerAction: 'all',
+                typeAhead: false,
+                mode: 'local',
+                //renderTo: Ext.getBody()
+            }
+            
+            if (header.choices.indexOf(header.value) != -1) { 
+                item.value = header.value; 
+            } else {
+                item.value = data[0].value;
+            }
+            
+            if ('label' in header) { 
+                item.fieldLabel = header.label;
+            } else {
+                item.fieldLabel = fieldname;
+            }
+            reverse_lookup[reverse_lookup_id] = header;
+            reverse_lookup_id += 1;
+
+        }
+        
         else {
             var defaultType; type = header.type || 'undefined';
             if(type == 'string' || type == 'undefined') {
@@ -293,5 +340,6 @@ function configForm(headerList, moduleID) {
 		} */
 		],
 	});
+	myFormPanel = formPanel;
 	return formPanel;
 }
