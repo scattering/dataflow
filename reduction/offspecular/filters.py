@@ -3,6 +3,7 @@ import numpy
 from numpy.ma import MaskedArray
 import os, simplejson, datetime, sys, types, xml.dom.minidom
 from copy import deepcopy
+from scipy import signal
 
 from FilterableMetaArray import FilterableMetaArray as MetaArray
 from he3analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
@@ -469,6 +470,113 @@ class WiggleCorrection(Filter2D):
         new_data['Measurements': 'counts'] = corrected_I
 
         return new_data
+        
+class SmoothData(Filter2D):
+    """ takes the input and smooths it according to
+    the specified window type and width, along the given axis """
+    
+    
+    @autoApplyToList
+    @updateCreationStory
+    def apply(self, data, window="flat", width=5, axis=0):
+        """smooth the data using a window with requested size.
+    
+        This method is based on the convolution of a scaled window with the signal.
+        The signal is prepared by introducing reflected copies of the signal 
+        (with the window size) in both ends so that transient parts are minimized
+        in the begining and end part of the output signal.
+        
+        input:
+            data: the input signal 
+            width: the dimension of the smoothing window; should be an odd integer
+            window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
+                flat window will produce a moving average smoothing.
+            axis: the axis to which the smoothing is applied
+
+        output:
+            the smoothed signal
+            
+        example:
+
+        t=linspace(-2,2,0.1)
+        x=sin(t)+randn(len(t))*0.1
+        y=smooth(x)
+        
+        see also: 
+        
+        numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
+        scipy.signal.lfilter
+     
+        TODO: the window parameter could be the window itself if an array instead of a string   
+        """
+
+        axis = int(axis)
+        width = int(width)
+        src_data = data.view(ndarray)
+        
+        if src_data.shape[axis] < width:
+            raise ValueError, "Input vector needs to be bigger than window size."
+
+        if width<3:
+            return data
+
+        if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
+            raise ValueError, "Window is not one of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+
+        if window == 'flat': #moving average
+            kernel=ones(width,'d')
+        else:
+            #w=eval('numpy.'+window+'(window_len)')
+            kernel = getattr(numpy, window)(width)
+            
+        ia_size = list(src_data.shape) # intermediate array initialization
+        ia_size[axis] += 2*(width-1)
+        ia = empty(ia_size)
+        
+        #start with empty slices over first two axes
+        output_slice = [slice(None, None)] * len(ia.shape)
+        input_slice = [slice(None, None)] * len(src_data.shape)
+        first_element_slice = [slice(None, None)] * len(src_data.shape)
+        first_element_slice[axis] = slice(0, 1)
+        last_element_slice = [slice(None, None)] * len(src_data.shape)
+        last_element_slice[axis] = slice(-1, None)
+        
+        # mirror data around left edge (element zero):
+        input_slice[axis] = slice(width, 1, -1)
+        output_slice[axis] = slice(None, width-1, 1)
+        ia[output_slice] = 2*src_data[first_element_slice] - src_data[input_slice]
+        # mirror data around right edge (last element, -1):
+        input_slice[axis] = slice(-1, -width, -1)
+        output_slice[axis] = slice(-(width-1), None)
+        ia[output_slice] = 2*src_data[last_element_slice] - src_data[input_slice]        
+        # fill the center of the expanded array with the original array
+        output_slice[axis] = slice(width-1, -(width-1), 1)
+        ia[output_slice] = src_data[:]
+        
+        kernel_shape = [1,] * len(src_data.shape)
+        kernel_shape[axis] = width
+        kernel.shape = tuple(kernel_shape)
+        
+        #print(len(s))
+        # modes include same, valid, full
+        sm_ia = signal.convolve(ia, kernel, mode='same')
+        output_slice[axis] = slice(width-1, -(width-1), 1)
+        
+        new_info = data.infoCopy()
+        smoothed_data = sm_ia[output_slice]
+        output_data = src_data.copy()
+        
+        # now go through and replace counts cols
+        for colnum, col in enumerate(new_info[-2]['cols']):
+            if col['name'].startswith('counts'):
+                output_data[...,colnum] = smoothed_data[...,colnum]       
+
+        new_data = MetaArray(output_data, info=new_info)
+        
+        return new_data
+
+        #y=numpy.convolve(w/w.sum(),s,mode='same')
+        #return y[window_len-1:-window_len+1]
 
 class AsterixPixelsToTwotheta(Filter2D):
     """ input array has pixels axis, convert to 

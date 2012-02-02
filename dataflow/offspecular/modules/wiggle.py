@@ -6,7 +6,7 @@ from ... import config
 from ...core import Module
 
 def wiggle_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[], xtype=None, **kwargs):
+                 version='0.0', fields={}, xtype=None, **kwargs):
     """Module for wiggle correction"""
 
     icon = {
@@ -34,13 +34,12 @@ def wiggle_module(id=None, datatype=None, action=None,
              ),
     ]
 
-    fields = {"amplitude": {
+    fields['amplitude'] = {
             "type":"float",
             "label": "amplitude",
             "name": "amplitude",
             "value": 0.14,
         }
-    }
 
     # Combine everything into a module.
     module = Module(id=id,
