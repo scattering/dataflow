@@ -66,7 +66,7 @@ def two_theta_lambda_qxqz_module(id=None, datatype=None, action=None,
             "value": 0.003,
         }
     fields["qxbins"] = {
-            "type":"int",
+            "type":"float",
             "label": "Qx bins",
             "name": "qxbins",
             "value": 201,
@@ -84,7 +84,7 @@ def two_theta_lambda_qxqz_module(id=None, datatype=None, action=None,
             "value": 0.1,
         }
     fields["qzbins"] = {
-            "type":"int",
+            "type":"float",
             "label": "Qz bins",
             "name": "qzbins",
             "value": 201,

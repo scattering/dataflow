@@ -6,7 +6,7 @@ from ... import config
 from ...core import Module
 
 def polarization_correct_module(id=None, datatype=None, action=None,
-                 version='0.0', fields=[], xtype=None):
+                 version='0.0', fields=[], xtype=None, **kwargs):
     """Module for correcting polarization"""
 
     icon = {
@@ -35,13 +35,13 @@ def polarization_correct_module(id=None, datatype=None, action=None,
     ]
     fields = {
         "assumptions": {
-            "type":"int",
+            "type":"float",
             "label": "Polarization assumptions",
             "name": "assumptions",
             "value": 0,
         },
         "auto_assumptions": {
-            "type":"bool", # maps a name to the offset
+            "type":"boolean", # maps a name to the offset
             "label": "Auto assumptions",
             "name": "auto_assumptions",
             "value": True,
@@ -57,7 +57,8 @@ def polarization_correct_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
-                  xtype=xtype
+                  xtype=xtype,
+                  **kwargs
                   )
 
     return module

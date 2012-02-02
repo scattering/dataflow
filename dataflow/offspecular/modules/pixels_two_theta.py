@@ -43,7 +43,7 @@ def pixels_two_theta_module(id=None, datatype=None, action=None,
             "value": 80.0,
         },
         "qzero_pixel": {
-            "type":"int",
+            "type":"float",
             "label": "qzero pixel",
             "name": "qzero_pixel",
             "value": 309,
