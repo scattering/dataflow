@@ -76,12 +76,14 @@ function sortedKeys(array, sortkey) {
 }
 */
 
-function makeFileMultiSelect(src_files, selected_files, form_id) {
+function makeFileMultiSelect(src_files, selected_files, form_id, fieldLabel) {
 
 //    var src_files = []
 //    for (var i in FILES) {
 //        src_files.push(FILES[i][1]);
 //    }
+    var fieldLabel = fieldLabel || 'files'; // can override
+    
     var form_id = form_id || 0;
     src_files.sort()
 
@@ -104,7 +106,7 @@ function makeFileMultiSelect(src_files, selected_files, form_id) {
 	
 	var itemselector = {
 	    xtype: 'itemselector',
-	    fieldLabel: 'files',
+	    fieldLabel: fieldLabel,
 	    multiselects: [source_files_selector, dest_files_selector],
 	    store: src_files,
 	    value: selected_files,
@@ -115,8 +117,8 @@ function makeFileMultiSelect(src_files, selected_files, form_id) {
 	
 	var item = {
 	    xtype: 'fieldset',
-	    title: 'files',
-	    fieldLabel: 'files',
+	    title: fieldLabel,
+	    fieldLabel: fieldLabel,
 	    //labelWidth: 0,
 	    collapsible: true,
 	    layout: 'fit',
@@ -156,14 +158,14 @@ function configForm(headerList, moduleID) {
     function createItem(header, fieldname) {
         // convert config fields into ExtJS form fields
         var item;
-        if (fieldname == 'files') {
+        if (header.type == 'files') {
 	        editor.FAT.update(FILES, editor.getValue().working.modules);
 	        var unassociated_files = editor.FAT.getUnassociatedFiles(editor.reductionInstance);
 	        var module_files = header.value;
 	        var total_files = [];
 	        for (var i in unassociated_files) { total_files.push(unassociated_files[i]); }
 	        for (var i in module_files) { total_files.push(module_files[i]); }
-	        item = makeFileMultiSelect(total_files, module_files, reverse_lookup_id);
+	        item = makeFileMultiSelect(total_files, module_files, reverse_lookup_id, header.label);
 	        reverse_lookup[reverse_lookup_id] = header; // pointer back to the original object
 	        reverse_lookup_id += 1;
 	        

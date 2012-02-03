@@ -27,8 +27,8 @@ def load_he3_module(id=None, datatype=None, action=None,
     ]
 
     fields = {"files": {
-        "type":"[file]",
-        "label": "Files",
+        "type":"files",
+        "label": "He3 analyzer files",
         "name": "files",
         "value": []
         }

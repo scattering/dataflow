@@ -80,16 +80,41 @@ data1d = Data(TAS_DATA, data_abstraction.TripleAxis)
 
 
 # === Component binding ===
+def get_friendly_name(fh):
+    from ...apps.tracks.models import File
+    return File.objects.get(name=str(fh)).friendly_name
 
-def load_action(files=None, intent=None, position=None, xtype=None, **kwargs):
-    """Currently set up to load ONLY 1 file"""
-    #print "loading", files
+def _load_data(name):
+    (dirName, fileName) = os.path.split(name)
+    friendlyName = get_friendly_name(fileName)
+    return data_abstraction.filereader(name, friendly_name=friendlyName)
 
-    print 'FRIENDLY FILE', File.objects.get(name=files[0].split('/')[-1]).friendly_name
-    print "/home/brendan/dataflow/reduction/tripleaxis/spins_data/" + File.objects.get(name=files[0].split('/')[-1]).friendly_name
-    result = [data_abstraction.filereader(f, friendly_name="/home/brendan/dataflow/reduction/tripleaxis/spins_data/" + File.objects.get(name=f.split('/')[-1]).friendly_name) for f in files]
-    print "done loading"
+def load_action(files=[], intent=None, position=None, xtype=None, **kwargs):
+    """ was set up to load ONLY 1 file... might work for bundles now """
+    print "loading", files
+    result = []
+    for i, f in enumerate(files):
+        subresult = _load_data(f)
+        if type(subresult) == types.ListType:
+            result.extend(subresult)
+        else:
+            result.append(subresult)   
     return dict(output=result)
+################################################################################
+# NOTE: 02/03/2012 bbm
+# this is what was in "load_action" before
+# it would clearly not work - the directory was hardcoded, 
+# and relied on a directory structure
+# that will not exist on a typical machine (i.e. /home/brendan...)
+#
+# the replacement above is an adaptation of the loader code in 
+# dataflow/dataflow/offspecular/instruments.py
+################################################################################
+#    print 'FRIENDLY FILE', File.objects.get(name=files[0].split('/')[-1]).friendly_name
+#    print "/home/brendan/dataflow/reduction/tripleaxis/spins_data/" + File.objects.get(name=files[0].split('/')[-1]).friendly_name
+#    result = [data_abstraction.filereader(f, friendly_name="/home/brendan/dataflow/reduction/tripleaxis/spins_data/" + File.objects.get(name=f.split('/')[-1]).friendly_name) for f in files]
+#    print "done loading"
+#    return dict(output=result)
     #pass
 load = load_module(id='tas.load', datatype=TAS_DATA,
                    version='1.0', action=load_action,)

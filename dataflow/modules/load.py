@@ -25,7 +25,7 @@ def load_module(id=None, datatype=None, action=None,
     ]
 
     files_field = {
-        "type":"[file]",
+        "type":"files",
         "label": "Files",
         "name": "files",
         "value": [],
