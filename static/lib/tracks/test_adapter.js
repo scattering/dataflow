@@ -148,7 +148,8 @@ test_adapter = {
 			success: function(o) {
 				var s = o.responseText;
 				         // CHANGED (7/5/11), JSON parsing was not working
-					 r = YAHOO.lang.JSON.parse(s)
+					 try { r = YAHOO.lang.JSON.parse(s) }
+					 catch(ex) { console.log('parse error in test_adapter:', ex); }
 					 //r = eval('(function() { return ' + s + '; })()');
 			 	callbacks.success.call(callbacks.scope, r);
 			},
