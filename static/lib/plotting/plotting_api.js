@@ -318,7 +318,10 @@ function renderImageColorbar2(parent_plot, plotid) {
                 }
             }, 
         });
-    };
+    }
+    else { // the colorbar already exists - just link it to the new plot
+        plot2d_colorbar.series[0].parent_plot = parent_plot;
+    }
     return plot2d_colorbar
 }
 
@@ -792,6 +795,10 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
     else { selectedIndex = 0 }
     document.getElementById('plot_selectz').selectedIndex = selectedIndex;
     
+    // out with the old bindings
+    jQuery('#plot_selectnum').unbind('change');
+    jQuery('#plot_selectz').unbind('change');
+    
     function onchange(e) {
         var selectz = document.getElementById('plot_selectz');
         var selectnum = document.getElementById('plot_selectnum');
@@ -805,7 +812,8 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         plot2d.replot();
         colorbar = renderImageColorbar2(plot.series[0], 'colorbar');
     }
-    
+
+    // new bindings
     jQuery('#plot_selectnum').change({}, onchange);
     jQuery('#plot_selectz').change({}, onchange);
 //    jQuery('#plot_update').unbind('click');

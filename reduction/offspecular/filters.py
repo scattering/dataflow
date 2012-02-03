@@ -480,7 +480,11 @@ class SmoothData(Filter2D):
     @updateCreationStory
     def apply(self, data, window="flat", width=5, axis=0):
         """smooth the data using a window with requested size.
-    
+        
+        ***************************************************************
+        *** Adapted from http://www.scipy.org/Cookbook/SignalSmooth ***
+        ***************************************************************
+        
         This method is based on the convolution of a scaled window with the signal.
         The signal is prepared by introducing reflected copies of the signal 
         (with the window size) in both ends so that transient parts are minimized
@@ -515,7 +519,7 @@ class SmoothData(Filter2D):
         src_data = data.view(ndarray)
         
         if src_data.shape[axis] < width:
-            raise ValueError, "Input vector needs to be bigger than window size."
+            raise ValueError, "Input vector " + str(src_data.shape) + " needs to be bigger than window size: " + str(width)
 
         if width<3:
             return data
@@ -557,7 +561,6 @@ class SmoothData(Filter2D):
         kernel_shape[axis] = width
         kernel.shape = tuple(kernel_shape)
         
-        #print(len(s))
         # modes include same, valid, full
         sm_ia = signal.convolve(ia, kernel, mode='same')
         output_slice[axis] = slice(width-1, -(width-1), 1)
