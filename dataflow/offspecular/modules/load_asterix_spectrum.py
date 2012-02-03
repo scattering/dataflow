@@ -26,8 +26,8 @@ def load_asterix_spectrum_module(id=None, datatype=None, action=None,
     ]
 
     fields = {"files": {
-        "type":"[file]",
-        "label": "Files",
+        "type":"files",
+        "label": "Spectrum Files",
         "name": "files",
         "value": [],
         }
