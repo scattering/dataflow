@@ -979,6 +979,27 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
         plot.options.cursor = { show: true, zoom: true, tooltipFormatString: '%.3g, %.3g', tooltipLocation:'ne'};
         plot.options.series[0].markerOptions = {shadow: false};
         plot.options.series[0].shadow = false;
+        plot.options.axes = {
+          xaxis:{
+            //label: data.xlabel,
+            //labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+            tickOptions: {
+                formatString: "%.2g"
+            }
+          },
+          yaxis:{
+            //label: data.ylabel,
+            //labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+            tickOptions: {
+                formatString: "%.2g",
+                // fix for ticks drifting to the left in accordionview!
+                _styles: {right: 0},
+            }
+          }
+        }
+        
         //plot.options.series = [{ renderer: jQuery.jqplot.errorbarRenderer, rendererOptions: { errorBar: true } }];
     }
     

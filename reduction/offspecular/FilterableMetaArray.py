@@ -101,7 +101,7 @@ class FilterableMetaArray(MetaArray):
             if error_col > 0:
                 yerror = self['Measurements':'error_'+col].tolist()
             else:
-                yerror = sqrt(self['Measurements':col]).tolist()
+                yerror = sqrt(abs(self['Measurements':col])).tolist()
             ordery = {'key': col, 'label': col}
             series_y = {
                 'values': y,
