@@ -301,7 +301,10 @@
 			};
 			for (var i in this.tempSavedWiring.modules) {
 				//console.log(i, this.tempSavedWiring.modules[i].config)
-				this.tempSavedWiring.modules[i].config = this.tempSavedWiring.modules[i].config[this.reductionInstance];
+				
+				// This saves only the most recent config...
+				//this.tempSavedWiring.modules[i].config = this.tempSavedWiring.modules[i].config[this.reductionInstance];
+				
 			}
 			var data = { saveToInstrument: saveToInstrument, 
 			                 new_wiring:  this.tempSavedWiring }
@@ -501,7 +504,7 @@
 				outfilename: outfilename,
 			};
 			for (var j in this.toReduce.modules) {
-			    this.toReduce.modules[j].config = this.toReduce.modules[j].config[reductionInstance];
+			    //this.toReduce.modules[j].config = this.toReduce.modules[j].config[reductionInstance];
 				//this.toReduce.modules[j].config['files'] = []
 			}
 
@@ -544,7 +547,7 @@
 				file_dict: FILE_DICT,
 			};
 			for (var j in this.toReduce.modules) {
-			    this.toReduce.modules[j].config = this.toReduce.modules[j].config[reductionInstance];
+			    //this.toReduce.modules[j].config = this.toReduce.modules[j].config[reductionInstance];
 				//this.toReduce.modules[j].config['files'] = []
 			}
 			
@@ -847,6 +850,10 @@
 
 				if(lang.isArray(wiring.modules)) {
 
+
+                    // Containers
+                    //for(i = 0 ; i < wiring.modules.length ; i++) {
+                        
 					// Containers
 					for(i = 0 ; i < wiring.modules.length ; i++) {
 						var m = wiring.modules[i];
@@ -858,10 +865,13 @@
 							var container = this.layer.addContainer(m.config);
 							//console.log('post',container)
 							Dom.addClass(container.el, "WiringEditor-module-"+m.name);
-							container.setValue(m.value);
-							container.tracksConfigs = {
-								1: m.config
-							}
+							container.tracksConfigs = m.config.groups;
+							
+							//edits: bbm 02/03/2012
+							//container.setValue(m.value);
+							//container.tracksConfigs = {
+							//	1: m.config
+							//}
 							//console.log(container)
 						} else {
 							throw new Error("WiringEditor: module '"+m.name+"' not found !");
@@ -1113,7 +1123,7 @@
 		displayClickedModuleConfig: function(module) {
 			//console.log('in display module config!')
 			HTML = '<dl class ="instance-info-display">'
-			config = module.getConfig()[this.reductionInstance]
+			config = module.getConfig().groups[this.reductionInstance]
 			//console.log(module.getConfig())
 			for (i in config) {
 				//console.log(i, config[i])
@@ -1138,7 +1148,7 @@
 			//badHeaders = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
 			excludeNames = ["position", "xtype", "width", "terminals", "height", "title", "image", "icon"];
 			var container = this.layer.containers[moduleID];
-			var configs = container.getConfig()[this.reductionInstance];
+			var configs = container.getConfig().groups[this.reductionInstance];
 			for (var n in excludeNames) {
 			    var en = excludeNames[n];
 			    if (en in configs) { delete configs[en] };

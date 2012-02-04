@@ -241,23 +241,29 @@ def getCSV(request):
     print 'IN RUN REDUCTION: getting CSV'
     config = {}
     bad_headers = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
+    active_group =str(int(data['group'])) # all keys are strings!
     for i, m in enumerate(data['modules']):
         conf = {}
-        for key, value in m.get('config', {}).items():
+        config_in = m.get('config', {})
+        groups = config_in.get('groups', {})
+        current_reduct = groups.get(active_group, {})
+        for key, value in current_reduct.items():
+            print key, value
             if key == 'files':
-                file_hashes = [data['file_dict'][f] for f in m['config']['files']['value']]
+                file_hashes = [data['file_dict'][f] for f in value['value']]
                 file_paths = [get_filepath_by_hash(fh) for fh in file_hashes]
                 conf.update({'files': file_paths})
             elif key not in bad_headers:
-                conf.update({key: value['value']})
+                conf.update({key: value['value']}) # mod for detailed confs coming from javascript
         config.update({i:conf})
     context = RequestContext(request)
     terminal_id = data['clickedOn']['source']['terminal']
     nodenum = int(data['clickedOn']['source']['moduleId'])
     print "calculating: terminal=%s, nodenum=%d" % (terminal_id, nodenum)
     language = data['language']
-    instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX}
-    instrument = instrument_by_language.get(language, None)
+    instrument = instrument_class_by_language.get(language, None)
+    #instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX}
+    #instrument = instrument_by_language.get(language, None)
     result = ['{}']
     if instrument is not None:
         template = wireit.wireit_diagram_to_template(data, instrument)
@@ -279,11 +285,16 @@ def runReduction(request):
     print data
     config = {}
     bad_headers = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
+    active_group =str(int(data['group'])) # all keys are strings!
     for i, m in enumerate(data['modules']):
         conf = {}
-        for key, value in m.get('config', {}).items():
+        config_in = m.get('config', {})
+        groups = config_in.get('groups', {})
+        current_reduct = groups.get(active_group, {})
+        for key, value in current_reduct.items():
+            print key, value
             if key == 'files':
-                file_hashes = [data['file_dict'][f] for f in m['config']['files']['value']]
+                file_hashes = [data['file_dict'][f] for f in value['value']]
                 file_paths = [get_filepath_by_hash(fh) for fh in file_hashes]
                 conf.update({'files': file_paths})
             elif key not in bad_headers:

@@ -372,7 +372,7 @@
 						//console.log('clicked on container')
                         if (!e || e.which == 1) { return false; } // only catch non-left-clicks
 						if(!this.tracksConfigs)
-							this.tracksConfigs = [];
+							this.tracksConfigs = {};
 						if(!this.tracksConfigs[editor.reductionInstance])
 							this.tracksConfigs[editor.reductionInstance] = {}
 						this.tracksConfigs[editor.reductionInstance].position = this.getXY()
@@ -396,20 +396,21 @@
 							}
 						}
 						fields = module.fields;
-						configs[editor.reductionInstance] = {};
-						configs[editor.reductionInstance]['position'] = [position[0], position[1]];
+						configs.groups = {};
+						configs.groups[editor.reductionInstance] = {};
+						//configs[editor.reductionInstance]['position'] = [position[0], position[1]];
 						for(var index in fields) {
 							field = fields[index];
-							configs[editor.reductionInstance][field.name] = field;
+							configs.groups[editor.reductionInstance][field.name] = field;
 							//console.log(field.name,field.value);
 						}
 						// if tracksConfigs exists, overwrite values with it.
 						if (this.tracksConfigs) {
 							for(var index in this.tracksConfigs) {
 								fields = this.tracksConfigs[index];
-								if (!configs[index]) { configs[index] = {}; }
+								if (!configs.groups[index]) { configs.groups[index] = {}; }
 								for(var field in fields) {
-									configs[index][field] = fields[field];
+									configs.groups[index][field] = fields[field];
 								}
 							}
 							//configs = this.tracksConfigs
