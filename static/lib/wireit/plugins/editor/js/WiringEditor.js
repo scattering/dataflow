@@ -203,6 +203,8 @@
 				containerConfig.getGrouper = function() {
 					return temp.getCurrentGrouper(temp);
 				};
+				containerConfig.fields = jQuery.extend(true, {}, module.fields);
+				containerConfig.groups = {};
 				var container = this.layer.addContainer(containerConfig);
 
 				// Adding the category CSS class name
@@ -833,11 +835,7 @@
 				this.preventLayerChangedEvent = true;
 				this.loadPanel.hide();
 
-				var wiring = this.getPipeByName(name), i; // getPipeByName has TASWires, but looking at
-				// getPipeByName, we need TASWires.working
-				// Changed getPipeByName such that it returns the
-				// wiring rather than the .working
-
+				var wiring = this.getPipeByName(name), i; 
 				if(!wiring) {
 					this.alert("The wiring '"+name+"' was not found.");
 					return;
@@ -846,7 +844,7 @@
 				// TODO: check if current wiring is saved...
 				this.layer.clear();
 
-				this.propertiesForm.setValue(wiring.properties, false); // the false tells inputEx to NOT fire the updatedEvt
+				//this.propertiesForm.setValue(wiring.properties, false); // the false tells inputEx to NOT fire the updatedEvt
 
 				if(lang.isArray(wiring.modules)) {
 
@@ -861,11 +859,10 @@
 							var baseContainerConfig = this.modulesByName[m.name].container;
 							YAHOO.lang.augmentObject(m.config, baseContainerConfig);
 							m.config.title = m.name;
-							//console.log('pre', m) // continue working on this (pulling module config from dumped template)
 							var container = this.layer.addContainer(m.config);
-							//console.log('post',container)
 							Dom.addClass(container.el, "WiringEditor-module-"+m.name);
-							container.tracksConfigs = m.config.groups;
+							container.fields = m.fields;
+							container.groups = m.config.groups;
 							
 							//edits: bbm 02/03/2012
 							//container.setValue(m.value);
@@ -949,7 +946,7 @@
 
 			for( i = 0 ; i < this.layer.containers.length ; i++) {
 				obj.modules.push({
-					name: this.layer.containers[i].title,
+					name: this.layer.containers[i].modulename,
 					value: this.layer.containers[i].getValue(),
 					config: this.layer.containers[i].getConfig()
 				});
@@ -1153,7 +1150,7 @@
 			    var en = excludeNames[n];
 			    if (en in configs) { delete configs[en] };
 			}
-			var module;
+			var module = this.modulesByName[container.modulename]
 			for(var index in CHOSEN_LANG.modules) {
 				if(CHOSEN_LANG.modules[index].name == container.title) {
 					module = CHOSEN_LANG.modules[index];
@@ -1164,12 +1161,25 @@
 			// !!! EXPLICIT JQUERY DEPENDENCY HERE !!!
 			// this creates an empty object, fills with fields from module definition, 
 			// then updates that object based on what is in configs
+		    function configFromFields(fields) {
+		        config = {};
+		        for (var i in fields) {
+		            var field = fields[i];
+		            if (field.type == "Object") { // recurse!
+		                config[field.name] = configFromFields(field.value);
+		            } else {
+		                config[field.name] = field.value;
+		            }
+		        }
+		        return config;
+		    }
+		    
 			
 			configHeaders = jQuery.extend({}, module.fields, configs);
-			if (!('tracksConfigs' in container)) { container.tracksConfigs = {}; }
+			if (!('groups' in container)) { container.groups = {}; }
 			// now we link the tracksConfigs object to the newly created object - so when it is
 			// updated in the form, it will update directly to the object config
-			container.tracksConfigs[this.reductionInstance] = configHeaders;
+			container.groups[this.reductionInstance] = configHeaders;
 			   
 			//console.log(configHeaders, configHeaders.length)
 			if (configHeaders.length != 0) {
@@ -1203,6 +1213,8 @@
 			}
 		},
 		setModuleConfigsFromForm: function(configs, moduleID, instanceNumber) {
+		    // probably not going to be used anymore...
+		    console.log("I thought this was deprecated! (setModuleConfigsFromForm)");
 			if (typeof instanceNumber == "number") {
 				for (var i in configs) {
 					splitConfig = i.split(',')
