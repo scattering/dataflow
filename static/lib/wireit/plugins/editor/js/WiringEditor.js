@@ -1143,36 +1143,36 @@
 //			}
 			configHeaders = [];
 			//badHeaders = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
-			excludeNames = ["position", "xtype", "width", "terminals", "height", "title", "image", "icon"];
+			var excludeNames = ["position", "xtype", "width", "terminals", "height", "title", "image", "icon"];
 			var container = this.layer.containers[moduleID];
-			var configs = container.getConfig().groups[this.reductionInstance];
-			for (var n in excludeNames) {
-			    var en = excludeNames[n];
-			    if (en in configs) { delete configs[en] };
-			}
+			var configs = container.getConfig().groups[this.reductionInstance] || {};
+//			for (var n in excludeNames) {
+//			    var en = excludeNames[n];
+//			    if (en in configs) { delete configs[en] };
+//			}
 			var module = this.modulesByName[container.modulename]
-			for(var index in CHOSEN_LANG.modules) {
-				if(CHOSEN_LANG.modules[index].name == container.title) {
-					module = CHOSEN_LANG.modules[index];
-					break;
-				}
-			}
+//			for(var index in CHOSEN_LANG.modules) {
+//				if(CHOSEN_LANG.modules[index].name == container.title) {
+//					module = CHOSEN_LANG.modules[index];
+//					break;
+//				}
+//			}
 			//console.log(configs)
 			// !!! EXPLICIT JQUERY DEPENDENCY HERE !!!
 			// this creates an empty object, fills with fields from module definition, 
 			// then updates that object based on what is in configs
-		    function configFromFields(fields) {
-		        config = {};
-		        for (var i in fields) {
-		            var field = fields[i];
-		            if (field.type == "Object") { // recurse!
-		                config[field.name] = configFromFields(field.value);
-		            } else {
-		                config[field.name] = field.value;
-		            }
-		        }
-		        return config;
-		    }
+//		    function configFromFields(fields) {
+//		        config = {};
+//		        for (var i in fields) {
+//		            var field = fields[i];
+//		            if (field.type == "Object") { // recurse!
+//		                config[field.name] = configFromFields(field.value);
+//		            } else {
+//		                config[field.name] = field.value;
+//		            }
+//		        }
+//		        return config;
+//		    }
 		    
 			
 			configHeaders = jQuery.extend({}, module.fields, configs);
