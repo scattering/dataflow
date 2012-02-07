@@ -21,13 +21,7 @@ with multiple groups
     var me = this;
     this.fileList = fileList;
     this.moduleConfigs = moduleConfigs;
-    this.loaderModules = {};
-    for (var i in moduleConfigs) {
-        // grab the modules that have a target (Loaders)
-        if ('target_id' in moduleConfigs[i].config) {
-            this.loaderModules[i] = moduleConfigs[i].config.target_id; 
-        }
-    }
+    this.loaderFields = {};
     
 
     // defines data model 'Data'
@@ -137,8 +131,8 @@ with multiple groups
     
     // combobox options for file type editing
     this.combo = []
-    for (var i in this.loaderModules) {
-	    this.combo.push([me.loaderModules[i],me.loaderModules[i]]);
+    for (var i in this.loaderFields) {
+	    this.combo.push([i,i]);
     }
 
     // create the grid
@@ -219,9 +213,32 @@ with multiple groups
         height: 350,
         width: 600,
     });
+   
 
-
+    this.getAllLoaderFields = function() {
+        // explicitly assumes that "files" fields are only located at the 
+        // top level of a fields object (not buried in an "Object" subfield)
+        var loaderFields = {};
+        for (var i in me.moduleConfigs) {
+            var config = me.moduleConfigs[i].config;
+            var fields = config.fields;
+            for (var j in fields) {
+                var field = fields[j];
+                if (field.type == "files") {
+                    var label = me.moduleConfigs[i].name + ' ';
+                    label += i.toString() + ' ' + j + ': ';
+                    label += config.target_id;
+                    var empty_field = jQuery.extend(true, {}, field);
+                    loaderFields[label] = {'module_id': i, 'empty_field': empty_field, 'fieldname': j};
+                }
+            }
+        }
+        return loaderFields;
+    }
     
+    
+        
+        
     this.refreshStore = function() {
         me.store.removeAll();
         //console.log('refreshing store:', me.loaderModules, me.fileList, me.moduleConfigs);
@@ -235,21 +252,22 @@ with multiple groups
 		        fileNames.push(me.fileList[q][1])
 		        files[me.fileList[q][1]] = {'hash': me.fileList[q][0], 'type': 'Unassigned', 'group': []};
 		    }
-	        for (var i in me.loaderModules) {
-	            var module = me.moduleConfigs[i];
-	            for (var j in module.config) {
-	                if (module.config[j] && module.config[j].files && module.config[j].files.value) {
-	                    for (var k in module.config[j].files.value) {
-	                        var fn = module.config[j].files.value[k];
-	                        if (fn in files) {
-			                    //files[fn].type = module.config.target_id;
-			                    files[fn].type = me.loaderModules[i];
-			                    files[fn].group.push(j);
-			                }
-	                    }
-	                }
-	            }
-	        }
+		    
+		    for (var l in me.loaderFields) {
+		        // the label is the key "l"...
+		        var sf = me.loaderFields[l];
+		        var module = me.moduleConfigs[sf.module_id];
+		        for (var i in module.config.groups) {
+		            var files_to_add = module.config.groups[i][sf.fieldname].value;
+		            for (var j in files_to_add) {
+		                var fn = files_to_add[j];
+		                if (fn in files) {
+		                    files[fn].type = l;
+		                    files[fn].group.push(i);
+		                }
+		            }
+		        }
+		    }
 
             for (var fn in files) {
                 var newFile = Ext.ModelManager.create({
@@ -285,6 +303,7 @@ with multiple groups
         //console.log('new loaderModules: ', me.loaderModules);
         me.fileList = fileList;
         me.moduleConfigs = moduleConfigs;
+        me.loaderFields = me.getAllLoaderFields();
         me.refreshStore();
         me.contextMenu = me.newContextMenu();
     }
@@ -306,35 +325,55 @@ with multiple groups
     
     this.displayPanel.add(this.grid);
     
+    
+           
+    function clearFiles(field) {
+        if (field.type == "Object") { 
+            clearFiles(field.value);
+        } else {
+            if (field.type == "files") {
+                field.value = [];
+            }
+        }
+    }
+    
+    this.removeFilesConfig = function() {
+        for (var i in editor.layer.containers) {
+            var container = editor.layer.containers[i];
+            var groups = container.groups;
+            for (var j in groups) {
+                var group = groups[j];
+                for (var k in group) {
+                    var field = group[k];
+                    clearFiles(field);
+                }
+            }
+        }
+    }
+
     this.submit_changes = function() {
-        // alter the containers in the editor... change this to a passback of configs?
-	    for (var i in me.loaderModules) {
-	        var module = me.moduleConfigs[i];
-	        var container = editor.layer.containers[i];
-	        for (var n in container.tracksConfigs) {
-	            if (typeof container.tracksConfigs[n] == 'object') {
-	                delete container.tracksConfigs[n]['files'];
-	            }
-	        }
-	        me.store.each( function (f) {
-	            var groups = f.data.group.split(',');
+        me.removeFilesConfig();
+        for (var i in me.loaderFields) {
+            var sf = me.loaderFields[i];
+            var module = me.moduleConfigs[sf.module_id];
+            var container = editor.layer.containers[sf.module_id];
+            me.store.each( function(f) {
+                var groups = f.data.group.split(',');
 	            for (var g in groups) {
 	                if (!(groups[g] == '')) {
 	                    var groupnum = Number(groups[g]);
-	                    //console.log('groupnum:', groupnum, groups);
-	                    if (!container.tracksConfigs) { container.tracksConfigs = {} }
-	                    if (!container.tracksConfigs[groupnum]) { container.tracksConfigs[groupnum] = {} }
-	                    if (!container.tracksConfigs[groupnum]['files']) { container.tracksConfigs[groupnum]['files'] = {} }
-	                    if (!container.tracksConfigs[groupnum]['files']['value']) { container.tracksConfigs[groupnum]['files']['value'] = [] }
-	                    if (f.data.filetype == me.loaderModules[i]) {
-	                        container.tracksConfigs[groupnum].files.value.push(f.data.filename);
-	                        //console.log('pushing ' + f.data.filename + ' to container ' + i);
+	                    var new_files_field = jQuery.extend(true, {}, sf.empty_field);
+	                    if (!container.groups) { container.groups = {} };
+	                    if (f.data.filetype == i) {
+	                        if (!container.groups[groupnum]) { container.groups[groupnum] = {}; };
+	                        if (!container.groups[groupnum][sf.fieldname]) { container.groups[groupnum][sf.fieldname] = new_files_field; };
+	                        container.groups[groupnum][sf.fieldname].value.push(f.data.filename);
 	                    }
 	                }
 	            }
-	        });    
+	        });
 	    }
-	    editor.reductionInstances = me.generateFileGroups();
+        editor.reductionInstances = me.generateFileGroups();
 	    editor.setReductionIndex();
         Ext.getCmp('FAT_popup').close();
     };
@@ -371,11 +410,11 @@ with multiple groups
 	            menu: function() {
 	                //console.log('menu', me);
 	                var setTypeMenu = [];
-	                for (var i in me.loaderModules) {
-	                    //console.log(me, loaderModules[i]);
+	                for (var i in me.loaderFields) {
+	                    //console.log(me, loaderFields[i]);
 	                    var entry = { 
-	                        text: me.loaderModules[i],  
-	                        handler: me.return_handler(me.loaderModules[i]),
+	                        text: i,  
+	                        handler: me.return_handler(i),
 	                    }
 	                    setTypeMenu.push(entry);
 	                }

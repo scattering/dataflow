@@ -64,13 +64,27 @@ def absolute_scaling_module(id=None, datatype=None, action=None,
         'type' :'dict',
         'label':'Bottom Left Coordinate',
         'name' :'bottomLeftCoord',
-        'value':{'X':0, 'Y':0},
+        'value':{
+            'X': {'label': 'X',
+                  'type': 'float',
+                  'value': 0},
+            'Y': {'label': 'Y',
+                  'type': 'float',
+                  'value': 0}
+            }
         }
     fields['topRightCoord'] = {
-        'type' :'dict',
+        'type' :'Object',
         'label':'Top Right Coordinate',
         'name' :'topRightCoord',
-        'value':{'X':0, 'Y':0},
+        'value':{
+            'X': {'label': 'X',
+                  'type': 'float',
+                  'value': 0},
+            'Y': {'label': 'Y',
+                  'type': 'float',
+                  'value': 0}
+            }
         }
     # Combine everything into a module.
     module = Module(id=id,

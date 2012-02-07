@@ -371,57 +371,27 @@
 					WireIt.Container.prototype.onMouseDown = function(e) {
 						//console.log('clicked on container')
                         if (!e || e.which == 1) { return false; } // only catch non-left-clicks
-						if(!this.tracksConfigs)
-							this.tracksConfigs = {};
-						if(!this.tracksConfigs[editor.reductionInstance])
-							this.tracksConfigs[editor.reductionInstance] = {}
-						this.tracksConfigs[editor.reductionInstance].position = this.getXY()
+						if(!this.groups)
+							this.groups = {};
+						if(!this.groups[editor.reductionInstance])
+							this.groups[editor.reductionInstance] = {};
+						//this.tracksConfigs[editor.reductionInstance].position = this.getXY()
 						editor.clickedModuleID = editor.layer.containers.indexOf(this)
 						//editor.displayClickedModuleConfig(this)
 						editor.generateConfigForm(editor.layer.containers.indexOf(this))
 						return false;
 					},
 					WireIt.Container.prototype.getConfig = function() {
-						configs = {};
+						configs = {'fields': {}, 'groups': {}};
+						jQuery.extend(true, configs.fields, this.fields); // copy of fields
+						jQuery.extend(true, configs.groups, this.groups);
 						var position = this.getXY();
 						configs['position'] = position;
 						if (this.target_id) { configs['target_id'] = this.target_id }
 						//console.log('XY', this.getXY())
 						configs['xtype'] = this.xtype;
-						module = {};
-						for(var index in CHOSEN_LANG.modules) {
-							if(CHOSEN_LANG.modules[index].name == this.title) {
-								module = CHOSEN_LANG.modules[index];
-								break;
-							}
-						}
-						fields = module.fields;
-						configs.groups = {};
-						configs.groups[editor.reductionInstance] = {};
-						//configs[editor.reductionInstance]['position'] = [position[0], position[1]];
-						for(var index in fields) {
-							field = fields[index];
-							configs.groups[editor.reductionInstance][field.name] = field;
-							//console.log(field.name,field.value);
-						}
-						// if tracksConfigs exists, overwrite values with it.
-						if (this.tracksConfigs) {
-							for(var index in this.tracksConfigs) {
-								fields = this.tracksConfigs[index];
-								if (!configs.groups[index]) { configs.groups[index] = {}; }
-								for(var field in fields) {
-									configs.groups[index][field] = fields[field];
-								}
-							}
-							//configs = this.tracksConfigs
-							//console.log('Getting Config', editor.reductionInstance)
-							//console.log(this.tracksConfigs[editor.reductionInstance])
-							//for (var i in this.tracksConfigs[editor.reductionInstance]) {
-							//	configs[i] = this.tracksConfigs[editor.reductionInstance][i]
-							//	}
-							//}
-						}
-						return configs
+						module = editor.modulesByName[this.modulename];
+					    return configs
 					},
 					// setting up events for wires
 					WireIt.Wire.prototype.onWireIn = function(x,y) {

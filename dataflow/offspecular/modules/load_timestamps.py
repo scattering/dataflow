@@ -6,7 +6,7 @@ from ... import config
 from ...core import Module
 
 def load_timestamp_module(id=None, datatype=None, action=None,
-                version='0.0', fields=[], xtype=None):
+                version='0.0', fields={}, xtype=None):
     """Module for loading a timestamp file"""
 
     icon = {
@@ -26,7 +26,7 @@ def load_timestamp_module(id=None, datatype=None, action=None,
              ),
     ]
 
-    filename_field = {
+    fields['files'] = {
         "type":"files",
         "label": "Timestamp files",
         "name": "files",
@@ -40,7 +40,7 @@ def load_timestamp_module(id=None, datatype=None, action=None,
                   description=action.__doc__,
                   #icon=icon,
                   terminals=terminals,
-                  fields=[filename_field] + fields,
+                  fields=fields,
                   action=action,
                   xtype=xtype
                   )

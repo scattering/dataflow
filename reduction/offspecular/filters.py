@@ -745,53 +745,123 @@ class PixelsToTwotheta(Filter2D):
     @autoApplyToList
     @updateCreationStory 
     def apply(self, data, pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6):
+        print " inside PixelsToTwoTheta "
         new_info = data.infoCopy()
         det_angle = new_info[0].pop('det_angle') # read and get rid of it!
-        th_vector = data.axisValues('theta')
-        th_spacing = th_vector[1] - th_vector[0]
-        pixels = data.axisValues('xpixel')
-        twoth = -1.0 * (pixels - qzero_pixel) / pixels_per_degree
-        twoth_min = det_angle.min() + twoth.min()
-        twoth_max = det_angle.max() + twoth.max()
-        twoth_max_edge = twoth_max + 1.0 / pixels_per_degree
-        dpp = 1.0 / pixels_per_degree
-        output_twoth_bin_edges = arange(twoth_max + dpp, twoth_min - dpp, -dpp)
-        output_twoth = output_twoth_bin_edges[:-1]
+        # det_angle should be a vector of the same length as the other axis (usually theta)
+        # or else just a float, in which case the detector is not moving!
+        ndim = len(new_info) - 2 # last two entries in info are for metadata
+        xpixel_axis = next((i for i in xrange(len(new_info)-2) if new_info[i]['name'] == 'xpixel'), None)
+        if xpixel_axis < 0:
+            raise ValueError("error: no xpixel axis in this dataset")
+            
+        if hasattr(det_angle, 'max'):
+            det_angle_max = det_angle.max()
+            det_angle_min = det_angle.min()
+        else: # we have a number
+            det_angle_max = det_angle_min = det_angle
+            
+        if ndim == 1 or ((det_angle_max - det_angle_min) < instr_resolution):
+            #then the detector is fixed: just change the values in 'xpixel' axis vector to twotheta
+            print "doing the simple switch of axis values..."
+
+            new_info[xpixel_axis]['name'] = 'twotheta'
+            twotheta_motor = det_angle_min
+            pixels = new_info[xpixel_axis]['values']
+            twoth = -1.0 * (pixels - qzero_pixel) / pixels_per_degree + twotheta_motor
+            new_info[xpixel_axis]['values'] = twoth
+            new_info[xpixel_axis]['units'] = 'degrees'
+            new_data = MetaArray(data.view(ndarray).copy(), info=new_info)
         
-        #input_twoth_bin_edges = output_twoth_bin_edges.copy()
-        #input_twoth_bin_edges[:-1] = twoth
-        th_bin_edges = linspace(th_vector[0], th_vector[-1] + th_spacing, len(th_vector) + 1)
-        new_info[1]['name'] = 'twotheta' # getting rid of pixel units: substitute twoth
-        new_info[1]['values'] = output_twoth
-        new_info[1]['units'] = 'degrees'
-        new_data = MetaArray((len(th_vector), len(output_twoth), data.shape[2]), info=new_info) # create the output data object!
-        # (still has to be filled with correct values)
-                       
-        if ((det_angle.max() - det_angle.min()) < instr_resolution):
-            #then the detector is fixed and we can pass a single 2theta vector to rebin2d
-            input_twoth_bin_edges = empty(len(pixels) + 1)
-            input_twoth_bin_edges[0] = twoth_max + 1.0 / pixels_per_degree
-            input_twoth_bin_edges[1:] = twoth + det_angle.min()
-            data_cols = ['counts', 'pixels', 'monitor', 'count_time']
-            for col in data_cols:
-                array_to_rebin = data[:, :, col].view(ndarray).copy() 
-                new_array = reb.rebin2d(th_bin_edges, input_twoth_bin_edges, array_to_rebin, th_bin_edges, output_twoth_bin_edges)
-                new_data[:, :, col] = new_array
         else:
-            #then the detector is not fixed, and we have to pass in each A4 value at a time to rebin
+            # the detector is moving - have to rebin the dataset to contain all values of twoth
+            # this is silly but have to set other axis!
+            other_axis = (1 if xpixel_axis == 0 else 0)
+            other_vector = new_info[other_axis]['values']
+            other_spacing = other_vector[1] - other_vector[0]
+            pixels = new_info[xpixel_axis]['values']
+            twoth = -1.0 * (pixels - qzero_pixel) / pixels_per_degree
+            twoth_min = det_angle_min + twoth.min()
+            twoth_max = det_angle_max + twoth.max()
+            twoth_max_edge = twoth_max + 1.0 / pixels_per_degree
+            dpp = 1.0 / pixels_per_degree
+            output_twoth_bin_edges = arange(twoth_max + dpp, twoth_min - dpp, -dpp)
+            output_twoth = output_twoth_bin_edges[:-1]
+            other_bin_edges = linspace(other_vector[0], other_vector[-1] + other_spacing, len(other_vector) + 1)
+            new_info[xpixel_axis]['name'] = 'twotheta' # getting rid of pixel units: substitute twoth
+            new_info[xpixel_axis]['values'] = output_twoth
+            new_info[xpixel_axis]['units'] = 'degrees'
+            output_shape = [0,0,0]
+            output_shape[xpixel_axis] = len(output_twoth)
+            output_shape[other_axis] = len(other_vector)
+            output_shape[2] = data.shape[2] # number of columns is unchanged!
+            new_data = MetaArray(tuple(output_shape), info=new_info) # create the output data object!
+            
             tth_min = twoth.min()
             tth_max = twoth.max()
+            data_in = data.view(ndarray).copy()
             for i, da in enumerate(det_angle):
                 twoth_min = da + tth_min
                 twoth_max = da + tth_max
                 input_twoth_bin_edges = empty(len(pixels) + 1)
                 input_twoth_bin_edges[0] = twoth_max + 1.0 / pixels_per_degree
                 input_twoth_bin_edges[1:] = twoth + da         
-                data_cols = ['counts', 'pixels', 'monitor', 'count_time']
-                for col in data_cols:
-                    array_to_rebin = data[i, :, col].view(ndarray).copy()
+                #data_cols = ['counts', 'pixels', 'monitor', 'count_time']
+                cols = new_info[-2]['cols']
+                
+                input_slice[xpixel_axis] = slice(i, i+1)
+                for col in range(len(cols)):
+                    input_slice = [slice(None, None), slice(None, None), col]
+                    input_slice[other_axis] = i
+                    array_to_rebin = data_in[input_slice]
                     new_array = reb.rebin(input_twoth_bin_edges, array_to_rebin, output_twoth_bin_edges)
-                    new_data[i, :, col] = new_array
+                    new_data[input_slice] = new_array
+            
+#        th_vector = data.axisValues('theta')
+#        th_spacing = th_vector[1] - th_vector[0]
+#        pixels = data.axisValues('xpixel')
+#        twoth = -1.0 * (pixels - qzero_pixel) / pixels_per_degree
+#        twoth_min = det_angle.min() + twoth.min()
+#        twoth_max = det_angle.max() + twoth.max()
+#        twoth_max_edge = twoth_max + 1.0 / pixels_per_degree
+#        dpp = 1.0 / pixels_per_degree
+#        output_twoth_bin_edges = arange(twoth_max + dpp, twoth_min - dpp, -dpp)
+#        output_twoth = output_twoth_bin_edges[:-1]
+#        
+#        #input_twoth_bin_edges = output_twoth_bin_edges.copy()
+#        #input_twoth_bin_edges[:-1] = twoth
+#        th_bin_edges = linspace(th_vector[0], th_vector[-1] + th_spacing, len(th_vector) + 1)
+#        new_info[1]['name'] = 'twotheta' # getting rid of pixel units: substitute twoth
+#        new_info[1]['values'] = output_twoth
+#        new_info[1]['units'] = 'degrees'
+#        new_data = MetaArray((len(th_vector), len(output_twoth), data.shape[2]), info=new_info) # create the output data object!
+#        # (still has to be filled with correct values)
+#                       
+#        if ((det_angle.max() - det_angle.min()) < instr_resolution):
+#            #then the detector is fixed and we can pass a single 2theta vector to rebin2d
+#            input_twoth_bin_edges = empty(len(pixels) + 1)
+#            input_twoth_bin_edges[0] = twoth_max + 1.0 / pixels_per_degree
+#            input_twoth_bin_edges[1:] = twoth + det_angle.min()
+#            data_cols = ['counts', 'pixels', 'monitor', 'count_time']
+#            for col in data_cols:
+#                array_to_rebin = data[:, :, col].view(ndarray).copy() 
+#                new_array = reb.rebin2d(th_bin_edges, input_twoth_bin_edges, array_to_rebin, th_bin_edges, output_twoth_bin_edges)
+#                new_data[:, :, col] = new_array
+#        else:
+#            #then the detector is not fixed, and we have to pass in each A4 value at a time to rebin
+#            tth_min = twoth.min()
+#            tth_max = twoth.max()
+#            for i, da in enumerate(det_angle):
+#                twoth_min = da + tth_min
+#                twoth_max = da + tth_max
+#                input_twoth_bin_edges = empty(len(pixels) + 1)
+#                input_twoth_bin_edges[0] = twoth_max + 1.0 / pixels_per_degree
+#                input_twoth_bin_edges[1:] = twoth + da         
+#                data_cols = ['counts', 'pixels', 'monitor', 'count_time']
+#                for col in data_cols:
+#                    array_to_rebin = data[i, :, col].view(ndarray).copy()
+#                    new_array = reb.rebin(input_twoth_bin_edges, array_to_rebin, output_twoth_bin_edges)
+#                    new_data[i, :, col] = new_array
                 
         return new_data
 
@@ -1157,7 +1227,7 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     mon.shape += (1,) # broadcast the monitor over the other dimension
     count_time = file_obj.monitor.count_time
     count_time.shape += (1,)
-    data_array[:, :, 0] = file_obj.detector.counts
+    data_array[:, :, 0] = file_obj.detector.counts[:,::-1]
     data_array[:, :, 1] = 1
     data_array[:, :, 2] = mon
     data_array[:, :, 3] = count_time

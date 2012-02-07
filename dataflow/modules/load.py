@@ -6,7 +6,7 @@ from .. import config
 from ..core import Module
 
 def load_module(id=None, datatype=None, action=None,
-                version='0.0', fields={}, **kwargs):
+                version='0.0', fields={}, xtype='WireIt.Container', **kwargs):
     """Module for loading a dataset"""
 
     icon = {
@@ -15,7 +15,7 @@ def load_module(id=None, datatype=None, action=None,
             'output': (20, 10, 1, 0),
         }
     }
-    
+   
     terminals = [
         dict(id='output',
              datatype=datatype,
@@ -48,6 +48,7 @@ def load_module(id=None, datatype=None, action=None,
                   terminals=terminals,
                   fields=fields,
                   action=action,
+                  xtype=xtype,
                   **kwargs
                   )
 
