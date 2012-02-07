@@ -385,6 +385,10 @@
 						configs = {'fields': {}, 'groups': {}};
 						jQuery.extend(true, configs.fields, this.fields); // copy of fields
 						jQuery.extend(true, configs.groups, this.groups);
+						// now add default values into each group
+						for (var i in configs.groups) {
+						    configs.groups[i] = jQuery.extend(true, configs.fields, configs.groups[i]);
+						}
 						var position = this.getXY();
 						configs['position'] = position;
 						if (this.target_id) { configs['target_id'] = this.target_id }
