@@ -27,10 +27,19 @@
  *     "This code is unrestricted: you are free to use it however you like."
  * 
  */
+
+/**
+ * Class: jqplot.FixedAspect
+ * Author: Brian Maranville
+ * 02/2012
+ * this program was created as part of the regular duties of a US government
+ * employee, and is in the public domain
+ */ 
+ 
 (function($) {
-    // Class: $.jqplot.FixedAspect.js
+    // Class: $.jqplot.FixedAspect
     // Constrains the plotting to a fixed aspect ratio of y to x (in pixels)
-    $.jqplot.FixedAspect = function(options){
+    $.jqplot.FixedAspect = function(options) {
         // prop: aspectRatio
         // parameter for plotting constraint, = (yaxis range) / (xaxis range) 
         this.aspectRatio = 1.0;
