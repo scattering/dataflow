@@ -106,6 +106,8 @@ class SansData(object):
             'type': '2d',
             'z':  [data],
             'title': '2D Sans Data',
+            'fixAspect': True,
+            'aspectRatio': 1.0,
             'dims': {
                 'xmax': 128,
                 'xmin': 0.0, 
@@ -181,6 +183,8 @@ class div(object):
             'type': '2d',
             'z':  [self.data.tolist()],
             'title': '2D Sans Data',
+            'fixAspect': True,
+            'aspectRatio': 1.0,
             'dims': {
                 'xmax': 128,
                 'xmin': 0.0, 
@@ -494,6 +498,8 @@ def convert_qxqy(sansdata):
     plottable_x= {
     'z': x,
     'title': 'Qx',
+    'fixAspect': True,
+    'aspectRatio': 1.0,
     'dims': {
       'xmax': qx.shape[0],
       'xmin': 0.0,
@@ -511,6 +517,8 @@ def convert_qxqy(sansdata):
     plottable_y= {
     'z': y,
     'title': 'Qx',
+    'fixAspect': True,
+    'aspectRatio': 1.0,
     'dims': {
       'xmax': qy.shape[0],
       'xmin': 0.0,

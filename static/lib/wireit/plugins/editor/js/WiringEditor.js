@@ -425,51 +425,11 @@
             textPopup.show();
             console.log(textPopup.submitted, textPopup.value);
         },
-//            items: [ 
-//            
-//            {xtype: 'form',
-//                //new Ext.FormPanel( {
-//		            //renderTo: Ext.getBody(),
-//		            bodyPadding: 5,
-//		            width: 300,
-//		            autoHeight: true,
-//                    layout: 'anchor',
-//		            id: 'text_input_form',
-//		            autodestroy: true,
-//		            //defaultType: 'textfield',
-//		            submitted: false,
-//		            items: [{
-//		                xtype: 'textfield',
-//                        fieldLabel: 'Enter new value:',
-//                        name: 'text_value',
-//                        allowblank: false,
-//                    }],
-//		            buttons: [{
-//		                text: 'Submit',
-//		                //formBind: true, //only enabled once the form is valid
-//		                //disabled: true,
-//		                handler: function() {
-//		                    var parent_popup = Ext.getCmp('text_input_popup');
-//			                parent_popup.submitted = true;
-//			                parent_popup.value = Ext.getCmp('text_input_form').items.items[0].value;
-//		                    parent_popup.close();
-//			                 
-//		                }
-//	                },{
-//			            text: 'Cancel',
-//			            handler: function() {
-//			                Ext.getCmp('text_input_popup').submitted = false;
-//			                Ext.getCmp('text_input_popup').close();
-//			                }
-//		            },],
-//	            //});
-//	            },
-//            ]
-//            }),		        		
-		
-		
+	        				
 		// added 9/20/11, Maranville
 		// sends current wiring diagram to server as POST, gets data in comma-separated-form as download
+		// seems natural to combine this function with runReduction, since it's the same
+		// except what you do with the result... 
 		/**
 		 * @method getCSV
 		 */
@@ -563,7 +523,7 @@
 			plotid = 'plot';
 			toPlot = display
 			if (!this.plotWindow || !this.plotWindow.window || this.plotWindow.window.closed) {
-			    this.plotWindow = window.open("/plotWindow/", "", "status=1,width=650,height=500");
+			    this.plotWindow = window.open("/plotWindow/", "", "status=1,width=700,height=500");
 			}
 			this.plotWindow.plottingAPI(toPlot, plotid)
 
@@ -847,10 +807,6 @@
 				//this.propertiesForm.setValue(wiring.properties, false); // the false tells inputEx to NOT fire the updatedEvt
 
 				if(lang.isArray(wiring.modules)) {
-
-
-                    // Containers
-                    //for(i = 0 ; i < wiring.modules.length ; i++) {
                         
 					// Containers
 					for(i = 0 ; i < wiring.modules.length ; i++) {
@@ -863,13 +819,6 @@
 							Dom.addClass(container.el, "WiringEditor-module-"+m.name);
 							container.fields = m.fields;
 							container.groups = m.config.groups;
-							
-							//edits: bbm 02/03/2012
-							//container.setValue(m.value);
-							//container.tracksConfigs = {
-							//	1: m.config
-							//}
-							//console.log(container)
 						} else {
 							throw new Error("WiringEditor: module '"+m.name+"' not found !");
 						}
@@ -898,7 +847,6 @@
 				if (this.reductionInstances.length == 0) this.reductionInstances = [1];
 				// if this.FAT.generateFileGroups returns empty group, set default to 1;
 				this.setReductionIndex();
-				//console.log('done replacing FAT');
 				// Call the File Association Table with appropriate headers
 				//makeFileTable(this.getFATHeaders(),FILES, this.getValue().working.modules)
 				///console.log(this.getFATHeaders())
@@ -980,6 +928,7 @@
 		 * 8/29 NOTE: this has been moved to inside the fileTable code.
 		 **/
 		getFATHeaders: function() {
+		    // NOT USED ANYMORE: queue for deletion
 		    console.log("Am I really getting FATHeaders?");
 			var wiringDiagram = this.getValue().working
 			var wireList = wiringDiagram.wires
@@ -1005,7 +954,7 @@
 		 **/
 
 		FATupdate: function(templateConfig) {
-		    // NOT USED ANYMORE
+		    // NOT USED ANYMORE: queue for deletion
 			//console.log('in Editor', templateConfig)
 			setMax = 0;
 			for (i in templateConfig) {
@@ -1019,7 +968,7 @@
 
 		},
 		updateFileConfigs: function(file_associations) {
-		    // NOT USED ANYMORE
+		    // NOT USED ANYMORE: queue for deletion
 			//console.log('ENTERING FILE CONFIGS')
 			for (var l in this.layer.containers) {
 				for (var j in this.layer.containers[l].tracksConfigs) {
@@ -1058,25 +1007,12 @@
 		 **/
 		prevReductionInstance: function() {
 		    this.setReductionIndex(this.reductionIndex - 1);
-//			if (this.reductionIndex > 0) {
-//				this.reductionIndex -= 1;
-//				this.reductionInstance = this.reductionInstances[this.reductionIndex];
-//				YAHOO.util.Dom.get('reductionInstance').innerHTML = String(this.reductionInstance)
-				//this.displayCurrentReduction()
-				//this.setModuleConfigs()
-//			}
-
 		},
+		
 		nextReductionInstance: function() {
 		    this.setReductionIndex(this.reductionIndex + 1);
-//			if (this.reductionIndex < (this.reductionInstances.length - 1)) {
-//				this.reductionIndex += 1;
-//				this.reductionInstance = this.reductionInstances[this.reductionIndex];
-//				YAHOO.util.Dom.get('reductionInstance').innerHTML = this.reductionInstance
-				//this.displayCurrentReduction()
-				//this.setModuleConfigs()
-//			}
 		},
+		
 		displayCurrentReduction: function() {
 			//console.log('In DISPLAY')
 
@@ -1098,6 +1034,8 @@
 		 **/
 
 		extendModuleConfigs: function() {
+		    // I don't think this is used anymore.  Queue for deletion.
+		    // 
 			console.log('In ExtendModuleConfig')
 			containers = this.layer.containers
 			for (var i=0; i < containers.length; i++) {
@@ -1143,41 +1081,15 @@
 //			}
 			configHeaders = [];
 			//badHeaders = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
-			var excludeNames = ["position", "xtype", "width", "terminals", "height", "title", "image", "icon"];
 			var container = this.layer.containers[moduleID];
 			var configs = container.getConfig().groups[this.reductionInstance] || {};
-//			for (var n in excludeNames) {
-//			    var en = excludeNames[n];
-//			    if (en in configs) { delete configs[en] };
-//			}
+
 			var module = this.modulesByName[container.modulename]
-//			for(var index in CHOSEN_LANG.modules) {
-//				if(CHOSEN_LANG.modules[index].name == container.title) {
-//					module = CHOSEN_LANG.modules[index];
-//					break;
-//				}
-//			}
-			//console.log(configs)
+
 			// !!! EXPLICIT JQUERY DEPENDENCY HERE !!!
-			// this creates an empty object, fills with fields from module definition, 
-			// then updates that object based on what is in configs
-//		    function configFromFields(fields) {
-//		        config = {};
-//		        for (var i in fields) {
-//		            var field = fields[i];
-//		            if (field.type == "Object") { // recurse!
-//		                config[field.name] = configFromFields(field.value);
-//		            } else {
-//		                config[field.name] = field.value;
-//		            }
-//		        }
-//		        return config;
-//		    }
-		    
-			
 			configHeaders = jQuery.extend({}, module.fields, configs);
 			if (!('groups' in container)) { container.groups = {}; }
-			// now we link the tracksConfigs object to the newly created object - so when it is
+			// now we link the groups object to the newly created object - so when it is
 			// updated in the form, it will update directly to the object config
 			container.groups[this.reductionInstance] = configHeaders;
 			   
@@ -1214,6 +1126,7 @@
 		},
 		setModuleConfigsFromForm: function(configs, moduleID, instanceNumber) {
 		    // probably not going to be used anymore...
+		    // queue for deletion
 		    console.log("I thought this was deprecated! (setModuleConfigsFromForm)");
 			if (typeof instanceNumber == "number") {
 				for (var i in configs) {
