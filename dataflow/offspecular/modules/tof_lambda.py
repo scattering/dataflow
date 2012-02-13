@@ -41,7 +41,7 @@ def tof_lambda_module(id=None, datatype=None, action=None,
         {
             "label": "Wavelength over Time-of-Flight", 
             "name": "wl_over_tof", 
-            "type": "scientific", 
+            "type": "float", 
             "value": 1.9050372144288577e-5,
         },
     }
