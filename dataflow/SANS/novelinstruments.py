@@ -238,7 +238,7 @@ correct_back = correct_background_module(id='sans.correct_background', datatype=
 
 #Instrument definitions
 SANS_NG3 = Instrument(id='ncnr.sans.ins',
-                 name='ng3',
+                 name='sans',
                  archive=config.NCNR_DATA + '/sansins',
                  menu=[('Input', [load, save]),
                        ('Reduction', [deadtime, generate_trans, correct_det_sens, initial_corr, annul_av, absolute]),
