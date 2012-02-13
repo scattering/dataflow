@@ -5,6 +5,7 @@ FILES_DIR = '/home/dataflow/FILES/'
 from django.shortcuts import render_to_response, render
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
+import json # keeps order of OrderedDict on dumps!
 from apps.tracks.forms import languageSelectForm, titleOnlyForm, experimentForm1, experimentForm2, titleOnlyFormExperiment
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
@@ -427,7 +428,7 @@ def displayEditor(request):
     	language_name = request.POST['language']
         file_context['language_name'] = language_name
         file_context['experiment_id'] = experiment_id
-        file_context['language_actual'] = simplejson.dumps(wireit.instrument_to_wireit_language(instrument_class_by_language[language_name]))
+        file_context['language_actual'] = json.dumps(wireit.instrument_to_wireit_language(instrument_class_by_language[language_name]))
         return render_to_response('tracer_testingforWireit/editor.html', file_context, context_instance=context)
     else:
         return HttpResponseRedirect('/editor/langSelect/')

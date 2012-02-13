@@ -49,7 +49,7 @@ def two_theta_lambda_qxqz_module(id=None, datatype=None, action=None,
     fields = OrderedDict()
     fields["theta"] = {
             "type":"string",
-            "label": "Sample angle (theta)",
+            "label": "Sample angle (theta - leave blank to use motor value from datafile)",
             "name": "theta",
             "value": "",
         }
