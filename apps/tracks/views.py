@@ -211,12 +211,20 @@ def saveWiring(request):
     if postData['saveToInstrument'] == True:
         if user.is_staff:
             instr = Instrument.objects.get(instrument_class = new_wiring['language'])
+            if len(instr.Templates.filter(Title=new_wiring['name'])) > 0:
+                reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'this name exists, please use another'}))
+                reply.status_code = 500
+                return reply
             instr.Templates.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring), user=request.user)
         else:
             reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'you are not staff!'}))
             reply.status_code = 500
             return reply
     else:
+        if len(Template.objects.filter(Title=new_wiring['name'])) > 0:
+            reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'this name exists, please use another'}))
+            reply.status_code = 500
+            return reply
         Template.objects.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring), user=request.user)
     # this puts the Template into the pool of existing Templates.
     #wirings_list.append(new_wiring)
@@ -428,6 +436,8 @@ def displayEditor(request):
     	language_name = request.POST['language']
         file_context['language_name'] = language_name
         file_context['experiment_id'] = experiment_id
+        # not using simplejson here because for some reason the old version of simplejson on danse
+        # does not respect key order for OrderedDict.
         file_context['language_actual'] = json.dumps(wireit.instrument_to_wireit_language(instrument_class_by_language[language_name]))
         return render_to_response('tracer_testingforWireit/editor.html', file_context, context_instance=context)
     else:

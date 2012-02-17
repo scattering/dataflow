@@ -154,11 +154,16 @@ test_adapter = {
 			 	callbacks.success.call(callbacks.scope, r);
 			},
 			failure: function(o) {
-			    //var s = o.responseText;
+			    var s = o.responseText;
 				//         // CHANGED (7/5/11), JSON parsing was not working
-				//	 r = YAHOO.lang.JSON.parse(s)
-				var error = o.status + " " + o.statusText;
-				callbacks.failure.call(callbacks.scope, error);
+				var errorStr = o.status + " " + o.statusText;
+				try { 
+				    r = YAHOO.lang.JSON.parse(s);
+				    errorStr = r.errorStr;
+				} 
+				catch(ex) {}
+
+				callbacks.failure.call(callbacks.scope, errorStr);
 			}
 		}, postData); 
 	}
