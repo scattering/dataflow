@@ -67892,7 +67892,16 @@ Ext.define('Ext.form.field.Number', {
     },
 
     rawToValue: function(rawValue) {
-        return this.fixPrecision(this.parseValue(rawValue)) || rawValue || null;
+        var f = this.fixPrecision(this.parseValue(rawValue));
+        if (typeof(f) == 'number') {
+            return f;
+        }
+        else if (rawValue) {
+            return rawValue;
+        }
+        else {
+            return null;
+        }
     },
 
     valueToRaw: function(value) {
