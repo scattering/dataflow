@@ -2,11 +2,16 @@
 import os,sys
 import ROOT_URL
 
-
 if sys.platform=='win32':
-    HOMEDIR=r'c:\dataflow'
+    HOMEDIR=r'c:\dataflow_new'
+    REPO_ROOT = os.path.split(HOMEDIR)[-1] 
+    FILES_DIR = r'c:\dataflow_files'
 else:
     HOMEDIR = __file__[:-12]
+    REPO_ROOT = HOMEDIR.split('/')[-2]
+    FILES_DIR = '/home/dataflow/FILES/'
+    
+ROOT_URLCONF = REPO_ROOT + '.urls'
 
 DEBUG = True
 #TEMPLATE_DEBUG = DEBUG

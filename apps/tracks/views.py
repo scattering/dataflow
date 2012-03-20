@@ -1,6 +1,6 @@
 # Create your views here.
 
-FILES_DIR = '/home/dataflow/FILES/'
+
 
 from django.shortcuts import render_to_response, render
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
@@ -44,6 +44,9 @@ from ...dataflow import wireit
 
 import random
 from numpy import NaN
+
+from django.conf import settings
+FILES_DIR=settings.FILES_DIR
 
 def xhr_test(request):
     if request.is_ajax():
