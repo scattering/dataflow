@@ -1,9 +1,9 @@
 # Django settings for dataflow project.
 import os,sys
-import ROOT_URL
+#import ROOT_URL
 
 if sys.platform=='win32':
-    HOMEDIR=r'c:\dataflow_new'
+    HOMEDIR=r'c:\dataflow_fresh'
     REPO_ROOT = os.path.split(HOMEDIR)[-1] 
     FILES_DIR = r'c:\dataflow_files'
 else:
@@ -151,17 +151,17 @@ MIDDLEWARE_CLASSES = (
 #REPO_ROOT = HOMEDIR.split('/')[-2]
 #ROOT_URLCONF = REPO_ROOT + '.urls'
 
-if sys.platform=='win32':
-    REPO_ROOT = os.path.split(HOMEDIR)[-1] 
-else:
-    REPO_ROOT = HOMEDIR.split('/')[-2]
+#if sys.platform=='win32':
+#    REPO_ROOT = os.path.split(HOMEDIR)[-1] 
+#else:
+#    REPO_ROOT = HOMEDIR.split('/')[-2]
 
 
-ROOT_URLCONF = ROOT_URL.ROOT_URLCONF
+#ROOT_URLCONF = ROOT_URL.ROOT_URLCONF
 
 
-print 'root repo', ROOT_URL.REPO_ROOT
-print 'root url', ROOT_URL.ROOT_URLCONF
+#print 'root repo', ROOT_URL.REPO_ROOT
+#print 'root url', ROOT_URL.ROOT_URLCONF
 
 TEMPLATE_DIRS = (template_dir,
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
