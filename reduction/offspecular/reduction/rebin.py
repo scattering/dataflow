@@ -1,15 +1,20 @@
 """
 1-D and 2-D rebinning code.
 """
-import numpy, struct
-if struct.calcsize("P") * 8 == 64:
-    import _reduction
-    reductionpkg = _reduction
-else:
-    from reduction32bit import _reduction
-    reductionpkg=_reduction
-    #import reduction32bit._reduction # 32 bit
-    #reductionpkg = reduction32bit._reduction
+import numpy, struct,platform
+
+#if struct.calcsize("P") * 8 == 64 or platform.architecture()[0]=='64bit':
+#    import _reduction
+#    reductionpkg = _reduction
+#else:
+#    from reduction32bit import _reduction
+#    reductionpkg=_reduction
+
+from refl_reduction import _reduction
+reductionpkg=_reduction
+
+
+    
     
 def rebin(x, I, xo, Io=None, dtype=numpy.float64):
     """
