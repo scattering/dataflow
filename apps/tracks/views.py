@@ -14,7 +14,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger #paging
 from django.core.exceptions import ObjectDoesNotExist
 import cStringIO, gzip
 
-import hashlib
+import hashlib,os
 import types
 
 ## models
@@ -51,7 +51,7 @@ FILES_DIR=settings.FILES_DIR
 def xhr_test(request):
     if request.is_ajax():
         if request.method == 'GET':
-                message = "This is an XHR GET request"
+            message = "This is an XHR GET request"
         elif request.method == 'POST':
             message = "This is an XHR POST request"
             # Here we can access the POST data
@@ -59,7 +59,7 @@ def xhr_test(request):
         else:
             message = "No XHR"
     else:
-	message = "What is this, WSGI?"
+        message = "What is this, WSGI?"
     return HttpResponse(message)
 
 def showInteractors(request):
@@ -73,7 +73,7 @@ def showSliceWindow(request):
 
 def mytest(request):
     return render_to_response('tracer_testingforWireit/xhr_temp.html')
-   
+
 def uploadtest(request):
     return render_to_response('upload.html')
 
@@ -89,14 +89,14 @@ def home(request):
     context = RequestContext(request)
     site_list = ['/editor/', '/login/', '/myProjects/', '/interactors/']
     return render_to_response('tracer_testingforWireit/home.html', locals(), context_instance=context)
-    
+
 ##################
 #### file loading testing
 
 store = [{
-        "id": 0,
-        "text": "A leaf Node",
-        "leaf": True
+    "id": 0,
+    "text": "A leaf Node",
+    "leaf": True
     }, {
         "id": 1,
         "text": "A folder Node",
@@ -106,13 +106,13 @@ store = [{
             "leaf": True
             #"children":[{}],
         }]
-   }]
+    }]
 def getNCNRdirectories(request):
-	return HttpResponse(simplejson.dumps(testftp.runMe()))  #testftp.runMe()
-    
+    return HttpResponse(simplejson.dumps(testftp.runMe()))  #testftp.runMe()
+
 def displayFileLoad(request):
-	return render_to_response('FileUpload/FileTreeTest.html', locals())
-    
+    return render_to_response('FileUpload/FileTreeTest.html', locals())
+
 ###################
 #### TRACKS testing
 
@@ -137,13 +137,13 @@ sample_data = {
     'z':  [ [1, 2], [3, 4] ],
     'title': 'This is the title',
     'dims': {
-      'xmax': 1.0,
-      'xmin': 0.0,
-      'ymin': 0.0,
-      'ymax': 12.0,
-      'xdim': 2,
-      'ydim': 2,
-    },
+        'xmax': 1.0,
+        'xmin': 0.0,
+        'ymin': 0.0,
+        'ymax': 12.0,
+        'xdim': 2,
+        'ydim': 2,
+        },
     'xlabel': 'This is my x-axis label',
     'ylabel': 'This is my y-axis label',
     'zlabel': 'This is my z-axis label',
@@ -157,8 +157,8 @@ TAS_TEMPLATE_FROM_WIREIT = {"modules":[{"config":{"position":[50, 50], "xtype":"
 
 
 # apps.tracks.models, convert file hash to file path
-	# File.objects.get(id=hash).location ("/tmp/FILES/{filename}")
-	# wireit.py, convert wireit_diagram to template
+        # File.objects.get(id=hash).location ("/tmp/FILES/{filename}")
+        # wireit.py, convert wireit_diagram to template
 # 
 
 
@@ -171,7 +171,7 @@ wirings_list = offspec + a + SANS + TAS_2 + SANS_4
 instrument_class_by_language = {}
 for instr in [ANDR, SANS_NG3, TAS_INS, ASTERIX]:
     instrument_class_by_language[instr.name] = instr
-    
+
 #instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX }
 print 'instrument_class_by_language:', instrument_class_by_language
 
@@ -185,14 +185,14 @@ def listWirings(request):
     default_templates = instr.Templates.all()
     for t in default_templates:
         wirings.append(simplejson.loads(t.Representation))
-        
+
     experiment_templates = Experiment.objects.get(id=data['experiment_id']).templates.all()
     for t in experiment_templates:
         wirings.append(simplejson.loads(t.Representation))
-        
+
     #if data['experiment_id'] == -1:
     # 	return HttpResponse(simplejson.dumps(wirings_list)) #, context_instance=context
-    
+
     return HttpResponse(simplejson.dumps(wirings)) 
 
 #    return HttpResponse(simplejson.dumps(a)) #andr vs bt7 testing
@@ -327,7 +327,7 @@ def runReduction(request):
         result = get_plottable(template, config, nodenum, terminal_id)
     # result is a list of plottable items (JSON strings) - need to concatenate them
     JSON_result = '[' + ','.join(result) + ']' 
-    
+
     print "result acquired"
     zbuf = cStringIO.StringIO()
     zfile = gzip.GzipFile(mode='wb', compresslevel=3, fileobj=zbuf)
@@ -362,22 +362,22 @@ def uploadFiles(request):
         experiment = Experiment.objects.get(id=experiment_id)
     else:
         experiment = None
-    
+
     if request.FILES.has_key('FILES'):
         file_data = request.FILES.getlist('FILES')
         for f in file_data:
             file_data = f.read()
             file_sha1 = hashlib.sha1(file_data)
 
-            write_here = location + file_sha1.hexdigest()
+            write_here = os.path.join(location,file_sha1.hexdigest())
             open(write_here, 'w').write(file_data)
 
             new_files = File.objects.filter(name=file_sha1.hexdigest())
             if len(new_files) > 0:
                 new_file = new_files[0]
             else:
-		        new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location)
-		        
+                new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location)
+
             if experiment is not None:
                 #print "experiment id: ", request.POST[u'experiment_id']
                 experiment.Files.add(new_file)
@@ -388,11 +388,11 @@ def uploadFiles(request):
 #    register_instrument(BT7)
 #    instruments.init_data()
 #    template = wireit.wireit_diagram_to_template(simplejson.loads(str(request.POST['data'])), BT7)
- #   a = run_template(template, [{'files': ['f1.bt7', 'f2.bt7']}, {'align': ['A3']}, {'scale': 2.5}, {'ext': 'dat'}])
- #   print a    
- #   data = [[random.random(), random.random()] for i in range(10)]
- #   c = {'reduction':'successful', 'data': data}
- #   return HttpResponse(simplejson.dumps(a))
+    #   a = run_template(template, [{'files': ['f1.bt7', 'f2.bt7']}, {'align': ['A3']}, {'scale': 2.5}, {'ext': 'dat'}])
+    #   print a    
+    #   data = [[random.random(), random.random()] for i in range(10)]
+    #   c = {'reduction':'successful', 'data': data}
+    #   return HttpResponse(simplejson.dumps(a))
 
 ###### ANDR TESTING
 #    register_instrument(ANDR)
@@ -425,18 +425,18 @@ def displayEditor(request):
     file_context = {}
     print request.POST.has_key('language')
     if request.POST.has_key('language'):
-    	if request.POST.has_key('experiment_id'):
-    		experiment = Experiment.objects.get(id=request.POST['experiment_id'])
-    		file_list = experiment.Files.all()
-    		experiment_id = request.POST['experiment_id']
-    	else:
-    		experiment = []
-    		file_list = []
-    		experiment_id = -1
-    	for i in range(len(file_list)):
-    		file_context[file_list[i].name + ',,,z,z,z,z,,,' + file_list[i].friendly_name] = ''
-    	file_context['file_keys'] = file_context.keys()
-    	language_name = request.POST['language']
+        if request.POST.has_key('experiment_id'):
+            experiment = Experiment.objects.get(id=request.POST['experiment_id'])
+            file_list = experiment.Files.all()
+            experiment_id = request.POST['experiment_id']
+        else:
+            experiment = []
+            file_list = []
+            experiment_id = -1
+        for i in range(len(file_list)):
+            file_context[file_list[i].name + ',,,z,z,z,z,,,' + file_list[i].friendly_name] = ''
+        file_context['file_keys'] = file_context.keys()
+        language_name = request.POST['language']
         file_context['language_name'] = language_name
         file_context['experiment_id'] = experiment_id
         # not using simplejson here because for some reason the old version of simplejson on danse
@@ -452,53 +452,53 @@ def languageSelect(request):
     context = RequestContext(request)
     if request.POST.has_key('instruments'):
         return render_to_response('tracer_testingforWireit/editorRedirect.html',
-                            {'lang':request.POST['instruments']}, context_instance=context)
+                                  {'lang':request.POST['instruments']}, context_instance=context)
     form = languageSelectForm()
     return render_to_response('tracer_testingforWireit/languageSelect.html', {'form':form}, context_instance=context)
-    
-    
+
+
 ###########
 ## Views for users, redirects to MyProjects page from login. Then continues logically from there.
 @login_required
 def myProjects(request):
-	context = RequestContext(request)
-	if request.POST.has_key('new_project'):
-		Project.objects.create(Title=request.POST['new_project'], user=request.user)
-	project_list = Project.objects.filter(user=request.user)
-	paginator = Paginator(project_list, 10) #10 projects per pages
-	page = request.GET.get('page')
-	if page == None:
-		page = 1
-	try:
-		projects = paginator.page(page)
-	except PageNotAnInteger:
-		projects = paginator.page(1)
-	except EmptyPage:
-		projects = paginator.page(paginator.num_pages)
-	form = titleOnlyForm()
-	return render_to_response('userProjects/displayProjects.html', {'projects':projects, 'form':form}, context_instance=context)
+    context = RequestContext(request)
+    if request.POST.has_key('new_project'):
+        Project.objects.create(Title=request.POST['new_project'], user=request.user)
+    project_list = Project.objects.filter(user=request.user)
+    paginator = Paginator(project_list, 10) #10 projects per pages
+    page = request.GET.get('page')
+    if page == None:
+        page = 1
+    try:
+        projects = paginator.page(page)
+    except PageNotAnInteger:
+        projects = paginator.page(1)
+    except EmptyPage:
+        projects = paginator.page(paginator.num_pages)
+    form = titleOnlyForm()
+    return render_to_response('userProjects/displayProjects.html', {'projects':projects, 'form':form}, context_instance=context)
 
 @login_required
 def editProject(request, project_id):
-	if request.POST.has_key('new_experiment'):
-		new_exp = Experiment.objects.create(ProposalNum=request.POST['new_experiment'], users=request.user)
-		new_exp.save()
-		Project.objects.get(id=project_id).experiments.add(new_exp) 
-	context = RequestContext(request)
-	project = Project.objects.get(id=project_id)
-	experiment_list = project.experiments.all()
-	paginator = Paginator(experiment_list, 10)
-	page = request.GET.get('page')
-	if page == None:
-		page = 1
-	try:
-		experiments = paginator.page(page)
-	except PageNotAnInteger:
-		experiments = paginator.page(1)
-	except EmptyPage:
-		experiments = paginator.page(paginator.num_pages)
-	form = titleOnlyFormExperiment()
-	return render_to_response('userProjects/editProject.html', {'project':project, 'form':form, 'experiments':experiments}, context_instance=context) 
+    if request.POST.has_key('new_experiment'):
+        new_exp = Experiment.objects.create(ProposalNum=request.POST['new_experiment'], users=request.user)
+        new_exp.save()
+        Project.objects.get(id=project_id).experiments.add(new_exp) 
+    context = RequestContext(request)
+    project = Project.objects.get(id=project_id)
+    experiment_list = project.experiments.all()
+    paginator = Paginator(experiment_list, 10)
+    page = request.GET.get('page')
+    if page == None:
+        page = 1
+    try:
+        experiments = paginator.page(page)
+    except PageNotAnInteger:
+        experiments = paginator.page(1)
+    except EmptyPage:
+        experiments = paginator.page(paginator.num_pages)
+    form = titleOnlyFormExperiment()
+    return render_to_response('userProjects/editProject.html', {'project':project, 'form':form, 'experiments':experiments}, context_instance=context) 
 
 @login_required 
 def editExperiment(request, experiment_id):
@@ -520,7 +520,7 @@ def editExperiment(request, experiment_id):
             if len(new_files) > 0:
                 new_file = new_files[0]
             else:
-		        new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=FILES_DIR)
+                new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=FILES_DIR)
             experiment.Files.add(new_file)
     if request.POST.has_key('instrument_name'):
         if request.POST['instrument_name']:
