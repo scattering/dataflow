@@ -234,7 +234,7 @@ def saveWiring(request):
     return HttpResponse(simplejson.dumps({'save':'successful'})) #, context_instance=context
 
 def get_filepath_by_hash(fh):
-    return File.objects.get(os.path.join(name=str(fh)).location,str(fh))
+    return os.path.join(File.objects.get(name=str(fh)).location,str(fh))
 
 #import redis
 #server = redis.Redis()
