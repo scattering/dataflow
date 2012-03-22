@@ -10,7 +10,7 @@ import numpy, struct,platform
 #    from reduction32bit import _reduction
 #    reductionpkg=_reduction
 
-from refl_reduction import _reduction
+from reflred import _reduction
 reductionpkg=_reduction
 
 

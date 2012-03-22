@@ -3,7 +3,8 @@ import os,sys
 #import ROOT_URL
 
 if sys.platform=='win32':
-    HOMEDIR=r'c:\dataflow_fresh'
+    #HOMEDIR=r'c:\dataflow_new'
+    HOMEDIR=os.path.dirname(__file__)
     REPO_ROOT = os.path.split(HOMEDIR)[-1] 
     FILES_DIR = r'c:\dataflow_files'
 else:
