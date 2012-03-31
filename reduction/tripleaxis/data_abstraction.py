@@ -1616,47 +1616,52 @@ def fit_plane(h, k, l, p0=None):
 
 
 
-def join(tas1, tas2):
-    """Joins two TripleAxis objects"""
+#def join(tas1, tas2):
+def join(tas_list):
+    """Joins a list of TripleAxis objects"""
     #average all similar points
     #put all detectors on the same monitor, assumed that the first monitor is desired throughout
-    joinedtas = tas1
+    joinedtas = tas_list[0]
     distinct = []
     not_distinct = []
     #tas1.detectors.primary_detector.measurement.join(tas2.detectors.primary_detector.measurement)
-    for key, value in joinedtas.__dict__.iteritems():
-        if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment':
-            #ignoring metadata for now
-            pass
-        elif key == 'detectors':
-            for field in value:
-                if field.name == 'primary_detector':
+    for tas2 in tas_list[1:]:
+        for key, value in joinedtas.__dict__.iteritems():
+            if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment':
+                #ignoring metadata for now
+                pass
+            elif key == 'detectors':
+                for field in value:
+                    if field.name == 'primary_detector':
+                        obj = getattr(tas2, key)
+                        field.measurement.join(getattr(obj, field.name).measurement)
+                        field.dimension[0] = field.dimension[0] + getattr(obj, field.name).dimension[0]
+                    else:
+                        obj = getattr(tas2, key)
+                        field.measurement.join_channels(getattr(obj, field.name).measurement)
+            elif key.find('blade') >= 0:
+                #TODO: how should we handle joining when both TAS objects have unequal #blades?
+                obj = getattr(tas2, key)
+                i = 0
+                for blade in value.blades:
+                    blade.measurement.join(obj.blades[i].measurement)
+                    i += 1
+                    if blade.isDistinct:
+                        distinct.append(blade)
+                    else:
+                        not_distinct.append(blade)
+            else:
+                for field in value:
                     obj = getattr(tas2, key)
                     field.measurement.join(getattr(obj, field.name).measurement)
-                    field.dimension[0] = field.dimension[0] + getattr(obj, field.name).dimension[0]
-                else:
-                    obj = getattr(tas2, key)
-                    field.measurement.join_channels(getattr(obj, field.name).measurement)
-        elif key.find('blade') >= 0:
-            #TODO: how should we handle joining when both TAS objects have unequal #blades?
-            obj = getattr(tas2, key)
-            i = 0
-            for blade in value.blades:
-                blade.measurement.join(obj.blades[i].measurement)
-                i += 1
-                if blade.isDistinct:
-                    distinct.append(blade)
-                else:
-                    not_distinct.append(blade)
-        else:
-            for field in value:
-                obj = getattr(tas2, key)
-                field.measurement.join(getattr(obj, field.name).measurement)
-                if field.isDistinct:
-                    distinct.append(field)
-                else:
-                    not_distinct.append(field)
+                    if field.isDistinct:
+                        distinct.append(field)
+                    else:
+                        not_distinct.append(field)
 
+    #remove duplicates
+    distinct=list(set(distinct))
+    not_distinct=list(set(not_distinct))
     joinedtas2 = remove_duplicates(joinedtas, distinct, not_distinct)
     return joinedtas2
     #np.where(hasattr('isDistinct') and isDistinct,,) #todo finish writing

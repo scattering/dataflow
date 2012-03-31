@@ -153,11 +153,14 @@ def join_action(input, xaxis='', yaxis='', **kwargs):
     # bundles, which I do in this example.
     joinedtas = None
     print "JOINING"
-    for tas in input:
-        if joinedtas == None:
-            joinedtas = tas
-        else:
-            joinedtas = data_abstraction.join(joinedtas, tas)
+    #for now, we will work on joining arbitrary inputs instead of two at a time...
+    #This will hopefully work on bundles, instead of doing things pairwise...
+    joinedtas = data_abstraction.join(input)
+    #for tas in input:
+        #if joinedtas == None:
+            #joinedtas = tas
+        #else:
+            #joinedtas = data_abstraction.join(joinedtas, tas)
     joinedtas.xaxis = xaxis
     joinedtas.yaxis = yaxis
     return dict(output=[joinedtas])
