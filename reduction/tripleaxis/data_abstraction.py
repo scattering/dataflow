@@ -16,6 +16,7 @@ if 1:
 if 0:
     #for use in local testing
     import sys, os
+    from matplotlib import pylab
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
     from dataflow import regular_gridding
 eps = 1e-8
@@ -816,6 +817,8 @@ class TripleAxis(object):
         plottable_data = {}
         print repr(self.xaxis) + " " + repr(self.yaxis)
         print self.__dict__.keys()
+        self.xaxis='h'
+        self.yaxis='e' #self.physical_motors.k
         if self.xaxis != '' and self.yaxis != '':
             print "2d plotting"
             xarr = None
@@ -852,9 +855,12 @@ class TripleAxis(object):
             #	list[list==None] = 0
             #print zi.tolist()[0]
             zi = zi.T
+            #pylab.Figure()
+            #pylab.pcolormesh(xi,yi,zi)
+            #pylab.show()
             plottable_data = {
                 'type': '2d',
-                'z':  [zi.tolist()],
+                'z':  zi.tolist(),
                 'title': 'TripleAxis Reduction Plot',
                 'dims': {
                     'xmax': xi.max(),
@@ -1801,7 +1807,17 @@ if __name__ == "__main__":
         spins63 = filereader(r'spins_data/bamno063.ng5')
         spins64 = filereader(r'spins_data/bamno064.ng5')
         spins65 = filereader(r'spins_data/bamno065.ng5')
-        spins = join(spins55,spins64)
+        spins56 = filereader(r'spins_data/bamno056.ng5')
+        spins58 = filereader(r'spins_data/bamno058.ng5')
+        spins59 = filereader(r'spins_data/bamno059.ng5')
+        spins60 = filereader(r'spins_data/bamno060.ng5')
+        spins61 = filereader(r'spins_data/bamno061.ng5')
+        spins62 = filereader(r'spins_data/bamno062.ng5')
+        spins66 = filereader(r'spins_data/bamno066.ng5')
+        spins67 = filereader(r'spins_data/bamno067.ng5')
+        spins68 = filereader(r'spins_data/bamno068.ng5')
+        spins69 = filereader(r'spins_data/bamno069.ng5')
+        spins = join([spins55,spins64,spins56,spins57,spins58,spins59,spins60,spins61,spins62,spins63,spins66,spins67,spins68,spins69])
         spins.xaxis='h'
         spins.yaxis='e'
         plotobj = spins.get_plottable()
