@@ -1,7 +1,7 @@
 import os,sys
 
 if sys.platform=='win32':
-    HOMEDIR=r'c:\dataflow'
+    HOMEDIR=r'c:\dataflow_new'
     REPO_ROOT = os.path.split(HOMEDIR)[-1] 
 else:
     HOMEDIR = __file__

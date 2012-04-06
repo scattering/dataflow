@@ -6,9 +6,11 @@ from django.conf.urls.defaults import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-import ROOT_URL
+from django.conf import settings
+REPO_ROOT=settings.REPO_ROOT
 
-urlpatterns = patterns(ROOT_URL.REPO_ROOT + '.apps.tracks.views',
+
+urlpatterns = patterns(REPO_ROOT + '.apps.tracks.views',
 		('^hello/$', 'xhr_test'),
 		('^test/$', 'mytest'),
 		#('^login/$', 'django.contrib.auth.views.login'),
@@ -58,7 +60,7 @@ urlpatterns += patterns('',
 		      url(r'^admin/', include(admin.site.urls)),
 		      (r'', include('registration.urls')),
 		      (r'^profiles/', include('profiles.urls')),
-		      (r'', ROOT_URL.REPO_ROOT + '.apps.tracks.views.home'),
+		      (r'', REPO_ROOT + '.apps.tracks.views.home'),
 		      
 		      
 		      )
