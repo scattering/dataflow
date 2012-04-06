@@ -396,7 +396,7 @@
                 var z = data[c][r];
                 var plotz = Math.floor(((this.t(z) - tzmin) / (tzmax - tzmin)) * maxColorIndex);
                 
-                if (isNaN(plotz)) { plotz = overflowIndex }
+                if (isNaN(plotz) || (z == null)) { plotz = overflowIndex }
                 else if (plotz > maxColorIndex) { plotz = maxColorIndex }
                 else if (plotz < 0) { plotz = 0 }
                 datacol.push(plotz);

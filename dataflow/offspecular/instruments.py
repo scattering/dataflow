@@ -306,17 +306,6 @@ def pixels_two_theta_action(input=[], pixels_per_degree=80.0, qzero_pixel=309, i
     return dict(output=result)
 pixels_two_theta = pixels_two_theta_module(id='ospec.twotheta', datatype=OSPEC_DATA, version='1.0', action=pixels_two_theta_action, filterModule=PixelsToTwotheta)
 
-# Asterix Correct Spectrum Module
-def correct_spectrum_action(data=[], spectrum=None):
-    print "multiplying monitor counts by spectrum"
-    polarizations = ["down_down", "down_up", "up_down", "up_up"]
-    passthrough_cols = ["counts_%s" % (pol,) for pol in polarizations]
-    passthrough_cols.extend(["pixels", "count_time"])
-    expressions = [{"name":col, "expression":"data1_%s" % (col,)} for col in passthrough_cols]
-
-    expressions.extend([{"name":"monitor_%s" % (pol,), "expression":"data1_monitor_%s * data2_column0" % (pol,)} for pol in polarizations])
-    expressions.extend([{"name":"pixels", "expression":"data1_pixels"} for pol in polarizations])
-    result = Algebra()
 
 # Asterix Pixels to two theta module
 def asterix_pixels_two_theta_action(input=[], qzero_pixel = 145., twotheta_offset=0.0, pw_over_d=0.0003411385649, **kwargs):
