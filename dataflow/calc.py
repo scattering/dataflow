@@ -213,6 +213,7 @@ def fingerprint_template(template, config):
         
         # Fingerprinting
         fp = finger_print(module, configuration, index, inputs_fp) # terminals included
+        print nodenum, module, configuration, index, inputs_fp, fp
         fingerprints[nodenum] = fp
         index += 1
     return fingerprints
