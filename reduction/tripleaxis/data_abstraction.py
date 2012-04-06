@@ -10,10 +10,12 @@ from mpfit import mpfit
 #from dataflow import regular_gridding
 #from ...dataflow import wireit
 
-if 1:
+LOCAL=False
+
+if not LOCAL:
     #for use in larger project
     from ... import regular_gridding
-if 0:
+if LOCAL:
     #for use in local testing
     import sys, os
     from matplotlib import pylab
@@ -817,8 +819,8 @@ class TripleAxis(object):
         plottable_data = {}
         print repr(self.xaxis) + " " + repr(self.yaxis)
         print self.__dict__.keys()
-        self.xaxis='h'
-        self.yaxis='e' #self.physical_motors.k
+        #self.xaxis='h'
+        #self.yaxis='e' #self.physical_motors.k
         if self.xaxis != '' and self.yaxis != '':
             print "2d plotting"
             xarr = None
@@ -841,7 +843,7 @@ class TripleAxis(object):
             xstep = 1.0 * (xfinal - xstart) / len(xarr)
             ystart = yarr.min()
             yfinal = yarr.max()
-            ystep = 1.0 * (yfinal - ystart) / len(yarr)
+            ystep  = 1.0 * (yfinal - ystart) / len(yarr)
             print "done with steps"
             xi, yi, zi = regular_gridding.regularlyGrid(xarr, yarr, self.detectors.primary_detector.measurement.x, xstart=xstart, xfinal=xfinal, xstep=xstep, ystart=ystart, yfinal=yfinal, ystep=ystep)		                               
             #print xstart, xfinal
@@ -855,9 +857,10 @@ class TripleAxis(object):
             #	list[list==None] = 0
             #print zi.tolist()[0]
             zi = zi.T
-            #pylab.Figure()
-            #pylab.pcolormesh(xi,yi,zi)
-            #pylab.show()
+            if LOCAL:
+                pylab.Figure()
+                pylab.pcolormesh(xi,yi,zi)
+                pylab.show()
             plottable_data = {
                 'type': '2d',
                 'z':  zi.tolist(),
@@ -1669,6 +1672,8 @@ def join(tas_list):
     distinct=list(set(distinct))
     not_distinct=list(set(not_distinct))
     joinedtas2 = remove_duplicates(joinedtas, distinct, not_distinct)
+    #joinedtas.xaxis=xaxis
+    #joinedtas.yaxis=yaxis
     return joinedtas2
     #np.where(hasattr('isDistinct') and isDistinct,,) #todo finish writing
 

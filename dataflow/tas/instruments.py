@@ -153,6 +153,11 @@ def join_action(input, xaxis='', yaxis='', **kwargs):
     # bundles, which I do in this example.
     joinedtas = None
     print "JOINING"
+    try:
+        xaxis=kwargs['fields']['xaxis']['value']
+        yaxis=kwargs['fields']['yaxis']['value']
+    except:
+        pass
     #for now, we will work on joining arbitrary inputs instead of two at a time...
     #This will hopefully work on bundles, instead of doing things pairwise...
     joinedtas = data_abstraction.join(input)
