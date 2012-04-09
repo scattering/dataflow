@@ -202,7 +202,7 @@ function renderImageData2(data, transform, plotid, plot_options) {
                 transform: transform
                 },
         },
-        series: [{showMarker:false, showLine:false}],
+        series: [{showMarker:false, showLine:false, breakOnNull:true}],
         axes:{
           xaxis:{
             label: data.xlabel,
