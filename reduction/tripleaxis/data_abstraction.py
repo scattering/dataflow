@@ -863,8 +863,9 @@ class TripleAxis(object):
                 pylab.show()
             plottable_data = {
                 'type': '2d',
-                'z':  zi.tolist(),
+                'z':  [zi.tolist()],
                 'title': 'TripleAxis Reduction Plot',
+                'transform': 'lin',
                 'dims': {
                     'xmax': xi.max(),
                     'xmin': xi.min(),
