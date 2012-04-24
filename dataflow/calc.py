@@ -154,13 +154,30 @@ def get_plottable(template, config, nodenum, terminal_id):
     all_fp = fingerprint_template(template, config)
     fp = all_fp[nodenum]
     plottable_fp = name_terminal(name_plottable(fp), terminal_id)
+    binary_fp = "Binary:" + fp + ":" + terminal_id
     if server.exists(plottable_fp):
         print "retrieving cached plottable: " + plottable_fp
         plottable = server.lrange(plottable_fp, 0, -1)
     else:
         print "no cached plottable: calculating..."
         data = calc_single(template, config, nodenum, terminal_id)
-        plottable = convert_to_plottable(data)
+        plottable = []
+        binary_data = []
+        for dnum, datum in enumerate(data):
+            if hasattr(datum, 'use_binary') and datum.use_binary() == True:
+                print datum.use_binary()
+                binary_data = datum.get_plottable_binary()
+                # need this so we can lookup by bundle number later
+                bundle_fp = binary_fp + ":" + str(dnum)
+                for i, item in enumerate(binary_data):
+                    # need this so we can look up individual plottable columns later
+                    new_fp = bundle_fp + ":" + str(i)
+                    server.rpush(new_fp, item)
+                p = datum.get_plottable(binary_fp=bundle_fp)
+            else:
+                p = datum.get_plottable()
+                
+            plottable.append(p)
         for item in plottable:
             server.rpush(plottable_fp, item)
             
