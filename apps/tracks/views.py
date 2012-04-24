@@ -365,7 +365,13 @@ def getCSV(request):
     data = simplejson.loads(request.POST['data'])
     template, config, nodenum, terminal_id = setupReduction(data)
     
-    result = get_csv(template, config, nodenum, terminal_id)[0]
+    result = ""
+    result_list = get_csv(template, config, nodenum, terminal_id)
+    for i, r in enumerate(result_list):
+        result += "#"*80 + "\n"
+        result += "# data set %d" % (i,) + "\n"
+        result += "#" * 80 + "\n"
+        result += r
     
     outfilename = data.get('outfilename', 'data.csv')
     response = HttpResponse(result, mimetype='text/csv')

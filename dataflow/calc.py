@@ -201,7 +201,7 @@ def get_csv(template, config, nodenum, terminal_id):
         csv = convert_to_csv(data)
         for item in csv:
             server.rpush(csv_fp, item)   
-    return csv, csv_fp
+    return csv
 
 def fingerprint_template(template, config):
     """ run the fingerprint operation on the whole template, returning
