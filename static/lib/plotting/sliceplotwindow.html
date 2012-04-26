@@ -26,6 +26,65 @@
 		
 		<!-- <script type="text/javascript" src="test_data2.js"></script> -->
 		<script type="text/javascript">
+		    function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie != '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        // remove whitespace from beginning and end: (like jQuery.trim)
+                        var cookie = cookies[i].replace(/(^[\s\xA0]+|[\s\xA0]+$)/g, '');
+                        //var cookie = jQuery.trim(cookies[i]);
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            
+		    getBinaryData = function(unfilled_data, onFinish) {
+                var oReq = new XMLHttpRequest(); 
+                //oReq.open("GET", "/getBinaryData/"+val, true); 
+                oReq.open("POST", "/getBinaryData/", true);   
+                oReq.responseType = "arraybuffer";
+                //oReq.multipart = true;
+                oReq.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+                oReq.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+                oReq.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+                
+                oReq.onload = function (oEvent) {
+                    if (oReq.status == 200) {
+                        var arrayBuffer = oReq.response;
+                        console.log('binary received');
+                        if (arrayBuffer) {  
+                            var byteArray = new Float32Array(arrayBuffer);
+                            unfilled_data.z_binary_array = byteArray;
+                            var z = [[]];
+                            var row;
+                            var width = unfilled_data.dims.xdim;
+                            var height = unfilled_data.dims.ydim;
+                            for (var r=0; r<height; r++) {
+                                var row = [];
+                                for (var c=0; c<width; c++) {
+                                    row.push(byteArray[c + r*width]);
+                                }
+                                z[0].push(row); 
+                            }
+                            
+                            unfilled_data.z = z;
+                            console.log('binary received and processed', byteArray.length); 
+                            onFinish();
+                            
+                        }  
+                    }
+                }
+                console.log('getting binary...', unfilled_data.binary_fp);
+                oReq.send("binary_fp="+unfilled_data.binary_fp);
+            }
+		</script>
+		<script type="text/javascript">
 		    var plot, colorbar, yslice, xslice;
 
             fit_plots = function() {
@@ -119,6 +178,10 @@
 		    update_plot = function(toPlot) {
 		        debug = false;
 		        data = toPlot;
+		        if (data.binary_fp && data.z_binary_array == undefined) {
+		            getBinaryData(data, function() { update_plot(data) })
+		            return
+		        } 
 		        if (plot == null) {
 		            // then initialize all the plot objects
 		            plot = $.jqplot('plot', data.z, {
