@@ -281,18 +281,43 @@ def old_getCSV(data):
 #@csrf_exempt 
 def setupReduction(data):
     #data = simplejson.loads(request.POST['data'])
+    #import pprint
     print 'IN RUN REDUCTION'
-    print data
+    #pprint.pprint( data )
     config = {}
-    bad_headers = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
+    bad_headers = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon", "fields"]
     active_group =str(int(data['group'])) # all keys are strings!
-    for i, m in enumerate(data['modules']):
+    for i in range(len(data['modules'])):
+        m = data['modules'][i]
         conf = {}
         config_in = m.get('config', {})
         groups = config_in.get('groups', {})
         current_reduct = groups.get(active_group, {})
         for key, value in current_reduct.items():
-            print key, value
+            if key == 'files' and current_reduct.get('autochain-loader', {}).get('value', False) == True:
+                import copy
+                new_moduleId = len(data['modules'])
+                for f in value['value']:
+                    new_config = copy.deepcopy(current_reduct)
+                    #new_config.pop('files')
+                    new_config['files']['value'] = [f]
+                    new_config['autochain-loader']['value'] = False
+                    data['modules'].append({'name': m['name'], 'config': {'position': [], 'groups': { active_group : new_config}}})
+                    new_wire = {'src': {'moduleId': new_moduleId, 'terminal': 'output'},
+                                'tgt': {'moduleId': i, 'terminal': 'input'}}
+                    data['wires'].append(new_wire)
+                    new_moduleId += 1
+                current_reduct['files']['value'] = []
+                #print 'autochaining! new config:'
+                #pprint.pprint( data )
+                
+    for i in range(len(data['modules'])):
+        m = data['modules'][i]
+        conf = {}
+        config_in = m.get('config', {})
+        groups = config_in.get('groups', {})
+        current_reduct = groups.get(active_group, {})
+        for key, value in current_reduct.items():
             if key == 'files':
                 file_hashes = [data['file_dict'][f] for f in value['value']]
                 file_paths = [get_filepath_by_hash(fh) for fh in file_hashes]

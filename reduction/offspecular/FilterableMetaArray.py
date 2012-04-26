@@ -63,7 +63,7 @@ class FilterableMetaArray(MetaArray):
 
     def use_binary(self):
         if len(self.shape) == 3:
-            return True
+            return False
         elif len(self.shape) == 2:
             return False
         else:
@@ -127,13 +127,15 @@ class FilterableMetaArray(MetaArray):
         
         result = []
         for colnum, col in enumerate(data_cols):      
-            array_out = self['Measurements':col]
+            array_out = self['Measurements':col].view(ndarray)
             
+            dump = {}
             if binary_fp is not None:
                 # use lookup to get binary value
                 z = [[0,0]]
+                dump['binary_fp'] = binary_fp + ":" + str(colnum)
             else: # use the old way
-                z = [array_out.tolist()]
+                z = [array_out.T.tolist()]
                 
             #zbin_base64 = base64.b64encode(array_out.tostring())
             #z = [arr[:, 0].tolist() for arr in self]
@@ -164,10 +166,10 @@ class FilterableMetaArray(MetaArray):
             title = 'AND/R data' # That's creative enough, right?
             plot_type = '2d'
             transform = 'lin' # this is nice by default
-            new_fp = binary_fp + ":" + str(colnum)
-            dump = dict(type=plot_type, z=z, title=title, dims=dims, 
+            dump.update( dict(type=plot_type, z=z, title=title, dims=dims, 
                         xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, 
-                        binary_fp=new_fp, transform=transform)
+                        transform=transform) )
+            
             result.append(simplejson.dumps(dump, sort_keys=True, indent=2))
         return ",".join(result)
     

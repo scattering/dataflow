@@ -118,7 +118,7 @@
     // steps are big enough to skip completely-overlapping rectangles (saving time);
     $.jqplot.heatmapRenderer.prototype.draw_rect = function (ctx, gd, options) {
         // do stuff
-        var sxdx = this.get_sxdx();
+        var sxdx = this.renderer.get_sxdx();
         var xzoom = sxdx.dw / sxdx.sw;
         var yzoom = sxdx.dh / sxdx.sh;
         var xstep = Math.max(1/xzoom, 1);

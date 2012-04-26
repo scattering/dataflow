@@ -165,7 +165,6 @@ def get_plottable(template, config, nodenum, terminal_id):
         binary_data = []
         for dnum, datum in enumerate(data):
             if hasattr(datum, 'use_binary') and datum.use_binary() == True:
-                print datum.use_binary()
                 binary_data = datum.get_plottable_binary()
                 # need this so we can lookup by bundle number later
                 bundle_fp = binary_fp + ":" + str(dnum)
@@ -225,8 +224,11 @@ def fingerprint_template(template, config):
         
         # Include configuration information
         configuration = {}
-        configuration.update(node.get('config', {}))
+        # let's not grab config information from the node... like position.
+        # only taking configuration defined for this group number.
+        #configuration.update(node.get('config', {}))
         configuration.update(config.get(nodenum, {}))
+        print "configuration for fingerprint:", configuration
         
         # Fingerprinting
         fp = finger_print(module, configuration, index, inputs_fp) # terminals included
@@ -293,7 +295,8 @@ def finger_print(module, args, nodenum, inputs_fp):
     new_args = dict((arg, value) for arg, value in args.items() if arg not in bad_args)
     new_args = format_ordered(new_args)
     fp += str(new_args) # all arguments for the given module
-    fp += str(nodenum) # node number in template order
+    # actually, I don't think it matters what order it's in! - bbm
+    #fp += str(nodenum) # node number in template order
     for item in inputs_fp:
         terminal_id, input_fp = item
         fp += terminal_id + input_fp

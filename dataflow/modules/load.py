@@ -17,6 +17,13 @@ def load_module(id=None, datatype=None, action=None,
     }
    
     terminals = [
+        dict(id='input',
+             datatype=datatype,
+             use='in',
+             description='data',
+             required=False,
+             multiple=True,
+             ),
         dict(id='output',
              datatype=datatype,
              use='out',
