@@ -130,9 +130,10 @@
 		                if (!(lim in cfg)) { cfg[lim] = {} };
                         if (!('value' in cfg[lim]) || cfg[lim]['value'].trim().length == 0) { cfg[lim]['value'] = lims[lim].toString(); };
 		            } 
-
+                    
+                    update_selectors(toPlot);
 		            update_plot(toPlot[0]);
-		            update_selectors(toPlot);
+		            
 		        } else {
 		            alert('no data to plot!');
 		        }
@@ -160,6 +161,8 @@
                     var plotnum = selectnum[selectnum.selectedIndex].value;
                     var toPlot = toPlots[plotnum];
 
+                    update_plot(toPlot, transform);
+                    /*
                     plot.series[0].set_data(toPlot.z[0], toPlot.dims);
                     plot.series[0].set_transform(transform);
                     plot.series[0]._xaxis.labelOptions.label = toPlot.xlabel;
@@ -170,12 +173,13 @@
 		            plot.series[0].generate_cumsums();
 		            //generate_cumsums(plot.series[0]);
 		            sl.update();
+		            */
                 }
                 
                 jQuery('#plot_selectnum').change({}, onchange);
                 jQuery('#plot_selectz').change({}, onchange);
 		    }
-		    update_plot = function(toPlot) {
+		    update_plot = function(toPlot, transform) {
 		        debug = false;
 		        data = toPlot;
 		        if (data.binary_fp && data.z_binary_array == undefined) {
@@ -210,7 +214,7 @@
 		                    shadow: false,
                             renderer:$.jqplot.heatmapRenderer,
                             rendererOptions: {
-                                transform: 'lin',
+                                transform: toPlot.transform || 'lin',
                                 dims: data.dims,
                                 //display_dims: { xmin: data.dims.xmin-1,
                                 //                ymin: data.dims.ymin-1,
@@ -370,11 +374,24 @@
 		        else {
 		            // no need to recreate everything... just update the data.
 		            plot.series[0].set_data(toPlot.z[0], toPlot.dims);
-		            plot.series[0].set_transform(toPlot.transform);
+		            plot.series[0].set_transform(transform || toPlot.transform);
+                    plot.series[0]._xaxis.labelOptions.label = toPlot.xlabel;
+                    plot.series[0]._yaxis.labelOptions.label = toPlot.ylabel;
+                    plot.plugins._interactor.zoomMax();
+                    colorbar.plugins._interactor.zoomMax();
+                    sl = slice_listener(plot.series[0]);
+		            plot.series[0].generate_cumsums();
+		            //generate_cumsums(plot.series[0]);
+		            sl.update();
+		            
+		            /*
+		            plot.series[0].set_data(toPlot.z[0], toPlot.dims);
+		            plot.series[0].set_transform(transform || toPlot.transform);
 		            plot.plugins._interactor.zoomMax();
                     colorbar.series[0].dims = toPlot.dims;
                     colorbar.series[0].set_ztransform(transform);
                     colorbar.plugins._interactor.zoomMax();
+                    */
 		        }
 		    }
 		    pointTextControl = function(p, coord, label, precision) {
