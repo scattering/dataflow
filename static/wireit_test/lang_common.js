@@ -188,42 +188,10 @@ YAHOO.lang.extend(SliceContainer, WireIt.Container, {
         editor.adapter.runReduction(toReduce, {
             success: function(result) { 
                 //toPlot = result;
-                var unfilled_data = [];
-			    var target_length = result.length;
-			    var filled_data_count = 0;
-			    
-			    for (var i=0; i<result.length; i++) {
-			        if (result[i].binary_fp) { unfilled_data.push(result[i]); } 
-			        else { filled_data_count++; }
-			    }
-			    
-			    if (filled_data_count == target_length) { 
-			        var sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768");
-			        sliceWindow.toPlot = result;
-			        sliceWindow.container = f;
-                    sliceWindow.reductionInstance = reductionInstance;
-			    }
-			    
-			    else { 
-			        for (var i=0; i<unfilled_data.length; i++) {
-			            var ud = unfilled_data[i];
-			            var onFinish = function()  { 
-			                //filled_data_count++;
-			                if (++filled_data_count == target_length) { 
-			                    var sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768");
-			                    sliceWindow.toPlot = result;
-			                    sliceWindow.container = f;
-                                sliceWindow.reductionInstance = reductionInstance;
-			                };
-			            } 
-			            editor.adapter.getBinaryData(ud, onFinish);
-			        }
-			    }
-                
-                //else {
-                //    sliceWindow.update_plot(result[0]);
-                //    sliceWindow.update_selectors(result);
-                //}
+                var sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768");
+		        sliceWindow.toPlot = result;
+		        sliceWindow.container = f;
+                sliceWindow.reductionInstance = reductionInstance;
             },
             failure: editor.runModuleFailure,
             scope: editor}
