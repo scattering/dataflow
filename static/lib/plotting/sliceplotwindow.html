@@ -183,7 +183,10 @@
 		        debug = false;
 		        data = toPlot;
 		        if (data.binary_fp && data.z_binary_array == undefined) {
-		            if (plot && plot.series && plot.series[0]) { plot.series[0].show=false; }
+		            if (plot && plot.series && plot.series[0]) { 
+		                plot.series[0].show=false; 
+		                plot.replot();
+		            }
 		            getBinaryData(data, function() { update_plot(data) })
 		            return
 		        } 
