@@ -20,6 +20,7 @@ urlpatterns = patterns(REPO_ROOT + '.apps.tracks.views',
 		('^sliceWindow/$', 'showSliceWindow'),
 		('^uploadFiles/$', 'uploadFiles'),
 		('^filesExist/$', 'filesExist'),
+		('^getBinaryData/', 'getBinaryData'),
         ('^json/$','return_data'),
         ('^test_table/$','testTable'),
 		

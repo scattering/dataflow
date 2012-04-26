@@ -154,13 +154,29 @@ def get_plottable(template, config, nodenum, terminal_id):
     all_fp = fingerprint_template(template, config)
     fp = all_fp[nodenum]
     plottable_fp = name_terminal(name_plottable(fp), terminal_id)
+    binary_fp = "Binary:" + fp + ":" + terminal_id
     if server.exists(plottable_fp):
         print "retrieving cached plottable: " + plottable_fp
         plottable = server.lrange(plottable_fp, 0, -1)
     else:
         print "no cached plottable: calculating..."
         data = calc_single(template, config, nodenum, terminal_id)
-        plottable = convert_to_plottable(data)
+        plottable = []
+        binary_data = []
+        for dnum, datum in enumerate(data):
+            if hasattr(datum, 'use_binary') and datum.use_binary() == True:
+                binary_data = datum.get_plottable_binary()
+                # need this so we can lookup by bundle number later
+                bundle_fp = binary_fp + ":" + str(dnum)
+                for i, item in enumerate(binary_data):
+                    # need this so we can look up individual plottable columns later
+                    new_fp = bundle_fp + ":" + str(i)
+                    server.rpush(new_fp, item)
+                p = datum.get_plottable(binary_fp=bundle_fp)
+            else:
+                p = datum.get_plottable()
+                
+            plottable.append(p)
         for item in plottable:
             server.rpush(plottable_fp, item)
             
@@ -184,7 +200,7 @@ def get_csv(template, config, nodenum, terminal_id):
         csv = convert_to_csv(data)
         for item in csv:
             server.rpush(csv_fp, item)   
-    return csv, csv_fp
+    return csv
 
 def fingerprint_template(template, config):
     """ run the fingerprint operation on the whole template, returning
@@ -208,8 +224,11 @@ def fingerprint_template(template, config):
         
         # Include configuration information
         configuration = {}
-        configuration.update(node.get('config', {}))
+        # let's not grab config information from the node... like position.
+        # only taking configuration defined for this group number.
+        #configuration.update(node.get('config', {}))
         configuration.update(config.get(nodenum, {}))
+        print "configuration for fingerprint:", configuration
         
         # Fingerprinting
         fp = finger_print(module, configuration, index, inputs_fp) # terminals included
@@ -276,7 +295,8 @@ def finger_print(module, args, nodenum, inputs_fp):
     new_args = dict((arg, value) for arg, value in args.items() if arg not in bad_args)
     new_args = format_ordered(new_args)
     fp += str(new_args) # all arguments for the given module
-    fp += str(nodenum) # node number in template order
+    # actually, I don't think it matters what order it's in! - bbm
+    #fp += str(nodenum) # node number in template order
     for item in inputs_fp:
         terminal_id, input_fp = item
         fp += terminal_id + input_fp

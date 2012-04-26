@@ -61,16 +61,24 @@ class FilterableMetaArray(MetaArray):
         subarr._info = meta['info']
         return subarr
 
-    def get_plottable(self):
+    def use_binary(self):
         if len(self.shape) == 3:
-            return self.get_plottable_2d()
+            return False
+        elif len(self.shape) == 2:
+            return False
+        else:
+            return False
+
+    def get_plottable(self, binary_fp=None):
+        if len(self.shape) == 3:
+            return self.get_plottable_2d(binary_fp)
         elif len(self.shape) == 2:
             return self.get_plottable_1d()
         else:
             print "can only handle 1d or 2d data"
             return 
             
-    def get_plottable_1d(self):
+    def get_plottable_1d(self, binary_fp=None):
         colors = ['Blue', 'Red', 'Green', 'Yellow']
         cols = self._info[1]['cols']
         data_cols = [col['name'] for col in cols if not col['name'].startswith('error')]
@@ -112,15 +120,23 @@ class FilterableMetaArray(MetaArray):
             
         return simplejson.dumps(plottable_data,sort_keys=True, indent=2)
             
-    def get_plottable_2d(self):
+    def get_plottable_2d(self, binary_fp=None):
         # grab the first counts col:
         cols = self._info[2]['cols']
         data_cols = [col['name'] for col in cols if col['name'].startswith('counts')]
         
         result = []
-        for col in data_cols:      
-            array_out = self['Measurements':col]
-            z = [array_out.tolist()]
+        for colnum, col in enumerate(data_cols):      
+            array_out = self['Measurements':col].view(ndarray)
+            
+            dump = {}
+            if binary_fp is not None:
+                # use lookup to get binary value
+                z = [[0,0]]
+                dump['binary_fp'] = binary_fp + ":" + str(colnum)
+            else: # use the old way
+                z = [array_out.T.tolist()]
+                
             #zbin_base64 = base64.b64encode(array_out.tostring())
             #z = [arr[:, 0].tolist() for arr in self]
             dims = {}
@@ -150,10 +166,26 @@ class FilterableMetaArray(MetaArray):
             title = 'AND/R data' # That's creative enough, right?
             plot_type = '2d'
             transform = 'lin' # this is nice by default
-            dump = dict(type=plot_type, z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, transform=transform)
+            dump.update( dict(type=plot_type, z=z, title=title, dims=dims, 
+                        xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, 
+                        transform=transform) )
+            
             result.append(simplejson.dumps(dump, sort_keys=True, indent=2))
         return ",".join(result)
     
+    def get_plottable_binary(self):
+        cols = self._info[2]['cols']
+        data_cols = [col['name'] for col in cols if col['name'].startswith('counts')]
+        
+        result = []
+        for col in data_cols:
+            # output in column-major order, since first index is "x",
+            # and we want to traverse that axis first.       
+            array_out = self['Measurements':col].view(ndarray).ravel('F')
+            result.append(array_out.astype(float32).tostring())
+        
+        return result
+     
     def get_csv(self):
         if len(self.shape) == 3:
             num_cols = self.shape[2]
