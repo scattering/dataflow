@@ -63,7 +63,7 @@ class FilterableMetaArray(MetaArray):
 
     def use_binary(self):
         if len(self.shape) == 3:
-            return False
+            return True
         elif len(self.shape) == 2:
             return False
         else:
