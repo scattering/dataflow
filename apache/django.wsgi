@@ -18,4 +18,4 @@ sys.stdout = sys.stderr
 os.environ['DJANGO_SETTINGS_MODULE'] = PROJ_NAM + '.settings'
 os.environ['MPLCONFIGDIR'] = os.path.join(PROJ_PATH, '.matplotlib/')
 import django.core.handlers.wsgi as wsgi
-application = django.core.handlers.wsgi.WSGIHandler()
+application = wsgi.WSGIHandler()
