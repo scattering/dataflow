@@ -5,6 +5,7 @@ import sys
 import vaxutils
 import numpy
 import math
+import os
 #from matplotlib import pyplot as plt
 
 def readNCNRSensitivity(inputfile):
@@ -61,7 +62,7 @@ def readNCNRData(inputfile):
     filename = dat[0].replace(' ','')
     
     #metadata
-    metadata = {}
+    metadata = {'run.filename': os.path.basename(inputfile)}
     reals = {}
     
     formatstring = '<4i4s4s4s4s20s3s11s1s8s' #run

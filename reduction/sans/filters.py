@@ -105,7 +105,8 @@ class SansData(object):
         plottable_data = {
             'type': '2d',
             'z':  [data],
-            'title': '2D Sans Data',
+            'title': self.metadata['run.filename']+': ' + self.metadata['sample.labl'],
+            'metadata': self.metadata,
             'fixAspect': True,
             'aspectRatio': 1.0,
             'dims': {
@@ -122,7 +123,7 @@ class SansData(object):
             'ylabel': 'Y',
             'zlabel': 'Intensity (I)',
             };
-        out = simplejson.dumps(plottable_data,sort_keys=True, indent=2)
+        out = simplejson.dumps(plottable_data,sort_keys=True)
         return out
     
     def dumps(self):
