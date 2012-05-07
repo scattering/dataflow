@@ -162,18 +162,6 @@
                     var toPlot = toPlots[plotnum];
 
                     update_plot(toPlot, transform);
-                    /*
-                    plot.series[0].set_data(toPlot.z[0], toPlot.dims);
-                    plot.series[0].set_transform(transform);
-                    plot.series[0]._xaxis.labelOptions.label = toPlot.xlabel;
-                    plot.series[0]._yaxis.labelOptions.label = toPlot.ylabel;
-                    plot.plugins._interactor.zoomMax();
-                    colorbar.plugins._interactor.zoomMax();
-                    sl = slice_listener(plot.series[0]);
-		            plot.series[0].generate_cumsums();
-		            //generate_cumsums(plot.series[0]);
-		            sl.update();
-		            */
                 }
                 
                 jQuery('#plot_selectnum').change({}, onchange);
