@@ -88,9 +88,8 @@ class FilterableMetaArray(MetaArray):
         plottable_data = {
             'type': '1d',
             'title': 'Offspecular summed Data',
-            'options': {},
+            'options': {'series': []},
             'clear_existing': False,
-            'series': [],
             'data': []
         }
         
@@ -103,7 +102,7 @@ class FilterableMetaArray(MetaArray):
             #    yerror = sqrt(abs(self['Measurements':col])).tolist()
             series_data = [[xx,yy] for xx, yy in zip(x,y)]
             plottable_data['data'].append(series_data)
-            plottable_data['series'].append({'label': col})
+            plottable_data['options']['series'].append({'label': col})
             
         return simplejson.dumps(plottable_data,sort_keys=True, indent=2)
         
