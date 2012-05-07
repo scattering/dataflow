@@ -557,7 +557,7 @@ var toPlots_input = null;
 function plottingAPI(toPlots, plotid_prefix) {
     toPlots_input = toPlots;
     if (debug) console.log(toPlots.constructor.name);
-    if (toPlots.constructor != Array) {
+    if (!(Array.isArray(toPlots))) {
         toPlots = [toPlots];
         if (debug)
             console.log('changing singleton data to length-1 array')
@@ -570,6 +570,7 @@ function plottingAPI(toPlots, plotid_prefix) {
         console.log('toPlots:', toPlots)
     // assuming all plots in the list are of the same type!
     plot_type = toPlots[0].type
+    console.log(plot_type);
     
     switch (plot_type) {
         case '2d':
