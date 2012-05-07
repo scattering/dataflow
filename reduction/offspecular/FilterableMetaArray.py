@@ -86,6 +86,35 @@ class FilterableMetaArray(MetaArray):
         x = self._info[0]['values'].tolist()
         xlabel = self._info[0]['name']
         plottable_data = {
+            'type': '1d',
+            'title': 'Offspecular summed Data',
+            'options': {},
+            'clear_existing': False,
+            'series': [],
+            'data': []
+        }
+        
+        for i, col in enumerate(data_cols):
+            y = self['Measurements':col].tolist()
+            #error_col = next((i for i in xrange(len(cols)) if cols[i]['name'] == ('error_'+col)), -1)
+            #if error_col > 0:
+            #    yerror = self['Measurements':'error_'+col].tolist()
+            #else:
+            #    yerror = sqrt(abs(self['Measurements':col])).tolist()
+            series_data = [[x,y] for x, y in zip(x,y)]
+            plottable_data['data'].append(series_data)
+            plottable_data['series'].append({'label': col})
+            
+        return simplejson.dumps(plottable_data,sort_keys=True, indent=2)
+        
+    def get_plottable_nd(self, binary_fp=None):
+        colors = ['Blue', 'Red', 'Green', 'Yellow']
+        cols = self._info[1]['cols']
+        data_cols = [col['name'] for col in cols if not col['name'].startswith('error')]
+        print data_cols
+        x = self._info[0]['values'].tolist()
+        xlabel = self._info[0]['name']
+        plottable_data = {
             'type': 'nd',
             'title': 'Offspecular summed Data',
 
