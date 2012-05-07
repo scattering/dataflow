@@ -576,6 +576,10 @@ function plottingAPI(toPlots, plotid_prefix) {
             plot = update2dPlot(plot, toPlots, plotid_prefix);
             break;
         
+        case '1d':
+            plot = update1dPlot(plot, toPlots, plotid_prefix);
+            break;
+        
         case 'nd': 
              for (var i = 0; i < toPlots.length; i ++) {
                 var toPlot = toPlots[i];
