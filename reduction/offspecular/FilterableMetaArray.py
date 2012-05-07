@@ -101,7 +101,7 @@ class FilterableMetaArray(MetaArray):
             #    yerror = self['Measurements':'error_'+col].tolist()
             #else:
             #    yerror = sqrt(abs(self['Measurements':col])).tolist()
-            series_data = [[x,y] for x, y in zip(x,y)]
+            series_data = [[xx,yy] for xx, yy in zip(x,y)]
             plottable_data['data'].append(series_data)
             plottable_data['series'].append({'label': col})
             
