@@ -32,7 +32,7 @@
             '</div></td>').appendTo(tr);
         }
         if (this.showLabels) {
-            elem = $('<td class="jqplot-table-legend" style="padding-top:'+rs+';"></td>');
+            elem = $('<td class="jqplot-table-legend-label" style="padding-top:'+rs+';" series_num='+series_num+'></td>');
             elem.appendTo(tr);
             if (this.escapeHtml) {
                 elem.text(label);
@@ -42,7 +42,6 @@
             }
         }
         elem.click(handleClick);
-        elem[0].setAttribute('series_num', series_num);
         tr = null;
         elem = null;
     };
