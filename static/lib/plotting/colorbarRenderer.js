@@ -40,6 +40,7 @@
         this.matchPlotToColorbar = matchPlotToColorbar;
         //this.update_plotdata = update_plotdata;
         this.set_transform = set_transform;
+        this.set_dims = set_dims;
         //this.set_data = set_data;
         this.zoom_to = zoom_to;
         this.set_transform(this.transform);
@@ -108,9 +109,15 @@
         return existing_min
     };
     
+    function set_dims(dims) {
+        $.extend(true, this.dims, dims);
+        this.set_transform();
+    }
+    
     function set_transform(tform) {
         // only knows log and lin for now
         //if (tform != this.transform) {
+            var tform = tform || this.transform;
             this.transform = tform;
             this._yaxis.transform = tform;
             
@@ -154,8 +161,8 @@
         var limits = limits || this.dims;
         if ('xmin' in limits) { console.log('xmin: ', limits.xmin, this._xaxis.min); this._xaxis.min = limits.xmin; }
         if ('xmax' in limits) this._xaxis.max = limits.xmax;
-        if ('ymin' in limits) this._yaxis.min = limits.ymin;
-        if ('ymax' in limits) this._yaxis.max = limits.ymax;
+        if ('zmin' in limits) this._yaxis.min = limits.zmin;
+        if ('zmax' in limits) this._yaxis.max = limits.zmax;
     };
        
 })(jQuery);
