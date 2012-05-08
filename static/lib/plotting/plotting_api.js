@@ -209,7 +209,7 @@ function render1dplot(data, transform, plotid, plot_options) {
     
     var options = {
         title: data.title,
-        seriesDefaults: {shadow: false},
+        seriesDefaults: {shadow: false, markerOptions: {shadow: false, size: 4}},
         axes:{
           xaxis:{
             renderer: $.jqplot.LinearAxisRenderer,  // renderer to use to draw the axis,
@@ -471,6 +471,9 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         var metadata_table = make_metadata_table(toPlot.metadata);
         document.getElementById('metadata').innerHTML = "";
         document.getElementById('metadata').appendChild(metadata_table);
+        jQuery(".show_hide").show();
+    } else {
+        jQuery(".show_hide").hide();
     }
     document.getElementById('aspect_ratio').value = aspectRatio;
     var fixAspect = toPlot.fixAspect || false;
