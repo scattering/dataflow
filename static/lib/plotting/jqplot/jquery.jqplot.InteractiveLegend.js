@@ -12,7 +12,7 @@
     
     $.jqplot.InteractiveLegendRenderer.prototype.init = function(options) {
         $.extend(true, this, options);
-        $.jqplot.eventListenerHooks.push(['jqplotClick', handleClick]);
+        //$.jqplot.eventListenerHooks.push(['jqplotClick', handleClick]);
     };
         
     $.jqplot.InteractiveLegendRenderer.prototype.addrow = function (label, color, pad, reverse) {
@@ -40,6 +40,7 @@
             else {
                 elem.html(label);
             }
+            elem.click(handleClick);
         }
         tr = null;
         elem = null;
