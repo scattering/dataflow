@@ -108,7 +108,7 @@
         } else {
             console.log('default handler used.');
         }
-    
+    } 
     
 })(jQuery);
 
