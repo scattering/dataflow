@@ -15,7 +15,7 @@
         //$.jqplot.eventListenerHooks.push(['jqplotClick', handleClick]);
     };
         
-    $.jqplot.InteractiveLegendRenderer.prototype.addrow = function (label, color, pad, reverse) {
+    $.jqplot.InteractiveLegendRenderer.prototype.addrow = function (label, color, pad, reverse, series_num) {
         var rs = (pad) ? this.rowSpacing : '0';
         var tr,
         	elem;
@@ -40,8 +40,9 @@
             else {
                 elem.html(label);
             }
-            elem.click(handleClick);
         }
+        elem.click(handleClick);
+        elem.setAttribute('series_num', series_num);
         tr = null;
         elem = null;
     };
@@ -82,7 +83,7 @@
                         else if (reverse && i == series.length - 1){
                             pad = false;
                         }
-                        this.renderer.addrow.call(this, lt, color, pad, reverse);
+                        this.renderer.addrow.call(this, lt, color, pad, reverse, i);
                         pad = true;
                     }
                     // let plugins add more rows to legend.  Used by trend line plugin.
@@ -100,8 +101,9 @@
         return this._elem;
     };
     
-    function handleClick(ev, gridpos, datapos, neighbor, plot) {
-        console.log(ev, gridpos, datapos, neighbor, plot);
+    function handleClick(ev) {
+        console.log(ev.target);
+        //console.log(ev, gridpos, datapos, neighbor, plot);
     }
     
 })(jQuery);
