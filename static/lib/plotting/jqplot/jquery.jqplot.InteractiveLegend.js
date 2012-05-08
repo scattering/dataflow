@@ -102,7 +102,7 @@
     };
     
     function handleClick(ev) {
-        console.log(ev.target);
+        //console.log(ev.target);
         //console.log(ev, gridpos, datapos, neighbor, plot);
     }
     

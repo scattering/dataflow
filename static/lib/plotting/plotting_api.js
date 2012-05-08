@@ -255,6 +255,12 @@ function render1dplot(data, transform, plotid, plot_options) {
     jQuery.extend(true, options, plot_options);
     plot1d = $.jqplot(plotid, data.data, options);
     plot1d.type = '1d';
+    function handleLegendClick(ev) {
+        var series_num = ev.target.getAttribute('series_num') || 0;
+        var mplot = ev.data.plot;
+        mplot.series[series_num].show = !mplot.series[series_num].show;
+    }
+    $('.jqplot-table-legend-label').click({plot: plot1d}, handleLegendClick);
     return plot1d
 };
 
