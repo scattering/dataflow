@@ -41,8 +41,13 @@
 		    window.onload = function() {
 		        debug=false;
 		        if (window.opener.toPlot) {
-		            plottingAPI(window.opener.toPlot, 'plot');
+		            plottingAPI(window.opener.toPlot, 'plot');   
 		        }
+		        
+		        jQuery(".slidingDiv").hide();
+		        jQuery('.show_hide').click(function(){
+                    jQuery(".slidingDiv").slideToggle();
+                });
 		    }
 		</script>
 	</head>
