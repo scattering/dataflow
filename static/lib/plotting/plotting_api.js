@@ -253,16 +253,19 @@ function render1dplot(data, transform, plotid, plot_options) {
     
     jQuery.extend(true, options, data.options);
     jQuery.extend(true, options, plot_options);
+    $('#'+plotid).empty();
     plot1d = $.jqplot(plotid, data.data, options);
     plot1d.type = '1d';
     function handleLegendClick(ev) {
         var series_num = ev.target.getAttribute('series_num') || 0;
-        var mplot = ev.data.plot;
+        //var mplot = ev.data.plot;
+        var mplot = plot1d;
         mplot.series[series_num].show = !mplot.series[series_num].show;
         mplot.replot();
-        $('.jqplot-table-legend-label').click({plot: plot1d}, handleLegendClick);
+        //$('.jqplot-table-legend-label').click({plot: plot1d}, handleLegendClick);
     }
-    $('.jqplot-table-legend-label').click({plot: plot1d}, handleLegendClick);
+    //$('.jqplot-table-legend-label').click({plot: plot1d}, handleLegendClick);
+    plot1d.legend.handleClick = handleLegendClick;
     return plot1d
 };
 
