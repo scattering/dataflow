@@ -266,6 +266,31 @@ function render1dplot(data, transform, plotid, plot_options) {
     }
     //$('.jqplot-table-legend-label').click({plot: plot1d}, handleLegendClick);
     plot1d.legend.handleClick = handleLegendClick;
+    
+    function transformData() {
+        if (transform == 'log') {
+            for (var i=0; i<this.series.length; i++) {
+                var pd = this.series[i]._plotData;
+                var d = this.data[i];
+                for (var j=0; j<pd.length; j++) {
+                    pd[j][1] = d[j][1]>0 ? Math.log(d[j][1]) / Math.LN10 : null;
+                }
+            }
+            this.axes.yaxis.resetScale();
+            this.replot();
+        } else {
+            for (var i=0; i<this.series.length; i++) {
+                var pd = this.series[i]._plotData;
+                var d = this.data[i];
+                for (var j=0; j<pd.length; j++) {
+                    pd[j][1] = d[j][1];
+                }
+            }
+            this.axes.yaxis.resetScale();
+            this.replot();
+        }
+    }
+    plot1d.setTransform = transformData
     return plot1d
 };
 
