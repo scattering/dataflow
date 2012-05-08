@@ -259,6 +259,7 @@ function render1dplot(data, transform, plotid, plot_options) {
         var series_num = ev.target.getAttribute('series_num') || 0;
         var mplot = ev.data.plot;
         mplot.series[series_num].show = !mplot.series[series_num].show;
+        mplot.replot();
     }
     $('.jqplot-table-legend-label').click({plot: plot1d}, handleLegendClick);
     return plot1d
