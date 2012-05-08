@@ -15,7 +15,7 @@
         //$.jqplot.eventListenerHooks.push(['jqplotClick', handleClick]);
     };
         
-    $.jqplot.InteractiveLegendRenderer.prototype.addrow = function (label, color, pad, reverse, series_num) {
+    $.jqplot.InteractiveLegendRenderer.prototype.addrow = function (label, color, pad, reverse, series_num, series_show) {
         var rs = (pad) ? this.rowSpacing : '0';
         var tr,
         	elem;
@@ -25,7 +25,7 @@
         else{
             tr = $('<tr class="jqplot-table-legend"></tr>').appendTo(this._elem);
         }
-        if (this.showSwatches) {
+        if (series_show) {
             $('<td class="jqplot-table-legend" style="text-align:center;padding-top:'+rs+';">'+
             '<div><div class="jqplot-table-legend-swatch" style="background-color:'+color+
             ';border-color:'+color+';width:10px;height:10px;"></div>'+
@@ -82,7 +82,7 @@
                         else if (reverse && i == series.length - 1){
                             pad = false;
                         }
-                        this.renderer.addrow.call(this, lt, color, pad, reverse, i);
+                        this.renderer.addrow.call(this, lt, color, pad, reverse, i, s.show);
                         pad = true;
                     }
                     // let plugins add more rows to legend.  Used by trend line plugin.
