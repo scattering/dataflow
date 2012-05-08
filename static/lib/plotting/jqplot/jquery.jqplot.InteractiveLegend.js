@@ -11,12 +11,6 @@
     $.jqplot.InteractiveLegendRenderer.prototype.constructor = $.jqplot.InteractiveLegendRenderer;
     
     $.jqplot.InteractiveLegendRenderer.prototype.init = function(options) {
-        function handleClick(ev) {
-            console.log('default click handler');
-            //console.log(ev.target);
-            //console.log(ev, gridpos, datapos, neighbor, plot);
-        }
-        this.handleClick = handleClick;
         $.extend(true, this, options);
         //$.jqplot.eventListenerHooks.push(['jqplotClick', handleClick]);
     };
@@ -48,7 +42,7 @@
                 elem.html(label);
             }
         //}
-        elem.click(this.handleClick);
+        elem.click({legend: this}, handleClick);
         tr = null;
         elem = null;
     };
@@ -107,6 +101,13 @@
         return this._elem;
     };
     
+    function handleClick(ev) {
+        console.log(ev);
+        if (ev.data && ev.data.legend && ev.data.legend.handleClick) {
+            ev.data.legend.handleClick(ev);
+        } else {
+            console.log('default handler used.');
+        }
     
     
 })(jQuery);

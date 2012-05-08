@@ -593,7 +593,6 @@ function plottingAPI(toPlots, plotid_prefix) {
         console.log('toPlots:', toPlots)
     // assuming all plots in the list are of the same type!
     plot_type = toPlots[0].type
-    console.log(plot_type);
     
     switch (plot_type) {
         case '2d':
