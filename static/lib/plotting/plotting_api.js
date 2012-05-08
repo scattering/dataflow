@@ -239,7 +239,11 @@ function render1dplot(data, transform, plotid, plot_options) {
             tooltipOffset: -60,
             useAxesFormatters: false,
         },
-        legend: {show: true, placement: 'outside'},
+        legend: {
+            show: true, 
+            placement: 'outside',
+            renderer: $.jqplot.InteractiveLegendRenderer
+        },
         grid: {shadow: false},
         sortData: false,
         //interactors: [ {type: 'Rectangle', name: 'rectangle'} ],
@@ -395,7 +399,10 @@ function update1dPlot(plot, toPlots, target_id, plotnum) {
         var metadata_table = make_metadata_table(toPlot.metadata);
         document.getElementById('metadata').innerHTML = "";
         document.getElementById('metadata').appendChild(metadata_table);
-    }   
+        jQuery(".show_hide").show();
+    } else {
+        jQuery(".show_hide").hide();
+    }  
     
     document.getElementById('plot_selectnum').innerHTML = "";
     for (var i=0; i<toPlots.length; i++) {
