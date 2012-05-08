@@ -102,12 +102,10 @@
     };
     
     function handleClick(ev) {
-        console.log(ev);
+        if (debug) {console.log(ev);}
         if (ev.data && ev.data.legend && ev.data.legend.handleClick) {
             ev.data.legend.handleClick(ev);
-        } else {
-            console.log('default handler used.');
-        }
+        } 
     } 
     
 })(jQuery);
