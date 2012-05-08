@@ -239,6 +239,7 @@ function render1dplot(data, transform, plotid, plot_options) {
             tooltipOffset: -60,
             useAxesFormatters: false,
         },
+        legend: {show: true, placement: 'outside'},
         grid: {shadow: false},
         sortData: false,
         //interactors: [ {type: 'Rectangle', name: 'rectangle'} ],
