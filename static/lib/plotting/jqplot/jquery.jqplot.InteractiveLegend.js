@@ -72,7 +72,7 @@
                 if (s._stack || s.renderer.constructor == $.jqplot.BezierCurveRenderer){
                     reverse = true;
                 }
-                if (s.show && s.showLabel) {
+                //if (s.show && s.showLabel) {
                     var lt = this.labels[i] || s.label.toString();
                     if (lt) {
                         var color = s.color;
@@ -94,7 +94,7 @@
                         } 
                     }
                     lt = null;
-                }
+                //}
             }
         }
         return this._elem;
@@ -102,8 +102,6 @@
     
     function handleClick(ev, gridpos, datapos, neighbor, plot) {
         console.log(ev, gridpos, datapos, neighbor, plot);
-        ev = ev;
-        clickPlot = plot;
     }
     
 })(jQuery);

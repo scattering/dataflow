@@ -240,7 +240,8 @@ function render1dplot(data, transform, plotid, plot_options) {
             useAxesFormatters: false,
         },
         legend: {
-            show: true, 
+            show: true,
+            parent: this,
             placement: 'outside',
             renderer: $.jqplot.InteractiveLegendRenderer
         },
