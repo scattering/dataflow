@@ -267,7 +267,7 @@ function render1dplot(data, transform, plotid, plot_options) {
     //$('.jqplot-table-legend-label').click({plot: plot1d}, handleLegendClick);
     plot1d.legend.handleClick = handleLegendClick;
     
-    function transformData() {
+    function transformData(transform) {
         if (transform == 'log') {
             for (var i=0; i<this.series.length; i++) {
                 var pd = this.series[i]._plotData;
@@ -278,7 +278,7 @@ function render1dplot(data, transform, plotid, plot_options) {
             }
             this.axes.yaxis.resetScale();
             this.replot();
-        } else {
+        } else { // transform == 'lin'
             for (var i=0; i<this.series.length; i++) {
                 var pd = this.series[i]._plotData;
                 var d = this.data[i];
@@ -291,6 +291,7 @@ function render1dplot(data, transform, plotid, plot_options) {
         }
     }
     plot1d.setTransform = transformData
+    plot1d.setTransform(transform);
     return plot1d
 };
 
