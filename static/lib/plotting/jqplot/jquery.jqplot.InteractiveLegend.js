@@ -25,11 +25,11 @@
         else{
             tr = $('<tr class="jqplot-table-legend"></tr>').appendTo(this._elem);
         }
-        var bgcolor = series_show ? color : "#FFFFFF";
+        var color = series_show ? color : "transparent";
 
             $('<td class="jqplot-table-legend" style="text-align:center;padding-top:'+rs+';">'+
             '<div><div class="jqplot-table-legend-swatch" style="background-color:'+color+
-            ';border-color:'+bgcolor+';width:10px;height:10px;"></div>'+
+            ';border-color:'+color+';width:10px;height:10px;"></div>'+
             '</div></td>').appendTo(tr);
         
         //if (this.showLabels) {
