@@ -209,7 +209,7 @@ function render1dplot(data, transform, plotid, plot_options) {
     
     var options = {
         title: data.title,
-        
+        seriesDefaults: {shadow: false},
         axes:{
           xaxis:{
             renderer: $.jqplot.LinearAxisRenderer,  // renderer to use to draw the axis,
