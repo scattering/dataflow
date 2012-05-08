@@ -25,13 +25,14 @@
         else{
             tr = $('<tr class="jqplot-table-legend"></tr>').appendTo(this._elem);
         }
-        if (series_show) {
+        var bgcolor = series_show ? color : "#FFFFFF";
+
             $('<td class="jqplot-table-legend" style="text-align:center;padding-top:'+rs+';">'+
             '<div><div class="jqplot-table-legend-swatch" style="background-color:'+color+
-            ';border-color:'+color+';width:10px;height:10px;"></div>'+
+            ';border-color:'+bgcolor+';width:10px;height:10px;"></div>'+
             '</div></td>').appendTo(tr);
-        }
-        if (this.showLabels) {
+        
+        //if (this.showLabels) {
             elem = $('<td class="jqplot-table-legend-label" style="padding-top:'+rs+';" series_num='+series_num+'></td>');
             elem.appendTo(tr);
             if (this.escapeHtml) {
@@ -40,7 +41,7 @@
             else {
                 elem.html(label);
             }
-        }
+        //}
         elem.click(handleClick);
         tr = null;
         elem = null;
