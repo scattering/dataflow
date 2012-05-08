@@ -42,7 +42,7 @@
             }
         }
         elem.click(handleClick);
-        elem.setAttribute('series_num', series_num);
+        elem[0].setAttribute('series_num', series_num);
         tr = null;
         elem = null;
     };
