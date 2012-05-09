@@ -235,6 +235,7 @@ function render1dplot(data, transform, plotid, plot_options) {
         cursor: {
             show: true,
             zoom: true,
+            clickReset: true,
             tooltipLocation:'se',
             tooltipOffset: -60,
             useAxesFormatters: false,
@@ -345,6 +346,7 @@ function renderImageData2(data, transform, plotid, plot_options) {
         cursor: {
             show: true,
             zoom: true,
+            clickReset: true,
             tooltipLocation:'se',
             tooltipOffset: -60,
             useAxesFormatters: false,
