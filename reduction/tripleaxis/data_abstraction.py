@@ -5,12 +5,13 @@ import readncnr4 as readncnr
 from formatnum import format_uncertainty
 import copy, simplejson, pickle
 from mpfit import mpfit
-
+from bumps.rebin import rebin2d
+from bumps.rebin import bin_edges, rebin
 
 #from dataflow import regular_gridding
 #from ...dataflow import wireit
 
-LOCAL=False
+LOCAL=True
 
 if not LOCAL:
     #for use in larger project
@@ -845,7 +846,13 @@ class TripleAxis(object):
             yfinal = yarr.max()
             ystep  = 1.0 * (yfinal - ystart) / len(yarr)
             print "done with steps"
-            xi, yi, zi = regular_gridding.regularlyGrid(xarr, yarr, self.detectors.primary_detector.measurement.x, xstart=xstart, xfinal=xfinal, xstep=xstep, ystart=ystart, yfinal=yfinal, ystep=ystep)		                               
+            
+            xi = np.arange(xstart, xfinal, xstep)
+            yi = np.arange(ystart, yfinal, ystep)            
+            zi=rebin2d(bin_edges(xarr),bin_edges(yarr),self.detectors.primary_detector.measurement.x,bin_edges(xi),bin_edges(yi),Io=None,dtype=None)
+            #xi, yi, zi = regular_gridding.regularlyGrid(xarr, yarr, self.detectors.primary_detector.measurement.x, xstart=xstart, xfinal=xfinal, xstep=xstep, ystart=ystart, yfinal=yfinal, ystep=ystep)		                               
+            
+            
             #print xstart, xfinal
             #print ystart, yfinal
             #print zi.min(), zi.max()
@@ -1807,6 +1814,7 @@ if __name__ == "__main__":
         print spins.get_plottable()
         print 'fixme2'
     if 1:
+        #test data for irregular grid
         spins54 = filereader(r'spins_data/bamno054.ng5')
         spins55 = filereader(r'spins_data/bamno055.ng5')
         spins57 = filereader(r'spins_data/bamno057.ng5')
@@ -1823,11 +1831,49 @@ if __name__ == "__main__":
         spins67 = filereader(r'spins_data/bamno067.ng5')
         spins68 = filereader(r'spins_data/bamno068.ng5')
         spins69 = filereader(r'spins_data/bamno069.ng5')
-        spins = join([spins55,spins64,spins56,spins57,spins58,spins59,spins60,spins61,spins62,spins63,spins66,spins67,spins68,spins69])
-        spins.xaxis='h'
-        spins.yaxis='e'
+        #spins = join([spins55,spins64,spins56,spins57,spins58,spins59,spins60,spins61,spins62,spins63,spins66,spins67,spins68,spins69])
+        spins_list =[spins55,spins64,spins56,spins57,#spins58,
+                     spins59,spins60,spins61,spins62,spins63,spins66,spins67,spins68,spins69]
+        hmin=min(min(si.physical_motors.h.x) for si in spins_list)
+        hmax=max(max(si.physical_motors.h.x) for si in spins_list)
+        emin=min(min(si.physical_motors.e.x) for si in spins_list)
+        emax=max(max(si.physical_motors.e.x) for si in spins_list)
+        h = bin_edges(np.linspace(hmin,hmax,100))
+        e = bin_edges(np.linspace(emin,emax,100))
+        data = np.array([rebin(bin_edges(si.physical_motors.e.x),si.detectors.primary_detector.x,e) for si in spins_list])
+        #pylab.pcolormesh(h,e,data)
+        #pylab.show()
+        h_in = np.asarray([si.physical_motors.h.x[0] for si in spins_list])
+        idx = np.argsort(h_in)
+        h_in = h_in[idx]
+        data = data[idx,:]
+        curh = h_in[0]
+        curdata = data[0]
+        joined = []
+        for i,nexth in enumerate(h_in[1:]):
+            if abs(curh-nexth) < 1e-6:
+                curdata += data[i+1]
+        data = np.array([rebin(bin_edges(h_in),rowi,h) for rowi in data.T[idx]])
+        pylab.pcolormesh(h,e,data)
+        pylab.show()
+        
+        
+        
+    
+        
+        #spins.xaxis='h'
+        #spins.yaxis='e'
         plotobj = spins.get_plottable()
         print plotobj
+        
+    if 0:
+        mydirectory=r'L:\BFO_ALL\BiFeO3Film_just data\Mar27_2011'
+        myfilenames=[os.path.join(mydirectory,'meshm%03d.bt9'%i) for i in range(1,64)]
+        bt9=join([filereader(fi) for fi in myfilenames])
+        bt9.xaxis='h'
+        bt9.yaxis='k'
+        plotobj = bt9.get_plottable()
+        
     if 0:
         spins54 = filereader(r'spins_data/bamno054.ng5')
         spins55 = filereader(r'spins_data/bamno055.ng5')
