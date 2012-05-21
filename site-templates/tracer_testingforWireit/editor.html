@@ -333,20 +333,20 @@
 					WireIt.ImageContainer.prototype.width = 64;
 					
 					
-					WireIt.ImageContainer.prototype.onMouseDown = function(e) {
+					/*WireIt.ImageContainer.prototype.onMouseDown = function(e) {
 						//console.log('clicked on imageContainer')
 						if (!e || e.which == 1) { return false; }
 						if(!this.tracksConfigs)
-							this.tracksConfigs = [];
+						    this.tracksConfigs = [];
 						if(!this.tracksConfigs[editor.reductionInstance])
-							this.tracksConfigs[editor.reductionInstance] = {}
+						    this.tracksConfigs[editor.reductionInstance] = {}
 						this.tracksConfigs[editor.reductionInstance].position = this.getXY()
 						editor.clickedModuleID = editor.layer.containers.indexOf(this)
 						//editor.displayClickedModuleConfig(this)
 						editor.generateConfigForm(editor.layer.containers.indexOf(this))
 						holder = this;
 						return false;
-					}
+					}*/
 					
                     WireIt.Container.prototype.addTerminal = function(terminalConfig) {
                         // THIS IS A COPY of the original from wireit.js, but with activation for terminals
@@ -397,6 +397,8 @@
 						module = editor.modulesByName[this.modulename];
 					    return configs
 					},
+					WireIt.ImageContainer.prototype.onMouseDown = WireIt.Container.prototype.onMouseDown;
+					
 					// setting up events for wires
 					WireIt.Wire.prototype.onWireIn = function(x,y) {
 						this.color = 'rgb(255,0,0)';

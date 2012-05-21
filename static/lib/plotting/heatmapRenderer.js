@@ -65,7 +65,7 @@
         this._xaxis.max = display_dims.xmax;
         this._yaxis.min = display_dims.ymin;
         this._yaxis.max = display_dims.ymax;
-                    
+                      
         // group: Methods 
         //
         
@@ -118,7 +118,7 @@
     // steps are big enough to skip completely-overlapping rectangles (saving time);
     $.jqplot.heatmapRenderer.prototype.draw_rect = function (ctx, gd, options) {
         // do stuff
-        var sxdx = this.get_sxdx();
+        var sxdx = this.renderer.get_sxdx();
         var xzoom = sxdx.dw / sxdx.sw;
         var yzoom = sxdx.dh / sxdx.sh;
         var xstep = Math.max(1/xzoom, 1);
@@ -173,7 +173,7 @@
                     if (dxp >=0 && dxp < this.dims.xdim) {
                         var offset = (y*width + x)*4;
                         //console.log(offset, this.plotdata);
-                        var fillstyle = this.palette_array[this.plotdata[dxp][dyp]];
+                        var fillstyle = this.palette_array[this.plotdata[dyp][dxp]];
                         myImageData.data[offset    ] = fillstyle[0];
                         myImageData.data[offset + 1] = fillstyle[1];
                         myImageData.data[offset + 2] = fillstyle[2];
@@ -297,13 +297,15 @@
     
     function set_data(new_data, new_dims) {
         this.dims = new_dims;
-        this.data = new_data;
+        
         if (!('dx' in this.dims)){ this.dims.dx = (this.dims.xmax - this.dims.xmin)/(this.dims.xdim -1); }
         if (!('dy' in this.dims)){ this.dims.dy = (this.dims.ymax - this.dims.ymin)/(this.dims.ydim -1); }
         this.source_data = [];
-        for (var i=0; i<this.dims.xdim; i++) {
+        //for (var i=0; i<this.dims.ydim; i++) {
+        for (var i=0; i<new_data.length; i++) { 
             this.source_data.push(new_data[i].slice());
         }
+        
         this.data = [[this.dims.xmin, this.dims.ymin],
                         [this.dims.xmax, this.dims.ymin],
                         [this.dims.xmax, this.dims.ymax],
@@ -387,21 +389,21 @@
         if (isNaN(tzmin)) tzmin = get_minimum(this.source_data, this.t);
         this.dims.zmin = this.tinv(tzmin);
         var data = this.source_data; 
-        var plotdata = [], datacol;
+        var plotdata = [], datarow;
         
-        for (var c = 0; c < width; c++) {
-            datacol = [];
-            for (var r = 0; r < height; r++) {
-                var offset = 4*((r*width) + c);
-                var z = data[c][r];
+        // plotdata is stored in row-major order ("C"), where row is "y"
+        for (var r = 0; r < height; r++) {
+            datarow = [];
+            for (var c = 0; c < width; c++) {
+                var z = data[r][c];
                 var plotz = Math.floor(((this.t(z) - tzmin) / (tzmax - tzmin)) * maxColorIndex);
                 
                 if (isNaN(plotz) || (z == null)) { plotz = overflowIndex }
                 else if (plotz > maxColorIndex) { plotz = maxColorIndex }
                 else if (plotz < 0) { plotz = 0 }
-                datacol.push(plotz);
+                datarow.push(plotz);
             }
-            plotdata.push(datacol.slice());
+            plotdata.push(datarow.slice());
         }
         this.plotdata = plotdata;
     };
@@ -425,7 +427,7 @@
             for (var r = 0; r < height; r++) {
                 var offset = 4*((r*width) + c);
                 //var z = data[c][height-r-1];
-                var z = data[c][r];
+                var z = data[r][c];
                 xsum += z;
                 ysum[r] += z;
                 cumsum_x_col.push(xsum);
@@ -438,5 +440,6 @@
         this.cumsum_x = cumsum_x;
         this.cumsum_y = cumsum_y;
     };
+    
        
 })(jQuery);

@@ -8,8 +8,8 @@ if sys.platform=='win32':
     REPO_ROOT = os.path.split(HOMEDIR)[-1] 
     FILES_DIR = r'c:\dataflow_files'
 else:
-    HOMEDIR = __file__[:-12]
-    REPO_ROOT = HOMEDIR.split('/')[-2]
+    HOMEDIR = os.path.abspath(os.path.dirname(__file__))
+    REPO_ROOT = os.path.basename(HOMEDIR)
     FILES_DIR = '/home/dataflow/FILES/'
 
 ROOT_URLCONF = REPO_ROOT + '.urls'

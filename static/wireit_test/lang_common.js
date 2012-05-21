@@ -189,13 +189,9 @@ YAHOO.lang.extend(SliceContainer, WireIt.Container, {
             success: function(result) { 
                 //toPlot = result;
                 var sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768");
-                sliceWindow.toPlot = result;
-                sliceWindow.container = f;
+		        sliceWindow.toPlot = result;
+		        sliceWindow.container = f;
                 sliceWindow.reductionInstance = reductionInstance;
-                //else {
-                //    sliceWindow.update_plot(result[0]);
-                //    sliceWindow.update_selectors(result);
-                //}
             },
             failure: editor.runModuleFailure,
             scope: editor}
@@ -206,5 +202,6 @@ YAHOO.lang.extend(SliceContainer, WireIt.Container, {
         
     }
 });
+
 
 

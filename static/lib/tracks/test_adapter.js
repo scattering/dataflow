@@ -50,7 +50,8 @@ test_adapter = {
 		filesExist: {
 		    method: 'POST', 
 		    url: '/filesExist/',
-		}, 
+		},
+		
 	},
 	
 	init: function() {
@@ -81,6 +82,47 @@ test_adapter = {
 		download_form.data.value = YAHOO.lang.JSON.stringify(val);
 		download_form.submit()
 	},
+	
+	getBinaryData: function(unfilled_data, onFinish) {
+        var oReq = new XMLHttpRequest(); 
+        //oReq.open("GET", "/getBinaryData/"+val, true); 
+        oReq.open("POST", "/getBinaryData/", true);   
+        oReq.responseType = "arraybuffer";
+        //oReq.multipart = true;
+        oReq.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        oReq.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+        oReq.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+        
+        oReq.onload = function (oEvent) {
+            if (oReq.status == 200) {
+            var arrayBuffer = oReq.response;
+            console.log('binary received');
+            if (arrayBuffer) {  
+                var byteArray = new Float32Array(arrayBuffer);
+                unfilled_data.z_binary_array = byteArray;
+                var z = [[]];
+                var row;
+                var width = unfilled_data.dims.xdim;
+                var height = unfilled_data.dims.ydim;
+                for (var r=0; r<height; r++) {
+                    var row = [];
+                    for (var c=0; c<width; c++) {
+                        row.push(byteArray[c + r*width]);
+                    }
+                    z[0].push(row); 
+                }
+                
+                unfilled_data.z = z;
+                console.log('binary received and processed', byteArray.length); 
+                onFinish();
+                
+            }  
+        }
+        }
+        console.log('getting binary...', unfilled_data.binary_fp);
+        oReq.send("binary_fp="+unfilled_data.binary_fp);
+    },
+    
 	
 	filesExist: function(filehashes, callbacks) {
 	    var callbacks = callbacks || { 

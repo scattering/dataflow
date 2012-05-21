@@ -383,7 +383,7 @@
         var master = this.plugins._interactor;
         if (master && master.interactors && master.interactors.length > 0) {
             master.Canvas = new $.jqplot.GenericCanvas();
-            this.eventCanvas._elem.before(master.Canvas.createElement(this._gridPadding, 'jqplot-interactor-canvas', this._plotDimensions));
+            this.eventCanvas._elem.before(master.Canvas.createElement(this._gridPadding, 'jqplot-interactor-canvas', this._plotDimensions, this));
             master.Canvas.setContext();
             master.context = master.Canvas._ctx;
             master.canvas = master.context.canvas;
@@ -430,7 +430,7 @@
                 var I = this.plugins.interactors[i];
                 //I.Canvas = master.Canvas;
                 I.Canvas = new $.jqplot.GenericCanvas();
-                this.eventCanvas._elem.before(I.Canvas.createElement(this._gridPadding, 'jqplot-interactor-'+I.name+'-canvas', this._plotDimensions));
+                this.eventCanvas._elem.before(I.Canvas.createElement(this._gridPadding, 'jqplot-interactor-'+I.name+'-canvas', this._plotDimensions, this));
                 I.Canvas.setContext();
                 I.context = I.Canvas._ctx;
                 I.canvas = I.context.canvas;

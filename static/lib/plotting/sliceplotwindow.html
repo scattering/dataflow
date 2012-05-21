@@ -26,6 +26,65 @@
 		
 		<!-- <script type="text/javascript" src="test_data2.js"></script> -->
 		<script type="text/javascript">
+		    function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie != '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        // remove whitespace from beginning and end: (like jQuery.trim)
+                        var cookie = cookies[i].replace(/(^[\s\xA0]+|[\s\xA0]+$)/g, '');
+                        //var cookie = jQuery.trim(cookies[i]);
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            
+		    getBinaryData = function(unfilled_data, onFinish) {
+                var oReq = new XMLHttpRequest(); 
+                //oReq.open("GET", "/getBinaryData/"+val, true); 
+                oReq.open("POST", "/getBinaryData/", true);   
+                oReq.responseType = "arraybuffer";
+                //oReq.multipart = true;
+                oReq.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+                oReq.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+                oReq.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+                
+                oReq.onload = function (oEvent) {
+                    if (oReq.status == 200) {
+                        var arrayBuffer = oReq.response;
+                        console.log('binary received');
+                        if (arrayBuffer) {  
+                            var byteArray = new Float32Array(arrayBuffer);
+                            unfilled_data.z_binary_array = byteArray;
+                            var z = [[]];
+                            var row;
+                            var width = unfilled_data.dims.xdim;
+                            var height = unfilled_data.dims.ydim;
+                            for (var r=0; r<height; r++) {
+                                var row = [];
+                                for (var c=0; c<width; c++) {
+                                    row.push(byteArray[c + r*width]);
+                                }
+                                z[0].push(row); 
+                            }
+                            
+                            unfilled_data.z = z;
+                            console.log('binary received and processed', byteArray.length); 
+                            onFinish();
+                            
+                        }  
+                    }
+                }
+                console.log('getting binary...', unfilled_data.binary_fp);
+                oReq.send("binary_fp="+unfilled_data.binary_fp);
+            }
+		</script>
+		<script type="text/javascript">
 		    var plot, colorbar, yslice, xslice;
 
             fit_plots = function() {
@@ -71,9 +130,10 @@
 		                if (!(lim in cfg)) { cfg[lim] = {} };
                         if (!('value' in cfg[lim]) || cfg[lim]['value'].trim().length == 0) { cfg[lim]['value'] = lims[lim].toString(); };
 		            } 
-
+                    
+                    update_selectors(toPlot);
 		            update_plot(toPlot[0]);
-		            update_selectors(toPlot);
+		            
 		        } else {
 		            alert('no data to plot!');
 		        }
@@ -101,24 +161,23 @@
                     var plotnum = selectnum[selectnum.selectedIndex].value;
                     var toPlot = toPlots[plotnum];
 
-                    plot.series[0].set_data(toPlot.z[0], toPlot.dims);
-                    plot.series[0].set_transform(transform);
-                    plot.series[0]._xaxis.labelOptions.label = toPlot.xlabel;
-                    plot.series[0]._yaxis.labelOptions.label = toPlot.ylabel;
-                    plot.plugins._interactor.zoomMax();
-                    colorbar.plugins._interactor.zoomMax();
-                    sl = slice_listener(plot.series[0]);
-		            plot.series[0].generate_cumsums();
-		            //generate_cumsums(plot.series[0]);
-		            sl.update();
+                    update_plot(toPlot, transform);
                 }
                 
                 jQuery('#plot_selectnum').change({}, onchange);
                 jQuery('#plot_selectz').change({}, onchange);
 		    }
-		    update_plot = function(toPlot) {
+		    update_plot = function(toPlot, transform) {
 		        debug = false;
 		        data = toPlot;
+		        if (data.binary_fp && data.z_binary_array == undefined) {
+		            if (plot && plot.series && plot.series[0]) { 
+		                plot.series[0].show=false; 
+		                plot.replot();
+		            }
+		            getBinaryData(data, function() { update_plot(data) })
+		            return
+		        } 
 		        if (plot == null) {
 		            // then initialize all the plot objects
 		            plot = $.jqplot('plot', data.z, {
@@ -147,7 +206,7 @@
 		                    shadow: false,
                             renderer:$.jqplot.heatmapRenderer,
                             rendererOptions: {
-                                transform: 'lin',
+                                transform: toPlot.transform || 'lin',
                                 dims: data.dims,
                                 //display_dims: { xmin: data.dims.xmin-1,
                                 //                ymin: data.dims.ymin-1,
@@ -306,12 +365,26 @@
 		        }
 		        else {
 		            // no need to recreate everything... just update the data.
+		            plot.series[0].show = true;
 		            plot.series[0].set_data(toPlot.z[0], toPlot.dims);
-		            plot.series[0].set_transform(toPlot.transform);
+		            plot.series[0].set_transform(transform || toPlot.transform);
+                    plot.series[0]._xaxis.labelOptions.label = toPlot.xlabel;
+                    plot.series[0]._yaxis.labelOptions.label = toPlot.ylabel;
+                    plot.plugins._interactor.zoomMax();
+                    colorbar.plugins._interactor.zoomMax();
+                    sl = slice_listener(plot.series[0]);
+		            plot.series[0].generate_cumsums();
+		            //generate_cumsums(plot.series[0]);
+		            sl.update();
+		            
+		            /*
+		            plot.series[0].set_data(toPlot.z[0], toPlot.dims);
+		            plot.series[0].set_transform(transform || toPlot.transform);
 		            plot.plugins._interactor.zoomMax();
                     colorbar.series[0].dims = toPlot.dims;
                     colorbar.series[0].set_ztransform(transform);
                     colorbar.plugins._interactor.zoomMax();
+                    */
 		        }
 		    }
 		    pointTextControl = function(p, coord, label, precision) {
