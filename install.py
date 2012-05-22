@@ -29,9 +29,10 @@ if __name__ == "__main__":
 		          'postgresql',
 		          'pgadmin3',
 		          'mercurial',
+                  'python-wxgtk2.8', # wx used in offspecular - check version # in future
 		          'python-imaging' # not installed by default on UTK server.  go figure.
                   ]
-    easy_commands = ['stompservice', 'orbited', '-U Django', '-U psycopg2', 'South', 'django-registration', 'django-profiles', 'h5py']
+    easy_commands = ['stompservice', 'orbited', '-U Django', '-U psycopg2', 'South', 'django-registration', 'django-profiles', 'h5py', 'wxpython']
     #easy_commands = ['stompservice', 'orbited', '-U Django', 'South', 'django-registration', 'django-profiles']
     merc_commands = ['https://bitbucket.org/ubernostrum/django-registration', 'https://bitbucket.org/ubernostrum/django-profiles']
     
