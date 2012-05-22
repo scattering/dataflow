@@ -18,19 +18,19 @@ if __name__ == "__main__":
                   'python-matplotlib',
                   'python-dev',
                   'python-simplejson', # no need for easy-install on this one.
-		          'python-psycopg2', # this is already being installed from easy_install below - conflicts!!
-		          #'python-h5py', #need newer version than is in Ubuntu 10.04
-		          'libhdf5-serial-dev',
-		          'build-essential',
+	              'python-psycopg2', # this is already being installed from easy_install below - conflicts!!
+	              #'python-h5py', #need newer version than is in Ubuntu 10.04
+	              'libhdf5-serial-dev',
+	              'build-essential',
                   'vim',
                   'subversion',
-		          'apache2',
-		          'libapache2-mod-wsgi',
-		          'postgresql',
-		          'pgadmin3',
-		          'mercurial',
+	              'apache2',
+	              'libapache2-mod-wsgi',
+	              'postgresql',
+	              'pgadmin3',
+	              'mercurial',
                   'python-wxgtk2.8', # wx used in offspecular - check version # in future
-		          'python-imaging' # not installed by default on UTK server.  go figure.
+	              'python-imaging' # not installed by default on UTK server.  go figure.
                   ]
     easy_commands = ['stompservice', 'orbited', '-U Django', '-U psycopg2', 'South', 'django-registration', 'django-profiles', 'h5py', 'wxpython']
     #easy_commands = ['stompservice', 'orbited', '-U Django', 'South', 'django-registration', 'django-profiles']
@@ -54,8 +54,15 @@ if __name__ == "__main__":
     # install the two modules downloaded from mercurial above:
     call('cd django-registration; python setup.py install; cd ..', shell=True)
     call('cd django-profiles; python setup.py install; cd ..', shell=True)
+
     for command in easy_commands:
         call('pip install %s' % (command,), shell=True)
+
+    # build and install reduction and bumps
+    call('cd ~; git clone https://github.com/reflectometry/reduction.git;', shell=True)
+    call('cd reduction/; python settings.py build; python settings.py install; cd ..', shell=True)
+    call('cd ~; git clone https://github.com/bumps/bumps.git;', shell=True)
+    call('cd bumps/; python settings.py build; python settings.py install; cd ..', shell=True)
         
 
 #NOTE: Also install matplotlib and download and install natgrid (https://github.com/matplotlib/natgrid)
