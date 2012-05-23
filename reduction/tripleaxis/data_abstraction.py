@@ -846,13 +846,13 @@ class TripleAxis(object):
             yfinal = yarr.max()
             ystep  = 1.0 * (yfinal - ystart) / len(yarr)
             print "done with steps"
-            
+
             xi = np.arange(xstart, xfinal, xstep)
             yi = np.arange(ystart, yfinal, ystep)            
             zi=rebin2d(bin_edges(xarr),bin_edges(yarr),self.detectors.primary_detector.measurement.x,bin_edges(xi),bin_edges(yi),Io=None,dtype=None)
             #xi, yi, zi = regular_gridding.regularlyGrid(xarr, yarr, self.detectors.primary_detector.measurement.x, xstart=xstart, xfinal=xfinal, xstep=xstep, ystart=ystart, yfinal=yfinal, ystep=ystep)		                               
-            
-            
+
+
             #print xstart, xfinal
             #print ystart, yfinal
             #print zi.min(), zi.max()
@@ -1679,7 +1679,7 @@ def join(tas_list):
     #remove duplicates
     distinct=list(set(distinct))
     not_distinct=list(set(not_distinct))
-    joinedtas2 = remove_duplicates(joinedtas, distinct, not_distinct)
+    joinedtas2 = remove_duplicates_optimized(joinedtas, distinct, not_distinct)
     #joinedtas.xaxis=xaxis
     #joinedtas.yaxis=yaxis
     return joinedtas2
@@ -1692,8 +1692,6 @@ def remove_duplicates(tas, distinct, not_distinct):
     #go through every column. If any row has a unique value, it is a unique row and stop comparing it to anything
     #after every column is exhausted, if non-unique rows still exist then go column by
     #column, find 'duplicates' and merge them
-
-
 
     uniques = [] #list of row indices to skip (ie unique pts to keep in datafile)
     dups = []
@@ -1794,6 +1792,181 @@ def remove_duplicates(tas, distinct, not_distinct):
     return newtas
 
 
+
+
+
+
+
+# **********************************************************
+# *********************** new ******************************
+# **********************************************************
+
+def remove_duplicates_optimized(tas, distinct, not_distinct):
+    """Removes the duplicate data rows from TripleAxis object tas whose distinct fields (columns)
+    are in the list distinct and nondistinct fields are in the list nondistinct"""
+
+    numrows = tas.detectors.primary_detector.dimension[0]
+    newtas = tas
+    tuples = []
+    indices = [] # list of lists of all duplicate indices to check
+    first = True
+
+    for field in distinct:
+        if first:  # will only go in here the first time 
+            for i in range(numrows):
+                tuples.append((field.measurement[i].x, i)) #appending tuples pairing value with index
+
+            tuples.sort()  #sorting by value
+
+            samelist = False #signifies whether or not a different duplicate values were found
+            index = -1
+
+            for i in range(0, len(tuples)-1):
+                if tuples[i+1][0] == tuples[i][0]:
+                    if not samelist:
+                        indices.append([tuples[i][1], tuples[i+1][1]]) #add array of duplicate indices
+                        samelist = True
+                        index += 1 #increment the index
+                    else:
+                        indices[index].append(tuples[i+1][1])
+                else:
+                    samelist = False
+            first = False
+        else:
+            j = 0
+            while j < len(indices):
+                indexlist = indices[j]
+                tuples = []
+                for index in indexlist: # O(n)
+                    tuples.append((field.measurement[index].x, index))
+                tuples.sort() # O(nlogn) hopefully
+                for i in range(0, len(tuples)-1):
+                    if tuples[i+1][0] != tuples[i][0]: # if values are different
+                        try:
+                            indexlist.remove(tuples[i+1][1]) # remove the index
+                        except:
+                            print "SOMETHING WENT WRONG!!! Couldn't find index to remove." # shouldn't ever occur
+                            pass
+                if len(indexlist)==1:
+                    # if this sublist of duplicates only has one item, don't check it anymore (remove it)
+                    #indices.remove(indexlist)
+                    indices.pop(j)
+                else:
+                    j += 1
+
+    print len(indices)
+    print indices
+    if not first and len(indices) < 1:
+        print "done"
+        return newtas  # if there are no duplicates left, then every row is unique so we're done
+
+    for field in not_distinct:
+        if not type(field) == Detector: #don't check Detectors
+            if first:
+                # In the event that there are no distinct fields (ie only not_distinct fields)
+                # This is the first segment, and will only run first.
+                for i in range(numrows):
+                    tuples.append((field.measurement[i].x, i)) #appending tuples pairing value with index
+                tuples.sort() 
+
+                samelist = False 
+                index = -1
+
+                for i in range(0, len(tuples)-1):
+                    if tuples[i][0] == None or tuples[i+1][0] == None or (type(tuples[i][0]) == str or type(tuples[i][0]) == np.string_ or not hasattr(field, 'window')): 
+                        # if no tolerance is specified or needed, directly compare:
+                        if tuples[i+1][0] == tuples[i][0]:
+                            if not samelist:
+                                indices.append([tuples[i][1], tuples[i+1][1]]) #add array of duplicate indices
+                                samelist = True
+                                index += 1 #increment the index
+                            else:
+                                indices[index].append(tuples[i+1][1])
+                        else:
+                            samelist = False
+                    else: # else use specified tolerance
+                        if tuples[i+1][0] - tuples[i][0] <= field.window:
+                            if not samelist:
+                                indices.append([tuples[i][1], tuples[i+1][1]]) #add array of duplicate indices
+                                samelist = True
+                                index += 1 #increment the index
+                            else:
+                                indices[index].append(xtuples[i+1][1])
+                        else:
+                            samelist = False
+                first = False
+            else:
+                j = 0
+                while j < len(indices):
+                    indexlist = indices[j]
+                    tuples = []
+                    for index in indexlist: # O(n)
+                        tuples.append((field.measurement[index].x, index))
+                    tuples.sort() # O(nlogn) hopefully
+
+                    for i in range(0, len(tuples)-1):
+                        if tuples[i][0] == None or tuples[i+1][0] == None or (type(tuples[i][0]) == str or type(tuples[i][0]) == np.string_ or not hasattr(field, 'window')): 
+                            if tuples[i+1][0] != tuples[i][0]: 
+                                try:
+                                    indexlist.remove(tuples[i+1][1]) 
+                                except:
+                                    print "Couldn't find index to remove." # shouldn't ever occur
+                                    pass
+                        else:
+                            if tuples[i+1][0] - tuples[i][0] > field.window: # if values are different enough
+                                try:
+                                    indexlist.remove(tuples[i+1][1]) 
+                                except:
+                                    print "Couldn't find index to remove." # shouldn't ever occur
+                                    pass
+                    if len(indexlist) == 1:
+                        # if this sublist of duplicates only has one item, don't check it anymore (remove it)
+                        #indices.remove(indexlist)
+                        indices.pop(j)
+                    else:
+                        j += 1
+
+    # AVERAGING DETECTORS
+    rows_to_be_removed = []
+    for indexlist in indices:
+        if len(indexlist) > 1: #if there are more than one rows that are duplicates
+            for k in range(1, len(indexlist)):
+                for detector in newtas.detectors:
+                    # Average the first (0th) duplicate row's detectors with every other (kth) duplicate row's 
+                    # detectors and save the result into the first duplicate row.
+                    detector.measurement[indexlist[0]] = (detector.measurement[indexlist[0]] + detector.measurement[indexlist[k]]) / 2.0
+
+                rows_to_be_removed.append(indexlist[k])
+    # DONE AVERAGING DETECTORS
+
+    rows_to_be_removed.sort() #duplicate rows to be removed indices in order now
+    rows_to_be_removed.reverse() #duplicate rows to be removed indices in reverse order now
+
+    for key, value in newtas.__dict__.iteritems():
+        if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment':
+            #ignoring metadata for now
+            pass
+        elif key.find('blade') >= 0:
+            for blade in value.blades:
+                for k in rows_to_be_removed:
+                    blade.measurement.__delitem__(k) #removes duplicate row from this field (column)
+        else:
+            for field in value:
+                for k in rows_to_be_removed:
+                    print field.name
+                    field.measurement.__delitem__(k) #removes duplicate row from this field (column)
+
+    #update primary detector dimension
+    newtas.detectors.primary_detector.dimension = [len(newtas.detectors.primary_detector.measurement.x), 1]
+    return newtas
+
+# **********************************************************
+# ********************* end new ****************************
+# **********************************************************
+
+
+
+
 def filereader(filename, friendly_name=None):
     filestr = filename
     mydatareader = readncnr.datareader()
@@ -1814,6 +1987,28 @@ if __name__ == "__main__":
         print spins.get_plottable()
         print 'fixme2'
     if 1:
+        spins54 = filereader(r'spins_data/bamno054.ng5')
+        spins55 = filereader(r'spins_data/bamno055.ng5')
+        spins57 = filereader(r'spins_data/bamno057.ng5')
+        spins63 = filereader(r'spins_data/bamno063.ng5')
+        spins64 = filereader(r'spins_data/bamno064.ng5')
+        spins65 = filereader(r'spins_data/bamno065.ng5')
+        spins56 = filereader(r'spins_data/bamno056.ng5')
+        spins58 = filereader(r'spins_data/bamno058.ng5')
+        spins59 = filereader(r'spins_data/bamno059.ng5')
+        spins60 = filereader(r'spins_data/bamno060.ng5')
+        spins61 = filereader(r'spins_data/bamno061.ng5')
+        spins62 = filereader(r'spins_data/bamno062.ng5')
+        spins66 = filereader(r'spins_data/bamno066.ng5')
+        spins67 = filereader(r'spins_data/bamno067.ng5')
+        spins68 = filereader(r'spins_data/bamno068.ng5')
+        spins69 = filereader(r'spins_data/bamno069.ng5')
+        #spins = join([spins55, spins64, spins56, spins57, spins59, spins60, spins61, spins62, spins63, spins66, spins67, spins68, spins69])
+        spins_list =[spins55,spins64,spins56,spins57,#spins58,
+                     spins59,spins60,spins61,spins62,spins63,spins66,spins67,spins68,spins69]
+
+        spins = join(spins_list)
+    if 0:
         #test data for irregular grid
         spins54 = filereader(r'spins_data/bamno054.ng5')
         spins55 = filereader(r'spins_data/bamno055.ng5')
@@ -1831,9 +2026,11 @@ if __name__ == "__main__":
         spins67 = filereader(r'spins_data/bamno067.ng5')
         spins68 = filereader(r'spins_data/bamno068.ng5')
         spins69 = filereader(r'spins_data/bamno069.ng5')
-        #spins = join([spins55,spins64,spins56,spins57,spins58,spins59,spins60,spins61,spins62,spins63,spins66,spins67,spins68,spins69])
+        #spins = join([spins55, spins64, spins56, spins57, spins59, spins60, spins61, spins62, spins63, spins66, spins67, spins68, spins69])
         spins_list =[spins55,spins64,spins56,spins57,#spins58,
                      spins59,spins60,spins61,spins62,spins63,spins66,spins67,spins68,spins69]
+
+
         hmin=min(min(si.physical_motors.h.x) for si in spins_list)
         hmax=max(max(si.physical_motors.h.x) for si in spins_list)
         emin=min(min(si.physical_motors.e.x) for si in spins_list)
@@ -1854,18 +2051,19 @@ if __name__ == "__main__":
             if abs(curh-nexth) < 1e-6:
                 curdata += data[i+1]
         data = np.array([rebin(bin_edges(h_in),rowi,h) for rowi in data.T[idx]])
+
+
         pylab.pcolormesh(h,e,data)
         pylab.show()
-        
-        
-        
-    
-        
+
+
+
         #spins.xaxis='h'
         #spins.yaxis='e'
-        plotobj = spins.get_plottable()
-        print plotobj
-        
+
+        #plotobj = spins.get_plottable()
+        #print plotobj
+
     if 0:
         mydirectory=r'L:\BFO_ALL\BiFeO3Film_just data\Mar27_2011'
         myfilenames=[os.path.join(mydirectory,'meshm%03d.bt9'%i) for i in range(1,64)]
@@ -1873,7 +2071,7 @@ if __name__ == "__main__":
         bt9.xaxis='h'
         bt9.yaxis='k'
         plotobj = bt9.get_plottable()
-        
+
     if 0:
         spins54 = filereader(r'spins_data/bamno054.ng5')
         spins55 = filereader(r'spins_data/bamno055.ng5')
@@ -1881,11 +2079,15 @@ if __name__ == "__main__":
         spins63 = filereader(r'spins_data/bamno063.ng5')
         spins64 = filereader(r'spins_data/bamno064.ng5')
         spins65 = filereader(r'spins_data/bamno065.ng5')
+        spins_list =[spins54,spins55,spins57,spins63,spins64,spins65]
+        spins = join(spins_list)
+        '''
         spins = join(spins54,spins55)
         spins = join(spins, spins57)
         spins = join(spins, spins63)
         spins = join(spins, spins64)
         spins = join(spins, spins65)
+	'''
         spins.xaxis='h'
         spins.yaxis='e'
         plotobj = spins.get_plottable()
@@ -1905,4 +2107,3 @@ if __name__ == "__main__":
         bt7.harmonic_monitor_correction('BT7')
         bt7.resolution_volume_correction()
     print 'bye'
-
