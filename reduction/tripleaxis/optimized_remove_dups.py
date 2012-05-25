@@ -1,8 +1,9 @@
 import numpy as np
 
+
 def remove_duplicates_optimized(tas, distinct, not_distinct):
     """Removes the duplicate data rows from TripleAxis object tas whose distinct fields (columns)
-    are in the list distinct and nondistinct fields are in the list nondistinct"""
+    are in the list distinct, and nondistinct fields are in the list nondistinct"""
 
     numrows = tas.detectors.primary_detector.dimension[0]
     newtas = tas
@@ -11,10 +12,10 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
     first = True
 
     for field in distinct:
-        #print field.name
         if first:  # will only go in here the first time 
             for i in range(numrows):
                 tuples.append((field.measurement[i].x, i)) #appending tuples pairing value with index
+
             tuples.sort()  #sorting by value
 
             samelist = False #signifies whether or not a different duplicate values were found
@@ -32,32 +33,40 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
                     samelist = False
             first = False
         else:
-            for indexlist in indices:
+            j = 0
+            while j < len(indices):
+                indexlist = indices.pop(j) #pop off the indices list at j
                 tuples = []
+
                 for index in indexlist: # O(n)
                     tuples.append((field.measurement[index].x, index))
                 tuples.sort() # O(nlogn) hopefully
+                
+                samelist = False     
+                dups = []
                 for i in range(0, len(tuples)-1):
-                    if tuples[i+1][0] != tuples[i][0]: # if values are different
-                        try:
-                            indexlist.remove(tuples[i+1][1]) # remove the index
-                        except:
-                            print "SOMETHING WENT WRONG!!! Couldn't find index to remove." # shouldn't ever occur
-                            pass
-                if len(indexlist)==1:
-                    # if this sublist of duplicates only has one item, don't check it anymore (remove it)
-                    indices.remove(indexlist)
-
+                    if tuples[i+1][0] == tuples[i][0]: # if values are same (duplicates)
+                        if not samelist: 
+                            #create dups --> list of duplicate indices
+                            dups.append(tuples[i][1])
+                            dups.append(tuples[i+1][1]) 
+                            samelist = True
+                        else:
+                            dups.append(tuples[i+1][1])
+                    else:
+                        if len(dups) > 0: # if there is a list of duplicates, add them to indices
+                            indices.insert(j, dups)
+                            j += 1 # increment j
+                            dups = [] # reset dups to be empty
+                        samelist = False                            
+                    		    
     print len(indices)
     print indices
-    print first
     if not first and len(indices) < 1:
-        print "done" # if there are no duplicates left, then every row is unique so we're done
-        return newtas
+        print "done"
+        return newtas  # if there are no duplicates left, then every row is unique so we're done
 
-    print "NOT DISTINCTS::::::::::"
     for field in not_distinct:
-	print field.name
         if not type(field) == Detector: #don't check Detectors
             if first:
                 # In the event that there are no distinct fields (ie only not_distinct fields)
@@ -93,30 +102,49 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
                             samelist = False
                 first = False
             else:
-                for indexlist in indices:
+                j = 0
+                while j < len(indices):
+                    indexlist = indices.pop(j)
                     tuples = []
                     for index in indexlist: # O(n)
                         tuples.append((field.measurement[index].x, index))
                     tuples.sort() # O(nlogn) hopefully
 
-                    for i in range(0, len(tuples)-1):
-                        if tuples[i][0] == None or tuples[i+1][0] == None or (type(tuples[i][0]) == str or type(tuples[i][0]) == np.string_ or not hasattr(field, 'window')): 
-                            if tuples[i+1][0] != tuples[i][0]: 
-                                try:
-                                    indexlist.remove(tuples[i+1][1]) 
-                                except:
-                                    print "Couldn't find index to remove." # shouldn't ever occur
-                                    pass
+		    samelist = False     
+		    dups = []
+		    for i in range(0, len(tuples)-1):
+                        if tuples[i][0] == None or tuples[i+1][0] == None or type(tuples[i][0]) == str \
+			   or type(tuples[i][0]) == np.string_ or not hasattr(field, 'window'): 
+			    if tuples[i+1][0] == tuples[i][0]: # if values are same (duplicates)
+				if not samelist: 
+				    #create dups --> list of duplicate indices
+				    dups.append(tuples[i][1])
+				    dups.append(tuples[i+1][1]) 
+				    samelist = True
+				else:
+				    dups.append(tuples[i+1][1])
+			    else:
+				if len(dups) > 0: # if there is a list of duplicates, add them to indices
+				    indices.insert(j, dups)
+				    j += 1 # increment j
+				    dups = [] # reset dups to be empty
+				samelist = False  
                         else:
                             if tuples[i+1][0] - tuples[i][0] > field.window: # if values are different enough
-                                try:
-                                    indexlist.remove(tuples[i+1][1]) 
-                                except:
-                                    print "Couldn't find index to remove." # shouldn't ever occur
-                                    pass
-                    if len(indexlist)==1:
-                        # if this sublist of duplicates only has one item, don't check it anymore (remove it)
-                        indices.remove(indexlist) 
+				if not samelist: 
+				    #create dups --> list of duplicate indices
+				    dups.append(tuples[i][1])
+				    dups.append(tuples[i+1][1]) 
+				    samelist = True
+				else:
+				    dups.append(tuples[i+1][1])
+			    else:
+				if len(dups) > 0: # if there is a list of duplicates, add them to indices
+				    indices.insert(j, dups)
+				    j += 1 # increment j
+				    dups = [] # reset dups to be empty
+				samelist = False  				
+
 
     # AVERAGING DETECTORS
     rows_to_be_removed = []
@@ -151,7 +179,6 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
     #update primary detector dimension
     newtas.detectors.primary_detector.dimension = [len(newtas.detectors.primary_detector.measurement.x), 1]
     return newtas
-
 
 
 

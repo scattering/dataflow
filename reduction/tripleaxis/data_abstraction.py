@@ -8,6 +8,8 @@ from mpfit import mpfit
 from bumps.rebin import rebin2d
 from bumps.rebin import bin_edges, rebin
 
+import rebin2
+
 #from dataflow import regular_gridding
 #from ...dataflow import wireit
 
@@ -1554,28 +1556,28 @@ def establish_correction_coefficients(filename):
 def make_orthonormal(o1, o2):
     """Given two vectors, creates an orthonormal set of three vectors. 
     Maintains the direction of o1 and the coplanarity of o1 and o2"""
-    o1 = o1 / N.linalg.norm(o1)
-    o2 = o2 / N.linalg.norm(o2)
-    o3 = N.cross(o1, o2)
-    o3 = o3 / N.linalg.norm(o3)
-    o2 = N.cross(o3, o1)
+    o1 = o1 / np.linalg.norm(o1)
+    o2 = o2 / np.linalg.norm(o2)
+    o3 = np.cross(o1, o2)
+    o3 = o3 / np.linalg.norm(o3)
+    o2 = np.cross(o3, o1)
     return o1, o2, o3
 
 def calc_plane(p, h, k, l, normalize=True):
-    o1 = N.array([p[0], p[1], p[2]])
-    o2 = N.array([p[3], p[4], p[5]])
+    o1 = np.array([p[0], p[1], p[2]])
+    o2 = np.array([p[3], p[4], p[5]])
     if normalize:
         o1, o2, o3 = make_orthonormal(o1, o2)
     else:
         o3 = np.cross(o1, o2)
-    A = N.array([o1, o2, o3]).T
+    A = np.array([o1, o2, o3]).T
     a_arr = []
     b_arr = []
     c_arr = []
 
     for i in range(len(h)):
-        hkl = N.array([h[i], k[i], l[i]])
-        sol = N.linalg.solve(A, hkl)
+        hkl = np.array([h[i], k[i], l[i]])
+        sol = np.linalg.solve(A, hkl)
         a = sol[0]
         b = sol[1]
         c = sol[2]
@@ -1587,12 +1589,12 @@ def calc_plane(p, h, k, l, normalize=True):
 
 def cost_func(p, h, k, l):
     a_arr, b_arr, c_arr = calc_plane(p, h, k, l)
-    c = N.array(c_arr)
+    c = np.array(c_arr)
     res = (c - c.mean())**2
     #dof=len(I)-len(p)
     #fake_dof=len(I)
     #print 'chi',(y-ycalc)/err
-    return res#/Ierr#/N.sqrt(fake_dof)
+    return res#/Ierr#/np.sqrt(fake_dof)
 
 
 
@@ -1608,7 +1610,7 @@ def myfunctlin(p, fjac=None, h=None, k=None, l=None):
 
 def fit_plane(h, k, l, p0=None):
     if p0 == None:
-        p0 = [1. / N.sqrt(5), -1. / N.sqrt(2), 0, 0, 0, 1] #a guess...
+        p0 = [1. / np.sqrt(5), -1. / np.sqrt(2), 0, 0, 0, 1] #a guess...
     parbase = {'value':0., 'fixed':0, 'limited':[0, 0], 'limits':[0., 0.]}
     parinfo = []
     for i in range(len(p0)):
@@ -1626,8 +1628,8 @@ def fit_plane(h, k, l, p0=None):
     #print 'status = ', m.status
     #print 'params = ', m.params
     #your parameters define two noncollinear vectors that will form the basis for your space
-    o1 = N.array([p[0], p[1], p[2]])
-    o2 = N.array([p[3], p[4], p[5]])
+    o1 = np.array([p[0], p[1], p[2]])
+    o2 = np.array([p[3], p[4], p[5]])
     o1, o2, o3 = make_orthonormal(o1, o2)
     return o1, o2, o3
 
@@ -2006,7 +2008,7 @@ if __name__ == "__main__":
         #spins = join(spin,spin2)
         print spins.get_plottable()
         print 'fixme2'
-    if 1:
+    if 0:
         spins54 = filereader(r'spins_data/bamno054.ng5')
         spins55 = filereader(r'spins_data/bamno055.ng5')
         spins57 = filereader(r'spins_data/bamno057.ng5')
@@ -2126,4 +2128,59 @@ if __name__ == "__main__":
         #print 'detailed balance done'
         bt7.harmonic_monitor_correction('BT7')
         bt7.resolution_volume_correction()
+    if 1:
+	data_list = []
+	for i in range(1, 64):
+	    if i < 10:
+		data_i = filereader(r'../../../WilliamData/meshm00%d.bt9' %i)
+	    elif i < 100:
+		data_i = filereader(r'../../../WilliamData/meshm0%d.bt9' %i)
+	    elif i < 1000:
+		data_i = filereader(r'../../../WilliamData/meshm%d.bt9' %i)
+	    data_list.append(data_i)		
+	joined = join(data_list)
+	
+	#rebinning testing
+	if 1:
+	    x = joined.physical_motors.h.x
+	    y = joined.physical_motors.k.x
+	    z = joined.detectors.primary_detector.x
+	    data = rebin2.rebin_rectangles(x, y, z)
+	    pylab.pcolormesh(x,y,data)
+	    pylab.show()
+	
+	
+	qxmin=min(min(si.physical_motors.h.x) for si in data_list)
+	qxmax=max(max(si.physical_motors.h.x) for si in data_list)
+	qymin=min(min(si.physical_motors.k.x) for si in data_list)
+	qymax=max(max(si.physical_motors.k.x) for si in data_list)
+	qx = bin_edges(np.linspace(qxmin,qxmax,100))
+	qy = bin_edges(np.linspace(qymin,qymax,100))
+	data = np.array([rebin(bin_edges(si.physical_motors.h.x),si.detectors.primary_detector.x,qy) for si in data_list])
+	#pylab.pcolormesh(qx,qy,data)
+	h=np.empty(0,'Float64')
+	k=np.empty(0,'Float64')
+	z=np.empty(0,'Float64')
+	for si in data_list:
+	    h=np.concatenate((h,si.physical_motors.h.x))
+	    k=np.concatenate((k,si.physical_motors.k.x))
+	    z=np.concatenate((z,si.detectors.primary_detector.x))
+	pylab.hexbin(h,k,z)
+	pylab.show()
+	
+	qx_in = np.asarray([si.physical_motors.h[0].x for si in data_list])
+	idx = np.argsort(qx_in)
+	qx_in = qx_in[idx]
+	data = data[idx,:]
+	curqx = qx_in[0]
+	curdata = data[0]
+	for i,nextqx in enumerate(qx_in[1:]):
+	    if abs(curqx-nextqx) < 1e-6:
+		curdata += data[i+1]
+	data = np.array([rebin(bin_edges(qx_in),rowi,qx) for rowi in data.T[idx]])
+
+
+	pylab.pcolormesh(qx,qy,data)
+	pylab.show()
+	
     print 'bye'

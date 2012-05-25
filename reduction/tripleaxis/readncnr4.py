@@ -644,12 +644,12 @@ class datareader(object):
                         print self.myfilestr
                         self.lines=lines
                         myfile = open(myfilestr, 'r')
-                        self.instrument=self.myfilestr.split('.')[1]
+                        self.instrument=os.path.splitext(filestr)[1].split('.')[1].lower()
                 if 1:
                         self.lines=lines
                         myfile = open(myfilestr, 'r')
                         filestr = myfilestr if (myfriendlyfilestr == None) else myfriendlyfilestr
-                        self.instrument=filestr.split('.')[1]
+                        self.instrument=os.path.splitext(filestr)[1].split('.')[1].lower()
                 if self.instrument in ['bt9','ng5','bt2']:
                         # Determine FileType
                         self.determinefiletype(myfile)
@@ -666,7 +666,7 @@ class datareader(object):
                         #read columns
                         self.readcolumns(myfile)
                         myfile.close()
-                        mydata=Data(self.metadata,self.columndict)
+                        mydata = Data(self.metadata,self.columndict)
                         #print self.metadata
                         #print self.columnlist
                         filename=os.path.split(filestr)[-1]
