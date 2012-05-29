@@ -45,16 +45,24 @@ def rebin_rectangles(xarr, yarr, zarr, BINCOUNT=100):
         #a point is on the edge of the grid will never occur. Points located at bins'
         #corners are considered in the bottom left bin.
         if xval == xbin[xoffset] and yval == ybin[yoffset]: # on intersection of bins' corners
-            zbin[xoffset][yoffset] += zarr[i] / 4
-            zbin[xoffset][yoffset + 1] += zarr[i] / 4
-            zbin[xoffset + 1][yoffset] += zarr[i] / 4
-            zbin[xoffset + 1][yoffset + 1] += zarr[i] / 4
+            zbin[xoffset][yoffset] += zarr[i] / 4.0
+            zbin[xoffset][yoffset + 1] += zarr[i] / 4.0
+            zbin[xoffset + 1][yoffset] += zarr[i] / 4.0
+            zbin[xoffset + 1][yoffset + 1] += zarr[i] / 4.0
+            zcounts[xoffset][yoffset] += 1
+            zcounts[xoffset + 1][yoffset] += 1
+            zcounts[xoffset][yoffset + 1] += 1
+            zcounts[xoffset + 1][yoffset + 1] += 1
         elif xval == xbin[xoffset]: # on intersection of two x bins, put half of value in each bin
-            zbin[xoffset][yoffset] += zarr[i] / 2
-            zbin[xoffset + 1][yoffset] += zarr[i] / 2
+            zbin[xoffset][yoffset] += zarr[i] / 2.0
+            zbin[xoffset + 1][yoffset] += zarr[i] / 2.0
+            zcounts[xoffset][yoffset] += 1
+            zcounts[xoffset + 1][yoffset] += 1            
         elif yval == ybin[yoffset]: # on intersection of two y bins, put half of value in each bin
-            zbin[xoffset][yoffset] += zarr[i] / 2
-            zbin[xoffset][yoffset + 1] += zarr[i] / 2
+            zbin[xoffset][yoffset] += zarr[i] / 2.0
+            zbin[xoffset][yoffset + 1] += zarr[i] / 2.0
+            zcounts[xoffset][yoffset] += 1
+            zcounts[xoffset][yoffset + 1] += 1            
         else:
             zbin[xoffset][yoffset] += zarr[i]
             zcounts[xoffset][yoffset] += 1
@@ -65,5 +73,6 @@ def rebin_rectangles(xarr, yarr, zarr, BINCOUNT=100):
         zbin[used_cells[0][i]][used_cells[1][i]] /= zcounts[used_cells[0][i]][used_cells[1][i]]
     
     return zbin
-            
-            
+
+if __name__ == "__main__":
+    pass

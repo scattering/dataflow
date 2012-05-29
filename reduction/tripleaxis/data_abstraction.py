@@ -1843,7 +1843,7 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
                 for index in indexlist: # O(n)
                     tuples.append((field.measurement[index].x, index))
                 tuples.sort() # O(nlogn) hopefully
-                
+
                 samelist = False     
                 dups = []
                 for i in range(0, len(tuples)-1):
@@ -1861,7 +1861,7 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
                             j += 1 # increment j
                             dups = [] # reset dups to be empty
                         samelist = False                            
-                    		    
+
     print len(indices)
     print indices
     if not first and len(indices) < 1:
@@ -1912,40 +1912,40 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
                         tuples.append((field.measurement[index].x, index))
                     tuples.sort() # O(nlogn) hopefully
 
-		    samelist = False     
-		    dups = []
-		    for i in range(0, len(tuples)-1):
+                    samelist = False     
+                    dups = []
+                    for i in range(0, len(tuples)-1):
                         if tuples[i][0] == None or tuples[i+1][0] == None or type(tuples[i][0]) == str \
-			   or type(tuples[i][0]) == np.string_ or not hasattr(field, 'window'): 
-			    if tuples[i+1][0] == tuples[i][0]: # if values are same (duplicates)
-				if not samelist: 
-				    #create dups --> list of duplicate indices
-				    dups.append(tuples[i][1])
-				    dups.append(tuples[i+1][1]) 
-				    samelist = True
-				else:
-				    dups.append(tuples[i+1][1])
-			    else:
-				if len(dups) > 0: # if there is a list of duplicates, add them to indices
-				    indices.insert(j, dups)
-				    j += 1 # increment j
-				    dups = [] # reset dups to be empty
-				samelist = False  
+                           or type(tuples[i][0]) == np.string_ or not hasattr(field, 'window'): 
+                            if tuples[i+1][0] == tuples[i][0]: # if values are same (duplicates)
+                                if not samelist: 
+                                    #create dups --> list of duplicate indices
+                                    dups.append(tuples[i][1])
+                                    dups.append(tuples[i+1][1]) 
+                                    samelist = True
+                                else:
+                                    dups.append(tuples[i+1][1])
+                            else:
+                                if len(dups) > 0: # if there is a list of duplicates, add them to indices
+                                    indices.insert(j, dups)
+                                    j += 1 # increment j
+                                    dups = [] # reset dups to be empty
+                                samelist = False  
                         else:
                             if tuples[i+1][0] - tuples[i][0] > field.window: # if values are different enough
-				if not samelist: 
-				    #create dups --> list of duplicate indices
-				    dups.append(tuples[i][1])
-				    dups.append(tuples[i+1][1]) 
-				    samelist = True
-				else:
-				    dups.append(tuples[i+1][1])
-			    else:
-				if len(dups) > 0: # if there is a list of duplicates, add them to indices
-				    indices.insert(j, dups)
-				    j += 1 # increment j
-				    dups = [] # reset dups to be empty
-				samelist = False  				
+                                if not samelist: 
+                                    #create dups --> list of duplicate indices
+                                    dups.append(tuples[i][1])
+                                    dups.append(tuples[i+1][1]) 
+                                    samelist = True
+                                else:
+                                    dups.append(tuples[i+1][1])
+                            else:
+                                if len(dups) > 0: # if there is a list of duplicates, add them to indices
+                                    indices.insert(j, dups)
+                                    j += 1 # increment j
+                                    dups = [] # reset dups to be empty
+                                samelist = False  				
 
 
     # AVERAGING DETECTORS
@@ -2129,58 +2129,59 @@ if __name__ == "__main__":
         bt7.harmonic_monitor_correction('BT7')
         bt7.resolution_volume_correction()
     if 1:
-	data_list = []
-	for i in range(1, 64):
-	    if i < 10:
-		data_i = filereader(r'../../../WilliamData/meshm00%d.bt9' %i)
-	    elif i < 100:
-		data_i = filereader(r'../../../WilliamData/meshm0%d.bt9' %i)
-	    elif i < 1000:
-		data_i = filereader(r'../../../WilliamData/meshm%d.bt9' %i)
-	    data_list.append(data_i)		
-	joined = join(data_list)
-	
-	#rebinning testing
-	if 1:
-	    x = joined.physical_motors.h.x
-	    y = joined.physical_motors.k.x
-	    z = joined.detectors.primary_detector.x
-	    data = rebin2.rebin_rectangles(x, y, z)
-	    pylab.pcolormesh(x,y,data)
-	    pylab.show()
-	
-	
-	qxmin=min(min(si.physical_motors.h.x) for si in data_list)
-	qxmax=max(max(si.physical_motors.h.x) for si in data_list)
-	qymin=min(min(si.physical_motors.k.x) for si in data_list)
-	qymax=max(max(si.physical_motors.k.x) for si in data_list)
-	qx = bin_edges(np.linspace(qxmin,qxmax,100))
-	qy = bin_edges(np.linspace(qymin,qymax,100))
-	data = np.array([rebin(bin_edges(si.physical_motors.h.x),si.detectors.primary_detector.x,qy) for si in data_list])
-	#pylab.pcolormesh(qx,qy,data)
-	h=np.empty(0,'Float64')
-	k=np.empty(0,'Float64')
-	z=np.empty(0,'Float64')
-	for si in data_list:
-	    h=np.concatenate((h,si.physical_motors.h.x))
-	    k=np.concatenate((k,si.physical_motors.k.x))
-	    z=np.concatenate((z,si.detectors.primary_detector.x))
-	pylab.hexbin(h,k,z)
-	pylab.show()
-	
-	qx_in = np.asarray([si.physical_motors.h[0].x for si in data_list])
-	idx = np.argsort(qx_in)
-	qx_in = qx_in[idx]
-	data = data[idx,:]
-	curqx = qx_in[0]
-	curdata = data[0]
-	for i,nextqx in enumerate(qx_in[1:]):
-	    if abs(curqx-nextqx) < 1e-6:
-		curdata += data[i+1]
-	data = np.array([rebin(bin_edges(qx_in),rowi,qx) for rowi in data.T[idx]])
+        data_list = []
+        for i in range(1, 64):
+            if i < 10:
+                data_i = filereader(r'../../../WilliamData/meshm00%d.bt9' %i)
+            elif i < 100:
+                data_i = filereader(r'../../../WilliamData/meshm0%d.bt9' %i)
+            elif i < 1000:
+                data_i = filereader(r'../../../WilliamData/meshm%d.bt9' %i)
+            data_list.append(data_i)		
+        joined = join(data_list)
+
+        #rebinning testing
+        if 1:
+            x = joined.physical_motors.h.x
+            y = joined.physical_motors.k.x
+            z = joined.detectors.primary_detector.x
+            data = rebin2.rebin_rectangles(x, y, z)
+            #pylab.hexbin(x,y,z)
+            pylab.pcolormesh(x,y,data)
+            pylab.show()
 
 
-	pylab.pcolormesh(qx,qy,data)
-	pylab.show()
-	
+        qxmin=min(min(si.physical_motors.h.x) for si in data_list)
+        qxmax=max(max(si.physical_motors.h.x) for si in data_list)
+        qymin=min(min(si.physical_motors.k.x) for si in data_list)
+        qymax=max(max(si.physical_motors.k.x) for si in data_list)
+        qx = bin_edges(np.linspace(qxmin,qxmax,100))
+        qy = bin_edges(np.linspace(qymin,qymax,100))
+        data = np.array([rebin(bin_edges(si.physical_motors.h.x),si.detectors.primary_detector.x,qy) for si in data_list])
+        #pylab.pcolormesh(qx,qy,data)
+        h=np.empty(0,'Float64')
+        k=np.empty(0,'Float64')
+        z=np.empty(0,'Float64')
+        for si in data_list:
+            h=np.concatenate((h,si.physical_motors.h.x))
+            k=np.concatenate((k,si.physical_motors.k.x))
+            z=np.concatenate((z,si.detectors.primary_detector.x))
+        pylab.hexbin(h,k,z)
+        pylab.show()
+
+        qx_in = np.asarray([si.physical_motors.h[0].x for si in data_list])
+        idx = np.argsort(qx_in)
+        qx_in = qx_in[idx]
+        data = data[idx,:]
+        curqx = qx_in[0]
+        curdata = data[0]
+        for i,nextqx in enumerate(qx_in[1:]):
+            if abs(curqx-nextqx) < 1e-6:
+                curdata += data[i+1]
+        data = np.array([rebin(bin_edges(qx_in),rowi,qx) for rowi in data.T[idx]])
+
+
+        pylab.pcolormesh(qx,qy,data)
+        pylab.show()
+
     print 'bye'
