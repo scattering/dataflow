@@ -2145,9 +2145,9 @@ if __name__ == "__main__":
             x = joined.physical_motors.h.x
             y = joined.physical_motors.k.x
             z = joined.detectors.primary_detector.x
-            data = rebin2.rebin_rectangles(x, y, z)
-            #pylab.hexbin(x,y,z)
-            pylab.pcolormesh(x,y,data)
+            xbin, ybin, data = rebin2.rebin_rectangles(x, y, z)
+            
+            pylab.pcolormesh(xbin, ybin, data)
             pylab.show()
 
 

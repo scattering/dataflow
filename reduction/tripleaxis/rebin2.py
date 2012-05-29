@@ -72,7 +72,7 @@ def rebin_rectangles(xarr, yarr, zarr, BINCOUNT=100):
     for i in range(len(used_cells[0])):
         zbin[used_cells[0][i]][used_cells[1][i]] /= zcounts[used_cells[0][i]][used_cells[1][i]]
     
-    return zbin
+    return xbin, ybin, zbin
 
 if __name__ == "__main__":
     pass
