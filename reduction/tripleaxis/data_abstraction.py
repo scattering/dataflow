@@ -8,6 +8,8 @@ from mpfit import mpfit
 from bumps.rebin import rebin2d
 from bumps.rebin import bin_edges, rebin
 
+import bumps
+import subprocess
 import rebin2
 
 #from dataflow import regular_gridding
@@ -763,11 +765,14 @@ class TripleAxis(object):
         # and doesn't actually modify self.detectors -> could be the 'yield'
         # statement producing a generator...
         mon0 = self.time.monitor.measurement
-        if len(mon0) > 1:
+        
+        try: #in the event mon0 is an array of values, select the first one to normalize to
             mon0 = mon0[0]
+        except:
+            pass
         for detector in self.detectors:
             detector.measurement = detector.measurement * (mon0 / monitor)
-            print 'hi'
+
             #for i in range(0,len(detector.measurement.x)):
             #        detector.measurement[i]=detector.measurement[i]*mon0[i]/monitor
         return
@@ -850,7 +855,8 @@ class TripleAxis(object):
             print "done with steps"
 
             xi = np.arange(xstart, xfinal, xstep)
-            yi = np.arange(ystart, yfinal, ystep)            
+            yi = np.arange(ystart, yfinal, ystep)
+            
             zi=rebin2d(bin_edges(xarr),bin_edges(yarr),self.detectors.primary_detector.measurement.x,bin_edges(xi),bin_edges(yi),Io=None,dtype=None)
             #xi, yi, zi = regular_gridding.regularlyGrid(xarr, yarr, self.detectors.primary_detector.measurement.x, xstart=xstart, xfinal=xfinal, xstep=xstep, ystart=ystart, yfinal=yfinal, ystep=ystep)		                               
 
@@ -1987,6 +1993,8 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
 # **********************************************************
 
 
+
+
 def subtract(tas, background, independent_variable):
     """Subtract a background singnal from a TripleAxis objects"""
     joinedtas = tas_list[0]
@@ -2052,7 +2060,10 @@ def filereader(filename, friendly_name=None):
     return instrument
 
 
-
+def run_bumps(tas, store_dir, fit="dream", burn=500, steps=1000, init="eps"):
+    process_result = subprocess.call(["bumps", "tasmodel.py", tas, "--parallel", "--fit=%s" %fit, "--burn=%d" %burn, 
+                                      "--steps=%d" %steps, "--init=%s" %init, "--store=%s" %store_dir], shell=True)
+    pass
 
 
 
@@ -2199,7 +2210,7 @@ if __name__ == "__main__":
         #print 'detailed balance done'
         bt7.harmonic_monitor_correction('BT7')
         bt7.resolution_volume_correction()
-    if 1:
+    if 0:
         data_list = []
         for i in range(1, 64):
             if i < 10:
@@ -2240,19 +2251,27 @@ if __name__ == "__main__":
         pylab.hexbin(h,k,z)
         pylab.show()
 
-        qx_in = np.asarray([si.physical_motors.h[0].x for si in data_list])
-        idx = np.argsort(qx_in)
-        qx_in = qx_in[idx]
-        data = data[idx,:]
-        curqx = qx_in[0]
-        curdata = data[0]
-        for i,nextqx in enumerate(qx_in[1:]):
-            if abs(curqx-nextqx) < 1e-6:
-                curdata += data[i+1]
-        data = np.array([rebin(bin_edges(qx_in),rowi,qx) for rowi in data.T[idx]])
 
+    if 1:
+        #Testing run_bumps
+        data_list = []
+        monitor = None
+        for i in range(1, 64):
+            if i < 10:
+                data_i = filereader(r'../../../WilliamData/meshm00%d.bt9' %i)
+            elif i < 100:
+                data_i = filereader(r'../../../WilliamData/meshm0%d.bt9' %i)
+            elif i < 1000:
+                data_i = filereader(r'../../../WilliamData/meshm%d.bt9' %i)
+                
+            if not monitor:
+                monitor = data_i.time.monitor.x
+            else:
+                data_i.normalize_monitor(monitor) # put all instruments on the same monitor
+            data_list.append(data_i)
+        
+        joinedtas = join(data_list) # joins all datafiles, removing duplicate points
+        run_bumps(joinedtas, '../../../WilliamData/BumpsResults')
 
-        pylab.pcolormesh(qx,qy,data)
-        pylab.show()
 
     print 'bye'

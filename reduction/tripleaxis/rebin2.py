@@ -1,18 +1,23 @@
 import numpy as np
 
 #TODO incorporate a parameter "edges" to determine whether we bins have edges or edges+1
-def rebin_1D(xarr, yarr, xbin=None, xstep=None):
+def rebin_1D(xarr, yarr, xbin=None, xstep=None, BINCOUNT=0):
     # if xbin is not given, it will be created based on the data
-    xsize = len(xarr)
+    size = len(xarr)
     if xbin == None:
         xmin = min(xarr) 
         xmax = max(xarr)
-        xstep = 1.0 * (xmax - xmin) / xsize
-        xbin = np.arange(xmin, xmax, xstep)
-    
-    #constructing ybin as an array to keep cumulative sum of data (to be averaged)
+        
+        if BINCOUNT > 0:
+            xbin = np.linspace(xmin, xmax, BINCOUNT)
+            ybin = np.zeros(BINCOUNT, dtype=np.float64)
+        else:
+            xstep = 1.0 * (xmax - xmin) / xsize
+            xbin = np.arange(xmin, xmax, xstep)
+            ybin = np.zeros(size, dtype=np.float64)            
+
+    #constructed ybin as an array to keep cumulative sum of data (to be averaged)
     #and ycounts as an array to keep track of how many points in each bin (for averaging)
-    ybin = np.zeros(xsize, dtype=np.float64)
     ycounts = ybin.copy() #should be a deep copy
     
     for i in range(xsize):
@@ -40,11 +45,14 @@ def rebin_1D(xarr, yarr, xbin=None, xstep=None):
     return xbin, ybin
 
 
-            
-            
-            
+def rebin_rectangles(xarr, yarr, zarr, BINCOUNT=0):
+    """ Given three arrays of data: bins the z values according to their (x,y) positions 
+    within the rectuangularly defined bins. Returns 2D array of zarr values binned. """
+    # could calculate the smallest x and y deltas to use to make the bins
+    # for now, set up with kwarg BINCOUNT that hardcodes in 100 bins
+    
     if zarr == None:
-        xbin, ybin = rebin_1D(xarr, yarr, BINCOUNT)
+        xbin, ybin = rebin_1D(xarr, yarr, BINCOUNT=BINCOUNT)
         return xbin, ybin, None
         
     
@@ -52,25 +60,19 @@ def rebin_1D(xarr, yarr, xbin=None, xstep=None):
     xmax=max(xarr)
     ymin=min(yarr)
     ymax=max(yarr)
+    size = len(xarr)
     
-    
-    #adjusting extremes so the bins will encompass the actual extremes
-    xmin -= (xmax - xmin) / BINCOUNT / 2
-    xmax += (xmax - xmin) / BINCOUNT / 2
-    ymin -= (ymax - ymin) / BINCOUNT / 2
-    ymax += (ymax - ymin) / BINCOUNT / 2
+    if BINCOUNT > 0:
+        xbin = np.linspace(xmin, xmax, BINCOUNT)
+        ybin = np.linspace(ymin, ymax, BINCOUNT)
+        zbin = np.zeros((BINCOUNT, BINCOUNT), dtype=np.float64)
+    else:
+        xstep = 1.0 * (xmax - xmin) / size
+        ystep = 1.0 * (ymax - ymin) / size
+        xbin = np.arange(xmin, xmax, xstep)
+        ybin = np.arange(ymin, ymax, xstep)
+        zbin = np.zeros((size, size), dtype=np.float64)
 
-    xbin = np.linspace(xmin, xmax, BINCOUNT + 1)
-    ybin = np.linspace(ymin, ymax, BINCOUNT + 1)
-  
-    
-    #constructing zbin as 2D array to keep cumulative sum of intensities (to be averaged)
-    #and zcounts  as 2D array to keep track of how many points in each bin (for averaging)
-
-    #zbin = np.array([])
-    #for i in range(BINCOUNT):
-    #    zbin = np.append(zbin, [np.zeros(BINCOUNT)])
-    zbin = np.zeros((BINCOUNT, BINCOUNT), dtype=np.float64)
     zcounts = zbin.copy() #should be a deep copy
     
     for i in range(len(xarr)):
@@ -86,7 +88,8 @@ def rebin_1D(xarr, yarr, xbin=None, xstep=None):
         #Since the min/max values were extended to make the bins, the case where
         #a point is on the edge of the grid will never occur. Points located at bins'
         #corners are considered in the bottom left bin.
-        if xval == xbin[xoffset] and yval == ybin[yoffset]: # on intersection of bins' corners
+        if (xoffset > 0 and xoffset < size-1) and (yoffset > 0 and yoffset < size-1) and \
+           xval == xbin[xoffset] and yval == ybin[yoffset]: # on intersection of bins' corners
             zbin[xoffset][yoffset] += zarr[i] / 4.0
             zbin[xoffset][yoffset + 1] += zarr[i] / 4.0
             zbin[xoffset + 1][yoffset] += zarr[i] / 4.0
@@ -95,16 +98,16 @@ def rebin_1D(xarr, yarr, xbin=None, xstep=None):
             zcounts[xoffset + 1][yoffset] += 1
             zcounts[xoffset][yoffset + 1] += 1
             zcounts[xoffset + 1][yoffset + 1] += 1
-        elif xval == xbin[xoffset]: # on intersection of two x bins, put half of value in each bin
+        elif (xoffset > 0 and xoffset < size-1) and xval == xbin[xoffset]: # on intersection of two x bins, put half of value in each bin
             zbin[xoffset][yoffset] += zarr[i] / 2.0
             zbin[xoffset + 1][yoffset] += zarr[i] / 2.0
             zcounts[xoffset][yoffset] += 1
-            zcounts[xoffset + 1][yoffset] += 1            
-        elif yval == ybin[yoffset]: # on intersection of two y bins, put half of value in each bin
+            zcounts[xoffset + 1][yoffset] += 1
+        elif (yoffset > 0 and yoffset < size-1) and yval == ybin[yoffset]: # on intersection of two y bins, put half of value in each bin
             zbin[xoffset][yoffset] += zarr[i] / 2.0
             zbin[xoffset][yoffset + 1] += zarr[i] / 2.0
             zcounts[xoffset][yoffset] += 1
-            zcounts[xoffset][yoffset + 1] += 1            
+            zcounts[xoffset][yoffset + 1] += 1
         else:
             zbin[xoffset][yoffset] += zarr[i]
             zcounts[xoffset][yoffset] += 1
@@ -115,8 +118,8 @@ def rebin_1D(xarr, yarr, xbin=None, xstep=None):
         zbin[used_cells[0][i]][used_cells[1][i]] /= zcounts[used_cells[0][i]][used_cells[1][i]]
     
     return xbin, ybin, zbin
-
-
+            
+          
 
 
 

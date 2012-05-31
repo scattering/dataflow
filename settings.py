@@ -10,7 +10,7 @@ if sys.platform=='win32':
 else:
     HOMEDIR = os.path.abspath(os.path.dirname(__file__))
     REPO_ROOT = os.path.basename(HOMEDIR)
-    FILES_DIR = '/home/dataflow/FILES/'
+    FILES_DIR = '/home/yee/dataflow/FILES/'
 
 ROOT_URLCONF = REPO_ROOT + '.urls'
 
