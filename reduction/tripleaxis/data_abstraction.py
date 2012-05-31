@@ -1687,7 +1687,7 @@ def join(tas_list):
     return joinedtas2
     #np.where(hasattr('isDistinct') and isDistinct,,) #todo finish writing
 
-
+'''
 def remove_duplicates(tas, distinct, not_distinct):
     """Removes the duplicate data rows from TripleAxis object tas whose distinct fields (columns)
     are in the list distinct and nondistinct fields are in the list nondistinct"""
@@ -1792,7 +1792,7 @@ def remove_duplicates(tas, distinct, not_distinct):
     #update primary detector dimension
     newtas.detectors.primary_detector.dimension = [len(newtas.detectors.primary_detector.measurement.x), 1]
     return newtas
-
+'''
 
 
 
@@ -1800,7 +1800,7 @@ def remove_duplicates(tas, distinct, not_distinct):
 
 
 # **********************************************************
-# *********************** new ******************************
+# ******************** optimized ***************************
 # **********************************************************
 
 def remove_duplicates_optimized(tas, distinct, not_distinct):
@@ -1983,10 +1983,64 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
     return newtas
 
 # **********************************************************
-# ********************* end new ****************************
+# ****************** end optimized *************************
 # **********************************************************
 
 
+def subtract(tas, background, independent_variable):
+    """Subtract a background singnal from a TripleAxis objects"""
+    joinedtas = tas_list[0]
+    distinct = []
+    not_distinct = []
+    xbin = None
+
+    #create xbin to use for all files
+    #bin each data column that applies for tas then for background, then subtract the background
+    # from the tas
+    #TODO: NOT DONE - FINISH BELOW
+
+    #obj = getattr(tas, independent_variable)
+    #rebin2.rebin_1D(getattr(tas, independent_variable).measurement
+    
+    #tas1.detectors.primary_detector.measurement.join(tas2.detectors.primary_detector.measurement)
+    for key, value in joinedtas.__dict__.iteritems():
+        if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment':
+            #ignoring metadata for now
+            pass
+        elif key == 'detectors':
+            for field in value:
+                if field.name == 'primary_detector':
+                    obj = getattr(tas, key)
+                    field.measurement.join(getattr(obj, field.name).measurement)
+                    field.dimension[0] = field.dimension[0] + getattr(obj, field.name).dimension[0]
+                else:
+                    obj = getattr(tas, key)
+                    field.measurement.join_channels(getattr(obj, field.name).measurement)
+        elif key.find('blade') >= 0:
+            obj = getattr(tas, key)
+            i = 0
+            for blade in value.blades:
+                blade.measurement.join(obj.blades[i].measurement)
+                i += 1
+                if blade.isDistinct:
+                    distinct.append(blade)
+                else:
+                    not_distinct.append(blade)
+        else:
+            for field in value:
+                obj = getattr(tas, key)
+                field.measurement.join(getattr(obj, field.name).measurement)
+                if field.isDistinct:
+                    distinct.append(field)
+                else:
+                    not_distinct.append(field)
+
+    distinct=list(set(distinct))
+    not_distinct=list(set(not_distinct))
+    rebin2.rebin_1D(independent_variable)
+    subtractedtas = tas
+
+    return subractedtas
 
 
 def filereader(filename, friendly_name=None):
@@ -1996,6 +2050,23 @@ def filereader(filename, friendly_name=None):
     instrument = TripleAxis()
     translate(instrument, mydata)
     return instrument
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":       
     if 0:
@@ -2145,9 +2216,9 @@ if __name__ == "__main__":
             x = joined.physical_motors.h.x
             y = joined.physical_motors.k.x
             z = joined.detectors.primary_detector.x
-            xbin, ybin, data = rebin2.rebin_rectangles(x, y, z)
-            
-            pylab.pcolormesh(xbin, ybin, data)
+            xbin, ybin, data = rebin2.rebin_rectangles_bin(x, y, z, 20)
+            pylab.contourf(xbin,ybin,data)
+            #pylab.pcolormesh(xbin, ybin, data)
             pylab.show()
 
 
