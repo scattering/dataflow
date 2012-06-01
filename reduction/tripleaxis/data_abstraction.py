@@ -1648,7 +1648,7 @@ def fit_plane(h, k, l, p0=None):
 
 
 
-#def join(tas1, tas2):
+
 def join(tas_list):
     """Joins a list of TripleAxis objects"""
     #average all similar points
@@ -1700,117 +1700,6 @@ def join(tas_list):
     #joinedtas.yaxis=yaxis
     return joinedtas2
     #np.where(hasattr('isDistinct') and isDistinct,,) #todo finish writing
-
-'''
-def remove_duplicates(tas, distinct, not_distinct):
-    """Removes the duplicate data rows from TripleAxis object tas whose distinct fields (columns)
-    are in the list distinct and nondistinct fields are in the list nondistinct"""
-    #go through every column. If any row has a unique value, it is a unique row and stop comparing it to anything
-    #after every column is exhausted, if non-unique rows still exist then go column by
-    #column, find 'duplicates' and merge them
-
-    uniques = [] #list of row indices to skip (ie unique pts to keep in datafile)
-    dups = []
-    numrows = tas.detectors.primary_detector.dimension[0]
-    for index in range(numrows):
-        dups.append(range(numrows)) #list of lists. Each inner list is a list of every row index (0 to len)
-                            #when a row becomes distinct from another, its index is removed from the the other's index
-    newtas = tas
-
-    for field in distinct:
-        for i in range(numrows):
-            if not uniques.__contains__(i): #if the row isn't unique
-                for j in range(i + 1, numrows):
-                    if not uniques.__contains__(j) and dups[i].__contains__(j):
-                        #going through every row below row i since i has been compared to every other row already
-                        if field.measurement[i].x != field.measurement[j].x:
-                            #For this column (field), if this measurement is not equal to any
-                            #another measurement in the column, these measurment are distinct
-                            #and the j index is removed from the dups[i] list and vise versa
-                            dups[i].remove(j)
-                            dups[j].remove(i)                                                        
-                if len(dups[i]) == 1:
-                    #if every row in the column is distinct from the ith row, then it is unique
-                    #MAY NOT NEED TO KEEP TRACK OF UNIQUES...
-                    #CAN ALWAYS GET BY len(dups[i])==1
-                    uniques.append(i)
-
-        if len(uniques) == numrows:
-            #if all rows are deemed unique, return
-            return tas
-
-    for field in not_distinct:
-        if not type(field) == Detector:
-            for i in range(numrows):
-                if not uniques.__contains__(i): #if the row isn't unique
-                    for j in range(i + 1, numrows):
-                        if not uniques.__contains__(j) and dups[i].__contains__(j):
-                            #if row j is NOT unique and row j still a potential duplicate of row i, then proceed
-                            if (type(field.measurement[i].x) == str or type(field.measurement[i].x) == np.string_ or not hasattr(field, 'window')):
-                                #if field has string values or doesn't have a window (tolerance), compare exact values                                                                
-                                if field.measurement[i].x != field.measurement[j].x:
-                                    dups[i].remove(j)
-                                    dups[j].remove(i)
-                            elif field.measurement[i].x == None and field.measurement[j].x == None:
-                                pass #if both are None, do nothing --> they are not distinct values
-                            elif field.measurement[i].x != field.measurement[j].x or abs(field.measurement[i] - field.measurement[j]).x > field.window:
-                                #For this column (field), if this measurement is NOT within the tolerance of the
-                                #other measurement in the column, the measurements are distinct.
-                                #NOTE: keep the != check before the tolerance check to catch if only one of the
-                                #      measurements is a'None' before performing subtraction
-                                dups[i].remove(j)
-                                dups[j].remove(i)
-                    if len(dups[i]) == 1:
-                        #if every row in the column is 'distinct' from the ith row, then it is unique
-                        uniques.append(i)
-
-            if len(uniques) == numrows:
-                #if all rows are deemed unique, return
-                return tas
-
-    #ALL UNIQUE ROWS ARE INDEXED IN uniques NOW
-    rows_to_be_removed = []
-    for alist in dups:
-        #average the detector counts of every detector of each row in alist
-        #and save the resulting averages into the first row of alist.
-        #then delete other rows, ie remove them
-        if len(alist) == 1:
-            #if the row is unique skip this list
-            pass 
-        else:
-            for k in range(1, len(alist)):
-                for detector in newtas.detectors:
-                    #average the first (0th) duplicate row's detectors with every other (kth) duplicate row's detectors
-                    #and save the result into the first duplicate row.
-                    detector.measurement[alist[0]] = (detector.measurement[alist[0]] + detector.measurement[alist[k]]) / 2.0
-                dups[alist[k]] = [alist[k]] #now the kth duplicate set of indices has only k, so it will be skipped
-                rows_to_be_removed.append(alist[k])
-
-    rows_to_be_removed.sort() #duplicate rows to be removed indices in order now
-    rows_to_be_removed.reverse() #duplicate rows to be removed indices in reverse order now
-
-
-    for key, value in newtas.__dict__.iteritems():
-        if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment':
-            #ignoring metadata for now
-            pass
-        elif key.find('blade') >= 0:
-            for blade in value.blades:
-                for k in rows_to_be_removed:
-                    blade.measurement.__delitem__(k) #removes duplicate row from this detector (column)
-        else:
-            for field in value:
-                for k in rows_to_be_removed:
-                    field.measurement.__delitem__(k) #removes duplicate row from this detector (column)
-
-    #update primary detector dimension
-    newtas.detectors.primary_detector.dimension = [len(newtas.detectors.primary_detector.measurement.x), 1]
-    return newtas
-'''
-
-
-
-
 
 
 # **********************************************************
@@ -2000,7 +1889,22 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
 # ****************** end optimized *************************
 # **********************************************************
 
-
+def normalize_monitor(tas_list, monitor=None):
+    """ 
+    Puts every TripleAxis object in the list on the given monitor
+    or on the first TripleAxis's monitor if none is specified
+    """
+    if not monitor:
+        monitor = tas_list[0].time.monitor.measurement
+        tas_list_ptr = tas_list[1:] #no need to normalize the first one
+    else:
+        tas_list_ptr = tas_list
+        
+    for tas in tas_list_ptr:
+        monitor_scalar = tas.time.monitor.measurement / monitor
+        if not monitor_scalar == 1:
+            for detector in tas.detectors:
+                detector.measurement = detector.measurement * monitor_scalar
 
 
 def subtract(tas, background, independent_variable):
@@ -2068,6 +1972,7 @@ def filereader(filename, friendly_name=None):
     return instrument
 
 
+#NOT WORKING! can't pass TAS object in subprocess.call()
 def run_bumps(tas, store_dir, fit="dream", burn=500, steps=1000, init="eps"):
     process_result = subprocess.call(["bumps", "tasmodel.py", tas, "--parallel", "--fit=%s" %fit, "--burn=%d" %burn, 
                                       "--steps=%d" %steps, "--init=%s" %init, "--store=%s" %store_dir], shell=True)
@@ -2259,8 +2164,11 @@ if __name__ == "__main__":
         pylab.hexbin(h,k,z)
         pylab.show()
 
-
     if 0:
+        
+        data_i = filereader(r'../../../yee/WilliamData/meshm011.bt9')
+        print data_i
+    if 1:
         #Testing run_bumps
         data_list = []
         monitor = None
@@ -2271,18 +2179,18 @@ if __name__ == "__main__":
                 data_i = filereader(r'../../../yee/WilliamData/meshm0%d.bt9' %i)
             elif i < 1000:
                 data_i = filereader(r'../../../yee/WilliamData/meshm%d.bt9' %i)
-                
-            if not monitor:
-                monitor = data_i.time.monitor.x
-            else:
-                data_i.normalize_monitor(monitor) # put all instruments on the same monitor
+
             data_list.append(data_i)
-        
-        joinedtas = join(data_list) # joins all datafiles, removing duplicate points
+            
+        normalize_monitor(data_list) # sets all monitors to that of the first TAS object
+        joinedtas = join(data_list)  # joins all datafiles, removing duplicate points
         data = np.array([joinedtas.physical_motors.h.x, joinedtas.physical_motors.k.x, 
-                         joinedtas.detectors.primary_detector])
-        np.savetxt("datatest.txt", data)
-        #temp = np.genfromtxt("datatest.txt")
+                         joinedtas.detectors.primary_detector.x, joinedtas.detectors.primary_detector.variance])
+        np.savetxt("datatest1.txt", data)
+
+            
+        #np.savetxt("datatest1error.txt", np.array([joinedtas.detectors.primary_detector.variance]))
+        #temp = np.genfromtxt("datatest1.txt")
         #run_bumps(joinedtas, '../../../WilliamData/BumpsResults')
 
 

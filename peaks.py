@@ -6,6 +6,7 @@ from math import degrees, radians, sin, cos
 import numpy as np
 
 from bumps.parameter import Parameter, varying
+from reduction.tripleaxis import rebin2
 
 def plot(X,Y,theory,data,err):
     import pylab
@@ -13,12 +14,18 @@ def plot(X,Y,theory,data,err):
     #print "theory",theory[1:6,1:6]
     #print "data",data[1:6,1:6]
     #print "delta",(data-theory)[1:6,1:6]
+    resid = (data-theory)/(err+1)
+    if len(data.shape) == 1:
+        xmesh, ymesh, data_mesh = rebin2.rebin_2D(X, Y, data, num_bins=20)
+        xmesh, ymesh, theory_mesh = rebin2.rebin_2D(X, Y, theory, num_bins=20)
+        xmesh, ymesh, resid_mesh = rebin2.rebin_2D(X, Y, resid, num_bins=20)
+        X, Y, theory, data, resid = xmesh, ymesh, theory_mesh, data_mesh, resid_mesh
     pylab.subplot(131)
     pylab.pcolormesh(X,Y, data)
     pylab.subplot(132)
     pylab.pcolormesh(X,Y, theory)
     pylab.subplot(133)
-    pylab.pcolormesh(X,Y, (data-theory)/(err+1))
+    pylab.pcolormesh(X,Y, resid)
 
 class Gaussian(object):
     def __init__(self, A=1, xc=0, yc=0, s1=1, s2=1, theta=0, name=""):

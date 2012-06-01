@@ -9,11 +9,12 @@ from bumps.names import Parameter, pmath, FitProblem
 
 
 def read_data():
-    tasdata = np.genfromtxt("datatest.txt")
-    x = tasdata[0]
-    y = tasdata[1]
-    data = tasdata[2].x
-    err = tasdata[2].variance
+    tasdata = np.genfromtxt("datatest1.txt")
+
+    X = tasdata[0]
+    Y = tasdata[1]
+    data = tasdata[2]
+    err = tasdata[3]
 
     return X, Y, data, err
 
@@ -41,7 +42,7 @@ def build_problem():
         theta=Parameter(45, name="theta")
         theta.range(0,90)
         peak1.xc.range(0.45,0.55)
-        peak1.yc.range(-0.55,-0.4)
+        peak1.yc.range(0.45,0.55)
         for i,peak in enumerate(M.parts[1:-1]):
             delta=Parameter(.0045, name="delta-%d"%(i+1))
             delta.range(0.0,0.015)
@@ -85,3 +86,5 @@ def build_problem():
     return FitProblem(M)
 
 problem = build_problem()
+
+problem.plot()

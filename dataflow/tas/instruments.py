@@ -206,14 +206,11 @@ def detailed_balance_action(input, **kwargs):
         tasinstrument.detailed_balance()
     return dict(output=input)
 
-def normalize_monitor_action(input, target_monitor, **kwargs):
+def normalize_monitor_action(input, target_monitor=None, **kwargs):
     #Requires the target monitor value
-    for tasinstrument in input:
-        tasinstrument.xaxis = ''
-        tasinstrument.yaxis = ''
-        tasinstrument.normalize_monitor(target_monitor)
-    #result=input[0].get_plottable()
+    data_abstraction.normalize_monitor(input, target_monitor)
     return dict(output=input)
+
 
 def monitor_correction_action(input, instrument_name, **kwargs):
     #Requires instrument name, e.g. 'BT7'.  
