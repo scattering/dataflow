@@ -13,8 +13,8 @@ def normalize_monitor_module(id=None, datatype=None, action=None,
     """
 
     icon = {
-        'URI': config.IMAGES + 'TAS/monitor_normalization.png',   #make new icon
-        'image': config.IMAGES + 'TAS/monitor_normalization.png', #make new icon
+        'URI': config.IMAGES + 'TAS/monitor_normalization.png',   #TODO make new icon
+        'image': config.IMAGES + 'TAS/monitor_normalization.png', #TODO make new icon
         'width': 'auto', 
         'terminals': {
             'input': (-12, 16, -1, 0),
@@ -50,13 +50,30 @@ def normalize_monitor_module(id=None, datatype=None, action=None,
         "name": "dependent_variable",
         "value": "k",
     }
-    fields['bincount'] = {
+    fields['num_bins'] = {
         "type": "float",
-        "label": "Number of bins",
+        "label": "Number of bins (optional)",
         "name": "bincount",
         "value": 0,
     }
-    
+    fields['xstep'] = {
+        "type": "float",
+        "label": "Number of bins (optional)",
+        "name": "bincount",
+        "value": None,
+    }
+    fields['ystep'] = {
+        "type": "float",
+        "label": "Number of bins (optional)",
+        "name": "bincount",
+        "value": None,
+    }
+    fields['edges'] = {
+        "type": "boolean",
+        "label": "Use edges (True) or bins (False)",
+        "name": "bincount",
+        "value": True,
+    }
     # Combine everything into a module.
     module = Module(id=id,
                   name='Rebin',

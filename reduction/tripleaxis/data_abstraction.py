@@ -29,9 +29,8 @@ if LOCAL:
 eps = 1e-8
 
 """
-Current notes:
-My current thoughts are to have one giant table so that we can do sorting
-easily.
+Old notes:
+My previous thoughts were to have one giant table so that we can do sorting easily.
 
 For some motors such as filter_translation, flipper_state, collimator, they have values such as 
 "ON/OFF", "A,B,C", "50Min", etc.  we either need to mark these as unplottable, or rather, have a "mapper" which takes these values
@@ -750,8 +749,10 @@ class TripleAxis(object):
         self.temperature = Temperature()
 
         self.analyzer_blades = Blades(title='analyzer', nblades=8)
+        self.num_bins = 0
         self.xaxis = ''
         self.yaxis = ''
+
 
     def detailed_balance(self):
         beta_times_temp = 11.6
@@ -825,7 +826,7 @@ class TripleAxis(object):
         ordery = []
         data = {}
         plottable_data = {}
-        print repr(self.xaxis) + " " + repr(self.yaxis)
+        print repr(self.xaxis) + " " + repr(self.yaxis) + " " + repr(self.num_bins)
         print self.__dict__.keys()
         #self.xaxis='h'
         #self.yaxis='e' #self.physical_motors.k
@@ -846,6 +847,7 @@ class TripleAxis(object):
                         print key + '.' + self.yaxis 
                 except:
                     pass
+            '''
             xstart = xarr.min()
             xfinal = xarr.max()
             xstep = 1.0 * (xfinal - xstart) / len(xarr)
@@ -858,6 +860,10 @@ class TripleAxis(object):
             yi = np.arange(ystart, yfinal, ystep)
             
             zi=rebin2d(bin_edges(xarr),bin_edges(yarr),self.detectors.primary_detector.measurement.x,bin_edges(xi),bin_edges(yi),Io=None,dtype=None)
+            '''
+            
+            #Brian's plotting requires edges=False
+            xi, yi, zi = rebin2.rebin_2D(xarr, yarr, self.detectors.primary_detector.measurement.x, num_bins=self.num_bins, edges=False)
             #xi, yi, zi = regular_gridding.regularlyGrid(xarr, yarr, self.detectors.primary_detector.measurement.x, xstart=xstart, xfinal=xfinal, xstep=xstep, ystart=ystart, yfinal=yfinal, ystep=ystep)		                               
 
 
@@ -976,6 +982,7 @@ class TripleAxis(object):
             }
         self.xaxis = ''
         self.yaxis = ''
+        self.num_bins = 0
         return simplejson.dumps(plottable_data)
 
 
@@ -1652,7 +1659,8 @@ def join(tas_list):
     #tas1.detectors.primary_detector.measurement.join(tas2.detectors.primary_detector.measurement)
     for tas2 in tas_list[1:]:
         for key, value in joinedtas.__dict__.iteritems():
-            if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment':
+            if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment' or \
+               key == 'num_bins':
                 #ignoring metadata for now
                 pass
             elif key == 'detectors':
@@ -2210,15 +2218,15 @@ if __name__ == "__main__":
         #print 'detailed balance done'
         bt7.harmonic_monitor_correction('BT7')
         bt7.resolution_volume_correction()
-    if 0:
+    if 1:
         data_list = []
         for i in range(1, 64):
             if i < 10:
-                data_i = filereader(r'../../../WilliamData/meshm00%d.bt9' %i)
+                data_i = filereader(r'../../../yee/WilliamData/meshm00%d.bt9' %i)
             elif i < 100:
-                data_i = filereader(r'../../../WilliamData/meshm0%d.bt9' %i)
+                data_i = filereader(r'../../../yee/WilliamData/meshm0%d.bt9' %i)
             elif i < 1000:
-                data_i = filereader(r'../../../WilliamData/meshm%d.bt9' %i)
+                data_i = filereader(r'../../../yee/WilliamData/meshm%d.bt9' %i)
             data_list.append(data_i)		
         joined = join(data_list)
 
@@ -2227,7 +2235,7 @@ if __name__ == "__main__":
             x = joined.physical_motors.h.x
             y = joined.physical_motors.k.x
             z = joined.detectors.primary_detector.x
-            xbin, ybin, data = rebin2.rebin_rectangles_bin(x, y, z, 20)
+            xbin, ybin, data = rebin2.rebin_2D(x, y, z, num_bins=20, edges=False)
             pylab.contourf(xbin,ybin,data)
             #pylab.pcolormesh(xbin, ybin, data)
             pylab.show()
@@ -2252,17 +2260,17 @@ if __name__ == "__main__":
         pylab.show()
 
 
-    if 1:
+    if 0:
         #Testing run_bumps
         data_list = []
         monitor = None
         for i in range(1, 64):
             if i < 10:
-                data_i = filereader(r'../../../WilliamData/meshm00%d.bt9' %i)
+                data_i = filereader(r'../../../yee/WilliamData/meshm00%d.bt9' %i)
             elif i < 100:
-                data_i = filereader(r'../../../WilliamData/meshm0%d.bt9' %i)
+                data_i = filereader(r'../../../yee/WilliamData/meshm0%d.bt9' %i)
             elif i < 1000:
-                data_i = filereader(r'../../../WilliamData/meshm%d.bt9' %i)
+                data_i = filereader(r'../../../yee/WilliamData/meshm%d.bt9' %i)
                 
             if not monitor:
                 monitor = data_i.time.monitor.x
@@ -2271,7 +2279,11 @@ if __name__ == "__main__":
             data_list.append(data_i)
         
         joinedtas = join(data_list) # joins all datafiles, removing duplicate points
-        run_bumps(joinedtas, '../../../WilliamData/BumpsResults')
+        data = np.array([joinedtas.physical_motors.h.x, joinedtas.physical_motors.k.x, 
+                         joinedtas.detectors.primary_detector])
+        np.savetxt("datatest.txt", data)
+        #temp = np.genfromtxt("datatest.txt")
+        #run_bumps(joinedtas, '../../../WilliamData/BumpsResults')
 
 
     print 'bye'

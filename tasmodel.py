@@ -9,11 +9,11 @@ from bumps.names import Parameter, pmath, FitProblem
 
 
 def read_data():
-    tas = sys.argv[1]
-    x = tas.physical_motors.h.x
-    y = tas.physical_motors.k.x
-    data = tas.detectors.primary_detector.x
-    err = tas.detectors.primary_detector.variance
+    tasdata = np.genfromtxt("datatest.txt")
+    x = tasdata[0]
+    y = tasdata[1]
+    data = tasdata[2].x
+    err = tasdata[2].variance
 
     return X, Y, data, err
 

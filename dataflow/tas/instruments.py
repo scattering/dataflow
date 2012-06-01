@@ -145,7 +145,7 @@ save = save_module(id='tas.save', datatype=TAS_DATA,
                    version='1.0', action=save_action,
                    fields=fields)
     
-def join_action(input, xaxis='', yaxis='', **kwargs):
+def join_action(input, xaxis='', yaxis='', num_bins=0, **kwargs):
     # This is confusing because load returns a bundle and join, which can
     # link to multiple loads, has a list of bundles.  So flatten this list.
     # The confusion between bundles and items will bother us continuously,
@@ -154,8 +154,9 @@ def join_action(input, xaxis='', yaxis='', **kwargs):
     joinedtas = None
     print "JOINING"
     try:
-        xaxis=kwargs['fields']['xaxis']['value']
-        yaxis=kwargs['fields']['yaxis']['value']
+        xaxis = kwargs['fields']['xaxis']['value']
+        yaxis = kwargs['fields']['yaxis']['value']
+        num_bins = kwards['fields']['num_bins']['value']
     except:
         pass
     #for now, we will work on joining arbitrary inputs instead of two at a time...
@@ -168,20 +169,29 @@ def join_action(input, xaxis='', yaxis='', **kwargs):
             #joinedtas = data_abstraction.join(joinedtas, tas)
     joinedtas.xaxis = xaxis
     joinedtas.yaxis = yaxis
+    joinedtas.num_bins = num_bins
     return dict(output=[joinedtas])
+
 fields = {'xaxis': {
     "type":"string",
     "label": "X axis for 2D plotting",
     "name": "xaxis",
     "value": '',
-}, 
+    }, 
     'yaxis': {
         "type":"string",
         "label": "Y axis for 2D plotting",
         "name": "yaxis",
         "value": '',
+    },
+    'num_bins': {
+        "type": "float",
+        "label": "Number of bins",
+        "name": "num_bins",
+        "value": 0.0,
     }
 }
+
 join = join_module(id='tas.join', datatype=TAS_DATA,
                    version='1.0', action=join_action,fields=fields, xtype=xtype, 
                                             filterModule=data_abstraction.join)
