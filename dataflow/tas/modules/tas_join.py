@@ -38,6 +38,37 @@ def join_module(id=None, datatype=None, action=None,
              ),
     ]
     
+    fields = {'xaxis': {
+        "type":"string",
+        "label": "X axis for 2D plotting",
+        "name": "xaxis",
+        "value": '',
+        }, 
+        'yaxis': {
+            "type":"string",
+            "label": "Y axis for 2D plotting",
+            "name": "yaxis",
+            "value": '',
+        },
+        'num_bins': {
+            "type": "float",
+            "label": "Number of bins (optional)",
+            "name": "num_bins",
+            "value": 0.0,
+        },
+        'xstep': {
+            "type": "float",
+            "label": "X bin spacing/step (optional)",
+            "name": "xstep",
+            "value": None,
+        },
+        'ystep': {
+            "type": "float",
+            "label": "Y bin spacing/step (optional)",
+            "name": "ystep",
+            "value": None,
+        }        
+    }    
     
     # Combine everything into a module.
     module = Module(id=id,

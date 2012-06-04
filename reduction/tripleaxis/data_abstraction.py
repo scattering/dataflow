@@ -752,6 +752,8 @@ class TripleAxis(object):
         self.num_bins = 0
         self.xaxis = ''
         self.yaxis = ''
+        self.xstep = None
+        self.ystep = None
 
 
     def detailed_balance(self):
@@ -826,7 +828,8 @@ class TripleAxis(object):
         ordery = []
         data = {}
         plottable_data = {}
-        print repr(self.xaxis) + " " + repr(self.yaxis) + " " + repr(self.num_bins)
+        print repr(self.xaxis) + " " + repr(self.yaxis) + " " + repr(self.num_bins) + \
+              repr(self.xstep) + " " + repr(self.ystep)
         print self.__dict__.keys()
         #self.xaxis='h'
         #self.yaxis='e' #self.physical_motors.k
@@ -862,21 +865,11 @@ class TripleAxis(object):
             zi=rebin2d(bin_edges(xarr),bin_edges(yarr),self.detectors.primary_detector.measurement.x,bin_edges(xi),bin_edges(yi),Io=None,dtype=None)
             '''
             
-            #Brian's plotting requires edges=False
-            xi, yi, zi = rebin2.rebin_2D(xarr, yarr, self.detectors.primary_detector.measurement.x, num_bins=self.num_bins, edges=False)
+            #Brian's plotting requires edges=False (5/25/2012)
+            xi, yi, zi = rebin2.rebin_2D(xarr, yarr, self.detectors.primary_detector.measurement.x, \
+                                         num_bins=self.num_bins, xstep=self.xstep, ystep=self.ystep, edges=False)
             #xi, yi, zi = regular_gridding.regularlyGrid(xarr, yarr, self.detectors.primary_detector.measurement.x, xstart=xstart, xfinal=xfinal, xstep=xstep, ystart=ystart, yfinal=yfinal, ystep=ystep)		                               
 
-
-            #print xstart, xfinal
-            #print ystart, yfinal
-            #print zi.min(), zi.max()
-            #print xfinal - xstart, yfinal - ystart
-            #print zi
-            #print len(xi), len(yi), len(zi)
-            #print len(zi[0]), len(zi[1])
-            #for list in zi:
-            #	list[list==None] = 0
-            #print zi.tolist()[0]
             zi = zi.T
             if LOCAL:
                 pylab.Figure()
@@ -980,9 +973,8 @@ class TripleAxis(object):
                     'style': 'line',
                     }],
             }
-        self.xaxis = ''
-        self.yaxis = ''
-        self.num_bins = 0
+        #self.xaxis = ''
+        #self.yaxis = ''
         return simplejson.dumps(plottable_data)
 
 
@@ -1660,7 +1652,7 @@ def join(tas_list):
     for tas2 in tas_list[1:]:
         for key, value in joinedtas.__dict__.iteritems():
             if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment' or \
-               key == 'num_bins':
+               key == 'num_bins' or key == 'xstep' or key == 'ystep':
                 #ignoring metadata for now
                 pass
             elif key == 'detectors':
@@ -1684,6 +1676,7 @@ def join(tas_list):
                     else:
                         not_distinct.append(blade)
             else:
+                print "hi"
                 for field in value:
                     obj = getattr(tas2, key)
                     field.measurement.join(getattr(obj, field.name).measurement)
@@ -1907,60 +1900,109 @@ def normalize_monitor(tas_list, monitor=None):
                 detector.measurement = detector.measurement * monitor_scalar
 
 
-def subtract(tas, background, independent_variable):
-    """Subtract a background singnal from a TripleAxis objects"""
-    joinedtas = tas_list[0]
-    distinct = []
-    not_distinct = []
-    xbin = None
-
-    #create xbin to use for all files
-    #bin each data column that applies for tas then for background, then subtract the background
-    # from the tas
-    #TODO: NOT DONE - FINISH BELOW
-
-    #obj = getattr(tas, independent_variable)
-    #rebin2.rebin_1D(getattr(tas, independent_variable).measurement
+def subtract(signal, background, independent_variable):
+    """
+    Subtract a background TripleAxis object from a signal TripleAxis object
+    """
     
-    #tas1.detectors.primary_detector.measurement.join(tas2.detectors.primary_detector.measurement)
-    for key, value in joinedtas.__dict__.iteritems():
-        if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment':
+    # create xbin to use for both files
+    # bin each data column that applies for background and for tas, then subtract the 
+    #     primary_detector measurement of the background from primary_detector of tas
+    
+    if not independent_variable:
+        # if no variable is specified, the first scanned variable is taken as the independent variable
+        independent_variable = getattr(signal, signal.meta_data.scanned_variables[0])
+            
+    sort_all_fields(signal, independent_variable)
+    sort_all_fields(background, independent_variable)
+    
+    xarr, xbin = rebin2.create_xbin(getattr(signal, independent_variable).measurement.x)
+    
+    bin_all_fields(signal, xarr, xbin)
+    bin_all_fields(background, xarr, xbin)
+
+    #Subtracting primary_detectors
+    signal.detectors.primary_detector.measurement - background.detectors.primary_detector.measurement
+        
+    
+    #return signal #signal is modified internally and the return is unnecessary
+
+
+def sort_all_fields(tas, independent_variable_name):
+    """
+    Sorts all of the rows of independent_measurements
+    """
+    independent_measurements = getattr(tas, independent_variable_name).measurement
+    num_rows = len(independent_measurements)
+    tuples = []
+    for i in range(num_rows):
+        tuples.append((independent_measurements.x, i)) #appending tuples pairing value with index
+    tuples.sort()  #sorting by value
+    
+    #building array of row indices that is sorted for independent_measurements
+    indices_order = np.array([])
+    for i in range(num_rows):
+        indices_order = np.append(indices_order, tuples[i][1])
+            
+    for key, value in tas.__dict__.iteritems():
+        if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment' or \
+           key == 'num_bins' or key == 'xstep' or key == 'ystep':
             #ignoring metadata for now
             pass
         elif key == 'detectors':
             for field in value:
                 if field.name == 'primary_detector':
-                    obj = getattr(tas, key)
-                    field.measurement.join(getattr(obj, field.name).measurement)
-                    field.dimension[0] = field.dimension[0] + getattr(obj, field.name).dimension[0]
+                    new_measurement = field.measurement[indices_order[0]]
+                    for i in range(1, num_rows):
+                        # put rows in the order defined by indices_order
+                        new_measurement.join(field.measurement[indices_order[i]])
+                    field = new_measurement 
                 else:
-                    obj = getattr(tas, key)
-                    field.measurement.join_channels(getattr(obj, field.name).measurement)
+                    new_measurement = field.measurement[indices_order[0]]
+                    for i in range(1, num_rows):
+                        # put rows in the order defined by indices_order
+                        new_measurement.join_channels(field.measurement[indices_order[i]])
+                    field = new_measurement
+            '''
+        # for now, ignore joining blades
         elif key.find('blade') >= 0:
-            obj = getattr(tas, key)
-            i = 0
-            for blade in value.blades:
-                blade.measurement.join(obj.blades[i].measurement)
-                i += 1
-                if blade.isDistinct:
-                    distinct.append(blade)
-                else:
-                    not_distinct.append(blade)
+            blades = value.blades
+            new_measurement = blades[indices_order[0]].measurement
+            for i in range(1, len(value.blades)):
+                new_measurement.join(blades[indices_order[i]].measurement)
+            '''
         else:
             for field in value:
-                obj = getattr(tas, key)
-                field.measurement.join(getattr(obj, field.name).measurement)
-                if field.isDistinct:
-                    distinct.append(field)
-                else:
-                    not_distinct.append(field)
+                try:
+                    if len(field)==num_rows:
+                        new_measurement = field.measurement[indices_order[0]]
+                        for i in range(1, num_rows):
+                            # put rows in the order defined by indices_order
+                            new_measurement.join(field.measurement[indices_order[i]])
+                        field = new_measurement                         
+                except:
+                    # if field doesn't have proper number of columns, don't sort
+                    pass
 
-    distinct=list(set(distinct))
-    not_distinct=list(set(not_distinct))
-    rebin2.rebin_1D(independent_variable)
-    subtractedtas = tas
 
-    return subractedtas
+def bin_all_fields(tas, xarr, xbin):
+    num_rows = len(xarr)
+    for key, value in tas.__dict__.iteritems():
+        if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment' or \
+           key == 'num_bins' or key == 'xstep' or key == 'ystep':
+            #ignoring metadata for now
+            pass
+        else:
+            for field in value:
+                try:
+                    if len(field)==num_rows:
+                        # overwriting field.measurement with its binned values
+                        xbin, field.measurement = rebin2.rebin_1D(xarr, field.measurement, xbin=xbin)
+                except:
+                    # if field doesn't have proper number of columns, don't rebin
+                    pass
+
+    
 
 
 def filereader(filename, friendly_name=None):
@@ -2132,7 +2174,7 @@ if __name__ == "__main__":
                 data_i = filereader(r'../../../yee/WilliamData/meshm0%d.bt9' %i)
             elif i < 1000:
                 data_i = filereader(r'../../../yee/WilliamData/meshm%d.bt9' %i)
-            data_list.append(data_i)		
+            data_list.append(data_i)
         joined = join(data_list)
 
         #rebinning testing
@@ -2141,8 +2183,14 @@ if __name__ == "__main__":
             y = joined.physical_motors.k.x
             z = joined.detectors.primary_detector.x
             xbin, ybin, data = rebin2.rebin_2D(x, y, z, num_bins=20, edges=False)
+            #xbin, ybin, data = rebin2.rebin_2D(x, y, z, xstep=0.002, ystep=0.002, edges=False)
+            
+            data = data.T
+            
             pylab.contourf(xbin,ybin,data)
             #pylab.pcolormesh(xbin, ybin, data)
+            pylab.show()
+            pylab.pcolormesh(xbin,ybin,data)
             pylab.show()
 
 
@@ -2168,7 +2216,7 @@ if __name__ == "__main__":
         
         data_i = filereader(r'../../../yee/WilliamData/meshm011.bt9')
         print data_i
-    if 1:
+    if 0:
         #Testing run_bumps
         data_list = []
         monitor = None
