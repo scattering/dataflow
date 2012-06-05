@@ -39,6 +39,7 @@ to something plottable
 """
 
 
+skipped_fields=['data','meta_data','sample','sample_environment','xstep','ystep','num_bins']
 
 
 
@@ -930,7 +931,7 @@ class TripleAxis(object):
                                 data[field.name] = {'values': val.tolist(), 'errors':err}
                             else:
                                 data[field.name] = {'values': val.tolist(), 'errors':err.tolist()}
-                elif key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment':
+                elif key in skipped_fields:
                     #ignoring these data fields for plotting
                     pass	
                 else:
@@ -1651,8 +1652,7 @@ def join(tas_list):
     #tas1.detectors.primary_detector.measurement.join(tas2.detectors.primary_detector.measurement)
     for tas2 in tas_list[1:]:
         for key, value in joinedtas.__dict__.iteritems():
-            if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment' or \
-               key == 'num_bins' or key == 'xstep' or key == 'ystep':
+            if key in skipped_fields:
                 #ignoring metadata for now
                 pass
             elif key == 'detectors':
@@ -1861,7 +1861,7 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
     rows_to_be_removed.reverse() #duplicate rows to be removed indices in reverse order now
 
     for key, value in newtas.__dict__.iteritems():
-        if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment':
+        if key in skipped_fields:
             #ignoring metadata for now
             pass
         elif key.find('blade') >= 0:
@@ -1900,7 +1900,7 @@ def normalize_monitor(tas_list, monitor=None):
                 detector.measurement = detector.measurement * monitor_scalar
 
 
-def subtract(signal, background, independent_variable):
+def subtract(signal, background, independent_variable=None):
     """
     Subtract a background TripleAxis object from a signal TripleAxis object
     """
@@ -1909,30 +1909,67 @@ def subtract(signal, background, independent_variable):
     # bin each data column that applies for background and for tas, then subtract the 
     #     primary_detector measurement of the background from primary_detector of tas
     
+    # if signal and background are given as a list, just use the first inputs in the list(s).
+    try:
+        if len(signal) > 0:
+            signal = signal[0]
+    except:
+        pass
+    try:
+        if len(background) > 0:
+            background = background[0]
+    except:
+        pass
+    
     if not independent_variable:
         # if no variable is specified, the first scanned variable is taken as the independent variable
-        independent_variable = getattr(signal, signal.meta_data.scanned_variables[0])
-            
-    sort_all_fields(signal, independent_variable)
-    sort_all_fields(background, independent_variable)
+        try:
+            independent_variable = getattr(signal, signal.meta_data.scanned_variables[0])
+        except:
+            print "Error in subraction: no independent variable specified and no scanned variables in object!"
+
+    signal_measurements = get_measurement(signal, independent_variable)
+    bg_measurements = get_measurement(background, independent_variable)
     
-    xarr, xbin = rebin2.create_xbin(getattr(signal, independent_variable).measurement.x)
+    sort_all_fields(signal, signal_measurements)
+    sort_all_fields(background, bg_measurements)
+    
+    xarr, xbin = rebin2.create_xbin(signal_measurements.x)
     
     bin_all_fields(signal, xarr, xbin)
     bin_all_fields(background, xarr, xbin)
 
-    #Subtracting primary_detectors
-    signal.detectors.primary_detector.measurement - background.detectors.primary_detector.measurement
-        
+    #Subtracting primary_detectors and overwriting signal's primary_detector. 
+    #No need to return anything.
+    subtracted = signal.detectors.primary_detector.measurement - background.detectors.primary_detector.measurement
+    signal.detectors.primary_detector.measurement = subtracted
     
-    #return signal #signal is modified internally and the return is unnecessary
+    return signal
 
 
-def sort_all_fields(tas, independent_variable_name):
+def get_measurement(tas, fieldname):
+    """
+    Given a field name, returns the measurement list associated with it for a
+    given TripleAxis object (tas). Returns None if field is not found.
+    
+    E.g. get_measurement(tas, 'k') --> returns:
+            tas.physical_motors.k.measurement
+    """
+    obj = None
+    for key, value in tas.__dict__.iteritems():
+        obj = getattr(tas, key)
+        try:
+            measurements = getattr(obj, fieldname).measurement
+            return measurements
+        except:
+            pass
+    return None
+
+    
+def sort_all_fields(tas, independent_measurements):
     """
     Sorts all of the rows of independent_measurements
     """
-    independent_measurements = getattr(tas, independent_variable_name).measurement
     num_rows = len(independent_measurements)
     tuples = []
     for i in range(num_rows):
@@ -1945,8 +1982,7 @@ def sort_all_fields(tas, independent_variable_name):
         indices_order = np.append(indices_order, tuples[i][1])
             
     for key, value in tas.__dict__.iteritems():
-        if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment' or \
-           key == 'num_bins' or key == 'xstep' or key == 'ystep':
+        if key in skipped_fields:
             #ignoring metadata for now
             pass
         elif key == 'detectors':
@@ -1988,8 +2024,7 @@ def sort_all_fields(tas, independent_variable_name):
 def bin_all_fields(tas, xarr, xbin):
     num_rows = len(xarr)
     for key, value in tas.__dict__.iteritems():
-        if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment' or \
-           key == 'num_bins' or key == 'xstep' or key == 'ystep':
+        if key in skipped_fields:
             #ignoring metadata for now
             pass
         else:
@@ -2165,7 +2200,7 @@ if __name__ == "__main__":
         #print 'detailed balance done'
         bt7.harmonic_monitor_correction('BT7')
         bt7.resolution_volume_correction()
-    if 1:
+    if 0:
         data_list = []
         for i in range(1, 64):
             if i < 10:
@@ -2213,10 +2248,6 @@ if __name__ == "__main__":
         pylab.show()
 
     if 0:
-        
-        data_i = filereader(r'../../../yee/WilliamData/meshm011.bt9')
-        print data_i
-    if 0:
         #Testing run_bumps
         data_list = []
         monitor = None
@@ -2241,5 +2272,14 @@ if __name__ == "__main__":
         #temp = np.genfromtxt("datatest1.txt")
         #run_bumps(joinedtas, '../../../WilliamData/BumpsResults')
 
-
-    print 'bye'
+    if 1:
+        instrument = TripleAxis()
+        bg = filereader(r'../../../yee/WilliamData/meshm001.bt9')
+        signal = filereader(r'../../../yee/WilliamData/meshm002.bt9')
+        m = uncertainty.Measurement([5.0, 3.0], [5.0, 2.0])
+        subtract(signal, bg, 'k')
+        
+        print 'subtracted!'
+        
+        
+    print 'Finished local test.'

@@ -16,6 +16,7 @@ if 1:
     
     #from dataflow.dataflow.modules.load import load_module
     from .modules.tas_join import join_module
+    from .modules.tas_subtract import subtract_module
     from ..modules.save import save_module
     from .modules.tas_load import load_module
     from .modules.tas_normalize_monitor import normalize_monitor_module
@@ -39,6 +40,7 @@ if 0:
     from dataflow.dataflow.core import Instrument, Data, Template, register_instrument
 
     from dataflow.dataflow.tas.modules.tas_join import join_module
+    from dataflow.dataflow.tas.modules.tas_subtractimport import subtract_module
     from dataflow.dataflow.modules.save import save_module
     from dataflow.dataflow.tas.modules.tas_load import load_module
     from dataflow.dataflow.tas.modules.tas_normalize_monitor import normalize_monitor_module
@@ -145,13 +147,13 @@ save = save_module(id='tas.save', datatype=TAS_DATA,
                    version='1.0', action=save_action,
                    fields=fields)
     
-def join_action(input, xaxis='', yaxis='', num_bins=0, **kwargs):
+def join_action(input, xaxis='', yaxis='', num_bins=0, xstep=None, ystep=None, **kwargs):
     # This is confusing because load returns a bundle and join, which can
     # link to multiple loads, has a list of bundles.  So flatten this list.
     # The confusion between bundles and items will bother us continuously,
     # and it is probably best if every filter just operates on and returns
     # bundles, which I do in this example.
-    joinedtas = None
+
     print "JOINING"
     try:
         xaxis = kwargs['fields']['xaxis']['value']
@@ -164,11 +166,7 @@ def join_action(input, xaxis='', yaxis='', num_bins=0, **kwargs):
     #for now, we will work on joining arbitrary inputs instead of two at a time...
     #This will hopefully work on bundles, instead of doing things pairwise...
     joinedtas = data_abstraction.join(input)
-    #for tas in input:
-        #if joinedtas == None:
-            #joinedtas = tas
-        #else:
-            #joinedtas = data_abstraction.join(joinedtas, tas)
+
     joinedtas.xaxis = xaxis
     joinedtas.yaxis = yaxis
     joinedtas.num_bins = num_bins
@@ -180,11 +178,23 @@ def join_action(input, xaxis='', yaxis='', num_bins=0, **kwargs):
 join = join_module(id='tas.join', datatype=TAS_DATA,
                    version='1.0', action=join_action, xtype=xtype, 
                                             filterModule=data_abstraction.join)
-'''
-join = join_module(id='tas.join', datatype=TAS_DATA,
-                   version='1.0', action=join_action,fields=fields, xtype=xtype, 
-                                            filterModule=data_abstraction.join)
-'''
+
+
+def subtract_action(signal, background, scan_variable=None, **kwargs):
+    print "SUBTRACTING"
+    try:
+        scan_var = kwargs['fields']['scan_variable']['value']
+    except:
+        pass
+    subtractedtas = data_abstraction.subtract(signal, background, independent_variable=scan_variable)
+
+    # Could always set up x/y axes here based on the independent variable
+    
+    return dict(output=[subtractedtas])
+
+
+subtract = subtract_module(id='tas.subtract', datatype=TAS_DATA, version='1.0', 
+                   action=subtract_action, xtype=xtype, filterModule=data_abstraction.subtract)
 
 
 #All TripleAxis reductions below require that:
@@ -243,7 +253,7 @@ BT7 = Instrument(id='ncnr.tas.bt7',
                  name='tas',
                  archive=config.NCNR_DATA + '/bt7',
                  menu=[('Input', [load, save]),
-                       ('Reduction', [join, normalizemonitor, detailedbalance,
+                       ('Reduction', [join, subtract, normalizemonitor, detailedbalance,
                                       monitorcorrection, volumecorrection])
                        ],
                  #requires=[config.JSCRIPT + '/tasplot.js'],
