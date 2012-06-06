@@ -2,6 +2,8 @@ import numpy as np
 import uncertainty, err1d
 
 import readncnr4 as readncnr
+import readchalk as readchalk
+
 from formatnum import format_uncertainty
 import copy, simplejson, pickle
 from mpfit import mpfit
@@ -38,7 +40,7 @@ to something plottable
 
 """
 
-
+# for purposes of iterating over a dictionary for a TripleAxis object, these fields are skipped
 skipped_fields=['data','meta_data','sample','sample_environment','xstep','ystep','num_bins']
 
 
@@ -982,23 +984,23 @@ class TripleAxis(object):
 # ****************************************************************************************************************************************************
 # ***************************************************************** TRANSLATION METHODS **************************************************************
 # ****************************************************************************************************************************************************
-def translate(bt7, dataset):
-    translate_monochromator(bt7, dataset)
-    translate_analyzer(bt7, dataset)
-    translate_collimator(bt7, dataset)
-    translate_sample(bt7, dataset) #sample must be done before physical motors to calculate orient1,2,3 from dataset
-    translate_primary_motors(bt7, dataset) #primary motors must be done before physical motors for Q calc.
-    translate_physical_motors(bt7, dataset)
-    translate_filters(bt7, dataset)
-    translate_apertures(bt7, dataset)
-    translate_polarized_beam(bt7, dataset)
-    translate_slits(bt7, dataset)
-    translate_temperature(bt7, dataset)
-    translate_time(bt7, dataset)
-    translate_metadata(bt7, dataset)
-    translate_detectors(bt7, dataset)
+def translate(tas, dataset):
+    translate_monochromator(tas, dataset)
+    translate_analyzer(tas, dataset)
+    translate_collimator(tas, dataset)
+    translate_sample(tas, dataset) #sample must be done before physical motors to calculate orient1,2,3 from dataset
+    translate_primary_motors(tas, dataset) #primary motors must be done before physical motors for Q calc.
+    translate_physical_motors(tas, dataset)
+    translate_filters(tas, dataset)
+    translate_apertures(tas, dataset)
+    translate_polarized_beam(tas, dataset)
+    translate_slits(tas, dataset)
+    translate_temperature(tas, dataset)
+    translate_time(tas, dataset)
+    translate_metadata(tas, dataset)
+    translate_detectors(tas, dataset)
 
-def translate_monochromator(bt7, dataset):
+def translate_monochromator(tas, dataset):
     translate_dict = {}
     #key--> on bt7
     #value -> input, i.e. the field in dataset.data or dataset.metadata
@@ -1009,7 +1011,7 @@ def translate_monochromator(bt7, dataset):
     translate_dict['translation'] = 'monotrans'
     translate_dict['elevation'] = 'monoelev'
     translate_dict['dspacing'] = 'monochromator_dspacing'
-    map_motors(translate_dict, bt7, bt7.monochromator, dataset)
+    map_motors(translate_dict, tas, tas.monochromator, dataset)
     #map_motors(translate_dict, bt7.monochromator, dataset)
 
     #for key,value in translate_dict.iteritems():
@@ -1043,14 +1045,14 @@ def translate_monochromator(bt7, dataset):
     #monochromator_blades.blades[7]=dataset.data.monoblade08
     #monochromator_blades.blades[8]=dataset.data.monoblade09
     #monochromator_blades.blades[9]=dataset.data.monoblade10
-    bt7.monochromator.blades = monochromator_blades
+    tas.monochromator.blades = monochromator_blades
 
 
 
-def translate_analyzer(bt7, dataset):
-    bt7.analyzer.dspacing = dataset.metadata['analyzer_dspacing']
+def translate_analyzer(tas, dataset):
+    tas.analyzer.dspacing = dataset.metadata['analyzer_dspacing']
     if dataset.metadata.has_key('analyzerfocusmode'):
-        bt7.analyzer.focus_mode = dataset.metadata['analyzerfocusmode']
+        tas.analyzer.focus_mode = dataset.metadata['analyzerfocusmode']
     analyzer_blades = Blades(title='analyzer', nblades=13)
     for i in range(13):
         if i < 9:
@@ -1072,11 +1074,11 @@ def translate_analyzer(bt7, dataset):
     #analyzer_blades.blades[10]=dataset.data.analyzerblade11
     #analyzer_blades.blades[11]=dataset.data.analyzerblade12
     #analyzer_blades.blades[12]=dataset.data.analyzerblade13
-    bt7.analyzer.blades = analyzer_blades
+    tas.analyzer.blades = analyzer_blades
 
 
 
-def translate_collimator(bt7, dataset):
+def translate_collimator(tas, dataset):
     translate_dict = {}
     translate_dict['pre_monochromator_collimator'] = 'premonocoll'
     translate_dict['post_monochromator_collimator'] = 'postmonocoll'
@@ -1084,7 +1086,7 @@ def translate_collimator(bt7, dataset):
     translate_dict['post_analyzer_collimator'] = 'postanacoll'
     translate_dict['radial_collimator'] = 'rc'
     translate_dict['soller_collimator'] = 'sc'
-    map_motors(translate_dict, bt7, bt7.collimators, dataset)
+    map_motors(translate_dict, tas, tas.collimators, dataset)
 
     #bt7.collimators.pre_monochromator_collimator=dataset.data['premonocoll']
     #bt7.collimators.post_monochromator_collimator =dataset.data['postmonocoll']
@@ -1095,17 +1097,17 @@ def translate_collimator(bt7, dataset):
     #if dataset.data.has_key('sc'):
     #        bt7.collimators.soller_collimator=dataset.data['sc']
 
-def translate_apertures(bt7, dataset):
+def translate_apertures(tas, dataset):
     translate_dict = {}
     translate_dict['aperture_horizontal'] = 'aperthori'
     translate_dict['aperture_vertical'] = 'apertvert'
-    map_motors(translate_dict, bt7, bt7.apertures, dataset)
+    map_motors(translate_dict, tas, tas.apertures, dataset)
     #map_motors(translate_dict,bt7.apertures, dataset)
 
     #bt7.apertures.aperture_horizontal=dataset.aperthori
     #bt7.apertures.aperture_vertical=dataset.apertvert
 
-def translate_polarized_beam(bt7, dataset):
+def translate_polarized_beam(tas, dataset):
     translate_dict = {}
     translate_dict['ei_flip'] = 'eiflip'
     translate_dict['ef_flip'] = 'efflip'
@@ -1118,7 +1120,7 @@ def translate_polarized_beam(bt7, dataset):
     translate_dict['hsample'] = 'hsample'
     translate_dict['vsample'] = 'vsample'
 
-    map_motors(translate_dict, bt7, bt7.polarized_beam, dataset)
+    map_motors(translate_dict, tas, tas.polarized_beam, dataset)
     #map_motors(translate_dict, bt7.polarized_beam, dataset)
 
     #bt7.polarized_beam.ei_flip=dataset.eiflip
@@ -1132,7 +1134,7 @@ def translate_polarized_beam(bt7, dataset):
     #bt7.polarized_beam.ef_guide=dataset.efguide
     #bt7.polarized_beam.ei_cancel=dataset.data.eicancel
 
-def translate_primary_motors(bt7, dataset):
+def translate_primary_motors(tas, dataset):
     translate_dict = {}
     translate_dict['sample_upper_tilt'] = 'smplutilt'
     translate_dict['sample_lower_tilt'] = 'smplltilt'
@@ -1149,7 +1151,7 @@ def translate_primary_motors(bt7, dataset):
     translate_dict['dfm_rotation'] = 'dfmrot'
     translate_dict['dfm'] = 'dfm'
 
-    map_motors(translate_dict, bt7, bt7.primary_motors, dataset)
+    map_motors(translate_dict, tas, tas.primary_motors, dataset)
     #map_motors(translate_dict, bt7.primary_motors,dataset)
 
     #for key,value in translate_dict.iteritems():
@@ -1174,7 +1176,7 @@ def translate_primary_motors(bt7, dataset):
 
 
 
-def translate_physical_motors(bt7, dataset):
+def translate_physical_motors(tas, dataset):
     translate_dict = {}
     #key--> on bt7
     #value -> input, i.e. the field in dataset.data or dataset.metadata
@@ -1185,39 +1187,39 @@ def translate_physical_motors(bt7, dataset):
     translate_dict['k'] = 'qy'
     translate_dict['l'] = 'qz'
     translate_dict['e'] = 'e'
-    map_motors(translate_dict, bt7, bt7.physical_motors, dataset)
+    map_motors(translate_dict, tas, tas.physical_motors, dataset)
     #map_motors(translate_dict,bt7.physical_motors,dataset)
 
     if dataset.metadata['efixed'] == 'ei':
-        bt7.physical_motors.ei.measurement.x = np.ones(np.array(dataset.data['e']).shape) * dataset.metadata['ei']
-        bt7.physical_motors.ei.measurement.variance = None
-        bt7.physical_motors.ef = bt7.physical_motors.ei.measurement - bt7.physical_motors.e.measurement
+        tas.physical_motors.ei.measurement.x = np.ones(np.array(dataset.data['e']).shape) * dataset.metadata['ei']
+        tas.physical_motors.ei.measurement.variance = None
+        tas.physical_motors.ef = tas.physical_motors.ei.measurement - tas.physical_motors.e.measurement
         #our convention is that Ei=Ef+delta_E (aka omega)
     else:
-        bt7.physical_motors.ef.measurement.x = np.ones(np.array(dataset.data['e']).shape) * dataset.metadata['ef']
-        bt7.physical_motors.ef.measurement.variance = None
-        bt7.physical_motors.ei.measurement.x = bt7.physical_motors.ef.measurement.x + bt7.physical_motors.e.measurement.x  #punt for now, later should figure out what to do if variance is None
+        tas.physical_motors.ef.measurement.x = np.ones(np.array(dataset.data['e']).shape) * dataset.metadata['ef']
+        tas.physical_motors.ef.measurement.variance = None
+        tas.physical_motors.ei.measurement.x = tas.physical_motors.ef.measurement.x + tas.physical_motors.e.measurement.x  #punt for now, later should figure out what to do if variance is None
 
     try:
-        Ei = bt7.physical_motors.ei.measurement
-        Ef = bt7.physical_motors.ef.measurement
-        A4 = bt7.primary_motors.sample_two_theta.measurement
+        Ei = tas.physical_motors.ei.measurement
+        Ef = tas.physical_motors.ef.measurement
+        A4 = tas.primary_motors.sample_two_theta.measurement
         Qsquared = (Ei + Ef - 2 * (Ei * Ef).sqrt()*(A4 / 2).cos()) / 2.072
         Q = Qsquared.sqrt()
-        bt7.physical_motors.q.measurement = Q
+        tas.physical_motors.q.measurement = Q
     except:
         #Some data files, e.g. summer school spins files, do not have a1-a6
         pass
     try:
-        o1temp = bt7.sample.orientation.orient1
-        o2temp = bt7.sample.orientation.orient2
+        o1temp = tas.sample.orientation.orient1
+        o2temp = tas.sample.orientation.orient2
         o1 = np.array([o1temp['h'], o1temp['k'], o1temp['l']])
         o2 = np.array([o2temp['h'], o2temp['k'], o2temp['l']])
         o1, o2, o3 = make_orthonormal(o1, o2)
 
-        setattr(bt7.physical_motors.orient1, 'value', o1)
-        setattr(bt7.physical_motors.orient2, 'value', o2)
-        setattr(bt7.physical_motors.orient3, 'value', o3)
+        setattr(tas.physical_motors.orient1, 'value', o1)
+        setattr(tas.physical_motors.orient2, 'value', o2)
+        setattr(tas.physical_motors.orient3, 'value', o3)
         #TODO - make 'fancy' names for these?
         #setattr(bt7.physical_motors.orient3, 'name', '110')
 
@@ -1234,7 +1236,7 @@ def translate_physical_motors(bt7, dataset):
     #self.meta_data.fixed_eief=dataset.metadata.efixed
     #self.meta_data.fixed_energy=dataset.metadata.ef
 
-def translate_filters(bt7, dataset):
+def translate_filters(tas, dataset):
     translate_dict = {}
     #key--> on bt7
     #value -> input, i.e. the field in dataset.data or dataset.metadata
@@ -1244,7 +1246,7 @@ def translate_filters(bt7, dataset):
     translate_dict['filter_tilt'] = 'temp'
     translate_dict['filter_translation'] = 'temperaturesensor1'
     translate_dict['filter_rotation'] = 'temperaturesensor2'
-    map_motors(translate_dict, bt7, bt7.filters, dataset)
+    map_motors(translate_dict, tas, tas.filters, dataset)
     #map_motors(translate_dict,bt7.filters,dataset)
 
     #self.filters.filter_tilt=dataset.filtilt
@@ -1252,7 +1254,7 @@ def translate_filters(bt7, dataset):
     #self.filters.filter_rotation=dataset.filrot
 
 
-def translate_time(bt7, dataset):
+def translate_time(tas, dataset):
     translate_dict = {}
     translate_dict['month'] = 'month'
     translate_dict['day'] = 'day'
@@ -1262,7 +1264,7 @@ def translate_time(bt7, dataset):
     translate_dict['duration'] = 'time'
     translate_dict['monitor'] = 'monitor'
     translate_dict['monitor2'] = 'monitor2'
-    map_motors(translate_dict, bt7, bt7.time, dataset)
+    map_motors(translate_dict, tas, tas.time, dataset)
     #map_motors(translate_dict,bt7.time,dataset)
 
     #self.time.timestamp=dataset.timestamp
@@ -1270,9 +1272,9 @@ def translate_time(bt7, dataset):
     #self.time.monitor=dataset.data.monitor
     #self.time.monitor2=dataset.data.monitor2
 
-def translate_temperature(bt7, dataset):
+def translate_temperature(tas, dataset):
     translate_dict = {}
-    #key--> on bt7
+    #key--> on tas
     #value -> input, i.e. the field in dataset.data or dataset.metadata
     #translate_dict['hkl']='hkl'
     #In older versions, we cannot trust h,k,l, hkl, etc. because we don't know if we went where we wanted. 
@@ -1284,11 +1286,11 @@ def translate_temperature(bt7, dataset):
     translate_dict['temperature_heater_power'] = 'temperatureheatorpower'
     translate_dict['temperature_control_reading'] = 'temperaturecontrolreading'
     translate_dict['temperature_setpoint'] = 'temperaturesetpoint'
-    map_motors(translate_dict, bt7, bt7.temperature, dataset)
-    #map_motors(translate_dict,bt7.temperature,dataset)
+    map_motors(translate_dict, tas, tas.temperature, dataset)
+    #map_motors(translate_dict,tas.temperature,dataset)
     if dataset.metadata.has_key('temperature_units'):
-        bt7.temperature.temperature.units = dataset.metadata['temperature_units']
-
+        tas.temperature.temperature.units = dataset.metadata['temperature_units']
+    
     #self.temperature.temperature=dataset.temp
     #self.temperature.temperature.units=dataset.metadata.temperature_units
     #self.temperature.temperaturesensor1=dataset.temperaturesensor1
@@ -1299,36 +1301,36 @@ def translate_temperature(bt7, dataset):
     #self.temperature.temperature_setpoint =dataset.temperaturesetpoint
 
 
-def translate_slits(bt7, dataset):
+def translate_slits(tas, dataset):
     translate_dict = {}
-    #key--> on bt7
+    #key--> on tas
     #value -> input, i.e. the field in dataset.data or dataset.metadata
     #translate_dict['hkl']='hkl'
     #In older versions, we cannot trust h,k,l, hkl, etc. because we don't know if we went where we wanted. 
     #Should translate to magnitude of q before hand
     translate_dict['back_slit_width'] = 'bksltwdth'
     translate_dict['back_slit_height'] = 'bkslthght'
-    map_motors(translate_dict, bt7, bt7.slits, dataset)
-    #map_motors(translate_dict,bt7.slits,dataset)
+    map_motors(translate_dict, tas, tas.slits, dataset)
+    #map_motors(translate_dict,tas.slits,dataset)
 
     #self.slits.back_slit_width =dataset.data.bksltwdth
     #self.slits.back_slit_height =dataset.data.bkslthght
 
 
 
-def translate_sample(bt7, dataset):
+def translate_sample(tas, dataset):
     translate_dict = {}
     translate_dict['orientation'] = 'orientation'
     translate_dict['lattice'] = 'lattice'
-    map_motors(translate_dict, bt7, bt7.sample, dataset)
-    #map_motors(translate_dict,bt7.sample,dataset)        
+    map_motors(translate_dict, tas, tas.sample, dataset)
+    #map_motors(translate_dict,tas.sample,dataset)        
 
-    if bt7.sample.orientation.orient1 == None:
+    if tas.sample.orientation.orient1 == None:
         #if the dataset has labels 'orient1' and 'orient2' but not 'orientation'
         translate_dict = {}
         translate_dict['orient1'] = 'orient1'
         translate_dict['orient2'] = 'orient2'
-        map_motors(translate_dict, bt7, bt7.sample.orientation, dataset)
+        map_motors(translate_dict, tas, tas.sample.orientation, dataset)
         #map_motors(translate_dict,bt7.sample.orientation,dataset)
     #bt7.sample.orientation =dataset.metadata.orientation
     #bt7.sample.mosaic=dataset.metadata.?
@@ -1336,7 +1338,7 @@ def translate_sample(bt7, dataset):
 
 
 
-def translate_metadata(bt7, dataset):
+def translate_metadata(tas, dataset):
     translate_dict = {}
     translate_dict['epoch'] = 'epoch'
     translate_dict['counting_standard'] = 'count_type'
@@ -1361,8 +1363,8 @@ def translate_metadata(bt7, dataset):
     translate_dict['scan_description'] = 'scan_description'
     translate_dict['desired_npoints'] = 'npoints'
 
-    map_motors(translate_dict, bt7, bt7.meta_data, dataset)
-    #ap_motors(translate_dict,bt7.meta_data,dataset)
+    map_motors(translate_dict, tas, tas.meta_data, dataset)
+    #ap_motors(translate_dict,tas.meta_data,dataset)
 
     #self.meta_data.epoch=dataset.metadata.epoch
     #self.meta_data.counting_standard=dataset.metadata.count_type
@@ -1389,16 +1391,16 @@ def translate_metadata(bt7, dataset):
     #self.meta_data.scan_description=dataset.metadata.scan_description
     #self.meta_data.desired_npoints=dataset.metadata.npoints
 
-def translate_detectors(bt7, dataset):
+def translate_detectors(tas, dataset):
     try:
-        bt7.detectors.primary_detector.measurement.x = np.array(dataset.data['detector'], 'Float64')
-        bt7.detectors.primary_detector.measurement.variance = np.array(dataset.data['detector'], 'Float64')
+        tas.detectors.primary_detector.measurement.x = np.array(dataset.data['detector'], 'Float64')
+        tas.detectors.primary_detector.measurement.variance = np.array(dataset.data['detector'], 'Float64')
     except:
-        bt7.detectors.primary_detector.measurement.x = np.array(dataset.data['counts'], 'Float64')
-        bt7.detectors.primary_detector.measurement.variance = np.array(dataset.data['counts'], 'Float64')	
+        tas.detectors.primary_detector.measurement.x = np.array(dataset.data['counts'], 'Float64')
+        tas.detectors.primary_detector.measurement.variance = np.array(dataset.data['counts'], 'Float64')	
 
-    bt7.detectors.primary_detector.dimension = [len(bt7.detectors.primary_detector.measurement.x), 1]
-    bt7.detectors.detector_mode = dataset.metadata['analyzerdetectormode']
+    tas.detectors.primary_detector.dimension = [len(tas.detectors.primary_detector.measurement.x), 1]
+    tas.detectors.detector_mode = dataset.metadata['analyzerdetectormode']
 
 
     #later, I should do something clever to determine how many detectors are in the file,
@@ -1408,22 +1410,22 @@ def translate_detectors(bt7, dataset):
 
     #detectors do NOT have a 'summed_counts' attribute currently.
     if dataset.metadata.has_key('analyzersdgroup') and not dataset.metadata['analyzersdgroup'] == None:
-        set_detector(bt7, dataset, 'single_detector', 'analyzersdgroup')
+        set_detector(tas, dataset, 'single_detector', 'analyzersdgroup')
         #bt7.detectors.single_detector.summed_counts.measurement.x=dataset.data['singledet']
         #bt7.detectors.single_detector.summed_counts.measurement.variance=dataset.data['singledet']
 
     if dataset.metadata.has_key('analyzerdoordetectorgroup') and not dataset.metadata['analyzerdoordetectorgroup'] == None:
-        set_detector(bt7, dataset, 'door_detector', 'analyzerdoordetectorgroup')
+        set_detector(tas, dataset, 'door_detector', 'analyzerdoordetectorgroup')
         #bt7.detectors.single_detector.summed_counts.measurement.x=bt7.detectors.door_detector.x.sum(axis=1)#None #dataset.data['doordet']  #Not sure why this one doesn't show up???
         #bt7.detectors.single_detector.summed_counts.measurement.variance=bt7.detectors.door_detector.x.sum(axis=1)#None #dataset.data['doordet']  #Not sure why this one doesn't show up???
 
     if dataset.metadata.has_key('analyzerddgroup') and not dataset.metadata['analyzerddgroup'] == None:
-        set_detector(bt7, dataset, 'diffraction_detector', 'analyzerddgroup')
+        set_detector(tas, dataset, 'diffraction_detector', 'analyzerddgroup')
         #bt7.detectors.diffraction_detector.summed_counts.measurement.x=dataset.data['diffdet']
         #bt7.detectors.diffraction_detector.summed_counts.measurement.variance=dataset.data['diffdet']
 
     if dataset.metadata.has_key('analyzerpsdgroup') and not dataset.metadata['analyzerpsdgroup'] == None:
-        set_detector(bt7, dataset, 'position_sensitive_detector', 'analyzerpsdgroup')
+        set_detector(tas, dataset, 'position_sensitive_detector', 'analyzerpsdgroup')
         #if hasattr(bt7.detectors,'position_sensitive_detector'):
             #bt7.detectors.position_sensitive_detector.summed_counts.measurement.x=dataset.data['psdet']
             #bt7.detectors.position_sensitive_detector.summed_counts.measurement.variance=dataset.data['psdet']
@@ -1431,21 +1433,21 @@ def translate_detectors(bt7, dataset):
 
 
 
-def set_detector(bt7, dataset, detector_name, data_name):                        
+def set_detector(tas, dataset, detector_name, data_name):                        
     analyzergroup = dataset.metadata[data_name]
-    setattr(bt7.detectors, detector_name, Detector(detector_name))
+    setattr(tas.detectors, detector_name, Detector(detector_name))
 
     dim = dataset.metadata['analyzersdgroup']
     if not dim == None:
-        setattr(getattr(bt7.detectors, detector_name), 'dimension', [len(dim), 1])
+        setattr(getattr(tas.detectors, detector_name), 'dimension', [len(dim), 1])
     else:
-        setattr(getattr(bt7.detectors, detector_name), 'dimension', [0, 0]) #if there is no analyzersdgroup, make dim 0
+        setattr(getattr(tas.detectors, detector_name), 'dimension', [0, 0]) #if there is no analyzersdgroup, make dim 0
     try:
         npts = len(dataset.data[dataset.metadata['analyzersdgroup'][0]])  #I choose this one because the sd group SHOULD always be present.
     except:
         npts = 0
-    Nx = getattr(getattr(bt7.detectors, detector_name), 'dimension')[0]
-    Ny = getattr(getattr(bt7.detectors, detector_name), 'dimension')[1]
+    Nx = getattr(getattr(tas.detectors, detector_name), 'dimension')[0]
+    Ny = getattr(getattr(tas.detectors, detector_name), 'dimension')[1]
     data = np.empty((npts, Nx, Ny), 'Float64')
     #put all the data in data array which is npts x Nx x Ny, in this case, Ny=1 since our detectors are 1D
     #We have to do some defensive programming here.  It turns out that even though the metadata states that the PSD may be present,
@@ -1455,10 +1457,10 @@ def set_detector(bt7, dataset, detector_name, data_name):
             curr_detector = dataset.metadata[data_name][nx]
             data[:, nx, 0] = np.array(dataset.data[curr_detector], 'Float64')
 
-        setattr(getattr(bt7.detectors, detector_name).measurement, 'x', np.copy(data))
-        setattr(getattr(bt7.detectors, detector_name).measurement, 'variance', np.copy(data))
+        setattr(getattr(tas.detectors, detector_name).measurement, 'x', np.copy(data))
+        setattr(getattr(tas.detectors, detector_name).measurement, 'variance', np.copy(data))
     else:
-        delattr(bt7.detectors, detector_name)  #We were lied to by ICE and this detector isn't really present...
+        delattr(tas.detectors, detector_name)  #We were lied to by ICE and this detector isn't really present...
 
 
 
@@ -2048,6 +2050,11 @@ def filereader(filename, friendly_name=None):
     translate(instrument, mydata)
     return instrument
 
+def chalk_filereader(filename):
+    instrument = TripleAxis()
+    translate(instrument, mydata)    
+    return instrument
+
 
 #NOT WORKING! can't pass TAS object in subprocess.call()
 def run_bumps(tas, store_dir, fit="dream", burn=500, steps=1000, init="eps"):
@@ -2273,7 +2280,6 @@ if __name__ == "__main__":
         #run_bumps(joinedtas, '../../../WilliamData/BumpsResults')
 
     if 1:
-        instrument = TripleAxis()
         bg = filereader(r'../../../yee/WilliamData/meshm001.bt9')
         signal = filereader(r'../../../yee/WilliamData/meshm002.bt9')
         m = uncertainty.Measurement([5.0, 3.0], [5.0, 2.0])
@@ -2281,5 +2287,9 @@ if __name__ == "__main__":
         
         print 'subtracted!'
         
+    if 0:
+        #testing loading of .aof and .acf files
+        instrument = TripleAxis()
+        readchalk.readruns()
         
     print 'Finished local test.'

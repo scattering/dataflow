@@ -371,7 +371,7 @@ class datareader(object):
                         if not(lineStr):
                                 break
                         if lineStr[0] != "#":
-                                count=count+1
+                                count=count + 1
                                 strippedLine=lineStr.rstrip().lower()
                                 tokenized=strippedLine.split()
                                 for i in range(len(tokenized)):
