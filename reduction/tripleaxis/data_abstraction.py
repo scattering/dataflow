@@ -750,6 +750,7 @@ class TripleAxis(object):
         self.meta_data = IceMetaData()
         self.apertures = Apertures()
         self.temperature = Temperature()
+        self.magnetic_field = MagneticField()
 
         self.analyzer_blades = Blades(title='analyzer', nblades=8)
         self.num_bins = 0
@@ -1000,6 +1001,12 @@ def translate(tas, dataset):
     translate_metadata(tas, dataset)
     translate_detectors(tas, dataset)
 
+
+def translate_magnetic_field(tas, dataset):
+    translate_dict = {}
+    translate_dict['magnetic_field'] = 'magnetic_field'
+    map_motors(translate_dict, tas, tas.magnetic_field, dataset)
+    
 def translate_monochromator(tas, dataset):
     translate_dict = {}
     #key--> on bt7
