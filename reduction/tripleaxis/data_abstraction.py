@@ -567,8 +567,11 @@ class MagneticField(object):
     def __init__(self):
         self.magnetic_field = SampleEnvironment('magnetic_field', values=None, err=None, units='Tesla', isDistinct=True,
                                                 isInterpolatable=True)
-
-
+    '''    
+    def __iter__(self):
+        for key, value in self.__dict__.iteritems():
+            yield value
+    '''
 
 
 
@@ -716,6 +719,8 @@ class PolarizedBeam(object):
         self.vsample = Motor('vsample', values=None, err=None, units='amps', isDistinct=False) #vertical current
         self.sample_guide_field_rotatation = Motor('sample_guide_field_rotatation', values=None, err=None, units='degrees', isDistinct=False)
         self.flipper_state = Motor('flipper_state', values=None, err=None, units='', isDistinct=False) #short hand, can be A,B,C, etc.
+        self.eta = Motor('eta', values=None, err=None, units='', isDistinct=False) # orient1 coefficient
+        self.dbhf = Motor('zeta', values=None, err=None, units='', isDistinct=False) # orient2 coefficient
     def __iter__(self):
         for key, value in self.__dict__.iteritems():
             yield value
@@ -1000,6 +1005,8 @@ def translate(tas, dataset):
     translate_time(tas, dataset)
     translate_metadata(tas, dataset)
     translate_detectors(tas, dataset)
+    
+    translate_magnetic_field(tas, dataset)
 
 
 def translate_magnetic_field(tas, dataset):
@@ -1126,6 +1133,25 @@ def translate_polarized_beam(tas, dataset):
     translate_dict['flipper_state'] = 'flip'
     translate_dict['hsample'] = 'hsample'
     translate_dict['vsample'] = 'vsample'
+    translate_dict['eta'] = 'eta'
+    translate_dict['zeta'] = 'zeta'
+    
+    # if the field is > 0 then we consider the flipper on and the beam negative/minus (m)
+    # otherwise, if the field == 0 then the flipper is off and beam is potitive (p)
+    # chalk river filename will have the associated p/m combination for the diffracted beam
+    # and scattered beam 
+    translate_dict['dbhf'] = 'dbhf' # diffracted beam horizontal field
+    translate_dict['dbvf'] = 'dbvf' # diffracted beam vertical field
+    translate_dict['sbvf'] = 'sbvf' # scattered beam vertical field
+    translate_dict['sbhf'] = 'sbhf' # scattered beam horizontal field
+    
+    # chalk river has a set of horizontal coils (a,c,b) and a veritcal coil (top, bottom)
+    # that are used to produce the magnetic field. Currents are recorded. 
+    translate_dict['ihfa'] = 'ihfa' # current horizontal field a
+    translate_dict['ihfb'] = 'ihfb' # current horizontal field b
+    translate_dict['ihfc'] = 'ihfc' # current horizontal field c
+    translate_dict['ivfb'] = 'ivfb' # current vertical field bottom (of coil)
+    translate_dict['ivft'] = 'ivft' # current vertical field top (of coil)        
 
     map_motors(translate_dict, tas, tas.polarized_beam, dataset)
     #map_motors(translate_dict, bt7.polarized_beam, dataset)
@@ -1193,20 +1219,22 @@ def translate_physical_motors(tas, dataset):
     translate_dict['h'] = 'qx'
     translate_dict['k'] = 'qy'
     translate_dict['l'] = 'qz'
-    translate_dict['e'] = 'e'
+    translate_dict['e'] = 'e'   
     map_motors(translate_dict, tas, tas.physical_motors, dataset)
     #map_motors(translate_dict,bt7.physical_motors,dataset)
-
-    if dataset.metadata['efixed'] == 'ei':
-        tas.physical_motors.ei.measurement.x = np.ones(np.array(dataset.data['e']).shape) * dataset.metadata['ei']
-        tas.physical_motors.ei.measurement.variance = None
-        tas.physical_motors.ef = tas.physical_motors.ei.measurement - tas.physical_motors.e.measurement
-        #our convention is that Ei=Ef+delta_E (aka omega)
-    else:
-        tas.physical_motors.ef.measurement.x = np.ones(np.array(dataset.data['e']).shape) * dataset.metadata['ef']
-        tas.physical_motors.ef.measurement.variance = None
-        tas.physical_motors.ei.measurement.x = tas.physical_motors.ef.measurement.x + tas.physical_motors.e.measurement.x  #punt for now, later should figure out what to do if variance is None
-
+    
+    try:
+        if dataset.metadata['efixed'] == 'ei':
+            tas.physical_motors.ei.measurement.x = np.ones(np.array(dataset.data['e']).shape) * dataset.metadata['ei']
+            tas.physical_motors.ei.measurement.variance = None
+            tas.physical_motors.ef = tas.physical_motors.ei.measurement - tas.physical_motors.e.measurement
+            #our convention is that Ei=Ef+delta_E (aka omega)
+        else:
+            tas.physical_motors.ef.measurement.x = np.ones(np.array(dataset.data['e']).shape) * dataset.metadata['ef']
+            tas.physical_motors.ef.measurement.variance = None
+            tas.physical_motors.ei.measurement.x = tas.physical_motors.ef.measurement.x + tas.physical_motors.e.measurement.x  #punt for now, later should figure out what to do if variance is None
+    except:
+        pass
     try:
         Ei = tas.physical_motors.ei.measurement
         Ef = tas.physical_motors.ef.measurement
@@ -1407,7 +1435,10 @@ def translate_detectors(tas, dataset):
         tas.detectors.primary_detector.measurement.variance = np.array(dataset.data['counts'], 'Float64')	
 
     tas.detectors.primary_detector.dimension = [len(tas.detectors.primary_detector.measurement.x), 1]
-    tas.detectors.detector_mode = dataset.metadata['analyzerdetectormode']
+    try:
+        tas.detectors.detector_mode = dataset.metadata['analyzerdetectormode']
+    except:
+        pass
 
 
     #later, I should do something clever to determine how many detectors are in the file,
@@ -1685,7 +1716,6 @@ def join(tas_list):
                     else:
                         not_distinct.append(blade)
             else:
-                print "hi"
                 for field in value:
                     obj = getattr(tas2, key)
                     field.measurement.join(getattr(obj, field.name).measurement)
@@ -2057,10 +2087,16 @@ def filereader(filename, friendly_name=None):
     translate(instrument, mydata)
     return instrument
 
-def chalk_filereader(filename):
-    instrument = TripleAxis()
-    translate(instrument, mydata)    
-    return instrument
+def chalk_filereader(aof_filename, orient1, orient2, acf_filename=None):
+    
+    mydata = readchalk.readruns(aof_filename, orient1, orient2, acf_file=acf_filename)
+    
+    instrument_list = []
+    for i in range(len(mydata)):
+        instrument = TripleAxis()
+        translate(instrument, mydata[i])
+        instrument_list.append(instrument)
+    return instrument_list
 
 
 #NOT WORKING! can't pass TAS object in subprocess.call()
@@ -2286,7 +2322,7 @@ if __name__ == "__main__":
         #temp = np.genfromtxt("datatest1.txt")
         #run_bumps(joinedtas, '../../../WilliamData/BumpsResults')
 
-    if 1:
+    if 0:
         bg = filereader(r'../../../yee/WilliamData/meshm001.bt9')
         signal = filereader(r'../../../yee/WilliamData/meshm002.bt9')
         m = uncertainty.Measurement([5.0, 3.0], [5.0, 2.0])
@@ -2294,9 +2330,15 @@ if __name__ == "__main__":
         
         print 'subtracted!'
         
-    if 0:
+    if 1:
         #testing loading of .aof and .acf files
-        instrument = TripleAxis()
-        readchalk.readruns()
+        aof_filename = r'chalk_data/WRBFOB.AOF'
+        acf_filename = r'chalk_data/WRBFOB.ACF'
+        orient1 = [1, -1, 0]
+        orient2 = [1, 1, 1]
+        instrument_list = chalk_filereader(aof_filename, orient1, orient2, acf_filename=None)
+        
+        joinedtas = join(instrument_list)
+        print 'read chalk'
         
     print 'Finished local test.'

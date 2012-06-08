@@ -24,10 +24,10 @@ def construct_translate_dict():
     #translate_dict['point'] = 
     translate_dict['sig'] = 'detector' # signal counts
 
-    translate_dict['dbhf'] = 'diffracted_beam_horizontal_field'
-    translate_dict['dbvf'] = 'diffracted_beam_vertical_field'
-    translate_dict['sbvf'] = 'scattering_beam_vertical_field'
-    translate_dict['sbhf'] = 'scattering_beam_horizontal_field'
+    #translate_dict['dbhf'] = 'diffracted_beam_horizontal_field'
+    #translate_dict['dbvf'] = 'diffracted_beam_vertical_field'
+    #translate_dict['sbvf'] = 'scattering_beam_vertical_field'
+    #translate_dict['sbhf'] = 'scattering_beam_horizontal_field'
 
     translate_dict['2tm'] = 'a2' # two theta monochromator
     translate_dict['psi'] = 'a3' # theta sample 
@@ -43,8 +43,8 @@ def construct_translate_dict():
     translate_dict['det'] = 'eta_step'
     translate_dict['dze'] = 'zeta_step'
     translate_dict['dnu'] = 'energy_step'
-    #translate_dict['dspace_anax'] = 'analyzer_dspacing'
-    #translate_dict['dspace_monox'] = 'monochromator_dspacing'
+    #translate_dict['dspace_anax'] = 'analyzer_dspacing' #hardcoding in this name already
+    #translate_dict['dspace_monox'] = 'monochromator_dspacing' #hardcoding in this name already
     translate_dict['eprim'] = 'e' #Energy of the incident beam (THz)--> should convert to meV
     
     translate_dict['eta'] = 'eta'
@@ -56,11 +56,11 @@ def construct_translate_dict():
     #translate_dict['file']
     #translate_dict['hhconst']
     #translate_dict['hhihf']
-    translate_dict['ihfa'] = 'current_horizontal_coil_a'
-    translate_dict['ihfb'] = 'current_horizontal_coil_b'
-    translate_dict['ihfc'] = 'current_horizontal_coil_c'    
-    translate_dict['ivfb'] = 'current_vertical_coil_bottom' 
-    translate_dict['ivft'] = 'current_vertical_coil_top' 
+    #translate_dict['ihfa'] = 'current_horizontal_coil_a'
+    #translate_dict['ihfb'] = 'current_horizontal_coil_b'
+    #translate_dict['ihfc'] = 'current_horizontal_coil_c'
+    #translate_dict['ivfb'] = 'current_vertical_coil_bottom' 
+    #translate_dict['ivft'] = 'current_vertical_coil_top' 
     
     #translate_dict['kprim'] 
     translate_dict['mfield'] = 'magnetic_field'
@@ -79,8 +79,22 @@ def construct_translate_dict():
     #translate_dict['seq']
     translate_dict['stemp'] = 'temp'
     #translate_dict['time']
-    
-    
+
+def translate_fields(metadata, data):
+    """
+    given dictionaries of metadata and data, translates the keys based on
+    the translate_dict to give them the name used in data_abstraciton's
+    TripleAxis object translations.
+    """
+    if translate_dict == {}:
+        construct_translate_dict()
+    for key in translate_dict.keys():
+        if metadata.has_key(key):
+            metadata[translate_dict[key]] = metadata[key]
+            del metadata[key]
+        if data.has_key(key):
+            data[translate_dict[key]] = data[key]
+            del data[key]
     
 
 def get_tokenized_line(myfile, returnline=None):
@@ -135,17 +149,31 @@ def metawrapper(metadata,key,value):
         metadata[key]=[]
         metadata[key].append(value)
 
-def readacf(myfilestr, preread_data_list):
-    return readaof(myfilestr, preread_data_list=preread_data_list)
+def readacf(myfilestr, orient1, orient2, preread_data_list):
+    """
+    Reads in a .acf file. See readaof(...). Requires a .aof file to be read in first,
+    hence required preread_data_list.
+    """
+    return readaof(myfilestr, orient1, orient2, preread_data_list=preread_data_list)
 
-def readaof(myfilestr, preread_data_list=None):
+def readaof(myfilestr, orient1, orient2, preread_data_list=None):
+    """
+    Reads data from a chalk river .acf or .aof file.
+    Returns data_list, a list of dictionaries: [metadata, data]
+    
+    myfilestr --> provided .aof or .acf file
+    orient1 --> first basis vector (list/array/tuple) with [h,k,l] indices
+    orient2 --> second basis vector (list/array/tuple) with [h,k,l] indices
+    preread_data_list --> if readaof was previously called on a file, its data 
+                          can be passed back in here and myfilestr's data will
+                          be appended to it. (e.g. load a .aof then a .acf)
+    """    
     myfile = open(myfilestr,'r')
-    fileName, fileExt = os.path.splitext(myfilestr)
-    #fileName = fileName.lower()
+    fileName, fileExt = os.path.splitext(os.path.basename(myfilestr))
     fileExt = fileExt.lower()
     
     myFlag=True
-    data_list = [] # list of lists of [data, metadata] for each run to be translated  
+    data_list = [] # list of lists of [metadata, data] for each run to be translated  
                    # into Data objects then intoTripleAxis objects
     #point_lines = 0
     #curr_run = 0
@@ -183,31 +211,7 @@ def readaof(myfilestr, preread_data_list=None):
                 break
         else:
         '''
-        # For the first line in a run
-        if returnline[0].find('=')<0 and not tokenized[0]=='point':
-            for i in range(0, len(tokenized)-1, 2):
-                field = tokenized[i].lower()
-                if field == 'run':
-                    if fileExt == '.acf':
-                        run_num = tokenized[i + 1]
-                        data = preread_data_list[run_num - 1][0]
-                        metadata = preread_data_list[run_num - 1][1]
-                        
-                    else:
-                        data={}
-                        metadata={}
-                        filestring = fileName + "_run" + repr(tokenized[i+1]) # creating filename - still need to append channel
-                        metadata['temperature_units'] = 'K' # setting temperature to Kelvin by default.
-                        metadata[field] = tokenized[i+1]
-                elif field == 'date':
-                    date_info = tokenized[i+1].split('-')
-                    metadata['day'] = date_info[0]
-                    metadata['month'] = date_info[1]
-                    metadata['year'] = date_info[2]
-                    metadata['start_time'] = tokenized[-1]
-                else:
-                    metadata[field] = tokenized[i+1]
-        
+
         # TODO BEGIN: get back to this with Mon_[] and add name/comment to metadata
         i=0
         while i < len(tokenized)-1:
@@ -248,7 +252,7 @@ def readaof(myfilestr, preread_data_list=None):
             continue
         
         if tokenized[0]=='monox':
-            if fileExt=='.acf':
+            if fileExt=='.aof':
                 #WARNING: if "[value]" has value large enough to take up space allotted between
                 # the braces [], the indices will be incorrect!!!
                 # Currently values have a space between "[" and first value. e.g. "[ 3.12345]#"
@@ -258,10 +262,33 @@ def readaof(myfilestr, preread_data_list=None):
                 metadata['analyzer_dspacing'] = tokenized[8].split(']')[0] #dspace_anax
             continue
             
-        if tokenized[0].lower()=="#Date".lower():
-            pass                    
-
-        
+        # For the first line in a run
+        if returnline[0].find('=')<0 and not tokenized[0]=='point':
+            for i in range(0, len(tokenized)-1, 2):
+                field = tokenized[i].lower()
+                if field == 'run':
+                    if fileExt == '.acf':
+                        # load in preivous .aof data_list
+                        run_num = int(tokenized[i + 1])
+                        metadata = preread_data_list[run_num - 1][0]
+                        data = preread_data_list[run_num - 1][1] 
+                    else:
+                        data={}
+                        metadata={}
+                        filestring = fileName + "_run" + repr(int(tokenized[i+1])) # creating filename - still need to append channel
+                        metadata['temperature_units'] = 'K' # setting temperature to Kelvin by default.
+                        metadata['orient1'] = {'h': orient1[0], 'k': orient1[1], 'l': orient1[2]}
+                        metadata['orient2'] = {'h': orient2[0], 'k': orient2[1], 'l': orient2[2]}
+                        metadata[field] = int(tokenized[i+1])
+                elif field == 'date':
+                    date_info = tokenized[i+1].split('-')
+                    metadata['day'] = date_info[0]
+                    metadata['month'] = date_info[1]
+                    metadata['year'] = date_info[2]
+                    metadata['start_time'] = tokenized[-1]
+                else:
+                    metadata[field] = tokenized[i+1]
+           
         if returnline[0].lower().find('point')>=0:
             if fileExt == '.aof': # .aof files have two lines of headers
                 first_headers = get_column_headings(tokenized)
@@ -287,19 +314,20 @@ def readaof(myfilestr, preread_data_list=None):
                     break 
                 else:
                     # read in polarized beam channels
-                    # only .aof files will have len(first_headers)>0
-                    for i in range(len(first_headers)):
-                        field = first_headers[i]
-                        if data.has_key(field):
-                            data[field].append(float(tokenized[i]))
-                        else:
-                            data[field] = [float(tokenized[i])]
+                    # only .aof files will have (first_headers)
+                    if fileExt == '.aof':
+                        for i in range(len(first_headers)):
+                            field = first_headers[i]
+                            if data.has_key(field):
+                                data[field].append(float(tokenized[i]))
+                            else:
+                                data[field] = [float(tokenized[i])]
                     
                     currpoint = tokenized[0]
                     prevpoint = tokenized[0]
                     polarized_flag = True
                     
-                    # if data is on one line, this loops should always go ONE time only
+                    # if data is on one line, this loop should always go ONE time only
                     while polarized_flag:
                         tokenized = get_tokenized_line(myfile, returnline=returnline)
                         if tokenized == [] or tokenized == None:
@@ -308,7 +336,7 @@ def readaof(myfilestr, preread_data_list=None):
                         currpoint = tokenized[0]
                         
                         if currpoint == prevpoint:
-                            if currpoint == 1:
+                            if int(currpoint) == 1:
                                 #first time through, determine channel
                                 #WARNING: assumes that the channel will NOT change during a run
                                 '''
@@ -346,11 +374,12 @@ def readaof(myfilestr, preread_data_list=None):
                             for i in range(len(second_headers)):
                                 field = second_headers[i]
                                 if not (i == 1 and  i == 3 and fileExt == '.acf'):
-                                     # don't recopy dbhf (i=1) and sbhf (i=3) --> already there from .aof
-                                    if data.has_key(field):
+                                    # don't recopy dbhf (i=1) and sbhf (i=3) --> already there from .aof
+                                    try:
                                         data[field].append(float(tokenized[i]))
-                                    else:
+                                    except:
                                         data[field] = [float(tokenized[i])]
+
                                             
                         else:
                             polarized_flag=False
@@ -404,7 +433,7 @@ def insert(source,idx,inserted):
     return 
 
 
-def readruns(aof_file, acf_file=None):
+def readruns(aof_file, orient1, orient2, acf_file=None):
     """
     Reads data from a .aof file (and possibly a .acf file for polarized beam).
     Stores the data in format similar to that of other readers by producing a
@@ -412,14 +441,17 @@ def readruns(aof_file, acf_file=None):
     """
 
     myfilestr = aof_file
-    data_list = readaof(myfilestr)
-
-    myfilestr = acf_file
-    data_list = readaof(myfilestr, preread_data_list=data_list)
+    data_list = readaof(myfilestr, orient1, orient2)
+    
+    if acf_file:
+        myfilestr = acf_file
+        data_list = readaof(myfilestr, orient1, orient2, preread_data_list=data_list)
     
     #metadata['sha1']=['sha123']
+
     mydata = []
     for i in range(len(data_list)):
+        translate_fields(data_list[i][0], data_list[i][1])
         mydata.append(Data(data_list[i][0], data_list[i][1]))
     
     return mydata
