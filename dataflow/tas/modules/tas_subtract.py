@@ -17,7 +17,7 @@ def subtract_module(id=None, datatype=None, action=None,
         'image': config.IMAGES + 'TAS/subtract.png',
         'width': 'auto', 
         'terminals': {
-            'signal': (-12, 14, -1, 0),
+            'signal': (-12, 15, -1, 0),
             'background': (-12, 18, -1, 0),
             'output': (48, 16, 1, 0),
         }

@@ -3,6 +3,7 @@ import uncertainty, err1d
 
 import readncnr4 as readncnr
 import readchalk as readchalk
+import readhfir as readhfir
 
 from formatnum import format_uncertainty
 import copy, simplejson, pickle
@@ -1064,7 +1065,10 @@ def translate_monochromator(tas, dataset):
 
 
 def translate_analyzer(tas, dataset):
-    tas.analyzer.dspacing = dataset.metadata['analyzer_dspacing']
+    try:
+        tas.analyzer.dspacing = dataset.metadata['analyzer_dspacing']
+    except:    
+        pass
     if dataset.metadata.has_key('analyzerfocusmode'):
         tas.analyzer.focus_mode = dataset.metadata['analyzerfocusmode']
     analyzer_blades = Blades(title='analyzer', nblades=13)
@@ -1397,6 +1401,7 @@ def translate_metadata(tas, dataset):
     translate_dict['user'] = 'user'
     translate_dict['scan_description'] = 'scan_description'
     translate_dict['desired_npoints'] = 'npoints'
+    translate_dict['ubmatrix'] = 'ubmatrix'
 
     map_motors(translate_dict, tas, tas.meta_data, dataset)
     #ap_motors(translate_dict,tas.meta_data,dataset)
@@ -2098,6 +2103,12 @@ def chalk_filereader(aof_filename, orient1, orient2, acf_filename=None):
         instrument_list.append(instrument)
     return instrument_list
 
+def hfir_filereader(filename):
+    mydata = readhfir.readfile(filename)
+    instrument = TripleAxis()
+    translate(instrument, mydata)
+    return instrument
+
 
 #NOT WORKING! can't pass TAS object in subprocess.call()
 def run_bumps(tas, store_dir, fit="dream", burn=500, steps=1000, init="eps"):
@@ -2330,7 +2341,7 @@ if __name__ == "__main__":
         
         print 'subtracted!'
         
-    if 1:
+    if 0:
         #testing loading of .aof and .acf files
         aof_filename = r'chalk_data/WRBFOB.AOF'
         acf_filename = r'chalk_data/WRBFOB.ACF'
@@ -2340,5 +2351,13 @@ if __name__ == "__main__":
         
         joinedtas = join(instrument_list)
         print 'read chalk'
+        
+        
+    if 1: 
+        # testing load for hfir files
+        myfilestr = r'hfir_data/HB3/exp331/Datafiles/HB3_exp0331_scan0001.dat'
+        tas = hfir_filereader(myfilestr)
+        
+        print 'read hfir'
         
     print 'Finished local test.'

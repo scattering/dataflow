@@ -15,7 +15,7 @@
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
    sodipodi:docname="Subtract.svg"
-   inkscape:export-filename="/home/alex/Desktop/dataflow/static/img/TAS/join.png"
+   inkscape:export-filename="/home/dataflow/static/img/TAS/subtract.png"
    inkscape:export-xdpi="13.840069"
    inkscape:export-ydpi="13.840069">
   <defs
@@ -29,7 +29,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="0.49497475"
      inkscape:cx="385.17725"
-     inkscape:cy="742.85894"
+     inkscape:cy="581.23453"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -49,7 +49,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -69,7 +69,7 @@
        xml:space="preserve"
        id="flowRoot2987-7"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       transform="matrix(1.0059505,0,0,0.96229963,120.97104,-49.447051)"><flowRegion
+       transform="matrix(1.0059505,0,0,0.96229963,118.95073,-81.771932)"><flowRegion
          id="flowRegion2989-8"><rect
            id="rect2991-5"
            width="256.88055"
@@ -78,15 +78,33 @@
            y="341.69128"
            ry="0" /></flowRegion><flowPara
          id="flowPara2993-8"
-         style="font-size:56.91733551px">Subtract</flowPara></flowRoot>    <rect
-       style="fill:#1a1a1a"
-       id="rect3287"
-       width="230.31477"
-       height="30.85556"
-       x="260.61935"
-       y="455.98422"
-       ry="15.42778" />
-  </g>
+         style="font-size:56.91733551px">Subtract</flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3081"
+       style="font-size:64px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"><flowRegion
+         id="flowRegion3083"><rect
+           id="rect3085"
+           width="50.507641"
+           height="282.84271"
+           x="200.01018"
+           y="316.97113"
+           ry="0"
+           style="font-size:64px" /></flowRegion><flowPara
+         id="flowPara3089">a</flowPara><flowPara
+         id="flowPara3091" /><flowPara
+         id="flowPara3093">b</flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3097"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       transform="translate(-4.0406102,6.0609152)"><flowRegion
+         id="flowRegion3099"><rect
+           id="rect3101"
+           width="159.60414"
+           height="98.994934"
+           x="428.30466"
+           y="385.6615" /></flowRegion><flowPara
+         id="flowPara3103"
+         style="font-size:64px">a - b</flowPara></flowRoot>  </g>
   <g
      inkscape:groupmode="layer"
      id="layer3"

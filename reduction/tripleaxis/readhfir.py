@@ -1,4 +1,4 @@
-import numpy as N
+import numpy as np
 #import pylab
 import datetime
 from time import mktime
@@ -16,15 +16,15 @@ def construct_translate_dict():
     
     #translate_dict['pt.'] = 
     translate_dict['sgu'] = 'sample_upper_tilt'
-    #translate_dict['time'] = 
+    translate_dict['time'] = 'duration'
     #translate_dict['detector'] = 
     #translate_dict['monitor'] = 
 
-    
+    '''
     #??? what are these fields???
     translate_dict['mcu'] = 
     translate_dict['focal_length'] = 
-    translate_dict['m1'] =     
+    translate_dict['m1'] = 
     translate_dict['m2'] = 
     translate_dict['mcrystal'] = 
     translate_dict['marc'] = 
@@ -32,7 +32,7 @@ def construct_translate_dict():
     translate_dict['mfocus'] = 
     translate_dict['s1'] = 
     translate_dict['s2'] = 
-    
+    '''
     translate_dict['sgl'] = 'sample_lower_tilt'
     translate_dict['stl'] = 'sample_lower_translation'
     translate_dict['stu'] = 'sample_upper_translation'
@@ -48,7 +48,23 @@ def construct_translate_dict():
     #translate_dict['e'] = 
     #translate_dict['coldtip'] = 
     
- 
+    #NOTE: hfir files have these axes for 2D plotting, whereas dataflow uses it for 3D
+    # if these below are uncommented, translate_fields must check metadata to replace keys
+    # and incorporate them into data_abstraction's translate()
+    #translate_dict['def_x'] = 'xaxis'
+    #translate_dict['def_y'] = 'yaxis'
+    
+def translate_fields(data):
+    """
+    Given a data dictionary, translates field names based on the translate_dict
+    """
+    if translate_dict == {}:
+        construct_translate_dict()
+
+    for key in translate_dict.keys():
+        if data.has_key(key):
+            data[translate_dict[key]] = data[key]
+            del data[key]
     
 def get_tokenized_line(myfile,returnline=['']):
     lineStr = myfile.readline()
@@ -57,27 +73,6 @@ def get_tokenized_line(myfile,returnline=['']):
     tokenized = strippedLine.split()
 
     return tokenized
-
-
-
-def readcolumns(myfile):
-    columndict,columnlist=get_columnmetadatas(myfile)
-    # get the names of the fields
-    #prepare to read the data
-    count =  0
-    while 1:
-        lineStr = myfile.readline()
-        if not(lineStr):
-            break
-        if lineStr[0] != "#":
-            count=count+1
-            strippedLine=lineStr.rstrip().lower()
-            tokenized=strippedLine.split()
-            for i in range(len(tokenized)):
-                field=columnlist[i]
-                columndict[field].append(float(tokenized[i]))
-    return columndict,columnlist
-
 
 def get_columnmetadatas(tokenized, data):
     # initializes all fields in data to empty lists.
@@ -90,24 +85,36 @@ def get_columnmetadatas(tokenized, data):
         
     return columnlist
 
-
+def convert_time(values):
+    # converts times from am/pm to the 24 hour timescale
+    time_info = values.split(' ')
+    times = time_info[0].split(':')
+    if time_info[1].lower() == 'pm' and not int(times[0]) == 12:
+        times[0] += 12
+    elif time_info[1].lower() == 'am' and int(times[0]) == 12:
+        times[0] = 0
+        
+    return times
 
 def readfile(myfilestr):
     #get first line
     myFlag = True
-    header = []
     returnline = ['']
     
-    myfile = open(myfilestr)
+    myfile = open(myfilestr, 'r')
     data = {}
     metadata = {}
 
     while myFlag:
         tokenized = get_tokenized_line(myfile, returnline=returnline)
-        if tokenized == []:
-            tokenized = ['']
+        if not tokenized:
+            break
+        elif tokenized == [] or tokenized == ['']:
+            #TODO check that this is necessary
+            continue #skip blank lines
             
-        if tokenized[1] == 'pt.':
+        if tokenized[1].lower() == 'col_headers':
+            tokenized = get_tokenized_line(myfile, returnline=returnline)
             columnlist = get_columnmetadatas(tokenized, data)
             
             while 1:
@@ -122,28 +129,61 @@ def readfile(myfilestr):
                     for i in range(len(tokenized)):
                         field = columnlist[i]
                         data[field].append(float(tokenized[i]))
-            myFlag = False
-    if len(columndict[columnlist[0]]) == 0:
-        columndict={}
-        columnlist=[]
-        #This is a drastic step, but if the file is empty, then no point in even recording the placeholders
+            
+        else: #if not column headers or the actual data lines, then it's metadata
+            field = tokenized[1]
+            line = returnline[-1]
+            
+            #if tokenized[2] == '=':
+            values = line.split('=')[1].strip() # everything right of the '='
+            
+            if field == 'time':
+                time_value = convert_time(values)
+                metadata['start_time'] = time_value
+            elif field == 'date':
+                date_info = values.split('/')
+                metadata['month'] = date_info[0]
+                metadata['day'] = date_info[1]
+                metadata['year'] = date_info[2]
+            elif field == 'latticeconstants': #make dictionary of a,b,c,alpha,beta,gamma
+                values = values.split(',')
+                lattice_dict = {'a': float(values[0]), 'b': float(values[1]), 'c': float(values[2]),
+                                'alpha': float(values[3]), 'beta': float(values[4]), 'gamma': float(values[5])}
+                metadata['lattice'] = lattice_dict
+            elif field == 'ubmatrix':
+                values = np.array(values.split(','), dtype='float64')
+                metadata[field] = values
+            elif field == 'plane_normal':
+                values = np.array(values.split(','), dtype='float64')
+                metadata[field] = values
+            elif field.lower() == 'sum': # Sum of Counts
+                pass
+            elif field.lower() == 'center': # Center of Mass
+                pass
+            elif field.lower() == 'full': # Full Width Half-Maximum
+                pass
+            elif tokenized[-1].lower() == 'completed.': # last line with time when scan was completed
+                myFlag = False # stop reading the file
+            else:
+                try:
+                    metadata[field] = float(values)
+                except:
+                    metadata[field] = values
 
-    data=Data()
-    data.header=deepcopy(header)
-    data.data=deepcopy(columndict)
-    data.metadata=deepcopy(metadata)
-    data.columnlist=deepcopy(columnlist)
-    data.additional_metadata=deepcopy(additional_metadata)
+    translate_fields(data)
+    data = Data(metadata, data)    
     return data
 
 
 class Data(object):
     def __init__(self):
-        self.header = []
         self.metadata = {}
         self.data = {}
-        self.columnlist = []
-        self.additional_metadata = {}
+        #self.columnlist = []
+        #self.additional_metadata = {}
+    def __init__(self, metadata, data):
+        self.metadata = metadata
+        self.data = data
 
 
 def num2string(num):
@@ -189,9 +229,7 @@ if __name__=='__main__':
         #print data.columnlist
         
     if 1:
-        metadata = {}
-        #file_list = genfiles([1,1])        
-        #data = readfile(file_list[0], metadata)
+        #file_list = genfiles([1,1])
         
         myfilestr = r'hfir_data/HB3/exp331/Datafiles/HB3_exp0331_scan0001.dat'
         data = readfile(myfilestr)

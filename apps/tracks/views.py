@@ -1,7 +1,3 @@
-# Create your views here.
-
-
-
 from django.shortcuts import render_to_response, render
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
@@ -393,7 +389,7 @@ def getCSV(request):
     result = ""
     result_list = get_csv(template, config, nodenum, terminal_id)
     for i, r in enumerate(result_list):
-        result += "#"*80 + "\n"
+        result += "#" * 80 + "\n"
         result += "# data set %d" % (i,) + "\n"
         result += "#" * 80 + "\n"
         result += r
@@ -502,7 +498,14 @@ def displayEditor(request):
         file_context['experiment_id'] = experiment_id
         # not using simplejson here because for some reason the old version of simplejson on danse
         # does not respect key order for OrderedDict.
-        file_context['language_actual'] = json.dumps(wireit.instrument_to_wireit_language(instrument_class_by_language[language_name]))
+        try:
+            file_context['language_actual'] = json.dumps(wireit.instrument_to_wireit_language(instrument_class_by_language[language_name]))
+        except:
+            #TODO 6/11/2012 - this redirects --> need to convert into popup if possible!
+            reply = HttpResponse('Remember to save changes first!')
+            reply.status_code = 500
+            return reply
+        
         return render_to_response('tracer_testingforWireit/editor.html', file_context, context_instance=context)
     else:
         return HttpResponseRedirect('/editor/langSelect/')
