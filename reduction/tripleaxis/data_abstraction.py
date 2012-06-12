@@ -42,7 +42,7 @@ to something plottable
 """
 
 # for purposes of iterating over a dictionary for a TripleAxis object, these fields are skipped
-skipped_fields=['data','meta_data','sample','sample_environment','xstep','ystep','num_bins']
+skipped_fields=['data','meta_data','sample','sample_environment','xstep','ystep','num_bins','magnetic_field']
 
 
 
@@ -721,7 +721,7 @@ class PolarizedBeam(object):
         self.sample_guide_field_rotatation = Motor('sample_guide_field_rotatation', values=None, err=None, units='degrees', isDistinct=False)
         self.flipper_state = Motor('flipper_state', values=None, err=None, units='', isDistinct=False) #short hand, can be A,B,C, etc.
         self.eta = Motor('eta', values=None, err=None, units='', isDistinct=False) # orient1 coefficient
-        self.dbhf = Motor('zeta', values=None, err=None, units='', isDistinct=False) # orient2 coefficient
+        self.zeta = Motor('zeta', values=None, err=None, units='', isDistinct=False) # orient2 coefficient
     def __iter__(self):
         for key, value in self.__dict__.iteritems():
             yield value
@@ -1159,6 +1159,10 @@ def translate_polarized_beam(tas, dataset):
 
     map_motors(translate_dict, tas, tas.polarized_beam, dataset)
     #map_motors(translate_dict, bt7.polarized_beam, dataset)
+    
+    # if zeta and eta are not defined/given, then calculate them from h,k,l
+    #if tas.polarized_beam.eta.measurement.x == None and tas.polarized_beam.zeta.measurement.x == None:
+    #    project_into_scattering_plane(tas) 
 
     #bt7.polarized_beam.ei_flip=dataset.eiflip
     #bt7.polarized_beam.ef_flip=dataset.efflip
@@ -1282,9 +1286,9 @@ def translate_filters(tas, dataset):
     #translate_dict['hkl']='hkl'
     #In older versions, we cannot trust h,k,l, hkl, etc. because we don't know if we went where we wanted. 
     #Should translate to magnitude of q before hand
-    translate_dict['filter_tilt'] = 'temp'
-    translate_dict['filter_translation'] = 'temperaturesensor1'
-    translate_dict['filter_rotation'] = 'temperaturesensor2'
+    translate_dict['filter_tilt'] = 'filtilt'
+    translate_dict['filter_translation'] = 'filtran'
+    translate_dict['filter_rotation'] = 'filrot'
     map_motors(translate_dict, tas, tas.filters, dataset)
     #map_motors(translate_dict,bt7.filters,dataset)
 
@@ -1604,6 +1608,13 @@ def establish_correction_coefficients(filename):
     return coefficients   
 
 
+def project_into_scattering_plane(tas):
+    """ 
+    Given h,k,l, orient1 and orient2, calculates eta and zeta.
+    """
+    pass
+    
+
 def make_orthonormal(o1, o2):
     """Given two vectors, creates an orthonormal set of three vectors. 
     Maintains the direction of o1 and the coplanarity of o1 and o2"""
@@ -1688,7 +1699,14 @@ def fit_plane(h, k, l, p0=None):
 
 
 def join(tas_list):
-    """Joins a list of TripleAxis objects"""
+    """
+    Joins a list of TripleAxis objects. 
+    
+    ASSUMPTION: the same number of points is recorded
+    along every data field that is relevant for determining duplicates. For intsance,
+    measuring 50 counts with 25 measurements of 'temp' and 25 measurements of 'qx, qy, qz'
+    cause errors in removing duplicates.
+    """
     #average all similar points
     #put all detectors on the same monitor, assumed that the first monitor is desired throughout
     joinedtas = tas_list[0]
@@ -2353,11 +2371,23 @@ if __name__ == "__main__":
         print 'read chalk'
         
         
-    if 1: 
+    if 0: 
         # testing load for hfir files
         myfilestr = r'hfir_data/HB3/exp331/Datafiles/HB3_exp0331_scan0001.dat'
         tas = hfir_filereader(myfilestr)
         
         print 'read hfir'
+    if 1:
+        # testing load for bt4 files
+        taslist = []
+        for i in range(1, 81):
+            if i < 10:     
+                tas = filereader(r'bt4_data/fbtse00%d.bt4' %i)
+            else:
+                tas = filereader(r'bt4_data/fbtse0%d.bt4' %i)
+            taslist.append(tas)
+        
+        instrument = join(taslist)
+        print 'done'
         
     print 'Finished local test.'
