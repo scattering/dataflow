@@ -18,13 +18,16 @@ from openopt import SNLE
 #Set up mode to use a single vector for "scattering plane mode" of triple axis
 #Make sure paths are continous
 #observations are h,k,l,ei,ef<--> a2, a6, a3,a4, chi, phi
+#Implement powder mode for tilt stage
+#use a,b,c explicitly so can constrain to orthorhombic, cubic, etc.
+#Refactor to use "a", "b" as stand-in for mu, nu, chi, phi??
 
 
 #Generally, we shall work in a left handed coordinate system, in which clockwise (CW) rotations are positive.
 #We shall define Q=ki-kf (as opposed to Q=kf-ki as used in Busing & Levy.
 #We shall have possitive energy tranfer for neutron energy loss, that is dE=Ei-Ef
 #For us, theta is theta_measured (aka Lumsden's 's')--that is, the actual rotation of the shaft about the z axis
-
+#Should we just call it a3???
 
 
 
@@ -61,13 +64,15 @@ def calc_tth_inelastic(ei,ef,q):
     """    
     ki=e_to_k(ei)
     kf=e_to_k(ef)
-    tth=np.arccos(-(q**2-ki**2-kf**2)/(2*ki*kf))
+    cos2t=-(q**2-ki**2-kf**2)/(2*ki*kf)
+    #if abs(cos2t) > 1, then scattering triangle doesn't close and we should raise an exception
+    tth=np.arccos(cos2t)
     return np.degrees(tth)
 
 
 def calc_th_inelastic(ei,ef,tth):
     """
-    Following the Lumsden formulation, calculate th.
+    Following the Lumsden formulation, calculate th.  Tth is given in radians
     """
     ki=e_to_k(ei)
     kf=e_to_k(ef)    
@@ -684,8 +689,176 @@ class UBCalcTilt(UBCalc):
         rmatrix=np.dot(np.dot(Omega,M),N)
         
         return rmatrix
+    def calc_u_phi(self,omega,mu,nu):
+            """
+            Calculates u_phi using the rmatrix, we will assume that the angles we are given are in degrees.
+            """
+            r_matrix=self.generate_rmatrix(omega,mu,nu)
+            u_phi=np.dot(np.linalg.inv(r_matrix),np.array([1.,0.,0.],'Float64'))
+            #u1p = np.array([np.cos(omega1)*np.cos(chi1)*np.cos(phi1) - np.sin(omega1)*np.sin(phi1),
+            #                   np.cos(omega1)*np.cos(chi1)*np.sin(phi1) + np.sin(omega1)*np.cos(phi1),
+            #                   np.cos(omega1)*np.sin(chi1)],'Float64')
+            #u2p = np.array([np.cos(omega2)*np.cos(chi2)*np.cos(phi2) - np.sin(omega2)*np.sin(phi2),
+            #               np.cos(omega2)*np.cos(chi2)*np.sin(phi2) + np.sin(omega2)*np.cos(phi2),
+            #               np.cos(omega2)*np.sin(chi2)],'Float64')
+            #u3p = np.cross(u1p, u2p)   
+            
+            #u1p = np.cos(omega)*np.cos(chi)*np.cos(phi) - np.sin(omega)*np.sin(phi)
+            #u2p = np.cos(omega)*np.cos(chi)*np.sin(phi) + np.sin(omega)*np.cos(phi)
+            #u3p = np.cos(omega)*np.sin(chi)    
+            return u_phi   
+        
+    def calc_R_plane(mu_plane, nu_plane,UB,Q_vec):
+        """Calculates R for a scattering plane with specified mu,nu
+        
+        """
+        # This is N^(-1)M^(-1) * [0,0,1]'
+        u_nu_perp=np.array([-np.sin(np.degrees(mu_plane)),
+                            np.cos(np.degrees(mu_plane))*np.sin(np.degrees(nu_plane)),
+                            np.cos(np.degrees(mu_plane))*np.cos(np.degrees(nu_plane))]
+                           ,'Float64')
+        Q_nu=np.dot(UB,Q_vec)
+        u_1_nu=Q_nu/np.linalg.norm(Q_nu)  #unit vector along q
+        u_2_nu=np.cross(u_nu_perp,u_1_nu)
+        
+        #There is a 
+        
+        t1_nu=u1_nu
+        t2_nu=u2_nu
+        t3_nu=np.cross(t1_nu, t2_nu)
+        T_nu=np.array([t1_nu, t2_nu,t3_nu],'Float64').T
+        #the t_i form the columns of the T matrix
+        R=np.linalg.inv(T_nu)
+        return R
+    
+    def calc_angles(mu_plane,nu_plane,UB,Q_vec,ei,ef):
+        """
+        Calculate the angles for the spectrometer.  mu_plane and nu_plane give the mu and nu for
+        the desired plane.  To keep the tilts flat, choose mu=nu=0.  The more general case is useful if
+        we try to keep the spectrometer close to the specified plane if for example, the first two orientation vectors
+        were slightly out of the plane.
+        """
+        
+        R=self.calc_R_plane(mu_plane, nu_plane,UB,Q_vec)
+        #Here, we will follow the approach of Mark Koennecke's tasub, rather than Mark Lumsden
+        #becasue using arctan2, we can determine the sign
+        #TODO:  check that the following are not inverted:
+        #sgu-->upper tilt-->nu_plane  
+        #sgl-->lower tilt-->mu_plane
+        
+        sgu=np.degrees(np.arctan2(R[2][1],R[2][2]))
+        
+        # R[2][1]= cos(sgl)sin(sgu)
+        # R[2][2]= cos(sgu)cos(sgl)
+        
+        om=np.degrees(np.arctan2(R[1][0],R[0][0]))
+        #R[1][0]= sin(om)cos(sgl)
+        #R[0][0]= cos(om)cos(sgl)
+        
+        sgl=np.degrees(np.arcsin(-R[2][0]))
+        
+        QC=np.dot(UB,Q_vec)
+        q=2.0*np.pi*np.linalg.norm(QC)
+        
+        tth=calc_tth_inelastic(ei,ef,q) #should multiply by scattering sense
+        theta=calc_th_inelastic(ei,ef,np.radians(tth))
+        a3=om+theta
+        
+        #next, check to make sure that a3 in [-180,180]
+        
+        a3=a3-180 #shift the whole range
+        if a3 < -180:
+            a3=a3+360
+        angles={}
+        angles['a3']=a3
+        angles['om']=om
+        angles['tth']=tth
+        angles['mu']=sgl
+        angles['nu']=sgu
+        return angles
+        
+        
+    def calcU(self,h1, k1, l1, h2, k2, l2, omega1, mu1, nu1, omega2, chi2, nu2, Bmatrix):
+            "Calculates the UB matrix using 2 sets of observations (h#, k#, l#) and their respective angle measurements in degrees (omega#, chi#, phi#)"
+            #Convertiung angles given in degrees to radians
+            #omega1 = np.radians(omega1)
+            #chi1 = np.radians(chi1)
+            #phi1 = np.radians(phi1)
+            #omega2 = np.radians(omega2)
+            #chi2 = np.radians(chi2)
+            #phi2 = np.radians(phi2)
+        
+            hmatrix1 = np.array([h1, k1, l1])
+            hmatrix2 = np.array([h2, k2, l2])
+            h1c = np.dot(Bmatrix, hmatrix1) 
+            h2c = np.dot(Bmatrix, hmatrix2)
+            h3c = np.cross(h1c, h2c)
+        
+            ''' Making the orthogonal unit-vectors t#c:
+           t1c is parallel to h1c
+           t3c is orthogonal to both t1c and t2c, and thus is parallel to h3c
+           t2c must be orthogonal to both t1c and t2c
+           '''
+            t1c = h1c / np.sqrt(np.power(h1c[0], 2) + np.power(h1c[1], 2) + np.power(h1c[2], 2))
+            t3c = h3c / np.sqrt(np.power(h3c[0], 2) + np.power(h3c[1], 2) + np.power(h3c[2], 2))
+            t2c = np.cross(t3c, t1c)
+            Tc = np.array([t1c, t2c, t3c]).T
+            #realU=np.array([[ -5.28548868e-01,   8.65056241e-17,  -6.63562568e-16],
+            #               [ -0.00000000e+00,   4.86909792e-01,   2.90030482e-16],
+            #               [  0.00000000e+00,   0.00000000e+00,  -1.26048191e-01]])
+        
+            #calculating u_phi 
+            
+            
+            #u1p = np.array([np.cos(omega1)*np.cos(chi1)*np.cos(phi1) - np.sin(omega1)*np.sin(phi1),
+            #              np.cos(omega1)*np.cos(chi1)*np.sin(phi1) + np.sin(omega1)*np.cos(phi1),
+            #               np.cos(omega1)*np.sin(chi1)],'Float64')
+            #u2p = np.array([np.cos(omega2)*np.cos(chi2)*np.cos(phi2) - np.sin(omega2)*np.sin(phi2),
+            #               np.cos(omega2)*np.cos(chi2)*np.sin(phi2) + np.sin(omega2)*np.cos(phi2),
+            #               np.cos(omega2)*np.sin(chi2)],'Float64')
+            u1p=self.calc_u_phi(omega1,mu1,nu1)
+            u2p=self.calc_u_phi(omega2,mu2,nu2)
+            u3p = np.cross(u1p, u2p)
+        
+            ''' Making orthogonal unit-vectors t#p
+           Tp should be exactaly superimposed on Tc
+           t#p is created the same way t#c was, except using u#p instead of h#c
+           '''
+            t1p = u1p / np.sqrt(u1p[0]**2 + u1p[1]**2 + u1p[2]**2)
+            t3p = u3p / np.sqrt(u3p[0]**2 + u3p[1]**2 + u3p[2]**2)
+            t2p = np.cross(t3p, t1p)
+            Tp = np.array([t1p, t2p, t3p],'Float64').T
+        
+            #calculating the UB matrix
+            Umatrix = np.dot(Tp, Tc.T) 
+            #UBmatrix = np.dot(Umatrix, Bmatrix)
+            return Umatrix    
 
 
+class StrategyFlatPlane(object):
+    def __init__(self):
+        pass
+    def calcIdealAngles(self,desiredh, chi, phi, UBmatrix, stars,ubcalc):
+        "Calculates the twotheta, theta, and omega values for a desired h vector. Uses chi and phi from calcScatteringPlane."
+        #Accepts the desired h vector, chi, phi, the UB matrix, the wavelength, and the stars dictionary
+    
+        desiredhp = np.dot(UBmatrix, desiredh[0:3])
+    
+        #Old code (scipy.optimize.fsolve) produced inaccurate results with far-off estimates
+        #solutions = scipy.optimize.fsolve(equations, x0, args=(h1p, h2p, wavelength)) 
+    
+        q = calcq (desiredh[0], desiredh[1], desiredh[2], stars)
+    
+        #twotheta = 2.0 * np.arcsin(wavelength * q / 4.0 / np.pi)
+    
+        ei=desiredh[3]
+        ef=desiredh[4]
+        #q=calc_q_inelastic(ei,ef,desiredh[0],desiredh[1],desiredh[2])
+        twotheta=calc_tth_inelastic(ei,ef,q)
+    
+        x0 = [0.0]
+        p = SNLE(self.secondequations, x0, args=(desiredhp, chi, phi, ei, twotheta,ubcalc))
+       
 
 
 
