@@ -1,0 +1,303 @@
+(************** Content-type: application/mathematica **************
+                     CreatedBy='Mathematica 5.2'
+
+                    Mathematica-Compatible Notebook
+
+This notebook can be used with any Mathematica-compatible
+application, such as Mathematica, MathReader or Publicon. The data
+for the notebook starts with the line containing stars above.
+
+To get the notebook into a Mathematica-compatible application, do
+one of the following:
+
+* Save the data starting with the line of stars above into a file
+  with a name ending in .nb, then open the file inside the
+  application;
+
+* Copy the data starting with the line of stars above to the
+  clipboard, then use the Paste menu command inside the application.
+
+Data for notebooks contains only printable 7-bit ASCII and can be
+sent directly in email or through ftp in text mode.  Newlines can be
+CR, LF or CRLF (Unix, Macintosh or MS-DOS style).
+
+NOTE: If you modify the data for this notebook not in a Mathematica-
+compatible application, you must delete the line below containing
+the word CacheID, otherwise Mathematica-compatible applications may
+try to use invalid cache data.
+
+For more information on notebooks and Mathematica-compatible 
+applications, contact Wolfram Research:
+  web: http://www.wolfram.com
+  email: info@wolfram.com
+  phone: +1-217-398-0700 (U.S.)
+
+Notebook reader applications are available free of charge from 
+Wolfram Research.
+*******************************************************************)
+
+(*CacheID: 232*)
+
+
+(*NotebookFileLineBreakTest
+NotebookFileLineBreakTest*)
+(*NotebookOptionsPosition[      7425,        232]*)
+(*NotebookOutlinePosition[      8070,        254]*)
+(*  CellTagsIndexPosition[      8026,        250]*)
+(*WindowFrame->Normal*)
+
+
+
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+    \(\(\(Cos[Pi]\)\(\ \)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(-1\)\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(\(\(PhiM = {{Cos[phi], Sin[phi], 0}, {\(-Sin[phi]\), Cos[phi], 
+            0}, \ \(\(\\\[IndentingNewLine]\)\(\[IndentingNewLine]\)\({0, 0, 
+              1}\)\)}\  // \ MatrixForm\)\(\[IndentingNewLine]\)
+    \)\)], "Input"],
+
+Cell[BoxData[
+    RowBox[{\(General::"spell1"\), \(\(:\)\(\ \)\), "\<\"Possible spelling \
+error: new symbol name \\\"\\!\\(PhiM\\)\\\" is similar to existing symbol \\\
+\"\\!\\(Phi\\)\\\". \\!\\(\\*ButtonBox[\\\"More\[Ellipsis]\\\", ButtonStyle->\
+\\\"RefGuideLinkText\\\", ButtonFrame->None, \
+ButtonData:>\\\"General::spell1\\\"]\\)\"\>"}]], "Message"],
+
+Cell[BoxData[
+    TagBox[
+      RowBox[{"(", "\[NoBreak]", GridBox[{
+            {\(Cos[phi]\), \(Sin[phi]\), "0"},
+            {\(-Sin[phi]\), \(Cos[phi]\), "0"},
+            {"0", "0", "1"}
+            },
+          RowSpacings->1,
+          ColumnSpacings->1,
+          ColumnAlignments->{Left}], "\[NoBreak]", ")"}],
+      Function[ BoxForm`e$, 
+        MatrixForm[ BoxForm`e$]]]], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(\(\(ChiM = \[IndentingNewLine]{{Cos[chi], 0, 
+            Sin[chi]}, \[IndentingNewLine]{0, 1, 
+            0}, \[IndentingNewLine]{\(-Sin[chi]\), 0, Cos[chi]}}\  // 
+        MatrixForm\)\(\[IndentingNewLine]\)\(\[IndentingNewLine]\)\(\
+\[IndentingNewLine]\)
+    \)\)], "Input"],
+
+Cell[BoxData[
+    RowBox[{\(General::"spell1"\), \(\(:\)\(\ \)\), "\<\"Possible spelling \
+error: new symbol name \\\"\\!\\(ChiM\\)\\\" is similar to existing symbol \\\
+\"\\!\\(PhiM\\)\\\". \\!\\(\\*ButtonBox[\\\"More\[Ellipsis]\\\", \
+ButtonStyle->\\\"RefGuideLinkText\\\", ButtonFrame->None, \
+ButtonData:>\\\"General::spell1\\\"]\\)\"\>"}]], "Message"],
+
+Cell[BoxData[
+    TagBox[
+      RowBox[{"(", "\[NoBreak]", GridBox[{
+            {\(Cos[chi]\), "0", \(Sin[chi]\)},
+            {"0", "1", "0"},
+            {\(-Sin[chi]\), "0", \(Cos[chi]\)}
+            },
+          RowSpacings->1,
+          ColumnSpacings->1,
+          ColumnAlignments->{Left}], "\[NoBreak]", ")"}],
+      Function[ BoxForm`e$, 
+        MatrixForm[ BoxForm`e$]]]], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(\(\(OmegaM = {{Cos[omega], Sin[omega], 
+            0}, \[IndentingNewLine]{\(-Sin[omega]\), Cos[omega], 
+            0}, \[IndentingNewLine]{0, 0, 1}}\  // 
+        MatrixForm\)\(\[IndentingNewLine]\)
+    \)\)], "Input"],
+
+Cell[BoxData[
+    TagBox[
+      RowBox[{"(", "\[NoBreak]", GridBox[{
+            {\(Cos[omega]\), \(Sin[omega]\), "0"},
+            {\(-Sin[omega]\), \(Cos[omega]\), "0"},
+            {"0", "0", "1"}
+            },
+          RowSpacings->1,
+          ColumnSpacings->1,
+          ColumnAlignments->{Left}], "\[NoBreak]", ")"}],
+      Function[ BoxForm`e$, 
+        MatrixForm[ BoxForm`e$]]]], "Output"]
+}, Open  ]],
+
+Cell[BoxData[""], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(uphi = 
+      Transpose[PhiM] . Transpose[ChiM] . 
+        Transpose[OmegaM] . {1, 0, 0}\)], "Input"],
+
+Cell[BoxData[
+    RowBox[{
+      RowBox[{"Transpose", "[", 
+        TagBox[
+          RowBox[{"(", "\[NoBreak]", GridBox[{
+                {\(Cos[phi]\), \(Sin[phi]\), "0"},
+                {\(-Sin[phi]\), \(Cos[phi]\), "0"},
+                {"0", "0", "1"}
+                },
+              RowSpacings->1,
+              ColumnSpacings->1,
+              ColumnAlignments->{Left}], "\[NoBreak]", ")"}],
+          Function[ BoxForm`e$, 
+            MatrixForm[ BoxForm`e$]]], "]"}], ".", 
+      RowBox[{"Transpose", "[", 
+        TagBox[
+          RowBox[{"(", "\[NoBreak]", GridBox[{
+                {\(Cos[chi]\), "0", \(Sin[chi]\)},
+                {"0", "1", "0"},
+                {\(-Sin[chi]\), "0", \(Cos[chi]\)}
+                },
+              RowSpacings->1,
+              ColumnSpacings->1,
+              ColumnAlignments->{Left}], "\[NoBreak]", ")"}],
+          Function[ BoxForm`e$, 
+            MatrixForm[ BoxForm`e$]]], "]"}], ".", 
+      RowBox[{"Transpose", "[", 
+        TagBox[
+          RowBox[{"(", "\[NoBreak]", GridBox[{
+                {\(Cos[omega]\), \(Sin[omega]\), "0"},
+                {\(-Sin[omega]\), \(Cos[omega]\), "0"},
+                {"0", "0", "1"}
+                },
+              RowSpacings->1,
+              ColumnSpacings->1,
+              ColumnAlignments->{Left}], "\[NoBreak]", ")"}],
+          Function[ BoxForm`e$, 
+            MatrixForm[ BoxForm`e$]]], "]"}], ".", \({1, 0, 0}\)}]], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(OmegaM . {1, 0, 0}\)], "Input"],
+
+Cell[BoxData[
+    RowBox[{
+      TagBox[
+        RowBox[{"(", "\[NoBreak]", GridBox[{
+              {\(Cos[omega]\), \(Sin[omega]\), "0"},
+              {\(-Sin[omega]\), \(Cos[omega]\), "0"},
+              {"0", "0", "1"}
+              },
+            RowSpacings->1,
+            ColumnSpacings->1,
+            ColumnAlignments->{Left}], "\[NoBreak]", ")"}],
+        Function[ BoxForm`e$, 
+          MatrixForm[ BoxForm`e$]]], ".", \({1, 0, 0}\)}]], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(Simplify[%]\)], "Input"],
+
+Cell[BoxData[
+    RowBox[{
+      TagBox[
+        RowBox[{"(", "\[NoBreak]", GridBox[{
+              {\(Cos[omega]\), \(Sin[omega]\), "0"},
+              {\(-Sin[omega]\), \(Cos[omega]\), "0"},
+              {"0", "0", "1"}
+              },
+            RowSpacings->1,
+            ColumnSpacings->1,
+            ColumnAlignments->{Left}], "\[NoBreak]", ")"}],
+        Function[ BoxForm`e$, 
+          MatrixForm[ BoxForm`e$]]], ".", \({1, 0, 0}\)}]], "Output"]
+}, Open  ]]
+},
+FrontEndVersion->"5.2 for Microsoft Windows",
+ScreenRectangle->{{0, 1024}, {0, 695}},
+WindowSize->{496, 537},
+WindowMargins->{{212, Automatic}, {Automatic, 9}}
+]
+
+(*******************************************************************
+Cached data follows.  If you edit this Notebook file directly, not
+using Mathematica, you must remove the line containing CacheID at
+the top of  the file.  The cache data will then be recreated when
+you save this file from within Mathematica.
+*******************************************************************)
+
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+
+(*NotebookFileOutline
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[1776, 53, 54, 1, 30, "Input"],
+Cell[1833, 56, 40, 1, 29, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[1910, 62, 246, 4, 110, "Input"],
+Cell[2159, 68, 355, 5, 52, "Message"],
+Cell[2517, 75, 394, 11, 71, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[2948, 91, 298, 6, 150, "Input"],
+Cell[3249, 99, 356, 5, 52, "Message"],
+Cell[3608, 106, 394, 11, 71, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[4039, 122, 241, 5, 90, "Input"],
+Cell[4283, 129, 402, 11, 71, "Output"]
+}, Open  ]],
+Cell[4700, 143, 26, 0, 30, "Input"],
+
+Cell[CellGroupData[{
+Cell[4751, 147, 121, 3, 50, "Input"],
+Cell[4875, 152, 1441, 37, 163, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[6353, 194, 51, 1, 30, "Input"],
+Cell[6407, 197, 459, 12, 57, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[6903, 214, 44, 1, 30, "Input"],
+Cell[6950, 217, 459, 12, 57, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+
+
+(*******************************************************************
+End of Mathematica Notebook file.
+*******************************************************************)
+
