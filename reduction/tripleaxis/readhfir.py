@@ -15,7 +15,7 @@ def construct_translate_dict():
     # Commented fields do not need to have their names changed.
     
     #translate_dict['pt.'] = 
-    translate_dict['sgu'] = 'sample_upper_tilt'
+    translate_dict['sgu'] = 'smplutilt' #'sample_upper_tilt'
     translate_dict['time'] = 'duration'
     #translate_dict['detector'] = 
     #translate_dict['monitor'] = 
@@ -33,9 +33,9 @@ def construct_translate_dict():
     translate_dict['s1'] = 
     translate_dict['s2'] = 
     '''
-    translate_dict['sgl'] = 'sample_lower_tilt'
-    translate_dict['stl'] = 'sample_lower_translation'
-    translate_dict['stu'] = 'sample_upper_translation'
+    translate_dict['sgl'] = 'smplltilt' #'sample_lower_tilt'
+    translate_dict['stl'] = 'smplltrn' #'sample_lower_translation'
+    translate_dict['stu'] = 'smplutrn' #'sample_upper_translation'
     #translate_dict['a1'] = 
     #translate_dict['a2'] = 
     #translate_dict['q'] = 
@@ -79,7 +79,17 @@ def get_columnmetadatas(tokenized, data):
     columnlist = []
 
     for i in range(1, len(tokenized)):
-        field = tokenized[i]
+        field = tokenized[i].lower()
+        if field == 'h':
+            field = 'qx'
+        if field == 'k':
+            field = 'qy'
+        if field == 'l':
+            field = 'qz'
+            
+        #if field == 't-act':
+        #    field = 'temp'
+      
         columnlist.append(field)
         data[field] = []
         
@@ -89,12 +99,19 @@ def convert_time(values):
     # converts times from am/pm to the 24 hour timescale
     time_info = values.split(' ')
     times = time_info[0].split(':')
+    
+    for i in range(len(times)): #convert strings to integers
+        times[i] = int(times[i])
+        
     if time_info[1].lower() == 'pm' and not int(times[0]) == 12:
         times[0] += 12
     elif time_info[1].lower() == 'am' and int(times[0]) == 12:
         times[0] = 0
         
     return times
+
+
+
 
 def readfile(myfilestr):
     #get first line

@@ -882,8 +882,7 @@ if __name__=='__main__':
                 print 'additional metadata'
                 print mydata.additional_metadata
 
-
-=======
+'''
 import numpy as N
 #import pylab
 import datetime
@@ -1749,3 +1748,4 @@ if __name__=='__main__':
                 print mydata.additional_metadata
 
 
+'''

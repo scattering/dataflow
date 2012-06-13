@@ -944,7 +944,6 @@ class TripleAxis(object):
                     #ignoring these data fields for plotting
                     pass	
                 else:
-                    print "in else"
                     print value
                     for field in value:
                         if has_null_first and not field.measurement.x == None:
@@ -2102,13 +2101,31 @@ def bin_all_fields(tas, xarr, xbin):
     
 
 
-def filereader(filename, friendly_name=None):
+def filereader(filename, orient1=None, orient2=None, acf_file=None, friendly_name=None):
+    filestr = filename
+    instrument = None
+    if friendly_name:
+        fileExt = os.path.splitext(friendly_name)[1]
+    else:
+        fileExt = os.path.splitext(filestr)[1]
+    
+    if fileExt in ['.bt2', '.bt4', '.bt7', '.bt9', '.ng5']:
+        instrument = ncnr_filereader(filestr, friendly_name=friendly_name)
+    #elif fileExt in ['.aof', '.acf']:
+    #    instrument = chalk_filereader(filestr, orient1, orient2, acf_file=acf_file) #currently returns a tas list!!!
+    elif fileExt in ['.dat']:
+        instrument = hfir_filereader(filestr)
+    
+    return instrument
+
+
+def ncnr_filereader(filename, friendly_name=None):
     filestr = filename
     mydatareader = readncnr.datareader()
     mydata = mydatareader.readbuffer(filestr, myfriendlyfilestr=friendly_name)
     instrument = TripleAxis()
     translate(instrument, mydata)
-    return instrument
+    return instrument    
 
 def chalk_filereader(aof_filename, orient1, orient2, acf_filename=None):
     
@@ -2129,10 +2146,10 @@ def hfir_filereader(filename):
 
 
 #NOT WORKING! can't pass TAS object in subprocess.call()
-def run_bumps(tas, store_dir, fit="dream", burn=500, steps=1000, init="eps"):
-    process_result = subprocess.call(["bumps", "tasmodel.py", tas, "--parallel", "--fit=%s" %fit, "--burn=%d" %burn, 
-                                      "--steps=%d" %steps, "--init=%s" %init, "--store=%s" %store_dir], shell=True)
-    pass
+#def run_bumps(tas, store_dir, fit="dream", burn=500, steps=1000, init="eps"):
+#    process_result = subprocess.call(["bumps", "tasmodel.py", tas, "--parallel", "--fit=%s" %fit, "--burn=%d" %burn, 
+#                                      "--steps=%d" %steps, "--init=%s" %init, "--store=%s" %store_dir], shell=True)
+
 
 
 
@@ -2371,13 +2388,19 @@ if __name__ == "__main__":
         print 'read chalk'
         
         
-    if 0: 
+    if 1: 
         # testing load for hfir files
-        myfilestr = r'hfir_data/HB3/exp331/Datafiles/HB3_exp0331_scan0001.dat'
+        taslist = []
+        for i in range(1, 109): 
+            tas = filereader(r'hfir_data/HB3/exp331/Datafiles/HB3_exp0331_scan' + repr(i).zfill(4) + '.dat')
+            taslist.append(tas)
+        
+        instrument = join(taslist)        
         tas = hfir_filereader(myfilestr)
         
         print 'read hfir'
-    if 1:
+        
+    if 0:
         # testing load for bt4 files
         taslist = []
         for i in range(1, 81):
