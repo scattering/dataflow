@@ -196,13 +196,13 @@ def calcB(astar,bstar,cstar,alphastar,betastar,gammastar,c, alpha):
 
 
 
-def isInPlane(h1, h2, v):
-    "Checks if vector v lies in the plane formed by vectors h1 and h2 by calculating the determinate."
-    determinate = (h1[0]*h2[1]*v[2] - h1[0]*v[1]*h2[2] - h1[1]*h2[0]*v[2] + h1[1]*v[0]*h2[2] + h1[2]*h2[0]*v[1] - h1[2]*v[0]*h2[1])
-    if determinant == 0:
-        return True
-    else:
+def isInPlane(h1, h2, v,tol=1e-5):
+    "Checks if vector v lies in the plane formed by vectors h1 and h2 by calculating the determinant."
+    determinant = (h1[0]*h2[1]*v[2] - h1[0]*v[1]*h2[2] - h1[1]*h2[0]*v[2] + h1[1]*v[0]*h2[2] + h1[2]*h2[0]*v[1] - h1[2]*v[0]*h2[1])
+    if np.abs(determinant-tol) > 0: #outside of tolerance
         return False
+    else:
+        return True
     
 def make_orthonormal(o1, o2):
     """Given two vectors, creates an orthonormal set of three vectors. 
@@ -706,9 +706,9 @@ class UBCalcTilt(UBCalc):
             #u1p = np.cos(omega)*np.cos(chi)*np.cos(phi) - np.sin(omega)*np.sin(phi)
             #u2p = np.cos(omega)*np.cos(chi)*np.sin(phi) + np.sin(omega)*np.cos(phi)
             #u3p = np.cos(omega)*np.sin(chi)    
-            return u_phi   
+            return -u_phi   
         
-    def calc_R_plane(mu_plane, nu_plane,UB,Q_vec):
+    def calc_R_plane(self,mu_plane, nu_plane,UB,Q_vec):
         """Calculates R for a scattering plane with specified mu,nu
         
         """
@@ -718,8 +718,8 @@ class UBCalcTilt(UBCalc):
                             np.cos(np.degrees(mu_plane))*np.cos(np.degrees(nu_plane))]
                            ,'Float64')
         Q_nu=np.dot(UB,Q_vec)
-        u_1_nu=Q_nu/np.linalg.norm(Q_nu)  #unit vector along q
-        u_2_nu=np.cross(u_nu_perp,u_1_nu)
+        u1_nu=Q_nu/np.linalg.norm(Q_nu)  #unit vector along q
+        u2_nu=np.cross(u_nu_perp,u1_nu)
         
         #There is a 
         
@@ -731,7 +731,7 @@ class UBCalcTilt(UBCalc):
         R=np.linalg.inv(T_nu)
         return R
     
-    def calc_angles(mu_plane,nu_plane,UB,Q_vec,ei,ef):
+    def calc_angles(self,mu_plane,nu_plane,UB,Q_vec,ei,ef):
         """
         Calculate the angles for the spectrometer.  mu_plane and nu_plane give the mu and nu for
         the desired plane.  To keep the tilts flat, choose mu=nu=0.  The more general case is useful if
@@ -758,7 +758,7 @@ class UBCalcTilt(UBCalc):
         sgl=np.degrees(np.arcsin(-R[2][0]))
         
         QC=np.dot(UB,Q_vec)
-        q=2.0*np.pi*np.linalg.norm(QC)
+        q=np.linalg.norm(QC)#*2.0*np.pi
         
         tth=calc_tth_inelastic(ei,ef,q) #should multiply by scattering sense
         theta=calc_th_inelastic(ei,ef,np.radians(tth))
@@ -778,7 +778,7 @@ class UBCalcTilt(UBCalc):
         return angles
         
         
-    def calcU(self,h1, k1, l1, h2, k2, l2, omega1, mu1, nu1, omega2, chi2, nu2, Bmatrix):
+    def calcU(self,h1, k1, l1, h2, k2, l2, omega1, mu1, nu1, omega2, mu2, nu2, Bmatrix):
             "Calculates the UB matrix using 2 sets of observations (h#, k#, l#) and their respective angle measurements in degrees (omega#, chi#, phi#)"
             #Convertiung angles given in degrees to radians
             #omega1 = np.radians(omega1)
@@ -1045,10 +1045,50 @@ def UBtest2():
     
     
     
+    
     return results
     #print result
     #print 'chi',(180-result[0])%360
     #print 'phi',(result[1]+180)%360    
+    
+    
+    
+    
+    
+def UBtest3():
+    "Test method to calculate UB matrix for tilt stage"
+    #a, b, c, alpha, beta, gamma, h1, k1, l1, omega1, chi1, phi1, h2, k2, l2, omega2, chi2, phi2 = input('enter data: ')
+    #Test data:
+    #3.9091,3.9091,3.9091,90,90,90,1,1,0,0,89.62,.001,0,0,1,0,-1.286,131.063
+    #maybe: 3.9091,3.9091,3.9091,90,90,90,1,1,0,-1.855,89.62,.001,0,0,1,-.0005,-1.286,131.063
+    #Should yield:
+    a, b, c, alpha, beta, gamma=3.9091,3.9091,3.9091,90.0,90.,90.
+    h1, k1, l1, th1, mu1, nu1, ei1, ef1=1.,0.,0.,    0.,0.,0., 14.7, 14.7
+    h2, k2, l2, th2, mu2, nu2, ei2, ef2=0.,1.,0.,    90.,0.,0.,14.7, 14.7
+
+    stars = star(a, b, c, alpha, beta, gamma)
+    Bmatrix = calcB(*(list(stars)+[c, alpha]))
+    
+    stars_dict = dict(zip(('astar','bstar','cstar','alphastar','betastar','gammastar'),
+                          stars))
+    ubcalc=UBCalcTilt()
+    om1=calc_om_elastic(h1,k1,l1,ei1,th1,stars_dict)
+    om2=calc_om_elastic(h2,k2,l2,ei2,th2,stars_dict)
+    
+    U = ubcalc.calcU(h1, k1, l1, h2, k2, l2, om1, mu1, nu1, om2, mu2, nu2, Bmatrix)
+    UB=ubcalc.calcUB(h1, k1, l1, h2, k2, l2, om1, mu1, nu1, om2, mu2, nu2, Bmatrix)    
+    #onehkl = lambda i: calcIdealAngles(np.array(i,'Float64'), UB,Bmatrix, 2.35916, stars_dict)
+    #allhkl = lambda hkl: [onehkl(i) for i in hkl]
+    #h, UBmatrix, Bmatrix, wavelength, stars
+    
+    #result = calcIdealAngles2(hv1, hv2, UB, 2.35916)
+    print UB    
+    Q_vec=np.array([1.,1.,0],'Float64')
+    mu_plane=0
+    nu_plane=0
+    angles=ubcalc.calc_angles(mu_plane,nu_plane,UB,Q_vec,14.7,14.7)
+    print 'angles', angles
+    return angles
     
     
 # **************************************** END OF UB MATRIX TESTING CODE ****************************************  
@@ -1064,8 +1104,10 @@ if __name__=="__main__":
         alpha=90; beta=90; gamma=90
         recip=star(a,b,c,alpha,beta,gamma)
         print recip
-        #UBtestrun()
-        UBtest2()
+        if 0:
+            UBtest2()
+        if 1:
+            UBtest3()
         print('done!')
         
         
