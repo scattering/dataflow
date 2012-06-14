@@ -16,7 +16,7 @@ def load_chalk_module(id=None, datatype=None, action=None,
         }
     }
 
-    terminals = [
+    terminals = [  
         dict(id='output',
              datatype=datatype,
              use='out',
@@ -24,12 +24,7 @@ def load_chalk_module(id=None, datatype=None, action=None,
              ),
     ]
 
-    fields = { 'chalk_files': {
-            "type": "files",
-            "label": "Add your .AOF file and corresponding .ACF file and/or .LOG file.",
-            "name": "chalk_files",
-            "value": [],
-        },
+    fields = { 
         'h1': {
             "type": "float",
             "label":"orient1 h",
@@ -65,7 +60,13 @@ def load_chalk_module(id=None, datatype=None, action=None,
             "label":"orient2 l",
             "name": "l2",
             "value": None,
-        }
+        },
+        'chalk_files': {
+            "type": "files",
+            "label": "Add your .AOF file and corresponding .ACF file and/or .LOG file.",
+            "name": "chalk_files",
+            "value": [],
+        }      
     }
     
    

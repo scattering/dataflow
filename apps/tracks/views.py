@@ -314,7 +314,7 @@ def setupReduction(data):
         groups = config_in.get('groups', {})
         current_reduct = groups.get(active_group, {})
         for key, value in current_reduct.items():
-            if key == 'files':
+            if key in ['files', 'chalk_files']: # if new file formats are added, at to list
                 file_hashes = [data['file_dict'][f] for f in value['value']]
                 file_paths = [get_filepath_by_hash(fh) for fh in file_hashes]
                 conf.update({'files': file_paths})
@@ -367,7 +367,7 @@ def runReduction(request):
     
     result = get_plottable(template, config, nodenum, terminal_id)
     
-    JSON_result = '[' + ','.join(result) + ']'            
+    JSON_result = '[' + ','.join(result) + ']'
     # result is a list of plottable items (JSON strings) - need to concatenate them
     print "result acquired"
     zbuf = cStringIO.StringIO()
