@@ -341,7 +341,7 @@ BT7 = Instrument(id='ncnr.tas.bt7',
                  name='tas',
                  archive=config.NCNR_DATA + '/bt7',
                  menu=[('Input', [load, loadchalk, save]),
-                       ('Reduction', [join, subtract, normalizemonitor, detailedbalance,
+                       ('Reduction', [extract, join, subtract, normalizemonitor, detailedbalance,
                                       monitorcorrection, volumecorrection])
                        ],
                  #requires=[config.JSCRIPT + '/tasplot.js'],
