@@ -29,6 +29,7 @@ def extract_module(id=None, datatype=None, action=None,
              datatype=datatype,
              use='in',
              description='Data parts',
+             required=False,
              multiple=True,
              ),
         dict(id='output',
@@ -39,7 +40,7 @@ def extract_module(id=None, datatype=None, action=None,
     ]
     
     fields = {'data_objects': {
-            "type": "files",
+            "type": "data_summary",
             "label": "Select the runs to extract",
             "name": "data_objects",
             "value": [],

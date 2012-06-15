@@ -120,7 +120,7 @@ def readfile(myfilestr):
     
     myfile = open(myfilestr, 'r')
     data = {}
-    metadata = {}
+    metadata = {'extrema': {}}
 
     while myFlag:
         tokenized = get_tokenized_line(myfile, returnline=returnline)
@@ -145,6 +145,7 @@ def readfile(myfilestr):
                     # getting data points 
                     for i in range(len(tokenized)):
                         field = columnlist[i]
+                        update_extrema(metadata, field, float(tokenized[i]))
                         data[field].append(float(tokenized[i]))
             
         else: #if not column headers or the actual data lines, then it's metadata
@@ -191,6 +192,16 @@ def readfile(myfilestr):
     data = Data(metadata, data)    
     return data
 
+def update_extrema(metadata, field, value):
+        if not field in metadata['extrema'].keys():
+                # if it doesn't have a min, it shouldn't have a max either. 
+                # if no min/max, then make the current value the min and max
+                metadata['extrema'][field] = [value, value]
+        else:
+                if value < metadata['extrema'][field][0]: # val < min
+                        metadata['extrema'][field][0] = value
+                if value > metadata['extrema'][field][1]: # val > max
+                        metadata['extrema'][field][1] = value
 
 class Data(object):
     def __init__(self):

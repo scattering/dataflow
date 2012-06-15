@@ -1,7 +1,8 @@
 import numpy as np
 import uncertainty, err1d
 
-import readncnr4 as readncnr
+#import readncnr4 as readncnr
+import readncnr5 as readncnr #readncnr5 is configured for min/max for get_metadata()
 import readchalk as readchalk
 import readhfir as readhfir
 
@@ -764,6 +765,7 @@ class TripleAxis(object):
         self.yaxis = ''
         self.xstep = None
         self.ystep = None
+        self.extrema = {}
 
 
     def detailed_balance(self):
@@ -985,7 +987,21 @@ class TripleAxis(object):
         #self.xaxis = ''
         #self.yaxis = ''
         return simplejson.dumps(plottable_data)
-
+    
+    
+    
+    
+    def get_metadata(self):
+        """
+        Returns metadata for file summary table
+        """
+        
+        summary_data = {
+            'title': 'Data Summary',
+            'clear_existing': False,
+            'extrema': self.meta_data['extrema'],
+        }
+        return simplejson.dumps(summary_data)
 
 # ****************************************************************************************************************************************************
 # ***************************************************************** TRANSLATION METHODS **************************************************************
@@ -1007,7 +1023,10 @@ def translate(tas, dataset):
     translate_detectors(tas, dataset)
     
     translate_magnetic_field(tas, dataset)
+    translate_extrema(tas, dataset)
 
+def translate_extrema(tas, dataset):
+    tas.extrema = dataset.metadata['extrema']
 
 def translate_magnetic_field(tas, dataset):
     translate_dict = {}

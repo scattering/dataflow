@@ -132,13 +132,13 @@ function makeFileMultiSelect(src_files, selected_files, form_id, fieldLabel) {
 }
 
 // Given a bundle of TripleAxis objects, 
-function makeDataMultiSelect(source_objects, selected_objects, form_id, fieldLabel) {
+function makeDataSummary(source_objects, selected_objects, form_id, fieldLabel) {
 
 //    var src_files = []
 //    for (var i in FILES) {
 //        src_files.push(FILES[i][1]);
 //    }
-    var fieldLabel = fieldLabel || 'data_objects'; // can override
+    var fieldLabel = fieldLabel || 'data_summary'; // can override
     
     var form_id = form_id || 0;
     //src_files.sort()
@@ -227,18 +227,17 @@ function configForm(headerList, moduleID) {
 	        
         } 
 
-        else if (header.type == 'data_objects') {
-/*
-                editor.FAT.update(FILES, editor.getValue().working.modules);
+        else if (header.type == 'data_summary') {
+                //editor.FAT.update(FILES, editor.getValue().working.modules);
 	        var unassociated_files = editor.FAT.getUnassociatedFiles(editor.reductionInstance);
 	        var module_files = header.value;
 	        var total_files = [];
 	        for (var i in unassociated_files) { total_files.push(unassociated_files[i]); }
 	        for (var i in module_files) { total_files.push(module_files[i]); }
-	        item = makeFileMultiSelect(total_files, module_files, reverse_lookup_id, header.label);
+	        item = makeDataSummary(total_files, module_files, reverse_lookup_id, header.label);
 	        reverse_lookup[reverse_lookup_id] = header; // pointer back to the original object
 	        reverse_lookup_id += 1;
-*/
+
       }
 
         else if (header.type == "Array" || header.type == "Object") { // allow for nested lists of parameters
