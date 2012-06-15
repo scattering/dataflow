@@ -182,6 +182,10 @@ def get_plottable(template, config, nodenum, terminal_id):
             
     return plottable
 
+def get_metadata(template, config, nodenum, terminal_id):
+    # TODO
+
+
 def get_csv(template, config, nodenum, terminal_id):
     # Find the modules
     node = template.modules[nodenum]

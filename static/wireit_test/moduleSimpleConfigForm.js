@@ -141,8 +141,8 @@ function makeDataSummary(source_objects, selected_objects, form_id, fieldLabel) 
     var fieldLabel = fieldLabel || 'data_summary'; // can override
     
     var form_id = form_id || 0;
-    //src_files.sort()
 
+    //TODO make into table/grid
     var source_objects_selector = {
 		xtype: 'multiselect',
 		name              :  'multiselect',
@@ -229,11 +229,11 @@ function configForm(headerList, moduleID) {
 
         else if (header.type == 'data_summary') {
                 //editor.FAT.update(FILES, editor.getValue().working.modules);
-	        var unassociated_files = editor.FAT.getUnassociatedFiles(editor.reductionInstance);
-	        var module_files = header.value;
-	        var total_files = [];
-	        for (var i in unassociated_files) { total_files.push(unassociated_files[i]); }
-	        for (var i in module_files) { total_files.push(module_files[i]); }
+	        //var unassociated_files = editor.FAT.getUnassociatedFiles(editor.reductionInstance);
+	        //var module_files = header.value;
+	        //var total_files = [];
+	        //for (var i in unassociated_files) { total_files.push(unassociated_files[i]); }
+	        //for (var i in module_files) { total_files.push(module_files[i]); }
 	        item = makeDataSummary(total_files, module_files, reverse_lookup_id, header.label);
 	        reverse_lookup[reverse_lookup_id] = header; // pointer back to the original object
 	        reverse_lookup_id += 1;

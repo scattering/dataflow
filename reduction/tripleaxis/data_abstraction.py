@@ -999,7 +999,7 @@ class TripleAxis(object):
         summary_data = {
             'title': 'Data Summary',
             'clear_existing': False,
-            'extrema': self.meta_data['extrema'],
+            'extrema': self.extrema,
         }
         return simplejson.dumps(summary_data)
 
@@ -2414,6 +2414,7 @@ if __name__ == "__main__":
             tas = filereader(r'hfir_data/HB3/exp331/Datafiles/HB3_exp0331_scan' + repr(i).zfill(4) + '.dat')
             taslist.append(tas)
         
+        print tas.get_metadata()
         instrument = join(taslist)        
         tas = hfir_filereader(myfilestr)
         
