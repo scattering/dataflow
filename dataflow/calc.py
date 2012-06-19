@@ -184,6 +184,7 @@ def get_plottable(template, config, nodenum, terminal_id):
 
 def get_metadata(template, config, nodenum, terminal_id):
     # TODO
+    pass
 
 
 def get_csv(template, config, nodenum, terminal_id):
