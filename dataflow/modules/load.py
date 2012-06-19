@@ -7,7 +7,7 @@ from ..core import Module
 
 def load_module(id=None, datatype=None, action=None,
                 version='0.0', fields={}, xtype='WireIt.Container', **kwargs):
-    """Module for loading a dataset"""
+    """Module for loading data from a raw datafile"""
 
     icon = {
         'URI': config.IMAGES + "load.png",
@@ -48,7 +48,7 @@ def load_module(id=None, datatype=None, action=None,
     
     # Combine everything into a module.
     module = Module(id=id,
-                  name='Load',
+                  name='Load Raw',
                   version=version,
                   description=action.__doc__,
                   #icon=icon,

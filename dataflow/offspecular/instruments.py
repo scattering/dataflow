@@ -14,6 +14,7 @@ module_imports = [
     ("dataflow", "config"),
    
     ("dataflow.modules.load", "load_module"),
+    ("dataflow.modules.load_saved", "load_saved_module"),
     ("dataflow.offspecular.modules.load_asterix", "load_asterix_module"),
     ("dataflow.offspecular.modules.load_asterix_spectrum", "load_asterix_spectrum_module"),
     ("dataflow.modules.save", "save_module"),
@@ -99,6 +100,35 @@ OSPEC_DATA_HE3 = OSPEC_DATA + '.he3'
 datahe3 = Data(OSPEC_DATA_HE3, He3AnalyzerCollection)
 OSPEC_DATA_TIMESTAMP = OSPEC_DATA + '.timestamp'
 datastamp = Data(OSPEC_DATA_TIMESTAMP, PlottableDict)
+
+"""
+import tarfile
+import StringIO
+
+tar = tarfile.TarFile("test.tar","w")
+
+string = StringIO.StringIO()
+string.write("hello")
+string.seek(0)
+info = tarfile.TarInfo(name="foo")
+info.size=len(string.buf)
+tar.addfile(tarinfo=info, fileobj=string)
+
+tar.close()
+"""
+
+# load saved result:
+def load_saved_action(results=[], intent='', **kwargs):
+    print "loading saved results"
+    import tarfile
+    from ...apps.tracks.models import File
+    Fileobj = File.objects.get(name=str(fh))
+    fn = Fileobj.name
+    fp = Fileobj.location
+    tf = tarfile.open(os.path.join(fp, fn), 'r')
+    result_objs = [tf.extractfile(member) for member in tf.getmembers()]
+    result = [FilterableMetaArray.loads(robj.read()) for robj in result_objs]
+    return dict(output=result)
 
 # Load module
 def load_action(input=[], files=[], intent='', auto_PolState=False, PolStates=[], **kwargs):

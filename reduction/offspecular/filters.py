@@ -764,14 +764,18 @@ class PixelsToTwotheta(Filter2D):
         if ndim == 1 or ((det_angle_max - det_angle_min) < instr_resolution):
             #then the detector is fixed: just change the values in 'xpixel' axis vector to twotheta
             print "doing the simple switch of axis values..."
-
+            
+            data_slices = [slice(None, None, 1), slice(None, None, 1)]
+            data_slices[xpixel_axis] = slice(None, None, -1)
+            
             new_info[xpixel_axis]['name'] = 'twotheta'
             twotheta_motor = det_angle_min
             pixels = new_info[xpixel_axis]['values']
             twoth = -1.0 * (pixels - qzero_pixel) / pixels_per_degree + twotheta_motor
-            new_info[xpixel_axis]['values'] = twoth
+            new_info[xpixel_axis]['values'] = twoth[::-1] # reverse: twotheta increases as pixels decrease
             new_info[xpixel_axis]['units'] = 'degrees'
-            new_data = MetaArray(data.view(ndarray).copy(), info=new_info)
+            new_array = (data.view(ndarray).copy())[data_slices]
+            new_data = MetaArray(new_array, info=new_info)
         
         else:
             # the detector is moving - have to rebin the dataset to contain all values of twoth
@@ -781,11 +785,13 @@ class PixelsToTwotheta(Filter2D):
             other_spacing = other_vector[1] - other_vector[0]
             pixels = new_info[xpixel_axis]['values']
             twoth = -1.0 * (pixels - qzero_pixel) / pixels_per_degree
+            twoth = twoth[::-1] # reverse
             twoth_min = det_angle_min + twoth.min()
             twoth_max = det_angle_max + twoth.max()
             twoth_max_edge = twoth_max + 1.0 / pixels_per_degree
             dpp = 1.0 / pixels_per_degree
-            output_twoth_bin_edges = arange(twoth_max + dpp, twoth_min - dpp, -dpp)
+            #output_twoth_bin_edges = arange(twoth_max + dpp, twoth_min - dpp, -dpp)
+            output_twoth_bin_edges = arange(twoth_min - dpp, twoth_max + dpp, dpp)
             output_twoth = output_twoth_bin_edges[:-1]
             other_bin_edges = linspace(other_vector[0], other_vector[-1] + other_spacing, len(other_vector) + 1)
             new_info[xpixel_axis]['name'] = 'twotheta' # getting rid of pixel units: substitute twoth
@@ -804,8 +810,8 @@ class PixelsToTwotheta(Filter2D):
                 twoth_min = da + tth_min
                 twoth_max = da + tth_max
                 input_twoth_bin_edges = empty(len(pixels) + 1)
-                input_twoth_bin_edges[0] = twoth_max + 1.0 / pixels_per_degree
-                input_twoth_bin_edges[1:] = twoth + da         
+                input_twoth_bin_edges[-1] = twoth_max + 1.0 / pixels_per_degree
+                input_twoth_bin_edges[:-1] = twoth + da         
                 #data_cols = ['counts', 'pixels', 'monitor', 'count_time']
                 cols = new_info[-2]['cols']
                 
@@ -1227,7 +1233,7 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     mon.shape += (1,) # broadcast the monitor over the other dimension
     count_time = file_obj.monitor.count_time
     count_time.shape += (1,)
-    data_array[:, :, 0] = file_obj.detector.counts[:,::-1]
+    data_array[:, :, 0] = file_obj.detector.counts
     data_array[:, :, 1] = 1
     data_array[:, :, 2] = mon
     data_array[:, :, 3] = count_time
@@ -1369,20 +1375,28 @@ class Combine(Filter2D):
         
     def add_to_grid(self, dataset, grid):
         dims = 2
+        grid_slice = [slice(None, None, 1),] * dims
         bin_edges = []
         for dim in range(dims):
             av = grid.axisValues(dim).copy()
-            dspacing = (av.max() - av.min()) / (len(av) - 1)
+            dspacing = (av[-1] - av[0]) / (len(av) - 1)
             edges = resize(av, len(av) + 1)
             edges[-1] = av[-1] + dspacing
+            if dspacing < 0:
+                edges = edges[::-1] # reverse
+                grid_slice[dim] = slice(None, None, -1)
             bin_edges.append(edges)
         
         data_edges = []
+        data_slice = [slice(None, None, 1),] * dims
         for dim in range(dims):
             av = dataset.axisValues(dim).copy()
-            dspacing = (av.max() - av.min()) / (len(av) - 1)
+            dspacing = (av[-1] - av[0]) / (len(av) - 1)
             edges = resize(av, len(av) + 1)
             edges[-1] = av[-1] + dspacing
+            if dspacing < 0:
+                edges = edges[::-1] # reverse
+                data_slice[dim] = slice(None, None, -1)
             data_edges.append(edges)
         
         #cols_to_add = ['counts', 'pixels', 'monitor', 'count_time'] # standard data columns
@@ -1392,9 +1406,10 @@ class Combine(Filter2D):
         for i, col in enumerate(new_info[2]['cols']):
             #if col['name'] in cols_to_add:
             array_to_rebin = dataset[:, :, col['name']].view(ndarray) 
-            new_array = reb.rebin2d(data_edges[0], data_edges[1], array_to_rebin, bin_edges[0], bin_edges[1])
-            grid[:, :, col['name']] += new_array
-                
+            print data_edges, bin_edges
+            new_array = reb.rebin2d(data_edges[0], data_edges[1], array_to_rebin[data_slice], bin_edges[0], bin_edges[1])
+            grid[:, :, col['name']] += new_array[grid_slice]
+            
         return grid
 
 class CombinePolarized(Filter2D):

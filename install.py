@@ -60,9 +60,9 @@ if __name__ == "__main__":
 
     # build and install reduction and bumps
     call('cd ~; git clone https://github.com/reflectometry/reduction.git;', shell=True)
-    call('cd reduction/; python settings.py build; python settings.py install; cd ..', shell=True)
+    call('cd reduction/; python setup.py build; python setup.py install; cd ..', shell=True)
     call('cd ~; git clone https://github.com/bumps/bumps.git;', shell=True)
-    call('cd bumps/; python settings.py build; python settings.py install; cd ..', shell=True)
+    call('cd bumps/; python setup.py build; python setup.py install; cd ..', shell=True)
         
 
 #NOTE: Also install matplotlib and download and install natgrid (https://github.com/matplotlib/natgrid)
