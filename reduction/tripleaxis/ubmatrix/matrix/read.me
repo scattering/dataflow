@@ -1,0 +1,112 @@
+-------------------------------------------------------------------------------
+                  Small Matrix Toolbox for C programmers
+                              version 0.42
+                         (Support Unix and DOS)
+
+                          by Patrick KO Shu-pui
+
+             Copyright (c) 1992, 1993, 1994 All Rights Reserved.
+-------------------------------------------------------------------------------
+ADDRESS TO CONTACT:
+
+            fidonet:  6:700/132 BiG Programming Club
+                      [852] 663-0223    19.2 kbps
+                      [852] 663-0236    16.8 kbps
+
+            internet: pko@hk.super.net
+
+            mailing:  Patrick Ko
+                      G.P.O. Box 7468
+                      Hong Kong
+-------------------------------------------------------------------------------
+MATRX042.ZIP contains
+
+READ    .ME     - this file
+DEMO    .C      - demo how to use this package
+DEMO    .DAT    - demo data
+DEMO    .EXE    - demo executable for DOS
+MAKEFILE.MSC    - makefile for Microsoft C/C++ 7.0 on DOS
+MAKEFILE.TC     - makefile for Turbo C 2.0 on DOS
+MAKEFILE.UX     - makefile for Unix
+MATRIX  .DOC    - matrix toolbox interface document
+MATRIX  .H      - matrix header file (must include it)
+MATADD  .C      - matrix addition
+MATCREAT.C      - matrix creation
+MATDET  .C      - find minor, cofactor, determinant
+MATDUMP .C      - matrix dump
+MATERR  .C      - matrix error handling routine
+MATINV  .C      - matrix inversion
+MATMUL  .C      - matrix multiplication
+MATSOLVE.C      - linear equations solver
+MATSUB  .C      - matrix substraction
+MATSUBX .C      - submatrix operation
+MATTOEPZ.C      - create symmetric Toeplitz matrix
+MATDURBN.C      - Symmetrix Toeplitz matrix fast solving algorithm
+MATTRAN .C      - matrix transpose
+
+-------------------------------------------------------------------------------
+WHATS NEW in v0.1:
+        -       +, -, *, inverse matrix operations
+
+WHATS NEW in v0.2:
+        -       Linear equation solver
+        -       C-programmer-friendly C sources
+
+WHATS NEW in v0.3:
+        -       better data structure (more Object-Oriented)
+        -       finding minors, cofactors, determinants
+        -       Levinson-Durbin algorithm for symmetric Toeplitz matrix
+
+WHATS NEW in v0.4:
+        -       Revised method for minors, cofactors and determinants
+                whose time complexity is T(n^3) instead of nearly T(n!).
+                This is important when you want to find the determinant
+                of a matrix whose size is over 10 x 10.
+        -       submatrix operator
+        -       matrix formmated dump function
+        -       brief matrix toolbox interface document included
+
+WHATS NEW in v0.41:
+        -       bug fix for unit matrix creation
+
+WHATS NEW in v0.42:
+        -       support Microsoft C/C++ 7.0
+
+HOW TO COMPILE:
+
+        1.      All Unix environment - make -f makefile.ux
+        2.      DOS (Turbo C v2.0) - make -fmakefile.tc
+        3.      DOS (Microsoft C/C++ v7.0) - nmake -fmakefile.msc
+
+REFERENCES
+
+        [1] Mary L.Boas, "Mathematical Methods in the Physical Sciene,"
+        John Wiley & Sons, 2nd Ed., 1983. Chap 3.
+
+        [2] Kendall E.Atkinson, "An Introduction to Numberical Analysis,"
+	John Wiley & Sons, 1978.
+
+	[3] Shuzo Saito, Kazuo Nakata, "Fundamentals of Speech Signal
+	Processing," Academic Press, 1985.
+
+        [4] Alfred V.Aho, John E.Hopcroft, Jeffrey D.Ullman, "The Design
+        and Analysis of Computer Algorithms," 1974.
+
+AUTHOR
+All the sources are written by Patrick KO Shu Pui
+BiG Programming Club (6:700/132, fidonet)
+
+===============================================================================
+AUTHORIZATION NOTICE
+
+This C source package MATRX042.ZIP is FREE for ACADEMIC purpose only.
+
+For COMMERCIAL use, authorization is required from the author.
+Please send US$25 for registration.
+===============================================================================
+DISCLAIMER      (I hate this but I have to do that)
+
+You are on your own risk - the author is not responsible for any lost due
+to the use of this toolbox.
+===============================================================================
+

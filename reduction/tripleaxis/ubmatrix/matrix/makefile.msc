@@ -1,0 +1,62 @@
+#------------------------------------------------------------------------------
+#       file:   makefile.msc
+#       desc:   makefile for matrix library package under Microsoft C/C++ v7.0
+#       by:     patrick ko
+#       date:   16 Apr 94
+#
+#       note:   a slim matrix library matrix.lib will be generated
+#------------------------------------------------------------------------------
+
+OBJS = matcreat.obj matdump.obj materr.obj matadd.obj matsub.obj \
+matmul.obj matinv.obj matsolve.obj matdet.obj mattran.obj matdurbn.obj \
+mattoepz.obj matsubx.obj
+
+CC = cl -c
+C = cl
+
+demo.exe:      demo.c matrix.lib
+        $(C) demo.c matrix.lib
+
+matrix.lib:     $(OBJS)
+        lib matrix +matcreat +matdump +materr +matadd.obj ,,
+        lib matrix +matsub +matmul +matinv +matsolve +matdet.obj ,,
+        lib matrix +mattran +matdurbn +mattoepz +matsubx ,,
+
+matcreat.obj:	matcreat.c matrix.h
+	$(CC) matcreat.c
+
+matdump.obj:	matdump.c matrix.h
+	$(CC) matdump.c
+
+materr.obj:	materr.c matrix.h
+	$(CC) materr.c
+
+matadd.obj:	matadd.c matrix.h
+	$(CC) matadd.c
+
+matsub.obj:	matsub.c matrix.h
+	$(CC) matsub.c
+
+matmul.obj:	matmul.c matrix.h
+	$(CC) matmul.c
+
+matinv.obj:	matinv.c matrix.h
+	$(CC) matinv.c
+
+matsolve.obj:	matsolve.c matrix.h
+	$(CC) matsolve.c
+
+mattran.obj:	mattran.c matrix.h
+	$(CC) mattran.c
+
+matdet.obj:	matdet.c matrix.h
+	$(CC) matdet.c
+
+matdurbn.obj:	matdurbn.c matrix.h
+	$(CC) matdurbn.c
+
+mattoepz.obj:	mattoepz.c matrix.h
+	$(CC) mattoepz.c
+
+matsubx.obj:	matsubx.c matrix.h
+	$(CC) matsubx.c

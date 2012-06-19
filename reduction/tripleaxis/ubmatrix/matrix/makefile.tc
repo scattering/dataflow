@@ -1,0 +1,74 @@
+#------------------------------------------------------------------------------
+#       file:   makefile.tc
+#       desc:   makefile for matrix library package under Turbo C v2.0
+#       by:     patrick ko
+#       date:   16 Apr 94
+#
+#       note:   a slim matrix library matrix.lib will be generated
+#------------------------------------------------------------------------------
+DRIVE = C:
+
+OBJS = matcreat.obj matdump.obj materr.obj matadd.obj matsub.obj \
+matmul.obj matinv.obj matsolve.obj matdet.obj mattran.obj matdurbn.obj \
+mattoepz.obj matsubx.obj
+
+LIB = -L$(DRIVE)\TC\LIB
+INC = -I$(DRIVE)\TC\INCLUDE
+CC = tcc -c -mh $(INC)
+C = tcc -mh $(LIB) $(INC)
+LL = tlib matrix.lib
+
+demo.exe:      demo.c $(OBJS)
+        $(C) demo.c matrix.lib
+
+matcreat.obj:	matcreat.c matrix.h
+	$(CC) matcreat.c
+	$(LL) -+matcreat.obj
+
+matdump.obj:	matdump.c matrix.h
+	$(CC) matdump.c
+	$(LL) -+matdump.obj
+
+materr.obj:	materr.c matrix.h
+	$(CC) materr.c
+	$(LL) -+materr.obj
+
+matadd.obj:	matadd.c matrix.h
+	$(CC) matadd.c
+	$(LL) -+matadd.obj
+
+matsub.obj:	matsub.c matrix.h
+	$(CC) matsub.c
+	$(LL) -+matsub.obj
+
+matmul.obj:	matmul.c matrix.h
+	$(CC) matmul.c
+	$(LL) -+matmul.obj
+
+matinv.obj:	matinv.c matrix.h
+	$(CC) matinv.c
+	$(LL) -+matinv.obj
+
+matsolve.obj:	matsolve.c matrix.h
+	$(CC) matsolve.c
+	$(LL) -+matsolve.obj
+
+mattran.obj:	mattran.c matrix.h
+	$(CC) mattran.c
+	$(LL) -+mattran.obj
+
+matdet.obj:	matdet.c matrix.h
+	$(CC) matdet.c
+	$(LL) -+matdet.obj
+
+matdurbn.obj:	matdurbn.c matrix.h
+	$(CC) matdurbn.c
+	$(LL) -+matdurbn.obj
+
+mattoepz.obj:	mattoepz.c matrix.h
+	$(CC) mattoepz.c
+	$(LL) -+mattoepz.obj
+
+matsubx.obj:	matsubx.c matrix.h
+	$(CC) matsubx.c
+	$(LL) -+matsubx.obj

@@ -1,0 +1,14 @@
+#---------------------------------------------------------------------------
+# Makefile for the Matrix library
+# machine-dependent part for Redhat Linux with AFS at PSI
+#
+# Mark Koennecke, November 1996
+# Markus Zolliker, March 2003
+#--------------------------------------------------------------------------
+
+include ../linux_def
+
+CC       = gcc
+CFLAGS   = -g $(DFORTIFY)
+
+include make_gen

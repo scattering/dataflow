@@ -1,0 +1,14 @@
+#---------------------------------------------------------------------------
+# Makefile for the Matrix library
+# machine-dependent part for Tru64 Unix
+#
+# Mark Koennecke, November 1996
+# Markus Zolliker, March 2003
+#--------------------------------------------------------------------------
+
+include ../alpha_def
+
+CC       = cc
+CFLAGS   = -std1 -g $(DFORTIFY)
+
+include make_gen

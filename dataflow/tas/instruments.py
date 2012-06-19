@@ -19,11 +19,14 @@ if 1:
     from .modules.tas_subtract import subtract_module
     from ..modules.save import save_module
     from .modules.tas_load import load_module
+    from .modules.tas_extract import extract_module
+    from .modules.loadchalk import load_chalk_module
     from .modules.tas_normalize_monitor import normalize_monitor_module
     from .modules.tas_detailed_balance import detailed_balance_module
     from .modules.tas_monitor_correction import monitor_correction_module
     from .modules.tas_volume_correction import volume_correction_module
     from ...apps.tracks.models import File
+    from ...apps.tracks.models import Facility
 
 
 if 0:
@@ -100,7 +103,7 @@ def load_action(files=[], intent=None, position=None, xtype=None, **kwargs):
         if type(subresult) == types.ListType:
             result.extend(subresult)
         else:
-            result.append(subresult)   
+            result.append(subresult)
     return dict(output=result)
 ################################################################################
 # NOTE: 02/03/2012 bbm
@@ -112,14 +115,99 @@ def load_action(files=[], intent=None, position=None, xtype=None, **kwargs):
 # the replacement above is an adaptation of the loader code in 
 # dataflow/dataflow/offspecular/instruments.py
 ################################################################################
-#    print 'FRIENDLY FILE', File.objects.get(name=files[0].split('/')[-1]).friendly_name
-#    print "/home/brendan/dataflow/reduction/tripleaxis/spins_data/" + File.objects.get(name=files[0].split('/')[-1]).friendly_name
-#    result = [data_abstraction.filereader(f, friendly_name="/home/brendan/dataflow/reduction/tripleaxis/spins_data/" + File.objects.get(name=f.split('/')[-1]).friendly_name) for f in files]
-#    print "done loading"
-#    return dict(output=result)
-    #pass
+
 load = load_module(id='tas.load', datatype=TAS_DATA,
                    version='1.0', action=load_action,)
+
+
+def _load_chalk_data(aof_filename, orient1, orient2, acf_filename=None):
+    #(dirName, fileName) = os.path.split(name)
+    #friendlyName = get_friendly_name(fileName)
+    
+    return data_abstraction.chalk_filereader(aof_filename, orient1, orient2, acf_filename=acf_filename)
+
+def load_chalk_action(chalk_files=[], h1=None, k1=None, l1=None, h2=None, k2=None, l2=None, **kwargs):
+
+    print "loading chalk river"
+    result = []
+    orient1 = []
+    orient2 = []
+    aof_filename = None
+    aof_file = None
+    acf_filename = None
+    acf_file = None
+    log_filename = None
+    log_file = None
+    
+    try:
+        h1 = kwargs['fields']['h1']['value']
+        k1 = kwargs['fields']['k1']['value']
+        l1 = kwargs['fields']['l1']['value']
+        h2 = kwargs['fields']['h2']['value']
+        k2 = kwargs['fields']['k2']['value']
+        l2 = kwargs['fields']['l2']['value']
+        orient1 = [h1, k1, l1]
+        orient2 = [h2, k2, l2]
+    except:
+        #TODO Throw error! orient1 and orient2 MUST be given!
+        pass
+    # The .AOF file may be linked with a .ACF file and a .LOG file.
+    # ASSUMPTION: the filename of these files are the same!!!
+    # The first .AOF, .ACF, or .LOG found will determine this shared filename.
+    for i, f in enumerate(chalk_files):
+        if aof_filename and acf_filename and log_filename:
+            #if the datafiles were already found, break loop
+            break
+        
+        fileName, fileExt = os.path.splitext(f) # capitalization matters for the filename!
+        fileExt = fileExt.lower()
+        if not aof_filename and fileExt == '.aof':
+            
+            if (not acf_filename and not log_filename) or \
+               (acf_filename and acf_filename == fileName) or \
+               (log_filename and log_filename == fileName):
+                aof_filename = fileName 
+                aof_file = f
+                
+        elif not acf_filename and fileExt == '.acf':
+            
+            if (not aof_filename and not log_filename) or \
+               (aof_filename and aof_filename == fileName) or \
+               (log_filename and log_filename == fileName):            
+                acf_filename = fileName
+                acf_file = f
+                
+        elif not log_filename and fileExt == '.log':
+            
+            if (not aof_filename and not acf_filename) or \
+               (aof_filename and aof_filename == fileName) or \
+               (acf_filename and acf_filename == fileName):                
+                log_filename = fileName
+                log_file = f
+            
+    
+    #improve reader so it will include .log files!
+    #result should be a list of TripleAxis objects
+    result = _load_chalk_data(aof_file, orient1, orient2, acf_filename=acf_file)
+
+    return dict(output=result)
+
+loadchalk = load_chalk_module(id='tas.loadchalk', datatype=TAS_DATA,
+                   version='1.0', action=load_chalk_action,)
+
+
+
+def extract_action(data_objects=[], **kwargs):
+    """ isolates/extracts the given list of objects """
+    print "extracting", data_objects
+    
+    return dict(output=data_objects)
+
+
+extract = extract_module(id='tas.extract', datatype=TAS_DATA,
+                   version='1.0', action=extract_action,)
+
+
 
 def save_action(input, ext=None, xtype=None, position=None, **kwargs):
     # Note that save does not accept inputs from multiple components, so
@@ -252,8 +340,8 @@ volumecorrection = volume_correction_module(id='tas.volume_correction', datatype
 BT7 = Instrument(id='ncnr.tas.bt7',
                  name='tas',
                  archive=config.NCNR_DATA + '/bt7',
-                 menu=[('Input', [load, save]),
-                       ('Reduction', [join, subtract, normalizemonitor, detailedbalance,
+                 menu=[('Input', [load, loadchalk, save]),
+                       ('Reduction', [extract, join, subtract, normalizemonitor, detailedbalance,
                                       monitorcorrection, volumecorrection])
                        ],
                  #requires=[config.JSCRIPT + '/tasplot.js'],

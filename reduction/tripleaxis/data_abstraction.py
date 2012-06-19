@@ -1,8 +1,10 @@
 import numpy as np
 import uncertainty, err1d
 
-import readncnr4 as readncnr
+#import readncnr4 as readncnr
+import readncnr5 as readncnr #readncnr5 is configured for min/max for get_metadata()
 import readchalk as readchalk
+import readhfir as readhfir
 
 from formatnum import format_uncertainty
 import copy, simplejson, pickle
@@ -41,7 +43,7 @@ to something plottable
 """
 
 # for purposes of iterating over a dictionary for a TripleAxis object, these fields are skipped
-skipped_fields=['data','meta_data','sample','sample_environment','xstep','ystep','num_bins']
+skipped_fields=['data','meta_data','sample','sample_environment','xstep','ystep','num_bins','magnetic_field']
 
 
 
@@ -720,7 +722,7 @@ class PolarizedBeam(object):
         self.sample_guide_field_rotatation = Motor('sample_guide_field_rotatation', values=None, err=None, units='degrees', isDistinct=False)
         self.flipper_state = Motor('flipper_state', values=None, err=None, units='', isDistinct=False) #short hand, can be A,B,C, etc.
         self.eta = Motor('eta', values=None, err=None, units='', isDistinct=False) # orient1 coefficient
-        self.dbhf = Motor('zeta', values=None, err=None, units='', isDistinct=False) # orient2 coefficient
+        self.zeta = Motor('zeta', values=None, err=None, units='', isDistinct=False) # orient2 coefficient
     def __iter__(self):
         for key, value in self.__dict__.iteritems():
             yield value
@@ -763,6 +765,7 @@ class TripleAxis(object):
         self.yaxis = ''
         self.xstep = None
         self.ystep = None
+        self.extrema = {}
 
 
     def detailed_balance(self):
@@ -943,7 +946,6 @@ class TripleAxis(object):
                     #ignoring these data fields for plotting
                     pass	
                 else:
-                    print "in else"
                     print value
                     for field in value:
                         if has_null_first and not field.measurement.x == None:
@@ -985,7 +987,21 @@ class TripleAxis(object):
         #self.xaxis = ''
         #self.yaxis = ''
         return simplejson.dumps(plottable_data)
-
+    
+    
+    
+    
+    def get_metadata(self):
+        """
+        Returns metadata for file summary table
+        """
+        
+        summary_data = {
+            'title': 'Data Summary',
+            'clear_existing': False,
+            'extrema': self.extrema,
+        }
+        return simplejson.dumps(summary_data)
 
 # ****************************************************************************************************************************************************
 # ***************************************************************** TRANSLATION METHODS **************************************************************
@@ -1007,7 +1023,10 @@ def translate(tas, dataset):
     translate_detectors(tas, dataset)
     
     translate_magnetic_field(tas, dataset)
+    translate_extrema(tas, dataset)
 
+def translate_extrema(tas, dataset):
+    tas.extrema = dataset.metadata['extrema']
 
 def translate_magnetic_field(tas, dataset):
     translate_dict = {}
@@ -1064,7 +1083,10 @@ def translate_monochromator(tas, dataset):
 
 
 def translate_analyzer(tas, dataset):
-    tas.analyzer.dspacing = dataset.metadata['analyzer_dspacing']
+    try:
+        tas.analyzer.dspacing = dataset.metadata['analyzer_dspacing']
+    except:    
+        pass
     if dataset.metadata.has_key('analyzerfocusmode'):
         tas.analyzer.focus_mode = dataset.metadata['analyzerfocusmode']
     analyzer_blades = Blades(title='analyzer', nblades=13)
@@ -1155,6 +1177,10 @@ def translate_polarized_beam(tas, dataset):
 
     map_motors(translate_dict, tas, tas.polarized_beam, dataset)
     #map_motors(translate_dict, bt7.polarized_beam, dataset)
+    
+    # if zeta and eta are not defined/given, then calculate them from h,k,l
+    #if tas.polarized_beam.eta.measurement.x == None and tas.polarized_beam.zeta.measurement.x == None:
+    #    project_into_scattering_plane(tas) 
 
     #bt7.polarized_beam.ei_flip=dataset.eiflip
     #bt7.polarized_beam.ef_flip=dataset.efflip
@@ -1278,9 +1304,9 @@ def translate_filters(tas, dataset):
     #translate_dict['hkl']='hkl'
     #In older versions, we cannot trust h,k,l, hkl, etc. because we don't know if we went where we wanted. 
     #Should translate to magnitude of q before hand
-    translate_dict['filter_tilt'] = 'temp'
-    translate_dict['filter_translation'] = 'temperaturesensor1'
-    translate_dict['filter_rotation'] = 'temperaturesensor2'
+    translate_dict['filter_tilt'] = 'filtilt'
+    translate_dict['filter_translation'] = 'filtran'
+    translate_dict['filter_rotation'] = 'filrot'
     map_motors(translate_dict, tas, tas.filters, dataset)
     #map_motors(translate_dict,bt7.filters,dataset)
 
@@ -1397,6 +1423,7 @@ def translate_metadata(tas, dataset):
     translate_dict['user'] = 'user'
     translate_dict['scan_description'] = 'scan_description'
     translate_dict['desired_npoints'] = 'npoints'
+    translate_dict['ubmatrix'] = 'ubmatrix'
 
     map_motors(translate_dict, tas, tas.meta_data, dataset)
     #ap_motors(translate_dict,tas.meta_data,dataset)
@@ -1599,6 +1626,13 @@ def establish_correction_coefficients(filename):
     return coefficients   
 
 
+def project_into_scattering_plane(tas):
+    """ 
+    Given h,k,l, orient1 and orient2, calculates eta and zeta.
+    """
+    pass
+    
+
 def make_orthonormal(o1, o2):
     """Given two vectors, creates an orthonormal set of three vectors. 
     Maintains the direction of o1 and the coplanarity of o1 and o2"""
@@ -1683,7 +1717,14 @@ def fit_plane(h, k, l, p0=None):
 
 
 def join(tas_list):
-    """Joins a list of TripleAxis objects"""
+    """
+    Joins a list of TripleAxis objects. 
+    
+    ASSUMPTION: the same number of points is recorded
+    along every data field that is relevant for determining duplicates. For intsance,
+    measuring 50 counts with 25 measurements of 'temp' and 25 measurements of 'qx, qy, qz'
+    cause errors in removing duplicates.
+    """
     #average all similar points
     #put all detectors on the same monitor, assumed that the first monitor is desired throughout
     joinedtas = tas_list[0]
@@ -2079,13 +2120,31 @@ def bin_all_fields(tas, xarr, xbin):
     
 
 
-def filereader(filename, friendly_name=None):
+def filereader(filename, orient1=None, orient2=None, acf_file=None, friendly_name=None):
+    filestr = filename
+    instrument = None
+    if friendly_name:
+        fileExt = os.path.splitext(friendly_name)[1]
+    else:
+        fileExt = os.path.splitext(filestr)[1]
+    
+    if fileExt in ['.bt2', '.bt4', '.bt7', '.bt9', '.ng5']:
+        instrument = ncnr_filereader(filestr, friendly_name=friendly_name)
+    #elif fileExt in ['.aof', '.acf']:
+    #    instrument = chalk_filereader(filestr, orient1, orient2, acf_file=acf_file) #currently returns a tas list!!!
+    elif fileExt in ['.dat']:
+        instrument = hfir_filereader(filestr)
+    
+    return instrument
+
+
+def ncnr_filereader(filename, friendly_name=None):
     filestr = filename
     mydatareader = readncnr.datareader()
     mydata = mydatareader.readbuffer(filestr, myfriendlyfilestr=friendly_name)
     instrument = TripleAxis()
     translate(instrument, mydata)
-    return instrument
+    return instrument    
 
 def chalk_filereader(aof_filename, orient1, orient2, acf_filename=None):
     
@@ -2098,12 +2157,18 @@ def chalk_filereader(aof_filename, orient1, orient2, acf_filename=None):
         instrument_list.append(instrument)
     return instrument_list
 
+def hfir_filereader(filename):
+    mydata = readhfir.readfile(filename)
+    instrument = TripleAxis()
+    translate(instrument, mydata)
+    return instrument
+
 
 #NOT WORKING! can't pass TAS object in subprocess.call()
-def run_bumps(tas, store_dir, fit="dream", burn=500, steps=1000, init="eps"):
-    process_result = subprocess.call(["bumps", "tasmodel.py", tas, "--parallel", "--fit=%s" %fit, "--burn=%d" %burn, 
-                                      "--steps=%d" %steps, "--init=%s" %init, "--store=%s" %store_dir], shell=True)
-    pass
+#def run_bumps(tas, store_dir, fit="dream", burn=500, steps=1000, init="eps"):
+#    process_result = subprocess.call(["bumps", "tasmodel.py", tas, "--parallel", "--fit=%s" %fit, "--burn=%d" %burn, 
+#                                      "--steps=%d" %steps, "--init=%s" %init, "--store=%s" %store_dir], shell=True)
+
 
 
 
@@ -2330,7 +2395,7 @@ if __name__ == "__main__":
         
         print 'subtracted!'
         
-    if 1:
+    if 0:
         #testing loading of .aof and .acf files
         aof_filename = r'chalk_data/WRBFOB.AOF'
         acf_filename = r'chalk_data/WRBFOB.ACF'
@@ -2340,5 +2405,32 @@ if __name__ == "__main__":
         
         joinedtas = join(instrument_list)
         print 'read chalk'
+        
+        
+    if 1: 
+        # testing load for hfir files
+        taslist = []
+        for i in range(1, 109): 
+            tas = filereader(r'hfir_data/HB3/exp331/Datafiles/HB3_exp0331_scan' + repr(i).zfill(4) + '.dat')
+            taslist.append(tas)
+        
+        print tas.get_metadata()
+        instrument = join(taslist)        
+        tas = hfir_filereader(myfilestr)
+        
+        print 'read hfir'
+        
+    if 0:
+        # testing load for bt4 files
+        taslist = []
+        for i in range(1, 81):
+            if i < 10:     
+                tas = filereader(r'bt4_data/fbtse00%d.bt4' %i)
+            else:
+                tas = filereader(r'bt4_data/fbtse0%d.bt4' %i)
+            taslist.append(tas)
+        
+        instrument = join(taslist)
+        print 'done'
         
     print 'Finished local test.'

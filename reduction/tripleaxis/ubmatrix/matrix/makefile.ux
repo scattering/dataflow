@@ -1,0 +1,54 @@
+#------------------------------------------------------------------------------
+#       file:   makefile.ux
+#       desc:   makefile for matrix library package under Unix
+#       by:     patrick ko
+#       date:   16 Apr 94
+#------------------------------------------------------------------------------
+OBJS = matcreat.o matdump.o materr.o matadd.o matsub.o \
+matmul.o matinv.o matsolve.o mattran.o matdet.o mattoepz.o matdurbn.o
+
+CC = cc -c
+C = cc
+CO = -lm -g
+
+demo:	demo.c $(OBJS)
+	$(C) demo.c -o demo $(OBJS) $(CO)
+
+matcreat.o:	matcreat.c matrix.h
+	$(CC) matcreat.c
+
+matdump.o:	matdump.c matrix.h
+	$(CC) matdump.c
+
+materr.o:	materr.c matrix.h
+	$(CC) materr.c
+
+matadd.o:	matadd.c matrix.h
+	$(CC) matadd.c
+
+matsub.o:	matsub.c matrix.h
+	$(CC) matsub.c
+
+matmul.o:	matmul.c matrix.h
+	$(CC) matmul.c
+
+matinv.o:	matinv.c matrix.h
+	$(CC) matinv.c
+
+matsolve.o:	matsolve.c matrix.h
+	$(CC) matsolve.c
+
+mattran.o:	mattran.c matrix.h
+	$(CC) mattran.c
+
+matdet.o:	matdet.c matrix.h
+	$(CC) matdet.c
+
+mattoepz.o:	mattoepz.c matrix.h
+	$(CC) mattoepz.c
+
+matdurbn.o:	matdurbn.c matrix.h
+	$(CC) matdurbn.c
+
+matsubx.o:	matsubx.c matrix.h
+	$(CC) matsubx.c
