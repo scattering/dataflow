@@ -723,8 +723,8 @@ class UBCalcTilt(UBCalc):
         
         #There is a 
         
-        t1_nu=u1_nu
-        t2_nu=u2_nu
+        t1_nu=np.copy(u1_nu)
+        t2_nu=np.copy(u2_nu)
         t3_nu=np.cross(t1_nu, t2_nu)
         T_nu=np.array([t1_nu, t2_nu,t3_nu],'Float64').T
         #the t_i form the columns of the T matrix
@@ -832,7 +832,7 @@ class UBCalcTilt(UBCalc):
             #calculating the UB matrix
             Umatrix = np.dot(Tp, Tc.T) 
             #UBmatrix = np.dot(Umatrix, Bmatrix)
-            return Umatrix    
+            return Umatrix
 
 
 class StrategyFlatPlane(object):
@@ -1083,7 +1083,7 @@ def UBtest3():
     
     #result = calcIdealAngles2(hv1, hv2, UB, 2.35916)
     print UB    
-    Q_vec=np.array([1.,1.,0],'Float64')
+    Q_vec=np.array([1.,1.,1.],'Float64')
     mu_plane=0
     nu_plane=0
     angles=ubcalc.calc_angles(mu_plane,nu_plane,UB,Q_vec,14.7,14.7)

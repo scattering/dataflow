@@ -1,0 +1,3 @@
+LIBRARY PyUB.pyd
+EXPORTS
+initPyUB
