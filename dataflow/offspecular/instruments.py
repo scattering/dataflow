@@ -372,12 +372,12 @@ two_theta_lambda_qxqz = two_theta_lambda_qxqz_module(id='ospec.tth_wl_qxqz', dat
 
 
 # Theta Two theta to qxqz module
-def theta_two_theta_qxqz_action(input=[], output_grid=None, wavelength=5.0, **kwargs):
+def theta_two_theta_qxqz_action(input=[], output_grid=None, wavelength=5.0, qxmin= -0.003, qxmax=0.003, qxbins=201, qzmin=0.0, qzmax=0.1, qzbins=201,**kwargs):
     print "converting theta and two theta to qx and qz"
     grid = None
     if output_grid != None:
         grid = output_grid[0]
-    result = ThetaTwothetaToQxQz().apply(input, output_grid=grid, wavelength=wavelength)
+    result = ThetaTwothetaToQxQz().apply(input, grid, wavelength, qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)
     return dict(output=result)
 theta_two_theta_qxqz = theta_two_theta_qxqz_module(id='ospec.th_tth_qxqz', datatype=OSPEC_DATA, version='1.0', action=theta_two_theta_qxqz_action)
 

@@ -707,7 +707,7 @@
         var ticks = [];
         ticks.push([min, ' ']); // ticks are positioned with log
         var tick = nextLogTick(Math.pow(10, min), false);
-        console.log(tick);
+        //console.log(tick);
         //var tickpos = tick.value;
         var tickpos = Math.log(tick.value)/Math.LN10;
         var i = 0;
