@@ -34,7 +34,7 @@ ub.calcplanenormal()
 #
 # You may then calculate spectrometer angles for a given ei,ef,H,K,L using self.calcangles():
 #
-(a2,a3,a4,sgl,sgu,a6) = ub.calcangles(ei=14.7,ef=14.7,qh=1.0,qk=1.0,ql=0.0)
+(a2,a3,a4,sgl,sgu,a6) = ub.calcangles(ei=14.7,ef=14.7,qh=1.0,qk=1.0,ql=1.0)
 ub.dump()   # Print current members of ub object
 print "A2 = %f  A3 = %f  A4 = %f  sgl = %f  sgu = %f  A6= %f \n"%(a2,a3,a4,sgl,sgu,a6)
 #
