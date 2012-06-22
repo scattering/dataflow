@@ -20,3 +20,4 @@ OOSuite
 *.tex~
 *.js~
 *.html~
+testdb*
