@@ -43,7 +43,7 @@ to something plottable
 """
 
 # for purposes of iterating over a dictionary for a TripleAxis object, these fields are skipped
-skipped_fields=['data','meta_data','sample','sample_environment','xstep','ystep','num_bins','magnetic_field']
+skipped_fields=['data','meta_data','sample','sample_environment','xstep','ystep','num_bins','magnetic_field','extrema']
 
 
 
