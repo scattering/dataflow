@@ -720,12 +720,14 @@ class UBCalcTilt(UBCalc):
         Q_nu=np.dot(UB,Q_vec)
         u1_nu=Q_nu/np.linalg.norm(Q_nu)  #unit vector along q
         u2_nu=np.cross(u_nu_perp,u1_nu)
+        u2_nu=u2_nu/np.linalg.norm(u2_nu)  #make unit vector (unnecessary)?
         
         #There is a 
         
         t1_nu=np.copy(u1_nu)
         t2_nu=np.copy(u2_nu)
         t3_nu=np.cross(t1_nu, t2_nu)
+        t3_nu=t3_nu/np.linalg.norm(t3_nu)  #make unit vector (unnecessary?)
         T_nu=np.array([t1_nu, t2_nu,t3_nu],'Float64').T
         #the t_i form the columns of the T matrix
         R=np.linalg.inv(T_nu)
