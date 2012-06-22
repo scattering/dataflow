@@ -1,6 +1,6 @@
 import numpy as np
 import uncertainty, err1d
-
+import sys, os
 #import readncnr4 as readncnr
 import readncnr5 as readncnr #readncnr5 is configured for min/max for get_metadata()
 import readchalk as readchalk
@@ -19,14 +19,14 @@ import rebin2
 #from dataflow import regular_gridding
 #from ...dataflow import wireit
 
-LOCAL=True
+LOCAL=False
 
 if not LOCAL:
     #for use in larger project
     from ... import regular_gridding
 if LOCAL:
     #for use in local testing
-    import sys, os
+    
     from matplotlib import pylab
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
     from dataflow import regular_gridding
