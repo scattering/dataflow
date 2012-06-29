@@ -19,7 +19,7 @@ import rebin2
 #from dataflow import regular_gridding
 #from ...dataflow import wireit
 
-LOCAL=False
+LOCAL=True
 
 if not LOCAL:
     #for use in larger project
@@ -996,12 +996,7 @@ class TripleAxis(object):
         Returns metadata for file summary table
         """
         
-        summary_data = {
-            'title': 'Data Summary',
-            'clear_existing': False,
-            'extrema': self.extrema,
-        }
-        return simplejson.dumps(summary_data)
+        return simplejson.dumps(self.extrema)
 
 # ****************************************************************************************************************************************************
 # ***************************************************************** TRANSLATION METHODS **************************************************************

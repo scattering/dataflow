@@ -132,7 +132,7 @@ function makeFileMultiSelect(src_files, selected_files, form_id, fieldLabel) {
 }
 
 // Given a bundle of TripleAxis objects, 
-function makeDataSummary(source_objects, selected_objects, form_id, fieldLabel) {
+function makeDataSummaryTable(source_objects, selected_objects, form_id, fieldLabel) {
 
 //    var src_files = []
 //    for (var i in FILES) {
@@ -142,49 +142,54 @@ function makeDataSummary(source_objects, selected_objects, form_id, fieldLabel) 
     
     var form_id = form_id || 0;
 
-    //TODO make into table/grid
-    var source_objects_selector = {
-		xtype: 'multiselect',
-		name              :  'multiselect',
-		fieldLabel        :  'Multiselect',
-		store: source_objects,
-		height: 390,
-	};
-	
-	var dest_objects_selector = {
-		xtype: 'multiselect',
-		name              :  'multiselect',
-		fieldLabel        :  'Multiselect',
-		store: [],          
-		allowBlank        :  true,
-		height: 390,
-	}
-	
-	var itemselector = {
-	    xtype: 'itemselector',
-	    fieldLabel: fieldLabel,
-	    multiselects: [source_objects_selector, dest_objects_selector],
-	    store: src_objects,
-	    value: selected_objects,
-	    width: 400,
-	    height: 400,
-	    reverse_lookup_id: form_id
-	}
-	
-	var item = {
-	    xtype: 'fieldset',
-	    title: fieldLabel,
-	    fieldLabel: fieldLabel,
-	    //labelWidth: 0,
-	    collapsible: true,
-	    layout: 'fit',
-//	    width: 600,
-//	    defaults: {
-//		    anchor: '100%'
-//	    },
-	    items: itemselector
-    }
-	return item;
+      myUBmatrix = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]] //The variable that will hold the calculated UB matrix
+
+    var baseData = [
+        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    ];
+    var baseIdealData = [
+        [0.0, 0.0, 0.0, '0', '0', '0', '0', '0'],
+    ];
+
+    // create the Data Store
+    var UBInputFields = [
+        { name: 'h',        type: 'float'},
+        { name: 'k',        type: 'float'},
+        { name: 'l',        type: 'float'},
+        { name: 'twotheta', type: 'float'},
+        { name: 'theta',    type: 'float'},
+        { name: 'chi',      type: 'float'},
+        { name: 'phi',      type: 'float'},
+    ] 
+    var store = new Ext.data.ArrayStore({
+        autodestroy     : false,
+        storeId         : 'UBInputStore',
+        fields          : UBInputFields,
+        pruneModifiedRecords: true
+    });
+    store.loadData(baseData);
+    
+    
+    var desiredFields = [
+        { name: 'h'},
+        { name: 'k'},
+        { name: 'l'},
+        { name: 'twotheta'},
+        { name: 'theta'},
+        { name: 'omega'},
+        { name: 'chi'},
+        { name: 'phi'},
+    ] 
+    var idealDataStore = new Ext.data.ArrayStore({
+        autoDestroy     : false,
+        storeId         : 'desiredStore',
+        fields          : desiredFields,
+        pruneModifiedRecords: true
+    });
+    idealDataStore.loadData(baseIdealData);
+    
+    //return item;
 }
 
 function stripHeadersObject(headers) {
@@ -226,7 +231,7 @@ function configForm(headerList, moduleID) {
 	        reverse_lookup_id += 1;
 	        
         } 
-
+	/*
         else if (header.type == 'data_summary') {
                 //editor.FAT.update(FILES, editor.getValue().working.modules);
 	        //var unassociated_files = editor.FAT.getUnassociatedFiles(editor.reductionInstance);
@@ -234,11 +239,12 @@ function configForm(headerList, moduleID) {
 	        //var total_files = [];
 	        //for (var i in unassociated_files) { total_files.push(unassociated_files[i]); }
 	        //for (var i in module_files) { total_files.push(module_files[i]); }
-	        item = makeDataSummary(total_files, module_files, reverse_lookup_id, header.label);
+	        item = makeDataSummaryTable(total_files, module_files, reverse_lookup_id, header.label);
 	        reverse_lookup[reverse_lookup_id] = header; // pointer back to the original object
 	        reverse_lookup_id += 1;
 
-      }
+	}
+	*/
 
         else if (header.type == "Array" || header.type == "Object") { // allow for nested lists of parameters
                 var itemlist = [];

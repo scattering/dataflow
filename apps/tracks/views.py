@@ -80,6 +80,11 @@ def return_data(request):
     dataArray=[['file name','database id','sha1','x','y','z'],[NaN,NaN,NaN,10,10,10],[NaN,NaN,NaN,-10,-10,-10],['file3','1','sh1','1,9','2,3','3,4'],['file2','1','sh2','4,5','2,3','5,5']]    
     return HttpResponse(simplejson.dumps(dataArray))  
 
+def return_tas_data(request):
+    #currently just for local testing --> eventually use data_abstraction's get_metadata()
+    dataObject = {"title": "Data Summary", "extrema": {"ei": [14.7001, 14.7001], "ef": [14.6988, 14.6988], "monitor": [493394.0, 493394.0]}}
+    return HttpResponse(simplejson.dumps(dataObject)) 
+
 import redis
 server = redis.Redis("localhost")
 
