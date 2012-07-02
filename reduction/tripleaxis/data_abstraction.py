@@ -2119,9 +2119,9 @@ def filereader(filename, orient1=None, orient2=None, acf_file=None, friendly_nam
     filestr = filename
     instrument = None
     if friendly_name:
-        fileExt = os.path.splitext(friendly_name)[1]
+        fileExt = os.path.splitext(friendly_name)[1].lower()
     else:
-        fileExt = os.path.splitext(filestr)[1]
+        fileExt = os.path.splitext(filestr)[1].lower()
     
     if fileExt in ['.bt2', '.bt4', '.bt7', '.bt9', '.ng5']:
         instrument = ncnr_filereader(filestr, friendly_name=friendly_name)
@@ -2129,6 +2129,8 @@ def filereader(filename, orient1=None, orient2=None, acf_file=None, friendly_nam
     #    instrument = chalk_filereader(filestr, orient1, orient2, acf_file=acf_file) #currently returns a tas list!!!
     elif fileExt in ['.dat']:
         instrument = hfir_filereader(filestr)
+    elif fileExt in ['.aof']:
+        instrument = chalk_filereader(filename, orient1, orient2, acf_filename=acf_filename)
     
     return instrument
 

@@ -21,8 +21,8 @@ urlpatterns = patterns(REPO_ROOT + '.apps.tracks.views',
 		('^uploadFiles/$', 'uploadFiles'),
 		('^filesExist/$', 'filesExist'),
 		('^getBinaryData/', 'getBinaryData'),
-                ('^json/$','return_data'),
-                ('^test_table/$','testTable'),
+        ('^json/$','return_data'),
+        ('^test_table/$','testTable'),
 		
 		# Wiring editor display urls
 		('^editor/$', 'displayEditor'),
@@ -63,6 +63,5 @@ urlpatterns += patterns('',
 		      (r'^profiles/', include('profiles.urls')),
 		      (r'', REPO_ROOT + '.apps.tracks.views.home'),
 		      
-		      
 		      )
-		
+

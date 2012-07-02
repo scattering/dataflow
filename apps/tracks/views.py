@@ -35,6 +35,11 @@ print "SANS imported: ", SANS_NG3.id
 from ...dataflow.tas.instruments import BT7 as TAS_INS
 print "TAS imported: ", TAS_INS.id
 
+# For reading in files and their metadata in the EditExperiment page
+from ...reduction.tripleaxis.data_abstraction import ncnr_filereader
+from ...reduction.tripleaxis.data_abstraction import chalk_filereader
+from ...reduction.tripleaxis.data_abstraction import hfir_filereader
+
 
 from ...dataflow import wireit
 
@@ -78,7 +83,7 @@ def testTable(request):
 
 def return_data(request):
     dataArray=[['file name','database id','sha1','x','y','z'],[NaN,NaN,NaN,10,10,10],[NaN,NaN,NaN,-10,-10,-10],['file3','1','sh1','1,9','2,3','3,4'],['file2','1','sh2','4,5','2,3','5,5']]    
-    return HttpResponse(simplejson.dumps(dataArray))  
+    return HttpResponse(simplejson.dumps(dataArray))
 
 def return_tas_data(request):
     #currently just for local testing --> eventually use data_abstraction's get_metadata()
@@ -87,6 +92,10 @@ def return_tas_data(request):
 
 import redis
 server = redis.Redis("localhost")
+
+
+#def return_loaded_file(request):
+    
 
 def getBinaryData(request):
     binary_fp = request.POST['binary_fp']
@@ -435,16 +444,52 @@ def uploadFiles(request):
             open(write_here, 'w').write(file_data)
 
             new_files = File.objects.filter(name=file_sha1.hexdigest())
+            
+            instrument = call_appropriate_filereader(write_here, friendly_name=f.name)
+            # extract's the instrument's metadata to put into the File model
+            try:
+                metadata = instrument.extrema
+            except:
+                metadata = None
+            
             if len(new_files) > 0:
                 new_file = new_files[0]
             else:
-                new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location)
+                new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location, metadata=metadata)
 
             if experiment is not None:
                 #print "experiment id: ", request.POST[u'experiment_id']
                 experiment.Files.add(new_file)
 
-    return HttpResponse('OK')    
+    return HttpResponse('OK') 
+
+
+def call_appropriate_filereader(filestr, friendly_name):
+    """
+    Determines the appropriate reader to call based on the file extension and returns
+    the 'loaded' instrument object.
+    
+    filestr --> full path to file so that "open(filestr, 'r')" will work.
+    friendly_name --> original file name before it was hashed to its sha1 identifier.
+    """
+    instrument = None
+    if friendly_name:
+        fileExt = os.path.splitext(friendly_name)[1].lower()
+    else:
+        try:
+            fileExt = os.path.splitext(filestr)[1].lower()
+        except:
+            #in the event that there is no extension (ie only a hash was provided)
+            fileExt = None
+    
+    if fileExt in ['.bt2', '.bt4', '.bt7', '.bt9', '.ng5']:
+        instrument = ncnr_filereader(filestr, friendly_name=friendly_name)
+    elif fileExt in ['.dat']:
+        instrument = hfir_filereader(filestr)
+    elif fileExt in ['.aof']:
+        instrument = chalk_filereader(filename, acf_filename=acf_filename)
+    
+    return instrument
 
 ###### BT7 TESTING
 #    register_instrument(BT7)
