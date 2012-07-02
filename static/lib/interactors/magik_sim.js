@@ -124,13 +124,13 @@
         this.redraw();
     };
     
-    $.jqplot.Arrow = function() {};
-    $.jqplot.Arrow.prototype = new $.jqplot.Spinor();
-    $.jqplot.Arrow.prototype.constructor = $.jqplot.Arrow;
-    $.extend($.jqplot.Arrow.prototype, {
+    $.jqplot.SpinArrow = function() {};
+    $.jqplot.SpinArrow.prototype = new $.jqplot.Spinor();
+    $.jqplot.SpinArrow.prototype.constructor = $.jqplot.SpinArrow;
+    $.extend($.jqplot.SpinArrow.prototype, {
         initialize: function (parent, c, p1, width) {
             $.jqplot.GrobConnector.prototype.initialize.call(this, parent, width);
-            this.name = 'arrow';
+            this.name = 'spinarrow';
             this.translatable = false;
             this.rotatable = true;
             this.connectortranslatable = false;
@@ -173,6 +173,72 @@
     });
     
     
+    $.jqplot.SpinArrowInteractor = function() {
+        $.jqplot.Interactor.call(this)
+    };
+    
+    $.jqplot.SpinArrowInteractor.prototype = new $.jqplot.Interactor();
+    $.jqplot.SpinArrowInteractor.prototype.constructor = $.jqplot.SpinArrowInteractor;
+    
+    $.jqplot.SpinArrowInteractor.prototype.init = function(canvasid) {
+        $.jqplot.Interactor.prototype.init.call(this, 'SpinArrow', 'Arrow.png', 0, canvasid);        
+        this.c = new $.jqplot.RotationAxis(); this.c.initialize(this, 200, 150);
+        this.c.translatable = false;
+        this.p1 = new $.jqplot.Point(); this.p1.initialize(this, 150, 100);
+        
+        var Arrow = new $.jqplot.SpinArrow(); Arrow.initialize(this, this.c, this.p1, 4);
+        this.grobs.push(Arrow, this.c,  this.p1);
+        // the order matters!!  if you push(c, Arrow) the Arrow is the last to get checked for isInside
+        // so it becomes the selected object (put items in order of increasing z-value!)
+        this.SpinArrow = Arrow;
+        this.p1.onDrag = function(e, pos) {
+                $.jqplot.Point.prototype.onDrag.call(this, e, pos);
+                
+                var new_angle = Math.atan2(this.pos.y - this.parent.c.pos.y, this.pos.x - this.parent.c.pos.x);
+                var new_len = 2*Math.sqrt(Math.pow(this.pos.y - this.parent.c.pos.y, 2) + Math.pow(this.pos.x - this.parent.c.pos.x, 2));
+                this.parent.SpinArrow.angle = new_angle;
+                this.parent.SpinArrow.len = new_len;
+                this.parent.c.angle = new_angle;
+            };
+        
+        this.redraw();
+    };
+    
+    $.jqplot.Arrow = function() {};
+    $.jqplot.Arrow.prototype = new $.jqplot.Segment();
+    $.jqplot.Arrow.prototype.constructor = $.jqplot.Arrow;
+    $.extend($.jqplot.Arrow.prototype, {
+        initialize: function (parent, p2, p1, width) {
+            $.jqplot.GrobConnector.prototype.initialize.call(this, parent, width);
+            this.name = 'arrow';
+            this.translatable = false;
+            this.connectortranslatable = false;
+            this.arrow_width = width * 5;
+            
+            this.angle = Math.atan2(this.p2.pos.y - this.p1.pos.y, this.p2.pos.x - this.p1.pos.x);
+            this.len = Math.sqrt(Math.pow(p2.pos.y - p1.pos.y, 2) + Math.pow(p2.pos.x - p1.pos.x, 2));
+        },
+        
+        update_angle: function() {
+            this.angle = Math.atan2(this.p2.pos.y - this.p1.pos.y, this.p2.pos.x - this.p1.pos.x);
+        },
+        
+        render: function(ctx) {
+            $.jqplot.GrobConnector.prototype.render.call(this, ctx);
+            this.update_angle();
+            arrow_p1 = { x: ( this.p2.pos.x + Math.cos(this.angle + Math.PI*0.85) * this.arrow_width ),
+                         y: ( this.p2.pos.y + Math.sin(this.angle + Math.PI*0.85) * this.arrow_width ) }
+            arrow_p2 = { x: ( this.p2.pos.x + Math.cos(this.angle - Math.PI*0.85) * this.arrow_width ),
+                         y: ( this.p2.pos.y + Math.sin(this.angle - Math.PI*0.85) * this.arrow_width ) }
+            ctx.beginPath();
+            ctx.moveTo(arrow_p1.x, arrow_p1.y);
+            ctx.lineTo(this.p2.pos.x, this.p2.pos.y);
+            ctx.lineTo(arrow_p2.x, arrow_p2.y);
+            ctx.stroke();   
+        }
+        
+    });
+    
     $.jqplot.ArrowInteractor = function() {
         $.jqplot.Interactor.call(this)
     };
@@ -182,24 +248,23 @@
     
     $.jqplot.ArrowInteractor.prototype.init = function(canvasid) {
         $.jqplot.Interactor.prototype.init.call(this, 'Arrow', 'Arrow.png', 0, canvasid);        
-        this.c = new $.jqplot.RotationAxis(); this.c.initialize(this, 200, 150);
-        this.c.translatable = false;
-        this.p1 = new $.jqplot.Point(); this.p1.initialize(this, 150, 100);
-        
-        var Arrow = new $.jqplot.Arrow(); Arrow.initialize(this, this.c, this.p1, 4);
-        this.grobs.push(Arrow, this.c,  this.p1);
+        this.p1 = new $.jqplot.Point(); this.p1.initialize(this, 50, 50);
+        this.p2 = new $.jqplot.Point(); this.p1.initialize(this, 150, 100);
+        var Arrow = new $.jqplot.Arrow(); Arrow.initialize(this, this.p1, this.p2, 4);
+        this.grobs.push(Arrow, this.p1,  this.p2);
         // the order matters!!  if you push(c, Arrow) the Arrow is the last to get checked for isInside
         // so it becomes the selected object (put items in order of increasing z-value!)
         this.Arrow = Arrow;
         this.p1.onDrag = function(e, pos) {
-                $.jqplot.Point.prototype.onDrag.call(this, e, pos);
-                
-                var new_angle = Math.atan2(this.pos.y - this.parent.c.pos.y, this.pos.x - this.parent.c.pos.x);
-                var new_len = 2*Math.sqrt(Math.pow(this.pos.y - this.parent.c.pos.y, 2) + Math.pow(this.pos.x - this.parent.c.pos.x, 2));
-                this.parent.Arrow.angle = new_angle;
-                this.parent.Arrow.len = new_len;
-                this.parent.c.angle = new_angle;
-            };
+            $.jqplot.Point.prototype.onDrag.call(this, e, pos);
+            //var new_len = 2*Math.sqrt(Math.pow(this.pos.y - this.parent.c.pos.y, 2) + Math.pow(this.pos.x - this.parent.c.pos.x, 2));
+            //this.parent.SpinArrow.angle = new_angle;
+            //this.parent.SpinArrow.len = new_len;
+            //this.parent.c.angle = new_angle;
+        };
+        this.p2.onDrag = function(e, pos) {
+            $.jqplot.Point.prototype.onDrag.call(this, e, pos);
+        };
         
         this.redraw();
     };

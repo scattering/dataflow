@@ -21,4 +21,5 @@ OOSuite
 *.js~
 *.html~
 settings.py
+testdb*
 

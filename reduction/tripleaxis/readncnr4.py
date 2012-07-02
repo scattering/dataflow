@@ -1,3 +1,4 @@
+
 import numpy as N
 #import pylab
 import datetime
@@ -13,10 +14,10 @@ import os
 months={'jan':1,'feb':2,'mar':3,'apr':4,'may':5,'jun':6,'jul':7,'aug':8,'sep':9,'oct':10,'nov':11,'dec':12}
 
 def get_tokenized_line(myfile,returnline=['']):
-        lineStr=myfile.readline()
-        returnline[0]=lineStr.rstrip()
-        strippedLine=lineStr.lower().rstrip()
-        tokenized=strippedLine.split()
+        lineStr = myfile.readline()
+        returnline[0] = lineStr.rstrip()
+        strippedLine = lineStr.lower().rstrip()
+        tokenized = strippedLine.split()
 
         return tokenized
 
@@ -350,11 +351,6 @@ class datareader(object):
                 self.metadata['year']=int(tokenized[3].strip("\'"))
                 self.metadata['start_time']=tokenized[4].strip("\'")
 
-                #I skip this for now, because it is not reliable about the actual number of points in the file, just the desired number
-                #self.metadata['npts']=int(tokenized[9])
-
-
-
                 #skip over names of fields
                 lineStr=myfile.readline()
                 #comment and filename
@@ -371,7 +367,7 @@ class datareader(object):
                         if not(lineStr):
                                 break
                         if lineStr[0] != "#":
-                                count=count+1
+                                count=count + 1
                                 strippedLine=lineStr.rstrip().lower()
                                 tokenized=strippedLine.split()
                                 for i in range(len(tokenized)):
@@ -636,7 +632,27 @@ class datareader(object):
                 #print self.columnlist
                 return
 
-
+        def readbt4(self, myfile):
+                # Assumes all metadata has already been read in. The first line read
+                # should be the column headers
+                myFlag=True
+                returnline = ['']
+                self.get_columnmetadatas(myfile)
+                
+                #field_names = get_tokenized_line(myfile)
+                #for field in field_names:
+                #        self.columndict[field] = []
+                
+                while myFlag:
+                        tokenized = get_tokenized_line(myfile)
+                        if tokenized == None or tokenized == []:
+                                break
+                        
+                        if len(tokenized) > 1:
+                                for i in range(len(self.columnlist)):
+                                        self.columndict[self.columnlist[i]].append(float(tokenized[i]))
+                                
+                return
 
         def readbuffer(self,myfilestr,lines=N.Inf,myfriendlyfilestr=None):
                 if 0:
@@ -644,13 +660,13 @@ class datareader(object):
                         print self.myfilestr
                         self.lines=lines
                         myfile = open(myfilestr, 'r')
-                        self.instrument=self.myfilestr.split('.')[1]
+                        self.instrument=os.path.splitext(filestr)[1].split('.')[1].lower()
                 if 1:
                         self.lines=lines
                         myfile = open(myfilestr, 'r')
                         filestr = myfilestr if (myfriendlyfilestr == None) else myfriendlyfilestr
-                        self.instrument=filestr.split('.')[1]
-                if self.instrument in ['bt9','ng5','bt2']:
+                        self.instrument=os.path.splitext(filestr)[1].split('.')[1].lower()
+                if self.instrument in ['bt2', 'bt4', 'bt9', 'ng5']:
                         # Determine FileType
                         self.determinefiletype(myfile)
                         if self.metadata['scantype'].lower()=='i':
@@ -664,20 +680,24 @@ class datareader(object):
                                 self.readqmetadata(myfile)
 
                         #read columns
-                        self.readcolumns(myfile)
+                        if self.instrument == 'bt4':
+                                self.readbt4(myfile)
+                        else:
+                                self.readcolumns(myfile)
+
                         myfile.close()
-                        mydata=Data(self.metadata,self.columndict)
+                        mydata = Data(self.metadata, self.columndict)
                         #print self.metadata
                         #print self.columnlist
                         filename=os.path.split(filestr)[-1]
-                        self.metadata['filename']=filename
+                        self.metadata['filename'] = filename
                         #print 'filename ', tokenized[1]
                         pattern = re.compile('^(?P<base>[^.]*?)(?P<seq>[0-9]*)(?P<ext>[.].*)?$')
                         match = pattern.match(filename)
                         dict((a,match.group(a)+"") for a in ['base','seq','ext'])
                         #print 'filebase ',match.group('base')
-                        self.metadata['filebase']=match.group('base')
-                        self.metadata['fileseq_number']=match.group('seq')
+                        self.metadata['filebase'] = match.group('base')
+                        self.metadata['fileseq_number'] = match.group('seq')
                 else:
                         #instrument is bt7
                         self.readbt7(myfile)
@@ -861,5 +881,4 @@ if __name__=='__main__':
         if 0:
                 print 'additional metadata'
                 print mydata.additional_metadata
-
 

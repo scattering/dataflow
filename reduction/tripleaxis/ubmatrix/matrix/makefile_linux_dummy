@@ -1,0 +1,2 @@
+DUMMY=_dummy
+include makefile_linux

@@ -1,0 +1,18 @@
+#---------------------------------------------------------------------------
+# Makefile for the Matrix library
+#
+# Mark Koennecke, November 1996
+#--------------------------------------------------------------------------
+
+OBJ=   matadd.o matcreat.o matdet.o matdump.o matdurbn.o materr.o \
+       matinv.o matmul.o matsolve.o matsub.o matsubx.o mattoepz.o \
+       mattran.o
+
+libmatrix.a: $(OBJ)
+	- rm -f libmatrix.a
+	ar cr libmatrix.a $(OBJ)
+	ranlib libmatrix.a
+
+clean:
+	rm -f *.o
+	rm -f *.a

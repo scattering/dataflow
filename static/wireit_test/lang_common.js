@@ -205,3 +205,65 @@ YAHOO.lang.extend(SliceContainer, WireIt.Container, {
 
 
 
+
+ExtractContainer = function(opts, layer) {
+    jQuery.extend(true, opts, {
+        'height': 16,
+        'width': 120,
+        'terminals': [{
+            "name": "input", 
+            "offsetPosition": {"left": -16, "top": 16}, 
+          }, 
+          {
+            "name": "output", 
+            "offsetPosition": {"left": 44,"bottom": -52}, 
+          }, 
+        ]
+    });  
+    ExtractContainer.superclass.constructor.call(this, opts, layer);
+
+    var content = document.createElement('div');
+    content.innerHTML = '';
+
+    var extractButton = document.createElement('button');
+    extractButton.value = 'extract';
+    extractButton.innerHTML = 'Extract';
+
+    content.appendChild(extractButton);
+    this.setBody(content);
+    
+    YAHOO.util.Event.addListener(extractButton, 'click', this.openExtractConfig, this, true);
+
+};
+
+YAHOO.lang.extend(ExtractContainer, WireIt.Container, {
+    xtype: 'ExtractContainer',
+    openExtractConfig: function(e, f) {
+        var reductionInstance = editor.reductionInstance;
+        var wires = f.wires;
+        if (wires.length == 0) {
+            alert('no data to get (no wires in)');
+            return
+        } else {
+            var wire_in = f.wires[0];
+            clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
+        }
+        var toReduce = editor.generateReductionRecipe(reductionInstance, clickedOn);
+        f.getConfig();
+        editor.adapter.runReduction(toReduce, {
+            success: function(result) { 
+		// Call get_metadata --> generate module config popup
+                
+		/*
+                var sliceWindow = window.open("/static/lib/plotting/sliceplotwindow.html", "", "status=1,width=1024,height=768");
+		        sliceWindow.toPlot = result;
+		        sliceWindow.container = f;
+                sliceWindow.reductionInstance = reductionInstance;
+		*/
+            },
+            failure: editor.runModuleFailure,
+            scope: editor}
+        );
+        
+    }
+});

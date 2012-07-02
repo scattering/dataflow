@@ -235,6 +235,7 @@ function render1dplot(data, transform, plotid, plot_options) {
         cursor: {
             show: true,
             zoom: true,
+            clickReset: true,
             tooltipLocation:'se',
             tooltipOffset: -60,
             useAxesFormatters: false,
@@ -345,6 +346,7 @@ function renderImageData2(data, transform, plotid, plot_options) {
         cursor: {
             show: true,
             zoom: true,
+            clickReset: true,
             tooltipLocation:'se',
             tooltipOffset: -60,
             useAxesFormatters: false,
@@ -416,7 +418,7 @@ function update1dPlot(plot, toPlots, target_id, plotnum) {
         var plotdiv = document.getElementById(target_id);
         plotdiv.innerHTML = "";
         jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 700px; height: 350px;", id:"plotbox"}));
-        jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width:550px; height: 350px; ", id:"plot1d"}));
+        jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width:550px; height: 350px; ", id:"plotgrid"}));
         jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 410px; height: 100px;", id:"plotbuttons"}));
         jQuery(plotdiv).append(jQuery('<div />', {id:"metadata", class:"slidingDiv"}));
         jQuery(document.getElementById('plotbuttons')).append(jQuery('<select />', {id:"plot_selectz"}));
@@ -448,7 +450,7 @@ function update1dPlot(plot, toPlots, target_id, plotnum) {
         jQuery(document.getElementById('plot_selectnum')).append(jQuery('<option />', { value: i, text: 'dataset: ' + i + " " + label }));
     }
     
-    plot = render1dplot(toPlot, transform, 'plot1d');
+    plot = render1dplot(toPlot, transform, 'plotgrid');
 
     var selectedIndex;
     if ( transform == 'log') { selectedIndex = 1 }
@@ -465,7 +467,7 @@ function update1dPlot(plot, toPlots, target_id, plotnum) {
         var transform = selectz[selectz.selectedIndex].value;
         var plotnum = selectnum[selectnum.selectedIndex].value;
         var toPlot = toPlots[plotnum];
-        plot = render1dplot(toPlot, transform, 'plot1d');
+        plot = render1dplot(toPlot, transform, 'plotgrid');
         if (toPlot.metadata) {
             var metadata_table = make_metadata_table(toPlot.metadata);
             document.getElementById('metadata').innerHTML = "";
@@ -487,7 +489,7 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         var plotdiv = document.getElementById(target_id);
         plotdiv.innerHTML = "";
         jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 700px; height: 350px;", id:"plotbox"}));
-        jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width:550px; height: 350px; ", id:"plot2d"}));
+        jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width:550px; height: 350px; ", id:"plotgrid"}));
         jQuery(document.getElementById('plotbox')).append(jQuery('<div />', {style:"float: left; width: 100; height: 350; ", id:"colorbar"}));
         jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 410px; height: 100px;", id:"plotbuttons"}));
         jQuery(plotdiv).append(jQuery('<div />', {id:"metadata", class:"slidingDiv"}));
@@ -531,7 +533,7 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         jQuery(document.getElementById('plot_selectnum')).append(jQuery('<option />', { value: i, text: 'dataset: ' + i + " " + zlabel }));
     }
     
-    plot = renderImageData2(toPlot, transform, 'plot2d', {'fixedAspect': {'fixAspect': fixAspect, 'aspectRatio': aspectRatio}});
+    plot = renderImageData2(toPlot, transform, 'plotgrid', {'fixedAspect': {'fixAspect': fixAspect, 'aspectRatio': aspectRatio}});
     colorbar = renderImageColorbar2(plot.series[0], 'colorbar');
     plot2d.series[0].zoom_to();
     plot2d.replot();

@@ -54,6 +54,7 @@ class Project(models.Model):
 class Experiment(models.Model):
 	ProposalNum = models.CharField(max_length=100) # IMS proposal/request number
 	Files = models.ManyToManyField('File', null=True)
+	Results = models.ManyToManyField('Result', null=True)
 	facility = models.ForeignKey('Facility', null=True)
 	users = models.ForeignKey(User)
 	#permissions = models.ForeignKey(Permission, null=True)
@@ -78,7 +79,16 @@ class Facility(models.Model):
 	instruments = models.ManyToManyField('Instrument', null=True)
 	def __unicode__(self):
 		return self.Name
-	
+
+class Result(models.Model):
+    name = models.CharField(max_length=160, primary_key=True) # sha1 hash of template
+    template_representation = models.TextField() # template that created the result
+    Title = models.CharField(max_length=50)
+    location = models.CharField(max_length=300) #location of file on disk
+    metadata = models.ManyToManyField('Metadata', null=True)
+    def __unicode__(self):
+        return self.Title
+
 	
 	
 	

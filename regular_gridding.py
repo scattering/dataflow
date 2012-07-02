@@ -5,6 +5,11 @@ import matplotlib.cbook
 import matplotlib.pyplot as plt
 from numpy.random import uniform
 
+def edges(C):
+    E = 0.5*(C[:-1]+C[1:])
+    return N.hstack((C[0]-2*(E[0]-C[0]), E, C[-1]+2*(C[-1]-E[-1])))
+
+
 def regularlyGrid(xarr, yarr, zarr, xstart=None, xfinal=None, xstep=None, ystart=None, yfinal=None, ystep=None):
     "Returns the regularly grided xi, yi, and zi arrays from the initial data."
     # if xstart,xfinal,xstep,ystart,yfinal,ystep are NOT given, they are derived from the data

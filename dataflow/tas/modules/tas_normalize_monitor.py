@@ -39,10 +39,10 @@ def normalize_monitor_module(id=None, datatype=None, action=None,
     ]
     
     fields['target_monitor'] = {
-        "type":"float",
+        "type": "float",
         "label": "Target monitor",
         "name": "target_monitor",
-        "value": 165000,
+        "value": None,
     }
     
     # Combine everything into a module.

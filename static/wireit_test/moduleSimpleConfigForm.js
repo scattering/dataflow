@@ -131,6 +131,62 @@ function makeFileMultiSelect(src_files, selected_files, form_id, fieldLabel) {
 	return item;
 }
 
+// Given a bundle of TripleAxis objects, 
+function makeDataSummary(source_objects, selected_objects, form_id, fieldLabel) {
+
+//    var src_files = []
+//    for (var i in FILES) {
+//        src_files.push(FILES[i][1]);
+//    }
+    var fieldLabel = fieldLabel || 'data_summary'; // can override
+    
+    var form_id = form_id || 0;
+
+    //TODO make into table/grid
+    var source_objects_selector = {
+		xtype: 'multiselect',
+		name              :  'multiselect',
+		fieldLabel        :  'Multiselect',
+		store: source_objects,
+		height: 390,
+	};
+	
+	var dest_objects_selector = {
+		xtype: 'multiselect',
+		name              :  'multiselect',
+		fieldLabel        :  'Multiselect',
+		store: [],          
+		allowBlank        :  true,
+		height: 390,
+	}
+	
+	var itemselector = {
+	    xtype: 'itemselector',
+	    fieldLabel: fieldLabel,
+	    multiselects: [source_objects_selector, dest_objects_selector],
+	    store: src_objects,
+	    value: selected_objects,
+	    width: 400,
+	    height: 400,
+	    reverse_lookup_id: form_id
+	}
+	
+	var item = {
+	    xtype: 'fieldset',
+	    title: fieldLabel,
+	    fieldLabel: fieldLabel,
+	    //labelWidth: 0,
+	    collapsible: true,
+	    layout: 'fit',
+//	    width: 600,
+//	    defaults: {
+//		    anchor: '100%'
+//	    },
+	    items: itemselector
+    }
+	return item;
+}
+
 function stripHeadersObject(headers) {
     // reduce headers to name:value pairs (removing label)
     var new_config = {};
@@ -169,25 +225,38 @@ function configForm(headerList, moduleID) {
 	        reverse_lookup[reverse_lookup_id] = header; // pointer back to the original object
 	        reverse_lookup_id += 1;
 	        
-	    } // else...
-	    
-	    else if (header.type == "Array" || header.type == "Object") { // allow for nested lists of parameters
-	        var itemlist = [];
-	        
-	        for (var j in header.value) { // nested list... is inner element
+        } 
+
+        else if (header.type == 'data_summary') {
+                //editor.FAT.update(FILES, editor.getValue().working.modules);
+	        //var unassociated_files = editor.FAT.getUnassociatedFiles(editor.reductionInstance);
+	        //var module_files = header.value;
+	        //var total_files = [];
+	        //for (var i in unassociated_files) { total_files.push(unassociated_files[i]); }
+	        //for (var i in module_files) { total_files.push(module_files[i]); }
+	        item = makeDataSummary(total_files, module_files, reverse_lookup_id, header.label);
+	        reverse_lookup[reverse_lookup_id] = header; // pointer back to the original object
+	        reverse_lookup_id += 1;
+
+      }
+
+        else if (header.type == "Array" || header.type == "Object") { // allow for nested lists of parameters
+                var itemlist = [];
+
+                for (var j in header.value) { // nested list... is inner element
                 itemlist.push(createItem(header.value[j]));
+        }
+        item = {
+                    xtype: 'fieldset',
+                    title: header.label,
+                    collapsible: true,
+                    //defaultType: header.type,
+                    decimalPrecision : 12,
+                    layout: 'anchor',
+                    anchor: '100%',
+                    autoHeight: true,
+                    items: itemlist,
             }
-            item = {
-			    xtype: 'fieldset',
-			    title: header.label,
-			    collapsible: true,
-			    //defaultType: header.type,
-			    decimalPrecision : 12,
-			    layout: 'anchor',
-			    anchor: '100%',
-			    autoHeight: true,
-			    items: itemlist,
-		    }
         }
         
         else if (header.type == "List") {
@@ -240,38 +309,38 @@ function configForm(headerList, moduleID) {
         else {
             var defaultType; type = header.type || 'undefined';
             if(type == 'string' || type == 'undefined') {
-			    defaultType = 'textfield';
-		    } else if(type == 'number' || type == 'float') {
-			    defaultType = 'numberfield';
-		    } else if(type == 'boolean') {
-			    defaultType = 'checkbox';
-		    }
+                defaultType = 'textfield';
+	    } else if(type == 'number' || type == 'float') {
+		defaultType = 'numberfield';
+	    } else if(type == 'boolean') {
+	        defaultType = 'checkbox';
+	    }
             item = {
-		        fieldLabel: header.label,
-		        xtype: defaultType,
-		        name: fieldname,
-		        decimalPrecision: 14,
-		        value: header.value,
-		        anchor: "-20", 
-		        allowblank: false,
-		        width: 100,
-		        autoHeight: true, 
-		        reverse_lookup_id: reverse_lookup_id
-			}
-			if (defaultType == 'checkbox') { item.checked = header.value; }
-			reverse_lookup[reverse_lookup_id] = header;
-			reverse_lookup_id += 1;
+	        fieldLabel: header.label,
+	        xtype: defaultType,
+	        name: fieldname,
+	        decimalPrecision: 14,
+	        value: header.value,
+	        anchor: "-20", 
+	        allowblank: false,
+	        width: 100,
+	        autoHeight: true, 
+	        reverse_lookup_id: reverse_lookup_id
+            }
+	    if (defaultType == 'checkbox') { item.checked = header.value; }
+		reverse_lookup[reverse_lookup_id] = header;
+		reverse_lookup_id += 1;
+            }
+            return item
         }
-    return item
-    }
     
-    for (var i in headerList) {
-        // walk through the headerList and create the form items
-        items.push(createItem(headerList[i], i));
-    }
+        for (var i in headerList) {
+            // walk through the headerList and create the form items
+            items.push(createItem(headerList[i], i));
+        }
             
     
-    var formPanel = new Ext.FormPanel( {
+        var formPanel = new Ext.FormPanel( {
         
 		//renderTo: Ext.getBody(),
 		reverse_lookup: reverse_lookup,

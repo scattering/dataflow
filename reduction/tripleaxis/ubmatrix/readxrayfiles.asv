@@ -1,0 +1,38 @@
+function readxrayfiles()
+
+xrayfile='c:\HoMn2O5\xray\homn.dat';
+if exist([xrayfile])
+    fid2=fopen([xrayfile],'r');%thedata=fscanf(fid,'%f %f %f',[3 inf])';fclose(fid);
+    
+end
+
+
+datat=[];
+while 1
+           
+          %  line = fgetl(fid2);if ~isstr(line), break, end
+               %token = strtok(line,'ITYP')
+               while 1
+                  line = fgetl(fid2);if ~isstr(line), break, end
+                  length(line);
+                  if length(line)>7
+                  [values]=sscanf(line,'%f %f %f %f');
+                  else
+                      [values]=sscanf(line,'%f')
+                  end
+                  size(datat);
+                  size(values);
+                  datat=[datat;values];
+               end
+            
+end
+
+%data
+fclose(fid2);
+datat=datat';
+tth=10:.05:80;
+size(tth)
+size(datat)
+p
+
+

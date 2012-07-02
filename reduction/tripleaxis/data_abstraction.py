@@ -1,11 +1,20 @@
 import numpy as np
 import uncertainty, err1d
+import sys, os
+#import readncnr4 as readncnr
+import readncnr5 as readncnr #readncnr5 is configured for min/max for get_metadata()
+import readchalk as readchalk
+import readhfir as readhfir
 
-import readncnr4 as readncnr
 from formatnum import format_uncertainty
 import copy, simplejson, pickle
 from mpfit import mpfit
+from bumps.rebin import rebin2d
+from bumps.rebin import bin_edges, rebin
 
+import bumps
+import subprocess
+import rebin2
 
 #from dataflow import regular_gridding
 #from ...dataflow import wireit
@@ -17,16 +26,15 @@ if not LOCAL:
     from ... import regular_gridding
 if LOCAL:
     #for use in local testing
-    import sys, os
+    
     from matplotlib import pylab
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
     from dataflow import regular_gridding
 eps = 1e-8
 
 """
-Current notes:
-My current thoughts are to have one giant table so that we can do sorting
-easily.
+Old notes:
+My previous thoughts were to have one giant table so that we can do sorting easily.
 
 For some motors such as filter_translation, flipper_state, collimator, they have values such as 
 "ON/OFF", "A,B,C", "50Min", etc.  we either need to mark these as unplottable, or rather, have a "mapper" which takes these values
@@ -34,7 +42,8 @@ to something plottable
 
 """
 
-
+# for purposes of iterating over a dictionary for a TripleAxis object, these fields are skipped
+skipped_fields=['data','meta_data','sample','sample_environment','xstep','ystep','num_bins','magnetic_field','extrema']
 
 
 
@@ -560,8 +569,11 @@ class MagneticField(object):
     def __init__(self):
         self.magnetic_field = SampleEnvironment('magnetic_field', values=None, err=None, units='Tesla', isDistinct=True,
                                                 isInterpolatable=True)
-
-
+    '''    
+    def __iter__(self):
+        for key, value in self.__dict__.iteritems():
+            yield value
+    '''
 
 
 
@@ -709,6 +721,8 @@ class PolarizedBeam(object):
         self.vsample = Motor('vsample', values=None, err=None, units='amps', isDistinct=False) #vertical current
         self.sample_guide_field_rotatation = Motor('sample_guide_field_rotatation', values=None, err=None, units='degrees', isDistinct=False)
         self.flipper_state = Motor('flipper_state', values=None, err=None, units='', isDistinct=False) #short hand, can be A,B,C, etc.
+        self.eta = Motor('eta', values=None, err=None, units='', isDistinct=False) # orient1 coefficient
+        self.zeta = Motor('zeta', values=None, err=None, units='', isDistinct=False) # orient2 coefficient
     def __iter__(self):
         for key, value in self.__dict__.iteritems():
             yield value
@@ -743,10 +757,16 @@ class TripleAxis(object):
         self.meta_data = IceMetaData()
         self.apertures = Apertures()
         self.temperature = Temperature()
+        self.magnetic_field = MagneticField()
 
         self.analyzer_blades = Blades(title='analyzer', nblades=8)
+        self.num_bins = 0
         self.xaxis = ''
         self.yaxis = ''
+        self.xstep = None
+        self.ystep = None
+        self.extrema = {}
+
 
     def detailed_balance(self):
         beta_times_temp = 11.6
@@ -760,11 +780,14 @@ class TripleAxis(object):
         # and doesn't actually modify self.detectors -> could be the 'yield'
         # statement producing a generator...
         mon0 = self.time.monitor.measurement
-        if len(mon0) > 1:
+        
+        try: #in the event mon0 is an array of values, select the first one to normalize to
             mon0 = mon0[0]
+        except:
+            pass
         for detector in self.detectors:
             detector.measurement = detector.measurement * (mon0 / monitor)
-            print 'hi'
+
             #for i in range(0,len(detector.measurement.x)):
             #        detector.measurement[i]=detector.measurement[i]*mon0[i]/monitor
         return
@@ -817,7 +840,8 @@ class TripleAxis(object):
         ordery = []
         data = {}
         plottable_data = {}
-        print repr(self.xaxis) + " " + repr(self.yaxis)
+        print repr(self.xaxis) + " " + repr(self.yaxis) + " " + repr(self.num_bins) + \
+              repr(self.xstep) + " " + repr(self.ystep)
         print self.__dict__.keys()
         #self.xaxis='h'
         #self.yaxis='e' #self.physical_motors.k
@@ -838,6 +862,7 @@ class TripleAxis(object):
                         print key + '.' + self.yaxis 
                 except:
                     pass
+            '''
             xstart = xarr.min()
             xfinal = xarr.max()
             xstep = 1.0 * (xfinal - xstart) / len(xarr)
@@ -845,17 +870,18 @@ class TripleAxis(object):
             yfinal = yarr.max()
             ystep  = 1.0 * (yfinal - ystart) / len(yarr)
             print "done with steps"
-            xi, yi, zi = regular_gridding.regularlyGrid(xarr, yarr, self.detectors.primary_detector.measurement.x, xstart=xstart, xfinal=xfinal, xstep=xstep, ystart=ystart, yfinal=yfinal, ystep=ystep)		                               
-            #print xstart, xfinal
-            #print ystart, yfinal
-            #print zi.min(), zi.max()
-            #print xfinal - xstart, yfinal - ystart
-            #print zi
-            #print len(xi), len(yi), len(zi)
-            #print len(zi[0]), len(zi[1])
-            #for list in zi:
-            #	list[list==None] = 0
-            #print zi.tolist()[0]
+
+            xi = np.arange(xstart, xfinal, xstep)
+            yi = np.arange(ystart, yfinal, ystep)
+            
+            zi=rebin2d(bin_edges(xarr),bin_edges(yarr),self.detectors.primary_detector.measurement.x,bin_edges(xi),bin_edges(yi),Io=None,dtype=None)
+            '''
+            
+            #Brian's plotting requires edges=False (5/25/2012)
+            xi, yi, zi = rebin2.rebin_2D(xarr, yarr, self.detectors.primary_detector.measurement.x, \
+                                         num_bins=self.num_bins, xstep=self.xstep, ystep=self.ystep, edges=False)
+            #xi, yi, zi = regular_gridding.regularlyGrid(xarr, yarr, self.detectors.primary_detector.measurement.x, xstart=xstart, xfinal=xfinal, xstep=xstep, ystart=ystart, yfinal=yfinal, ystep=ystep)		                               
+
             zi = zi.T
             if LOCAL:
                 pylab.Figure()
@@ -916,11 +942,10 @@ class TripleAxis(object):
                                 data[field.name] = {'values': val.tolist(), 'errors':err}
                             else:
                                 data[field.name] = {'values': val.tolist(), 'errors':err.tolist()}
-                elif key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment':
+                elif key in skipped_fields:
                     #ignoring these data fields for plotting
                     pass	
                 else:
-                    print "in else"
                     print value
                     for field in value:
                         if has_null_first and not field.measurement.x == None:
@@ -959,31 +984,56 @@ class TripleAxis(object):
                     'style': 'line',
                     }],
             }
-        self.xaxis = ''
-        self.yaxis = ''
+        #self.xaxis = ''
+        #self.yaxis = ''
         return simplejson.dumps(plottable_data)
-
+    
+    
+    
+    
+    def get_metadata(self):
+        """
+        Returns metadata for file summary table
+        """
+        
+        summary_data = {
+            'title': 'Data Summary',
+            'clear_existing': False,
+            'extrema': self.extrema,
+        }
+        return simplejson.dumps(summary_data)
 
 # ****************************************************************************************************************************************************
 # ***************************************************************** TRANSLATION METHODS **************************************************************
 # ****************************************************************************************************************************************************
-def translate(bt7, dataset):
-    translate_monochromator(bt7, dataset)
-    translate_analyzer(bt7, dataset)
-    translate_collimator(bt7, dataset)
-    translate_sample(bt7, dataset) #sample must be done before physical motors to calculate orient1,2,3 from dataset
-    translate_primary_motors(bt7, dataset) #primary motors must be done before physical motors for Q calc.
-    translate_physical_motors(bt7, dataset)
-    translate_filters(bt7, dataset)
-    translate_apertures(bt7, dataset)
-    translate_polarized_beam(bt7, dataset)
-    translate_slits(bt7, dataset)
-    translate_temperature(bt7, dataset)
-    translate_time(bt7, dataset)
-    translate_metadata(bt7, dataset)
-    translate_detectors(bt7, dataset)
+def translate(tas, dataset):
+    translate_monochromator(tas, dataset)
+    translate_analyzer(tas, dataset)
+    translate_collimator(tas, dataset)
+    translate_sample(tas, dataset) #sample must be done before physical motors to calculate orient1,2,3 from dataset
+    translate_primary_motors(tas, dataset) #primary motors must be done before physical motors for Q calc.
+    translate_physical_motors(tas, dataset)
+    translate_filters(tas, dataset)
+    translate_apertures(tas, dataset)
+    translate_polarized_beam(tas, dataset)
+    translate_slits(tas, dataset)
+    translate_temperature(tas, dataset)
+    translate_time(tas, dataset)
+    translate_metadata(tas, dataset)
+    translate_detectors(tas, dataset)
+    
+    translate_magnetic_field(tas, dataset)
+    translate_extrema(tas, dataset)
 
-def translate_monochromator(bt7, dataset):
+def translate_extrema(tas, dataset):
+    tas.extrema = dataset.metadata['extrema']
+
+def translate_magnetic_field(tas, dataset):
+    translate_dict = {}
+    translate_dict['magnetic_field'] = 'magnetic_field'
+    map_motors(translate_dict, tas, tas.magnetic_field, dataset)
+    
+def translate_monochromator(tas, dataset):
     translate_dict = {}
     #key--> on bt7
     #value -> input, i.e. the field in dataset.data or dataset.metadata
@@ -994,7 +1044,7 @@ def translate_monochromator(bt7, dataset):
     translate_dict['translation'] = 'monotrans'
     translate_dict['elevation'] = 'monoelev'
     translate_dict['dspacing'] = 'monochromator_dspacing'
-    map_motors(translate_dict, bt7, bt7.monochromator, dataset)
+    map_motors(translate_dict, tas, tas.monochromator, dataset)
     #map_motors(translate_dict, bt7.monochromator, dataset)
 
     #for key,value in translate_dict.iteritems():
@@ -1028,14 +1078,17 @@ def translate_monochromator(bt7, dataset):
     #monochromator_blades.blades[7]=dataset.data.monoblade08
     #monochromator_blades.blades[8]=dataset.data.monoblade09
     #monochromator_blades.blades[9]=dataset.data.monoblade10
-    bt7.monochromator.blades = monochromator_blades
+    tas.monochromator.blades = monochromator_blades
 
 
 
-def translate_analyzer(bt7, dataset):
-    bt7.analyzer.dspacing = dataset.metadata['analyzer_dspacing']
+def translate_analyzer(tas, dataset):
+    try:
+        tas.analyzer.dspacing = dataset.metadata['analyzer_dspacing']
+    except:    
+        pass
     if dataset.metadata.has_key('analyzerfocusmode'):
-        bt7.analyzer.focus_mode = dataset.metadata['analyzerfocusmode']
+        tas.analyzer.focus_mode = dataset.metadata['analyzerfocusmode']
     analyzer_blades = Blades(title='analyzer', nblades=13)
     for i in range(13):
         if i < 9:
@@ -1057,11 +1110,11 @@ def translate_analyzer(bt7, dataset):
     #analyzer_blades.blades[10]=dataset.data.analyzerblade11
     #analyzer_blades.blades[11]=dataset.data.analyzerblade12
     #analyzer_blades.blades[12]=dataset.data.analyzerblade13
-    bt7.analyzer.blades = analyzer_blades
+    tas.analyzer.blades = analyzer_blades
 
 
 
-def translate_collimator(bt7, dataset):
+def translate_collimator(tas, dataset):
     translate_dict = {}
     translate_dict['pre_monochromator_collimator'] = 'premonocoll'
     translate_dict['post_monochromator_collimator'] = 'postmonocoll'
@@ -1069,7 +1122,7 @@ def translate_collimator(bt7, dataset):
     translate_dict['post_analyzer_collimator'] = 'postanacoll'
     translate_dict['radial_collimator'] = 'rc'
     translate_dict['soller_collimator'] = 'sc'
-    map_motors(translate_dict, bt7, bt7.collimators, dataset)
+    map_motors(translate_dict, tas, tas.collimators, dataset)
 
     #bt7.collimators.pre_monochromator_collimator=dataset.data['premonocoll']
     #bt7.collimators.post_monochromator_collimator =dataset.data['postmonocoll']
@@ -1080,17 +1133,17 @@ def translate_collimator(bt7, dataset):
     #if dataset.data.has_key('sc'):
     #        bt7.collimators.soller_collimator=dataset.data['sc']
 
-def translate_apertures(bt7, dataset):
+def translate_apertures(tas, dataset):
     translate_dict = {}
     translate_dict['aperture_horizontal'] = 'aperthori'
     translate_dict['aperture_vertical'] = 'apertvert'
-    map_motors(translate_dict, bt7, bt7.apertures, dataset)
+    map_motors(translate_dict, tas, tas.apertures, dataset)
     #map_motors(translate_dict,bt7.apertures, dataset)
 
     #bt7.apertures.aperture_horizontal=dataset.aperthori
     #bt7.apertures.aperture_vertical=dataset.apertvert
 
-def translate_polarized_beam(bt7, dataset):
+def translate_polarized_beam(tas, dataset):
     translate_dict = {}
     translate_dict['ei_flip'] = 'eiflip'
     translate_dict['ef_flip'] = 'efflip'
@@ -1102,9 +1155,32 @@ def translate_polarized_beam(bt7, dataset):
     translate_dict['flipper_state'] = 'flip'
     translate_dict['hsample'] = 'hsample'
     translate_dict['vsample'] = 'vsample'
+    translate_dict['eta'] = 'eta'
+    translate_dict['zeta'] = 'zeta'
+    
+    # if the field is > 0 then we consider the flipper on and the beam negative/minus (m)
+    # otherwise, if the field == 0 then the flipper is off and beam is potitive (p)
+    # chalk river filename will have the associated p/m combination for the diffracted beam
+    # and scattered beam 
+    translate_dict['dbhf'] = 'dbhf' # diffracted beam horizontal field
+    translate_dict['dbvf'] = 'dbvf' # diffracted beam vertical field
+    translate_dict['sbvf'] = 'sbvf' # scattered beam vertical field
+    translate_dict['sbhf'] = 'sbhf' # scattered beam horizontal field
+    
+    # chalk river has a set of horizontal coils (a,c,b) and a veritcal coil (top, bottom)
+    # that are used to produce the magnetic field. Currents are recorded. 
+    translate_dict['ihfa'] = 'ihfa' # current horizontal field a
+    translate_dict['ihfb'] = 'ihfb' # current horizontal field b
+    translate_dict['ihfc'] = 'ihfc' # current horizontal field c
+    translate_dict['ivfb'] = 'ivfb' # current vertical field bottom (of coil)
+    translate_dict['ivft'] = 'ivft' # current vertical field top (of coil)        
 
-    map_motors(translate_dict, bt7, bt7.polarized_beam, dataset)
+    map_motors(translate_dict, tas, tas.polarized_beam, dataset)
     #map_motors(translate_dict, bt7.polarized_beam, dataset)
+    
+    # if zeta and eta are not defined/given, then calculate them from h,k,l
+    #if tas.polarized_beam.eta.measurement.x == None and tas.polarized_beam.zeta.measurement.x == None:
+    #    project_into_scattering_plane(tas) 
 
     #bt7.polarized_beam.ei_flip=dataset.eiflip
     #bt7.polarized_beam.ef_flip=dataset.efflip
@@ -1117,7 +1193,7 @@ def translate_polarized_beam(bt7, dataset):
     #bt7.polarized_beam.ef_guide=dataset.efguide
     #bt7.polarized_beam.ei_cancel=dataset.data.eicancel
 
-def translate_primary_motors(bt7, dataset):
+def translate_primary_motors(tas, dataset):
     translate_dict = {}
     translate_dict['sample_upper_tilt'] = 'smplutilt'
     translate_dict['sample_lower_tilt'] = 'smplltilt'
@@ -1134,7 +1210,7 @@ def translate_primary_motors(bt7, dataset):
     translate_dict['dfm_rotation'] = 'dfmrot'
     translate_dict['dfm'] = 'dfm'
 
-    map_motors(translate_dict, bt7, bt7.primary_motors, dataset)
+    map_motors(translate_dict, tas, tas.primary_motors, dataset)
     #map_motors(translate_dict, bt7.primary_motors,dataset)
 
     #for key,value in translate_dict.iteritems():
@@ -1159,7 +1235,7 @@ def translate_primary_motors(bt7, dataset):
 
 
 
-def translate_physical_motors(bt7, dataset):
+def translate_physical_motors(tas, dataset):
     translate_dict = {}
     #key--> on bt7
     #value -> input, i.e. the field in dataset.data or dataset.metadata
@@ -1169,40 +1245,42 @@ def translate_physical_motors(bt7, dataset):
     translate_dict['h'] = 'qx'
     translate_dict['k'] = 'qy'
     translate_dict['l'] = 'qz'
-    translate_dict['e'] = 'e'
-    map_motors(translate_dict, bt7, bt7.physical_motors, dataset)
+    translate_dict['e'] = 'e'   
+    map_motors(translate_dict, tas, tas.physical_motors, dataset)
     #map_motors(translate_dict,bt7.physical_motors,dataset)
-
-    if dataset.metadata['efixed'] == 'ei':
-        bt7.physical_motors.ei.measurement.x = np.ones(np.array(dataset.data['e']).shape) * dataset.metadata['ei']
-        bt7.physical_motors.ei.measurement.variance = None
-        bt7.physical_motors.ef = bt7.physical_motors.ei.measurement - bt7.physical_motors.e.measurement
-        #our convention is that Ei=Ef+delta_E (aka omega)
-    else:
-        bt7.physical_motors.ef.measurement.x = np.ones(np.array(dataset.data['e']).shape) * dataset.metadata['ef']
-        bt7.physical_motors.ef.measurement.variance = None
-        bt7.physical_motors.ei.measurement.x = bt7.physical_motors.ef.measurement.x + bt7.physical_motors.e.measurement.x  #punt for now, later should figure out what to do if variance is None
-
+    
     try:
-        Ei = bt7.physical_motors.ei.measurement
-        Ef = bt7.physical_motors.ef.measurement
-        A4 = bt7.primary_motors.sample_two_theta.measurement
+        if dataset.metadata['efixed'] == 'ei':
+            tas.physical_motors.ei.measurement.x = np.ones(np.array(dataset.data['e']).shape) * dataset.metadata['ei']
+            tas.physical_motors.ei.measurement.variance = None
+            tas.physical_motors.ef = tas.physical_motors.ei.measurement - tas.physical_motors.e.measurement
+            #our convention is that Ei=Ef+delta_E (aka omega)
+        else:
+            tas.physical_motors.ef.measurement.x = np.ones(np.array(dataset.data['e']).shape) * dataset.metadata['ef']
+            tas.physical_motors.ef.measurement.variance = None
+            tas.physical_motors.ei.measurement.x = tas.physical_motors.ef.measurement.x + tas.physical_motors.e.measurement.x  #punt for now, later should figure out what to do if variance is None
+    except:
+        pass
+    try:
+        Ei = tas.physical_motors.ei.measurement
+        Ef = tas.physical_motors.ef.measurement
+        A4 = tas.primary_motors.sample_two_theta.measurement
         Qsquared = (Ei + Ef - 2 * (Ei * Ef).sqrt()*(A4 / 2).cos()) / 2.072
         Q = Qsquared.sqrt()
-        bt7.physical_motors.q.measurement = Q
+        tas.physical_motors.q.measurement = Q
     except:
         #Some data files, e.g. summer school spins files, do not have a1-a6
         pass
     try:
-        o1temp = bt7.sample.orientation.orient1
-        o2temp = bt7.sample.orientation.orient2
+        o1temp = tas.sample.orientation.orient1
+        o2temp = tas.sample.orientation.orient2
         o1 = np.array([o1temp['h'], o1temp['k'], o1temp['l']])
         o2 = np.array([o2temp['h'], o2temp['k'], o2temp['l']])
         o1, o2, o3 = make_orthonormal(o1, o2)
 
-        setattr(bt7.physical_motors.orient1, 'value', o1)
-        setattr(bt7.physical_motors.orient2, 'value', o2)
-        setattr(bt7.physical_motors.orient3, 'value', o3)
+        setattr(tas.physical_motors.orient1, 'value', o1)
+        setattr(tas.physical_motors.orient2, 'value', o2)
+        setattr(tas.physical_motors.orient3, 'value', o3)
         #TODO - make 'fancy' names for these?
         #setattr(bt7.physical_motors.orient3, 'name', '110')
 
@@ -1219,17 +1297,17 @@ def translate_physical_motors(bt7, dataset):
     #self.meta_data.fixed_eief=dataset.metadata.efixed
     #self.meta_data.fixed_energy=dataset.metadata.ef
 
-def translate_filters(bt7, dataset):
+def translate_filters(tas, dataset):
     translate_dict = {}
     #key--> on bt7
     #value -> input, i.e. the field in dataset.data or dataset.metadata
     #translate_dict['hkl']='hkl'
     #In older versions, we cannot trust h,k,l, hkl, etc. because we don't know if we went where we wanted. 
     #Should translate to magnitude of q before hand
-    translate_dict['filter_tilt'] = 'temp'
-    translate_dict['filter_translation'] = 'temperaturesensor1'
-    translate_dict['filter_rotation'] = 'temperaturesensor2'
-    map_motors(translate_dict, bt7, bt7.filters, dataset)
+    translate_dict['filter_tilt'] = 'filtilt'
+    translate_dict['filter_translation'] = 'filtran'
+    translate_dict['filter_rotation'] = 'filrot'
+    map_motors(translate_dict, tas, tas.filters, dataset)
     #map_motors(translate_dict,bt7.filters,dataset)
 
     #self.filters.filter_tilt=dataset.filtilt
@@ -1237,7 +1315,7 @@ def translate_filters(bt7, dataset):
     #self.filters.filter_rotation=dataset.filrot
 
 
-def translate_time(bt7, dataset):
+def translate_time(tas, dataset):
     translate_dict = {}
     translate_dict['month'] = 'month'
     translate_dict['day'] = 'day'
@@ -1247,7 +1325,7 @@ def translate_time(bt7, dataset):
     translate_dict['duration'] = 'time'
     translate_dict['monitor'] = 'monitor'
     translate_dict['monitor2'] = 'monitor2'
-    map_motors(translate_dict, bt7, bt7.time, dataset)
+    map_motors(translate_dict, tas, tas.time, dataset)
     #map_motors(translate_dict,bt7.time,dataset)
 
     #self.time.timestamp=dataset.timestamp
@@ -1255,9 +1333,9 @@ def translate_time(bt7, dataset):
     #self.time.monitor=dataset.data.monitor
     #self.time.monitor2=dataset.data.monitor2
 
-def translate_temperature(bt7, dataset):
+def translate_temperature(tas, dataset):
     translate_dict = {}
-    #key--> on bt7
+    #key--> on tas
     #value -> input, i.e. the field in dataset.data or dataset.metadata
     #translate_dict['hkl']='hkl'
     #In older versions, we cannot trust h,k,l, hkl, etc. because we don't know if we went where we wanted. 
@@ -1269,11 +1347,11 @@ def translate_temperature(bt7, dataset):
     translate_dict['temperature_heater_power'] = 'temperatureheatorpower'
     translate_dict['temperature_control_reading'] = 'temperaturecontrolreading'
     translate_dict['temperature_setpoint'] = 'temperaturesetpoint'
-    map_motors(translate_dict, bt7, bt7.temperature, dataset)
-    #map_motors(translate_dict,bt7.temperature,dataset)
+    map_motors(translate_dict, tas, tas.temperature, dataset)
+    #map_motors(translate_dict,tas.temperature,dataset)
     if dataset.metadata.has_key('temperature_units'):
-        bt7.temperature.temperature.units = dataset.metadata['temperature_units']
-
+        tas.temperature.temperature.units = dataset.metadata['temperature_units']
+    
     #self.temperature.temperature=dataset.temp
     #self.temperature.temperature.units=dataset.metadata.temperature_units
     #self.temperature.temperaturesensor1=dataset.temperaturesensor1
@@ -1284,36 +1362,36 @@ def translate_temperature(bt7, dataset):
     #self.temperature.temperature_setpoint =dataset.temperaturesetpoint
 
 
-def translate_slits(bt7, dataset):
+def translate_slits(tas, dataset):
     translate_dict = {}
-    #key--> on bt7
+    #key--> on tas
     #value -> input, i.e. the field in dataset.data or dataset.metadata
     #translate_dict['hkl']='hkl'
     #In older versions, we cannot trust h,k,l, hkl, etc. because we don't know if we went where we wanted. 
     #Should translate to magnitude of q before hand
     translate_dict['back_slit_width'] = 'bksltwdth'
     translate_dict['back_slit_height'] = 'bkslthght'
-    map_motors(translate_dict, bt7, bt7.slits, dataset)
-    #map_motors(translate_dict,bt7.slits,dataset)
+    map_motors(translate_dict, tas, tas.slits, dataset)
+    #map_motors(translate_dict,tas.slits,dataset)
 
     #self.slits.back_slit_width =dataset.data.bksltwdth
     #self.slits.back_slit_height =dataset.data.bkslthght
 
 
 
-def translate_sample(bt7, dataset):
+def translate_sample(tas, dataset):
     translate_dict = {}
     translate_dict['orientation'] = 'orientation'
     translate_dict['lattice'] = 'lattice'
-    map_motors(translate_dict, bt7, bt7.sample, dataset)
-    #map_motors(translate_dict,bt7.sample,dataset)        
+    map_motors(translate_dict, tas, tas.sample, dataset)
+    #map_motors(translate_dict,tas.sample,dataset)        
 
-    if bt7.sample.orientation.orient1 == None:
+    if tas.sample.orientation.orient1 == None:
         #if the dataset has labels 'orient1' and 'orient2' but not 'orientation'
         translate_dict = {}
         translate_dict['orient1'] = 'orient1'
         translate_dict['orient2'] = 'orient2'
-        map_motors(translate_dict, bt7, bt7.sample.orientation, dataset)
+        map_motors(translate_dict, tas, tas.sample.orientation, dataset)
         #map_motors(translate_dict,bt7.sample.orientation,dataset)
     #bt7.sample.orientation =dataset.metadata.orientation
     #bt7.sample.mosaic=dataset.metadata.?
@@ -1321,7 +1399,7 @@ def translate_sample(bt7, dataset):
 
 
 
-def translate_metadata(bt7, dataset):
+def translate_metadata(tas, dataset):
     translate_dict = {}
     translate_dict['epoch'] = 'epoch'
     translate_dict['counting_standard'] = 'count_type'
@@ -1345,9 +1423,10 @@ def translate_metadata(bt7, dataset):
     translate_dict['user'] = 'user'
     translate_dict['scan_description'] = 'scan_description'
     translate_dict['desired_npoints'] = 'npoints'
+    translate_dict['ubmatrix'] = 'ubmatrix'
 
-    map_motors(translate_dict, bt7, bt7.meta_data, dataset)
-    #ap_motors(translate_dict,bt7.meta_data,dataset)
+    map_motors(translate_dict, tas, tas.meta_data, dataset)
+    #ap_motors(translate_dict,tas.meta_data,dataset)
 
     #self.meta_data.epoch=dataset.metadata.epoch
     #self.meta_data.counting_standard=dataset.metadata.count_type
@@ -1374,16 +1453,19 @@ def translate_metadata(bt7, dataset):
     #self.meta_data.scan_description=dataset.metadata.scan_description
     #self.meta_data.desired_npoints=dataset.metadata.npoints
 
-def translate_detectors(bt7, dataset):
+def translate_detectors(tas, dataset):
     try:
-        bt7.detectors.primary_detector.measurement.x = np.array(dataset.data['detector'], 'Float64')
-        bt7.detectors.primary_detector.measurement.variance = np.array(dataset.data['detector'], 'Float64')
+        tas.detectors.primary_detector.measurement.x = np.array(dataset.data['detector'], 'Float64')
+        tas.detectors.primary_detector.measurement.variance = np.array(dataset.data['detector'], 'Float64')
     except:
-        bt7.detectors.primary_detector.measurement.x = np.array(dataset.data['counts'], 'Float64')
-        bt7.detectors.primary_detector.measurement.variance = np.array(dataset.data['counts'], 'Float64')	
+        tas.detectors.primary_detector.measurement.x = np.array(dataset.data['counts'], 'Float64')
+        tas.detectors.primary_detector.measurement.variance = np.array(dataset.data['counts'], 'Float64')	
 
-    bt7.detectors.primary_detector.dimension = [len(bt7.detectors.primary_detector.measurement.x), 1]
-    bt7.detectors.detector_mode = dataset.metadata['analyzerdetectormode']
+    tas.detectors.primary_detector.dimension = [len(tas.detectors.primary_detector.measurement.x), 1]
+    try:
+        tas.detectors.detector_mode = dataset.metadata['analyzerdetectormode']
+    except:
+        pass
 
 
     #later, I should do something clever to determine how many detectors are in the file,
@@ -1393,22 +1475,22 @@ def translate_detectors(bt7, dataset):
 
     #detectors do NOT have a 'summed_counts' attribute currently.
     if dataset.metadata.has_key('analyzersdgroup') and not dataset.metadata['analyzersdgroup'] == None:
-        set_detector(bt7, dataset, 'single_detector', 'analyzersdgroup')
+        set_detector(tas, dataset, 'single_detector', 'analyzersdgroup')
         #bt7.detectors.single_detector.summed_counts.measurement.x=dataset.data['singledet']
         #bt7.detectors.single_detector.summed_counts.measurement.variance=dataset.data['singledet']
 
     if dataset.metadata.has_key('analyzerdoordetectorgroup') and not dataset.metadata['analyzerdoordetectorgroup'] == None:
-        set_detector(bt7, dataset, 'door_detector', 'analyzerdoordetectorgroup')
+        set_detector(tas, dataset, 'door_detector', 'analyzerdoordetectorgroup')
         #bt7.detectors.single_detector.summed_counts.measurement.x=bt7.detectors.door_detector.x.sum(axis=1)#None #dataset.data['doordet']  #Not sure why this one doesn't show up???
         #bt7.detectors.single_detector.summed_counts.measurement.variance=bt7.detectors.door_detector.x.sum(axis=1)#None #dataset.data['doordet']  #Not sure why this one doesn't show up???
 
     if dataset.metadata.has_key('analyzerddgroup') and not dataset.metadata['analyzerddgroup'] == None:
-        set_detector(bt7, dataset, 'diffraction_detector', 'analyzerddgroup')
+        set_detector(tas, dataset, 'diffraction_detector', 'analyzerddgroup')
         #bt7.detectors.diffraction_detector.summed_counts.measurement.x=dataset.data['diffdet']
         #bt7.detectors.diffraction_detector.summed_counts.measurement.variance=dataset.data['diffdet']
 
     if dataset.metadata.has_key('analyzerpsdgroup') and not dataset.metadata['analyzerpsdgroup'] == None:
-        set_detector(bt7, dataset, 'position_sensitive_detector', 'analyzerpsdgroup')
+        set_detector(tas, dataset, 'position_sensitive_detector', 'analyzerpsdgroup')
         #if hasattr(bt7.detectors,'position_sensitive_detector'):
             #bt7.detectors.position_sensitive_detector.summed_counts.measurement.x=dataset.data['psdet']
             #bt7.detectors.position_sensitive_detector.summed_counts.measurement.variance=dataset.data['psdet']
@@ -1416,21 +1498,21 @@ def translate_detectors(bt7, dataset):
 
 
 
-def set_detector(bt7, dataset, detector_name, data_name):                        
+def set_detector(tas, dataset, detector_name, data_name):                        
     analyzergroup = dataset.metadata[data_name]
-    setattr(bt7.detectors, detector_name, Detector(detector_name))
+    setattr(tas.detectors, detector_name, Detector(detector_name))
 
     dim = dataset.metadata['analyzersdgroup']
     if not dim == None:
-        setattr(getattr(bt7.detectors, detector_name), 'dimension', [len(dim), 1])
+        setattr(getattr(tas.detectors, detector_name), 'dimension', [len(dim), 1])
     else:
-        setattr(getattr(bt7.detectors, detector_name), 'dimension', [0, 0]) #if there is no analyzersdgroup, make dim 0
+        setattr(getattr(tas.detectors, detector_name), 'dimension', [0, 0]) #if there is no analyzersdgroup, make dim 0
     try:
         npts = len(dataset.data[dataset.metadata['analyzersdgroup'][0]])  #I choose this one because the sd group SHOULD always be present.
     except:
         npts = 0
-    Nx = getattr(getattr(bt7.detectors, detector_name), 'dimension')[0]
-    Ny = getattr(getattr(bt7.detectors, detector_name), 'dimension')[1]
+    Nx = getattr(getattr(tas.detectors, detector_name), 'dimension')[0]
+    Ny = getattr(getattr(tas.detectors, detector_name), 'dimension')[1]
     data = np.empty((npts, Nx, Ny), 'Float64')
     #put all the data in data array which is npts x Nx x Ny, in this case, Ny=1 since our detectors are 1D
     #We have to do some defensive programming here.  It turns out that even though the metadata states that the PSD may be present,
@@ -1440,10 +1522,10 @@ def set_detector(bt7, dataset, detector_name, data_name):
             curr_detector = dataset.metadata[data_name][nx]
             data[:, nx, 0] = np.array(dataset.data[curr_detector], 'Float64')
 
-        setattr(getattr(bt7.detectors, detector_name).measurement, 'x', np.copy(data))
-        setattr(getattr(bt7.detectors, detector_name).measurement, 'variance', np.copy(data))
+        setattr(getattr(tas.detectors, detector_name).measurement, 'x', np.copy(data))
+        setattr(getattr(tas.detectors, detector_name).measurement, 'variance', np.copy(data))
     else:
-        delattr(bt7.detectors, detector_name)  #We were lied to by ICE and this detector isn't really present...
+        delattr(tas.detectors, detector_name)  #We were lied to by ICE and this detector isn't really present...
 
 
 
@@ -1544,31 +1626,38 @@ def establish_correction_coefficients(filename):
     return coefficients   
 
 
+def project_into_scattering_plane(tas):
+    """ 
+    Given h,k,l, orient1 and orient2, calculates eta and zeta.
+    """
+    pass
+    
+
 def make_orthonormal(o1, o2):
     """Given two vectors, creates an orthonormal set of three vectors. 
     Maintains the direction of o1 and the coplanarity of o1 and o2"""
-    o1 = o1 / N.linalg.norm(o1)
-    o2 = o2 / N.linalg.norm(o2)
-    o3 = N.cross(o1, o2)
-    o3 = o3 / N.linalg.norm(o3)
-    o2 = N.cross(o3, o1)
+    o1 = o1 / np.linalg.norm(o1)
+    o2 = o2 / np.linalg.norm(o2)
+    o3 = np.cross(o1, o2)
+    o3 = o3 / np.linalg.norm(o3)
+    o2 = np.cross(o3, o1)
     return o1, o2, o3
 
 def calc_plane(p, h, k, l, normalize=True):
-    o1 = N.array([p[0], p[1], p[2]])
-    o2 = N.array([p[3], p[4], p[5]])
+    o1 = np.array([p[0], p[1], p[2]])
+    o2 = np.array([p[3], p[4], p[5]])
     if normalize:
         o1, o2, o3 = make_orthonormal(o1, o2)
     else:
         o3 = np.cross(o1, o2)
-    A = N.array([o1, o2, o3]).T
+    A = np.array([o1, o2, o3]).T
     a_arr = []
     b_arr = []
     c_arr = []
 
     for i in range(len(h)):
-        hkl = N.array([h[i], k[i], l[i]])
-        sol = N.linalg.solve(A, hkl)
+        hkl = np.array([h[i], k[i], l[i]])
+        sol = np.linalg.solve(A, hkl)
         a = sol[0]
         b = sol[1]
         c = sol[2]
@@ -1580,12 +1669,12 @@ def calc_plane(p, h, k, l, normalize=True):
 
 def cost_func(p, h, k, l):
     a_arr, b_arr, c_arr = calc_plane(p, h, k, l)
-    c = N.array(c_arr)
+    c = np.array(c_arr)
     res = (c - c.mean())**2
     #dof=len(I)-len(p)
     #fake_dof=len(I)
     #print 'chi',(y-ycalc)/err
-    return res#/Ierr#/N.sqrt(fake_dof)
+    return res#/Ierr#/np.sqrt(fake_dof)
 
 
 
@@ -1601,7 +1690,7 @@ def myfunctlin(p, fjac=None, h=None, k=None, l=None):
 
 def fit_plane(h, k, l, p0=None):
     if p0 == None:
-        p0 = [1. / N.sqrt(5), -1. / N.sqrt(2), 0, 0, 0, 1] #a guess...
+        p0 = [1. / np.sqrt(5), -1. / np.sqrt(2), 0, 0, 0, 1] #a guess...
     parbase = {'value':0., 'fixed':0, 'limited':[0, 0], 'limits':[0., 0.]}
     parinfo = []
     for i in range(len(p0)):
@@ -1619,16 +1708,23 @@ def fit_plane(h, k, l, p0=None):
     #print 'status = ', m.status
     #print 'params = ', m.params
     #your parameters define two noncollinear vectors that will form the basis for your space
-    o1 = N.array([p[0], p[1], p[2]])
-    o2 = N.array([p[3], p[4], p[5]])
+    o1 = np.array([p[0], p[1], p[2]])
+    o2 = np.array([p[3], p[4], p[5]])
     o1, o2, o3 = make_orthonormal(o1, o2)
     return o1, o2, o3
 
 
 
-#def join(tas1, tas2):
+
 def join(tas_list):
-    """Joins a list of TripleAxis objects"""
+    """
+    Joins a list of TripleAxis objects. 
+    
+    ASSUMPTION: the same number of points is recorded
+    along every data field that is relevant for determining duplicates. For intsance,
+    measuring 50 counts with 25 measurements of 'temp' and 25 measurements of 'qx, qy, qz'
+    cause errors in removing duplicates.
+    """
     #average all similar points
     #put all detectors on the same monitor, assumed that the first monitor is desired throughout
     joinedtas = tas_list[0]
@@ -1637,7 +1733,7 @@ def join(tas_list):
     #tas1.detectors.primary_detector.measurement.join(tas2.detectors.primary_detector.measurement)
     for tas2 in tas_list[1:]:
         for key, value in joinedtas.__dict__.iteritems():
-            if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment':
+            if key in skipped_fields:
                 #ignoring metadata for now
                 pass
             elif key == 'detectors':
@@ -1672,128 +1768,421 @@ def join(tas_list):
     #remove duplicates
     distinct=list(set(distinct))
     not_distinct=list(set(not_distinct))
-    joinedtas2 = remove_duplicates(joinedtas, distinct, not_distinct)
+    joinedtas2 = remove_duplicates_optimized(joinedtas, distinct, not_distinct)
     #joinedtas.xaxis=xaxis
     #joinedtas.yaxis=yaxis
     return joinedtas2
     #np.where(hasattr('isDistinct') and isDistinct,,) #todo finish writing
 
 
-def remove_duplicates(tas, distinct, not_distinct):
+# **********************************************************
+# ******************** optimized ***************************
+# **********************************************************
+
+def remove_duplicates_optimized(tas, distinct, not_distinct):
     """Removes the duplicate data rows from TripleAxis object tas whose distinct fields (columns)
-    are in the list distinct and nondistinct fields are in the list nondistinct"""
-    #go through every column. If any row has a unique value, it is a unique row and stop comparing it to anything
-    #after every column is exhausted, if non-unique rows still exist then go column by
-    #column, find 'duplicates' and merge them
+    are in the list distinct, and nondistinct fields are in the list nondistinct"""
 
-
-
-    uniques = [] #list of row indices to skip (ie unique pts to keep in datafile)
-    dups = []
     numrows = tas.detectors.primary_detector.dimension[0]
-    for index in range(numrows):
-        dups.append(range(numrows)) #list of lists. Each inner list is a list of every row index (0 to len)
-                            #when a row becomes distinct from another, its index is removed from the the other's index
     newtas = tas
+    tuples = []
+    indices = [] # list of lists of all duplicate indices to check
+    first = True
 
     for field in distinct:
-        for i in range(numrows):
-            if not uniques.__contains__(i): #if the row isn't unique
-                for j in range(i + 1, numrows):
-                    if not uniques.__contains__(j) and dups[i].__contains__(j):
-                        #going through every row below row i since i has been compared to every other row already
-                        if field.measurement[i].x != field.measurement[j].x:
-                            #For this column (field), if this measurement is not equal to any
-                            #another measurement in the column, these measurment are distinct
-                            #and the j index is removed from the dups[i] list and vise versa
-                            dups[i].remove(j)
-                            dups[j].remove(i)                                                        
-                if len(dups[i]) == 1:
-                    #if every row in the column is distinct from the ith row, then it is unique
-                    #MAY NOT NEED TO KEEP TRACK OF UNIQUES...
-                    #CAN ALWAYS GET BY len(dups[i])==1
-                    uniques.append(i)
+        if first:  # will only go in here the first time 
+            for i in range(numrows):
+                tuples.append((field.measurement[i].x, i)) #appending tuples pairing value with index
 
-        if len(uniques) == numrows:
-            #if all rows are deemed unique, return
-            return tas
+            tuples.sort()  #sorting by value
+
+            samelist = False #signifies whether or not a different duplicate values were found
+            index = -1
+
+            for i in range(0, len(tuples)-1):
+                if tuples[i+1][0] == tuples[i][0]:
+                    if not samelist:
+                        indices.append([tuples[i][1], tuples[i+1][1]]) #add array of duplicate indices
+                        samelist = True
+                        index += 1 #increment the index
+                    else:
+                        indices[index].append(tuples[i+1][1])
+                else:
+                    samelist = False
+            first = False
+        else:
+            j = 0
+            while j < len(indices):
+                indexlist = indices.pop(j) #pop off the indices list at j
+                tuples = []
+
+                for index in indexlist: # O(n)
+                    tuples.append((field.measurement[index].x, index))
+                tuples.sort() # O(nlogn) hopefully
+
+                samelist = False     
+                dups = []
+                for i in range(0, len(tuples)-1):
+                    if tuples[i+1][0] == tuples[i][0]: # if values are same (duplicates)
+                        if not samelist: 
+                            #create dups --> list of duplicate indices
+                            dups.append(tuples[i][1])
+                            dups.append(tuples[i+1][1]) 
+                            samelist = True
+                        else:
+                            dups.append(tuples[i+1][1])
+                    else:
+                        if len(dups) > 0: # if there is a list of duplicates, add them to indices
+                            indices.insert(j, dups)
+                            j += 1 # increment j
+                            dups = [] # reset dups to be empty
+                        samelist = False                            
+
+    print len(indices)
+    print indices
+    if not first and len(indices) < 1:
+        print "done"
+        return newtas  # if there are no duplicates left, then every row is unique so we're done
 
     for field in not_distinct:
-        if not type(field) == Detector:
-            for i in range(numrows):
-                if not uniques.__contains__(i): #if the row isn't unique
-                    for j in range(i + 1, numrows):
-                        if not uniques.__contains__(j) and dups[i].__contains__(j):
-                            #if row j is NOT unique and row j still a potential duplicate of row i, then proceed
-                            if (type(field.measurement[i].x) == str or type(field.measurement[i].x) == np.string_ or not hasattr(field, 'window')):
-                                #if field has string values or doesn't have a window (tolerance), compare exact values                                                                
-                                if field.measurement[i].x != field.measurement[j].x:
-                                    dups[i].remove(j)
-                                    dups[j].remove(i)
-                            elif field.measurement[i].x == None and field.measurement[j].x == None:
-                                pass #if both are None, do nothing --> they are not distinct values
-                            elif field.measurement[i].x != field.measurement[j].x or abs(field.measurement[i] - field.measurement[j]).x > field.window:
-                                #For this column (field), if this measurement is NOT within the tolerance of the
-                                #other measurement in the column, the measurements are distinct.
-                                #NOTE: keep the != check before the tolerance check to catch if only one of the
-                                #      measurements is a'None' before performing subtraction
-                                dups[i].remove(j)
-                                dups[j].remove(i)
-                    if len(dups[i]) == 1:
-                        #if every row in the column is 'distinct' from the ith row, then it is unique
-                        uniques.append(i)
+        if not type(field) == Detector: #don't check Detectors
+            if first:
+                # In the event that there are no distinct fields (ie only not_distinct fields)
+                # This is the first segment, and will only run first.
+                for i in range(numrows):
+                    tuples.append((field.measurement[i].x, i)) #appending tuples pairing value with index
+                tuples.sort() 
 
-            if len(uniques) == numrows:
-                #if all rows are deemed unique, return
-                return tas
+                samelist = False 
+                index = -1
 
-    #ALL UNIQUE ROWS ARE INDEXED IN uniques NOW
+                for i in range(0, len(tuples)-1):
+                    if tuples[i][0] == None or tuples[i+1][0] == None or (type(tuples[i][0]) == str or type(tuples[i][0]) == np.string_ or not hasattr(field, 'window')): 
+                        # if no tolerance is specified or needed, directly compare:
+                        if tuples[i+1][0] == tuples[i][0]:
+                            if not samelist:
+                                indices.append([tuples[i][1], tuples[i+1][1]]) #add array of duplicate indices
+                                samelist = True
+                                index += 1 #increment the index
+                            else:
+                                indices[index].append(tuples[i+1][1])
+                        else:
+                            samelist = False
+                    else: # else use specified tolerance
+                        if tuples[i+1][0] - tuples[i][0] <= field.window:
+                            if not samelist:
+                                indices.append([tuples[i][1], tuples[i+1][1]]) #add array of duplicate indices
+                                samelist = True
+                                index += 1 #increment the index
+                            else:
+                                indices[index].append(xtuples[i+1][1])
+                        else:
+                            samelist = False
+                first = False
+            else:
+                j = 0
+                while j < len(indices):
+                    indexlist = indices.pop(j)
+                    tuples = []
+                    for index in indexlist: # O(n)
+                        tuples.append((field.measurement[index].x, index))
+                    tuples.sort() # O(nlogn) hopefully
+
+                    samelist = False     
+                    dups = []
+                    for i in range(0, len(tuples)-1):
+                        if tuples[i][0] == None or tuples[i+1][0] == None or type(tuples[i][0]) == str \
+                           or type(tuples[i][0]) == np.string_ or not hasattr(field, 'window'): 
+                            if tuples[i+1][0] == tuples[i][0]: # if values are same (duplicates)
+                                if not samelist: 
+                                    #create dups --> list of duplicate indices
+                                    dups.append(tuples[i][1])
+                                    dups.append(tuples[i+1][1]) 
+                                    samelist = True
+                                else:
+                                    dups.append(tuples[i+1][1])
+                            else:
+                                if len(dups) > 0: # if there is a list of duplicates, add them to indices
+                                    indices.insert(j, dups)
+                                    j += 1 # increment j
+                                    dups = [] # reset dups to be empty
+                                samelist = False  
+                        else:
+                            if tuples[i+1][0] - tuples[i][0] > field.window: # if values are different enough
+                                if not samelist: 
+                                    #create dups --> list of duplicate indices
+                                    dups.append(tuples[i][1])
+                                    dups.append(tuples[i+1][1]) 
+                                    samelist = True
+                                else:
+                                    dups.append(tuples[i+1][1])
+                            else:
+                                if len(dups) > 0: # if there is a list of duplicates, add them to indices
+                                    indices.insert(j, dups)
+                                    j += 1 # increment j
+                                    dups = [] # reset dups to be empty
+                                samelist = False  				
+
+
+    # AVERAGING DETECTORS
     rows_to_be_removed = []
-    for alist in dups:
-        #average the detector counts of every detector of each row in alist
-        #and save the resulting averages into the first row of alist.
-        #then delete other rows, ie remove them
-        if len(alist) == 1:
-            #if the row is unique skip this list
-            pass 
-        else:
-            for k in range(1, len(alist)):
+    for indexlist in indices:
+        if len(indexlist) > 1: #if there are more than one rows that are duplicates
+            for k in range(1, len(indexlist)):
                 for detector in newtas.detectors:
-                    #average the first (0th) duplicate row's detectors with every other (kth) duplicate row's detectors
-                    #and save the result into the first duplicate row.
-                    detector.measurement[alist[0]] = (detector.measurement[alist[0]] + detector.measurement[alist[k]]) / 2.0
-                dups[alist[k]] = [alist[k]] #now the kth duplicate set of indices has only k, so it will be skipped
-                rows_to_be_removed.append(alist[k])
+                    # Average the first (0th) duplicate row's detectors with every other (kth) duplicate row's 
+                    # detectors and save the result into the first duplicate row.
+                    detector.measurement[indexlist[0]] = (detector.measurement[indexlist[0]] + detector.measurement[indexlist[k]]) / 2.0
+
+                rows_to_be_removed.append(indexlist[k])
+    # DONE AVERAGING DETECTORS
 
     rows_to_be_removed.sort() #duplicate rows to be removed indices in order now
     rows_to_be_removed.reverse() #duplicate rows to be removed indices in reverse order now
 
-
     for key, value in newtas.__dict__.iteritems():
-        if key == 'data' or key == 'meta_data' or key == 'sample' or key == 'sample_environment':
+        if key in skipped_fields:
             #ignoring metadata for now
             pass
         elif key.find('blade') >= 0:
             for blade in value.blades:
                 for k in rows_to_be_removed:
-                    blade.measurement.__delitem__(k) #removes duplicate row from this detector (column)
+                    blade.measurement.__delitem__(k) #removes duplicate row from this field (column)
         else:
             for field in value:
                 for k in rows_to_be_removed:
-                    field.measurement.__delitem__(k) #removes duplicate row from this detector (column)
+                    print field.name
+                    field.measurement.__delitem__(k) #removes duplicate row from this field (column)
 
     #update primary detector dimension
     newtas.detectors.primary_detector.dimension = [len(newtas.detectors.primary_detector.measurement.x), 1]
     return newtas
 
+# **********************************************************
+# ****************** end optimized *************************
+# **********************************************************
 
-def filereader(filename, friendly_name=None):
+def normalize_monitor(tas_list, monitor=None):
+    """ 
+    Puts every TripleAxis object in the list on the given monitor
+    or on the first TripleAxis's monitor if none is specified
+    """
+    if not monitor:
+        monitor = tas_list[0].time.monitor.measurement
+        tas_list_ptr = tas_list[1:] #no need to normalize the first one
+    else:
+        tas_list_ptr = tas_list
+        
+    for tas in tas_list_ptr:
+        monitor_scalar = tas.time.monitor.measurement / monitor
+        if not monitor_scalar == 1:
+            for detector in tas.detectors:
+                detector.measurement = detector.measurement * monitor_scalar
+
+
+def subtract(signal, background, independent_variable=None):
+    """
+    Subtract a background TripleAxis object from a signal TripleAxis object
+    """
+    
+    # create xbin to use for both files
+    # bin each data column that applies for background and for tas, then subtract the 
+    #     primary_detector measurement of the background from primary_detector of tas
+    
+    # if signal and background are given as a list, just use the first inputs in the list(s).
+    try:
+        if len(signal) > 0:
+            signal = signal[0]
+    except:
+        pass
+    try:
+        if len(background) > 0:
+            background = background[0]
+    except:
+        pass
+    
+    if not independent_variable:
+        # if no variable is specified, the first scanned variable is taken as the independent variable
+        try:
+            independent_variable = getattr(signal, signal.meta_data.scanned_variables[0])
+        except:
+            print "Error in subraction: no independent variable specified and no scanned variables in object!"
+
+    signal_measurements = get_measurement(signal, independent_variable)
+    bg_measurements = get_measurement(background, independent_variable)
+    
+    sort_all_fields(signal, signal_measurements)
+    sort_all_fields(background, bg_measurements)
+    
+    xarr, xbin = rebin2.create_xbin(signal_measurements.x)
+    
+    bin_all_fields(signal, xarr, xbin)
+    bin_all_fields(background, xarr, xbin)
+
+    #Subtracting primary_detectors and overwriting signal's primary_detector. 
+    #No need to return anything.
+    subtracted = signal.detectors.primary_detector.measurement - background.detectors.primary_detector.measurement
+    signal.detectors.primary_detector.measurement = subtracted
+    
+    return signal
+
+
+def get_measurement(tas, fieldname):
+    """
+    Given a field name, returns the measurement list associated with it for a
+    given TripleAxis object (tas). Returns None if field is not found.
+    
+    E.g. get_measurement(tas, 'k') --> returns:
+            tas.physical_motors.k.measurement
+    """
+    obj = None
+    for key, value in tas.__dict__.iteritems():
+        obj = getattr(tas, key)
+        try:
+            measurements = getattr(obj, fieldname).measurement
+            return measurements
+        except:
+            pass
+    return None
+
+    
+def sort_all_fields(tas, independent_measurements):
+    """
+    Sorts all of the rows of independent_measurements
+    """
+    num_rows = len(independent_measurements)
+    tuples = []
+    for i in range(num_rows):
+        tuples.append((independent_measurements.x, i)) #appending tuples pairing value with index
+    tuples.sort()  #sorting by value
+    
+    #building array of row indices that is sorted for independent_measurements
+    indices_order = np.array([])
+    for i in range(num_rows):
+        indices_order = np.append(indices_order, tuples[i][1])
+            
+    for key, value in tas.__dict__.iteritems():
+        if key in skipped_fields:
+            #ignoring metadata for now
+            pass
+        elif key == 'detectors':
+            for field in value:
+                if field.name == 'primary_detector':
+                    new_measurement = field.measurement[indices_order[0]]
+                    for i in range(1, num_rows):
+                        # put rows in the order defined by indices_order
+                        new_measurement.join(field.measurement[indices_order[i]])
+                    field = new_measurement 
+                else:
+                    new_measurement = field.measurement[indices_order[0]]
+                    for i in range(1, num_rows):
+                        # put rows in the order defined by indices_order
+                        new_measurement.join_channels(field.measurement[indices_order[i]])
+                    field = new_measurement
+            '''
+        # for now, ignore joining blades
+        elif key.find('blade') >= 0:
+            blades = value.blades
+            new_measurement = blades[indices_order[0]].measurement
+            for i in range(1, len(value.blades)):
+                new_measurement.join(blades[indices_order[i]].measurement)
+            '''
+        else:
+            for field in value:
+                try:
+                    if len(field)==num_rows:
+                        new_measurement = field.measurement[indices_order[0]]
+                        for i in range(1, num_rows):
+                            # put rows in the order defined by indices_order
+                            new_measurement.join(field.measurement[indices_order[i]])
+                        field = new_measurement                         
+                except:
+                    # if field doesn't have proper number of columns, don't sort
+                    pass
+
+
+def bin_all_fields(tas, xarr, xbin):
+    num_rows = len(xarr)
+    for key, value in tas.__dict__.iteritems():
+        if key in skipped_fields:
+            #ignoring metadata for now
+            pass
+        else:
+            for field in value:
+                try:
+                    if len(field)==num_rows:
+                        # overwriting field.measurement with its binned values
+                        xbin, field.measurement = rebin2.rebin_1D(xarr, field.measurement, xbin=xbin)
+                except:
+                    # if field doesn't have proper number of columns, don't rebin
+                    pass
+
+    
+
+
+def filereader(filename, orient1=None, orient2=None, acf_file=None, friendly_name=None):
+    filestr = filename
+    instrument = None
+    if friendly_name:
+        fileExt = os.path.splitext(friendly_name)[1]
+    else:
+        fileExt = os.path.splitext(filestr)[1]
+    
+    if fileExt in ['.bt2', '.bt4', '.bt7', '.bt9', '.ng5']:
+        instrument = ncnr_filereader(filestr, friendly_name=friendly_name)
+    #elif fileExt in ['.aof', '.acf']:
+    #    instrument = chalk_filereader(filestr, orient1, orient2, acf_file=acf_file) #currently returns a tas list!!!
+    elif fileExt in ['.dat']:
+        instrument = hfir_filereader(filestr)
+    
+    return instrument
+
+
+def ncnr_filereader(filename, friendly_name=None):
     filestr = filename
     mydatareader = readncnr.datareader()
     mydata = mydatareader.readbuffer(filestr, myfriendlyfilestr=friendly_name)
     instrument = TripleAxis()
     translate(instrument, mydata)
+    return instrument    
+
+def chalk_filereader(aof_filename, orient1, orient2, acf_filename=None):
+    
+    mydata = readchalk.readruns(aof_filename, orient1, orient2, acf_file=acf_filename)
+    
+    instrument_list = []
+    for i in range(len(mydata)):
+        instrument = TripleAxis()
+        translate(instrument, mydata[i])
+        instrument_list.append(instrument)
+    return instrument_list
+
+def hfir_filereader(filename):
+    mydata = readhfir.readfile(filename)
+    instrument = TripleAxis()
+    translate(instrument, mydata)
     return instrument
+
+
+#NOT WORKING! can't pass TAS object in subprocess.call()
+#def run_bumps(tas, store_dir, fit="dream", burn=500, steps=1000, init="eps"):
+#    process_result = subprocess.call(["bumps", "tasmodel.py", tas, "--parallel", "--fit=%s" %fit, "--burn=%d" %burn, 
+#                                      "--steps=%d" %steps, "--init=%s" %init, "--store=%s" %store_dir], shell=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":       
     if 0:
@@ -1806,7 +2195,7 @@ if __name__ == "__main__":
         #spins = join(spin,spin2)
         print spins.get_plottable()
         print 'fixme2'
-    if 1:
+    if 0:
         spins54 = filereader(r'spins_data/bamno054.ng5')
         spins55 = filereader(r'spins_data/bamno055.ng5')
         spins57 = filereader(r'spins_data/bamno057.ng5')
@@ -1823,11 +2212,75 @@ if __name__ == "__main__":
         spins67 = filereader(r'spins_data/bamno067.ng5')
         spins68 = filereader(r'spins_data/bamno068.ng5')
         spins69 = filereader(r'spins_data/bamno069.ng5')
-        spins = join([spins55,spins64,spins56,spins57,spins58,spins59,spins60,spins61,spins62,spins63,spins66,spins67,spins68,spins69])
-        spins.xaxis='h'
-        spins.yaxis='e'
-        plotobj = spins.get_plottable()
-        print plotobj
+        #spins = join([spins55, spins64, spins56, spins57, spins59, spins60, spins61, spins62, spins63, spins66, spins67, spins68, spins69])
+        spins_list =[spins55,spins64,spins56,spins57,#spins58,
+                     spins59,spins60,spins61,spins62,spins63,spins66,spins67,spins68,spins69]
+
+        spins = join(spins_list)
+    if 0:
+        #test data for irregular grid
+        spins54 = filereader(r'spins_data/bamno054.ng5')
+        spins55 = filereader(r'spins_data/bamno055.ng5')
+        spins57 = filereader(r'spins_data/bamno057.ng5')
+        spins63 = filereader(r'spins_data/bamno063.ng5')
+        spins64 = filereader(r'spins_data/bamno064.ng5')
+        spins65 = filereader(r'spins_data/bamno065.ng5')
+        spins56 = filereader(r'spins_data/bamno056.ng5')
+        spins58 = filereader(r'spins_data/bamno058.ng5')
+        spins59 = filereader(r'spins_data/bamno059.ng5')
+        spins60 = filereader(r'spins_data/bamno060.ng5')
+        spins61 = filereader(r'spins_data/bamno061.ng5')
+        spins62 = filereader(r'spins_data/bamno062.ng5')
+        spins66 = filereader(r'spins_data/bamno066.ng5')
+        spins67 = filereader(r'spins_data/bamno067.ng5')
+        spins68 = filereader(r'spins_data/bamno068.ng5')
+        spins69 = filereader(r'spins_data/bamno069.ng5')
+        #spins = join([spins55, spins64, spins56, spins57, spins59, spins60, spins61, spins62, spins63, spins66, spins67, spins68, spins69])
+        spins_list =[spins55,spins64,spins56,spins57,#spins58,
+                     spins59,spins60,spins61,spins62,spins63,spins66,spins67,spins68,spins69]
+
+
+        hmin=min(min(si.physical_motors.h.x) for si in spins_list)
+        hmax=max(max(si.physical_motors.h.x) for si in spins_list)
+        emin=min(min(si.physical_motors.e.x) for si in spins_list)
+        emax=max(max(si.physical_motors.e.x) for si in spins_list)
+        h = bin_edges(np.linspace(hmin,hmax,100))
+        e = bin_edges(np.linspace(emin,emax,100))
+        data = np.array([rebin(bin_edges(si.physical_motors.e.x),si.detectors.primary_detector.x,e) for si in spins_list])
+        #pylab.pcolormesh(h,e,data)
+        #pylab.show()
+        h_in = np.asarray([si.physical_motors.h.x[0] for si in spins_list])
+        idx = np.argsort(h_in)
+        h_in = h_in[idx]
+        data = data[idx,:]
+        curh = h_in[0]
+        curdata = data[0]
+        joined = []
+        for i,nexth in enumerate(h_in[1:]):
+            if abs(curh-nexth) < 1e-6:
+                curdata += data[i+1]
+        data = np.array([rebin(bin_edges(h_in),rowi,h) for rowi in data.T[idx]])
+
+
+        pylab.pcolormesh(h,e,data)
+        pylab.show()
+
+
+
+        #spins.xaxis='h'
+        #spins.yaxis='e'
+
+        #plotobj = spins.get_plottable()
+        #print plotobj
+
+    if 0:
+        mydirectory=r'L:\BFO_ALL\BiFeO3Film_just data\Mar27_2011'
+        myfilenames=[os.path.join(mydirectory,'meshm%03d.bt9'%i) for i in range(1,64)]
+        bt9=join([filereader(fi) for fi in myfilenames])
+        bt9.xaxis='h'
+        bt9.yaxis='k'
+        plotobj = bt9.get_plottable()
+
     if 0:
         spins54 = filereader(r'spins_data/bamno054.ng5')
         spins55 = filereader(r'spins_data/bamno055.ng5')
@@ -1835,11 +2288,15 @@ if __name__ == "__main__":
         spins63 = filereader(r'spins_data/bamno063.ng5')
         spins64 = filereader(r'spins_data/bamno064.ng5')
         spins65 = filereader(r'spins_data/bamno065.ng5')
+        spins_list =[spins54,spins55,spins57,spins63,spins64,spins65]
+        spins = join(spins_list)
+        '''
         spins = join(spins54,spins55)
         spins = join(spins, spins57)
         spins = join(spins, spins63)
         spins = join(spins, spins64)
         spins = join(spins, spins65)
+	'''
         spins.xaxis='h'
         spins.yaxis='e'
         plotobj = spins.get_plottable()
@@ -1858,5 +2315,122 @@ if __name__ == "__main__":
         #print 'detailed balance done'
         bt7.harmonic_monitor_correction('BT7')
         bt7.resolution_volume_correction()
-    print 'bye'
+    if 0:
+        data_list = []
+        for i in range(1, 64):
+            if i < 10:
+                data_i = filereader(r'../../../yee/WilliamData/meshm00%d.bt9' %i)
+            elif i < 100:
+                data_i = filereader(r'../../../yee/WilliamData/meshm0%d.bt9' %i)
+            elif i < 1000:
+                data_i = filereader(r'../../../yee/WilliamData/meshm%d.bt9' %i)
+            data_list.append(data_i)
+        joined = join(data_list)
 
+        #rebinning testing
+        if 1:
+            x = joined.physical_motors.h.x
+            y = joined.physical_motors.k.x
+            z = joined.detectors.primary_detector.x
+            xbin, ybin, data = rebin2.rebin_2D(x, y, z, num_bins=20, edges=False)
+            #xbin, ybin, data = rebin2.rebin_2D(x, y, z, xstep=0.002, ystep=0.002, edges=False)
+            
+            data = data.T
+            
+            pylab.contourf(xbin,ybin,data)
+            #pylab.pcolormesh(xbin, ybin, data)
+            pylab.show()
+            pylab.pcolormesh(xbin,ybin,data)
+            pylab.show()
+
+
+        qxmin=min(min(si.physical_motors.h.x) for si in data_list)
+        qxmax=max(max(si.physical_motors.h.x) for si in data_list)
+        qymin=min(min(si.physical_motors.k.x) for si in data_list)
+        qymax=max(max(si.physical_motors.k.x) for si in data_list)
+        qx = bin_edges(np.linspace(qxmin,qxmax,100))
+        qy = bin_edges(np.linspace(qymin,qymax,100))
+        data = np.array([rebin(bin_edges(si.physical_motors.h.x),si.detectors.primary_detector.x,qy) for si in data_list])
+        #pylab.pcolormesh(qx,qy,data)
+        h=np.empty(0,'Float64')
+        k=np.empty(0,'Float64')
+        z=np.empty(0,'Float64')
+        for si in data_list:
+            h=np.concatenate((h,si.physical_motors.h.x))
+            k=np.concatenate((k,si.physical_motors.k.x))
+            z=np.concatenate((z,si.detectors.primary_detector.x))
+        pylab.hexbin(h,k,z)
+        pylab.show()
+
+    if 0:
+        #Testing run_bumps
+        data_list = []
+        monitor = None
+        for i in range(1, 64):
+            if i < 10:
+                data_i = filereader(r'../../../yee/WilliamData/meshm00%d.bt9' %i)
+            elif i < 100:
+                data_i = filereader(r'../../../yee/WilliamData/meshm0%d.bt9' %i)
+            elif i < 1000:
+                data_i = filereader(r'../../../yee/WilliamData/meshm%d.bt9' %i)
+
+            data_list.append(data_i)
+            
+        normalize_monitor(data_list) # sets all monitors to that of the first TAS object
+        joinedtas = join(data_list)  # joins all datafiles, removing duplicate points
+        data = np.array([joinedtas.physical_motors.h.x, joinedtas.physical_motors.k.x, 
+                         joinedtas.detectors.primary_detector.x, joinedtas.detectors.primary_detector.variance])
+        np.savetxt("datatest1.txt", data)
+
+            
+        #np.savetxt("datatest1error.txt", np.array([joinedtas.detectors.primary_detector.variance]))
+        #temp = np.genfromtxt("datatest1.txt")
+        #run_bumps(joinedtas, '../../../WilliamData/BumpsResults')
+
+    if 0:
+        bg = filereader(r'../../../yee/WilliamData/meshm001.bt9')
+        signal = filereader(r'../../../yee/WilliamData/meshm002.bt9')
+        m = uncertainty.Measurement([5.0, 3.0], [5.0, 2.0])
+        subtract(signal, bg, 'k')
+        
+        print 'subtracted!'
+        
+    if 0:
+        #testing loading of .aof and .acf files
+        aof_filename = r'chalk_data/WRBFOB.AOF'
+        acf_filename = r'chalk_data/WRBFOB.ACF'
+        orient1 = [1, -1, 0]
+        orient2 = [1, 1, 1]
+        instrument_list = chalk_filereader(aof_filename, orient1, orient2, acf_filename=None)
+        
+        joinedtas = join(instrument_list)
+        print 'read chalk'
+        
+        
+    if 1: 
+        # testing load for hfir files
+        taslist = []
+        for i in range(1, 109): 
+            tas = filereader(r'hfir_data/HB3/exp331/Datafiles/HB3_exp0331_scan' + repr(i).zfill(4) + '.dat')
+            taslist.append(tas)
+        
+        print tas.get_metadata()
+        instrument = join(taslist)        
+        tas = hfir_filereader(myfilestr)
+        
+        print 'read hfir'
+        
+    if 0:
+        # testing load for bt4 files
+        taslist = []
+        for i in range(1, 81):
+            if i < 10:     
+                tas = filereader(r'bt4_data/fbtse00%d.bt4' %i)
+            else:
+                tas = filereader(r'bt4_data/fbtse0%d.bt4' %i)
+            taslist.append(tas)
+        
+        instrument = join(taslist)
+        print 'done'
+        
+    print 'Finished local test.'

@@ -3,6 +3,7 @@
 // # by Ophir Lifshitz #
 // # Aug, 2011         #
 // #####################
+debug = true;
 
 (function($) {
     function toArray(obj) {
@@ -20,12 +21,13 @@
     
     // called with scope of a series
     $.jqplot.Interactor.prototype = {
-    init: function(name, icon, state, canvasid) {
+    init: function(name, icon, state, canvasid, notMaster) {
         //console.log("nInteractor init", this, name, icon, state, canvasid)
         this.name = name;
         this.icon = icon;
         this.state = state;
         this.translatable = true;
+        this.notMaster = notMaster || false;
         
         this.canvas = document.getElementById(canvasid);
         this.context = this.getContext(canvasid);
@@ -43,9 +45,11 @@
         
         //this.canvas.onmouseover = this.onMouseOver.bind(this);
         //this.canvas.onmousemove = this.onMouseMove.bind(this);
-        this.canvas.onmousemove = bind(this, this.onMouseMove);
-        this.canvas.onmousedown = bind(this, this.onMouseDown);
-        this.canvas.onmouseup   = bind(this, this.onMouseUp);
+        if (!this.notMaster) {
+            this.canvas.onmousemove = bind(this, this.onMouseMove);
+            this.canvas.onmousedown = bind(this, this.onMouseDown);
+            this.canvas.onmouseup   = bind(this, this.onMouseUp);
+        }
     },
 
     getMouse: function(e) {
@@ -63,6 +67,7 @@
     getContext: function(id) {
         var elem = document.getElementById(id);
         if (!elem || !elem.getContext) {
+            if (debug) { console.log('no elem or elem.getContext', elem, id); }
             return;
         }
 
@@ -75,7 +80,7 @@
     },
 
     redraw: function() {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        if (!this.notMaster) { this.context.clearRect(0, 0, this.canvas.width, this.canvas.height); }
         for (var i = 0; i < this.grobs.length; i ++) {
             var grob = this.grobs[i];
             grob.render(this.context);

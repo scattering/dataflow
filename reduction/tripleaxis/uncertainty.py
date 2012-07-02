@@ -36,7 +36,7 @@ class Measurement(object):
             else:
                 xs=numpy.hstack((self.x,other.x))
             if self.variance==None and other.variance==None:
-                variances=None            
+                variances=None
             else:
                 variances=numpy.hstack((self.variance,other.variance))
             self.x=xs

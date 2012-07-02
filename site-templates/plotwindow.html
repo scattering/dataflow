@@ -16,6 +16,7 @@
 		<script type="text/javascript" src="../static/lib/plotting/jqplot/plugins/jqplot.cursor.js"></script>
 		<script type="text/javascript" src="../static/lib/plotting/jqplot/jqplot.FixedAspect.js"></script>
 		<script type="text/javascript" src="../static/lib/plotting/jqplot/jquery.jqplot.InteractiveLegend.js"></script>
+		<script type="text/javascript" src="../static/lib/plotting/jqplot/plugins/jqplot.mobile.js"></script>
 		<script type="text/javascript" src="../static/lib/plotting/palettes.js"></script>
 		<script type="text/javascript" src="../static/lib/plotting/plotting_api.js"></script>
 		<script type="text/javascript" src="../static/lib/plotting/heatmapRenderer.js"></script>
@@ -45,6 +46,16 @@
 			    width: 10;
 			    height: 10;
 			}
+			.show_hide {
+                display:none;
+            }
+            .metadata-label {color: red}
+		    .slidingDiv {
+                background-color: #99CCFF;
+                padding:20px;
+                margin-top:10px;
+                border-bottom:5px solid #3399FF;
+            }
 		</style>
 		<script type="text/javascript">
 		    window.onload = function() {

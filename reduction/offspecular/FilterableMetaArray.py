@@ -209,7 +209,8 @@ class FilterableMetaArray(MetaArray):
         for col in data_cols:
             # output in column-major order, since first index is "x",
             # and we want to traverse that axis first.       
-            array_out = self['Measurements':col].view(ndarray).ravel('F')
+            array_out = self['Measurements':col].view(ndarray)
+            array_out = array_out.ravel('F')
             result.append(array_out.astype(float32).tostring())
         
         return result

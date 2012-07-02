@@ -18,7 +18,7 @@ Editing:
 		with multiple groups
 
 */
-	var maxvals = [];
+    var maxvals = [];
     var minvals = [];
     // Generates the "range graphic" in the cells of the file gridpanel
     function vrange(val, meta, record, rI, cI, store) {
@@ -39,15 +39,15 @@ Editing:
     var storeFields = [];
     var dataArray = [];
 
-	Ext.regModel('fileModel', {
-    fields: [
-        {name: 'file name', type: 'string'},
-        'database id',
-        {name:'sha1',type:'string'}
-    ]
-	});
+    Ext.regModel('fileModel', {
+	fields: [
+	    {name: 'file name', type: 'string'},
+	    'database id',
+	    {name:'sha1',type:'string'}
+	]
+    });
 
-	var store = Ext.create('Ext.data.Store', { model: 'fileModel'});
+    var store = Ext.create('Ext.data.Store', { model: 'fileModel'});
 	
 //	var store = new Ext.data.Store({
 //        proxy: new Ext.data.proxy.Memory(dataArray),
@@ -56,7 +56,7 @@ Editing:
 //    });
     var gridColumns = [];
 	
-	gridColumns.push({header: 'file name', width: 150, sortable: true, dataIndex: 'filename'});
+    gridColumns.push({header: 'file name', width: 150, sortable: true, dataIndex: 'filename'});
     //storeFields.push({name: fieldData[0]});
     gridColumns.push({header: 'database id', width: 150,hidden:true, sortable: true, dataIndex: 'database_id'});
     //storeFields.push({name: fieldData[1]});
@@ -74,40 +74,40 @@ Editing:
         bbar: [],
     });
 	
-	grid.render('gridtest');
+    grid.render('gridtest');
 
 
 	
 /*After data is retrieved from server, we have to reinitiallize the Store reconfigure the ArrayGrid
 so that the new data is displayed on the page*/
     function reload_data(){
-    var fieldData = dataArray[0]; //First row is the parameters of the data file (e.g. ['X', 'Y', 'Z', 'Temp'])
-    maxvals = dataArray[1];       //Second row is the max values of the parameters over all files (used for rendering ranges)
-    minvals = dataArray[2];       //Third row is min values of parameters
-    dataArray.splice(0, 3);        //The rest is the actual data
-    var gridColumns = [];
-    storeFields = [];
-/*The first three parameters (File Name, database ID, and md5 sum) aren't renedered using the
-standard renderer and the ID and md5 sum aren't displayed at all, they are only used for server
-requests later, so we add them to the Store differently*/
-    gridColumns.push({header: fieldData[0], width: 150, sortable: true, dataIndex: fieldData[0]});
-    storeFields.push({name: fieldData[0]});
-    gridColumns.push({header: fieldData[1], width: 150,hidden:true, sortable: true, dataIndex: fieldData[1]});
-    storeFields.push({name: fieldData[1]});
-    gridColumns.push({header: fieldData[2], width: 150,hidden:true, sortable: true, dataIndex: fieldData[2]});
-    storeFields.push({name: fieldData[2]});
-    for (var i = 3; i < fieldData.length; ++i) {
-        gridColumns.push({header: fieldData[i], width: 100, renderer: vrange, sortable: true, dataIndex: fieldData[i]});
-        storeFields.push({name: fieldData[i]});
-    }
-    //store = new Ext.data.Store({
-    //    proxy: new Ext.data.proxy.Memory(dataArray),
-    //    reader: new Ext.data.ArrayReader({},storeFields),
-    //    remoteSort: true,
-    //});
-	
+	var fieldData = dataArray[0]; //First row is the parameters of the data file (e.g. ['X', 'Y', 'Z', 'Temp'])
+	maxvals = dataArray[1];       //Second row is the max values of the parameters over all files (used for rendering ranges)
+	minvals = dataArray[2];       //Third row is min values of parameters
+	dataArray.splice(0, 3);        //The rest is the actual data
+	var gridColumns = [];
+	storeFields = [];
+    /*The first three parameters (File Name, database ID, and md5 sum) aren't renedered using the
+    standard renderer and the ID and md5 sum aren't displayed at all, they are only used for server
+    requests later, so we add them to the Store differently*/
+	gridColumns.push({header: fieldData[0], width: 150, sortable: true, dataIndex: fieldData[0]});
+	storeFields.push({name: fieldData[0]});
+	gridColumns.push({header: fieldData[1], width: 150,hidden:true, sortable: true, dataIndex: fieldData[1]});
+	storeFields.push({name: fieldData[1]});
+	gridColumns.push({header: fieldData[2], width: 150,hidden:true, sortable: true, dataIndex: fieldData[2]});
+	storeFields.push({name: fieldData[2]});
+	for (var i = 3; i < fieldData.length; ++i) {
+	    gridColumns.push({header: fieldData[i], width: 100, renderer: vrange, sortable: true, dataIndex: fieldData[i]});
+	    storeFields.push({name: fieldData[i]});
+	}
+	//store = new Ext.data.Store({
+	//    proxy: new Ext.data.proxy.Memory(dataArray),
+	//    reader: new Ext.data.ArrayReader({},storeFields),
+	//    remoteSort: true,
+	//});
+	    
 	Ext.regModel('fileModel', {
-    fields: storeFields
+	    fields: storeFields
 	});
 	var store = Ext.create('Ext.data.Store', { model: 'fileModel'});
 	grid.columns=gridColumns;
@@ -115,27 +115,27 @@ requests later, so we add them to the Store differently*/
 	//add all files to the store..
 	var filerecs=[];
 	for (var j = 0; j < dataArray.length; ++j) {
-	var filerec={}
-	for (var i = 0; i < fieldData.length; ++i) {
-        filerec[fieldData[i]]=dataArray[j][i];
-	}
-	filerecs.push(filerec);
+	    var filerec={}
+	    for (var i = 0; i < fieldData.length; ++i) {
+		filerec[fieldData[i]]=dataArray[j][i];
+	    }
+	    filerecs.push(filerec);
 	}
 	store.loadData(filerecs);
-    //colModel = new Ext.grid.ColumnModel({columns: gridColumns});
-    //store.load({params:{start:0, limit:10}});
-    //grid.getBottomToolbar().removeAll();
-    //grid.getBottomToolbar().add(new Ext.PagingToolbar({
-    //        store:store,
-    //        pageSize: 10,
-    //        displayInfo: false,
-    //        displayMsg: 'Displaying topics {0} - {1} of {2}',
-    //        emptyMsg: "No topics to display",
-    //    }))
-    //grid.getBottomToolbar().doLayout();
-    grid.reconfigure(store, gridColumns);
-
-};
+	//colModel = new Ext.grid.ColumnModel({columns: gridColumns});
+	//store.load({params:{start:0, limit:10}});
+	//grid.getBottomToolbar().removeAll();
+	//grid.getBottomToolbar().add(new Ext.PagingToolbar({
+	//        store:store,
+	//        pageSize: 10,
+	//        displayInfo: false,
+	//        displayMsg: 'Displaying topics {0} - {1} of {2}',
+	//        emptyMsg: "No topics to display",
+	//    }))
+	//grid.getBottomToolbar().doLayout();
+	grid.reconfigure(store, gridColumns);
+    
+    };
 
 
 
