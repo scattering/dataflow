@@ -197,7 +197,7 @@ loadchalk = load_chalk_module(id='tas.loadchalk', datatype=TAS_DATA,
 
 
 
-def extract_action(data_objects=[], **kwargs):
+def extract_action(input, data_objects=[], **kwargs):
     """ isolates/extracts the given list of objects """
     print "extracting", data_objects
     
@@ -205,7 +205,7 @@ def extract_action(data_objects=[], **kwargs):
 
 
 extract = extract_module(id='tas.extract', datatype=TAS_DATA,
-                   version='1.0', action=extract_action,)
+                   version='1.0', action=extract_action, fields=None)
 
 
 

@@ -444,24 +444,34 @@ def uploadFiles(request):
             open(write_here, 'w').write(file_data)
 
             new_files = File.objects.filter(name=file_sha1.hexdigest())
-            
-            instrument = call_appropriate_filereader(write_here, friendly_name=f.name)
-            # extract's the instrument's metadata to put into the File model
-            try:
-                metadata = instrument.extrema
-            except:
-                metadata = None
-            
+                       
             if len(new_files) > 0:
                 new_file = new_files[0]
             else:
-                new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location, metadata=metadata)
+                new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location)
+
+
+            instrument = call_appropriate_filereader(write_here, friendly_name=f.name)
+            # extract's the instrument's metadata to put into the File model
+            try:
+                extrema = instrument.extrema
+                for key in extrema.keys():
+                    # Assumes that all keys (ie field headers) are strings/chars
+                    keymin = key + '_min'
+                    new_metadata_min = Metadata.objects.create(Myfile=new_file, Key=keymin, Value=extrema[key][0])
+                    new_file.metadata.add(new_metadata_min)
+                    
+                    keymax = key + '_max'
+                    new_metadata_max = Metadata.objects.create(Myfile=new_file, Key=keymax, Value=extrema[key][1])
+                    new_file.metadata.add(new_metadata_max)
+            except:
+                extrema = None
 
             if experiment is not None:
                 #print "experiment id: ", request.POST[u'experiment_id']
                 experiment.Files.add(new_file)
 
-    return HttpResponse('OK') 
+    return HttpResponse('OK')
 
 
 def call_appropriate_filereader(filestr, friendly_name):

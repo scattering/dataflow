@@ -131,65 +131,55 @@ function makeFileMultiSelect(src_files, selected_files, form_id, fieldLabel) {
 	return item;
 }
 
-// Given a bundle of TripleAxis objects, 
-function makeDataSummaryTable(source_objects, selected_objects, form_id, fieldLabel) {
 
-//    var src_files = []
-//    for (var i in FILES) {
-//        src_files.push(FILES[i][1]);
-//    }
-    var fieldLabel = fieldLabel || 'data_summary'; // can override
+function makeFileSummarySelect(src_files, form_id, fieldLabel) {
+    var fieldLabel = fieldLabel || 'files_with_summary'; // can override
     
     var form_id = form_id || 0;
+    src_files.sort()
 
-      myUBmatrix = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]] //The variable that will hold the calculated UB matrix
-
-    var baseData = [
-        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-    ];
-    var baseIdealData = [
-        [0.0, 0.0, 0.0, '0', '0', '0', '0', '0'],
-    ];
-
-    // create the Data Store
-    var UBInputFields = [
-        { name: 'h',        type: 'float'},
-        { name: 'k',        type: 'float'},
-        { name: 'l',        type: 'float'},
-        { name: 'twotheta', type: 'float'},
-        { name: 'theta',    type: 'float'},
-        { name: 'chi',      type: 'float'},
-        { name: 'phi',      type: 'float'},
-    ] 
-    var store = new Ext.data.ArrayStore({
-        autodestroy     : false,
-        storeId         : 'UBInputStore',
-        fields          : UBInputFields,
-        pruneModifiedRecords: true
-    });
-    store.loadData(baseData);
-    
-    
-    var desiredFields = [
-        { name: 'h'},
-        { name: 'k'},
-        { name: 'l'},
-        { name: 'twotheta'},
-        { name: 'theta'},
-        { name: 'omega'},
-        { name: 'chi'},
-        { name: 'phi'},
-    ] 
-    var idealDataStore = new Ext.data.ArrayStore({
-        autoDestroy     : false,
-        storeId         : 'desiredStore',
-        fields          : desiredFields,
-        pruneModifiedRecords: true
-    });
-    idealDataStore.loadData(baseIdealData);
-    
-    //return item;
+    var source_files_selector = {
+		xtype: 'multiselect',
+		name              :  'multiselect',
+		fieldLabel        :  'Multiselect',
+		store: src_files,
+		height: 390,
+	};
+	
+	var dest_files_selector = {
+		xtype: 'multiselect',
+		name              :  'multiselect',
+		fieldLabel        :  'Multiselect',
+		store: [],          
+		allowBlank        :  true,
+		height: 390,
+	}
+	
+	var itemselector = {
+	    xtype: 'itemselector',
+	    fieldLabel: fieldLabel,
+	    multiselects: [source_files_selector, dest_files_selector],
+	    store: src_files,
+	    value: selected_files,
+	    width: 400,
+	    height: 400,
+	    reverse_lookup_id: form_id
+	}
+	
+	var item = {
+	    xtype: 'fieldset',
+	    title: fieldLabel,
+	    fieldLabel: fieldLabel,
+	    //labelWidth: 0,
+	    collapsible: true,
+	    layout: 'fit',
+//	    width: 600,
+//	    defaults: {
+//		    anchor: '100%'
+//	    },
+	    items: itemselector
+    }
+	return item;
 }
 
 function stripHeadersObject(headers) {
@@ -207,6 +197,13 @@ function stripHeadersObject(headers) {
     return new_config;
 }
 
+function extractMetadata(files) {
+    all_files = files.objects.all();
+    metadata_dict = {}
+    
+}
+
+
 function configForm(headerList, moduleID) {
 
 	// **DEPRECATED**: headerList should contain a list of [fieldset title ("theta"), [list field names ["x","y"] (dict will have multiple, list and float only one) ]
@@ -220,48 +217,55 @@ function configForm(headerList, moduleID) {
         // convert config fields into ExtJS form fields
         var item;
         if (header.type == 'files') {
-	        editor.FAT.update(FILES, editor.getValue().working.modules);
-	        var unassociated_files = editor.FAT.getUnassociatedFiles(editor.reductionInstance);
-	        var module_files = header.value;
-	        var total_files = [];
-	        for (var i in unassociated_files) { total_files.push(unassociated_files[i]); }
-	        for (var i in module_files) { total_files.push(module_files[i]); }
-	        item = makeFileMultiSelect(total_files, module_files, reverse_lookup_id, header.label);
-	        reverse_lookup[reverse_lookup_id] = header; // pointer back to the original object
-	        reverse_lookup_id += 1;
-	        
-        } 
-	/*
-        else if (header.type == 'data_summary') {
-                //editor.FAT.update(FILES, editor.getValue().working.modules);
-	        //var unassociated_files = editor.FAT.getUnassociatedFiles(editor.reductionInstance);
-	        //var module_files = header.value;
-	        //var total_files = [];
-	        //for (var i in unassociated_files) { total_files.push(unassociated_files[i]); }
-	        //for (var i in module_files) { total_files.push(module_files[i]); }
-	        item = makeDataSummaryTable(total_files, module_files, reverse_lookup_id, header.label);
-	        reverse_lookup[reverse_lookup_id] = header; // pointer back to the original object
-	        reverse_lookup_id += 1;
+	        /*
+            editor.FAT.update(FILES, editor.getValue().working.modules);
+            var unassociated_files = editor.FAT.getUnassociatedFiles(editor.reductionInstance);
+            var module_files = header.value;
+            var total_files = [];
+            for (var i in unassociated_files) { total_files.push(unassociated_files[i]); }
+            for (var i in module_files) { total_files.push(module_files[i]); }
+            item = makeFileMultiSelect(total_files, module_files, reverse_lookup_id, header.label);
+            reverse_lookup[reverse_lookup_id] = header; // pointer back to the original object
+            reverse_lookup_id += 1;
+            */
+            editor.FAT.update(FILES, editor.getValue().working.modules);
+            var total_files = header.value;
 
-	}
-	*/
+            extractMetadata(total_files);
+
+            item = makeFileSummarySelect(total_files, reverse_lookup_id, header.label);
+            reverse_lookup[reverse_lookup_id] = header; // pointer back to the original object
+            reverse_lookup_id += 1;
+        } 
+        /*
+        else if (header.type == 'files_with_summary') {
+            editor.FAT.update(FILES, editor.getValue().working.modules);
+            var total_files = header.value;
+
+            extractMetadata(total_files);
+
+            item = makeFileSummarySelect(total_files, reverse_lookup_id, header.label);
+            reverse_lookup[reverse_lookup_id] = header; // pointer back to the original object
+            reverse_lookup_id += 1;
+	    }
+        */
 
         else if (header.type == "Array" || header.type == "Object") { // allow for nested lists of parameters
-                var itemlist = [];
+            var itemlist = [];
 
-                for (var j in header.value) { // nested list... is inner element
+            for (var j in header.value) { // nested list... is inner element
                 itemlist.push(createItem(header.value[j]));
-        }
-        item = {
-                    xtype: 'fieldset',
-                    title: header.label,
-                    collapsible: true,
-                    //defaultType: header.type,
-                    decimalPrecision : 12,
-                    layout: 'anchor',
-                    anchor: '100%',
-                    autoHeight: true,
-                    items: itemlist,
+            }
+            item = {
+                xtype: 'fieldset',
+                title: header.label,
+                collapsible: true,
+                //defaultType: header.type,
+                decimalPrecision : 12,
+                layout: 'anchor',
+                anchor: '100%',
+                autoHeight: true,
+                items: itemlist,
             }
         }
         

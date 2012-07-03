@@ -28,10 +28,10 @@ class File(models.Model):
 
 class Metadata(models.Model):
     Myfile = models.ForeignKey('File', related_name="file")
-    Key = models.CharField(max_length=30)	
+    Key = models.CharField(max_length=30)
     Value = models.CharField(max_length=300)
     def __unicode__(self):
-        return self.Key + ": " + self.Value
+        return self.Key + ": " + repr(self.Value)
 
 class Template(models.Model):
     Title = models.CharField(max_length=50)
