@@ -85,10 +85,92 @@ def return_data(request):
     dataArray=[['file name','database id','sha1','x','y','z'],[NaN,NaN,NaN,10,10,10],[NaN,NaN,NaN,-10,-10,-10],['file3','1','sh1','1,9','2,3','3,4'],['file2','1','sh2','4,5','2,3','5,5']]    
     return HttpResponse(simplejson.dumps(dataArray))
 
-def return_tas_data(request):
-    #currently just for local testing --> eventually use data_abstraction's get_metadata()
-    dataObject = {"title": "Data Summary", "extrema": {"ei": [14.7001, 14.7001], "ef": [14.6988, 14.6988], "monitor": [493394.0, 493394.0]}}
-    return HttpResponse(simplejson.dumps(dataObject)) 
+def return_metadata(request):
+    """
+    !!! ASSUMPTION: all files have the same metadata fields !!!
+    
+    Creating a dataObject to be passed to moduleSimpleConfigForm.js
+    dataObject will have the following mappings (key : value_description):
+        headerlist : List of headers. Indices correspond to column indices in metadata.
+                     e.g. ['Available Files', 'h_min', 'h_max', ...]. 
+        metadata : 2D lists of metadata columns. A file and all of its metadata shares the same
+                   row index in this 2D list. By default, filenames are located in the first
+                   column (i.e. metadata[0]).
+                   e.g. [['file001', 'file002', ...], [0, 0.1, 0.2,...], [1.0, 1.1, 1.2,...], ...]
+                   
+    This format is used to obtain min of min's and max of max's. NO LONGER USED FOR dataObject.
+        
+        dataObject : a 2D array of in the form: [[fileheaders...], [min of min's...], 
+                                                 [max of max's...],[row1 values], [row2 values],...]
+    """
+    #if request.GET.has_key(u'experiment_id'):
+    experiment_id = request.GET[u'experiment_id']
+    experiment = Experiment.objects.get(id=experiment_id)    
+    headerlist = ['Available Files']
+    metadata = []
+    dataObject = []
+    
+    for f in experiment.Files.all():
+        try:
+            metadata[0].append(f.friendly_name)
+        except:
+            metadata.insert(0, [f.friendly_name])
+        
+        datalist = [f.friendly_name]
+        metadatalist = f.metadata.all()
+        for i in range(len(metadatalist)):
+            #if a min/max  is not a float, it is assigned NaN
+            try:
+                value = float(metadatalist[i].Value)
+            except:
+                value = NaN
+            key = metadatalist[i].Key
+            
+            
+            try:
+                index = headerlist.index(key)
+            except:
+                index = len(headerlist)
+                headerlist.append(key)
+                
+            try:
+                metadata[index].append(value)
+            except:
+                #first time, instantiate the list
+                metadata.insert(index, [value])
+                
+            # the '_min' should always directly proceed the '_max' based on the way
+            # Metadata was created in uploadFiles()
+            ending = key[-4:] #will get the '_min' or '_max'
+            if ending == '_min':
+                datalist.append(repr(value))
+            elif ending == '_max':
+                datalist[-1] = datalist[-1] + ',' + repr(value)
+                
+        dataObject.append(datalist)
+                
+    fileheaders = ['Available Files']
+    for i in range(0, len(headerlist)/2):
+        #loops through all headers, skipping every other (ie the ones ending in '_max')
+        index = i * 2 + 1
+        fileheaders.append(headerlist[index][:-4]) #removes the '_min' ending
+        
+    minvals = [NaN]
+    maxvals = [NaN]
+    for i in range(0, len(headerlist)/2):
+        minval = min(metadata[i * 2 + 1]) #find min of min's for each '_min' column
+        maxval = max(metadata[i * 2 + 2]) #find max of max's for each '_max' column
+               
+        minvals.append(NaN if type(minval)==type('') else minval)
+        maxvals.append(NaN if type(maxval)==type('') else maxval)
+        
+        
+    dataObject.insert(0, minvals)
+    dataObject.insert(0, maxvals)
+    dataObject.insert(0, fileheaders)
+    
+    return HttpResponse(simplejson.dumps(dataObject))
+
 
 import redis
 server = redis.Redis("localhost")

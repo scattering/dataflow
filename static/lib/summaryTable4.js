@@ -5,7 +5,6 @@ Ext.onReady(function() {
     var minvals = [];
     // Generates the "range graphic" in the cells of the file gridpanel
     function vrange(val, meta, record, rI, cI, store) {
-        console
         var range = maxvals[cI] - minvals[cI];
         var spl = val.split(',');
         var low = parseFloat(spl[0]);
@@ -44,11 +43,11 @@ Ext.onReady(function() {
 //    });
     var gridColumns = [];
 	
-    gridColumns.push({header: 'File Name', width: 150, sortable: true, dataIndex: 'filename'});
+    gridColumns.push({header: 'File Name', width: 100, sortable: true, dataIndex: 'filename'});
     //storeFields.push({name: fieldData[0]});
-    gridColumns.push({header: 'database id', width: 150, hidden:true, sortable: true, dataIndex: 'database_id'});
+    gridColumns.push({header: 'database id', width: 100, hidden:true, sortable: true, dataIndex: 'database_id'});
     //storeFields.push({name: fieldData[1]});
-    gridColumns.push({header: 'sha1', width: 150, hidden:true, sortable: true, dataIndex: 'sha1'});
+    gridColumns.push({header: 'sha1', width: 100, hidden:true, sortable: true, dataIndex: 'sha1'});
     //storeFields.push({name: fieldData[2]});	
 	
     /*GridPanel that displays the data*/    
@@ -64,31 +63,30 @@ Ext.onReady(function() {
 	
     grid.render('summarygrid');
 
-
 	
     /*After data is retrieved from server, we have to reinitiallize the Store reconfigure the ArrayGrid
     so that the new data is displayed on the page*/
     function reload_data(){
-	    var fieldData = dataArray[0]; //First row is the parameters of the data file (e.g. ['X', 'Y', 'Z', 'Temp'])
-	    maxvals = dataArray[1];       //Second row is the max values of the parameters over all files (used for rendering ranges)
-	    minvals = dataArray[2];       //Third row is min values of parameters
-	    dataArray.splice(0, 3);       //Remove first three elements; the rest is the actual data
+        var fieldData = dataArray[0]; //First row is the parameters of the data file (e.g. ['X', 'Y', 'Z', 'Temp'])    
+        maxvals = dataArray[1];       //Second row is the max values of the parameters over all files (used for rendering ranges)
+        minvals = dataArray[2];       //Third row is min values of parameters
+        dataArray.splice(0, 3);       //Remove first three elements; the rest is the actual data
 
-	    var gridColumns = [];
-	    storeFields = [];
+        var gridColumns = [];
+        storeFields = [];
         /*The first three parameters (File Name, database ID, and md5 sum) aren't renedered using the
         standard renderer and the ID and md5 sum aren't displayed at all, they are only used for server
         requests later, so we add them to the Store differently*/
-	    gridColumns.push({header: fieldData[0], width: 150, sortable: true, dataIndex: fieldData[0]});
-	    storeFields.push({name: fieldData[0]});
-	    gridColumns.push({header: fieldData[1], width: 150, hidden:true, sortable: true, dataIndex: fieldData[1]});
-	    storeFields.push({name: fieldData[1]});
-	    gridColumns.push({header: fieldData[2], width: 150, hidden:true, sortable: true, dataIndex: fieldData[2]});
-	    storeFields.push({name: fieldData[2]});
-	    for (var i = 3; i < fieldData.length; ++i) {
-	        gridColumns.push({header: fieldData[i], width: 100, renderer: vrange, sortable: true, dataIndex: fieldData[i]});
-	        storeFields.push({name: fieldData[i]});
-	    }
+        gridColumns.push({header: fieldData[0], width: 100, sortable: true, dataIndex: fieldData[0]});
+        storeFields.push({name: fieldData[0]});
+        gridColumns.push({header: fieldData[1], width: 100, hidden:true, sortable: true, dataIndex: fieldData[1]});
+        storeFields.push({name: fieldData[1]});
+        gridColumns.push({header: fieldData[2], width: 100, hidden:true, sortable: true, dataIndex: fieldData[2]});
+        storeFields.push({name: fieldData[2]});
+        for (var i = 3; i < fieldData.length; ++i) {
+            gridColumns.push({header: fieldData[i], width: 100, renderer: vrange, sortable: true, dataIndex: fieldData[i]});
+            storeFields.push({name: fieldData[i]});
+        }
 	    //store = new Ext.data.Store({
 	    //    proxy: new Ext.data.proxy.Memory(dataArray),
 	    //    reader: new Ext.data.ArrayReader({},storeFields),
@@ -103,7 +101,7 @@ Ext.onReady(function() {
 	    grid.columns=gridColumns;
 	
 	    //add all files to the store..
-	    var filerecs=[];
+	    var filerecs = [];
 	    for (var j = 0; j < dataArray.length; ++j) {
 	        var filerec={}
             //fieldData = dataArray[j]
@@ -112,6 +110,7 @@ Ext.onReady(function() {
 	        }
 	        filerecs.push(filerec);
 	    }
+        
 	    store.loadData(filerecs);
         
 	    //colModel = new Ext.grid.ColumnModel({columns: gridColumns});
@@ -155,9 +154,6 @@ anytime there is new data, and initially to populate the table.*/
     }
     
     //update();
-	hardcode_update();
-
-
-
+    hardcode_update();
 
 });

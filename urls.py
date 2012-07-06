@@ -22,6 +22,7 @@ urlpatterns = patterns(REPO_ROOT + '.apps.tracks.views',
                        ('^filesExist/$', 'filesExist'),
                        ('^getBinaryData/', 'getBinaryData'),
                        ('^json/$','return_data'),
+                       ('^metadatajson/$', 'return_metadata'),
                        ('^test_table/$','testTable'),
 
                        # Wiring editor display urls
