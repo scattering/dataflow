@@ -1,8 +1,8 @@
 '''
-Author: Alex Yee
 
-Edit History
-    See Research Journal
+Original Author: Alex Yee
+Current Author:  William Ratcliff
+
 '''
 import sys
 import numpy as np
@@ -29,17 +29,51 @@ from openopt import SNLE
 #For us, theta is theta_measured (aka Lumsden's 's')--that is, the actual rotation of the shaft about the z axis
 #Should we just call it a3???
 
+""""
+th->sample theta
+tth->sample two theta
+
+""""
+
+def rtan(y,x):
+    if x == 0. and y == 0.:
+	return 0.0
+    if x == 0.0:
+	if (y < 0.):
+	    return -np.pi/2.
+	else:
+	    return np.pi/2.
+    if np.abs(y) < np.abs(x):
+	val = np.arctan(np.abs(y/x))
+	if x < 0.: 
+	    val = np.pi - val
+	if y < 0.:
+	    val = -val;
+	return val
+    else:
+	val  = np.pi/2. - np.arctan(np.abs(x/y))
+	if x < 0.:
+	    val = np.pi - val
+	if y < 0.:
+	    val = - val
+	return val
 
 
 def e_to_k(e):
+    """Convert energy to wave vector, k
+    """
     k=np.sqrt(e/2.072)
     return k
 
 def e_to_wavelength(e):
+    """Convert energy to wavelength
+    """
     wavelength=9.045/np.sqrt(e)
     return wavelength
 
 def a2_to_k(a2,dspacing):
+    """Convert monochromator two theta, a2, to wave vector, k    
+    """
     taum=2*np.pi/dspacing
     k=taum/np.sqrt(2.0-2*np.cos(a2))
     return k
@@ -76,12 +110,13 @@ def calc_th_inelastic(ei,ef,tth):
     """
     ki=e_to_k(ei)
     kf=e_to_k(ef)    
-    th=np.arctan2((ki-kf*np.cos(tth)),kf*np.sin(tth))
+    #th=np.arctan2((ki-kf*np.cos(tth)),kf*np.sin(tth))
+    th=rtan((ki-kf*np.cos(tth)),kf*np.sin(tth))
     return np.degrees(th)
 
 def calc_om_inelastic(ei,ef,tth,theta):
     """
-    Following the Lumsden formulation, calculate om.
+    Following the Lumsden formulation, calculate om.  Should be left handed
     """
     om=theta-calc_th_inelastic(ei,ef,tth)
     #theta is the instrument theta
@@ -268,6 +303,8 @@ def calcTwoTheta(h, stars, ei):
 
 
 def calc_om_elastic(h1,k1,l1,ei,th1,stars):
+    """Calculates omega for diffraction...This seems to give a right handed answer...Be careful!
+    """
     q1=calcq(h1,k1,l1,stars)
     tth1=calcTwoTheta([h1,k1,l1],stars,ei)
     om1=th1-tth1/2.0    
@@ -311,7 +348,11 @@ class UBCalc(object):
         return hphi    
     
     def calcUB (self,*args):
+	"""
+	Calculates the UB matrix from two reflections.
+	"""
         Umatrix = self.calcU(*args)
+	# *args=h1, k1, l1, h2, k2, l2, omega1, chi1, phi1, omega2, chi2, phi2, Bmatrix
         UBmatrix = np.dot(Umatrix, args[-1])
         return UBmatrix
     
@@ -326,6 +367,10 @@ class UBCalc(object):
 # *********************************** START - calculations for bisecting mode  *********************************** 
 
 class StrategyBisectingMode(object):
+    """
+    Class for performing angle calculations using the UB matrix in the condition where the
+    chi circle bisects the detector angle.   For this case, omega=0.
+    """
     def __init__(self):
         pass
 
@@ -367,6 +412,10 @@ class StrategyBisectingMode(object):
 # ********************************* START - calculations for scattering plane mode  ********************************* 
 
 class StrategyScatteringPlane(object):
+    """
+    Calculates angles for the spectrometer for an eulerian cradle in which the scattering plane
+    and UB matrix are specified.
+    """
     def __init__(self):
         pass
     def calcIdealAngles(self,desiredh, chi, phi, UBmatrix, stars,ubcalc):
@@ -733,6 +782,17 @@ class UBCalcTilt(UBCalc):
         R=np.linalg.inv(T_nu)
         return R
     
+    def calc_coords(self, UB, mu, nu,th, tth,ei,ef,stars_dict):
+        """
+        Return the coordinates (h,k,l) given the UB matrix and the spectrometer angles.
+        """
+        omega=calc_om_inelastic(ei,ef,tth,th)  #omega should be omega+90...ack!!!
+        q=calc_q_inelastic(ei,ef,tth)
+        u_nu=self.calc_u_phi(omega, mu,nu)
+        Q=np.dot(np.linalg.inv(UB),q*u_nu)
+        return Q
+        
+    
     def calc_angles(self,mu_plane,nu_plane,UB,Q_vec,ei,ef):
         """
         Calculate the angles for the spectrometer.  mu_plane and nu_plane give the mu and nu for
@@ -781,7 +841,7 @@ class UBCalcTilt(UBCalc):
         
         
     def calcU(self,h1, k1, l1, h2, k2, l2, omega1, mu1, nu1, omega2, mu2, nu2, Bmatrix):
-            "Calculates the UB matrix using 2 sets of observations (h#, k#, l#) and their respective angle measurements in degrees (omega#, chi#, phi#)"
+            "Calculates the U matrix using 2 sets of observations (h#, k#, l#) and their respective angle measurements in degrees (omega#, chi#, phi#)"
             #Convertiung angles given in degrees to radians
             #omega1 = np.radians(omega1)
             #chi1 = np.radians(chi1)
@@ -1065,8 +1125,8 @@ def UBtest3():
     #maybe: 3.9091,3.9091,3.9091,90,90,90,1,1,0,-1.855,89.62,.001,0,0,1,-.0005,-1.286,131.063
     #Should yield:
     a, b, c, alpha, beta, gamma=3.9091,3.9091,3.9091,90.0,90.,90.
-    h1, k1, l1, th1, mu1, nu1, ei1, ef1=1.,0.,0.,    0.,0.,0., 14.7, 14.7
-    h2, k2, l2, th2, mu2, nu2, ei2, ef2=0.,1.,0.,    90.,0.,0.,14.7, 14.7
+    h1, k1, l1, th1, mu1, nu1, ei1, ef1=0.,1.,0.,    0.,0.,0., 14.7, 14.7
+    h2, k2, l2, th2, mu2, nu2, ei2, ef2=-1.,0.,0.,    90.,0.,0.,14.7, 14.7
 
     stars = star(a, b, c, alpha, beta, gamma)
     Bmatrix = calcB(*(list(stars)+[c, alpha]))
@@ -1076,6 +1136,12 @@ def UBtest3():
     ubcalc=UBCalcTilt()
     om1=calc_om_elastic(h1,k1,l1,ei1,th1,stars_dict)
     om2=calc_om_elastic(h2,k2,l2,ei2,th2,stars_dict)
+
+    tth1=calcTwoTheta(np.array([h1,k1,l1],'Float64'),stars_dict,ei1);
+    tth2=calcTwoTheta(np.array([h2,k2,l2],'Float64'),stars_dict,ei1);
+    om1=calc_om_inelastic(ei1,ef1,tth1,th1)  #left handed
+    om2=calc_om_inelastic(ei2,ef2,tth2,th2)  #left handed
+
     
     U = ubcalc.calcU(h1, k1, l1, h2, k2, l2, om1, mu1, nu1, om2, mu2, nu2, Bmatrix)
     UB=ubcalc.calcUB(h1, k1, l1, h2, k2, l2, om1, mu1, nu1, om2, mu2, nu2, Bmatrix)    
@@ -1088,9 +1154,27 @@ def UBtest3():
     Q_vec=np.array([1.,1.,1.],'Float64')
     mu_plane=0
     nu_plane=0
+    
     angles=ubcalc.calc_angles(mu_plane,nu_plane,UB,Q_vec,14.7,14.7)
     print 'angles', angles
+    
+    ei=14.7; ef=14.7; mu=0.0; nu=0.0;
+    tth=tth1
+    print 'tth', tth    
+    
+    #orient1 test
+    th=th1;
+    coords=ubcalc.calc_coords(UB,mu,nu,th,tth,ei,ef,stars_dict)
+    print 'coords',coords
+    
+    #orient2 test
+    th=th2
+    coords=ubcalc.calc_coords(UB,mu,nu,th,tth,ei,ef,stars_dict)
+    print 'coords',coords
+    
     return angles
+
+
     
     
 # **************************************** END OF UB MATRIX TESTING CODE ****************************************  
