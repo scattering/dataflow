@@ -104,8 +104,13 @@ def return_metadata(request):
                                                  [max of max's...],[row1 values], [row2 values],...]
     """
     #if request.GET.has_key(u'experiment_id'):
-    experiment_id = request.GET[u'experiment_id']
-    experiment = Experiment.objects.get(id=experiment_id)    
+    #experiment_id = request.GET[u'experiment_id']
+    experiment_id = request
+    if experiment_id < 0:
+        return '{}'
+    
+    experiment = Experiment.objects.get(id=experiment_id) 
+    
     headerlist = ['Available Files']
     metadata = []
     dataObject = []
@@ -169,8 +174,8 @@ def return_metadata(request):
     dataObject.insert(0, maxvals)
     dataObject.insert(0, fileheaders)
     
-    return HttpResponse(simplejson.dumps(dataObject))
-
+    #return HttpResponse(simplejson.dumps(dataObject))
+    return simplejson.dumps(dataObject)
 
 import redis
 server = redis.Redis("localhost")
@@ -531,21 +536,35 @@ def uploadFiles(request):
                 new_file = new_files[0]
             else:
                 new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location)
-
+                
 
             instrument = call_appropriate_filereader(write_here, friendly_name=f.name)
             # extract's the instrument's metadata to put into the File model
+            
             try:
                 extrema = instrument.extrema
                 for key in extrema.keys():
                     # Assumes that all keys (ie field headers) are strings/chars
                     keymin = key + '_min'
-                    new_metadata_min = Metadata.objects.create(Myfile=new_file, Key=keymin, Value=extrema[key][0])
-                    new_file.metadata.add(new_metadata_min)
+                    
+                    # finds the unique location of this key in the database if it was previously loaded.
+                    # sorts on the file's unique hash then key value. Does this for both min and max.
+                    existing_metadata = Metadata.objects.filter(Myfile=file_sha1.hexdigest()).filter(Key=keymin)
+                    if existing_metadata: 
+                        # if there is a metadata object in the database already, update its value
+                        existing_metadata[0].Value = extrema[key][0]
+                    else:
+                        new_metadata_min = Metadata.objects.create(Myfile=new_file, Key=keymin, Value=extrema[key][0])
+                        new_file.metadata.add(new_metadata_min)
                     
                     keymax = key + '_max'
-                    new_metadata_max = Metadata.objects.create(Myfile=new_file, Key=keymax, Value=extrema[key][1])
-                    new_file.metadata.add(new_metadata_max)
+                    existing_metadata = Metadata.objects.filter(Myfile=file_sha1.hexdigest()).filter(Key=keymax)
+                    if existing_metadata: 
+                        # if there is a metadata object in the database already, update its value
+                        existing_metadata[0].Value = extrema[key][1]                    
+                    else:
+                        new_metadata_max = Metadata.objects.create(Myfile=new_file, Key=keymax, Value=extrema[key][1])
+                        new_file.metadata.add(new_metadata_max)
             except:
                 extrema = None
 
@@ -635,6 +654,7 @@ def displayEditor(request):
         for i in range(len(file_list)):
             file_context[file_list[i].name + ',,,z,z,z,z,,,' + file_list[i].friendly_name] = ''
         file_context['file_keys'] = file_context.keys()
+        file_context['file_metadata'] = return_metadata(experiment_id)
         language_name = request.POST['language']
         file_context['language_name'] = language_name
         file_context['experiment_id'] = experiment_id

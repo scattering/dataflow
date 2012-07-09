@@ -289,11 +289,12 @@
 
 			YAHOO.util.Event.onDOMReady( function() {
 				try {
-					CHOSEN_LANG_NAME = "{{ language_name }}" // this is the language that is set as a template's language in
+                    CHOSEN_LANG_NAME = "{{ language_name }}" // this is the language that is set as a template's language in
 					// WiringEditor.js getValue()
 					//CHOSEN_LANG = languageDictionary["{{ lang }}"] // converts language string to language object
 					// Jumping into the deep end...
 					CHOSEN_LANG = {{ language_actual|safe }} // get language from server!
+                    METADATA = {{ file_metadata|safe }}
 					FILES = []
 					{% for variable in file_keys %}
 					FILES.push("{{ variable }}".split(',,,z,z,z,z,,,'))
@@ -321,6 +322,21 @@
 					editor.reductionInstance = 1;
 					editor.maxReduction = 1;
                     editor.FAT = makeFileTable(FILES, editor.getValue().working.modules);
+                    // Making the asynchronous call to create the file summary grid
+                    /*var conn = new Ext.data.Connection();
+                    conn.request({
+                        url: '/metadatajson/',
+                        method: 'GET',
+                        params: {'experiment_id': launchedFromExperimentPage},
+                        success: function(responseObject) {
+                            dataObject = Ext.decode(responseObject.responseText); //decodes the response
+                            //reload_data();
+                            editor.filesummarygrid = makeFileSummarySelect(dataObject, launchedFromExperimentPage);
+                        },
+                        failure: function() {
+                            alert("failure with GET!");
+                        }
+                    });*/
 					// more initial settings
 					editor.launchedFromExperimentPage = launchedFromExperimentPage;
                     

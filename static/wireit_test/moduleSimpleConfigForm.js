@@ -134,13 +134,12 @@ function makeFileMultiSelect(src_files, selected_files, form_id, fieldLabel) {
 
 //******************************************************************************
 
-function makeFileSummarySelect(experiment_id, form_id, fieldLabel) {
+function makeFileSummarySelect(dataObject, selected_files, experiment_id, fieldLabel) {
+    var dataObject = dataObject.slice(0) || []; //make a shallow copy of dataObject to protect METADATA from splicing later
     var fieldLabel = fieldLabel || 'files'; // can override
     var form_id = form_id || 0;
-    var table_is_created = false;
+    //var table_is_created = false;
 
-    var maxvals = [];
-    var minvals = [];
     // Generates the "range graphic" in the cells of the file gridpanel
     function vrange(val, meta, record, rI, cI, store) {
         var range = maxvals[cI] - minvals[cI];
@@ -161,14 +160,15 @@ function makeFileSummarySelect(experiment_id, form_id, fieldLabel) {
         }
     }
 
+    //Creating store and grid.
     Ext.regModel('fileModel', {
         fields: storeFields
     });
     var storeFields = [];
     var store = Ext.create('Ext.data.Store', { model: 'fileModel'});
-    var dataObject = [];
     var gridColumns = [];
-
+    //var selectedfiles = [];
+    /*
     var myCheckboxModel = new Ext.selection.CheckboxModel({
         //checkOnly: true,
         listeners: {
@@ -178,6 +178,34 @@ function makeFileSummarySelect(experiment_id, form_id, fieldLabel) {
             }
         }
     });
+    */
+    var fieldData = dataObject[0]; //First row is the parameters of the data file (e.g. ['X', 'Y', 'Z',...])    
+    var maxvals = dataObject[1];   //Second row is the max values of the parameters over all files (used for rendering ranges)
+    var minvals = dataObject[2];   //Third row is min values of parameters
+    dataObject.splice(0, 3);       //Remove first three rows; the rest is the actual data
+
+    //add all files to the store..
+    var filerecs=[];
+    for (var j = 0; j < dataObject.length; ++j) {
+        var filerec={}
+        for (var i = 0; i < fieldData.length; ++i) {
+            filerec[fieldData[i]] = dataObject[j][i];
+        }
+        filerecs.push(filerec);
+    }
+
+    // the first two columns of checkboxes and "Available Files" are not
+    // rendered using the standard renderer
+    gridColumns.push({header: fieldData[0], width: 100, sortable: true, dataIndex: fieldData[0]});
+    storeFields.push({name: fieldData[0]});
+
+    for (var i = 1; i < fieldData.length; ++i) {
+        gridColumns.push({header: fieldData[i], width: 100, renderer: vrange, sortable: true, dataIndex: fieldData[i]});
+        storeFields.push({name: fieldData[i]});
+    }
+   
+    store.loadData(filerecs);
+
 
 
     /* GridPanel that displays the data. Filled with empty columns since they are populated with update() */
@@ -186,16 +214,20 @@ function makeFileSummarySelect(experiment_id, form_id, fieldLabel) {
         selModel: new Ext.selection.CheckboxModel(),
         columns: gridColumns,
         stripeRows: true,
-        height: 250,
+        fieldLabel: fieldLabel,
+        height: 300,
         autoWidth: true,
         title: 'Select the files to run reductions on:',
         bbar: [],
+        reverse_lookup_id: form_id,
+        getValue: function (){
+            
+        }
     });
-    
-
 
     /* After data is retrieved from server, we have to reinitiallize the Store reconfigure the grid
     so that the new data is displayed on the page */
+    /*
     function reload_data(){
         var fieldData = dataObject[0]; //First row is the parameters of the data file (e.g. ['X', 'Y', 'Z', 'Temp'])    
         maxvals = dataObject[1];       //Second row is the max values of the parameters over all files (used for rendering ranges)
@@ -229,24 +261,26 @@ function makeFileSummarySelect(experiment_id, form_id, fieldLabel) {
             Ext.regModel('fileModel', {
                 fields: storeFields
             });
-            var store = Ext.create('Ext.data.Store', { model: 'fileModel'});
+            //var store = Ext.create('Ext.data.Store', { model: 'fileModel'});
             filesummarygrid.columns = gridColumns;
             
             store.loadData(filerecs);
-            filesummarygrid.store = store;
+            //filesummarygrid.store = store;
+
+            filesummarygrid.getView().refresh();
 
             table_is_created = true;
-	    } else {
+        } else {
             filesummarygrid.store.loadData(filerecs);
             filesummarygrid.getView().refresh();
         }
         
     };
+    
 
 
-
-    /*Retrieve data in json format via a GET request to the server. This is used
-    anytime there is new data, and initially to populate the table.*/
+    //Retrieve data in json format via a GET request to the server. This is used
+    //anytime there is new data, and initially to populate the table.
     function update() {
         var conn = new Ext.data.Connection();
         conn.request({
@@ -255,7 +289,8 @@ function makeFileSummarySelect(experiment_id, form_id, fieldLabel) {
             params: {'experiment_id': experiment_id},
             success: function(responseObject) {
                 dataObject = Ext.decode(responseObject.responseText); //decodes the response
-                reload_data();                                        //resets the store and grids
+                reload_data();                                      //resets the store and grids
+                
             },
             failure: function() {
                 alert("failure with GET!");
@@ -263,9 +298,12 @@ function makeFileSummarySelect(experiment_id, form_id, fieldLabel) {
         });
 	    
     }
-    
     update();
-	return filesummarygrid;
+    */
+
+    //NOTE: above commented because we decided to have the table in editor.html
+
+    return filesummarygrid;
 }
 
 function stripHeadersObject(headers) {
@@ -288,9 +326,9 @@ function configForm(headerList, moduleID) {
 	// **DEPRECATED**: headerList should contain a list of [fieldset title ("theta"), [list field names ["x","y"] (dict will have multiple, list and float only one) ]
 	// headerlist now should contain list [{'name': name, 'value': val, 'label': label, 'type': type}], {'name': name2, 'value': val2...}, ...]?? not really
 
-	items = [];
-	var reverse_lookup_id = 0;
-	reverse_lookup = {};
+    items = [];
+    var reverse_lookup_id = 0;
+    reverse_lookup = {};
 	
     function createItem(header, fieldname) {
         // convert config fields into ExtJS form fields
@@ -307,27 +345,14 @@ function configForm(headerList, moduleID) {
             reverse_lookup[reverse_lookup_id] = header; // pointer back to the original object
             reverse_lookup_id += 1;
             */
+            editor.FAT.update(FILES, editor.getValue().working.modules);
 
-            experiment_id = editor.launchedFromExperimentPage
-            item = makeFileSummarySelect(experiment_id, reverse_lookup_id, header.label);
-            //item = makeFileSummarySelect(total_files, module_files, reverse_lookup_id, header.label);
+            item = makeFileSummarySelect(METADATA, header.value, reverse_lookup_id, header.label);
 
             reverse_lookup[reverse_lookup_id] = header; // pointer back to the original object
             reverse_lookup_id += 1;
             
         } 
-        /*
-        else if (header.type == 'files_with_summary') {
-            editor.FAT.update(FILES, editor.getValue().working.modules);
-            var total_files = header.value;
-
-            extractMetadata(total_files);
-
-            item = makeFileSummarySelect(total_files, reverse_lookup_id, header.label);
-            reverse_lookup[reverse_lookup_id] = header; // pointer back to the original object
-            reverse_lookup_id += 1;
-	    }
-        */
 
         else if (header.type == "Array" || header.type == "Object") { // allow for nested lists of parameters
             var itemlist = [];
@@ -399,88 +424,98 @@ function configForm(headerList, moduleID) {
             var defaultType; type = header.type || 'undefined';
             if(type == 'string' || type == 'undefined') {
                 defaultType = 'textfield';
-	    } else if(type == 'number' || type == 'float') {
-		defaultType = 'numberfield';
-	    } else if(type == 'boolean') {
-	        defaultType = 'checkbox';
-	    }
-            item = {
-	        fieldLabel: header.label,
-	        xtype: defaultType,
-	        name: fieldname,
-	        decimalPrecision: 14,
-	        value: header.value,
-	        anchor: "-20", 
-	        allowblank: false,
-	        width: 100,
-	        autoHeight: true, 
-	        reverse_lookup_id: reverse_lookup_id
-            }
-	    if (defaultType == 'checkbox') { item.checked = header.value; }
-		reverse_lookup[reverse_lookup_id] = header;
-		reverse_lookup_id += 1;
-            }
-            return item
+        } else if(type == 'number' || type == 'float') {
+            defaultType = 'numberfield';
+        } else if(type == 'boolean') {
+            defaultType = 'checkbox';
         }
+        item = {
+            fieldLabel: header.label,
+            xtype: defaultType,
+            name: fieldname,
+            decimalPrecision: 14,
+            value: header.value,
+            anchor: "-20", 
+            allowblank: false,
+            width: 100,
+            autoHeight: true, 
+            reverse_lookup_id: reverse_lookup_id
+        }
+        if (defaultType == 'checkbox') { item.checked = header.value; }
+    	    reverse_lookup[reverse_lookup_id] = header;
+    	    reverse_lookup_id += 1;
+        }
+        return item
+    }
     
-        for (var i in headerList) {
-            // walk through the headerList and create the form items
-            items.push(createItem(headerList[i], i));
-        }
+    for (var i in headerList) {
+        // walk through the headerList and create the form items
+        items.push(createItem(headerList[i], i));
+    }
             
     
-        var formPanel = new Ext.FormPanel( {
+    var formPanel = new Ext.FormPanel( {
         
-		//renderTo: Ext.getBody(),
-		reverse_lookup: reverse_lookup,
-		bodyPadding: 5,
-		width: 600,
+        //renderTo: Ext.getBody(),
+        reverse_lookup: reverse_lookup,
+        bodyPadding: 5,
+        width: 600,
         layout: 'anchor',
-		id: 'module_config_form',
-		autodestroy: true,
-		//defaultType: 'textfield',
-		items: items,
-		buttons: [{
-			text: 'Reset',
-			handler: function() {
-				this.up('form').getForm().reset();
-			}
-		},{
-			text: 'Submit',
-			formBind: true, //only enabled once the form is valid
-			disabled: true,
-			handler: function() {
-				var moduleConfigs = {}
-				var form = this.up('form').getForm();
+        id: 'module_config_form',
+        autodestroy: true,
+        //defaultType: 'textfield',
+        items: items,
+        buttons: [{
+            text: 'Reset',
+            handler: function() {
+                this.up('form').getForm().reset();
+            }
+        },{
+            text: 'Submit',
+            formBind: true, //only enabled once the form is valid
+            disabled: true,
+            handler: function() {
+                var moduleConfigs = {}
+                var form = this.up('form').getForm();
 
-				if (form.isValid()) {
-				    for (var j in form._fields.items) {
-				        var item = form._fields.items[j];
-				        if ("reverse_lookup_id" in item) {
-				            reverse_lookup[item.reverse_lookup_id].value = item.getValue();
-				        }
-				    }
-				    Ext.getCmp('module_config_popup').close();
-				}
-				else { editor.alert('form not valid!'); }
-			}
-		},{
-			text: 'Show Source',
-			formBind: true,
-			disabled: true,
-			handler: function() {
-			    var container = editor.layer.containers[moduleID];
-			    var module = editor.modules.filter(function(el) { return el.name == container.modulename })[0]; 
-			    sourcewin = window.open("/static/lib/sourcewindow.html", "_blank");
-			    sourcewin.modname = module.name;
-			    sourcewin.source = module.source;
-			    sourcewin.onload = function() {
-			        this.document.title = "Source: " + module.name;
-			        //this.document.getElementById('modname').innerHTML = "<h2>" + this.modname + "</h2>";
-			        this.document.getElementById('code').innerHTML = this.source;
-			    }
-			}
-		}
+                if (form.isValid()) {
+                    for (var j in form._fields.items) {
+                        var item = form._fields.items[j];
+                        if ("reverse_lookup_id" in item) {
+                            reverse_lookup[item.reverse_lookup_id].value = item.getValue();
+                        }
+                    }
+                    if (form.items[0].fieldLabel === 'Files') {
+                        var s = form.items[0].getSelectionModel().getSelection();
+                        var filenamelist = [];
+                        for (var i = 0; i < s.length; ++i) {
+                            filenamelist.push(s[i].data['Available Files']);
+                        }
+                        var lookup_id = form.items[0].reverse_lookup_id;
+                        reverse_lookup[lookup_id].value = filenamelist;
+                    }
+                    Ext.getCmp('module_config_popup').close();
+                }
+             
+                else { editor.alert('form not valid!'); }
+            }
+        },{
+            text: 'Show Source',
+            formBind: true,
+            disabled: true,
+            handler: function() {
+                var container = editor.layer.containers[moduleID];
+                var module = editor.modules.filter(function(el) { return el.name == container.modulename })[0]; 
+                sourcewin = window.open("/static/lib/sourcewindow.html", "_blank");
+                sourcewin.modname = module.name;
+                sourcewin.source = module.source;
+                sourcewin.onload = function() {
+                    this.document.title = "Source: " + module.name;
+                    //this.document.getElementById('modname').innerHTML = "<h2>" + this.modname + "</h2>";
+                    this.document.getElementById('code').innerHTML = this.source;
+                }
+            }
+        }
 		/*{
 			text: 'Submit for all instances',
 			formBind: true,
@@ -498,8 +533,8 @@ function configForm(headerList, moduleID) {
 				}
 			}
 		} */
-		],
-	});
-	myFormPanel = formPanel;
-	return formPanel;
+        ],
+    });
+    myFormPanel = formPanel;
+    return formPanel;
 }
