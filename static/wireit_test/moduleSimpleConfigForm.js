@@ -139,7 +139,6 @@ function makeFileSummarySelect(dataObject, selected_files, experiment_id, fieldL
     var fieldLabel = fieldLabel || 'files'; // can override
     var form_id = form_id || 0;
     var selected_files = selected_files || []
-    //var table_is_created = false;
 
     // Generates the "range graphic" in the cells of the file gridpanel
     function vrange(val, meta, record, rI, cI, store) {
@@ -169,18 +168,7 @@ function makeFileSummarySelect(dataObject, selected_files, experiment_id, fieldL
     var storeFields = [];
     var store = Ext.create('Ext.data.Store', { model: 'fileModel'});
     var gridColumns = [];
-    //var selectedfiles = [];
-    
-    var myCheckboxModel = new Ext.selection.CheckboxModel({
-        //checkOnly: true,
-        listeners: {
-            selectionchange: function (selectionModel, selected) {
-                // Must refresh the view after every selection
-                selectionModel.view.refresh();
-            },
-        }
-    });
-    
+    var myCheckboxModel = new Ext.selection.CheckboxModel(); //just a reference
     
     var fieldData = dataObject[0]; //First row is the parameters of the data file (e.g. ['X', 'Y', 'Z',...])    
     var maxvals = dataObject[1];   //Second row is the max values of the parameters over all files (used for rendering ranges)
@@ -215,7 +203,7 @@ function makeFileSummarySelect(dataObject, selected_files, experiment_id, fieldL
     //       errors and frequently failed to do what they should do. Introduced hack of adding
     //       directly to supposedly read-only .selected field.
     if (selected_files.length === datalen) {
-        // if all are selected, no need to search for individual files.
+        // if all are selected, no need to search for individual files, just select them all one by one.
         Ext.each(store.getRange(), function(record, i){
             myCheckboxModel.selected.add(record);
         });
