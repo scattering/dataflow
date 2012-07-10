@@ -211,14 +211,14 @@ Ext.onReady(function () {
     //creating the checkbox selection model
     checkBoxRowSelectionModel = function(config) {
         checkBoxRowSelectionModel.superclass.constructor.call(this, config);
-    }
+    };
     Ext.extend(checkBoxRowSelectionModel , Ext.grid.RowSelectionModel, {
 	    initEvents : function(){
             var view = this.grid.view;
             view.on("refresh", this.onRefresh, this);
             view.on("rowupdated", this.onRowUpdated, this);
             view.on("rowremoved", this.onRemove, this);
-        }	
+        }
     });
 
     var cm = new Ext.grid.ColumnModel({
@@ -374,7 +374,7 @@ Ext.onReady(function () {
         height: 200,
         title: 'Desired Results',
         frame: true,
-        clicksToEdit: 1,        
+        clicksToEdit: 1,
         decimalPrecision: 6,
         tbar: [{
             text: 'Add New Row',
