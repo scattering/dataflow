@@ -20,4 +20,6 @@ OOSuite
 *.tex~
 *.js~
 *.html~
+settings.py
 testdb*
+
