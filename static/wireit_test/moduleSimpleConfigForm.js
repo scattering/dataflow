@@ -138,10 +138,12 @@ function makeFileSummarySelect(dataObject, selected_files, experiment_id, fieldL
     var dataObject = dataObject.slice(0) || []; //make a shallow copy of dataObject to protect METADATA from splicing later
     var fieldLabel = fieldLabel || 'files'; // can override
     var form_id = form_id || 0;
+    var selected_files = selected_files || []
     //var table_is_created = false;
 
     // Generates the "range graphic" in the cells of the file gridpanel
     function vrange(val, meta, record, rI, cI, store) {
+        --cI; //cI (columnIndex) was one too high because of the checkboxes column taking index 0.
         var range = maxvals[cI] - minvals[cI];
         var spl = val.split(',');
         var low = parseFloat(spl[0]);
@@ -152,11 +154,11 @@ function makeFileSummarySelect(dataObject, selected_files, experiment_id, fieldL
             loffset = ((low - minvals[cI]) / range) * 100 - 1;
             roffset = ((maxvals[cI] - high) / range) * 100 - 1;
         }
-        var ret = high + low;
+        
         if (range != 0 && low != NaN && high != NaN) {
-            return '<div class="woot"><div style="margin-right:' + roffset + '%; margin-left:' + loffset + '%;"></div></div>';
+            return '<div class="woot" low=' + low + ' high=' + high + '><div style="margin-right:' + roffset + '%; margin-left:' + loffset + '%;"></div></div>';
         } else {
-            return '<div class="woot empty"></div>';
+            return '<div class="woot empty" low=' + low + ' high=' + high + '></div>';
         }
     }
 
@@ -168,25 +170,27 @@ function makeFileSummarySelect(dataObject, selected_files, experiment_id, fieldL
     var store = Ext.create('Ext.data.Store', { model: 'fileModel'});
     var gridColumns = [];
     //var selectedfiles = [];
-    /*
+    
     var myCheckboxModel = new Ext.selection.CheckboxModel({
         //checkOnly: true,
         listeners: {
-            selectionchange: function (selectionModel, selected, options) {
+            selectionchange: function (selectionModel, selected) {
                 // Must refresh the view after every selection
                 selectionModel.view.refresh();
-            }
+            },
         }
     });
-    */
+    
+    
     var fieldData = dataObject[0]; //First row is the parameters of the data file (e.g. ['X', 'Y', 'Z',...])    
     var maxvals = dataObject[1];   //Second row is the max values of the parameters over all files (used for rendering ranges)
     var minvals = dataObject[2];   //Third row is min values of parameters
     dataObject.splice(0, 3);       //Remove first three rows; the rest is the actual data
+    var datalen = dataObject.length;
 
     //add all files to the store..
     var filerecs=[];
-    for (var j = 0; j < dataObject.length; ++j) {
+    for (var j = 0; j < datalen; ++j) {
         var filerec={}
         for (var i = 0; i < fieldData.length; ++i) {
             filerec[fieldData[i]] = dataObject[j][i];
@@ -206,24 +210,77 @@ function makeFileSummarySelect(dataObject, selected_files, experiment_id, fieldL
    
     store.loadData(filerecs);
 
-
-
+    /*
+    // Pre selecting the rows that were previously submitted.
+    if (selected_files.length === datalen) {
+        myCheckboxModel.selectAll();
+    }
+    */
     /* GridPanel that displays the data. Filled with empty columns since they are populated with update() */
     var filesummarygrid = new Ext.grid.GridPanel({
         store: store,
-        selModel: new Ext.selection.CheckboxModel(),
+        selModel: myCheckboxModel, //new Ext.selection.CheckboxModel(),
         columns: gridColumns,
         stripeRows: true,
+        /*viewConfig: { stripeRows: true,
+            listeners: { //code to select preivously submitted(selected) files upon reloading
+                beforerefresh : function(view) {
+                    var store = view.getStore();
+                    var model = view.getSelectionModel();
+                    var rows_to_select = [];
+                    Ext.each(selected_files, function(afile, index) {
+                        Ext.each(store.getRange(), function(record, i){
+                            if (record.get('Available Flies') === afile) {
+                                console.log('found ' + afile);
+                                rows_to_select.push(record);
+                                break;
+                            }
+                        });
+                    });
+                    model.select(rows_to_select);
+                }
+            }
+        },*/
         fieldLabel: fieldLabel,
         height: 300,
         autoWidth: true,
         title: 'Select the files to run reductions on:',
         bbar: [],
         reverse_lookup_id: form_id,
-        getValue: function (){
-            
-        }
     });
+
+    // For more information on tooltips, see Ext.tip.Tooltip documentation
+    filesummarygrid.getView().on('render', function(view) {
+        view.tip = Ext.create('Ext.tip.ToolTip', {
+            target: view.el,                // The overall target element.
+            delegate: view.cellSelector,    // Each grid cell causes its own seperate show and hide.
+                                            // NOTE: To do each grid row ==> view.itemSelector
+            trackMouse: true,               // Moving within the row should not hide the tip.
+            listeners: {
+                // Change content dynamically depending on which element triggered the show.
+                beforeshow: function updateTipBody(tip) {
+                    try {
+                        // the divs (constructed in vrange function) have 'low' and 'high' attributes.
+                        var lowtxt = tip.triggerElement.firstChild.firstChild.getAttribute('low');
+                        var hightxt = tip.triggerElement.firstChild.firstChild.getAttribute('high');
+                        if (lowtxt == null || hightxt == null) {
+                            //both lowtxt and hightxt are null for the checkbox column
+                            tip.update('Clicking a row will deselect other rows. Checking a checkbox will not');
+                        } else {
+                            // display value range tooltip for applicable cells
+                            tip.update('Range: [' + lowtxt + ', ' + hightxt + ']');
+                        }
+                    } catch (err) {
+                        tip.update('Mouse over a cell to view its numeric range.');
+                    }
+                }
+            }
+        });
+    });
+
+
+    //NOTE: below code commented because the update was asynchronous, so METADATA is simply loaded
+    //      into editor.html on pageload.
 
     /* After data is retrieved from server, we have to reinitiallize the Store reconfigure the grid
     so that the new data is displayed on the page */
@@ -300,8 +357,6 @@ function makeFileSummarySelect(dataObject, selected_files, experiment_id, fieldL
     }
     update();
     */
-
-    //NOTE: above commented because we decided to have the table in editor.html
 
     return filesummarygrid;
 }

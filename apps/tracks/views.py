@@ -85,7 +85,7 @@ def return_data(request):
     dataArray=[['file name','database id','sha1','x','y','z'],[NaN,NaN,NaN,10,10,10],[NaN,NaN,NaN,-10,-10,-10],['file3','1','sh1','1,9','2,3','3,4'],['file2','1','sh2','4,5','2,3','5,5']]    
     return HttpResponse(simplejson.dumps(dataArray))
 
-def return_metadata(request):
+def return_metadata(experiment_id):
     """
     !!! ASSUMPTION: all files have the same metadata fields !!!
     
@@ -105,7 +105,6 @@ def return_metadata(request):
     """
     #if request.GET.has_key(u'experiment_id'):
     #experiment_id = request.GET[u'experiment_id']
-    experiment_id = request
     if experiment_id < 0:
         return '{}'
     
