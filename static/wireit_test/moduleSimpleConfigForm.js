@@ -210,37 +210,33 @@ function makeFileSummarySelect(dataObject, selected_files, experiment_id, fieldL
    
     store.loadData(filerecs);
 
-    /*
     // Pre selecting the rows that were previously submitted.
+    // NOTE: API functions, such as .selectAll(), .select(), .doSelect(), etc. all threw unexplained
+    //       errors and frequently failed to do what they should do. Introduced hack of adding
+    //       directly to supposedly read-only .selected field.
     if (selected_files.length === datalen) {
-        myCheckboxModel.selectAll();
+        // if all are selected, no need to search for individual files.
+        Ext.each(store.getRange(), function(record, i){
+            myCheckboxModel.selected.add(record);
+        });
+    } else {
+        Ext.each(selected_files, function(afile, index) {
+            Ext.each(store.getRange(), function(record, i){
+                if (record.get('Available Files') === afile) {
+                    myCheckboxModel.selected.add(record);
+                    return false; //break out of Ext.each when function returns false
+                }
+            });
+        });
     }
-    */
+
+    
     /* GridPanel that displays the data. Filled with empty columns since they are populated with update() */
     var filesummarygrid = new Ext.grid.GridPanel({
         store: store,
         selModel: myCheckboxModel, //new Ext.selection.CheckboxModel(),
         columns: gridColumns,
         stripeRows: true,
-        /*viewConfig: { stripeRows: true,
-            listeners: { //code to select preivously submitted(selected) files upon reloading
-                beforerefresh : function(view) {
-                    var store = view.getStore();
-                    var model = view.getSelectionModel();
-                    var rows_to_select = [];
-                    Ext.each(selected_files, function(afile, index) {
-                        Ext.each(store.getRange(), function(record, i){
-                            if (record.get('Available Flies') === afile) {
-                                console.log('found ' + afile);
-                                rows_to_select.push(record);
-                                break;
-                            }
-                        });
-                    });
-                    model.select(rows_to_select);
-                }
-            }
-        },*/
         fieldLabel: fieldLabel,
         height: 300,
         autoWidth: true,
@@ -523,7 +519,14 @@ function configForm(headerList, moduleID) {
         buttons: [{
             text: 'Reset',
             handler: function() {
-                this.up('form').getForm().reset();
+                var form = this.up('form').getForm();
+                if (form.items[0].fieldLabel === 'Files') {
+                    //removing all selected rows to account for 'hack' earlier when restoring
+                    //checked rows after a submit.
+                    form.items[0].getSelectionModel().deselectAll();
+                    //form.items[0].getSelectionModel().selected.removeAll();
+                }
+                form.reset();
             }
         },{
             text: 'Submit',
