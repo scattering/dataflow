@@ -990,14 +990,14 @@ class TripleAxis(object):
     
     
     
-    
+    '''
     def get_metadata(self):
         """
         Returns metadata for file summary table
         """
         
         return simplejson.dumps(self.extrema)
-
+    '''
 # ****************************************************************************************************************************************************
 # ***************************************************************** TRANSLATION METHODS **************************************************************
 # ****************************************************************************************************************************************************
@@ -1722,6 +1722,7 @@ def join(tas_list):
     """
     #average all similar points
     #put all detectors on the same monitor, assumed that the first monitor is desired throughout
+    normalize_monitor(tas_list)
     joinedtas = tas_list[0]
     distinct = []
     not_distinct = []
@@ -1833,10 +1834,7 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
                             dups = [] # reset dups to be empty
                         samelist = False                            
 
-    print len(indices)
-    print indices
     if not first and len(indices) < 1:
-        print "done"
         return newtas  # if there are no duplicates left, then every row is unique so we're done
 
     for field in not_distinct:
@@ -2359,30 +2357,7 @@ if __name__ == "__main__":
         pylab.hexbin(h,k,z)
         pylab.show()
 
-    if 0:
-        #Testing run_bumps
-        data_list = []
-        monitor = None
-        for i in range(1, 64):
-            if i < 10:
-                data_i = filereader(r'../../../yee/WilliamData/meshm00%d.bt9' %i)
-            elif i < 100:
-                data_i = filereader(r'../../../yee/WilliamData/meshm0%d.bt9' %i)
-            elif i < 1000:
-                data_i = filereader(r'../../../yee/WilliamData/meshm%d.bt9' %i)
-
-            data_list.append(data_i)
-            
-        normalize_monitor(data_list) # sets all monitors to that of the first TAS object
-        joinedtas = join(data_list)  # joins all datafiles, removing duplicate points
-        data = np.array([joinedtas.physical_motors.h.x, joinedtas.physical_motors.k.x, 
-                         joinedtas.detectors.primary_detector.x, joinedtas.detectors.primary_detector.variance])
-        np.savetxt("datatest1.txt", data)
-
-            
-        #np.savetxt("datatest1error.txt", np.array([joinedtas.detectors.primary_detector.variance]))
-        #temp = np.genfromtxt("datatest1.txt")
-        #run_bumps(joinedtas, '../../../WilliamData/BumpsResults')
+    
 
     if 0:
         bg = filereader(r'../../../yee/WilliamData/meshm001.bt9')
@@ -2404,7 +2379,7 @@ if __name__ == "__main__":
         print 'read chalk'
         
         
-    if 1: 
+    if 0: 
         # testing load for hfir files
         taslist = []
         for i in range(1, 109): 
@@ -2429,5 +2404,81 @@ if __name__ == "__main__":
         
         instrument = join(taslist)
         print 'done'
+    
+    if 0:
+        data_list = []
+        monitor = None
+        for i in range(1, 64):
+            if i < 10:
+                data_i = filereader(r'../../../yee/WilliamData/Mar27_2011/meshm00%d.bt9' %i)
+            elif i < 100:
+                data_i = filereader(r'../../../yee/WilliamData/Mar27_2011/meshm0%d.bt9' %i)
+            elif i < 1000:
+                data_i = filereader(r'../../../yee/WilliamData/Mar27_2011/meshm%d.bt9' %i)
+
+            data_list.append(data_i)
+            
+        normalize_monitor(data_list) # sets all monitors to that of the first TAS object
+        joinedtas = join(data_list)  # joins all datafiles, removing duplicate points
+        data = np.array([joinedtas.physical_motors.h.x, joinedtas.physical_motors.k.x, 
+                         joinedtas.detectors.primary_detector.x, joinedtas.detectors.primary_detector.variance])
+        np.savetxt("datatest1.txt", data)
+
+            
+        #np.savetxt("datatest1error.txt", np.array([joinedtas.detectors.primary_detector.variance]))
+        #temp = np.genfromtxt("datatest1.txt")
+        #run_bumps(joinedtas, '../../../WilliamData/BumpsResults')     
+            
+            
+            
+    if 0:
+        # prep for bumps
+        #meshl
+        taslistl = []
+        for i in range(1, 21): 
+            tas = filereader(r'../../../yee/WilliamData/Mar27_2011/Meshl/meshl' + repr(i).zfill(3) + '.bt9')
+            taslistl.append(tas)
+        joinedtas = join(taslistl)  # joins all datafiles, putting all tas on first one's monitor, removing duplicate points
+        data = np.array([joinedtas.physical_motors.h.x, joinedtas.physical_motors.k.x, 
+                         joinedtas.detectors.primary_detector.x, joinedtas.detectors.primary_detector.variance])
+        np.savetxt("datatestl.txt", data)        
         
-    print 'Finished local test.'
+        #meshn +20V
+        taslistn = []
+        for i in range(1, 35): 
+            tas = filereader(r'../../../yee/WilliamData/Mar27_2011/Meshn/meshn' + repr(i).zfill(3) + '.bt9')
+            taslistn.append(tas)  
+        joinedtas = join(taslistn)  # joins all datafiles, putting all tas on first one's monitor, removing duplicate points
+        data = np.array([joinedtas.physical_motors.h.x, joinedtas.physical_motors.k.x, 
+                         joinedtas.detectors.primary_detector.x, joinedtas.detectors.primary_detector.variance])
+        np.savetxt("datatestn.txt", data)            
+
+        #meshq -20V
+        taslistq = []
+        for i in range(1, 50): 
+            tas = filereader(r'../../../yee/WilliamData/Mar27_2011/Meshq/meshq' + repr(i).zfill(3) + '.bt9')
+            taslistq.append(tas)  
+        joinedtas = join(taslistq)  # joins all datafiles, putting all tas on first one's monitor, removing duplicate points
+        data = np.array([joinedtas.physical_motors.h.x, joinedtas.physical_motors.k.x, 
+                         joinedtas.detectors.primary_detector.x, joinedtas.detectors.primary_detector.variance])
+        np.savetxt("datatestq.txt", data)        
+        
+        print 'done'
+    
+    if 0:
+        import bumps
+        from bumps.fitters import FIT_OPTIONS, FitDriver, DreamFit, StepMonitor, ConsoleMonitor
+        import bumps.modelfn, bumps.fitproblem
+        fn = lambda chi,phi,omega1,omega2: np.linalg.norm(self.scatteringEquations([chi,phi,omega1,omega2], h1p, h2p,q1,q2))
+        print fn(chi=45, phi=72.4, omega1=-90, omega2=0)
+        
+        M = bumps.modelfn.ModelFunction(fn, chi=0.0, phi=0.0, omega1=0.0, omega2=0.0)
+        M._parameters['chi'].range(30,60.)
+        M._parameters['phi'].range(0,90.)
+        M._parameters['omega1'].range(-90,90.)
+        M._parameters['omega2'].range(-90,90.)
+        problem = bumps.fitproblem.FitProblem(M)
+        fitdriver = FitDriver(DreamFit, problem=problem, burn=1000)
+        best, fbest = fitdriver.fit()
+        print best, fbest
+        print 'done'        

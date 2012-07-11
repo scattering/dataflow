@@ -1,5 +1,71 @@
 {% extends "base.html" %}
 {% block title %}My projects{% endblock %}
+{% block head %}
+    <script type="text/javascript" src="/static/lib/ext/ext-all.js"></script>
+    <script type="text/javascript">
+
+        //appending csrftoken to post requests
+        jQuery(document).ajaxSend(function(event, xhr, settings) {
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie != '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = jQuery.trim(cookies[i]);
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            function sameOrigin(url) {
+                // url could be relative or scheme relative or absolute
+                var host = document.location.host; // host + port
+                var protocol = document.location.protocol;
+                var sr_origin = '//' + host;
+                var origin = protocol + sr_origin;
+                // Allow absolute or scheme relative URLs to same origin
+                return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+                    (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+                    // or any other URL that isn't scheme relative or absolute i.e relative.
+                    !(/^(\/\/|http:|https:).*/.test(url));
+            }
+            function safeMethod(method) {
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+            }
+
+            if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        });
+
+
+        deleteProject = function(projectname) {
+            // Send alert to have user confirm deletion. 
+            var choice = confirm("Are you sure you want to delete project:  "  + projectname + "?");
+            if (choice == true) {
+                // Delete the project via Ajax request 
+                var conn = new Ext.data.Connection();
+                conn.request({
+                    url: '/myProjects/',
+                    method: 'POST',
+                    params: {'delete_project' : projectname},
+                    success: function(responseObject) {
+                        //don't think we need to do anything
+                        alert("successfully deleted! REMOVE THIS -- TESTING PURPOSES ONLY");
+                    },
+                    failure: function() {
+                        alert("Could not delete project!");
+                    }
+                });
+            } else { /* do nothing. */ }
+        };
+    </script>
+{% endblock %}
+
 {% block content %}
 		    <h1 class="alt">My projects</h1>
 		    <hr />
@@ -7,7 +73,7 @@
 			    {% csrf_token %}
 		        <ul>
 		        {% for project in projects.object_list %}
-            		<li><a href="editProject/{{project.id}}/">{{ project }}</a></li>
+            		<li><input type="button" value="Delete project" onclick="deleteProject('{{project}}')" /> <body> ..... </body> <a href="editProject/{{project.id}}/">{{ project }}</a></li>
 		        {% endfor %}
             		<li>{{ form.new_project }} <input type="submit" value="Create project" /></li>
 		        </ul>
@@ -15,4 +81,5 @@
 		    <p class="pagination">
 			    <span class="step-links">{% if projects.has_previous %}<a href="?page={{ projects.previous_page_number }}">previous</a> {% endif %}<span class="current">Page {{ projects.number }} of {{ projects.paginator.num_pages }}</span>{% if projects.has_next %} <a href="?page={{ projects.next_page_number }}">next</a>{% endif %}</span>
 		    </p>
+
 {% endblock %}

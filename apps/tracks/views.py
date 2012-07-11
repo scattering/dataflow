@@ -689,8 +689,13 @@ def languageSelect(request):
 @login_required
 def myProjects(request):
     context = RequestContext(request)
-    if request.POST.has_key('new_project'):
+    if request.POST.has_key('delete_project'):
+        #this will may cause problems... deletes all projects with the given name.
+        #TODO link each project with an ID so the delete can be more precise.
+        Project.objects.filter(Title=request.POST['delete_project'], user=request.user).delete()
+    elif request.POST.has_key('new_project'):
         Project.objects.create(Title=request.POST['new_project'], user=request.user)
+    #if request.POST.has_key('
     project_list = Project.objects.filter(user=request.user)
     paginator = Paginator(project_list, 10) #10 projects per pages
     page = request.GET.get('page')
