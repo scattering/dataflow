@@ -12,7 +12,7 @@ class Test(models.Model):
 # class User     is provided by contrib.auth
 
 class Userprofile(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ManyToManyField(User)
     userdisplay = models.CharField(max_length=300)
 
 # class Permission     is provided by contrib.auth
@@ -36,16 +36,16 @@ class Metadata(models.Model):
 class Template(models.Model):
     Title = models.CharField(max_length=50)
     Representation = models.TextField() # can easily convert back and forth from strings to dicts with str(dict) and dict(str)
-    user = models.ForeignKey(User)
+    user = models.ManyToManyField(User)
     #permissions = models.ForeignKey(Permission, null=True)
     def __unicode__(self):
         return self.Title
 
 class Project(models.Model):
     Title = models.CharField(max_length=50) 
-    user = models.ForeignKey(User)
+    user = models.ManyToManyField(User) 
     #permissions = models.ForeignKey(Permission, null=True)
-    experiments = models.ManyToManyField('Experiment', null=True)
+    #experiments = models.ForeignKey('Experiment', null=True)
     templateInstances = models.ManyToManyField('Template', null=True) # are the templates here and  								          # under Instruments meant to be different
 
     def __unicode__(self):
@@ -56,7 +56,8 @@ class Experiment(models.Model):
     Files = models.ManyToManyField('File', null=True)
     Results = models.ManyToManyField('Result', null=True)
     facility = models.ForeignKey('Facility', null=True)
-    users = models.ForeignKey(User)
+    project = models.ForeignKey('Project', null=True)
+    users = models.ManyToManyField(User)
     #permissions = models.ForeignKey(Permission, null=True)
     instrument = models.ForeignKey('Instrument', null=True)
     templates = models.ManyToManyField('Template', null=True)

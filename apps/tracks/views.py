@@ -32,7 +32,7 @@ print "ANDR imported: ", ANDR.id
 print "ASTERIX imported: ", ASTERIX.id
 from ...dataflow.SANS.novelinstruments import SANS_NG3
 print "SANS imported: ", SANS_NG3.id
-from ...dataflow.tas.instruments import BT7 as TAS_INS
+from ...dataflow.tas.instruments import TAS as TAS_INS
 print "TAS imported: ", TAS_INS.id
 
 # For reading in files and their metadata in the EditExperiment page
@@ -302,7 +302,8 @@ def saveWiring(request):
                 reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'this name exists, please use another'}))
                 reply.status_code = 500
                 return reply
-            instr.Templates.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring), user=request.user)
+            temp = instr.Templates.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring))
+            temp.user.add(request.user)
         else:
             reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'you are not staff!'}))
             reply.status_code = 500
@@ -312,7 +313,8 @@ def saveWiring(request):
             reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'this name exists, please use another'}))
             reply.status_code = 500
             return reply
-        Template.objects.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring), user=request.user)
+        temp = Template.objects.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring))
+        temp.user.add(request.user)
     # this puts the Template into the pool of existing Templates.
     #wirings_list.append(new_wiring)
     return HttpResponse(simplejson.dumps({'save':'successful'})) #, context_instance=context
@@ -689,13 +691,17 @@ def languageSelect(request):
 @login_required
 def myProjects(request):
     context = RequestContext(request)
-    if request.POST.has_key('delete_project'):
-        #this will may cause problems... deletes all projects with the given name.
-        #TODO link each project with an ID so the delete can be more precise.
-        Project.objects.filter(Title=request.POST['delete_project'], user=request.user).delete()
+    #Using an elif setup to save a bit of time since only one button (to delete or add project)
+    # can be clicked for one request.
+    if request.POST.has_key('project_id'):
+        project_id = request.POST['project_id']
+        Project.objects.get(id=project_id).delete()
+        #NOTE: new ids are assigned as (id of last id in list)+1 e.g. deleting project_id 7 out 
+        #of 10, will make the next project_id 11 instead of reusing 7. Then if ids 8-11 were
+        #deleted, then he next one made would be 7 again.
     elif request.POST.has_key('new_project'):
-        Project.objects.create(Title=request.POST['new_project'], user=request.user)
-    #if request.POST.has_key('
+        newproj = Project.objects.create(Title=request.POST['new_project'])
+        newproj.user.add(request.user)
     project_list = Project.objects.filter(user=request.user)
     paginator = Paginator(project_list, 10) #10 projects per pages
     page = request.GET.get('page')
@@ -712,13 +718,16 @@ def myProjects(request):
 
 @login_required
 def editProject(request, project_id):
-    if request.POST.has_key('new_experiment'):
-        new_exp = Experiment.objects.create(ProposalNum=request.POST['new_experiment'], users=request.user)
-        new_exp.save()
-        Project.objects.get(id=project_id).experiments.add(new_exp) 
+    if request.POST.has_key('experiment_id'):
+        experiment_id = request.POST['experiment_id']
+        Experiment.objects.get(id=experiment_id).delete() 
+    elif request.POST.has_key('new_experiment'):
+        new_exp = Experiment.objects.create(ProposalNum=request.POST['new_experiment'], project=Project.objects.get(id=project_id))
+        new_exp.users.add(request.user)
     context = RequestContext(request)
     project = Project.objects.get(id=project_id)
-    experiment_list = project.experiments.all()
+    experiment_list = project.experiment_set.all() #experiment_list = project.experiments.all()
+    
     paginator = Paginator(experiment_list, 10)
     page = request.GET.get('page')
     if page == None:
