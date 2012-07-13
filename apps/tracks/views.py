@@ -515,6 +515,8 @@ def filesExist(request):
     return HttpResponse(simplejson.dumps(existences))
 
 def uploadFiles(request):
+    # TODO: In the process of storing instrument objects instead of raw files
+    # TODO: THIS WHOLE METHOD WILL NEED TO BE REDONE    
     location = FILES_DIR
     if request.POST.has_key(u'experiment_id'):
         experiment_id = request.POST[u'experiment_id']
@@ -524,7 +526,19 @@ def uploadFiles(request):
 
     if request.FILES.has_key('FILES'):
         file_data = request.FILES.getlist('FILES')
+        aofchalkfiles = []
+        acfchalkfiles = []
         for f in file_data:
+            #due to the strange nature of chalk river files, those are handled separately
+            #appends all chalkriver files
+            fileExt = os.path.splitext(f.name)[1].lower()
+            if fileExt == '.aof':
+                aofchalkfiles.append(f)
+                continue
+            if fileExt == '.acf':
+                acfchalkfiles.append(f)
+                continue
+                
             file_data = f.read()
             file_sha1 = hashlib.sha1(file_data)
 
@@ -532,74 +546,101 @@ def uploadFiles(request):
             open(write_here, 'w').write(file_data)
 
             new_files = File.objects.filter(name=file_sha1.hexdigest())
-                       
+            
             if len(new_files) > 0:
                 new_file = new_files[0]
             else:
                 new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location)
                 
-
-            instrument = call_appropriate_filereader(write_here, friendly_name=f.name)
             # extract's the instrument's metadata to put into the File model
+            instrument = call_appropriate_filereader(write_here, friendly_name=f.name, fileExt=fileExt)
+            add_metadata_to_file(new_file, instrument)
             
-            try:
-                extrema = instrument.extrema
-                for key in extrema.keys():
-                    # Assumes that all keys (ie field headers) are strings/chars
-                    keymin = key + '_min'
-                    
-                    # finds the unique location of this key in the database if it was previously loaded.
-                    # sorts on the file's unique hash then key value. Does this for both min and max.
-                    existing_metadata = Metadata.objects.filter(Myfile=file_sha1.hexdigest()).filter(Key=keymin)
-                    if existing_metadata: 
-                        # if there is a metadata object in the database already, update its value
-                        existing_metadata[0].Value = extrema[key][0]
-                    else:
-                        new_metadata_min = Metadata.objects.create(Myfile=new_file, Key=keymin, Value=extrema[key][0])
-                        new_file.metadata.add(new_metadata_min)
-                    
-                    keymax = key + '_max'
-                    existing_metadata = Metadata.objects.filter(Myfile=file_sha1.hexdigest()).filter(Key=keymax)
-                    if existing_metadata: 
-                        # if there is a metadata object in the database already, update its value
-                        existing_metadata[0].Value = extrema[key][1]                    
-                    else:
-                        new_metadata_max = Metadata.objects.create(Myfile=new_file, Key=keymax, Value=extrema[key][1])
-                        new_file.metadata.add(new_metadata_max)
-            except:
-                extrema = None
-
             if experiment is not None:
-                #print "experiment id: ", request.POST[u'experiment_id']
                 experiment.Files.add(new_file)
+        '''
+        for aoffile in aofchalkfiles:
+            
+            #NOTE: to link a .acf and .aof file, their names have to be EXACTLY the same (case sensitive)
+            #NOTE: .acf files loaded without a corresponding .aof file are not read nor used.
+            acf_filename = None
+            aofname = os.path.splitext(aoffile.name)[0]
+            for acffile in acfchalkfiles:
+                acfname = os.path.splitext(acffile.name)[0]
+                if acfname === aofname:
+                    acfchalkfiles.remove(acffile)
+                    acf_filename = acffile
+                    break      
+                   
+            file_data = aoffile.read()
+            file_sha1 = hashlib.sha1(file_data)
+    
+            write_here = os.path.join(location,file_sha1.hexdigest())
+            open(write_here, 'w').write(file_data)
+            
+            instruments = chalk_filereader(write_here, acf_filename=acf_filename)
+            
+            # TODO: INCOMPLETE CHALK RIVER LOADING
+
+        '''
 
     return HttpResponse('OK')
 
+def add_metadata_to_file(new_file, instrument):
+    """
+    Adds the metadata extrema from the provided instrument to the provided file.
+    Metadata is stored 
+    """
+    extrema = instrument.extrema
+    for key in extrema.keys():
+        # Assumes that all keys (ie field headers) are strings/chars
+        keymin = key + '_min'
+        
+        # finds the unique location of this key in the database if it was previously loaded.
+        # sorts on the file's unique hash then key value. Does this for both min and max.
+        existing_metadata = Metadata.objects.filter(Myfile=file_sha1.hexdigest()).filter(Key=keymin)
+        if existing_metadata: 
+            # if there is a metadata object in the database already, update its value
+            existing_metadata[0].Value = extrema[key][0]
+        else:
+            new_metadata_min = Metadata.objects.create(Myfile=new_file, Key=keymin, Value=extrema[key][0])
+            new_file.metadata.add(new_metadata_min)
+        
+        keymax = key + '_max'
+        existing_metadata = Metadata.objects.filter(Myfile=file_sha1.hexdigest()).filter(Key=keymax)
+        if existing_metadata: 
+            # if there is a metadata object in the database already, update its value
+            existing_metadata[0].Value = extrema[key][1]                    
+        else:
+            new_metadata_max = Metadata.objects.create(Myfile=new_file, Key=keymax, Value=extrema[key][1])
+            new_file.metadata.add(new_metadata_max)
 
-def call_appropriate_filereader(filestr, friendly_name):
+    
+def call_appropriate_filereader(filestr, friendly_name=None, fileExt=None):
     """
     Determines the appropriate reader to call based on the file extension and returns
     the 'loaded' instrument object.
     
     filestr --> full path to file so that "open(filestr, 'r')" will work.
     friendly_name --> original file name before it was hashed to its sha1 identifier.
+    fileExt --> file extension, generally obtained from the friendly_name. 
+                Not available via sha1 hash
     """
     instrument = None
-    if friendly_name:
-        fileExt = os.path.splitext(friendly_name)[1].lower()
-    else:
-        try:
-            fileExt = os.path.splitext(filestr)[1].lower()
-        except:
-            #in the event that there is no extension (ie only a hash was provided)
-            fileExt = None
-    
+    if fileExt == None:
+        if friendly_name:
+            fileExt = os.path.splitext(friendly_name)[1].lower()
+        else:
+            try:
+                fileExt = os.path.splitext(filestr)[1].lower()
+            except:
+                #in the event that there is no extension (ie only a hash was provided), fileExt remains None
+                pass
+            
     if fileExt in ['.bt2', '.bt4', '.bt7', '.bt9', '.ng5']:
         instrument = ncnr_filereader(filestr, friendly_name=friendly_name)
     elif fileExt in ['.dat']:
         instrument = hfir_filereader(filestr)
-    elif fileExt in ['.aof']:
-        instrument = chalk_filereader(filename, acf_filename=acf_filename)
     
     return instrument
 

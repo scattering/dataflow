@@ -86,7 +86,7 @@ function sendMultipleFiles(handler){
     handler.current = 0;
     if(length){
         handler.file = handler.files[handler.current];
-        console.log(handler.file);
+        //console.log(handler.file);
         sendFile(handler).onload = function(rpe, xhr){
             if(++handler.current < length){
                 handler.sent += handler.files[handler.current - 1].fileSize;
