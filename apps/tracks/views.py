@@ -554,7 +554,7 @@ def uploadFiles(request):
                 
             # extract's the instrument's metadata to put into the File model
             instrument = call_appropriate_filereader(write_here, friendly_name=f.name, fileExt=fileExt)
-            add_metadata_to_file(new_file, instrument)
+            add_metadata_to_file(new_file, file_sha1, instrument)
             
             if experiment is not None:
                 experiment.Files.add(new_file)
@@ -586,7 +586,7 @@ def uploadFiles(request):
 
     return HttpResponse('OK')
 
-def add_metadata_to_file(new_file, instrument):
+def add_metadata_to_file(new_file, file_sha1, instrument):
     """
     Adds the metadata extrema from the provided instrument to the provided file.
     Metadata is stored 

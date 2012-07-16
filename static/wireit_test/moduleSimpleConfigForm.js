@@ -161,11 +161,11 @@ function makeFileSummarySelect(dataObject, selected_files, experiment_id, fieldL
         }
     }
 
+    var storeFields = [];
     //Creating store and grid.
     Ext.regModel('fileModel', {
         fields: storeFields
     });
-    var storeFields = [];
     var store = Ext.create('Ext.data.Store', { model: 'fileModel'});
     var gridColumns = [];
     var myCheckboxModel = new Ext.selection.CheckboxModel(); //just a reference
@@ -179,7 +179,7 @@ function makeFileSummarySelect(dataObject, selected_files, experiment_id, fieldL
     //add all files to the store..
     var filerecs=[];
     for (var j = 0; j < datalen; ++j) {
-        var filerec={}
+        var filerec = {};
         for (var i = 0; i < fieldData.length; ++i) {
             filerec[fieldData[i]] = dataObject[j][i];
         }
@@ -209,7 +209,7 @@ function makeFileSummarySelect(dataObject, selected_files, experiment_id, fieldL
         });
     } else {
         Ext.each(selected_files, function(afile, index) {
-            Ext.each(store.getRange(), function(record, i){
+            Ext.each(store.getRange(), function(record, i) {
                 if (record.get('Available Files') === afile) {
                     myCheckboxModel.selected.add(record);
                     return false; //break out of Ext.each when function returns false
@@ -219,7 +219,7 @@ function makeFileSummarySelect(dataObject, selected_files, experiment_id, fieldL
     }
 
     
-    /* GridPanel that displays the data. Filled with empty columns since they are populated with update() */
+    /* GridPanel that displays the data.  */
     var filesummarygrid = new Ext.grid.GridPanel({
         store: store,
         selModel: myCheckboxModel, //new Ext.selection.CheckboxModel(),

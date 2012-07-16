@@ -615,7 +615,7 @@ function plottingAPI(toPlots, plotid_prefix) {
 
         // throw "Unsupported data format! Data must be a list of series.";
     }
-   // toPlots = $A(toPlots).flatten();
+// toPlots = $A(toPlots).flatten();
     
     if (debug)
         console.log('toPlots:', toPlots)
@@ -647,13 +647,13 @@ function plottingAPI(toPlots, plotid_prefix) {
                     plotid: plotid,
                     plotid_prefix: plotid_prefix
                     }, 
-                        function(e) {
-                            var plot = e.data.plot; 
-                            var toPlot = e.data.toPlot;
-                            var plotid = e.data.plotid;
-                            var plotid_prefix = e.data.plotid_prefix;
-                            plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix);
-                        });
+                    function(e) {
+                        var plot = e.data.plot; 
+                        var toPlot = e.data.toPlot;
+                        var plotid = e.data.plotid;
+                        var plotid_prefix = e.data.plotid_prefix;
+                        plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix);
+                    });
             }
             break;
         
