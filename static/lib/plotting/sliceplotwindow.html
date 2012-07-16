@@ -180,7 +180,7 @@
 		        } 
 		        if (plot == null) {
 		            // then initialize all the plot objects
-		            plot = $.jqplot('plot', data.z, {
+		            plot = $.jqplot('plot', [[0,0],[1,1]], {
 		                //cursor: {show: true, zoom: false},
 		                sortData: false,
 		                interactors: [{ type:'Rectangle', 
