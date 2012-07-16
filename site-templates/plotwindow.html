@@ -62,6 +62,7 @@
         <script type="text/javascript">
             window.onload = function() {
                 debug = false;
+                console.log(window.opener.toPlot);
                 if (window.opener.toPlot) {
                     var plotgrid = makePlotSelector(window.opener.toPlot);
                     plottingAPI(window.opener.toPlot, 'plot');   
