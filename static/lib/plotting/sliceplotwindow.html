@@ -117,7 +117,8 @@
 		       
 		    window.onload = function() {
 		        fit_plots();
-		        if (toPlot) {
+		        console.log(window);
+		        if (window.opener.toPlot) {
 		            
 		            var dims = toPlot[0].dims;
 		            // configuration from tracksConfigs supersedes the default from getConfig()
