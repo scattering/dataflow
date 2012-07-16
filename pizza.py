@@ -93,6 +93,14 @@ pizza_prefs = {
             "all are acceptable",
          ],
     },
+    "david":{
+        "likes":[
+            "pizza",
+         ],
+         "dislikes":[
+            "no pizza",
+         ]
+     }
 }
 
 

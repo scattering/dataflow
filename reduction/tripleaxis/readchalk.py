@@ -277,8 +277,10 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None):
                         metadata={}
                         filestring = fileName + "_run" + repr(int(tokenized[i+1])) # creating filename - still need to append channel
                         metadata['temperature_units'] = 'K' # setting temperature to Kelvin by default.
-                        metadata['orient1'] = {'h': orient1[0], 'k': orient1[1], 'l': orient1[2]}
-                        metadata['orient2'] = {'h': orient2[0], 'k': orient2[1], 'l': orient2[2]}
+                        if orient1:
+                            metadata['orient1'] = {'h': orient1[0], 'k': orient1[1], 'l': orient1[2]}
+                        if orient2:
+                            metadata['orient2'] = {'h': orient2[0], 'k': orient2[1], 'l': orient2[2]}
                         metadata[field] = int(tokenized[i+1])
                 elif field == 'date':
                     date_info = tokenized[i+1].split('-')
