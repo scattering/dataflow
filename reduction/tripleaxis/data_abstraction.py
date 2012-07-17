@@ -971,6 +971,7 @@ class TripleAxis(object):
 
                         data[field.name] = {'values': val, 'errors': err}
 
+            filename = self.meta_data.filename # Should never be None
             plottable_data = {
                 'type': 'nd',
                 'title': 'Triple Axis Plot',
@@ -978,11 +979,11 @@ class TripleAxis(object):
                 'orderx': orderx,
                 'ordery': ordery,
                 'series': [{
-                    'label': 'File 1',
+                    'label': filename,
                     'data': data,
                     'color': 'Red',
                     'style': 'line',
-                    }],
+                }],
             }
         #self.xaxis = ''
         #self.yaxis = ''

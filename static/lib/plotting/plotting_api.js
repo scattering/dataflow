@@ -28,7 +28,7 @@ function DataSeries(props) {
 
 var arrayMax = function( array ){
     var max = array[0];
-    for (var i = 0; i < array.length; i ++)
+    for (var i = 0; i < array.length; ++i)
       if (max < array[i])
         max = array[i];
     return max;
@@ -36,7 +36,7 @@ var arrayMax = function( array ){
 };
 var arrayMin = function( array ){
     var min = array[0];
-    for (var i = 0; i < array.length; i ++)
+    for (var i = 0; i < array.length; ++i)
       if (min > array[i])
         min = array[i];
     return min;
@@ -604,6 +604,8 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
 var plot = null;
 var plotregion = null;
 var toPlots_input = null;
+var myndgridpanel = null;
+var checkboxchange = false;
 
 function plottingAPI(toPlots, plotid_prefix) {
     toPlots_input = toPlots;
@@ -632,35 +634,115 @@ function plottingAPI(toPlots, plotid_prefix) {
             break;
         
         case 'nd': 
-             for (var i = 0; i < toPlots.length; i ++) {
-                var toPlot = toPlots[i];
-                var plotid = plotid_prefix + '_' + i;
-                if (debug)
-                    console.log('plotid:', plotid);
-                
-                plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, true);
-                
-                jQuery(document.getElementById(plotid + '_update')).unbind('click');
-                jQuery(document.getElementById(plotid + '_update')).click({ 
-                    plot: plot, 
-                    toPlot: toPlot, 
-                    plotid: plotid,
-                    plotid_prefix: plotid_prefix
-                    }, 
-                    function(e) {
-                        var plot = e.data.plot; 
-                        var toPlot = e.data.toPlot;
-                        var plotid = e.data.plotid;
-                        var plotid_prefix = e.data.plotid_prefix;
-                        plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix);
-                    });
-            }
+            //for (var i = 0; i < toPlots.length; i ++) {
+            i = 0;
+            //var toPlot = toPlots[i];
+            var toPlot = toPlots;
+            var plotid = plotid_prefix + '_' + i;
+            
+            plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, true); 
+            //with create=true, myndgridpanel will be updated and not null.
+            
+            jQuery(document.getElementById(plotid + '_update')).unbind('click');
+            jQuery(document.getElementById(plotid + '_update')).click({ 
+                plot: plot, 
+                //toPlot: toPlot, 
+                plotid: plotid,
+                plotid_prefix: plotid_prefix
+                }, 
+                function(e) {
+                    var plot = e.data.plot; 
+                    var toPlot = getSelectedPlots();
+                    var plotid = e.data.plotid;
+                    var plotid_prefix = e.data.plotid_prefix;
+                    plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, false);
+                }
+            );
+            //}
             break;
         
         default:
             alert('plotting of datatype "' + plot_type + '" is unsupported');
     }
 }
+function getSelectedPlots(){
+    toPlotArr = [];
+    Ext.each(myndgridpanel.getSelectionModel().selected.items, function(item, i) {
+        toPlotArr.push(item.data.toPlotObj);
+    });
+    return toPlotArr;
+}
+
+
+function makeNdPlotSelector(toPlot) {
+    /* Creates the plotgrid by instantiating the columns and store based on the passed objects
+       Currently for ndplotting only. */
+    console.log(toPlot);
+    //Creating store and grid.
+    var storeFields = [{name: 'Files'}, {name: 'Legend'}, {name: 'toPlotObj'}];
+    Ext.regModel('fileModel', {
+        fields: storeFields
+    });
+    var store = Ext.create('Ext.data.Store', { model: 'fileModel'});
+
+    
+    var myCheckboxModel = new Ext.selection.CheckboxModel({
+        listeners: {
+            selectionchange: function(model, records) {
+                if (!checkboxchange)
+                    checkboxchange = true;
+                /*//The update button is already handling this...
+                //unless we want each check click to update plot                
+                var recordToPlots = [];
+                Ext.each(records, function(record, i){
+                    recordToPlots.push(record.data.toPlotObj);
+                });
+                plot = updateNdPlot(plot, recordToPlots, 'plot_0', 'plot', false)
+                */
+            }
+        }
+    });
+
+    //add all files to the store..
+    var filerecs=[];
+    for (var j = 0; j < toPlot.length; ++j) {
+        console.log(j);
+        var filerec = {};
+        filerec['Files'] = toPlot[j].series[0].label;
+        filerec['Legend'] = NaN;            //NaN for now... TODO
+        filerec['toPlotObj'] = toPlot[j];   //hidden field
+        filerecs.push(filerec);
+    }
+
+    //TODO setup renderer for 'Legend'
+    var gridColumns = [];
+    gridColumns.push({header: 'Files', width: 150, sortable: true, dataIndex: 'Files'});
+    gridColumns.push({header: 'Legend', width: 75, sortable: false, dataIndex: 'Legend'});
+    gridColumns.push({header: 'toPlotObj', hidden: true, sortable: false, dataIndex: 'toPlotObj'});
+    store.loadData(filerecs);
+
+    //select first file to plot by default
+    var record = store.getRange()[0];
+    myCheckboxModel.selected.add(record);
+
+
+    /* GridPanel that displays the data. */
+    var plotgridpanel = new Ext.grid.GridPanel({
+        id: 'plotgridpanel',
+        store: store,
+        selModel: myCheckboxModel,
+        columns: gridColumns,
+        stripeRows: true,
+        height: 300,
+        width: 250,
+        //autoWidth: true,
+        title: 'Select the files to plot:',
+        //renderTo: 'plot' //gridplotid,
+    });
+
+    return plotgridpanel;
+}
+
 
 function createNdPlotRegion(plotid, renderTo) {
     var div = document.createElement('div');
@@ -689,7 +771,8 @@ function createNdPlotRegion(plotid, renderTo) {
     updatebutton.setAttribute('id', plotid + '_update');
     updatebutton.setAttribute('type', 'submit');
     updatebutton.setAttribute('value', 'Update plot');
-    
+
+
     divy.appendChild(selecty);
     divx.appendChild(selectx);
     divx.appendChild(updatebutton);
@@ -737,15 +820,14 @@ function get(arr, i) {
 }
 
 function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
+    console.log('create: ' + create + ', checkboxchange: ' + checkboxchange);
     var stage = 2;
-    var plotdiv = document.getElementById(plotid_prefix);
-    if (debug)
-        console.log('plotid:', plotid, 'plotdiv:', plotdiv, plotid_prefix)
+    //if (debug)
+    //    console.log('plotid:', plotid, 'plotdiv:', plotdiv, plotid_prefix)
     
-    if (!plot || !plot.hasOwnProperty("type") || plot.type!='nd'){
+    if (!plot || !plot.hasOwnProperty("type") || plot.type!='nd' || checkboxchange){
         stage = 1;
-        plotdiv.innerHTML = ""
-        var plot = { stage: 1, prevtype: null, targetId: plotid + '_target', series: [], options: { title: '', series: [{}], axes: {} }};
+        plot = { stage: 1, prevtype: null, targetId: plotid + '_target', series: [], options: { title: '', series: [{}], axes: {} }};
         plot.options.cursor = { show: true, zoom: true, tooltipFormatString: '%.3g, %.3g', tooltipLocation:'ne'};
         plot.options.series[0].markerOptions = {shadow: false};
         plot.options.series[0].shadow = false;
@@ -769,48 +851,88 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
             }
           }
         }
-        
         //plot.options.series = [{ renderer: jQuery.jqplot.errorbarRenderer, rendererOptions: { errorBar: true } }];
     }
     
     if (create) {
-        plotdiv.appendChild(createNdPlotRegion(plotid));
-        updateSeriesSelects(toPlot, plotid);
+        var plotdiv = document.getElementById(plotid_prefix);
+        plotdiv.innerHTML = ""
+        myplotdiv = createNdPlotRegion(plotid);
+        plotdiv.appendChild(myplotdiv);
+        //console.log(plotdiv);
+        myndgridpanel = makeNdPlotSelector(toPlot);
+        
+        myplotpanel = new Ext.panel.Panel({
+            items: [myplotdiv],
+        });
+        
+        new Ext.panel.Panel({
+            layout: 'hbox',
+            frame: true,
+            height: 400,
+            width: 900,
+            renderTo: 'plotpanel',
+            //defaults: { flex: 1 },
+            items: [ myplotpanel, myndgridpanel ]
+            
+        });
+        toPlot = [toPlot[0]] //only doing the first file (set up so first file is only one checked in gridpanel)
+        updateSeriesSelects(toPlot[0], plotid);
+    } else if (checkboxchange) {
+//TODO FIX! currently making two plots on top of each other!!! 7/17/2012
+        /*var plotdiv = document.getElementById(plotid_prefix);
+        plotdiv.innerHTML = ""
+        myplotdiv = createNdPlotRegion(plotid);
+        plotdiv.appendChild(myplotdiv);*/
     }
     
     target_id = plotid + '_target';
     //var plotid = plot.targetId.substring(1 * (plot.targetId[0] == '#'), plot.targetId.length - 7);
-    var series = plot.series;
+
+    series = (stage == 2) ? plot.series : new Array();
     var options = plot.options;
-    //var series = plot.series;
-    //var options = plot.options;
+
     if (debug) console.log(100, plotid, toPlot);
     
     var quantityx = document.getElementById(plotid + '_selectx').value,
         quantityy = document.getElementById(plotid + '_selecty').value;
     if (debug) console.log(200, plotid+'_selectx', quantityx, quantityy);
     
-    for (var s = 0; s < toPlot.series.length; s++) {
-        // Prototype.js's Enumerable.zip() is handy here
-        var datax = toPlot.series[s].data[quantityx],
-            datay = toPlot.series[s].data[quantityy];
-        if (debug) console.log(300, toPlot.series[s], quantityx, quantityy, datax, datay);
-        // I know, I know: "series" is both singular and plural... go blame the English language, not me!
-        //var serie = $A(datax.values).zip(datay.values, datax.errors, datay.errors, function(a) { return [a[0], a[1], { xerr: a[2], yerr: a[3] }]; });
-        var serie = new Array();
-        if (datax.values) {
-            for (var i = 0; i < datax.values.length; i++) {
-                serie[i] = [datax.values[i], datay.values[i], {xerr: get(datax.errors, i), yerr: get(datay.errors, i)}];
+    toPlotlength = toPlot.length;
+    //recently added outer for - may not be necessary
+    for (var p = 0; p < toPlotlength; ++p){
+        toPlot_p = toPlot[p];
+        for (var s = 0; s < toPlot_p.series.length; ++s) {
+            // For TripleAxis plottables, this loop will only run once...  7/17/2012
+            // Prototype.js's Enumerable.zip() is handy here
+            var datax = toPlot_p.series[s].data[quantityx],
+                datay = toPlot_p.series[s].data[quantityy];
+            if (debug) console.log(300, toPlot_p.series[s], quantityx, quantityy, datax, datay);
+            // I know, I know: "series" is both singular and plural... go blame the English language, not me!
+            //var serie = $A(datax.values).zip(datay.values, datax.errors, datay.errors, function(a) { return [a[0], a[1], { xerr: a[2], yerr: a[3] }]; });
+            var serie = new Array();
+            if (datax.values) {
+                for (var i = 0; i < datax.values.length; i++) {
+                    serie[i] = [datax.values[i], datay.values[i], {xerr: get(datax.errors, i), yerr: get(datay.errors, i)}];
+                }
             }
+
+            if (checkboxchange) {
+                series.push(serie);
+            } else {
+                if (!series[s] || !series[s].hasOwnProperty('data')) {
+                series[s] = serie;
+                } else {
+                // adds background series (ie plotting multiple files)
+                series[s].data = serie;
+                }
+            }
+
+            
+            //options.series[s] = { renderer: jQuery.jqplot.errorbarRenderer, rendererOptions: { errorBar: true, /*bodyWidth: 1, wickColor: 'red', openColor: 'yellow', closeColor: 'blue'*/ } };
         }
-        if (debug) console.log('serie '+s, serie);
-        if (!series[s] || !series[s].hasOwnProperty('data'))
-            series[s] = serie;
-        else
-            series[s].data = serie;
-        
-        //options.series[s] = { renderer: jQuery.jqplot.errorbarRenderer, rendererOptions: { errorBar: true, /*bodyWidth: 1, wickColor: 'red', openColor: 'yellow', closeColor: 'blue'*/ } };
     }
+    console.log('series: ', series);
     if (debug) console.log('series', series, 'options', options);
     
     if (stage == 1) {
@@ -825,8 +947,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
             options.series[0].show = true;
         }
         
-    }
-    else {
+    } else {
         plot.series.data = series;
         plot.options = options;
         plot.resetAxesScale();
