@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+        <title>Plot from Dataflow</title>
+        
+        <!-- JQPLOT -->
+        <script type="text/javascript" src="jqplot/jquery-1.5.1.js"></script>
+        <script type="text/javascript" src="jqplot/jquery.jqplot.js"></script>
+		<script type="text/javascript" src="jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
+		<script type="text/javascript" src="jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+		<script type="text/javascript" src="jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
+		<script type="text/javascript" src="jqplot/plugins/jqplot.errorbarRenderer.js"></script>
+		<script type="text/javascript" src="jqplot/plugins/jqplot.pcolorRenderer.js"></script>
+		<script type="text/javascript" src="jqplot/plugins/jqplot.cursor.js"></script>
+		<script type="text/javascript" src="palettes.js"></script>
+		<script type="text/javascript" src="plotting_api.js"></script>
+		<script type="text/javascript" src="heatmapRenderer.js"></script>
+		<script type="text/javascript" src="colorbarRenderer.js"></script>
+		
+		<!-- Interactors -->
+		<script type="text/javascript" src="../interactors/interactors_nonprototype.js"></script>
+		<script type="text/javascript" src="../interactors/interactor_plugin_base.js"></script>
+		<script type="text/javascript" src="../interactors/rectangle_interactor_plugin.js"></script>
+		<script type="text/javascript" src="../interactors/linear_interactor_plugin.js"></script>
+		<script type="text/javascript" src="../interactors/reflectivity_sim.js"></script>
+        
+        <!-- Uniq Array -->
+		<script type="text/javascript" src="../UniqArray.js"></script>
+		<script type="text/javascript" src="../js-object-length.js"></script>
+		
+		<!-- <script type="text/javascript" src="test_data2.js"></script> -->
+		<script type="text/javascript">
+		    function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie != '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        // remove whitespace from beginning and end: (like jQuery.trim)
+                        var cookie = cookies[i].replace(/(^[\s\xA0]+|[\s\xA0]+$)/g, '');
+                        //var cookie = jQuery.trim(cookies[i]);
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            
+            getBinaryData = function(unfilled_data, onFinish) {
+                var oReq = new XMLHttpRequest(); 
+                //oReq.open("GET", "/getBinaryData/"+val, true); 
+                oReq.open("POST", "/getBinaryData/", true);   
+                oReq.responseType = "arraybuffer";
+                //oReq.multipart = true;
+                oReq.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+                oReq.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+                oReq.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+                
+                oReq.onload = function (oEvent) {
+                    if (oReq.status == 200) {
+                        var arrayBuffer = oReq.response;
+                        console.log('binary received');
+                        if (arrayBuffer) {  
+                            var byteArray = new Float32Array(arrayBuffer);
+                            unfilled_data.z_binary_array = byteArray;
+                            var z = [[]];
+                            var row;
+                            var width = unfilled_data.dims.xdim;
+                            var height = unfilled_data.dims.ydim;
+                            for (var r=0; r<height; r++) {
+                                var row = [];
+                                for (var c=0; c<width; c++) {
+                                    row.push(byteArray[c + r*width]);
+                                }
+                                z[0].push(row); 
+                            }
+                            
+                            unfilled_data.z = z;
+                            console.log('binary received and processed', byteArray.length); 
+                            onFinish();
+                        }  
+                    }
+                }
+                console.log('getting binary...', unfilled_data.binary_fp);
+                oReq.send("binary_fp="+unfilled_data.binary_fp);
+            }
+        </script>
+        <script type="text/javascript">
+		    var plot;
+
+            fit_plots = function() {
+		        var width = document.body.offsetWidth;
+		        var height = document.body.offsetHeight;
+		        document.getElementById('plot').style.width = ((width-100) * 0.59).toString() + "px";
+		        
+		        var plotheight = ((height-50) * 0.49).toString() + "px";
+		        document.getElementById('upper').style.height = plotheight;
+		        document.getElementById('lower').style.height = plotheight;
+		        document.getElementById('plot').style.height = plotheight;
+		    };
+		    
+		    replot_all = function() {
+  		        plot.replot(); 
+  		    };
+  		    
+  		    parseConfig = function(cfg) {
+  		      // nothing yet 
+		    };
+		       
+		    window.onload = function() {
+		        fit_plots();
+		        update_plot(); // delete later
+		        /*if (toPlot) {
+		            
+		            var dims = toPlot[0].dims;
+		            // configuration from tracksConfigs supersedes the default from getConfig()
+		            cfg = {}; //{xmin: dims.xmin, xmax: dims.xmax, ymin: dims.ymin, ymax: dims.ymax};
+		            var all_cfg = container.getConfig();
+		            if (reductionInstance in all_cfg) jQuery.extend(cfg, all_cfg[reductionInstance]);
+		            var lims = {xmin: dims.xmin, xmax: dims.xmax, ymin: dims.ymin, ymax: dims.ymax};
+		            for (var lim in lims) {
+		                
+		                if (!(lim in cfg)) { cfg[lim] = {} };
+                        if (!('value' in cfg[lim]) || cfg[lim]['value'].trim().length == 0) { cfg[lim]['value'] = lims[lim].toString(); };
+		            } 
+                    
+                    update_selectors(toPlot);
+		            update_plot(toPlot[0]);
+		            
+		        } else {
+		            alert('no data to plot!');
+		        }*/
+		        //update_plot(testdata);
+		        
+		    }
+		    
+		    window.onresize = function() { fit_plots(); replot_all(); };
+		    
+		    /*update_selectors = function(toPlots) {
+		        document.getElementById('plot_selectnum').innerHTML = "";
+                for (var i=0; i<toPlots.length; i++) {
+                    var zlabel = toPlots[i].zlabel || '';
+                    var opt = document.createElement('option');
+                    opt.setAttribute('value', i);
+                    opt.innerHTML = 'dataset: ' + i + " " + zlabel;
+                    document.getElementById('plot_selectnum').appendChild(opt);
+                    //jQuery(document.getElementById('plot_selectnum')).append(jQuery("<option / > ", { value: i, text: 'dataset: ' + i + " " + zlabel }));
+                };
+                function onchange(e) {
+                    console.log('changing');
+                    var selectz = document.getElementById('plot_selectz');
+                    var selectnum = document.getElementById('plot_selectnum');
+                    var transform = selectz[selectz.selectedIndex].value;
+                    var plotnum = selectnum[selectnum.selectedIndex].value;
+                    var toPlot = toPlots[plotnum];
+
+                    update_plot(toPlot, transform);
+                }
+                
+                jQuery('#plot_selectnum').change({}, onchange);
+                jQuery('#plot_selectz').change({}, onchange);
+		    }*/
+		    update_plot = function(/*toPlot,*/ transform) {
+		        debug = false;
+		        /*data = toPlot;
+		        if (data.binary_fp && data.z_binary_array == undefined) {
+		            if (plot && plot.series && plot.series[0]) { 
+		                plot.series[0].show=false; 
+		                plot.replot();
+		            }
+		            getBinaryData(data, function() { update_plot(data) })
+		            return
+		        } */
+		        if (plot == null) {
+		            // then initialize all the plot objects
+		            plot = $.jqplot('plot', [[[0,0],[1,1],[2,2],[3,5],[4,9],[5,2]]], {
+		                //cursor: {show: true, zoom: false},
+		                sortData: false,
+		                interactors: [{ type:'Line', 
+		                                name:'line',
+		                                xmin: 1.0,
+		                                ymin: 1.0,
+		                                xmax: 4.0,
+		                                ymax: 4.0},
+		                              { type:'VerticalLine',
+		                                name:'verticalline'},
+		                              { type:'VerticalLine',
+		                                name:'verticalline2',
+		                                x0: 3.0}],
+		                //renderer: $.jqplot.heatmapRender,
+		                series: [ {shadow: false, padding: 0} ],
+                        grid: {shadow: false},
+                        axesDefaults: {
+		                    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                            tickOptions: {formatString: "%.3g", _styles: {right: 0}}
+                        },
+                        axes:{ 
+                            xaxis:{ label: /*toPlot.xlabel*/ 'x-axis' },
+                            yaxis:{ label: /*toPlot.ylabel*/ 'y-axis' }
+                        },
+		                seriesDefaults:{
+		                    shadow: false,
+                            /*renderer:$.jqplot.heatmapRenderer,
+                            rendererOptions: {
+                                transform: toPlot.transform || 'lin',
+                                dims: { xmin: 0.0,
+                                        ymin: 0.0,
+                                        xmax: 5.0,
+                                        ymax: 5.0},
+                                //dims: data.dims,
+                                //display_dims: { xmin: data.dims.xmin-1,
+                                //                ymin: data.dims.ymin-1,
+                                //                ymax: data.dims.ymax+1,
+                                //                xmax: data.dims.xmax+1}
+                            },*/
+                        }
+		                
+		            });
+		            
+		            var linePlugin = plot.plugins.interactors.line;
+		            
+		            var linex1 = new pointTextControl(linePlugin.p1, 'x', 'x<sub>P1</sub> ', 5);
+		            linex1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(linex1.div);
+		            var liney1 = new pointTextControl(linePlugin.p1, 'y', 'y<sub>P1</sub> ', 5);
+		            liney1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(liney1.div);
+		            var linex2 = new pointTextControl(linePlugin.p2, 'x', 'x<sub>P2</sub> ', 5);
+		            linex2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(linex2.div); 
+		            var liney2 = new pointTextControl(linePlugin.p2, 'y', 'y<sub>P2</sub> ', 5);
+		            liney2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(liney2.div);
+		            var lineslope = new slopeTextControl(linePlugin, linex1, liney1, linex2, liney2, 'slope ', 5);
+		            lineslope.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(lineslope.div);
+		            var lineinter = new interceptTextControl(linePlugin, liney1, liney2, 'y-intercept ', 5);
+		            lineinter.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(lineinter.div);
+		            
+		            var vertLine = plot.plugins.interactors.verticalline;
+		            var vert1 = new pointTextControl(vertLine.p, 'x', 'Start of Interval ', 5);
+		            vert1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(vert1.div);
+		            var vertLine2 = plot.plugins.interactors.verticalline2;
+		            var vert2 = new pointTextControl(vertLine2.p, 'x', 'End of Interval ', 5);
+		            vert2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(vert2.div);	            
+		            
+                    var hr = document.createElement('div'); hr.innerHTML = "<hr>";
+                    document.getElementById('footcontrols').appendChild(hr);
+                    
+                    /*var maxbutton = document.createElement('input');
+                    maxbutton.setAttribute('type', 'button');
+                    maxbutton.setAttribute('value', 'Maximize to data');
+                    var maximize = function () {
+                        xminctl.update({x: plot.series[0].dims.xmin});
+                        xminctl.update_external();
+                        ymaxctl.update({y: plot.series[0].dims.ymax});
+                        ymaxctl.update_external();
+                        xmaxctl.update({x: plot.series[0].dims.xmax});
+                        xmaxctl.update_external();
+                        yminctl.update({y: plot.series[0].dims.ymin});
+                        yminctl.update_external();
+                    }
+                    maxbutton.onclick = maximize;                  
+                    document.getElementById('slicecontrols').appendChild(maxbutton);*/
+                    
+                    /*var submitbutton = document.createElement('input');
+                    submitbutton.setAttribute('type', 'button');
+                    submitbutton.setAttribute('value', 'Submit Changes');
+                    var submitChanges = function() {
+                        cfg.xmax.value = xmaxctl.textbox.value;
+                        cfg.xmin.value = xminctl.textbox.value;
+                        cfg.ymin.value = yminctl.textbox.value;
+                        cfg.ymax.value = ymaxctl.textbox.value;
+                        
+                        if (!('tracksConfigs' in container)) container.tracksConfigs = {};
+                        if (!(reductionInstance in container.tracksConfigs)) container.tracksConfigs[reductionInstance] = {};
+                        jQuery.extend(container.tracksConfigs[reductionInstance], cfg);
+                    };
+                    submitbutton.onclick = submitChanges;                    
+                    document.getElementById('footcontrols').appendChild(submitbutton);  
+                                       
+                    slice_listener = function(series) {
+		                slicebox.p1.listeners.push(this);
+		                slicebox.p3.listeners.push(this);
+		                var p0 = series;
+		                this.update = function(pos) {
+		                    var width = p0.dims.xdim;
+                            var height = p0.dims.ydim;
+		                    //console.log(slicebox.p1.coords.x, p0.dims.xmin, p0.dims.xdim);
+		                    i_min = Math.floor((slicebox.p1.coords.x - p0.dims.xmin) / p0.dims.dx);
+		                    i_min = Math.min(Math.max(i_min, 0), p0.dims.xdim);
+		                    i_max = Math.ceil((slicebox.p3.coords.x - p0.dims.xmin) / p0.dims.dx);
+		                    i_max = Math.max(Math.min(i_max, p0.dims.xdim), 0);
+		                    j_min = Math.floor((slicebox.p3.coords.y - p0.dims.ymin) / p0.dims.dy);
+		                    j_min = Math.min(Math.max(j_min, 0), p0.dims.ydim);
+		                    j_max = Math.ceil((slicebox.p1.coords.y - p0.dims.ymin) / p0.dims.dy);
+		                    j_max = Math.max(Math.min(j_max, p0.dims.ydim), 0);
+		                    var xdata = [], ydata = [];
+		                    for (var c=i_min; c <=i_max-1; c++) {
+		                        xdata.push([p0.dims.xmin + c*p0.dims.dx, p0.cumsum_x[c][j_max] - p0.cumsum_x[c][j_min]]);
+		                    }
+		                    for (var r=j_min; r<=j_max-1; r++) {
+		                        ydata.push([p0.cumsum_y[i_max][r] - p0.cumsum_y[i_min][r], p0.dims.ymin + r*p0.dims.dy]);
+		                    }
+		                };
+		                return this;  
+		            };
+		            sl = slice_listener(plot.series[0]);
+		            plot.series[0].generate_cumsums()
+		            //generate_cumsums(plot.series[0]);
+		            sl.update();
+		            //maximize();*/
+		        }
+		        else {
+		            // no need to recreate everything... just update the data.
+		            plot.series[0].show = true;
+		            plot.series[0].set_data(toPlot.z[0], toPlot.dims);
+		            plot.series[0].set_transform(transform || toPlot.transform);
+                    plot.series[0]._xaxis.labelOptions.label = toPlot.xlabel;
+                    plot.series[0]._yaxis.labelOptions.label = toPlot.ylabel;
+                    plot.plugins._interactor.zoomMax();
+                    sl = slice_listener(plot.series[0]);
+		            plot.series[0].generate_cumsums();
+		            //generate_cumsums(plot.series[0]);
+		            sl.update();
+		            
+		            /*
+		            plot.series[0].set_data(toPlot.z[0], toPlot.dims);
+		            plot.series[0].set_transform(transform || toPlot.transform);
+		            plot.plugins._interactor.zoomMax();
+                    colorbar.series[0].dims = toPlot.dims;
+                    colorbar.series[0].set_ztransform(transform);
+                    colorbar.plugins._interactor.zoomMax();
+                    */
+		        }
+		    }
+		    slopeTextControl = function(linePlugin, x1, y1, x2, y2, label, precision) {
+		        var precision = precision || 3;
+		        this.precision = precision;
+		        this.slope = linePlugin.slope;
+		        var textbox = document.createElement('input');
+		        textbox.setAttribute('type', 'text');
+		        textbox.setAttribute('style', 'width:90px');
+		        var input_label = document.createElement('label');
+		        var div = document.createElement('div');
+		        div.innerHTML = label;
+		        div.appendChild(textbox);
+		        this.div = div;
+		        this.div.setAttribute('id', 'slopeTextControl_' + label);
+		        this.div.setAttribute('style', 'display: inline; padding: 5px 10px;');
+		        this.textbox = textbox;
+		        this.update = function(newSlope) {  // slope should just be a number
+		            textbox.value = newSlope.toPrecision(precision);
+		        }
+		        var me = this;
+		        this.update_external = function() {
+		            var newSlope = parseFloat(textbox.value);
+		            linePlugin.slope = newSlope;
+		            var intercept = linePlugin.intercept;
+		            newy1 = (newSlope * parseFloat(x1.textbox.value)) + intercept;
+		            newy2 = (newSlope * parseFloat(x2.textbox.value)) + intercept;
+		            
+		            y1.textbox.value = newy1.toPrecision(precision);
+		            y2.textbox.value = newy2.toPrecision(precision);
+		            y1.update_external();
+		            y2.update_external();
+		            
+		            textbox.value = (linePlugin.slope).toPrecision(precision); 
+		        }
+		        textbox.onchange = this.update_external;
+		        this.update(linePlugin.slope);
+		        return this;
+		    }
+		    interceptTextControl = function(linePlugin, y1, y2, label, precision) {
+		        var precision = precision || 3;
+		        this.precision = precision;
+		        this.intercept = linePlugin.intercept;
+		        var textbox = document.createElement('input');
+		        textbox.setAttribute('type', 'text');
+		        textbox.setAttribute('style', 'width:90px');
+		        var input_label = document.createElement('label');
+		        var div = document.createElement('div');
+		        div.innerHTML = label;
+		        div.appendChild(textbox);
+		        this.div = div;
+		        this.div.setAttribute('id', 'intTextControl_' + label);
+		        this.div.setAttribute('style', 'display: inline; padding: 5px 10px;');
+		        this.textbox = textbox;
+		        this.update = function(newIntercept) {
+		            textbox.value = newIntercept.toPrecision(precision);
+		        }
+		        var me = this;
+		        this.update_external = function() {
+		            var newInt = parseFloat(textbox.value);
+		            dInt = (newInt - linePlugin.intercept);
+		            linePlugin.intercept = newInt; 
+		            
+		            y1.textbox.value = (Number(y1.textbox.value) + dInt).toPrecision(precision);
+		            y2.textbox.value = (Number(y2.textbox.value) + dInt).toPrecision(precision);
+		            y1.update_external();
+		            y2.update_external();
+		           
+		            textbox.value = (linePlugin.intercept).toPrecision(precision);
+		        }
+		        textbox.onchange = this.update_external;
+		        this.update(linePlugin.intercept);
+		        return this;
+		    }
+		    pointTextControl = function(p, coord, label, precision) {
+                // coord should be 'x' or 'y'
+                var precision = precision || 3;
+                this.precision = precision;
+                this.coord = coord;
+                this.p = p;
+                var textbox = document.createElement('input');
+                textbox.setAttribute('type', 'text');
+                textbox.setAttribute('style', 'width:90px');
+                var input_label = document.createElement('label');
+                var div = document.createElement('div');
+                div.innerHTML = label;
+                // div.appendChild(document.createTextNode(label))
+                div.appendChild(textbox);
+                this.div = div;
+                this.div.setAttribute('id', 'ptTextControl_' + label);
+                this.div.setAttribute('style', 'display: inline; padding: 5px 10px;');
+                //this.div.setAttribute('style', 'position: relative; float: left; padding: 5px; text-align: top;');
+                this.textbox = textbox;
+                this.update = function(pos) {
+                    textbox.value = pos[coord].toPrecision(precision);
+                }
+                var me = this;
+                this.update_external = function() {
+                    var mypos = {}; mypos[coord] = textbox.value;
+                    
+                    var newpos = p.putCoords ? p.putCoords(mypos) : mypos;
+                    var dpos = {}; dpos[coord] = newpos[coord] - p.pos[coord];
+                    p.move(dpos);
+                    p.parent.onDrag();  // centers
+                    p.parent.redraw();
+                }
+                
+                textbox.onchange = this.update_external;
+                p.listeners.push(this);
+                this.update(p.getCoords());
+                return this;
+            }
+            
+        </script>
+    </head>
+    <body>
+        <div id="upper" style="display: block; width: 100%; height: 352px;">
+	        <div id="plot" style="display: inline-block; width: 500px; height: 350px; padding: 0; margin:0;"></div>
+	    </div>
+	    <!--<div id="controls" style="display: block; width: 100%;">
+	        <select id="plot_selectz">
+	            <option value='lin'>lin</option>
+	            <option value='log'>log</option>
+	        </select>
+	        <select id="plot_selectnum"></select>
+	    </div>-->
+	    <div id="lower" style="display: block; width: 100%; height: 350px;">
+	        <div id="footcontrols" style="display: inline-block; width: 39%; text-align: center;">Footprint Control Region:<hr></div>
+	    </div>	    
+    </body>
+</html>
