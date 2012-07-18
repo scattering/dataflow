@@ -540,7 +540,7 @@
 			}
 			
 			if (filled_data_count == target_length) { 
-			    toPlot=display;
+			    toPlot=display;	    
 			    makePlotWindow();
 			    //this.plotWindow.plottingAPI(display, plotid)  //commented out, was throwing errors; Yee 7/13/12
 			};

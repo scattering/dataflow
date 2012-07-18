@@ -2,6 +2,9 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <title>Plot from Dataflow</title>
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="../static/lib/ext/resources/css/ext-all.css" />
+
         <!-- JQPLOT -->
         <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/start/jquery-ui.css" type="text/css" rel="Stylesheet" />
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
@@ -62,9 +65,10 @@
         <script type="text/javascript">
             window.onload = function() {
                 debug = false;
+                //console.log(window.opener.toPlot);
                 if (window.opener.toPlot) {
-                    var plotgrid = makePlotSelector(window.opener.toPlot);
-                    plottingAPI(window.opener.toPlot, 'plot');   
+                    plottingAPI(window.opener.toPlot, 'plot');
+                    //console.log(document.getElementById('plot'));
                 }
 
                 jQuery(".slidingDiv").hide();
@@ -73,52 +77,12 @@
                 });
             };
 
-            function makePlotSelector(toPlot) {
-                /* Creates the plotgrid by instantiating the columns and store based on the passed objects */
-
-                //Creating store and grid.
-                var storeFields = [{name: 'Files'}, {name: 'Legend'}];
-                Ext.regModel('fileModel', {
-                    fields: storeFields
-                });
-                var store = Ext.create('Ext.data.Store', { model: 'fileModel'});
-                var myCheckboxModel = new Ext.selection.CheckboxModel(); //just a reference, can override
-
-                //add all files to the store..
-                var filerecs=[];
-                for (var j = 0; j < toPlot.length; ++j) {
-                    var filerec = {};
-                    filerec['Files'] = toPlot[j].series[0].label;
-                    filerec['Legend'] = NaN;            //NaN for now... TODO
-                    filerec['toPlotObj'] = toPlot[j];   //hidden field
-                    filerecs.push(filerec);
-                }
-
-                //TODO setup renderer for 'Legend'
-                var gridColumns = [];
-                gridColumns.push({header: 'Files', width: 150, sortable: true, dataIndex: 'Files'});
-                gridColumns.push({header: 'Legend', width: 75, sortable: false, dataIndex: 'Legend'});
-                gridColumns.push({header: 'toPlotObj', hidden: true, sortable: false, dataIndex: 'toPlotObj'});
-                store.loadData(filerecs);
-
-                /* GridPanel that displays the data. */
-                var plotgrid = new Ext.grid.GridPanel({
-                    store: store,
-                    selModel: myCheckboxModel,
-                    columns: gridColumns,
-                    stripeRows: true,
-                    fieldLabel: 'plotpanel',
-                    height: 300,
-                    autoWidth: true,
-                    title: 'Select the files to plot:',
-                });
-
-                return plotgrid;
-            }
-
+            
         </script>
     </head>
     <body id="woot" class="yui-skin-sam">
+        <div id="plotpanel">
+        </div>
         <div id="plot">
             I am a plot.
         </div>
