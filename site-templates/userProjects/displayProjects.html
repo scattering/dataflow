@@ -16,7 +16,7 @@
                     url: '/myProjects/',
                     type: 'POST',
                     data: {'project_id' : projectid},
-                    success: function(response, a, b, c) {
+                    success: function(response) {
                         //projectid is not in scope here; calling another function that has it.
                         successfunction(); 
                     }

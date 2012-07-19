@@ -363,6 +363,62 @@ function renderImageData2(data, transform, plotid, plot_options) {
     return plot2d
 };
 
+function renderndplot(data, transform, plotid) {
+    
+    var options = {
+        title: data.title,
+        seriesDefaults: {shadow: false, markerOptions: {shadow: false, size: 4}},
+        axes:{
+          xaxis:{
+            renderer: $.jqplot.LinearAxisRenderer,  // renderer to use to draw the axis,
+            label: data.xlabel,
+            labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+            tickOptions: {
+                formatString: "%.2g"
+            }
+          },
+          yaxis:{
+            renderer: (transform == 'log') ? $.jqplot.LogAxisRenderer : $.jqplot.LinearAxisRenderer,
+            label: data.ylabel,
+            labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+            tickOptions: {
+                formatString: "%.2g",
+                // fix for ticks drifting to the left in accordionview!
+                _styles: {right: 0},
+            }
+          }
+        },
+        cursor: {
+            show: true,
+            zoom: true,
+            clickReset: true,
+            tooltipLocation:'se',
+            tooltipOffset: -60,
+            useAxesFormatters: false,
+        },
+        legend: {
+            show: true,
+            parent: this,
+            placement: 'outside',
+            renderer: $.jqplot.InteractiveLegendRenderer
+        },
+        grid: {shadow: false},
+        sortData: false,
+        //interactors: [ {type: 'Rectangle', name: 'rectangle'} ],
+        type: 'nd'
+    };
+    
+    jQuery.extend(true, options, data.options);
+    //jQuery(plotid).empty(); // empty the jqplot div in the DOM. Unnecessary I think...
+    plotnd = jQuery.jqplot(plotid, series, options);
+    plotnd.replot({resetAxes : true});  //clears old axes instead of having new axes rendered on top of old axes.
+                                        //a little strange to replot after making a new plot, but it works...
+    plotnd.type = 'nd';
+    return plotnd
+};
+
 
 
 function getContext(id) {
@@ -504,7 +560,6 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'lin', text: 'lin' }));
         jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'log', text: 'log' }));
         
-        
         plot = null;
         plot2d = null;
         plot2d_colorbar = null;
@@ -634,31 +689,27 @@ function plottingAPI(toPlots, plotid_prefix) {
             break;
         
         case 'nd': 
-            //for (var i = 0; i < toPlots.length; i ++) {
             i = 0;
-            //var toPlot = toPlots[i];
             var toPlot = toPlots;
             var plotid = plotid_prefix + '_' + i;
             
             plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, true); 
-            //with create=true, myndgridpanel will be updated and not null.
+            //with create=true, myndgridpanel will be created and not null.
             
             jQuery(document.getElementById(plotid + '_update')).unbind('click');
             jQuery(document.getElementById(plotid + '_update')).click({ 
-                plot: plot, 
+                //plot: plot, 
                 //toPlot: toPlot, 
                 plotid: plotid,
                 plotid_prefix: plotid_prefix
                 }, 
                 function(e) {
-                    var plot = e.data.plot; 
                     var toPlot = getSelectedPlots();
                     var plotid = e.data.plotid;
                     var plotid_prefix = e.data.plotid_prefix;
                     plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, false);
                 }
             );
-            //}
             break;
         
         default:
@@ -820,41 +871,9 @@ function get(arr, i) {
 }
 
 function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
-    console.log('create: ' + create + ', checkboxchange: ' + checkboxchange);
-    var stage = 2;
     //if (debug)
     //    console.log('plotid:', plotid, 'plotdiv:', plotdiv, plotid_prefix)
-    
-    if (!plot || !plot.hasOwnProperty("type") || plot.type!='nd' || checkboxchange){
-        stage = 1;
-        plot = { stage: 1, prevtype: null, targetId: plotid + '_target', series: [], options: { title: '', series: [{}], axes: {} }};
-        plot.options.cursor = { show: true, zoom: true, tooltipFormatString: '%.3g, %.3g', tooltipLocation:'ne'};
-        plot.options.series[0].markerOptions = {shadow: false};
-        plot.options.series[0].shadow = false;
-        plot.options.axes = {
-          xaxis:{
-            //label: data.xlabel,
-            //labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
-            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
-            tickOptions: {
-                formatString: "%.2g"
-            }
-          },
-          yaxis:{
-            //label: data.ylabel,
-            //labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
-            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
-            tickOptions: {
-                formatString: "%.2g",
-                // fix for ticks drifting to the left in accordionview!
-                _styles: {right: 0},
-            }
-          }
-        }
-        //plot.options.series = [{ renderer: jQuery.jqplot.errorbarRenderer, rendererOptions: { errorBar: true } }];
-    }
-    
-    if (create) {
+    if (create || !plot || !plot.hasOwnProperty("type") || plot.type!='nd'){
         var plotdiv = document.getElementById(plotid_prefix);
         plotdiv.innerHTML = ""
         myplotdiv = createNdPlotRegion(plotid);
@@ -878,38 +897,63 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
         });
         toPlot = [toPlot[0]] //only doing the first file (set up so first file is only one checked in gridpanel)
         updateSeriesSelects(toPlot[0], plotid);
-    } else if (checkboxchange) {
-//TODO FIX! currently making two plots on top of each other!!! 7/17/2012
-        /*var plotdiv = document.getElementById(plotid_prefix);
-        plotdiv.innerHTML = ""
-        myplotdiv = createNdPlotRegion(plotid);
-        plotdiv.appendChild(myplotdiv);*/
+    } 
+    
+    /*plot = { stage: 1, prevtype: null, targetId: plotid + '_target', series: [], options: { title: '', series: [{}], axes: {} }};
+    plot.options.cursor = { show: true, zoom: true, tooltipFormatString: '%.3g, %.3g', tooltipLocation:'ne'};
+    plot.options.series[0].markerOptions = {shadow: false};
+    plot.options.series[0].shadow = false;
+    plot.options.axes = {
+      xaxis:{
+        //label: data.xlabel,
+        //labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+        tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+        tickOptions: {
+            formatString: "%.2g"
+        }
+      },
+      yaxis:{
+        //label: data.ylabel,
+        //labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+        tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+        tickOptions: {
+            formatString: "%.2g",
+            // fix for ticks drifting to the left in accordionview!
+            _styles: {right: 0},
+        }
+      }
     }
-    
+    //plot.options.series = [{ renderer: jQuery.jqplot.errorbarRenderer, rendererOptions: { errorBar: true } }];
+        
+    */
+
     target_id = plotid + '_target';
-    //var plotid = plot.targetId.substring(1 * (plot.targetId[0] == '#'), plot.targetId.length - 7);
+    series = new Array();
 
-    series = (stage == 2) ? plot.series : new Array();
-    var options = plot.options;
-
-    if (debug) console.log(100, plotid, toPlot);
-    
     var quantityx = document.getElementById(plotid + '_selectx').value,
         quantityy = document.getElementById(plotid + '_selecty').value;
-    if (debug) console.log(200, plotid+'_selectx', quantityx, quantityy);
-    
+
     toPlotlength = toPlot.length;
+
+    var data = {};
+    data.data = series;
+    data.title = (toPlotlength > 0) ? toPlot[0].title : "nd plot";
+    //data.options =
+    data.xlabel = quantityx
+    data.ylabel = quantityy
+
     //recently added outer for - may not be necessary
     for (var p = 0; p < toPlotlength; ++p){
         toPlot_p = toPlot[p];
         for (var s = 0; s < toPlot_p.series.length; ++s) {
             // For TripleAxis plottables, this loop will only run once...  7/17/2012
-            // Prototype.js's Enumerable.zip() is handy here
             var datax = toPlot_p.series[s].data[quantityx],
                 datay = toPlot_p.series[s].data[quantityy];
-            if (debug) console.log(300, toPlot_p.series[s], quantityx, quantityy, datax, datay);
+
             // I know, I know: "series" is both singular and plural... go blame the English language, not me!
+            // Prototype.js's Enumerable.zip() is handy here
             //var serie = $A(datax.values).zip(datay.values, datax.errors, datay.errors, function(a) { return [a[0], a[1], { xerr: a[2], yerr: a[3] }]; });
+
             var serie = new Array();
             if (datax.values) {
                 for (var i = 0; i < datax.values.length; i++) {
@@ -917,24 +961,24 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
                 }
             }
 
+            series.push(serie);
+            /*
             if (checkboxchange) {
                 series.push(serie);
             } else {
                 if (!series[s] || !series[s].hasOwnProperty('data')) {
-                series[s] = serie;
+                    series[s] = serie;
                 } else {
-                // adds background series (ie plotting multiple files)
-                series[s].data = serie;
+                    // adds background series (ie plotting multiple files)
+                    series[s].data = serie;
                 }
             }
-
+            */
             
-            //options.series[s] = { renderer: jQuery.jqplot.errorbarRenderer, rendererOptions: { errorBar: true, /*bodyWidth: 1, wickColor: 'red', openColor: 'yellow', closeColor: 'blue'*/ } };
+            //options.series[s] = { renderer: jQuery.jqplot.errorbarRenderer, rendererOptions: { errorBar: true, bodyWidth: 1, wickColor: 'red', openColor: 'yellow', closeColor: 'blue' } };
         }
     }
-    console.log('series: ', series);
-    if (debug) console.log('series', series, 'options', options);
-    
+    /*
     if (stage == 1) {
         var empty = (series.length == 0);
         if (empty) {
@@ -948,11 +992,24 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
         }
         
     } else {
+        console.log(plot.series);
         plot.series.data = series;
+        opts = {'resetAxes': true}
         plot.options = options;
+        plot.replot(opts);
+        //plot.resetZoom();
+        //plot.redraw();
         plot.resetAxesScale();
-        plot.replot();
     }
+
+    if (checkboxchange)
+        checkboxchange = !checkboxchange;
+    return plot;
+    */
+
+    console.log('data: ' + data);
+    var transform = 'none'; //For now, only setting to 'log' will set it. Defaults to linear
+    plot = renderndplot(data, transform, target_id)
     return plot;
 }
 
