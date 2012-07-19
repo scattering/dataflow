@@ -10,9 +10,10 @@ if len(Facility.objects.all()) == 0:
         Facility.objects.create(Name='NCNR')
         Facility.objects.create(Name='HFIR')
         Facility.objects.create(Name='Chalk River')
-if len(Template.objects.all()) == 0:
-        temp = Template.objects.create(Title='testTemplate')
-        temp.metadata.add(User.objects.get(id=1))
+
+#if len(Template.objects.all()) == 0:
+#        temp = Template.objects.create(Title='testTemplate')
+#        temp.metadata.add(User.objects.get(id=1))
 
 #to add a new model (instrument, facility, or template) manually, you can run:    
         # python manage.py shell

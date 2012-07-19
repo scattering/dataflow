@@ -579,6 +579,31 @@
 			});		    
 		},
 		
+		runAndSave: function(reductionInstance, clickedOn, dataname) {
+		    if (!dataname) {
+                function process_result(btn, text) {
+                    if (btn == 'ok' && text != ""){
+                        editor.saveData(reductionInstance, clickedOn, text);
+                    } 
+                }
+                
+                Ext.Msg.prompt('Name', 'Data name:', process_result, {}, false );
+                return // getCSV ends here... will be called again by process_result if button "ok" pressed
+            }
+		    var toReduce = this.generateReductionRecipe(reductionInstance, clickedOn);
+		    var tempSavedWiring = {
+				name: dataname,
+				modules: toReduce.modules,
+				properties: toReduce.properties,
+				wires: toReduce.wires,
+				language: toReduce.languageName
+			};
+		    var data = { toReduce: toReduce,
+		                 new_wiring:  tempSavedWiring,
+		                 dataname: dataname }
+		    this.adapter.saveData(data);		    
+		},
+		
 		/**
 		 * @method onNew
 		 */

@@ -314,9 +314,9 @@
                         cfg.ymin.value = yminctl.textbox.value;
                         cfg.ymax.value = ymaxctl.textbox.value;
                         
-                        if (!('tracksConfigs' in container)) container.tracksConfigs = {};
-                        if (!(reductionInstance in container.tracksConfigs)) container.tracksConfigs[reductionInstance] = {};
-                        jQuery.extend(container.tracksConfigs[reductionInstance], cfg);
+                        if (!('groups' in container)) container.groups = {};
+                        if (!(reductionInstance in container.groups)) container.groups[reductionInstance] = {};
+                        jQuery.extend(container.groups[reductionInstance], cfg);
                     };
                     submitbutton.onclick = submitChanges;
                     

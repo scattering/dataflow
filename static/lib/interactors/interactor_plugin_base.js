@@ -18,6 +18,34 @@
         };
     };
     
+    var touchToMouse = function(event) {
+        //if (event.touches.length > 1) return; //allow default multi-touch gestures to work
+        var touch = event.changedTouches[0];
+        touch.data = event.data;
+        var type = "";
+        
+        switch (event.type) {
+        case "touchstart": 
+            type = "mousedown"; break;
+        case "touchmove":  
+            type="mousemove";   break;
+        case "touchend":   
+            type="mouseup";     break;
+        default: 
+            return;
+        }
+        
+        // https://developer.mozilla.org/en/DOM/event.initMouseEvent for API
+        var simulatedEvent = document.createEvent("MouseEvent");
+        simulatedEvent.initMouseEvent(type, true, true, window, 1, 
+                touch.screenX, touch.screenY, 
+                touch.clientX, touch.clientY, false, 
+                false, false, false, 0, null);
+        
+        touch.target.dispatchEvent(simulatedEvent);
+        event.preventDefault();
+    };
+    
     $.jqplot.InteractorPlugin = function() {
         //$.jqplot.Interactor.call(this);
     };
@@ -33,6 +61,7 @@
             this.state = null;
             this.plot = null;
             this.translatable = true;
+            this.notMaster = true;
 
             this.grobs = [];
             this.mousedown = false;
@@ -60,6 +89,18 @@
             for (var i=0; i<this.grobs.length; i++) {
                 var g = this.grobs[i];
                 if (g.reset) g.reset();
+            }
+        },
+        
+        redraw: function() {
+            // unlike the non-plugin interactors, each plugin interactor has
+            // its own context and canvas, so clear them at each redraw:
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            if (this.show) {
+                for (var i = 0; i < this.grobs.length; i ++) {
+                    var grob = this.grobs[i];
+                    grob.render(this.context);
+                }
             }
         },
         
@@ -114,7 +155,6 @@
             this.state = null;
             this.plot = null;
             this.translatable = true;
-            
 
             this.grobs = [];
             this.mousedown = false;
@@ -126,6 +166,7 @@
             
             this.rc = 1;//Math.random();
             $.extend(true, this, options);
+            this.notMaster = false;
             this.interactors = []; // number of interactors
             this.generate_ticks = generate_ticks;
         },
@@ -231,23 +272,26 @@
             
             var pos = this.getMouse(e);
             var sel_grob = null;
+	    var sel_grob_num = null;
+	    //console.log(pos);
             for (var i = 0; i < this.grobs.length; i ++) {
                 var g = this.grobs[i];
                 var inside = g.isInside(pos);
                 
                 if (inside) {
                     //this.prevpos = pos;
-                    sel_grob = i;
+                    sel_grob_num = i;
+		    sel_grob = g;
                 }
             }
-            //console.log("double-clicked:", sel_grob);
-            if (sel_grob == null) {
+            //console.log("double-clicked:", sel_grob.parent);
+            if (sel_grob_num == null) {
                 // then we're double-clicking outside all the interactors
                 this.zoomMax();
             } else {
-                g.parent.reset();
-                this.redraw();
-                this.redraw();
+	    	sel_grob.parent.onDoubleClick(sel_grob, pos);
+                //this.redraw();
+                //this.redraw();
             }
                 
             return false;
@@ -261,6 +305,7 @@
         },
         
         redraw: function() {
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
             this.grobs = [];
             for (var i in this.interactors) {
                 var I = this.interactors[i];
@@ -322,16 +367,20 @@
         },
         
         zoomMax: function() {
-            // zoom to the limits of the data, with good tick locations
-            var xmin = this.plot.series[0]._xaxis._dataBounds.min;
-            var xmax = this.plot.series[0]._xaxis._dataBounds.max;
-            var ymin = this.plot.series[0]._yaxis._dataBounds.min;
-            var ymax = this.plot.series[0]._yaxis._dataBounds.max;
-            var xtransf = this.plot.series[0]._xaxis.transform || 'lin';
-            var ytransf = this.plot.series[0]._yaxis.transform || 'lin';
-            this.plot.series[0]._xaxis.ticks = generate_ticks({min:xmin, max:xmax}, xtransf);
-            this.plot.series[0]._yaxis.ticks = generate_ticks({min:ymin, max:ymax}, ytransf);
-            this.plot.replot();
+	    var xdb = this.plot.series[0]._xaxis._dataBounds;
+	    var ydb = this.plot.series[0]._yaxis._dataBounds;
+	    if ((xdb.min != null) && (xdb.max != null) && (ydb.min != null) && (ydb.max != null)) {
+                // zoom to the limits of the data, with good tick locations
+                var xmin = xdb.min;
+                var xmax = xdb.max;
+                var ymin = ydb.min;
+                var ymax = ydb.max;
+                var xtransf = this.plot.series[0]._xaxis.transform || 'lin';
+                var ytransf = this.plot.series[0]._yaxis.transform || 'lin';
+                this.plot.series[0]._xaxis.ticks = generate_ticks({min:xmin, max:xmax}, xtransf);
+                this.plot.series[0]._yaxis.ticks = generate_ticks({min:ymin, max:ymax}, ytransf);
+                this.plot.replot();
+            }
         },
         
         zoomPlot: function(dzoom, centerpos) {
@@ -398,6 +447,12 @@
             ec.ondblclick = bind(master, master.onDoubleClick);
             ec.onselectstart = function() { return false; };
             
+            ec.ontouchstart = touchToMouse;
+            ec.ontouchmove = touchToMouse;
+            ec.ontouchend = touchToMouse;
+            
+            /*
+            
             if (!ec._touchstartregistered && ec.addEventListener) {
                 ec.addEventListener('touchstart', function(event) {
                     ec.onmousedown(event.touches[0]);
@@ -418,6 +473,8 @@
                 }, false);
                 ec._touchendregistered = true;
             }
+            
+            */
             
             if (!ec._scrollregistered && ec.addEventListener) {
                 ec.addEventListener('DOMMouseScroll', function(event) {
@@ -544,11 +601,11 @@
         
         updateListeners: function() {
             for (var i in this.listeners) {
-                this.listeners[i].update(this.coords);
+                this.listeners[i].update(this.coords, [this]);
             }
         },
         
-        putCoords: function(coords) {
+        putCoords: function(coords, setPos) {
             var coords = coords || this.coords;
             var pos = {};
             if ('x' in coords) {
@@ -559,6 +616,7 @@
                 pos.y = this.parent.plot.axes.yaxis.u2p(coords.y);
                 pos.y -= this.parent.canvas.offsetTop;
             }
+	    if (setPos) { this.pos = pos; } 
             return pos     
         },
         

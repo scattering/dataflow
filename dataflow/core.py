@@ -273,13 +273,14 @@ implement an interface that allows data sets to be listed and
 retrieved for a particular instrument/experiment.
 """
     def __init__(self, id, name=None, menu=None,
-                 datatypes=None, requires=None, archive=None):
+                 datatypes=None, requires=None, archive=None, loaders=None):
         self.id = id
         self.name = name
         self.menu = menu
         self.datatypes = datatypes
         self.requires = requires
         self.archive = archive
+        self.loaders = loaders
 
         self.modules = []
         for _, m in menu:
