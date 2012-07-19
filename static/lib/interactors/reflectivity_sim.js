@@ -37,7 +37,7 @@
         this.vline.initialize(this, this.p, this.width);
         this.grobs.push(this.vline);
         this.grobs.push(this.p);
-        /*this.p.render = function(ctx) {
+        this.p.render = function(ctx) {
             var height = ctx.canvas.height;
             var width = ctx.canvas.width;
             ctx.fillStyle = this.color;
@@ -51,9 +51,9 @@
             ctx.closePath();
             ctx.stroke();
             ctx.fill(); 
-        }*/
+        }
         this.p.move = function(dpos) {
-            //this.dpos.y = 0;
+            this.dpos.y = 0;
             this.translateBy(dpos);
             this.parent.redraw();
             //this.parent.translateBy(dpos);
