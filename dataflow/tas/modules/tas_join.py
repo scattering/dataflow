@@ -40,13 +40,22 @@ def join_module(id=None, datatype=None, action=None,
     
     fields = {
         'xaxis': {
-            "type": "list",
+            "type": "string",
+            "label": "X axis for 2D plotting",
+            "name": "xaxis",
+            "value": '',
+        }, 
+        '''
+        'xaxis': {
+            "type": "List",
             "label": "X axis for 2D plotting",
             "name": "xaxis",
             "value": '',
             "choices": ['focus_pg', 'elevation', 'ei', 'translation', 'focus_cu', 'filter_translation',
                         'filter_tilt', 'filter_rotation', 'ei_cancel', 'sample_guide_field_rotation', ], 
+            #TODO get the choices from metadata!!!!!!!!!!
         }, 
+        '''
         'yaxis': {
             "type": "string",
             "label": "Y axis for 2D plotting",
