@@ -20,6 +20,8 @@ class Userprofile(models.Model):
 class File(models.Model):
     #permissions = models.ForeignKey(Permission, null=True) # or should this be a string of permission names
     name = models.CharField(max_length=160, primary_key=True) # sha1 hash of file contents
+    template_representation = models.TextField() # template that created the result
+    datatype = models.CharField(max_length=300) # string representing the datatype - needed to use correct loader
     friendly_name = models.CharField(max_length=60)
     location = models.CharField(max_length=300) #location of file on disk
     metadata = models.ManyToManyField('Metadata', null=True)
@@ -54,7 +56,7 @@ class Project(models.Model):
 class Experiment(models.Model):
     ProposalNum = models.CharField(max_length=100) # IMS proposal/request number
     Files = models.ManyToManyField('File', null=True)
-    Results = models.ManyToManyField('Result', null=True)
+    #Results = models.ManyToManyField('Result', null=True)
     facility = models.ForeignKey('Facility', null=True)
     project = models.ForeignKey('Project', null=True)
     users = models.ManyToManyField(User)
@@ -80,17 +82,6 @@ class Facility(models.Model):
     instruments = models.ManyToManyField('Instrument', null=True)
     def __unicode__(self):
         return self.Name
-
-class Result(models.Model):
-    name = models.CharField(max_length=160, primary_key=True) # sha1 hash of template
-    template_representation = models.TextField() # template that created the result
-    Title = models.CharField(max_length=50)
-    location = models.CharField(max_length=300) #location of file on disk
-    metadata = models.ManyToManyField('Metadata', null=True)
-    def __unicode__(self):
-        return self.Title
-
-
 
 
 
