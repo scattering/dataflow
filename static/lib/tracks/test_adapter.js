@@ -44,13 +44,18 @@ test_adapter = {
 		
 		getCSV: {
 		    method: 'POST',
-		    url: 'getCSV/',
+		    url: 'getCSV/'
 		},
 		
 		filesExist: {
 		    method: 'POST', 
-		    url: '/filesExist/',
+		    url: '/filesExist/'
 		},
+		
+		saveData: {
+		    method: 'POST', 
+		    url: 'saveData/'
+		}
 		
 	},
 	
@@ -81,6 +86,16 @@ test_adapter = {
 		var download_form = document.getElementById('getCSVForm');
 		download_form.data.value = YAHOO.lang.JSON.stringify(val);
 		download_form.submit()
+	},
+	
+	saveData: function(val, callbacks) {
+	    var wiring = {};
+	    var callbacks = callbacks || { 
+	        success: function(o) { console.log('success', o ); },
+	        failure: function(o) { console.log('failure', o ); },
+	        };
+	    YAHOO.lang.augmentObject(wiring, val);
+	    this._sendRequest("saveData", wiring, callbacks);
 	},
 	
 	getBinaryData: function(unfilled_data, onFinish) {

@@ -1,28 +1,33 @@
+<!DOCTYPE html>
 <html>
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-		<title>Plot from Dataflow</title>
-		<!-- JQPLOT -->
-		<script type="text/javascript" src="/static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
-		<script type="text/javascript" src="/static/lib/plotting/jqplot/jquery.jqplot.js"></script>
-		<script type="text/javascript" src="/static/lib/plotting/jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
-		<script type="text/javascript" src="/static/lib/plotting/jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
-		<script type="text/javascript" src="/static/lib/plotting/jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
-		<script type="text/javascript" src="/static/lib/plotting/jqplot/plugins/jqplot.errorbarRenderer.js"></script>
-		<script type="text/javascript" src="/static/lib/plotting/jqplot/plugins/jqplot.pcolorRenderer.js"></script>
-		<script type="text/javascript" src="/static/lib/plotting/jqplot/plugins/jqplot.cursor.js"></script>
-		<script type="text/javascript" src="/static/lib/plotting/palettes.js"></script>
-		<script type="text/javascript" src="/static/lib/plotting/plotting_api.js"></script>
-		<script type="text/javascript" src="/static/lib/plotting/heatmapRenderer.js"></script>
-		<script type="text/javascript" src="/static/lib/plotting/colorbarRenderer.js"></script>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+        <title>Plot from Dataflow</title>
+        
+        <!-- JQPLOT -->
+        <script type="text/javascript" src="jqplot/jquery-1.5.1.js"></script>
+        <script type="text/javascript" src="jqplot/jquery.jqplot.js"></script>
+		<script type="text/javascript" src="jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
+		<script type="text/javascript" src="jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+		<script type="text/javascript" src="jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
+		<script type="text/javascript" src="jqplot/plugins/jqplot.errorbarRenderer.js"></script>
+		<script type="text/javascript" src="jqplot/plugins/jqplot.pcolorRenderer.js"></script>
+		<script type="text/javascript" src="jqplot/plugins/jqplot.cursor.js"></script>
+		<script type="text/javascript" src="palettes.js"></script>
+		<script type="text/javascript" src="plotting_api.js"></script>
+		<script type="text/javascript" src="heatmapRenderer.js"></script>
+		<script type="text/javascript" src="colorbarRenderer.js"></script>
+		
 		<!-- Interactors -->
-        <script type="text/javascript" src="/static/lib/interactors/interactors_nonprototype.js"></script>
-        <script type="text/javascript" src="/static/lib/interactors/interactor_plugin_base.js"></script>
-        <script type="text/javascript" src="/static/lib/interactors/rectangle_interactor_plugin.js"></script>
-
-		<!-- Uniq Array -->
-		<script type="text/javascript" src="/static/lib/UniqArray.js"></script>
-		<script type="text/javascript" src="/static/lib/js-object-length.js"></script>
+		<script type="text/javascript" src="../interactors/interactors_nonprototype.js"></script>
+		<script type="text/javascript" src="../interactors/interactor_plugin_base.js"></script>
+		<script type="text/javascript" src="../interactors/rectangle_interactor_plugin.js"></script>
+		<script type="text/javascript" src="../interactors/linear_interactor_plugin.js"></script>
+		<script type="text/javascript" src="../interactors/reflectivity_sim.js"></script>
+        
+        <!-- Uniq Array -->
+		<script type="text/javascript" src="../UniqArray.js"></script>
+		<script type="text/javascript" src="../js-object-length.js"></script>
 		
 		<!-- <script type="text/javascript" src="test_data2.js"></script> -->
 		<script type="text/javascript">
@@ -44,7 +49,7 @@
                 return cookieValue;
             }
             
-		    getBinaryData = function(unfilled_data, onFinish) {
+            getBinaryData = function(unfilled_data, onFinish) {
                 var oReq = new XMLHttpRequest(); 
                 //oReq.open("GET", "/getBinaryData/"+val, true); 
                 oReq.open("POST", "/getBinaryData/", true);   
@@ -76,39 +81,29 @@
                             unfilled_data.z = z;
                             console.log('binary received and processed', byteArray.length); 
                             onFinish();
-                            
                         }  
                     }
                 }
                 console.log('getting binary...', unfilled_data.binary_fp);
                 oReq.send("binary_fp="+unfilled_data.binary_fp);
             }
-		</script>
-		<script type="text/javascript">
-		    var plot, colorbar, yslice, xslice;
+        </script>
+        <script type="text/javascript">
+		    var plot;
 
             fit_plots = function() {
 		        var width = document.body.offsetWidth;
 		        var height = document.body.offsetHeight;
 		        document.getElementById('plot').style.width = ((width-100) * 0.59).toString() + "px";
-		        document.getElementById('colorbar').style.width = "100px";
-		        document.getElementById('yslice').style.width = ((width-100) * 0.39).toString() + "px";
-		        document.getElementById('xslice').style.width = ((width-100) * 0.59).toString() + "px";
 		        
 		        var plotheight = ((height-50) * 0.49).toString() + "px";
 		        document.getElementById('upper').style.height = plotheight;
 		        document.getElementById('lower').style.height = plotheight;
 		        document.getElementById('plot').style.height = plotheight;
-		        document.getElementById('colorbar').style.height = plotheight;
-		        document.getElementById('yslice').style.height = plotheight;
-		        document.getElementById('xslice').style.height = plotheight;
 		    };
 		    
 		    replot_all = function() {
   		        plot.replot(); 
-  		        colorbar.replot(); 
-  		        yslice.replot(); 
-  		        xslice.replot();
   		    };
   		    
   		    parseConfig = function(cfg) {
@@ -117,8 +112,8 @@
 		       
 		    window.onload = function() {
 		        fit_plots();
-		        console.log(window);
-		        if (window.opener.toPlot) {
+		        update_plot(); // delete later
+		        /*if (toPlot) {
 		            
 		            var dims = toPlot[0].dims;
 		            // configuration from tracksConfigs supersedes the default from getConfig()
@@ -137,14 +132,14 @@
 		            
 		        } else {
 		            alert('no data to plot!');
-		        }
+		        }*/
 		        //update_plot(testdata);
 		        
 		    }
 		    
 		    window.onresize = function() { fit_plots(); replot_all(); };
 		    
-		    update_selectors = function(toPlots) {
+		    /*update_selectors = function(toPlots) {
 		        document.getElementById('plot_selectnum').innerHTML = "";
                 for (var i=0; i<toPlots.length; i++) {
                     var zlabel = toPlots[i].zlabel || '';
@@ -167,10 +162,10 @@
                 
                 jQuery('#plot_selectnum').change({}, onchange);
                 jQuery('#plot_selectz').change({}, onchange);
-		    }
-		    update_plot = function(toPlot, transform) {
+		    }*/
+		    update_plot = function(/*toPlot,*/ transform) {
 		        debug = false;
-		        data = toPlot;
+		        /*data = toPlot;
 		        if (data.binary_fp && data.z_binary_array == undefined) {
 		            if (plot && plot.series && plot.series[0]) { 
 		                plot.series[0].show=false; 
@@ -178,20 +173,24 @@
 		            }
 		            getBinaryData(data, function() { update_plot(data) })
 		            return
-		        } 
+		        } */
 		        if (plot == null) {
 		            // then initialize all the plot objects
-		            plot = $.jqplot('plot', [[0,0],[1,1]], {
+		            plot = $.jqplot('plot', [[[0,0],[1,1],[2,2],[3,5],[4,9],[5,2]]], {
 		                //cursor: {show: true, zoom: false},
 		                sortData: false,
-		                interactors: [{ type:'Rectangle', 
-		                                name:'rectangle',
-		                                showrect: false,
-		                                xmin: Number(cfg.xmin.value), 
-		                                ymin: Number(cfg.ymin.value),
-		                                xmax: Number(cfg.xmax.value), 
-		                                ymax: Number(cfg.ymax.value)}],
-		                renderer: $.jqplot.heatmapRender,
+		                interactors: [{ type:'Line', 
+		                                name:'line',
+		                                xmin: 1.0,
+		                                ymin: 1.0,
+		                                xmax: 4.0,
+		                                ymax: 4.0},
+		                              { type:'VerticalLine',
+		                                name:'verticalline'},
+		                              { type:'VerticalLine',
+		                                name:'verticalline2',
+		                                x0: 3.0}],
+		                //renderer: $.jqplot.heatmapRender,
 		                series: [ {shadow: false, padding: 0} ],
                         grid: {shadow: false},
                         axesDefaults: {
@@ -200,95 +199,62 @@
                             tickOptions: {formatString: "%.3g", _styles: {right: 0}}
                         },
                         axes:{ 
-                            xaxis:{ label: toPlot.xlabel },
-                            yaxis:{ label: toPlot.ylabel }
+                            xaxis:{ label: /*toPlot.xlabel*/ 'x-axis' },
+                            yaxis:{ label: /*toPlot.ylabel*/ 'y-axis' }
                         },
 		                seriesDefaults:{
 		                    shadow: false,
-                            renderer:$.jqplot.heatmapRenderer,
+                            /*renderer:$.jqplot.heatmapRenderer,
                             rendererOptions: {
                                 transform: toPlot.transform || 'lin',
-                                dims: data.dims,
+                                dims: { xmin: 0.0,
+                                        ymin: 0.0,
+                                        xmax: 5.0,
+                                        ymax: 5.0},
+                                //dims: data.dims,
                                 //display_dims: { xmin: data.dims.xmin-1,
                                 //                ymin: data.dims.ymin-1,
                                 //                ymax: data.dims.ymax+1,
                                 //                xmax: data.dims.xmax+1}
-                            },
+                            },*/
                         }
 		                
 		            });
-		        
-		        
-		            colorbar = $.jqplot('colorbar', data.z, {
-		                //cursor: {show: true, zoom: true},
-		                paddingLeft: 0,
-		                sortData: false,
-		                interactors: [{ type:'standard', name: 'standard'}],
-		                series: [ {shadow: false, padding: 0} ],
-                        grid: {shadow: false},
-		                seriesDefaults:{
-		                    yaxis: 'y2axis',
-		                    shadow: false,
-                            renderer:$.jqplot.colorbarRenderer,
-                            rendererOptions: { parent_plot: plot.series[0] }
-                        },
-                        axes:{ 
-                            xaxis:{ tickOptions: {show: false} },
-                            y2axis:{
-                                //label: 'Intensity',
-                                labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
-                                tickRenderer: $.jqplot.CanvasAxisTickRenderer,
-                                tickOptions: {
-                                    formatString: "%.3g",
-                                    _styles: {left: 5},
-                                }
-                            }
-                        }, 
-                    });
-		        
-		        
-		            yslice = $.jqplot('yslice', [[[1,1],[1,2],[0.5,3],[2,4]]], {
-		                cursor: {show: true, zoom: true}, 
-		                grid: {shadow: false}, 
-		                sortData: false, 
-		                series: [ {shadow: false, color: 'red', markerOptions: {shadow: false, size: 4}} ],
-		                axesDefaults: {
-		                    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
-                            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
-                            tickOptions: {formatString: "%.3g", _styles: {right: 10}}
-                        },
-                        axes: {xaxis: {label: 'sum along x'}}
-		            });
-		            xslice = $.jqplot('xslice', [[1,2,3,4]], {
-		                cursor: {show: true, zoom: true},
-		                grid: {shadow: false}, 
-		                sortData: false, 
-		                series: [ {shadow: false, color: 'blue', markerOptions: {shadow: false, size: 4}} ],
-		                axesDefaults: {
-		                    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
-                            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
-                            tickOptions: {formatString: "%.3g", _styles: {right: 0}}
-                        },
-                        axes: {yaxis: {label: 'sum along y'}}
-		            });
 		            
+		            var linePlugin = plot.plugins.interactors.line;
 		            
-		            var slicebox = plot.plugins.interactors.rectangle;
-		            var ymaxctl = new pointTextControl(slicebox.p1, 'y', 'y<sub>max</sub>', 5);
-                    ymaxctl.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
-                    document.getElementById('slicecontrols').appendChild(ymaxctl.div);
-		            var xminctl = new pointTextControl(slicebox.p1, 'x', 'x<sub>min</sub>', 5);
-		            xminctl.div.setAttribute('style', 'display: inline; text-align: center; width: 100%; padding: 5px 10px;');
-                    document.getElementById('slicecontrols').appendChild(xminctl.div);
-                    var xmaxctl = new pointTextControl(slicebox.p3, 'x', 'x<sub>max</sub>', 5);
-                    xmaxctl.div.setAttribute('style', 'display: inline; text-align: center; width: 100%; padding: 5px 10px;');
-                    document.getElementById('slicecontrols').appendChild(xmaxctl.div);
-                    var yminctl = new pointTextControl(slicebox.p3, 'y', 'y<sub>min</sub>', 5);
-                    yminctl.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
-                    document.getElementById('slicecontrols').appendChild(yminctl.div);
+		            var linex1 = new pointTextControl(linePlugin.p1, 'x', 'x<sub>P1</sub> ', 5);
+		            linex1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(linex1.div);
+		            var liney1 = new pointTextControl(linePlugin.p1, 'y', 'y<sub>P1</sub> ', 5);
+		            liney1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(liney1.div);
+		            var linex2 = new pointTextControl(linePlugin.p2, 'x', 'x<sub>P2</sub> ', 5);
+		            linex2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(linex2.div); 
+		            var liney2 = new pointTextControl(linePlugin.p2, 'y', 'y<sub>P2</sub> ', 5);
+		            liney2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(liney2.div);
+		            var lineslope = new slopeTextControl(linePlugin, linex1, liney1, linex2, liney2, 'slope ', 5);
+		            lineslope.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(lineslope.div);
+		            var lineinter = new interceptTextControl(linePlugin, liney1, liney2, 'y-intercept ', 5);
+		            lineinter.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(lineinter.div);
+		            
+		            var vertLine = plot.plugins.interactors.verticalline;
+		            var vert1 = new pointTextControl(vertLine.p, 'x', 'Start of Interval ', 5);
+		            vert1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(vert1.div);
+		            var vertLine2 = plot.plugins.interactors.verticalline2;
+		            var vert2 = new pointTextControl(vertLine2.p, 'x', 'End of Interval ', 5);
+		            vert2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(vert2.div);	            
+		            
                     var hr = document.createElement('div'); hr.innerHTML = "<hr>";
-                    document.getElementById('slicecontrols').appendChild(hr);
-                    var maxbutton = document.createElement('input');
+                    document.getElementById('footcontrols').appendChild(hr);
+                    
+                    /*var maxbutton = document.createElement('input');
                     maxbutton.setAttribute('type', 'button');
                     maxbutton.setAttribute('value', 'Maximize to data');
                     var maximize = function () {
@@ -301,11 +267,10 @@
                         yminctl.update({y: plot.series[0].dims.ymin});
                         yminctl.update_external();
                     }
-                    maxbutton.onclick = maximize;
+                    maxbutton.onclick = maximize;                  
+                    document.getElementById('slicecontrols').appendChild(maxbutton);*/
                     
-                    document.getElementById('slicecontrols').appendChild(maxbutton);
-                    
-                    var submitbutton = document.createElement('input');
+                    /*var submitbutton = document.createElement('input');
                     submitbutton.setAttribute('type', 'button');
                     submitbutton.setAttribute('value', 'Submit Changes');
                     var submitChanges = function() {
@@ -318,12 +283,9 @@
                         if (!(reductionInstance in container.tracksConfigs)) container.tracksConfigs[reductionInstance] = {};
                         jQuery.extend(container.tracksConfigs[reductionInstance], cfg);
                     };
-                    submitbutton.onclick = submitChanges;
-                    
-                    document.getElementById('slicecontrols').appendChild(submitbutton);
-                    
-                    
-                    
+                    submitbutton.onclick = submitChanges;                    
+                    document.getElementById('footcontrols').appendChild(submitbutton);  
+                                       
                     slice_listener = function(series) {
 		                slicebox.p1.listeners.push(this);
 		                slicebox.p3.listeners.push(this);
@@ -347,14 +309,6 @@
 		                    for (var r=j_min; r<=j_max-1; r++) {
 		                        ydata.push([p0.cumsum_y[i_max][r] - p0.cumsum_y[i_min][r], p0.dims.ymin + r*p0.dims.dy]);
 		                    }
-		                    xslice.series[0].data = xdata;
-		                    xslice.resetAxesScale();
-		                    xslice.grid._offsets.left = xslice.axes.yaxis._elem.width();
-		                    xslice.replot();
-		                    yslice.series[0].data = ydata;
-		                    yslice.resetAxesScale();
-		                    yslice.grid._offsets.left = yslice.axes.yaxis._elem.width();
-		                    yslice.replot();
 		                };
 		                return this;  
 		            };
@@ -362,7 +316,7 @@
 		            plot.series[0].generate_cumsums()
 		            //generate_cumsums(plot.series[0]);
 		            sl.update();
-		            //maximize();
+		            //maximize();*/
 		        }
 		        else {
 		            // no need to recreate everything... just update the data.
@@ -372,7 +326,6 @@
                     plot.series[0]._xaxis.labelOptions.label = toPlot.xlabel;
                     plot.series[0]._yaxis.labelOptions.label = toPlot.ylabel;
                     plot.plugins._interactor.zoomMax();
-                    colorbar.plugins._interactor.zoomMax();
                     sl = slice_listener(plot.series[0]);
 		            plot.series[0].generate_cumsums();
 		            //generate_cumsums(plot.series[0]);
@@ -387,6 +340,78 @@
                     colorbar.plugins._interactor.zoomMax();
                     */
 		        }
+		    }
+		    slopeTextControl = function(linePlugin, x1, y1, x2, y2, label, precision) {
+		        var precision = precision || 3;
+		        this.precision = precision;
+		        this.slope = linePlugin.slope;
+		        var textbox = document.createElement('input');
+		        textbox.setAttribute('type', 'text');
+		        textbox.setAttribute('style', 'width:90px');
+		        var input_label = document.createElement('label');
+		        var div = document.createElement('div');
+		        div.innerHTML = label;
+		        div.appendChild(textbox);
+		        this.div = div;
+		        this.div.setAttribute('id', 'slopeTextControl_' + label);
+		        this.div.setAttribute('style', 'display: inline; padding: 5px 10px;');
+		        this.textbox = textbox;
+		        this.update = function(newSlope) {  // slope should just be a number
+		            textbox.value = newSlope.toPrecision(precision);
+		        }
+		        var me = this;
+		        this.update_external = function() {
+		            var newSlope = parseFloat(textbox.value);
+		            linePlugin.slope = newSlope;
+		            var intercept = linePlugin.intercept;
+		            newy1 = (newSlope * parseFloat(x1.textbox.value)) + intercept;
+		            newy2 = (newSlope * parseFloat(x2.textbox.value)) + intercept;
+		            
+		            y1.textbox.value = newy1.toPrecision(precision);
+		            y2.textbox.value = newy2.toPrecision(precision);
+		            y1.update_external();
+		            y2.update_external();
+		            
+		            textbox.value = (linePlugin.slope).toPrecision(precision); 
+		        }
+		        textbox.onchange = this.update_external;
+		        this.update(linePlugin.slope);
+		        return this;
+		    }
+		    interceptTextControl = function(linePlugin, y1, y2, label, precision) {
+		        var precision = precision || 3;
+		        this.precision = precision;
+		        this.intercept = linePlugin.intercept;
+		        var textbox = document.createElement('input');
+		        textbox.setAttribute('type', 'text');
+		        textbox.setAttribute('style', 'width:90px');
+		        var input_label = document.createElement('label');
+		        var div = document.createElement('div');
+		        div.innerHTML = label;
+		        div.appendChild(textbox);
+		        this.div = div;
+		        this.div.setAttribute('id', 'intTextControl_' + label);
+		        this.div.setAttribute('style', 'display: inline; padding: 5px 10px;');
+		        this.textbox = textbox;
+		        this.update = function(newIntercept) {
+		            textbox.value = newIntercept.toPrecision(precision);
+		        }
+		        var me = this;
+		        this.update_external = function() {
+		            var newInt = parseFloat(textbox.value);
+		            dInt = (newInt - linePlugin.intercept);
+		            linePlugin.intercept = newInt; 
+		            
+		            y1.textbox.value = (Number(y1.textbox.value) + dInt).toPrecision(precision);
+		            y2.textbox.value = (Number(y2.textbox.value) + dInt).toPrecision(precision);
+		            y1.update_external();
+		            y2.update_external();
+		           
+		            textbox.value = (linePlugin.intercept).toPrecision(precision);
+		        }
+		        textbox.onchange = this.update_external;
+		        this.update(linePlugin.intercept);
+		        return this;
 		    }
 		    pointTextControl = function(p, coord, label, precision) {
                 // coord should be 'x' or 'y'
@@ -428,23 +453,20 @@
             }
             
         </script>
-	</head>
-	<body>
-	    <div id="upper" style="display: block; width: 100%; height: 352px;">
-	            <div id="plot" style="display: inline-block; width: 500px; height: 350px; padding: 0; margin:0;"></div>
-	            <div id="colorbar" style="display: inline-block; width: 99px; height: 350px; padding: 0; margin:0;"></div>
-	        <div id="yslice" style="display: inline-block; width: 399px; height: 350px; padding: 0; margin:0;"></div>
+    </head>
+    <body>
+        <div id="upper" style="display: block; width: 100%; height: 352px;">
+	        <div id="plot" style="display: inline-block; width: 500px; height: 350px; padding: 0; margin:0;"></div>
 	    </div>
-	    <div id="controls" style="display: block; width: 100%;">
+	    <!--<div id="controls" style="display: block; width: 100%;">
 	        <select id="plot_selectz">
 	            <option value='lin'>lin</option>
 	            <option value='log'>log</option>
 	        </select>
 	        <select id="plot_selectnum"></select>
-	    </div>
+	    </div>-->
 	    <div id="lower" style="display: block; width: 100%; height: 350px;">
-	        <div id="xslice"   style="display: inline-block; width: 59%;"></div>
-	        <div id="slicecontrols" style="display: inline-block; width: 39%; text-align: center;">Slice Region:<hr></div>
-	    </div>
-	</body>
+	        <div id="footcontrols" style="display: inline-block; width: 39%; text-align: center;">Footprint Control Region:<hr></div>
+	    </div>	    
+    </body>
 </html>
