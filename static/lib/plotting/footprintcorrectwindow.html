@@ -186,7 +186,8 @@
 		                                xmax: 4.0,
 		                                ymax: 4.0},
 		                              { type:'VerticalLine',
-		                                name:'verticalline'},
+		                                name:'verticalline',
+		                                x0: 0.0},
 		                              { type:'VerticalLine',
 		                                name:'verticalline2',
 		                                x0: 3.0}],
@@ -341,6 +342,7 @@
                     */
 		        }
 		    }
+		    
 		    slopeTextControl = function(linePlugin, x1, y1, x2, y2, label, precision) {
 		        var precision = precision || 3;
 		        this.precision = precision;
@@ -356,8 +358,14 @@
 		        this.div.setAttribute('id', 'slopeTextControl_' + label);
 		        this.div.setAttribute('style', 'display: inline; padding: 5px 10px;');
 		        this.textbox = textbox;
-		        this.update = function(newSlope) {  // slope should just be a number
-		            textbox.value = newSlope.toPrecision(precision);
+		        this.update = function(pos) {
+		            var p1 = linePlugin.p1;
+		            var p2 = linePlugin.p2;
+		            var rise = p2.getCoords()['y'] - p1.getCoords()['y'];
+		            var run = p2.getCoords()['x'] - p1.getCoords()['x'];
+		            var slope = rise / run;
+		            linePlugin.slope = slope;
+		            textbox.value = (linePlugin.slope).toPrecision(precision);
 		        }
 		        var me = this;
 		        this.update_external = function() {
@@ -375,7 +383,14 @@
 		            textbox.value = (linePlugin.slope).toPrecision(precision); 
 		        }
 		        textbox.onchange = this.update_external;
-		        this.update(linePlugin.slope);
+		        
+		        var p1 = linePlugin.p1;
+		        var p2 = linePlugin.p2;
+		        p1.listeners.push(this);
+		        p2.listeners.push(this);
+		        var rise = p2.getCoords()['y'] - p1.getCoords()['y'];
+		        var run = p2.getCoords()['x'] - p1.getCoords()['x'];
+		        this.update(rise / run);
 		        return this;
 		    }
 		    interceptTextControl = function(linePlugin, y1, y2, label, precision) {
@@ -393,8 +408,15 @@
 		        this.div.setAttribute('id', 'intTextControl_' + label);
 		        this.div.setAttribute('style', 'display: inline; padding: 5px 10px;');
 		        this.textbox = textbox;
-		        this.update = function(newIntercept) {
-		            textbox.value = newIntercept.toPrecision(precision);
+		        this.update = function(pos) {
+		            var p1 = linePlugin.p1;
+		            var p2 = linePlugin.p2;
+		            var rise = p2.getCoords()['y'] - p1.getCoords()['y'];
+		            var run = p2.getCoords()['x'] - p1.getCoords()['x'];	            
+		            var slope = rise / run;
+		            var newIntercept = (p1.getCoords()['y'] - (slope * p1.getCoords()['x']));
+		            linePlugin.intercept = newIntercept;
+		            textbox.value = (linePlugin.intercept).toPrecision(precision);
 		        }
 		        var me = this;
 		        this.update_external = function() {
@@ -410,7 +432,15 @@
 		            textbox.value = (linePlugin.intercept).toPrecision(precision);
 		        }
 		        textbox.onchange = this.update_external;
-		        this.update(linePlugin.intercept);
+		        
+		        var p1 = linePlugin.p1;
+		        var p2 = linePlugin.p2;
+		        p1.listeners.push(this);
+		        p2.listeners.push(this);
+		        var rise = p2.getCoords()['y'] - p1.getCoords()['y'];
+		        var run = p2.getCoords()['x'] - p1.getCoords()['x'];
+		        var slope = rise / run;
+		        this.update((p1.getCoords()['y'] - (slope * p1.getCoords()['x'])));
 		        return this;
 		    }
 		    pointTextControl = function(p, coord, label, precision) {
