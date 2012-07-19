@@ -602,8 +602,8 @@ def uploadFiles(request):
                 new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location, template_representation="", datatype="")
                 
             # extract's the instrument's metadata to put into the File model
-            instrument = call_appropriate_filereader(write_here, friendly_name=f.name, fileExt=fileExt)
-            add_metadata_to_file(new_file, file_sha1, instrument)
+            data_object = call_appropriate_filereader(write_here, friendly_name=f.name, fileExt=fileExt)
+            add_metadata_to_file(new_file, file_sha1, data_object)
             
             if experiment is not None:
                 experiment.Files.add(new_file)
@@ -790,8 +790,8 @@ def myProjects(request):
         #deleted, then he next one made would be 7 again.
     elif request.POST.has_key('new_project'):
         newproj = Project.objects.create(Title=request.POST['new_project'])
-        newproj.user.add(request.user)
-    project_list = Project.objects.filter(user=request.user)
+        newproj.users.add(request.user)
+    project_list = Project.objects.filter(users=request.user)
     paginator = Paginator(project_list, 10) #10 projects per pages
     page = request.GET.get('page')
     if page == None:

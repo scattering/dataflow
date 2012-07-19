@@ -38,14 +38,14 @@ class Metadata(models.Model):
 class Template(models.Model):
     Title = models.CharField(max_length=50)
     Representation = models.TextField() # can easily convert back and forth from strings to dicts with str(dict) and dict(str)
-    user = models.ManyToManyField(User)
+    user = models.ManyToManyField(User, null=True)
     #permissions = models.ForeignKey(Permission, null=True)
     def __unicode__(self):
         return self.Title
 
 class Project(models.Model):
     Title = models.CharField(max_length=50) 
-    user = models.ManyToManyField(User) 
+    users = models.ManyToManyField(User, related_name='users') 
     #permissions = models.ForeignKey(Permission, null=True)
     #experiments = models.ForeignKey('Experiment', null=True)
     templateInstances = models.ManyToManyField('Template', null=True) # are the templates here and  								          # under Instruments meant to be different
