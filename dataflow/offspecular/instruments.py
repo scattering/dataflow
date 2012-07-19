@@ -12,7 +12,7 @@ SERVER = 0
 module_imports = [
     #("dataflow.wireit", ["template_to_wireit_diagram", "instrument_to_wireit_language"]),
     ("dataflow", "config"),
-   
+    ("dataflow.ordered_dict", "OrderedDict"),
     ("dataflow.modules.load", "load_module"),
     #("dataflow.modules.load_saved", "load_saved_module"),
     ("dataflow.offspecular.modules.load_asterix", "load_asterix_module"),
@@ -125,7 +125,7 @@ def load_saved_action(results=[], intent='', **kwargs):
     Fileobj = File.objects.get(name=str(fh))
     fn = Fileobj.name
     fp = Fileobj.location
-    tf = tarfile.open(os.path.join(fp, fn), 'r')
+    tf = tarfile.open(os.path.join(fp, fn), 'r:gz')
     result_objs = [tf.extractfile(member) for member in tf.getmembers()]
     result = [FilterableMetaArray.loads(robj.read()) for robj in result_objs]
     return dict(output=result)
@@ -208,7 +208,7 @@ PolStates_field = {
 }
 
 load = load_module(id='ospec.load', datatype=OSPEC_DATA,
-                   version='1.0', action=load_action, fields={'auto_PolState': auto_PolState_field, 'PolStates': PolStates_field, 'autochain-loader':autochain_loader_field}, filterModule=LoadICPData)
+                   version='1.0', action=load_action, fields=OrderedDict({'files': {}, 'autochain-loader':autochain_loader_field, 'auto_PolState': auto_PolState_field, 'PolStates': PolStates_field}), filterModule=LoadICPData)
 
 #load_asterix = load_asterix_module(id='ospec.asterix.load', datatype=OSPEC_DATA,
 #                   version='1.0', action=load_asterix_action, filterModule=LoadAsterixRawHDF)

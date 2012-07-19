@@ -32,6 +32,7 @@ urlpatterns = patterns(REPO_ROOT + '.apps.tracks.views',
 		('^editor/listWirings/$', 'listWirings'),
 		('^editor/saveWiring/$', 'saveWiring'),
 		('^editor/runReduction/$', 'runReduction'),
+		('^editor/saveData/$', 'saveData'),
 		('^editor/uploadFiles/$', 'uploadFiles'),
 		('^editor/getCSV/$', 'getCSV'),
 

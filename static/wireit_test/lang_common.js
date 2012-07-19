@@ -100,9 +100,19 @@ SaveContainer = function(opts, layer) {
 
 YAHOO.lang.extend(SaveContainer, WireIt.Container, {
     xtype: 'SaveContainer',
-    Save: function(e) {
-        console.log('save click:', e);
-        alert('save to server not yet implemented.  Try downloading CSV version of data');
+    Save: function(e, f) {
+        console.log('save click:', e, f);
+        var reductionInstance = editor.reductionInstance;
+        var wires = f.wires;
+        if (wires.length == 0) {
+            alert('no data to get (no wires in)');
+            return
+        } else {
+            var wire_in = f.wires[0];
+            clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
+        }
+        editor.saveData(reductionInstance, clickedOn);
+        //alert('save to server not yet implemented.  Try downloading CSV version of data');
     },
     getCSV: function(e, f) {
         var reductionInstance = editor.reductionInstance;
