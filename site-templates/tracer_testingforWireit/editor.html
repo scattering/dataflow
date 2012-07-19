@@ -295,11 +295,8 @@
 					// Jumping into the deep end...
 					CHOSEN_LANG = {{ language_actual|safe }} // get language from server!
                     METADATA = {{ file_metadata|safe }}
-					FILES = []
-					{% for variable in file_keys %}
-					FILES.push("{{ variable }}".split(',,,z,z,z,z,,,'))
-					{% endfor %}
-                    
+					FILES = {{ file_keys|safe }}
+					
 					// for converting from readable name to unique hash
 					FILE_DICT = {}
 					for (var i in FILES) {
@@ -399,7 +396,7 @@
 						return false;
 					},
 					WireIt.Container.prototype.getConfig = function() {
-						configs = {'fields': {}, 'groups': {}};
+						configs = {'fields': {}, 'groups': {}, terminals: []};
 						jQuery.extend(true, configs.fields, this.fields); // copy of fields
 						jQuery.extend(true, configs.groups, this.groups);
 						// now add default values into each group

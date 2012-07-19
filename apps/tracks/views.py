@@ -24,6 +24,7 @@ from ... import fillDB
 #from ...apps.fileview import testftp
 
 from ...dataflow import wireit
+from ...dataflow.core import lookup_module, lookup_datatype
 from ...dataflow.calc import run_template
 from ...dataflow.calc import calc_single, fingerprint_template, get_plottable, get_csv
 from ...dataflow.offspecular.instruments import ANDR, ASTERIX
@@ -484,6 +485,54 @@ def runReduction(request):
     print "response sent", str(len(compressed_content))
     return response
 
+def saveData(request):
+    # takes a request to run a reduction, then stashes the result in 
+    # the filesystem as a tarfile with SHA1 as filename.
+    location = FILES_DIR
+    data = simplejson.loads(request.POST['data'])
+    toReduce = data['toReduce']
+    template, config, nodenum, terminal_id = setupReduction(toReduce)
+    result = calc_single(template, config, nodenum, terminal_id)
+    result_str = result.dumps()
+    filename = hashlib.sha1(result_str)
+    
+    node = template.modules[nodenum]
+    module_id = node['module'] # template.modules[node]
+    module = lookup_module(module_id)
+    terminal = module.get_terminal_by_id(terminal_id)
+    datatype = terminal['datatype']
+    
+    if toReduce.has_key('experiment_id'):
+        experiment_id = toReduce['experiment_id']
+        experiment = Experiment.objects.get(id=experiment_id)
+    else:
+        experiment = None
+    
+    new_wiring = data.get('new_wiring', '')
+        
+    import tarfile
+    import StringIO
+
+    file_path = os.path.join(FILES_DIR, filename)
+    tar = tarfile.open(file_path,"w:gz")
+    
+    for i, dataset in enumerate(result):
+        string = StringIO.StringIO()
+        string.write(dataset.dumps())
+        string.seek(0)
+        info = tarfile.TarInfo(name="data_%d" % (i,))
+        info.size=len(string.buf)
+        tar.addfile(tarinfo=info, fileobj=string)
+
+    tar.close()
+    dataname = data.get('dataname', 'saved_data')
+    
+    new_file = File.objects.create(friendly_name=dataname, name=filename, template_representation=new_wiring, datatype=datatype, location=location)
+    if experiment is not None:
+        #print "experiment id: ", request.POST[u'experiment_id']
+        experiment.Files.add(new_result)
+    return HttpResponse('OK');
+    
 def getCSV(request):
     data = simplejson.loads(request.POST['data'])
     template, config, nodenum, terminal_id = setupReduction(data)
@@ -550,7 +599,7 @@ def uploadFiles(request):
             if len(new_files) > 0:
                 new_file = new_files[0]
             else:
-                new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location)
+                new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location, template_representation="", datatype="")
                 
             # extract's the instrument's metadata to put into the File model
             instrument = call_appropriate_filereader(write_here, friendly_name=f.name, fileExt=fileExt)
@@ -693,9 +742,8 @@ def displayEditor(request):
             experiment = []
             file_list = []
             experiment_id = -1
-        for i in range(len(file_list)):
-            file_context[file_list[i].name + ',,,z,z,z,z,,,' + file_list[i].friendly_name] = ''
-        file_context['file_keys'] = file_context.keys()
+        file_keys = [[fl.name, fl.friendly_name] for fl in file_list]
+        file_context['file_keys'] = simplejson.dumps(file_keys)
         file_context['file_metadata'] = return_metadata(experiment_id)
         language_name = request.POST['language']
         file_context['language_name'] = language_name
