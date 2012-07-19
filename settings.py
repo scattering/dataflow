@@ -45,7 +45,7 @@ if 1:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-            'NAME': r'/home/david/MyDatabase/testdb1',
+            'NAME': r'/home/yee/Databases/testdb1',
             #'NAME': r'/var/www/DBs/testdb10',		# Or path to database file if using sqlite3.
             'USER': '',                      # Not used with sqlite3.
             'PASSWORD': '',                  # Not used with sqlite3.
