@@ -540,9 +540,9 @@
 			}
 			
 			if (filled_data_count == target_length) { 
-			    toPlot=display;
+			    toPlot=display;	    
 			    makePlotWindow();
-			    this.plotWindow.plottingAPI(display, plotid) 
+			    //this.plotWindow.plottingAPI(display, plotid)  //commented out, was throwing errors; Yee 7/13/12
 			};
 			
 			for (var i=0; i<unfilled_data.length; i++) {
@@ -553,7 +553,7 @@
 			        if (filled_data_count == target_length) { 
 			            toPlot = display;
 			            makePlotWindow();
-			            that.plotWindow.plottingAPI(display, plotid);
+			            //that.plotWindow.plottingAPI(display, plotid); 
 			        };
 			    } 
 			    this.adapter.getBinaryData(ud, onFinish);

@@ -1,5 +1,5 @@
 
-INSTRUMENTS = ['ncnr.tas.bt7']
+INSTRUMENTS = ['ncnr.tas']
 MEDIA = "/media/"
 #IMAGES = MEDIA + "images/"  # URI to root of image directory
 IMAGES = "../../static/img/" # different location

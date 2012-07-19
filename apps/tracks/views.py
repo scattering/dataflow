@@ -32,8 +32,13 @@ print "ANDR imported: ", ANDR.id
 print "ASTERIX imported: ", ASTERIX.id
 from ...dataflow.SANS.novelinstruments import SANS_NG3
 print "SANS imported: ", SANS_NG3.id
-from ...dataflow.tas.instruments import BT7 as TAS_INS
+from ...dataflow.tas.instruments import TAS as TAS_INS
 print "TAS imported: ", TAS_INS.id
+
+# For reading in files and their metadata in the EditExperiment page
+from ...reduction.tripleaxis.data_abstraction import ncnr_filereader
+from ...reduction.tripleaxis.data_abstraction import chalk_filereader
+from ...reduction.tripleaxis.data_abstraction import hfir_filereader
 
 
 from ...dataflow import wireit
@@ -78,10 +83,105 @@ def testTable(request):
 
 def return_data(request):
     dataArray=[['file name','database id','sha1','x','y','z'],[NaN,NaN,NaN,10,10,10],[NaN,NaN,NaN,-10,-10,-10],['file3','1','sh1','1,9','2,3','3,4'],['file2','1','sh2','4,5','2,3','5,5']]    
-    return HttpResponse(simplejson.dumps(dataArray))  
+    return HttpResponse(simplejson.dumps(dataArray))
+
+def return_metadata(experiment_id):
+    """
+    !!! ASSUMPTION: all files have the same metadata fields !!!
+    
+    Creating a dataObject to be passed to moduleSimpleConfigForm.js
+    dataObject will have the following mappings (key : value_description):
+        headerlist : List of headers. Indices correspond to column indices in metadata.
+                     e.g. ['Available Files', 'h_min', 'h_max', ...]. 
+        metadata : 2D lists of metadata columns. A file and all of its metadata shares the same
+                   row index in this 2D list. By default, filenames are located in the first
+                   column (i.e. metadata[0]).
+                   e.g. [['file001', 'file002', ...], [0, 0.1, 0.2,...], [1.0, 1.1, 1.2,...], ...]
+                   
+    This format is used to obtain min of min's and max of max's. NO LONGER USED FOR dataObject.
+        
+        dataObject : a 2D array of in the form: [[fileheaders...], [min of min's...], 
+                                                 [max of max's...],[row1 values], [row2 values],...]
+    """
+    #if request.GET.has_key(u'experiment_id'):
+    #experiment_id = request.GET[u'experiment_id']
+    if experiment_id < 0:
+        return '{}'
+    
+    experiment = Experiment.objects.get(id=experiment_id) 
+    
+    headerlist = ['Available Files']
+    metadata = []
+    dataObject = []
+    
+    for f in experiment.Files.all():
+        try:
+            metadata[0].append(f.friendly_name)
+        except:
+            metadata.insert(0, [f.friendly_name])
+        
+        datalist = [f.friendly_name]
+        metadatalist = f.metadata.all()
+        for i in range(len(metadatalist)):
+            #if a min/max  is not a float, it is assigned NaN
+            try:
+                value = float(metadatalist[i].Value)
+            except:
+                value = NaN
+            key = metadatalist[i].Key
+            
+            
+            try:
+                index = headerlist.index(key)
+            except:
+                index = len(headerlist)
+                headerlist.append(key)
+                
+            try:
+                metadata[index].append(value)
+            except:
+                #first time, instantiate the list
+                metadata.insert(index, [value])
+                
+            # the '_min' should always directly proceed the '_max' based on the way
+            # Metadata was created in uploadFiles()
+            ending = key[-4:] #will get the '_min' or '_max'
+            if ending == '_min':
+                datalist.append(repr(value))
+            elif ending == '_max':
+                datalist[-1] = datalist[-1] + ',' + repr(value)
+                
+        dataObject.append(datalist)
+                
+    fileheaders = ['Available Files']
+    for i in range(0, len(headerlist)/2):
+        #loops through all headers, skipping every other (ie the ones ending in '_max')
+        index = i * 2 + 1
+        fileheaders.append(headerlist[index][:-4]) #removes the '_min' ending
+        
+    minvals = [NaN]
+    maxvals = [NaN]
+    for i in range(0, len(headerlist)/2):
+        minval = min(metadata[i * 2 + 1]) #find min of min's for each '_min' column
+        maxval = max(metadata[i * 2 + 2]) #find max of max's for each '_max' column
+               
+        minvals.append(NaN if type(minval)==type('') else minval)
+        maxvals.append(NaN if type(maxval)==type('') else maxval)
+        
+        
+    dataObject.insert(0, minvals)
+    dataObject.insert(0, maxvals)
+    dataObject.insert(0, fileheaders)
+    
+    #return HttpResponse(simplejson.dumps(dataObject))
+    return simplejson.dumps(dataObject)
 
 import redis
 server = redis.Redis("localhost")
+
+
+#def return_loaded_file(request):
+    
 
 def getBinaryData(request):
     binary_fp = request.POST['binary_fp']
@@ -202,7 +302,8 @@ def saveWiring(request):
                 reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'this name exists, please use another'}))
                 reply.status_code = 500
                 return reply
-            instr.Templates.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring), user=request.user)
+            temp = instr.Templates.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring))
+            temp.user.add(request.user)
         else:
             reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'you are not staff!'}))
             reply.status_code = 500
@@ -212,7 +313,8 @@ def saveWiring(request):
             reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'this name exists, please use another'}))
             reply.status_code = 500
             return reply
-        Template.objects.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring), user=request.user)
+        temp = Template.objects.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring))
+        temp.user.add(request.user)
     # this puts the Template into the pool of existing Templates.
     #wirings_list.append(new_wiring)
     return HttpResponse(simplejson.dumps({'save':'successful'})) #, context_instance=context
@@ -413,6 +515,8 @@ def filesExist(request):
     return HttpResponse(simplejson.dumps(existences))
 
 def uploadFiles(request):
+    # TODO: In the process of storing instrument objects instead of raw files
+    # TODO: THIS WHOLE METHOD WILL NEED TO BE REDONE    
     location = FILES_DIR
     if request.POST.has_key(u'experiment_id'):
         experiment_id = request.POST[u'experiment_id']
@@ -422,7 +526,19 @@ def uploadFiles(request):
 
     if request.FILES.has_key('FILES'):
         file_data = request.FILES.getlist('FILES')
+        aofchalkfiles = []
+        acfchalkfiles = []
         for f in file_data:
+            #due to the strange nature of chalk river files, those are handled separately
+            #appends all chalkriver files
+            fileExt = os.path.splitext(f.name)[1].lower()
+            if fileExt == '.aof':
+                aofchalkfiles.append(f)
+                continue
+            if fileExt == '.acf':
+                acfchalkfiles.append(f)
+                continue
+                
             file_data = f.read()
             file_sha1 = hashlib.sha1(file_data)
 
@@ -430,16 +546,103 @@ def uploadFiles(request):
             open(write_here, 'w').write(file_data)
 
             new_files = File.objects.filter(name=file_sha1.hexdigest())
+            
             if len(new_files) > 0:
                 new_file = new_files[0]
             else:
                 new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location)
-
+                
+            # extract's the instrument's metadata to put into the File model
+            instrument = call_appropriate_filereader(write_here, friendly_name=f.name, fileExt=fileExt)
+            add_metadata_to_file(new_file, file_sha1, instrument)
+            
             if experiment is not None:
-                #print "experiment id: ", request.POST[u'experiment_id']
                 experiment.Files.add(new_file)
+        '''
+        for aoffile in aofchalkfiles:
+            
+            #NOTE: to link a .acf and .aof file, their names have to be EXACTLY the same (case sensitive)
+            #NOTE: .acf files loaded without a corresponding .aof file are not read nor used.
+            acf_filename = None
+            aofname = os.path.splitext(aoffile.name)[0]
+            for acffile in acfchalkfiles:
+                acfname = os.path.splitext(acffile.name)[0]
+                if acfname === aofname:
+                    acfchalkfiles.remove(acffile)
+                    acf_filename = acffile
+                    break      
+                   
+            file_data = aoffile.read()
+            file_sha1 = hashlib.sha1(file_data)
+    
+            write_here = os.path.join(location,file_sha1.hexdigest())
+            open(write_here, 'w').write(file_data)
+            
+            instruments = chalk_filereader(write_here, acf_filename=acf_filename)
+            
+            # TODO: INCOMPLETE CHALK RIVER LOADING
 
-    return HttpResponse('OK')    
+        '''
+
+    return HttpResponse('OK')
+
+def add_metadata_to_file(new_file, file_sha1, instrument):
+    """
+    Adds the metadata extrema from the provided instrument to the provided file.
+    Metadata is stored 
+    """
+    extrema = instrument.extrema
+    for key in extrema.keys():
+        # Assumes that all keys (ie field headers) are strings/chars
+        keymin = key + '_min'
+        
+        # finds the unique location of this key in the database if it was previously loaded.
+        # sorts on the file's unique hash then key value. Does this for both min and max.
+        existing_metadata = Metadata.objects.filter(Myfile=file_sha1.hexdigest()).filter(Key=keymin)
+        if existing_metadata: 
+            # if there is a metadata object in the database already, update its value
+            existing_metadata[0].Value = extrema[key][0]
+        else:
+            new_metadata_min = Metadata.objects.create(Myfile=new_file, Key=keymin, Value=extrema[key][0])
+            new_file.metadata.add(new_metadata_min)
+        
+        keymax = key + '_max'
+        existing_metadata = Metadata.objects.filter(Myfile=file_sha1.hexdigest()).filter(Key=keymax)
+        if existing_metadata: 
+            # if there is a metadata object in the database already, update its value
+            existing_metadata[0].Value = extrema[key][1]                    
+        else:
+            new_metadata_max = Metadata.objects.create(Myfile=new_file, Key=keymax, Value=extrema[key][1])
+            new_file.metadata.add(new_metadata_max)
+
+    
+def call_appropriate_filereader(filestr, friendly_name=None, fileExt=None):
+    """
+    Determines the appropriate reader to call based on the file extension and returns
+    the 'loaded' instrument object.
+    
+    filestr --> full path to file so that "open(filestr, 'r')" will work.
+    friendly_name --> original file name before it was hashed to its sha1 identifier.
+    fileExt --> file extension, generally obtained from the friendly_name. 
+                Not available via sha1 hash
+    """
+    instrument = None
+    if fileExt == None:
+        if friendly_name:
+            fileExt = os.path.splitext(friendly_name)[1].lower()
+        else:
+            try:
+                fileExt = os.path.splitext(filestr)[1].lower()
+            except:
+                #in the event that there is no extension (ie only a hash was provided), fileExt remains None
+                pass
+            
+    if fileExt in ['.bt2', '.bt4', '.bt7', '.bt9', '.ng5']:
+        instrument = ncnr_filereader(filestr, friendly_name=friendly_name)
+    elif fileExt in ['.dat']:
+        instrument = hfir_filereader(filestr)
+    
+    return instrument
 
 ###### BT7 TESTING
 #    register_instrument(BT7)
@@ -493,6 +696,7 @@ def displayEditor(request):
         for i in range(len(file_list)):
             file_context[file_list[i].name + ',,,z,z,z,z,,,' + file_list[i].friendly_name] = ''
         file_context['file_keys'] = file_context.keys()
+        file_context['file_metadata'] = return_metadata(experiment_id)
         language_name = request.POST['language']
         file_context['language_name'] = language_name
         file_context['experiment_id'] = experiment_id
@@ -528,8 +732,17 @@ def languageSelect(request):
 @login_required
 def myProjects(request):
     context = RequestContext(request)
-    if request.POST.has_key('new_project'):
-        Project.objects.create(Title=request.POST['new_project'], user=request.user)
+    #Using an elif setup to save a bit of time since only one button (to delete or add project)
+    # can be clicked for one request.
+    if request.POST.has_key('project_id'):
+        project_id = request.POST['project_id']
+        Project.objects.get(id=project_id).delete()
+        #NOTE: new ids are assigned as (id of last id in list)+1 e.g. deleting project_id 7 out 
+        #of 10, will make the next project_id 11 instead of reusing 7. Then if ids 8-11 were
+        #deleted, then he next one made would be 7 again.
+    elif request.POST.has_key('new_project'):
+        newproj = Project.objects.create(Title=request.POST['new_project'])
+        newproj.user.add(request.user)
     project_list = Project.objects.filter(user=request.user)
     paginator = Paginator(project_list, 10) #10 projects per pages
     page = request.GET.get('page')
@@ -546,13 +759,16 @@ def myProjects(request):
 
 @login_required
 def editProject(request, project_id):
-    if request.POST.has_key('new_experiment'):
-        new_exp = Experiment.objects.create(ProposalNum=request.POST['new_experiment'], users=request.user)
-        new_exp.save()
-        Project.objects.get(id=project_id).experiments.add(new_exp) 
+    if request.POST.has_key('experiment_id'):
+        experiment_id = request.POST['experiment_id']
+        Experiment.objects.get(id=experiment_id).delete() 
+    elif request.POST.has_key('new_experiment'):
+        new_exp = Experiment.objects.create(ProposalNum=request.POST['new_experiment'], project=Project.objects.get(id=project_id))
+        new_exp.users.add(request.user)
     context = RequestContext(request)
     project = Project.objects.get(id=project_id)
-    experiment_list = project.experiments.all()
+    experiment_list = project.experiment_set.all() #experiment_list = project.experiments.all()
+    
     paginator = Paginator(experiment_list, 10)
     page = request.GET.get('page')
     if page == None:

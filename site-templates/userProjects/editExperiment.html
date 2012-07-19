@@ -27,17 +27,17 @@
         }
     </style>
     <!-- YUI -->
-	<script type="text/javascript" src="/static/lib/yui/yahoo/yahoo.js"></script>
-	<script type="text/javascript" src="/static/lib/yui/yahoo/yahoo-debug.js"></script>
-	<script type="text/javascript" src="/static/lib/yui/utilities/utilities.js"></script>
-	<script type="text/javascript" src="/static/lib/yui/json/json-debug.js"></script>
+    <script type="text/javascript" src="/static/lib/yui/yahoo/yahoo.js"></script>
+    <script type="text/javascript" src="/static/lib/yui/yahoo/yahoo-debug.js"></script>
+    <script type="text/javascript" src="/static/lib/yui/utilities/utilities.js"></script>
+    <script type="text/javascript" src="/static/lib/yui/json/json-debug.js"></script>
     <!-- adapter for talking to server -->
     <script type="text/javascript" src="/static/lib/tracks/test_adapter.js"></script>
     <script type="text/javascript" src="/static/lib/sha1.js"></script>
     <script type="text/javascript" src="/static/lib/sendFile.js"></script>
     
     <script type="text/javascript">
-    
+
         experiment_id = {{ experiment.id }};
         function getCookie(name) {
                 var cookieValue = null;
@@ -106,7 +106,6 @@
             };
             
             input.addEventListener("change", function(){
-                
                 // disable the input
                 input.setAttribute("disabled", "true");
                 
@@ -144,9 +143,10 @@
                     onload:function(rpe, xhr){
                         // enable the input again
                         input.removeAttribute("disabled");
+
                         // reload the page without reposting any data:
                         window.location.href = window.location.pathname;
-                        
+
                         // this would reload the window, but includes last POST data:
                         //window.location.reload();
                     },
@@ -160,6 +160,7 @@
                         input.removeAttribute("disabled");
                     }
                 });
+                
             }, false);         
             
         };

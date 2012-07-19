@@ -197,7 +197,7 @@ loadchalk = load_chalk_module(id='tas.loadchalk', datatype=TAS_DATA,
 
 
 
-def extract_action(data_objects=[], **kwargs):
+def extract_action(input, data_objects=[], **kwargs):
     """ isolates/extracts the given list of objects """
     print "extracting", data_objects
     
@@ -205,7 +205,7 @@ def extract_action(data_objects=[], **kwargs):
 
 
 extract = extract_module(id='tas.extract', datatype=TAS_DATA,
-                   version='1.0', action=extract_action,)
+                   version='1.0', action=extract_action, fields=None)
 
 
 
@@ -337,11 +337,11 @@ volumecorrection = volume_correction_module(id='tas.volume_correction', datatype
 
 
 # ==== Instrument definitions ====
-BT7 = Instrument(id='ncnr.tas.bt7',
+TAS = Instrument(id='ncnr.tas',
                  name='tas',
-                 archive=config.NCNR_DATA + '/bt7',
+                 archive=config.NCNR_DATA + '/tas',
                  menu=[('Input', [load, loadchalk, save]),
-                       ('Reduction', [extract, join, subtract, normalizemonitor, detailedbalance,
+                       ('Reduction', [join, subtract, normalizemonitor, detailedbalance,
                                       monitorcorrection, volumecorrection])
                        ],
                  #requires=[config.JSCRIPT + '/tasplot.js'],
@@ -351,7 +351,7 @@ BT7 = Instrument(id='ncnr.tas.bt7',
 
 # Return a list of triple axis instruments
 if 1:
-    instruments = [BT7]
+    instruments = [TAS]
     for instrument in instruments:
         register_instrument(instrument)
 
@@ -361,7 +361,7 @@ if 0:
         dict(module="tas.load", position=(10, 150), config={'files':[ROOT_URL.HOMEDIR[:-12] + 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
         dict(module="tas.normalize_monitor", position=(270, 20), config={'target_monitor': 165000}),
         dict(module="tas.detailed_balance", position=(270, 120), config={}),
-        dict(module="tas.monitor_correction", position=(270, 220), config={'instrument_name':'BT7'}),
+        dict(module="tas.monitor_correction", position=(270, 220), config={'instrument_name':'TAS'}),
         dict(module="tas.volume_correction", position=(270, 320), config={}),
         dict(module="tas.save", position=(500, 150), config={}),
     ]
@@ -384,7 +384,7 @@ if 0:
                         description='example reduction diagram',
                         modules=modules,
                         wires=wires,
-                        instrument=BT7.id,
+                        instrument=TAS.id,
                         )
 
 if 1:
@@ -404,7 +404,7 @@ if 1:
                         description='example reduction diagram',
                         modules=modules,
                         wires=wires,
-                        instrument=BT7.id,
+                        instrument=TAS.id,
                         )
 
 
@@ -427,5 +427,5 @@ if __name__ == "__main__":
     #hi=TAS_RUN()
     print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
     #print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
-    print 'language', simplejson.dumps(wireit.instrument_to_wireit_language(BT7))
+    print 'language', simplejson.dumps(wireit.instrument_to_wireit_language(TAS))
     print "done"
