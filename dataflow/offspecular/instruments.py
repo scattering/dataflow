@@ -99,7 +99,7 @@ data2d = Data(OSPEC_DATA, FilterableMetaArray, loaders=[{'function':LoadICPData,
 OSPEC_DATA_HE3 = OSPEC_DATA + '.he3'
 datahe3 = Data(OSPEC_DATA_HE3, He3AnalyzerCollection, loaders=[{'function':He3AnalyzerCollection, 'id':'LoadHe3'}])
 OSPEC_DATA_TIMESTAMP = OSPEC_DATA + '.timestamp'
-datastamp = Data(OSPEC_DATA_TIMESTAMP, PlottableDict, loaders=[{'function':LoadTimeStamps, 'id':'LoadTimeStamps'}])
+datastamp = Data(OSPEC_DATA_TIMESTAMP, PlottableDict, loaders=[])
 
 """
 import tarfile
@@ -411,6 +411,8 @@ load_stamp = load_timestamp_module(id='ospec.loadstamp', datatype=OSPEC_DATA_TIM
 def LoadTimestamps(filename, friendlyName="", path=""):
     fn = os.path.join(dirName, filename)
     return PlottableDict(simplejson.load(open(fn, 'r')))
+
+datastamp.loaders.append({'function':LoadTimestamps, 'id':'LoadTimeStamps'})
     
 # Append polarization matrix module
 def append_polarization_matrix_action(input=[], he3cell=None, **kwargs):
@@ -458,7 +460,6 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],
                  datatypes=[data2d, datahe3, datastamp],
-                 loaders = 
                  )
 
 ASTERIX = Instrument(id='lansce.ospec.asterix',
