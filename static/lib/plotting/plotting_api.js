@@ -913,6 +913,9 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
 
     target_id = plotid + '_target';
     series = new Array();
+    var markerOptionsArray = ['filledSquare', 'circle', 'diamond', 'x'];
+    var numberOptions = 4; // markerOptionsArray.length; //hardcoding for speed
+    var markerIndex = 0;
 
     var quantityx = document.getElementById(plotid + '_selectx').value,
         quantityy = document.getElementById(plotid + '_selecty').value;
@@ -956,9 +959,12 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
             }
 
             series.push(serie);
+            linestyle = markerOptionsArray[markerIndex % numberOptions];
+            ++markerIndex;
 
             //if the errorbars are toggled on, add the errorbarRenderer. Otherwise do not.
-            data.options.series.push((errorbarsOn) ? {label: filename, renderer: $.jqplot.errorbarRenderer, rendererOptions: {errorBar: true}} : {label: filename});
+            //markerOptions do not appear to render when errorbars are on.
+            data.options.series.push((errorbarsOn) ? {label: filename, renderer: $.jqplot.errorbarRenderer, rendererOptions: {errorBar: true}, markerOptions: {style: linestyle}} : {label: filename, markerOptions: {style: linestyle}});
             
             //data.options.series.push({label: filename, renderer: $.jqplot.errorbarRenderer, rendererOptions: {errorBar: true}});
         }
