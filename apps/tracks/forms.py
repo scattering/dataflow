@@ -25,7 +25,10 @@ class titleOnlyForm(forms.Form):
         new_project = forms.CharField(initial="Project name")
 
 class titleOnlyFormExperiment(forms.Form):
-        new_experiment = forms.CharField(initial="00000000")
+        facility = forms.ModelChoiceField(queryset = Facility.objects.all(),empty_label=u"\u2013")
+        instrument_class = forms.ChoiceField(instrument_class_choices) #how to generate the choices
+        instrument_name = forms.ModelChoiceField(queryset=Instrument.objects.all(), empty_label=u"\u2013")
+        new_experiment = forms.CharField(initial="00000000")    
 
 ##### REMOVE THE BLANK=TRUE
 class experimentForm1(forms.Form):

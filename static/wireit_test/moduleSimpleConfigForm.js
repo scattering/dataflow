@@ -412,7 +412,7 @@ function configForm(headerList, moduleID) {
             }
         }
         
-        else if (header.type == "List") {
+        else if (header.type == "List" || header.type == "list") {
             item = 12;
             
             var data = [];

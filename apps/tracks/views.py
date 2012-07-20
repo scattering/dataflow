@@ -12,6 +12,7 @@ import cStringIO, gzip
 
 import hashlib,os
 import types
+import tempfile
 
 ## models
 from django.contrib.auth.models import User 
@@ -635,6 +636,42 @@ def uploadFiles(request):
 
     return HttpResponse('OK')
 
+"""    
+def uploadFiles(request):
+    location = FILES_DIR
+    if request.POST.has_key(u'experiment_id'):
+        experiment_id = request.POST[u'experiment_id']
+        experiment = Experiment.objects.get(id=experiment_id)
+    else:
+        experiment = None
+
+    if request.FILES.has_key('FILES'):
+        language = request.POST['language']
+        #instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX }
+        instrument = instrument_class_by_language.get(language, None)
+        file_data = request.FILES.getlist('FILES')
+        for f in file_data:
+            file_contents = f.read()
+            file_sha1 = hashlib.sha1(file_contents)
+
+            #write_here = os.path.join(location,file_sha1.hexdigest())
+            #open(write_here, 'w').write(file_data)
+            tmp_file, tmp_path = tempfile.mkstemp()
+            open(tmp_path, 'wb').write(file_contents)
+
+            new_files = File.objects.filter(name=file_sha1.hexdigest())
+            if len(new_files) > 0:
+                new_file = new_files[0]
+            else:
+                new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location)
+
+            if experiment is not None:
+                #print "experiment id: ", request.POST[u'experiment_id']
+                experiment.Files.add(new_file)
+
+    return HttpResponse('OK') 
+"""
+
 def add_metadata_to_file(new_file, file_sha1, instrument):
     """
     Adds the metadata extrema from the provided instrument to the provided file.
@@ -813,6 +850,17 @@ def editProject(request, project_id):
     elif request.POST.has_key('new_experiment'):
         new_exp = Experiment.objects.create(ProposalNum=request.POST['new_experiment'], project=Project.objects.get(id=project_id))
         new_exp.users.add(request.user)
+        if request.POST.has_key('instrument_name'):
+            if request.POST['instrument_name']:
+                instrument = Instrument.objects.get(id=request.POST['instrument_name'])
+                instrument_class = instrument.instrument_class
+                new_exp.instrument = instrument
+                new_exp.save()
+        if request.POST.has_key('facility'):
+            if request.POST['facility']:
+                facility = Facility.objects.get(id=request.POST['facility'])
+                new_exp.facility = facility
+                new_exp.save()
     context = RequestContext(request)
     project = Project.objects.get(id=project_id)
     experiment_list = project.experiment_set.all() #experiment_list = project.experiments.all()
@@ -837,15 +885,14 @@ def editExperiment(request, experiment_id):
     if request.FILES.has_key('new_files'):
         file_data = request.FILES.getlist('new_files')
         for f in file_data:
-            file_sha1 = hashlib.sha1(f.read())
+            file_contents = f.read()
+            file_sha1 = hashlib.sha1(file_contents)
             #file_sha1 = hashlib.sha1()
             #for line in f.read():
             #    file_sha1.update(line)
-            write_here = FILES_DIR + file_sha1.hexdigest()
-            write_here = open(write_here, 'w')
-            for line in f:
-                write_here.write(line)
-            write_here.close()
+            write_here = TEMP_DIR + file_sha1.hexdigest()
+            open(write_here, 'w').write(file_contents)
+            
             new_files = File.objects.filter(name=file_sha1.hexdigest())
             if len(new_files) > 0:
                 new_file = new_files[0]

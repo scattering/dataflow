@@ -1,4 +1,4 @@
-var debug = true;
+var debug = false;
 var prevtype = null;
 var types = { lin: {
                 incr: function(i, step) { return i + step; },
@@ -363,6 +363,65 @@ function renderImageData2(data, transform, plotid, plot_options) {
     return plot2d
 };
 
+function renderndplot(data, transform, plotid) {
+    
+    var options = {
+        title: data.title,
+        seriesDefaults: {shadow: false, markerOptions: {shadow: false, size: 4}},
+        axes:{
+          xaxis:{
+            renderer: $.jqplot.LinearAxisRenderer,  // renderer to use to draw the axis,
+            label: data.xlabel,
+            labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+            tickOptions: {
+                formatString: "%.2g"
+            }
+          },
+          yaxis:{
+            renderer: (transform == 'log') ? $.jqplot.LogAxisRenderer : $.jqplot.LinearAxisRenderer,
+            label: data.ylabel,
+            labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+            tickOptions: {
+                formatString: "%.2g",
+                // fix for ticks drifting to the left in accordionview!
+                _styles: {right: 0},
+            }
+          }
+        },
+        cursor: {
+            show: true,
+            zoom: true,
+            clickReset: true,
+            tooltipLocation:'se',
+            tooltipOffset: -60,
+            useAxesFormatters: false,
+        },
+        legend: {
+            show: true,
+            parent: this,
+            placement: 'outside',
+            xoffset: 10,
+            renderer: $.jqplot.InteractiveLegendRenderer
+        },
+        grid: {shadow: false},
+        sortData: false,
+        //interactors: [ {type: 'Rectangle', name: 'rectangle'} ],
+        type: 'nd'
+    };
+    
+    jQuery.extend(true, options, data.options);
+    //jQuery(plotid).empty(); // empty the jqplot div in the DOM. Seemed unnecessary. 7/17/2012
+    plotnd = jQuery.jqplot(plotid, series, options);
+
+    //replot clears old axes instead of having new axes rendered on top of old axes.
+    plotnd.replot({resetAxes : true});  
+
+    plotnd.type = 'nd';
+    return plotnd
+};
+
 
 
 function getContext(id) {
@@ -504,7 +563,6 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'lin', text: 'lin' }));
         jQuery(document.getElementById('plot_selectz')).append(jQuery('<option />', { value: 'log', text: 'log' }));
         
-        
         plot = null;
         plot2d = null;
         plot2d_colorbar = null;
@@ -605,9 +663,10 @@ var plot = null;
 var plotregion = null;
 var toPlots_input = null;
 var myndgridpanel = null;
-var checkboxchange = false;
+var errorbarsOn = false; //true will turn errorbars on for ndplotting.
 
 function plottingAPI(toPlots, plotid_prefix) {
+    $.jqplot.config.enablePlugins = true;
     toPlots_input = toPlots;
     if (debug) console.log(toPlots.constructor.name);
     if (!(Array.isArray(toPlots))) {
@@ -634,31 +693,35 @@ function plottingAPI(toPlots, plotid_prefix) {
             break;
         
         case 'nd': 
-            //for (var i = 0; i < toPlots.length; i ++) {
-            i = 0;
-            //var toPlot = toPlots[i];
             var toPlot = toPlots;
-            var plotid = plotid_prefix + '_' + i;
+            var plotid = plotid_prefix + '_nd';
             
             plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, true); 
-            //with create=true, myndgridpanel will be updated and not null.
-            
-            jQuery(document.getElementById(plotid + '_update')).unbind('click');
-            jQuery(document.getElementById(plotid + '_update')).click({ 
-                plot: plot, 
-                //toPlot: toPlot, 
-                plotid: plotid,
-                plotid_prefix: plotid_prefix
-                }, 
-                function(e) {
-                    var plot = e.data.plot; 
+            //with create=true, myndgridpanel will be created and not null.
+
+            //Listener for clicking the Toggle Errorbar button.
+            jQuery(document.getElementById(plotid + '_toggle')).unbind('click');
+            jQuery(document.getElementById(plotid + '_toggle')).click(
+                function (e) {
                     var toPlot = getSelectedPlots();
-                    var plotid = e.data.plotid;
-                    var plotid_prefix = e.data.plotid_prefix;
+                    errorbarsOn = !errorbarsOn; //toggle
                     plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, false);
                 }
             );
-            //}
+
+            // Setting up auto-update when drop-down menu changes
+            jQuery(document.getElementById(plotid + '_selectx')).change(
+                function (e) {
+                    var toPlot = getSelectedPlots();
+                    plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, false);
+                }
+            );
+            jQuery(document.getElementById(plotid + '_selecty')).change(
+                function (e) {
+                    var toPlot = getSelectedPlots();
+                    plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, false);
+                }
+            );
             break;
         
         default:
@@ -674,10 +737,9 @@ function getSelectedPlots(){
 }
 
 
-function makeNdPlotSelector(toPlot) {
+function makeNdPlotSelector(toPlot, plotid, plotid_prefix) {
     /* Creates the plotgrid by instantiating the columns and store based on the passed objects
        Currently for ndplotting only. */
-    console.log(toPlot);
     //Creating store and grid.
     var storeFields = [{name: 'Files'}, {name: 'Legend'}, {name: 'toPlotObj'}];
     Ext.regModel('fileModel', {
@@ -689,16 +751,14 @@ function makeNdPlotSelector(toPlot) {
     var myCheckboxModel = new Ext.selection.CheckboxModel({
         listeners: {
             selectionchange: function(model, records) {
-                if (!checkboxchange)
-                    checkboxchange = true;
-                /*//The update button is already handling this...
+                //The update button is already handling this...
                 //unless we want each check click to update plot                
                 var recordToPlots = [];
                 Ext.each(records, function(record, i){
                     recordToPlots.push(record.data.toPlotObj);
                 });
-                plot = updateNdPlot(plot, recordToPlots, 'plot_0', 'plot', false)
-                */
+                //plot = updateNdPlot(plot, recordToPlots, plotid, plotid_prefix, false);
+                plot = updateNdPlot(plot, recordToPlots, 'plot_nd', 'plot', false);
             }
         }
     });
@@ -706,10 +766,9 @@ function makeNdPlotSelector(toPlot) {
     //add all files to the store..
     var filerecs=[];
     for (var j = 0; j < toPlot.length; ++j) {
-        console.log(j);
         var filerec = {};
         filerec['Files'] = toPlot[j].series[0].label;
-        filerec['Legend'] = NaN;            //NaN for now... TODO
+        //filerec['Legend'] = NaN;            //NaN for now... using jqplot's legend for now.
         filerec['toPlotObj'] = toPlot[j];   //hidden field
         filerecs.push(filerec);
     }
@@ -717,7 +776,7 @@ function makeNdPlotSelector(toPlot) {
     //TODO setup renderer for 'Legend'
     var gridColumns = [];
     gridColumns.push({header: 'Files', width: 150, sortable: true, dataIndex: 'Files'});
-    gridColumns.push({header: 'Legend', width: 75, sortable: false, dataIndex: 'Legend'});
+    //gridColumns.push({header: 'Legend', hidden: true, sortable: false, dataIndex: 'Legend'});
     gridColumns.push({header: 'toPlotObj', hidden: true, sortable: false, dataIndex: 'toPlotObj'});
     store.loadData(filerecs);
 
@@ -733,8 +792,8 @@ function makeNdPlotSelector(toPlot) {
         selModel: myCheckboxModel,
         columns: gridColumns,
         stripeRows: true,
-        height: 300,
-        width: 250,
+        height: 410,
+        width: 190,
         //autoWidth: true,
         title: 'Select the files to plot:',
         //renderTo: 'plot' //gridplotid,
@@ -754,9 +813,9 @@ function createNdPlotRegion(plotid, renderTo) {
     var divx = document.createElement('div');
     divx.setAttribute('id', plotid + '_divx');
     divx.setAttribute('class', 'plot-axis plot-axis-x');
-    var divc = document.createElement('div');
-    divc.setAttribute('id', plotid + '_divc');
-    divc.setAttribute('class', 'plot-axis plot-axis-c');
+    //var divc = document.createElement('div');
+    //divc.setAttribute('id', plotid + '_divc');
+    //divc.setAttribute('class', 'plot-axis plot-axis-c');
     var divtarget = document.createElement('div');
     divtarget.setAttribute('id', plotid + '_target');
     divtarget.setAttribute('style', 'display: block; width: 450; height: 350;');
@@ -767,18 +826,18 @@ function createNdPlotRegion(plotid, renderTo) {
     var selectx = document.createElement('select');
     selectx.setAttribute('id', plotid + '_selectx');
     selectx.setAttribute('class', 'plot-axis-select plot-axis-select-x');
-    var updatebutton = document.createElement('input');
-    updatebutton.setAttribute('id', plotid + '_update');
-    updatebutton.setAttribute('type', 'submit');
-    updatebutton.setAttribute('value', 'Update plot');
+    var errorbartogglebutton = document.createElement('input');
+    errorbartogglebutton.setAttribute('id', plotid + '_toggle');
+    errorbartogglebutton.setAttribute('type', 'submit');
+    errorbartogglebutton.setAttribute('value', 'Toggle Errorbars');
 
 
     divy.appendChild(selecty);
     divx.appendChild(selectx);
-    divx.appendChild(updatebutton);
+    divx.appendChild(errorbartogglebutton);
     div.appendChild(divy);
     div.appendChild(divtarget);
-    div.appendChild(divc);
+    //div.appendChild(divc);
     div.appendChild(divx);
     
     return div;
@@ -820,139 +879,106 @@ function get(arr, i) {
 }
 
 function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
-    console.log('create: ' + create + ', checkboxchange: ' + checkboxchange);
-    var stage = 2;
-    //if (debug)
-    //    console.log('plotid:', plotid, 'plotdiv:', plotdiv, plotid_prefix)
-    
-    if (!plot || !plot.hasOwnProperty("type") || plot.type!='nd' || checkboxchange){
-        stage = 1;
-        plot = { stage: 1, prevtype: null, targetId: plotid + '_target', series: [], options: { title: '', series: [{}], axes: {} }};
-        plot.options.cursor = { show: true, zoom: true, tooltipFormatString: '%.3g, %.3g', tooltipLocation:'ne'};
-        plot.options.series[0].markerOptions = {shadow: false};
-        plot.options.series[0].shadow = false;
-        plot.options.axes = {
-          xaxis:{
-            //label: data.xlabel,
-            //labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
-            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
-            tickOptions: {
-                formatString: "%.2g"
-            }
-          },
-          yaxis:{
-            //label: data.ylabel,
-            //labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
-            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
-            tickOptions: {
-                formatString: "%.2g",
-                // fix for ticks drifting to the left in accordionview!
-                _styles: {right: 0},
-            }
-          }
-        }
-        //plot.options.series = [{ renderer: jQuery.jqplot.errorbarRenderer, rendererOptions: { errorBar: true } }];
-    }
-    
-    if (create) {
+    if (create || !plot || !plot.hasOwnProperty("type") || plot.type!='nd'){
         var plotdiv = document.getElementById(plotid_prefix);
-        plotdiv.innerHTML = ""
-        myplotdiv = createNdPlotRegion(plotid);
-        plotdiv.appendChild(myplotdiv);
-        //console.log(plotdiv);
-        myndgridpanel = makeNdPlotSelector(toPlot);
+        plotdiv.innerHTML = "";  //removing the "I am a plot." from plotwindow.html's div
+        myplotdiv = createNdPlotRegion(plotid);  //creates plot div
+        myndgridpanel = makeNdPlotSelector(toPlot, plotid, plotid_prefix);  //creates gridpanel file selector
         
         myplotpanel = new Ext.panel.Panel({
-            items: [myplotdiv],
+            //height: 350,
+            //width: 500,
+            flex: 1,
+            contentEl: myplotdiv,
         });
         
         new Ext.panel.Panel({
-            layout: 'hbox',
+            layout: {
+                type: 'hbox',
+                padding: 10
+            },
             frame: true,
-            height: 400,
-            width: 900,
-            renderTo: 'plotpanel',
+            //height: 600,
+            autoheight: true,
+            width: 800,
+            //autowidth: true,
+            renderTo: plotid_prefix, //'plot'
             //defaults: { flex: 1 },
-            items: [ myplotpanel, myndgridpanel ]
+            items: [ myndgridpanel, {xtype: 'splitter', width: 15}, myplotpanel ]
             
         });
         toPlot = [toPlot[0]] //only doing the first file (set up so first file is only one checked in gridpanel)
         updateSeriesSelects(toPlot[0], plotid);
-    } else if (checkboxchange) {
-//TODO FIX! currently making two plots on top of each other!!! 7/17/2012
-        /*var plotdiv = document.getElementById(plotid_prefix);
-        plotdiv.innerHTML = ""
-        myplotdiv = createNdPlotRegion(plotid);
-        plotdiv.appendChild(myplotdiv);*/
-    }
-    
+    } 
+
     target_id = plotid + '_target';
-    //var plotid = plot.targetId.substring(1 * (plot.targetId[0] == '#'), plot.targetId.length - 7);
+    series = new Array();
+    var markerOptionsArray = ['filledSquare', 'circle', 'diamond', 'x'];
+    var numberOptions = 4; // markerOptionsArray.length; //hardcoding for speed
+    var markerIndex = 0;
 
-    series = (stage == 2) ? plot.series : new Array();
-    var options = plot.options;
-
-    if (debug) console.log(100, plotid, toPlot);
-    
     var quantityx = document.getElementById(plotid + '_selectx').value,
         quantityy = document.getElementById(plotid + '_selecty').value;
-    if (debug) console.log(200, plotid+'_selectx', quantityx, quantityy);
-    
+
     toPlotlength = toPlot.length;
+
+    var data = {};
+    data.data = series; //reference to series; CAUTION: be careful if changing this!!
+    data.title = (toPlotlength > 0) ? toPlot[0].title : "Empty plot";
+    data.options = {series: []}; // legend names/labels go in the 'series' option
+    data.xlabel = quantityx;
+    data.ylabel = quantityy;
+
     //recently added outer for - may not be necessary
     for (var p = 0; p < toPlotlength; ++p){
         toPlot_p = toPlot[p];
         for (var s = 0; s < toPlot_p.series.length; ++s) {
             // For TripleAxis plottables, this loop will only run once...  7/17/2012
-            // Prototype.js's Enumerable.zip() is handy here
             var datax = toPlot_p.series[s].data[quantityx],
                 datay = toPlot_p.series[s].data[quantityy];
-            if (debug) console.log(300, toPlot_p.series[s], quantityx, quantityy, datax, datay);
-            // I know, I know: "series" is both singular and plural... go blame the English language, not me!
+                filename = toPlot_p.series[s].label;
+
+            // I know, I know: "series" is both singular and plural... 
+            // go blame the English language, not me!
+            // Prototype.js's Enumerable.zip() is handy here
             //var serie = $A(datax.values).zip(datay.values, datax.errors, datay.errors, function(a) { return [a[0], a[1], { xerr: a[2], yerr: a[3] }]; });
+
+            // Following Ophir's 'serie/series' convention...
             var serie = new Array();
             if (datax.values) {
-                for (var i = 0; i < datax.values.length; i++) {
-                    serie[i] = [datax.values[i], datay.values[i], {xerr: get(datax.errors, i), yerr: get(datay.errors, i)}];
+                for (var i = 0; i < datax.values.length; ++i) {
+                    var xerror = get(datax.errors, i) / 2.0;
+                    var yerror = get(datay.errors, i) / 2.0;
+                    
+                    serie[i] = [datax.values[i], datay.values[i], {xerr: [xerror, xerror], yerr: [yerror, yerror]}];
                 }
-            }
-
-            if (checkboxchange) {
-                series.push(serie);
             } else {
-                if (!series[s] || !series[s].hasOwnProperty('data')) {
-                series[s] = serie;
-                } else {
-                // adds background series (ie plotting multiple files)
-                series[s].data = serie;
-                }
+                //if the file does not have plotable data for the selected axes, 
+                //just plot the origin to avoid jqplot errors.
+                serie = [[0,0]];
             }
 
+            series.push(serie);
+            linestyle = markerOptionsArray[markerIndex % numberOptions];
+            ++markerIndex;
+
+            //if the errorbars are toggled on, add the errorbarRenderer. Otherwise do not.
+            //markerOptions do not seem to render when errorbars are on. 7/20/2012
+            data.options.series.push((errorbarsOn) ? {label: filename, renderer: $.jqplot.errorbarRenderer, rendererOptions: {errorBar: true}/*, markerOptions: {size: 5, style: linestyle}*/} : {label: filename, markerOptions: {size: 5, style: linestyle}});
             
-            //options.series[s] = { renderer: jQuery.jqplot.errorbarRenderer, rendererOptions: { errorBar: true, /*bodyWidth: 1, wickColor: 'red', openColor: 'yellow', closeColor: 'blue'*/ } };
+            //data.options.series.push({label: filename, renderer: $.jqplot.errorbarRenderer, rendererOptions: {errorBar: true}});
         }
     }
-    console.log('series: ', series);
-    if (debug) console.log('series', series, 'options', options);
     
-    if (stage == 1) {
-        var empty = (series.length == 0);
-        if (empty) {
-            series = [[[0,0]]];
-            options.series[0].show = false;
-        }
-        plot = jQuery.jqplot(target_id, series, options);
-        plot.type = 'nd';
-        if (empty) {
-            options.series[0].show = true;
-        }
-        
-    } else {
-        plot.series.data = series;
-        plot.options = options;
-        plot.resetAxesScale();
-        plot.replot();
+    
+    if (series.length == 0) {
+        //if there are no files selected to plot, origin  and hide the legend.
+        series = [[[0,0]]];  //NOTE: this works because data.data = series (by reference!)
+        data.options.legend = {show: false};
     }
+
+    var transform = 'none'; //For now, only setting to 'log' will set it. Defaults to linear
+    plot = renderndplot(data, transform, target_id);
     return plot;
 }
 
@@ -982,7 +1008,7 @@ function create2dPlotRegion(plotid, renderTo) {
     var updatebutton = document.createElement('input');
     updatebutton.setAttribute('id', plotid + '_update');
     updatebutton.setAttribute('type', 'submit');
-    updatebutton.setAttribute('value', 'Update plot');
+    updatebutton.setAttribute('value', 'Update plot ');
     
     var colorbar = document.createElement('canvas');
     colorbar.setAttribute('width', 60);

@@ -345,10 +345,11 @@ inputs : { <input terminal name> : [(<hist iindex>, <output terminal>), ...] }
 config : { <field name> : value, ... }
 dataid : string
 """
-    def __new__(subtype, id, cls):
+    def __new__(subtype, id, cls, loaders=[]):
         obj = object.__new__(subtype)
         obj.id = id
         obj.cls = cls
+        obj.loaders = loaders
         return obj
     
     def __getstate__(self):
