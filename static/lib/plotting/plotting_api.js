@@ -1,4 +1,4 @@
-var debug = true;
+var debug = false;
 var prevtype = null;
 var types = { lin: {
                 incr: function(i, step) { return i + step; },
@@ -663,8 +663,10 @@ var plot = null;
 var plotregion = null;
 var toPlots_input = null;
 var myndgridpanel = null;
+var errorbarsOn = false; //true will turn errorbars on for ndplotting.
 
 function plottingAPI(toPlots, plotid_prefix) {
+    $.jqplot.config.enablePlugins = true;
     toPlots_input = toPlots;
     if (debug) console.log(toPlots.constructor.name);
     if (!(Array.isArray(toPlots))) {
@@ -691,30 +693,21 @@ function plottingAPI(toPlots, plotid_prefix) {
             break;
         
         case 'nd': 
-            i = 0;
             var toPlot = toPlots;
-            var plotid = plotid_prefix + '_' + i;
+            var plotid = plotid_prefix + '_nd';
             
             plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, true); 
             //with create=true, myndgridpanel will be created and not null.
 
-            //Listener for clicking the Update button. Now removed and updates
-            //to plot are done on selection change. 7/19/2012
-            /*
-            jQuery(document.getElementById(plotid + '_update')).unbind('click');
-            jQuery(document.getElementById(plotid + '_update')).click({ 
-                //plot: plot, 
-                //toPlot: toPlot, 
-                plotid: plotid,
-                plotid_prefix: plotid_prefix
-                }, 
+            //Listener for clicking the Toggle Errorbar button.
+            jQuery(document.getElementById(plotid + '_toggle')).unbind('click');
+            jQuery(document.getElementById(plotid + '_toggle')).click(
                 function (e) {
                     var toPlot = getSelectedPlots();
-                    var plotid = e.data.plotid;
-                    var plotid_prefix = e.data.plotid_prefix;
+                    errorbarsOn = !errorbarsOn; //toggle
                     plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, false);
                 }
-            );*/
+            );
 
             // Setting up auto-update when drop-down menu changes
             jQuery(document.getElementById(plotid + '_selectx')).change(
@@ -744,10 +737,9 @@ function getSelectedPlots(){
 }
 
 
-function makeNdPlotSelector(toPlot) {
+function makeNdPlotSelector(toPlot, plotid, plotid_prefix) {
     /* Creates the plotgrid by instantiating the columns and store based on the passed objects
        Currently for ndplotting only. */
-    console.log(toPlot);
     //Creating store and grid.
     var storeFields = [{name: 'Files'}, {name: 'Legend'}, {name: 'toPlotObj'}];
     Ext.regModel('fileModel', {
@@ -765,7 +757,8 @@ function makeNdPlotSelector(toPlot) {
                 Ext.each(records, function(record, i){
                     recordToPlots.push(record.data.toPlotObj);
                 });
-                plot = updateNdPlot(plot, recordToPlots, 'plot_0', 'plot', false);
+                //plot = updateNdPlot(plot, recordToPlots, plotid, plotid_prefix, false);
+                plot = updateNdPlot(plot, recordToPlots, 'plot_nd', 'plot', false);
             }
         }
     });
@@ -833,15 +826,15 @@ function createNdPlotRegion(plotid, renderTo) {
     var selectx = document.createElement('select');
     selectx.setAttribute('id', plotid + '_selectx');
     selectx.setAttribute('class', 'plot-axis-select plot-axis-select-x');
-    //var updatebutton = document.createElement('input');
-    //updatebutton.setAttribute('id', plotid + '_update');
-    //updatebutton.setAttribute('type', 'submit');
-    //updatebutton.setAttribute('value', 'Update plot');
+    var errorbartogglebutton = document.createElement('input');
+    errorbartogglebutton.setAttribute('id', plotid + '_toggle');
+    errorbartogglebutton.setAttribute('type', 'submit');
+    errorbartogglebutton.setAttribute('value', 'Toggle Errorbars');
 
 
     divy.appendChild(selecty);
     divx.appendChild(selectx);
-    //divx.appendChild(updatebutton);
+    divx.appendChild(errorbartogglebutton);
     div.appendChild(divy);
     div.appendChild(divtarget);
     //div.appendChild(divc);
@@ -890,7 +883,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
         var plotdiv = document.getElementById(plotid_prefix);
         plotdiv.innerHTML = "";  //removing the "I am a plot." from plotwindow.html's div
         myplotdiv = createNdPlotRegion(plotid);  //creates plot div
-        myndgridpanel = makeNdPlotSelector(toPlot);  //creates gridpanel file selector
+        myndgridpanel = makeNdPlotSelector(toPlot, plotid, plotid_prefix);  //creates gridpanel file selector
         
         myplotpanel = new Ext.panel.Panel({
             //height: 350,
@@ -928,7 +921,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
 
     var data = {};
     data.data = series; //reference to series; CAUTION: be careful if changing this!!
-    data.title = (toPlotlength > 0) ? toPlot[0].title : "nd plot";
+    data.title = (toPlotlength > 0) ? toPlot[0].title : "Empty plot";
     data.options = {series: []}; // legend names/labels go in the 'series' option
     data.xlabel = quantityx;
     data.ylabel = quantityy;
@@ -951,7 +944,10 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
             var serie = new Array();
             if (datax.values) {
                 for (var i = 0; i < datax.values.length; i++) {
-                    serie[i] = [datax.values[i], datay.values[i], {xerr: get(datax.errors, i), yerr: get(datay.errors, i)}];
+                    var xerror = get(datax.errors, i) / 2.0;
+                    var yerror = get(datay.errors, i) / 2.0;
+                    
+                    serie[i] = [datax.values[i], datay.values[i], {xerr: [xerror, xerror], yerr: [yerror, yerror]}];
                 }
             } else {
                 //if the file does not have plotable data for the selected axes, 
@@ -960,7 +956,11 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
             }
 
             series.push(serie);
-            data.options.series.push({label: filename}); 
+
+            //if the errorbars are toggled on, add the errorbarRenderer. Otherwise do not.
+            data.options.series.push((errorbarsOn) ? {label: filename, renderer: $.jqplot.errorbarRenderer, rendererOptions: {errorBar: true}} : {label: filename});
+            
+            //data.options.series.push({label: filename, renderer: $.jqplot.errorbarRenderer, rendererOptions: {errorBar: true}});
         }
     }
     
