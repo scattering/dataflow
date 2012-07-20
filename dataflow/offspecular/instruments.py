@@ -95,11 +95,11 @@ def get_friendly_name(fh):
     return fh
 
 OSPEC_DATA = 'ospec.data2d'
-data2d = Data(OSPEC_DATA, FilterableMetaArray)
+data2d = Data(OSPEC_DATA, FilterableMetaArray, loaders=[{'function':LoadICPData, 'id':'LoadICPData'}])
 OSPEC_DATA_HE3 = OSPEC_DATA + '.he3'
-datahe3 = Data(OSPEC_DATA_HE3, He3AnalyzerCollection)
+datahe3 = Data(OSPEC_DATA_HE3, He3AnalyzerCollection, loaders=[{'function':He3AnalyzerCollection, 'id':'LoadHe3'}])
 OSPEC_DATA_TIMESTAMP = OSPEC_DATA + '.timestamp'
-datastamp = Data(OSPEC_DATA_TIMESTAMP, PlottableDict)
+datastamp = Data(OSPEC_DATA_TIMESTAMP, PlottableDict, loaders=[{'function':LoadTimeStamps, 'id':'LoadTimeStamps'}])
 
 """
 import tarfile
@@ -179,7 +179,7 @@ def _load_asterix_data(name):
         format = "HDF4"
     else: #h5
         format = "HDF5"
-    return LoadAsterixRawHDF(fileName, path=dirName, format=format )
+    return LoadAsterixRawHDF(fileName, path=dirName, friendlyName=friendlyName, format=format )
     #return SuperLoadAsterixHDF(fileName, path=dirName, center_pixel=center_pixel, wl_over_tof=wl_over_tof, pixel_width_over_dist=pixel_width_over_dist, format=format )
 
 def load_asterix_spectrum_action(files=[], **kwargs):
@@ -408,6 +408,10 @@ def load_timestamp_action(files=[], **kwargs):
 load_stamp = load_timestamp_module(id='ospec.loadstamp', datatype=OSPEC_DATA_TIMESTAMP,
                    version='1.0', action=load_timestamp_action)
 
+def LoadTimestamps(filename, friendlyName="", path=""):
+    fn = os.path.join(dirName, filename)
+    return PlottableDict(simplejson.load(open(fn, 'r')))
+    
 # Append polarization matrix module
 def append_polarization_matrix_action(input=[], he3cell=None, **kwargs):
     print "appending polarization matrix"
@@ -454,6 +458,7 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],
                  datatypes=[data2d, datahe3, datastamp],
+                 loaders = 
                  )
 
 ASTERIX = Instrument(id='lansce.ospec.asterix',
