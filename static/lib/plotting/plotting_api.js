@@ -946,7 +946,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
             // Following Ophir's 'serie/series' convention...
             var serie = new Array();
             if (datax.values) {
-                for (var i = 0; i < datax.values.length; i++) {
+                for (var i = 0; i < datax.values.length; ++i) {
                     var xerror = get(datax.errors, i) / 2.0;
                     var yerror = get(datay.errors, i) / 2.0;
                     
@@ -963,8 +963,8 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
             ++markerIndex;
 
             //if the errorbars are toggled on, add the errorbarRenderer. Otherwise do not.
-            //markerOptions do not appear to render when errorbars are on.
-            data.options.series.push((errorbarsOn) ? {label: filename, renderer: $.jqplot.errorbarRenderer, rendererOptions: {errorBar: true}, markerOptions: {style: linestyle}} : {label: filename, markerOptions: {style: linestyle}});
+            //markerOptions do not seem to render when errorbars are on. 7/20/2012
+            data.options.series.push((errorbarsOn) ? {label: filename, renderer: $.jqplot.errorbarRenderer, rendererOptions: {errorBar: true}/*, markerOptions: {size: 5, style: linestyle}*/} : {label: filename, markerOptions: {size: 5, style: linestyle}});
             
             //data.options.series.push({label: filename, renderer: $.jqplot.errorbarRenderer, rendererOptions: {errorBar: true}});
         }
