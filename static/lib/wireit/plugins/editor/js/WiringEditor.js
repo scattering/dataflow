@@ -540,14 +540,14 @@
 			}
 			
 			if (filled_data_count == target_length) { 
-			    toPlot=display;	    
+			    toPlot=display;
 			    makePlotWindow();
 			    //this.plotWindow.plottingAPI(display, plotid)  //commented out, was throwing errors; Yee 7/13/12
 			};
 			
 			for (var i=0; i<unfilled_data.length; i++) {
 			    var ud = unfilled_data[i];
-			    var onFinish = function()  { 
+			    var onFinish = function() { 
 			        filled_data_count++;
 			        console.log(filled_data_count);
 			        if (filled_data_count == target_length) { 
