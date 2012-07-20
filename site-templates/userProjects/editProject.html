@@ -44,9 +44,9 @@
 			    {% csrf_token %}
 		        <ul>
         		{% for experiment in experiments.object_list %}
-            		<li><input type="button" id="{{experiment.id}}" value="Delete experiment" onclick="deleteExperiment('{{experiment}}', {{experiment.id}}, {{project.id}})" /> <body> ..... </body> <a href="editExperiment/{{experiment.id}}/">{{ experiment }}</a></li>
+            		<li><input type="button" id="{{experiment.id}}" value="Delete experiment" onclick="deleteExperiment('{{experiment}}', {{experiment.id}}, {{project.id}})" /> <body> ..... </body> <a href="editExperiment/{{experiment.id}}/">{{ experiment }}</a> ( {{ experiment.instrument.instrument_class }} )</li>
         		{% endfor %}
-            		<li>{{ form.new_experiment }} <input type="submit" value="Create experiment" /></li>
+            		<li>{{ form.as_table }} <input type="submit" value="Create experiment" /></li>
         		</ul>
 			</form>
 		    <p class="pagination">

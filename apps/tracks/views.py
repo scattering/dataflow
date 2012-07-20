@@ -850,6 +850,17 @@ def editProject(request, project_id):
     elif request.POST.has_key('new_experiment'):
         new_exp = Experiment.objects.create(ProposalNum=request.POST['new_experiment'], project=Project.objects.get(id=project_id))
         new_exp.users.add(request.user)
+        if request.POST.has_key('instrument_name'):
+            if request.POST['instrument_name']:
+                instrument = Instrument.objects.get(id=request.POST['instrument_name'])
+                instrument_class = instrument.instrument_class
+                new_exp.instrument = instrument
+                new_exp.save()
+        if request.POST.has_key('facility'):
+            if request.POST['facility']:
+                facility = Facility.objects.get(id=request.POST['facility'])
+                new_exp.facility = facility
+                new_exp.save()
     context = RequestContext(request)
     project = Project.objects.get(id=project_id)
     experiment_list = project.experiment_set.all() #experiment_list = project.experiments.all()
