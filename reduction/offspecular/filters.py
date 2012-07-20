@@ -1010,10 +1010,15 @@ def hdf_to_dict(hdf_obj, convert_i1_tostr=True):
             out_dict[key] = hdf_to_dict(val)
     return out_dict
 
-def LoadAsterixRawHDF(filename, path=None, format="HDF5", **kwargs):
+def LoadAsterixRawHDF(filename, path=None, friendlyName="", format="HDF5", **kwargs):
     if path == None:
         path = os.getcwd()
     print "format:", format
+    if friendlyName.endswith('hdf'):
+        format = "HDF4"
+    else: #h5
+        format = "HDF5"
+        
     if format == "HDF4":
         print "converting hdf4 to hdf5"
         (tmp_fd, tmp_path) = tempfile.mkstemp() #temporary file for converting to HDF5
@@ -1068,7 +1073,7 @@ def LoadAsterixRawHDF(filename, path=None, format="HDF5", **kwargs):
     return MetaArray(data_array[:], dtype='float', info=info[:])
 
 
-def SuperLoadAsterixHDF(filename, path=None, center_pixel = 145.0, wl_over_tof=1.9050372144288577e-5, pixel_width_over_dist = 0.0195458*pi/180., format="HDF5"):
+def SuperLoadAsterixHDF(filename, friendlyName="", path=None, center_pixel = 145.0, wl_over_tof=1.9050372144288577e-5, pixel_width_over_dist = 0.0195458*pi/180., format="HDF5"):
     """ loads an Asterix file and does the most common reduction steps, 
     giving back a length-4 list of data objects in twotheta-wavelength space,
     with the low-tof region shifted to the high-tof region """
@@ -1078,7 +1083,7 @@ def SuperLoadAsterixHDF(filename, path=None, center_pixel = 145.0, wl_over_tof=1
     shifted = AsterixShiftData().apply(wl_converted, edge_bin=180)
     return shifted   
 
-def LoadAsterixHDF(filename, path=None, center_pixel = 145.0, wl_over_tof=1.9050372144288577e-5):
+def LoadAsterixHDF(filename, friendlyName="", path=None, center_pixel = 145.0, wl_over_tof=1.9050372144288577e-5):
     if path == None:
         path = os.getcwd()
     hdf_obj = h5py.File(os.path.join(path, filename))
@@ -1129,7 +1134,7 @@ def LoadAsterixHDF(filename, path=None, center_pixel = 145.0, wl_over_tof=1.9050
         output_objs.append(MetaArray(data_array[:], dtype='float', info=info[:]))
     return output_objs 
 
-def LoadAsterixData(filename, path = None):
+def LoadAsterixData(filename, friendlyName="", path = None):
     if path == None:
         path = os.getcwd()
     pol_states = {2:'--', 3:'-+', 4:'+-', 5:'++'}  
@@ -1156,7 +1161,7 @@ def LoadAsterixData(filename, path = None):
         output_objs.append(MetaArray(data_array[:], dtype='float', info=info[:]))
     return output_objs    
 
-def LoadText(filename, path=None, first_as_x=True):
+def LoadText(filename, friendlyName="", path=None, first_as_x=True):
     if path == None:
         path = os.getcwd()
     creation_story = "LoadText('{fn}')".format(fn=filename)
@@ -1178,7 +1183,7 @@ def LoadText(filename, path=None, first_as_x=True):
     output_obj = MetaArray(data_in[:,first_y_col:], dtype='float', info=info[:])
     return output_obj 
 
-def LoadAsterixSpectrum(filename, path=None):
+def LoadAsterixSpectrum(filename, friendlyName="", path=None):
     spec = LoadText(filename, path, first_as_x = True)
     spec._info[0]["name"] = "tof"
     spec._info[0]["units"] = "microseconds"
@@ -1189,7 +1194,7 @@ def LoadAsterixSpectrum(filename, path=None):
             spec._info[1]['cols'][i]['name'] = 'spectrum_%' % (pol,)            
     return spec
 
-def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
+def LoadICPData(filename, path=None, friendlyName="", auto_PolState=False, PolState=''):
     """ 
     loads a data file into a MetaArray and returns that.
     Checks to see if data being loaded is 2D; if not, quits
@@ -1204,8 +1209,8 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
         # not a 2D object!
         return
     if auto_PolState:
-        key = filename[-2] # na1, ca1 etc. are --, nc1, cc1 are -+...
-        PolState = lookup[key]
+        key = friendlyName[-2:-1] # na1, ca1 etc. are --, nc1, cc1 are -+...
+        PolState = lookup.get(key, "")
     # force PolState to a regularized version:
     if not PolState in lookup.values():
         PolState = ''
