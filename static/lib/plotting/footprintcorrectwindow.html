@@ -224,7 +224,7 @@
 		            
 		            var linePlugin = plot.plugins.interactors.line;
 		            
-		            var linex1 = new pointTextControl(linePlugin.p1, 'x', 'x<sub>P1</sub> ', 5);
+		            /*var linex1 = new pointTextControl(linePlugin.p1, 'x', 'x<sub>P1</sub> ', 5);
 		            linex1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
 		            document.getElementById('footcontrols').appendChild(linex1.div);
 		            var liney1 = new pointTextControl(linePlugin.p1, 'y', 'y<sub>P1</sub> ', 5);
@@ -235,11 +235,11 @@
 		            document.getElementById('footcontrols').appendChild(linex2.div); 
 		            var liney2 = new pointTextControl(linePlugin.p2, 'y', 'y<sub>P2</sub> ', 5);
 		            liney2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
-		            document.getElementById('footcontrols').appendChild(liney2.div);
-		            var lineslope = new slopeTextControl(linePlugin, linex1, liney1, linex2, liney2, 'slope ', 5);
+		            document.getElementById('footcontrols').appendChild(liney2.div);*/
+		            var lineslope = new slopeTextControl(linePlugin, /*linex1, liney1, linex2, liney2,*/ 'slope ', 5);
 		            lineslope.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
 		            document.getElementById('footcontrols').appendChild(lineslope.div);
-		            var lineinter = new interceptTextControl(linePlugin, liney1, liney2, 'y-intercept ', 5);
+		            var lineinter = new interceptTextControl(linePlugin, /*liney1, liney2,*/ 'y-intercept ', 5);
 		            lineinter.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
 		            document.getElementById('footcontrols').appendChild(lineinter.div);
 		            
@@ -343,7 +343,7 @@
 		        }
 		    }
 		    
-		    slopeTextControl = function(linePlugin, x1, y1, x2, y2, label, precision) {
+		    slopeTextControl = function(linePlugin, /*x1, y1, x2, y2,*/ label, precision) {
 		        var precision = precision || 3;
 		        this.precision = precision;
 		        this.slope = linePlugin.slope;
@@ -370,15 +370,15 @@
 		        var me = this;
 		        this.update_external = function() {
 		            var newSlope = parseFloat(textbox.value);
-		            linePlugin.slope = newSlope;
+		            //linePlugin.slope = newSlope;
 		            var intercept = linePlugin.intercept;
-		            newy1 = (newSlope * parseFloat(x1.textbox.value)) + intercept;
+		            /*newy1 = (newSlope * parseFloat(x1.textbox.value)) + intercept;
 		            newy2 = (newSlope * parseFloat(x2.textbox.value)) + intercept;
 		            
 		            y1.textbox.value = newy1.toPrecision(precision);
 		            y2.textbox.value = newy2.toPrecision(precision);
 		            y1.update_external();
-		            y2.update_external();
+		            y2.update_external();*/
 		            
 		            textbox.value = (linePlugin.slope).toPrecision(precision); 
 		        }
@@ -393,7 +393,7 @@
 		        this.update(rise / run);
 		        return this;
 		    }
-		    interceptTextControl = function(linePlugin, y1, y2, label, precision) {
+		    interceptTextControl = function(linePlugin, /*y1, y2,*/ label, precision) {
 		        var precision = precision || 3;
 		        this.precision = precision;
 		        this.intercept = linePlugin.intercept;
@@ -421,13 +421,13 @@
 		        var me = this;
 		        this.update_external = function() {
 		            var newInt = parseFloat(textbox.value);
-		            dInt = (newInt - linePlugin.intercept);
+		            //dInt = (newInt - linePlugin.intercept);
 		            linePlugin.intercept = newInt; 
 		            
-		            y1.textbox.value = (Number(y1.textbox.value) + dInt).toPrecision(precision);
+		            /*y1.textbox.value = (Number(y1.textbox.value) + dInt).toPrecision(precision);
 		            y2.textbox.value = (Number(y2.textbox.value) + dInt).toPrecision(precision);
 		            y1.update_external();
-		            y2.update_external();
+		            y2.update_external();*/
 		           
 		            textbox.value = (linePlugin.intercept).toPrecision(precision);
 		        }

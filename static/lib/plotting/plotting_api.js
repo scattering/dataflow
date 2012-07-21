@@ -913,6 +913,9 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
 
     target_id = plotid + '_target';
     series = new Array();
+    var markerOptionsArray = ['filledSquare', 'circle', 'diamond', 'x'];
+    var numberOptions = 4; // markerOptionsArray.length; //hardcoding for speed
+    var markerIndex = 0;
 
     var quantityx = document.getElementById(plotid + '_selectx').value,
         quantityy = document.getElementById(plotid + '_selecty').value;
@@ -943,7 +946,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
             // Following Ophir's 'serie/series' convention...
             var serie = new Array();
             if (datax.values) {
-                for (var i = 0; i < datax.values.length; i++) {
+                for (var i = 0; i < datax.values.length; ++i) {
                     var xerror = get(datax.errors, i) / 2.0;
                     var yerror = get(datay.errors, i) / 2.0;
                     
@@ -956,9 +959,12 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
             }
 
             series.push(serie);
+            linestyle = markerOptionsArray[markerIndex % numberOptions];
+            ++markerIndex;
 
             //if the errorbars are toggled on, add the errorbarRenderer. Otherwise do not.
-            data.options.series.push((errorbarsOn) ? {label: filename, renderer: $.jqplot.errorbarRenderer, rendererOptions: {errorBar: true}} : {label: filename});
+            //markerOptions do not seem to render when errorbars are on. 7/20/2012
+            data.options.series.push((errorbarsOn) ? {label: filename, renderer: $.jqplot.errorbarRenderer, rendererOptions: {errorBar: true}/*, markerOptions: {size: 5, style: linestyle}*/} : {label: filename, markerOptions: {size: 5, style: linestyle}});
             
             //data.options.series.push({label: filename, renderer: $.jqplot.errorbarRenderer, rendererOptions: {errorBar: true}});
         }
