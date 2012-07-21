@@ -673,6 +673,9 @@ def uploadFiles(request):
                     loader_function = l['function']
                     break
         dataObjects = loader_function(file_descriptors)
+        for fd in file_descriptors:
+            os.remove(fd['filename'])
+
         for dobj in dataObjects:
             serialized = dobj.dumps()
             s_sha1 = hashlib.sha1(serialized)
@@ -686,8 +689,7 @@ def uploadFiles(request):
             if experiment is not None:
                 #print "experiment id: ", request.POST[u'experiment_id']
                 experiment.Files.add(new_file)    
-        for fd in file_descriptors:
-            os.remove(fd['filename'])
+                
         """    
             new_files = File.objects.filter(name=file_sha1.hexdigest())
             if len(new_files) > 0:

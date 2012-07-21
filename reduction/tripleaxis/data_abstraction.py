@@ -2136,6 +2136,9 @@ def filereader(filename, orient1=None, orient2=None, acf_file=None, friendly_nam
     
     return instrument
 
+def autoloader(filedescriptors):
+    result = [filereader(fd['filename'], friendly_name=fd['friendly_name']) for fd in filedescriptors]
+    return result
 
 def ncnr_filereader(filename, friendly_name=None):
     filestr = filename
