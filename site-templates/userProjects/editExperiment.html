@@ -39,6 +39,7 @@
     <script type="text/javascript">
 
         experiment_id = {{ experiment.id }};
+        instrument_class = "{{ experiment.instrument.instrument_class }}";
         function getCookie(name) {
                 var cookieValue = null;
                 if (document.cookie && document.cookie != '') {
@@ -108,6 +109,7 @@
             input.addEventListener("change", function(){
                 // disable the input
                 input.setAttribute("disabled", "true");
+                var activeLoader = document.getElementById('loaderSelect').value;
                 
                 progress_div.innerHTML="";
                 progress_bars = {};
@@ -125,7 +127,9 @@
                     // list of files to upload
                     files:input.files,
                     
-                    extra_data: {"experiment_id": experiment_id},
+                    extra_data: {"experiment_id": experiment_id, 
+                                 "instrument_class": instrument_class,
+                                 "loader_id": activeLoader},
                     
                     csrf_token: getCookie('csrftoken'),
                     
@@ -221,7 +225,7 @@
 	        	    {% else %}
 		        	    <p>There are currently 0 files. Please add files below.</p>
 	        	    {% endif %}
-	        	    <h3 class="alt">{{ form2.new_files.label }}</h3>
+	        	    <h3 class="alt">{{ form2.new_files.label }}:  {{ form2.loaders }}</h3>
 	        	    <p>{{ form2.new_files }}</p>
 	        	    <div id='progress_div'></div>
 <!-- 	        	    <p><input type="button" onclick="check_existence(document.getElementById('new_files').files)" value="Add selected files" /></p>  -->

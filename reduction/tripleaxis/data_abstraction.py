@@ -767,7 +767,10 @@ class TripleAxis(object):
         self.ystep = None
         self.extrema = {}
 
-
+    
+    def get_extrema(self):
+        return self.extrema
+        
     def detailed_balance(self):
         beta_times_temp = 11.6
         beta = beta_times_temp / self.temperature.temperature
