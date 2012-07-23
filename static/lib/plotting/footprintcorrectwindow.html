@@ -24,6 +24,7 @@
 		<script type="text/javascript" src="../interactors/rectangle_interactor_plugin.js"></script>
 		<script type="text/javascript" src="../interactors/linear_interactor_plugin.js"></script>
 		<script type="text/javascript" src="../interactors/reflectivity_sim.js"></script>
+		<script type="text/javascript" src="../interactors/interval_interactor_plugin.js"></script>
         
         <!-- Uniq Array -->
 		<script type="text/javascript" src="../UniqArray.js"></script>
@@ -185,12 +186,9 @@
 		                                ymin: 1.0,
 		                                xmax: 4.0,
 		                                ymax: 4.0},
-		                              { type:'VerticalLine',
-		                                name:'verticalline',
-		                                x0: 0.0},
-		                              { type:'VerticalLine',
-		                                name:'verticalline2',
-		                                x0: 3.0}],
+		                              { type:'Interval',
+		                                name:'interval',
+		                                x02: 3.0}],
 		                //renderer: $.jqplot.heatmapRender,
 		                series: [ {shadow: false, padding: 0} ],
                         grid: {shadow: false},
@@ -223,32 +221,34 @@
 		            });
 		            
 		            var linePlugin = plot.plugins.interactors.line;
+		            var interval = plot.plugins.interval;
 		            
-		            /*var linex1 = new pointTextControl(linePlugin.p1, 'x', 'x<sub>P1</sub> ', 5);
+		            // The variables linex1, liney1, linex2, and liney2 keep track of the old location of the point but
+		            // are not actually placed in the Slice Region
+		            var linex1 = new pointTextControl(linePlugin.p1, 'x', 'x<sub>P1</sub> ', 5);
 		            linex1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
-		            document.getElementById('footcontrols').appendChild(linex1.div);
+		            //document.getElementById('footcontrols').appendChild(linex1.div);
 		            var liney1 = new pointTextControl(linePlugin.p1, 'y', 'y<sub>P1</sub> ', 5);
 		            liney1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
-		            document.getElementById('footcontrols').appendChild(liney1.div);
+		            //document.getElementById('footcontrols').appendChild(liney1.div);
 		            var linex2 = new pointTextControl(linePlugin.p2, 'x', 'x<sub>P2</sub> ', 5);
 		            linex2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
-		            document.getElementById('footcontrols').appendChild(linex2.div); 
+		            //document.getElementById('footcontrols').appendChild(linex2.div); 
 		            var liney2 = new pointTextControl(linePlugin.p2, 'y', 'y<sub>P2</sub> ', 5);
 		            liney2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
-		            document.getElementById('footcontrols').appendChild(liney2.div);*/
-		            var lineslope = new slopeTextControl(linePlugin, /*linex1, liney1, linex2, liney2,*/ 'slope ', 5);
+		            //document.getElementById('footcontrols').appendChild(liney2.div);
+		            var lineslope = new slopeTextControl(linePlugin, linex1, liney1, linex2, liney2, 'slope ', 5);
 		            lineslope.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
 		            document.getElementById('footcontrols').appendChild(lineslope.div);
-		            var lineinter = new interceptTextControl(linePlugin, /*liney1, liney2,*/ 'y-intercept ', 5);
+		            var lineinter = new interceptTextControl(linePlugin, liney1, liney2, 'y-intercept ', 5);
 		            lineinter.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
 		            document.getElementById('footcontrols').appendChild(lineinter.div);
 		            
-		            var vertLine = plot.plugins.interactors.verticalline;
-		            var vert1 = new pointTextControl(vertLine.p, 'x', 'Start of Interval ', 5);
+		            var interval = plot.plugins.interactors.interval;
+		            var vert1 = new pointTextControl(interval.p1, 'x', 'Start of Interval ', 5);
 		            vert1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
 		            document.getElementById('footcontrols').appendChild(vert1.div);
-		            var vertLine2 = plot.plugins.interactors.verticalline2;
-		            var vert2 = new pointTextControl(vertLine2.p, 'x', 'End of Interval ', 5);
+		            var vert2 = new pointTextControl(interval.p2, 'x', 'End of Interval ', 5);
 		            vert2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
 		            document.getElementById('footcontrols').appendChild(vert2.div);	            
 		            
@@ -343,7 +343,7 @@
 		        }
 		    }
 		    
-		    slopeTextControl = function(linePlugin, /*x1, y1, x2, y2,*/ label, precision) {
+		    slopeTextControl = function(linePlugin, x1, y1, x2, y2, label, precision) {
 		        var precision = precision || 3;
 		        this.precision = precision;
 		        this.slope = linePlugin.slope;
@@ -364,21 +364,21 @@
 		            var rise = p2.getCoords()['y'] - p1.getCoords()['y'];
 		            var run = p2.getCoords()['x'] - p1.getCoords()['x'];
 		            var slope = rise / run;
-		            linePlugin.slope = slope;
+		            linePlugin.slope = slope;		            
 		            textbox.value = (linePlugin.slope).toPrecision(precision);
 		        }
 		        var me = this;
 		        this.update_external = function() {
 		            var newSlope = parseFloat(textbox.value);
-		            //linePlugin.slope = newSlope;
+		            linePlugin.slope = newSlope;
 		            var intercept = linePlugin.intercept;
-		            /*newy1 = (newSlope * parseFloat(x1.textbox.value)) + intercept;
-		            newy2 = (newSlope * parseFloat(x2.textbox.value)) + intercept;
+		            var newy1 = (newSlope * parseFloat(x1.textbox.value)) + intercept;
+		            var newy2 = (newSlope * parseFloat(x2.textbox.value)) + intercept;
 		            
 		            y1.textbox.value = newy1.toPrecision(precision);
 		            y2.textbox.value = newy2.toPrecision(precision);
 		            y1.update_external();
-		            y2.update_external();*/
+		            y2.update_external();
 		            
 		            textbox.value = (linePlugin.slope).toPrecision(precision); 
 		        }
@@ -393,7 +393,7 @@
 		        this.update(rise / run);
 		        return this;
 		    }
-		    interceptTextControl = function(linePlugin, /*y1, y2,*/ label, precision) {
+		    interceptTextControl = function(linePlugin, y1, y2, label, precision) {
 		        var precision = precision || 3;
 		        this.precision = precision;
 		        this.intercept = linePlugin.intercept;
@@ -421,13 +421,13 @@
 		        var me = this;
 		        this.update_external = function() {
 		            var newInt = parseFloat(textbox.value);
-		            //dInt = (newInt - linePlugin.intercept);
+		            dInt = (newInt - linePlugin.intercept);
 		            linePlugin.intercept = newInt; 
 		            
-		            /*y1.textbox.value = (Number(y1.textbox.value) + dInt).toPrecision(precision);
+		            y1.textbox.value = (Number(y1.textbox.value) + dInt).toPrecision(precision);
 		            y2.textbox.value = (Number(y2.textbox.value) + dInt).toPrecision(precision);
 		            y1.update_external();
-		            y2.update_external();*/
+		            y2.update_external();
 		           
 		            textbox.value = (linePlugin.intercept).toPrecision(precision);
 		        }
@@ -468,14 +468,12 @@
                 var me = this;
                 this.update_external = function() {
                     var mypos = {}; mypos[coord] = textbox.value;
-                    
                     var newpos = p.putCoords ? p.putCoords(mypos) : mypos;
                     var dpos = {}; dpos[coord] = newpos[coord] - p.pos[coord];
-                    p.move(dpos);
+                    p.move(dpos);                                      
                     p.parent.onDrag();  // centers
                     p.parent.redraw();
                 }
-                
                 textbox.onchange = this.update_external;
                 p.listeners.push(this);
                 this.update(p.getCoords());

@@ -7,6 +7,7 @@ from ..modules.join import join_module
 from ..modules.scale import scale_module
 from ..modules.normalize import normalize_module
 from ..modules.footprintmodule import footprint_module
+from dataflow.reduction.reflectometry.filters import FootprintCorrection
 
 #def join_action(input=None):
 #    print "combining", input
@@ -36,11 +37,11 @@ from ..modules.footprintmodule import footprint_module
 def footprint_action(input=[], start="", end="", slope="", intercept=""):
     print "applying footprint correction"
     return dict(output=FootprintCorrection().apply(input, start, end, slope, intercept)) 
-    footprint = footprint_module(id='refl.footprint', datatype='data1d.refl',
-                    version='1.0', action=footprint_action)
+footprint_data = footprint_module(id='refl.footprint', datatype='data1d.refl',
+                    version='1.0', action=footprint_action, filterModule=FootprintCorrection)
     
-normalize = normalize_module(id='refl.normalize', datatype='data1d.refl',
-                             version='1.0', action=normalize_action)
+#normalize = normalize_module(id='refl.normalize', datatype='data1d.refl',
+#                             version='1.0', action=normalize_action)
 
 data1d = Datatype(id='data1d.refl',
                   name='1-D Reflectometry Data',
@@ -57,7 +58,7 @@ PBR = Instrument(id='ncnr.refl.pbr',
                        ('Input', input),
                        ('Reduction', reduction),
                       ],
-                 requires=['/media/tasplot.js'],
+                 requires=[],
                  datatypes=[data1d],
                  )
 
