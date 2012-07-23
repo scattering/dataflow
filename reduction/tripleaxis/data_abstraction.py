@@ -991,14 +991,22 @@ class TripleAxis(object):
     
     
     
-    '''
-    def get_metadata(self):
+    
+    def get_field_names(self):
         """
-        Returns metadata for file summary table
+        Returns a list of field names. Useful for constructing a drop-down menu of fields.
         """
-        
-        return simplejson.dumps(self.extrema)
-    '''
+        fieldlist = []
+        for key, value in self.__dict__.iteritems():
+            if key in skipped_fields:
+                #ignoring these data fields for plotting
+                pass
+            else:
+                for field in value:
+                    fieldlist.append(field.name)
+     
+        return simplejson.dumps(fieldlist)
+    
 # ****************************************************************************************************************************************************
 # ***************************************************************** TRANSLATION METHODS **************************************************************
 # ****************************************************************************************************************************************************

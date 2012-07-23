@@ -55,7 +55,7 @@ if 0:
 
 TAS_DATA = 'data1d.tas'
 xtype = 'AutosizeImageContainer'
-data1d = Data(TAS_DATA, data_abstraction.TripleAxis)
+data1d = Data(TAS_DATA, data_abstraction.TripleAxis, loaders=[{'function':data_abstraction.filereader, 'id':'tasloader'}])
 # Reduction operations may refer to data from other objects, but may not
 # modify it.  Instead of modifying, first copy the data and then work on
 # the copy.
@@ -261,6 +261,42 @@ def join_action(input, xaxis='', yaxis='', num_bins=0, xstep=None, ystep=None, *
     joinedtas.xstep = xstep
     joinedtas.ystep = ystep
     return dict(output=[joinedtas])
+
+'''
+fields = {
+    'xaxis': {
+        "type": "List",
+        "label": "X axis for 2D plotting",
+        "name": "xaxis",
+        "value": '',
+        "choices": [data_abstraction.
+    }, 
+    'yaxis': {
+        "type": "string",
+        "label": "Y axis for 2D plotting",
+        "name": "yaxis",
+        "value": '',
+    },
+    'num_bins': {
+        "type": "float",
+        "label": "Number of bins (optional)",
+        "name": "num_bins",
+        "value": 0.0,
+    },
+    'xstep': {
+        "type": "float",
+        "label": "X bin spacing/step (optional)",
+        "name": "xstep",
+        "value": None,
+    },
+    'ystep': {
+        "type": "float",
+        "label": "Y bin spacing/step (optional)",
+        "name": "ystep",
+        "value": None,
+    }
+}
+'''
 
 
 join = join_module(id='tas.join', datatype=TAS_DATA,
