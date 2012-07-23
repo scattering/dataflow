@@ -1007,8 +1007,48 @@ class TripleAxis(object):
             else:
                 for field in value:
                     fieldlist.append(field.name)
-     
+                    
         return simplejson.dumps(fieldlist)
+    
+    
+    
+    def project_into_scattering_plane(self):
+        """ 
+        Given h,k,l, orient1, and orient2, calculate eta and zeta.
+        """
+        h = self.physical_motors.h
+        k = self.physical_motors.k
+        l = self.physical_motors.l        
+        if (self.physical_motors.orient1 and self.physical_motors.orient2 and h and k and l):
+            p = np.append(self.physical_motors.orient1, self.physical_motors.orient2)
+            
+            #ignore o3arr... we don't care about how far out of plane a point is;
+            # in a scattering plane scan o3arr will be zeros.
+            o1list, o2list, o3list = calc_plane(p, h, k, l)
+            map_field(self.polarized_beam, 'eta', o1list)
+            map_field(self.polarized_beam, 'zeta', o2list)
+            
+    
+    def generate_hkl_from_projection(self):
+        """
+        Given eta, zeta, orient1, and orient2, calculate hkl
+        """
+        eta = self.polarized_beam.eta
+        zeta = self.polarized_beam.zeta
+        o1 = self.physical_motors.orient1
+        o2 = self.physical_motors.orient2
+        if (o1 and o2 and eta and zeta):
+            h = []
+            k = []
+            l = []
+            for i in range(len(eta)):
+                h.append(eta[i] * o1[0] + zeta[i] * o2[0])
+                k.append(eta[i] * o1[1] + zeta[i] * o2[1])
+                l.append(eta[i] * o1[2] + zeta[i] * o2[2])
+            map_field(self.physical_motors, 'h', h)
+            map_field(self.physical_motors, 'k', k)
+            map_field(self.physical_motors, 'l', l)
+    
     
 # ****************************************************************************************************************************************************
 # ***************************************************************** TRANSLATION METHODS **************************************************************
@@ -1611,6 +1651,35 @@ def map_motors(translate_dict, tas, target_field, dataset):
                 setattr(target_field, key, dataset.metadata[value])               
 
 
+def map_field(target_field, key, value):
+    """
+    Sets the target_field.key to value.
+    
+    target_field: reference to the TripleAxis field to set. e.g. tas.physical_motors
+    key:          new field to set within target_field. e.g. h
+    value:        value to set target_field.key to. e.g. np.array([0, 1, 2, 1, 4])
+    """
+    if hasattr(target_field, key) and isinstance(getattr(target_field, key), Motor):
+        try:
+            getattr(target_field, key).measurement.x = np.array(value, 'Float64')
+            getattr(target_field, key).measurement.variance = None
+        except:
+            getattr(target_field, key).measurement.x = np.array(value) 
+            getattr(target_field, key).measurement.variance = None
+    else:
+        try:
+            setattr(target_field, key, Motor(key, values=np.array(value, 'Float64'),
+                                             err=None,
+                                             units=None,
+                                             isDistinct=True,
+                                             isInterpolatable=True))
+        except:
+            setattr(target_field, key, Motor(key, values=value,
+                                             err=None,
+                                             units=None,
+                                             isDistinct=True,
+                                             isInterpolatable=True))
+
 
 def establish_correction_coefficients(filename):
     "Obtains the instrument-dependent correction coefficients from a given file and \
@@ -1632,12 +1701,6 @@ def establish_correction_coefficients(filename):
 
     return coefficients   
 
-
-def project_into_scattering_plane(tas):
-    """ 
-    Given h,k,l, orient1 and orient2, calculates eta and zeta.
-    """
-    pass
     
 
 def make_orthonormal(o1, o2):
@@ -2154,6 +2217,7 @@ def ncnr_filereader(filename, friendly_name=None):
     mydata = mydatareader.readbuffer(filestr, myfriendlyfilestr=friendly_name)
     instrument = TripleAxis()
     translate(instrument, mydata)
+    #instrument.project_into_scattering_plane() #generate eta and zeta
     return instrument    
 
 def chalk_filereader(aof_filename, orient1, orient2, acf_filename=None):
@@ -2164,13 +2228,16 @@ def chalk_filereader(aof_filename, orient1, orient2, acf_filename=None):
     for i in range(len(mydata)):
         instrument = TripleAxis()
         translate(instrument, mydata[i])
+        #instrument.generate_hkl_from_projection()
         instrument_list.append(instrument)
+        
     return instrument_list
 
 def hfir_filereader(filename):
     mydata = readhfir.readfile(filename)
     instrument = TripleAxis()
     translate(instrument, mydata)
+    #instrument.project_into_scattering_plane() #generate eta and zeta
     return instrument
 
 
