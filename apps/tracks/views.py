@@ -564,6 +564,8 @@ def filesExist(request):
         print existences
     return HttpResponse(simplejson.dumps(existences))
 
+
+"""
 def uploadFiles(request):
     # TODO: In the process of storing instrument objects instead of raw files
     # TODO: THIS WHOLE METHOD WILL NEED TO BE REDONE    
@@ -646,10 +648,11 @@ def uploadFiles(request):
         experiment = None
 
     if request.FILES.has_key('FILES'):
-        language = request.POST['language']
+        #instrument_class = request.POST[u'instrument_class']
         #instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX }
-        instrument = instrument_class_by_language.get(language, None)
+        #instrument = instrument_class_by_language.get(instrument_class, None)
         file_data = request.FILES.getlist('FILES')
+        file_descriptors = []
         for f in file_data:
             file_contents = f.read()
             file_sha1 = hashlib.sha1(file_contents)
@@ -658,7 +661,36 @@ def uploadFiles(request):
             #open(write_here, 'w').write(file_data)
             tmp_file, tmp_path = tempfile.mkstemp()
             open(tmp_path, 'wb').write(file_contents)
+            file_descriptors.append({'filename': tmp_path, 'friendly_name': f.name})
+        
+        print file_descriptors
+        instrument_class = request.POST[u'instrument_class']    
+        loader_id = request.POST[u'loader_id']
+        loader_function = None
+        for dt in instrument_class_by_language[instrument_class].datatypes:
+            for l in dt.loaders:
+                if l['id'] == loader_id:
+                    loader_function = l['function']
+                    break
+        dataObjects = loader_function(file_descriptors)
+        for fd in file_descriptors:
+            os.remove(fd['filename'])
 
+        for dobj in dataObjects:
+            serialized = dobj.dumps()
+            s_sha1 = hashlib.sha1(serialized)
+            new_files = File.objects.filter(name=s_sha1.hexdigest()) 
+            if len(new_files) > 0:
+                new_file = new_files[0]
+            else:
+                new_file = File.objects.create(name=s_sha1.hexdigest(), friendly_name=f.name, location=location)
+                
+            add_metadata_to_file(new_file, s_sha1, dobj)
+            if experiment is not None:
+                #print "experiment id: ", request.POST[u'experiment_id']
+                experiment.Files.add(new_file)    
+                
+        """    
             new_files = File.objects.filter(name=file_sha1.hexdigest())
             if len(new_files) > 0:
                 new_file = new_files[0]
@@ -668,16 +700,15 @@ def uploadFiles(request):
             if experiment is not None:
                 #print "experiment id: ", request.POST[u'experiment_id']
                 experiment.Files.add(new_file)
-
+        """
     return HttpResponse('OK') 
-"""
 
 def add_metadata_to_file(new_file, file_sha1, instrument):
     """
     Adds the metadata extrema from the provided instrument to the provided file.
     Metadata is stored 
     """
-    extrema = instrument.extrema
+    extrema = instrument.get_extrema()
     for key in extrema.keys():
         # Assumes that all keys (ie field headers) are strings/chars
         keymin = key + '_min'
@@ -938,7 +969,10 @@ def editExperiment(request, experiment_id):
     else:
         instrument_class = None
     form1 = experimentForm1(initial={'facility':facility, 'instrument_class':instrument_class, 'instrument_name':instrument, })
-    form2 = experimentForm2(USER=request.user, experiment=experiment)
+    loaders = []
+    for dt in instrument_class_by_language[instrument_class].datatypes:
+        loaders.extend([l['id'] for l in dt.loaders])
+    form2 = experimentForm2(USER=request.user, experiment=experiment, loaders = loaders )
     #print form2.fields['new_templates'].length
     return render_to_response('userProjects/editExperiment.html', { 'form1':form1, 'form2': form2, 'experiment':experiment, }, context_instance=context)
 

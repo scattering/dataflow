@@ -41,6 +41,8 @@ class experimentForm2(forms.Form):
                 print 'kwargs:',kwargs
                 USER = kwargs.pop('USER')
                 experiment = kwargs.pop('experiment')
+                loaders = kwargs.pop('loaders')
+                loaders = tuple([tuple([l, l]) for l in loaders])
                 super(experimentForm2, self).__init__(*args, **kwargs)
                 cur_templates = experiment.templates.all()
                 new_templates = Template.objects.filter(user=USER) #.exclude(experiment.templates.all())
@@ -48,9 +50,12 @@ class experimentForm2(forms.Form):
                 cur_files = cur_files.extra(order_by = ['friendly_name'])
                 self.fields['new_templates'] = forms.ModelMultipleChoiceField(queryset=new_templates, label='Available templates', widget=forms.CheckboxSelectMultiple)
                 self.fields['new_templates'].length = len(new_templates)
+                self.fields['loaders'] = forms.ChoiceField(loaders) #how to generate the choicesforms.
+                self.fields['loaders'].widget.attrs['id'] = 'loaderSelect'
                 self.fields['new_files'] = forms.FileField(label='Add files')
                 self.fields['new_files'].widget.attrs['multiple'] = 'true'
                 self.fields['new_files'].widget.attrs['id'] = 'new_files'
+                self.fields['new_files'].widget.attrs['value'] = "select files"
                 self.fields['cur_templates'] = forms.ModelMultipleChoiceField(queryset=cur_templates, label='Current templates', widget=forms.CheckboxSelectMultiple)
                 self.fields['cur_files'] = forms.ModelMultipleChoiceField(queryset=cur_files, label='Current files', widget=forms.CheckboxSelectMultiple)
 

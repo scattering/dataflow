@@ -767,7 +767,10 @@ class TripleAxis(object):
         self.ystep = None
         self.extrema = {}
 
-
+    
+    def get_extrema(self):
+        return self.extrema
+        
     def detailed_balance(self):
         beta_times_temp = 11.6
         beta = beta_times_temp / self.temperature.temperature
@@ -2141,6 +2144,9 @@ def filereader(filename, orient1=None, orient2=None, acf_file=None, friendly_nam
     
     return instrument
 
+def autoloader(filedescriptors):
+    result = [filereader(fd['filename'], friendly_name=fd['friendly_name']) for fd in filedescriptors]
+    return result
 
 def ncnr_filereader(filename, friendly_name=None):
     filestr = filename

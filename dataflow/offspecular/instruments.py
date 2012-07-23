@@ -44,7 +44,7 @@ module_imports = [
     ("dataflow.offspecular.modules.collapse_data", "collapse_data_module"),
     ("dataflow.calc", ["run_template", "get_plottable", "calc_single"]),
     ("dataflow.core", ["Data", "Instrument", "Template", "register_instrument"]),
-    ("reduction.offspecular.filters", ["LoadICPData", "LoadAsterixRawHDF", "LoadAsterixSpectrum", "Autogrid", "Combine", "Subtract", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "CollapseData", "WiggleCorrection", "SmoothData", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz"]),
+    ("reduction.offspecular.filters", ["LoadICPData", "LoadICPMany", "LoadAsterixRawHDF", "LoadAsterixSpectrum", "Autogrid", "Combine", "Subtract", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "CollapseData", "WiggleCorrection", "SmoothData", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz"]),
     ("reduction.offspecular.he3analyzer", "He3AnalyzerCollection"),
     ("reduction.offspecular.FilterableMetaArray", "FilterableMetaArray"),
 ]
@@ -95,7 +95,7 @@ def get_friendly_name(fh):
     return fh
 
 OSPEC_DATA = 'ospec.data2d'
-data2d = Data(OSPEC_DATA, FilterableMetaArray, loaders=[{'function':LoadICPData, 'id':'LoadICPData'}])
+data2d = Data(OSPEC_DATA, FilterableMetaArray, loaders=[{'function':LoadICPMany, 'id':'LoadICPData'}])
 OSPEC_DATA_HE3 = OSPEC_DATA + '.he3'
 datahe3 = Data(OSPEC_DATA_HE3, He3AnalyzerCollection, loaders=[{'function':He3AnalyzerCollection, 'id':'LoadHe3'}])
 OSPEC_DATA_TIMESTAMP = OSPEC_DATA + '.timestamp'
@@ -151,8 +151,8 @@ def load_action(input=[], files=[], intent='', auto_PolState=False, PolStates=[]
 
 def _load_data(name, auto_PolState, PolState):
     (dirName, fileName) = os.path.split(name)
-    friendlyName = get_friendly_name(fileName)
-    return LoadICPData(fileName, path=dirName, auto_PolState=auto_PolState, PolState=PolState)
+    friendly_name = get_friendly_name(fileName)
+    return LoadICPData(fileName, friendly_name=friendly_name, path=dirName, auto_PolState=auto_PolState, PolState=PolState)
 
 
 def load_asterix_action(input=[], files=[], **kwargs):
@@ -173,13 +173,13 @@ def load_asterix_action(input=[], files=[], **kwargs):
     
 def _load_asterix_data(name):
     (dirName, fileName) = os.path.split(name)
-    friendlyName = get_friendly_name(fileName)
-    print "friendlyName:", friendlyName
-    if friendlyName.endswith('hdf'):
+    friendly_name = get_friendly_name(fileName)
+    print "friendly_name:", friendly_name
+    if friendly_name.endswith('hdf'):
         format = "HDF4"
     else: #h5
         format = "HDF5"
-    return LoadAsterixRawHDF(fileName, path=dirName, friendlyName=friendlyName, format=format )
+    return LoadAsterixRawHDF(fileName, path=dirName, friendly_name=friendly_name, format=format )
     #return SuperLoadAsterixHDF(fileName, path=dirName, center_pixel=center_pixel, wl_over_tof=wl_over_tof, pixel_width_over_dist=pixel_width_over_dist, format=format )
 
 def load_asterix_spectrum_action(files=[], **kwargs):
@@ -408,7 +408,7 @@ def load_timestamp_action(files=[], **kwargs):
 load_stamp = load_timestamp_module(id='ospec.loadstamp', datatype=OSPEC_DATA_TIMESTAMP,
                    version='1.0', action=load_timestamp_action)
 
-def LoadTimestamps(filename, friendlyName="", path=""):
+def LoadTimestamps(filename, friendly_name="", path=""):
     fn = os.path.join(dirName, filename)
     return PlottableDict(simplejson.load(open(fn, 'r')))
 

@@ -37,6 +37,14 @@ class FilterableMetaArray(MetaArray):
         fd.close()
         return ans
     
+    def get_extrema(self):
+        extrema = {}
+        for ax in self._info:
+            if ax.has_key('values'):
+                values = array(ax['values'])
+                extrema[ax['name']] = [values.min(), values.max()]
+        return extrema
+    
     @classmethod
     def loads(cls, str):
         fd = StringIO(str)
