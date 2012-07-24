@@ -585,7 +585,7 @@
 		runAndSave: function(reductionInstance, clickedOn, dataname) {
 		    if (!dataname) {
                 function process_result(btn, text) {
-                    if (btn == 'ok' && text != ""){
+                    if (btn == 'ok' && text != "") {
                         editor.runAndSave(reductionInstance, clickedOn, text);
                     } 
                 }
@@ -601,20 +601,20 @@
 				wires: toReduce.wires,
 				language: toReduce.languageName
 			};
-		    var data = { toReduce: toReduce,
+		    var datadict = { toReduce: toReduce,
 		                 new_wiring:  tempSavedWiring,
 		                 experiment_id: this.launchedFromExperimentPage,
-		                 dataname: dataname }
+		                 dataname: dataname };
 
             var callbacksdict = {
-                success: {
-                    JQuery.ajax({
+                success: function () {
+                    $.ajax({
                         url: '/saveUpdate/',
                         type: 'GET',
-                        data: {this.launchedFromExperimentPage},  //experiment id
+                        data: { 'experiment_id': this.launchedFromExperimentPage },
                         success: function(response) {
-                            updateFilesMetadata();
-                        }
+                            updateFilesMetadata(response);
+                        },
                         failure: function(response) {
                             console.log('failure: ', response);
                         }
@@ -622,7 +622,7 @@
                 }, 
                 failure: function(response) { console.log('failure: ', response); }
             };
-		    this.adapter.saveData(data, callbacksdict);		    
+		    this.adapter.saveData(datadict, callbacksdict);		    
 		},
 		
 		/**
