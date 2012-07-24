@@ -81,7 +81,7 @@ class FilterableMetaArray(MetaArray):
         if len(self.shape) == 3:
             return self.get_plottable_2d(binary_fp)
         elif len(self.shape) == 2:
-            return self.get_plottable_1d()
+            return self.get_plottable_nd()
         else:
             print "can only handle 1d or 2d data"
             return 
@@ -123,12 +123,12 @@ class FilterableMetaArray(MetaArray):
         xlabel = self._info[0]['name']
         plottable_data = {
             'type': 'nd',
-            'title': 'Offspecular summed Data',
+            'title': '1d summed Data',
 
             'clear_existing': False,
             'orderx': [{'key': xlabel, 'label': xlabel }],
             'ordery': [],
-            'series': [ {'label': self._info[-1].get('filename', '1d data'),
+            'series': [ {'label': self._info[-1].get('friendly_name', '1d data'),
                         'color': 'Red',
                         'style': 'line',
                         'data': { xlabel: {

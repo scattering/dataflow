@@ -205,6 +205,40 @@ axesDefaults: {
         showTickMarks: true,    // wether or not to show the tick marks
     },
 */
+
+
+function transformData(transform) {
+    if (transform == 'log') {
+        for (var i=0; i<this.series.length; i++) {
+            var pd = this.series[i]._plotData;
+            var d = this.data[i];
+            for (var j=0; j<pd.length; j++) {
+                pd[j][1] = d[j][1]>0 ? Math.log(d[j][1]) / Math.LN10 : null;
+            }
+        }
+        this.axes.yaxis.resetScale();
+        this.axes.yaxis.renderer = new $.jqplot.LogAxisRenderer();
+        this.replot();
+    } else { // transform == 'lin'
+        for (var i=0; i<this.series.length; i++) {
+            var pd = this.series[i]._plotData;
+            var d = this.data[i];
+            for (var j=0; j<pd.length; j++) {
+                pd[j][1] = d[j][1];
+            }
+        }
+        this.axes.yaxis.resetScale();
+        this.axes.yaxis.renderer = new $.jqplot.LinearAxisRenderer();
+        this.replot();
+    }
+    this.transform = transform;
+}
+
+function toggleLogLin() {
+    if (this.transform == 'log') this.setTransform('lin');
+    else if (this.transform == 'lin') this.setTransform('log');
+}
+
 function render1dplot(data, transform, plotid, plot_options) {
     
     var options = {
@@ -267,32 +301,10 @@ function render1dplot(data, transform, plotid, plot_options) {
     }
     //$('.jqplot-table-legend-label').click({plot: plot1d}, handleLegendClick);
     plot1d.legend.handleClick = handleLegendClick;
-    
-    function transformData(transform) {
-        if (transform == 'log') {
-            for (var i=0; i<this.series.length; i++) {
-                var pd = this.series[i]._plotData;
-                var d = this.data[i];
-                for (var j=0; j<pd.length; j++) {
-                    pd[j][1] = d[j][1]>0 ? Math.log(d[j][1]) / Math.LN10 : null;
-                }
-            }
-            this.axes.yaxis.resetScale();
-            this.replot();
-        } else { // transform == 'lin'
-            for (var i=0; i<this.series.length; i++) {
-                var pd = this.series[i]._plotData;
-                var d = this.data[i];
-                for (var j=0; j<pd.length; j++) {
-                    pd[j][1] = d[j][1];
-                }
-            }
-            this.axes.yaxis.resetScale();
-            this.replot();
-        }
-    }
+       
     plot1d.setTransform = transformData
     plot1d.setTransform(transform);
+    plot1d.toggleLogLin = toggleLogLin;
     return plot1d
 };
 
@@ -417,7 +429,10 @@ function renderndplot(data, transform, plotid) {
 
     //replot clears old axes instead of having new axes rendered on top of old axes.
     plotnd.replot({resetAxes : true});  
-
+    
+    plotnd.setTransform = transformData
+    plotnd.setTransform(transform);
+    plotnd.toggleLogLin = toggleLogLin;
     plotnd.type = 'nd';
     return plotnd
 };
@@ -708,6 +723,13 @@ function plottingAPI(toPlots, plotid_prefix) {
                     plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, false);
                 }
             );
+            // logscale
+            jQuery(document.getElementById(plotid + '_toggleloglin')).unbind('click');
+            jQuery(document.getElementById(plotid + '_toggleloglin')).click(
+                function (e) {
+                    if (plot && plot.toggleLogLin) plot.toggleLogLin();
+                }
+            );
 
             // Setting up auto-update when drop-down menu changes
             jQuery(document.getElementById(plotid + '_selectx')).change(
@@ -722,12 +744,21 @@ function plottingAPI(toPlots, plotid_prefix) {
                     plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, false);
                 }
             );
+            jQuery(document.getElementById(plotid)).keypress(
+                function (e) {
+                    console.log(e);
+                    if (event.which == 108 || event.which == 76) {
+                        if (plot && plot.toggleLogLin) plot.toggleLogLin();
+                    }
+                }
+            );
             break;
         
         default:
             alert('plotting of datatype "' + plot_type + '" is unsupported');
     }
 }
+
 function getSelectedPlots(){
     toPlotArr = [];
     Ext.each(myndgridpanel.getSelectionModel().selected.items, function(item, i) {
@@ -830,11 +861,16 @@ function createNdPlotRegion(plotid, renderTo) {
     errorbartogglebutton.setAttribute('id', plotid + '_toggle');
     errorbartogglebutton.setAttribute('type', 'submit');
     errorbartogglebutton.setAttribute('value', 'Toggle Errorbars');
+    var loglintogglebutton = document.createElement('input');
+    loglintogglebutton.setAttribute('id', plotid + '_toggleloglin');
+    loglintogglebutton.setAttribute('type', 'submit');
+    loglintogglebutton.setAttribute('value', 'Toggle log/lin');
 
 
     divy.appendChild(selecty);
     divx.appendChild(selectx);
     divx.appendChild(errorbartogglebutton);
+    divx.appendChild(loglintogglebutton);
     div.appendChild(divy);
     div.appendChild(divtarget);
     //div.appendChild(divc);
@@ -977,7 +1013,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
         data.options.legend = {show: false};
     }
 
-    var transform = 'none'; //For now, only setting to 'log' will set it. Defaults to linear
+    var transform = 'lin'; //For now, only setting to 'log' will set it. Defaults to linear
     plot = renderndplot(data, transform, target_id);
     return plot;
 }

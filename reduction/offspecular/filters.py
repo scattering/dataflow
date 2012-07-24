@@ -1240,7 +1240,7 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
                     {"name": "pixels"},
                     {"name": "monitor"},
                     {"name": "count_time"}]},
-            {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date,
+            {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date, "friendly_name": friendly_name,
              "CreationStory":creation_story, "path":path}]
         )
     data_array = zeros(dims + (4,))
