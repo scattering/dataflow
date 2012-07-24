@@ -36,6 +36,8 @@ from ...dataflow.SANS.novelinstruments import SANS_NG3
 print "SANS imported: ", SANS_NG3.id
 from ...dataflow.tas.instruments import TAS as TAS_INS
 print "TAS imported: ", TAS_INS.id
+from ...dataflow.refl.instruments import PBR as PBR_INS
+print "PBR imported: ", PBR_INS.id
 
 # For reading in files and their metadata in the EditExperiment page
 from ...reduction.tripleaxis.data_abstraction import ncnr_filereader
@@ -258,7 +260,7 @@ b = {'save':'successful'}
 # 
 
 instrument_class_by_language = {}
-for instr in [ANDR, SANS_NG3, TAS_INS, ASTERIX]:
+for instr in [ANDR, SANS_NG3, TAS_INS, ASTERIX, PBR_INS]:
     instrument_class_by_language[instr.name] = instr
 
 #instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX }

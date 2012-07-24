@@ -1,13 +1,18 @@
 """
-Triple Axis Spectrometer reduction and analysis filters
+Specular reflectometry reduction and analysis filters
 """
 
-from ..core import Instrument, Datatype, register_module
-from ..modules.join import join_module
-from ..modules.scale import scale_module
-from ..modules.normalize import normalize_module
-from ..modules.footprintmodule import footprint_module
-from dataflow.reduction.reflectometry.filters import FootprintCorrection
+from ..core import Instrument, Data, Template, register_instrument, register_module
+from ..modules.load import load_module
+from ..modules.save import save_module
+#from ..modules.join import join_module
+#from ..modules.scale import scale_module
+#from ..modules.normalize import normalize_module
+from .modules.footprintmodule import footprint_module
+#from dataflow.reduction.reflectometry.filters import FootprintCorrection
+from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray
+from ...reduction.offspecular.filters import LoadICPMany, LoadICPData
+from ...reduction.reflectometry.filters import FootprintCorrection
 
 #def join_action(input=None):
 #    print "combining", input
@@ -33,26 +38,44 @@ from dataflow.reduction.reflectometry.filters import FootprintCorrection
 #    result = None
 #    return dict(output=result)
 
+SPEC_DATA = 'refl.data1d'
+data1d = Data(SPEC_DATA, FilterableMetaArray, loaders=[{'function':LoadICPMany, 'id':'LoadICPData'}])
+
 # FootprintCorrection module
 def footprint_action(input=[], start="", end="", slope="", intercept=""):
     print "applying footprint correction"
-    return dict(output=FootprintCorrection().apply(input, start, end, slope, intercept)) 
-footprint_data = footprint_module(id='refl.footprint', datatype='data1d.refl',
-                    version='1.0', action=footprint_action, filterModule=FootprintCorrection)
+    return dict(output=FootprintCorrection().apply(input, start, end, slope, intercept))
     
+footprint = footprint_module(id='refl.footprint', datatype='refl.data1d',
+                    version='1.0', action=footprint_action, filterModule=FootprintCorrection)
+
 #normalize = normalize_module(id='refl.normalize', datatype='data1d.refl',
 #                             version='1.0', action=normalize_action)
 
-data1d = Datatype(id='data1d.refl',
-                  name='1-D Reflectometry Data',
-                  plot='reflplot')
 
-input = [load]
+#data1d = Datatype(id='data1d.refl',
+#                  name='1-D Reflectometry Data',
+#                  plot='reflplot')
+
+load = load_module(id='refl.load', datatype=SPEC_DATA,
+                   version='1.0', 
+                   #action=load_action, 
+                   #fields=OrderedDict({'files': {}, 'autochain-loader':autochain_loader_field, 'auto_PolState': auto_PolState_field, 'PolStates': PolStates_field}), 
+                   filterModule=LoadICPData)
+
+save = save_module(id='refl.save', datatype=SPEC_DATA,
+                   version='1.0', action=None)
+save.xtype = 'SaveContainer'
+
+input = [load, save]
+
+
+
 #reduction = [join, scale, subtract, normalize, footprint, polcor]
 reduction = [footprint]
 
 PBR = Instrument(id='ncnr.refl.pbr',
-                 name='NCNR PBR',
+                 name='refl',
                  archive='http://www.ncnr/nist.gov/data/pbr',
                  menu=[
                        ('Input', input),
@@ -63,3 +86,5 @@ PBR = Instrument(id='ncnr.refl.pbr',
                  )
 
 instruments = [PBR]
+for instrument in instruments:
+        register_instrument(instrument)

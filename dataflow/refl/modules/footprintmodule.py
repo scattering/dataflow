@@ -14,11 +14,11 @@ def footprint_module(id=None, datatype=None, action=None,
         'image': config.IMAGES + config.ANDR_FOLDER + 'autgrid_image.png',
         'terminals': {
             'input': (None, None, -1, 0),
-            'output': (None, None, 1, 0);
+            'output': (None, None, 1, 0)
         }
     }
     
-    xtype = "FootprintContainer"
+    #xtype = "FootprintContainer"
     terminals = [
         dict(id='input',
             datatype=datatype,
@@ -69,5 +69,5 @@ def footprint_module(id=None, datatype=None, action=None,
                     filterModule=filterModule,
                     xtype=xtype
                     )
-module.LABEL_WIDTH = 150
-return module
+    module.LABEL_WIDTH = 150
+    return module

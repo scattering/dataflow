@@ -1208,16 +1208,20 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
     """
     lookup = {"a":"_down_down", "b":"_up_down", "c":"_down_up", "d":"_up_up", "g": ""}
     file_obj = load(os.path.join(path, filename), format='NCNR NG-1')
-    if not (len(file_obj.detector.counts.shape) == 2):
+    dims = file_obj.detector.counts.shape
+    ndims = len(dims)
+    #if not (len(file_obj.detector.counts.shape) == 2):
         # not a 2D object!
-        return
+    #    return
     if auto_PolState:
         key = friendly_name[-2:-1] # na1, ca1 etc. are --, nc1, cc1 are -+...
         PolState = lookup.get(key, "")
     # force PolState to a regularized version:
     if not PolState in lookup.values():
         PolState = ''
-    datalen, xpixels = file_obj.detector.counts.shape
+    datalen = file_obj.detector.counts.shape[0]
+    if ndims == 2:    
+        xpixels = file_obj.detector.counts.shape[1]
     creation_story = "LoadICPData('{fn}', path='{p}', auto_PolState={aPS}, PolState='{PS}'".format(fn=filename, p=path, aPS=auto_PolState, PS=PolState)
 
 # doesn't really matter; changing so that each keyword (whether it took the default value
@@ -1227,8 +1231,10 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
 
         
     creation_story += ")" 
-    info = [{"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x, "det_angle":file_obj.detector.angle_x },
-            {"name": "xpixel", "units": "pixels", "values": range(xpixels) },
+    info = [{"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x, "det_angle":file_obj.detector.angle_x }]
+    if ndims == 2:
+        info.append({"name": "xpixel", "units": "pixels", "values": range(xpixels) })
+    info.extend([
             {"name": "Measurements", "cols": [
                     {"name": "counts"},
                     {"name": "pixels"},
@@ -1236,15 +1242,17 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
                     {"name": "count_time"}]},
             {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date,
              "CreationStory":creation_story, "path":path}]
-    data_array = zeros((datalen, xpixels, 4))
+        )
+    data_array = zeros(dims + (4,))
     mon = file_obj.monitor.counts
-    mon.shape += (1,) # broadcast the monitor over the other dimension
     count_time = file_obj.monitor.count_time
-    count_time.shape += (1,)
-    data_array[:, :, 0] = file_obj.detector.counts
-    data_array[:, :, 1] = 1
-    data_array[:, :, 2] = mon
-    data_array[:, :, 3] = count_time
+    if ndims == 2:
+        mon.shape += (1,) # broadcast the monitor over the other dimension
+        count_time.shape += (1,)
+    data_array[..., 0] = file_obj.detector.counts
+    data_array[..., 1] = 1
+    data_array[..., 2] = mon
+    data_array[..., 3] = count_time
     # data_array[:,:,4]... I wish!!!  Have to do by hand.
     data = MetaArray(data_array, dtype='float', info=info)
     data.friendly_name = friendly_name # goes away on dumps/loads... just for initial object.

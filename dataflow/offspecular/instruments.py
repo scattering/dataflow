@@ -233,6 +233,7 @@ def _save_one(input, ext, index):
         outname = ".".join([os.path.splitext(outname)[0] + str(index), ext])
     print "saving", initname, 'as', outname
     input.write(outname)
+    
 save = save_module(id='ospec.save', datatype=OSPEC_DATA,
                    version='1.0', action=None)
 save.xtype = 'SaveContainer'
