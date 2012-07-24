@@ -9,7 +9,6 @@
 		<script type="text/javascript" src="/static/lib/plotting/jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
 		<script type="text/javascript" src="/static/lib/plotting/jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
 		<script type="text/javascript" src="/static/lib/plotting/jqplot/plugins/jqplot.errorbarRenderer.js"></script>
-		<script type="text/javascript" src="/static/lib/plotting/jqplot/plugins/jqplot.pcolorRenderer.js"></script>
 		<script type="text/javascript" src="/static/lib/plotting/jqplot/plugins/jqplot.cursor.js"></script>
 		<script type="text/javascript" src="/static/lib/plotting/palettes.js"></script>
 		<script type="text/javascript" src="/static/lib/plotting/plotting_api.js"></script>
@@ -75,7 +74,7 @@
                             
                             unfilled_data.z = z;
                             console.log('binary received and processed', byteArray.length); 
-                            onFinish();
+                            onFinish(unfilled_data);
                             
                         }  
                     }
@@ -85,7 +84,7 @@
             }
 		</script>
 		<script type="text/javascript">
-		    var plot, colorbar, yslice, xslice;
+		    //var plot, colorbar, yslice, xslice;
 
             fit_plots = function() {
 		        var width = document.body.offsetWidth;
@@ -105,10 +104,10 @@
 		    };
 		    
 		    replot_all = function() {
-  		        plot.replot(); 
-  		        colorbar.replot(); 
-  		        yslice.replot(); 
-  		        xslice.replot();
+		        if (plot && plot.replot) plot.replot();
+		        if (colorbar && colorbar.replot) colorbar.replot();
+		        if (yslice && yslice.replot) yslice.replot();
+		        if (xslice && xslice.replot) xslice.replot(); 
   		    };
   		    
   		    parseConfig = function(cfg) {
@@ -123,7 +122,7 @@
 		            var dims = toPlot[0].dims;
 		            // configuration from tracksConfigs supersedes the default from getConfig()
 		            cfg = {}; //{xmin: dims.xmin, xmax: dims.xmax, ymin: dims.ymin, ymax: dims.ymax};
-		            var all_cfg = container.getConfig();
+		            var all_cfg = container.getConfig().groups;
 		            if (reductionInstance in all_cfg) jQuery.extend(cfg, all_cfg[reductionInstance]);
 		            var lims = {xmin: dims.xmin, xmax: dims.xmax, ymin: dims.ymin, ymax: dims.ymax};
 		            for (var lim in lims) {
@@ -169,19 +168,23 @@
                 jQuery('#plot_selectz').change({}, onchange);
 		    }
 		    update_plot = function(toPlot, transform) {
+		        console.log("updating plot...", toPlot);
 		        debug = false;
 		        data = toPlot;
+		        
 		        if (data.binary_fp && data.z_binary_array == undefined) {
-		            if (plot && plot.series && plot.series[0]) { 
-		                plot.series[0].show=false; 
-		                plot.replot();
-		            }
-		            getBinaryData(data, function() { update_plot(data) })
+		            //if (plot && plot.series && plot.series[0]) { 
+		            //    plot.series[0].show=false; 
+		            //    plot.replot();
+		            //} else {
+		            getBinaryData(data, update_plot)
+		            console.log('getting binary data...');
 		            return
+		            //}
 		        } 
 		        if (plot == null) {
 		            // then initialize all the plot objects
-		            plot = $.jqplot('plot', [[0,0],[1,1]], {
+		            plot = $.jqplot('plot', data.z, {
 		                //cursor: {show: true, zoom: false},
 		                sortData: false,
 		                interactors: [{ type:'Rectangle', 
@@ -192,7 +195,7 @@
 		                                xmax: Number(cfg.xmax.value), 
 		                                ymax: Number(cfg.ymax.value)}],
 		                renderer: $.jqplot.heatmapRender,
-		                series: [ {shadow: false, padding: 0} ],
+		                series: [ {shadow: false, padding: 0, showMarker: false, showLine:false, breakOnNull:true} ],
                         grid: {shadow: false},
                         axesDefaults: {
 		                    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,

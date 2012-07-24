@@ -1247,6 +1247,7 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
     data_array[:, :, 3] = count_time
     # data_array[:,:,4]... I wish!!!  Have to do by hand.
     data = MetaArray(data_array, dtype='float', info=info)
+    data.friendly_name = friendly_name # goes away on dumps/loads... just for initial object.
     return data                   
 
 class InsertTimestamps(Filter2D):

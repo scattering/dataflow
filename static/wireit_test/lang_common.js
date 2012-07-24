@@ -111,7 +111,7 @@ YAHOO.lang.extend(SaveContainer, WireIt.Container, {
             var wire_in = f.wires[0];
             clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
         }
-        editor.saveData(reductionInstance, clickedOn);
+        editor.runAndSave(reductionInstance, clickedOn);
         //alert('save to server not yet implemented.  Try downloading CSV version of data');
     },
     getCSV: function(e, f) {

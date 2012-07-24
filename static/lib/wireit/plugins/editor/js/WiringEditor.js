@@ -583,7 +583,7 @@
 		    if (!dataname) {
                 function process_result(btn, text) {
                     if (btn == 'ok' && text != ""){
-                        editor.saveData(reductionInstance, clickedOn, text);
+                        editor.runAndSave(reductionInstance, clickedOn, text);
                     } 
                 }
                 
@@ -600,6 +600,7 @@
 			};
 		    var data = { toReduce: toReduce,
 		                 new_wiring:  tempSavedWiring,
+		                 experiment_id: this.launchedFromExperimentPage,
 		                 dataname: dataname }
 		    this.adapter.saveData(data);		    
 		},

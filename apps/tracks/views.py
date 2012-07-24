@@ -494,8 +494,29 @@ def saveData(request):
     toReduce = data['toReduce']
     template, config, nodenum, terminal_id = setupReduction(toReduce)
     result = calc_single(template, config, nodenum, terminal_id)
-    result_str = result.dumps()
-    filename = hashlib.sha1(result_str)
+    result_strs = []
+    sha1 = hashlib.new('sha1')
+    for dataset in result:
+        data_str = dataset.dumps()
+        sha1.update(data_str)
+        result_strs.append(data_str)
+        
+    filename = sha1.hexdigest()
+    file_path = os.path.join(FILES_DIR, filename)
+    
+    import tarfile
+    import StringIO
+    tar = tarfile.open(file_path,"w:gz")
+    
+    for i, data_str in enumerate(result_strs):
+        string = StringIO.StringIO()
+        string.write(data_str)
+        string.seek(0)
+        info = tarfile.TarInfo(name="data_%d" % (i,))
+        info.size=len(string.buf)
+        tar.addfile(tarinfo=info, fileobj=string)
+
+    tar.close()
     
     node = template.modules[nodenum]
     module_id = node['module'] # template.modules[node]
@@ -503,35 +524,29 @@ def saveData(request):
     terminal = module.get_terminal_by_id(terminal_id)
     datatype = terminal['datatype']
     
-    if toReduce.has_key('experiment_id'):
-        experiment_id = toReduce['experiment_id']
+    print 'data:\n', data
+    
+    if data.has_key('experiment_id'):
+        experiment_id = data['experiment_id']
         experiment = Experiment.objects.get(id=experiment_id)
     else:
         experiment = None
     
     new_wiring = data.get('new_wiring', '')
-        
-    import tarfile
-    import StringIO
-
-    file_path = os.path.join(FILES_DIR, filename)
-    tar = tarfile.open(file_path,"w:gz")
-    
-    for i, dataset in enumerate(result):
-        string = StringIO.StringIO()
-        string.write(dataset.dumps())
-        string.seek(0)
-        info = tarfile.TarInfo(name="data_%d" % (i,))
-        info.size=len(string.buf)
-        tar.addfile(tarinfo=info, fileobj=string)
-
-    tar.close()
     dataname = data.get('dataname', 'saved_data')
     
-    new_file = File.objects.create(friendly_name=dataname, name=filename, template_representation=new_wiring, datatype=datatype, location=location)
+    new_files = File.objects.filter(name=filename)
+    if len(new_files) > 0:
+        new_file = new_files[0]
+    else:
+        new_file = File.objects.create(friendly_name=dataname, name=filename, template_representation=new_wiring, datatype=datatype, location=location)
+    
+    for dobj in result:
+        add_metadata_to_file(new_file, dobj)
+    
     if experiment is not None:
         #print "experiment id: ", request.POST[u'experiment_id']
-        experiment.Files.add(new_result)
+        experiment.Files.add(new_file)
     return HttpResponse('OK');
     
 def getCSV(request):
@@ -667,25 +682,51 @@ def uploadFiles(request):
         instrument_class = request.POST[u'instrument_class']    
         loader_id = request.POST[u'loader_id']
         loader_function = None
+        datatype_id = None
         for dt in instrument_class_by_language[instrument_class].datatypes:
             for l in dt.loaders:
                 if l['id'] == loader_id:
                     loader_function = l['function']
+                    datatype_id = dt.id
                     break
         dataObjects = loader_function(file_descriptors)
         for fd in file_descriptors:
             os.remove(fd['filename'])
 
         for dobj in dataObjects:
+            # you'll want your data objects to take friendly_name as an argument (required above)
+            # and pass it to an attribute called "friendly_name"
+            # This allows for files that have many subsets of data in them to generate 
+            # their own "friendly_name" for each dataset, in the manner of your choosing.
+            friendly_name = dobj.friendly_name if hasattr(dobj, 'friendly_name') else "data"
             serialized = dobj.dumps()
             s_sha1 = hashlib.sha1(serialized)
-            new_files = File.objects.filter(name=s_sha1.hexdigest()) 
+            filename = s_sha1.hexdigest()
+            new_files = File.objects.filter(name=filename)
+            
+            import tarfile
+            import StringIO
+            string = StringIO.StringIO()
+            string.write(serialized)
+            string.seek(0)
+
+            file_path = os.path.join(FILES_DIR, filename)
+            tar = tarfile.open(file_path,"w:gz")
+            info = tarfile.TarInfo(name=friendly_name)
+            info.size=len(string.buf)
+            tar.addfile(tarinfo=info, fileobj=string)
+            tar.close()
+            #dataname = data.get('dataname', 'saved_data')
+            
+            #write_here = os.path.join(location, s_sha1.hexdigest())
+            #gzip.open(write_here, 'wb').write(serialized) 
+            
             if len(new_files) > 0:
                 new_file = new_files[0]
             else:
-                new_file = File.objects.create(name=s_sha1.hexdigest(), friendly_name=f.name, location=location)
+                new_file = File.objects.create(name=s_sha1.hexdigest(), friendly_name=friendly_name, location=location, datatype=datatype_id)
                 
-            add_metadata_to_file(new_file, s_sha1, dobj)
+            add_metadata_to_file(new_file, dobj)
             if experiment is not None:
                 #print "experiment id: ", request.POST[u'experiment_id']
                 experiment.Files.add(new_file)    
@@ -703,7 +744,7 @@ def uploadFiles(request):
         """
     return HttpResponse('OK') 
 
-def add_metadata_to_file(new_file, file_sha1, instrument):
+def add_metadata_to_file(new_file, instrument):
     """
     Adds the metadata extrema from the provided instrument to the provided file.
     Metadata is stored 
@@ -715,7 +756,7 @@ def add_metadata_to_file(new_file, file_sha1, instrument):
         
         # finds the unique location of this key in the database if it was previously loaded.
         # sorts on the file's unique hash then key value. Does this for both min and max.
-        existing_metadata = Metadata.objects.filter(Myfile=file_sha1.hexdigest()).filter(Key=keymin)
+        existing_metadata = Metadata.objects.filter(Myfile=new_file.name).filter(Key=keymin)
         if existing_metadata: 
             # if there is a metadata object in the database already, update its value
             existing_metadata[0].Value = extrema[key][0]
@@ -724,7 +765,7 @@ def add_metadata_to_file(new_file, file_sha1, instrument):
             new_file.metadata.add(new_metadata_min)
         
         keymax = key + '_max'
-        existing_metadata = Metadata.objects.filter(Myfile=file_sha1.hexdigest()).filter(Key=keymax)
+        existing_metadata = Metadata.objects.filter(Myfile=new_file.name).filter(Key=keymax)
         if existing_metadata: 
             # if there is a metadata object in the database already, update its value
             existing_metadata[0].Value = extrema[key][1]                    

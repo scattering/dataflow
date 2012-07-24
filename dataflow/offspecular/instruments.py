@@ -208,7 +208,10 @@ PolStates_field = {
 }
 
 load = load_module(id='ospec.load', datatype=OSPEC_DATA,
-                   version='1.0', action=load_action, fields=OrderedDict({'files': {}, 'autochain-loader':autochain_loader_field, 'auto_PolState': auto_PolState_field, 'PolStates': PolStates_field}), filterModule=LoadICPData)
+                   version='1.0', 
+                   #action=load_action, 
+                   #fields=OrderedDict({'files': {}, 'autochain-loader':autochain_loader_field, 'auto_PolState': auto_PolState_field, 'PolStates': PolStates_field}), 
+                   filterModule=LoadICPData)
 
 #load_asterix = load_asterix_module(id='ospec.asterix.load', datatype=OSPEC_DATA,
 #                   version='1.0', action=load_asterix_action, filterModule=LoadAsterixRawHDF)
@@ -231,7 +234,7 @@ def _save_one(input, ext, index):
     print "saving", initname, 'as', outname
     input.write(outname)
 save = save_module(id='ospec.save', datatype=OSPEC_DATA,
-                   version='1.0', action=save_action)
+                   version='1.0', action=None)
 save.xtype = 'SaveContainer'
 save.image = config.IMAGES + config.ANDR_FOLDER + "save_image.png"
 
