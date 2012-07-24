@@ -43,7 +43,7 @@ to something plottable
 """
 
 # for purposes of iterating over a dictionary for a TripleAxis object, these fields are skipped
-skipped_fields=['data','meta_data','sample','sample_environment','xstep','ystep','num_bins','magnetic_field','extrema']
+skipped_fields=['friendly_name', 'data','meta_data','sample','sample_environment','xstep','ystep','num_bins','magnetic_field','extrema']
 
 
 
@@ -766,6 +766,7 @@ class TripleAxis(object):
         self.xstep = None
         self.ystep = None
         self.extrema = {}
+        self.friendly_name = ''
 
     
     def get_extrema(self):
@@ -974,7 +975,7 @@ class TripleAxis(object):
 
                         data[field.name] = {'values': val, 'errors': err}
 
-            filename = self.meta_data.filename # Should never be None
+            filename = self.friendly_name # Should never be None
             plottable_data = {
                 'type': 'nd',
                 'title': 'Triple Axis Plot',
@@ -1473,6 +1474,7 @@ def translate_metadata(tas, dataset):
     translate_dict['ubmatrix'] = 'ubmatrix'
 
     map_motors(translate_dict, tas, tas.meta_data, dataset)
+    tas.friendly_name = tas.meta_data.filename
     #ap_motors(translate_dict,tas.meta_data,dataset)
 
     #self.meta_data.epoch=dataset.metadata.epoch

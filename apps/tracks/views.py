@@ -836,7 +836,16 @@ def call_appropriate_filereader(filestr, friendly_name=None, fileExt=None):
 ## The intermediate template 'editorRedirect.html' is used so that we can redirect to /editor/ while preserving 
 ## the language selection.
 
-## HAVING TROUBLE SENDING LIST OF STRINGS AS CONTEXT TO THE EDITOR
+
+def return_files_metadata(experiment_id):
+    """
+    Returns FILES and METADATA
+    """
+    experiment = Experiment.objects.get(id=experiment_id)
+    file_list = experiment.Files.all()
+    file_keys = [[fl.name, fl.friendly_name] for fl in file_list]
+    return simplejson.dumps(file_keys), return_metadata(experiment_id)
+
 #@csrf_exempt 
 def displayEditor(request):
     context = RequestContext(request)
@@ -859,9 +868,10 @@ def displayEditor(request):
         file_context['experiment_id'] = experiment_id
         # not using simplejson here because for some reason the old version of simplejson on danse
         # does not respect key order for OrderedDict.
-        
+    
         #try:
         file_context['language_actual'] = json.dumps(wireit.instrument_to_wireit_language(instrument_class_by_language[language_name]))
+
         '''        
         except:
             #TODO 6/11/2012 - this redirects --> need to convert into popup if possible!

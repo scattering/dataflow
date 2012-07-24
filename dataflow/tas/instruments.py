@@ -18,7 +18,7 @@ if 1:
     from .modules.tas_join import join_module
     from .modules.tas_subtract import subtract_module
     from ..modules.save import save_module
-    from .modules.tas_load import load_module
+    from ..modules.load import load_module
     from .modules.tas_extract import extract_module
     from .modules.loadchalk import load_chalk_module
     from .modules.tas_normalize_monitor import normalize_monitor_module
@@ -45,7 +45,7 @@ if 0:
     from dataflow.dataflow.tas.modules.tas_join import join_module
     from dataflow.dataflow.tas.modules.tas_subtractimport import subtract_module
     from dataflow.dataflow.modules.save import save_module
-    from dataflow.dataflow.tas.modules.tas_load import load_module
+    from dataflow.dataflow.modules.load import load_module
     from dataflow.dataflow.tas.modules.tas_normalize_monitor import normalize_monitor_module
     from dataflow.dataflow.tas.modules.tas_detailed_balance import detailed_balance_module
     from dataflow.dataflow.tas.modules.tas_monitor_correction import monitor_correction_module
@@ -88,7 +88,7 @@ data1d = Data(TAS_DATA, data_abstraction.TripleAxis, loaders=[{'function':data_a
 def get_friendly_name(fh):
     from ...apps.tracks.models import File
     return File.objects.get(name=str(fh)).friendly_name
-
+'''
 def _load_data(name):
     (dirName, fileName) = os.path.split(name)
     friendlyName = get_friendly_name(fileName)
@@ -105,6 +105,7 @@ def load_action(files=[], intent=None, position=None, xtype=None, **kwargs):
         else:
             result.append(subresult)
     return dict(output=result)
+'''
 ################################################################################
 # NOTE: 02/03/2012 bbm
 # this is what was in "load_action" before
@@ -116,10 +117,9 @@ def load_action(files=[], intent=None, position=None, xtype=None, **kwargs):
 # dataflow/dataflow/offspecular/instruments.py
 ################################################################################
 
-load = load_module(id='tas.load', datatype=TAS_DATA,
-                   version='1.0', action=load_action,)
+load = load_module(id='tas.load', datatype=TAS_DATA, version='1.0')
 
-
+'''
 def _load_chalk_data(aof_filename, orient1, orient2, acf_filename=None):
     #(dirName, fileName) = os.path.split(name)
     #friendlyName = get_friendly_name(fileName)
@@ -196,7 +196,6 @@ loadchalk = load_chalk_module(id='tas.loadchalk', datatype=TAS_DATA,
                    version='1.0', action=load_chalk_action,)
 
 
-'''
 def extract_action(input, data_objects=[], **kwargs):
     """ isolates/extracts the given list of objects """
     print "extracting", data_objects
@@ -234,6 +233,7 @@ fields = {'ext': {
 save = save_module(id='tas.save', datatype=TAS_DATA,
                    version='1.0', action=save_action,
                    fields=fields)
+save.xtype = 'SaveContainer'
     
 def join_action(input, xaxis='', yaxis='', num_bins=0, xstep=None, ystep=None, **kwargs):
     # This is confusing because load returns a bundle and join, which can
@@ -262,14 +262,14 @@ def join_action(input, xaxis='', yaxis='', num_bins=0, xstep=None, ystep=None, *
     joinedtas.ystep = ystep
     return dict(output=[joinedtas])
 
-'''
+
 fields = {
     'xaxis': {
         "type": "List",
         "label": "X axis for 2D plotting",
         "name": "xaxis",
         "value": '',
-        "choices": [data_abstraction.
+        "choices": []#data_abstraction.TripleAxis.get_field_names()]
     }, 
     'yaxis': {
         "type": "string",
@@ -296,7 +296,7 @@ fields = {
         "value": None,
     }
 }
-'''
+
 
 
 join = join_module(id='tas.join', datatype=TAS_DATA,
@@ -376,7 +376,7 @@ volumecorrection = volume_correction_module(id='tas.volume_correction', datatype
 TAS = Instrument(id='ncnr.tas',
                  name='tas',
                  archive=config.NCNR_DATA + '/tas',
-                 menu=[('Input', [load, loadchalk, save]),
+                 menu=[('Input', [load, save]),
                        ('Reduction', [join, subtract, normalizemonitor, detailedbalance,
                                       monitorcorrection, volumecorrection])
                        ],

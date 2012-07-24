@@ -41,6 +41,7 @@ urlpatterns = patterns(REPO_ROOT + '.apps.tracks.views',
     # File loader display urls (testing, 7/6)
     ('^loadFiles/$', 'displayFileLoad'),
     ('^loadFiles/getNCNRdirs/', 'getNCNRdirectories'),
+    ('^saveUpdate/$', 'return_files_metadata'),
 
     # user projects/experiments/instruments/files interactions
     ('^myProjects/$', 'myProjects'),

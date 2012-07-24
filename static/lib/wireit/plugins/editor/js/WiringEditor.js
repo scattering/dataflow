@@ -9,6 +9,9 @@
 	 * @constructor
 	 * @param {Object} options
 	 */
+    updateFilesMetadata = function (response) {
+        console.log(response);
+    };
 	WireIt.WiringEditor = function(options) {
 
 		/**
@@ -524,7 +527,7 @@
 			var that = this;
 			function makePlotWindow() {
 			    if (!that.plotWindow || !that.plotWindow.window || that.plotWindow.window.closed) {
-			        that.plotWindow = window.open("/plotWindow/", "", "status=1,width=700,height=500"); }
+			        that.plotWindow = window.open("/plotWindow/", "", "status=1,width=800,height=450"); }
 			}
 			
 			var unfilled_data = [];
@@ -602,7 +605,24 @@
 		                 new_wiring:  tempSavedWiring,
 		                 experiment_id: this.launchedFromExperimentPage,
 		                 dataname: dataname }
-		    this.adapter.saveData(data);		    
+
+            var callbacksdict = {
+                success: {
+                    JQuery.ajax({
+                        url: '/saveUpdate/',
+                        type: 'GET',
+                        data: {this.launchedFromExperimentPage},  //experiment id
+                        success: function(response) {
+                            updateFilesMetadata();
+                        }
+                        failure: function(response) {
+                            console.log('failure: ', response);
+                        }
+                    });                
+                }, 
+                failure: function(response) { console.log('failure: ', response); }
+            };
+		    this.adapter.saveData(data, callbacksdict);		    
 		},
 		
 		/**
