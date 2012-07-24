@@ -95,7 +95,7 @@ class FilterableMetaArray(MetaArray):
         xlabel = self._info[0]['name']
         plottable_data = {
             'type': '1d',
-            'title': 'Offspecular summed Data',
+            'title': '1d Data',
             'options': {'series': []},
             'clear_existing': False,
             'data': []
