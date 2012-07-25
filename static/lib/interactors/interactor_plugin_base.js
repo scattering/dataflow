@@ -155,6 +155,7 @@
             this.state = null;
             this.plot = null;
             this.translatable = true;
+            this.allow_pan = true;
 
             this.grobs = [];
             this.mousedown = false;
@@ -363,7 +364,7 @@
         },
         
         onEmptyDrag: function(pos) {
-            this.panPlot(pos);
+            if (this.allow_pan == true) this.panPlot(pos);
         },
         
         zoomMax: function() {
@@ -521,7 +522,16 @@
         if (options.interactors) {
             if (!this.plugins.interactors) this.plugins.interactors = {};
             this.plugins._interactor = new $.jqplot.MasterInteractorPlugin();
-            this.plugins._interactor.init();
+            var master_opts = {}
+            for (var i in options.interactors) {
+                var iopts = options.interactors[i];
+                var itype = iopts.type;
+                if (itype == 'master') {
+                    master_opts = iopts;
+                    break
+                }
+            }
+            this.plugins._interactor.init(master_opts);
             this.plugins._interactor.plot = this;
             this.plugins._interactor.name = "master";
             //var master = this.plugins._interactor;
