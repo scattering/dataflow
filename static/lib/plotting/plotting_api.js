@@ -375,7 +375,7 @@ function renderImageData2(data, transform, plotid, plot_options) {
     return plot2d
 };
 
-function renderndplot(data, transform, plotid) {
+function renderndplot(data, transform, plotid, plot_options) {
     
     var options = {
         title: data.title,
@@ -424,8 +424,9 @@ function renderndplot(data, transform, plotid) {
     };
     
     jQuery.extend(true, options, data.options);
+    jQuery.extend(true, options, plot_options);
     //jQuery(plotid).empty(); // empty the jqplot div in the DOM. Seemed unnecessary. 7/17/2012
-    plotnd = jQuery.jqplot(plotid, series, options);
+    plotnd = jQuery.jqplot(plotid, data.data, options);
 
     //replot clears old axes instead of having new axes rendered on top of old axes.
     plotnd.replot({resetAxes : true});  
@@ -487,7 +488,7 @@ function make_metadata_table(metadata, numcols) {
     return new_table;
 }
 
-function update1dPlot(plot, toPlots, target_id, plotnum) {
+function update1dPlot(plot, toPlots, target_id, plotnum, plot_options) {
     if (!plot || !plot.hasOwnProperty("type") || plot.type!='1d'){
         var plotdiv = document.getElementById(target_id);
         plotdiv.innerHTML = "";
@@ -524,7 +525,7 @@ function update1dPlot(plot, toPlots, target_id, plotnum) {
         jQuery(document.getElementById('plot_selectnum')).append(jQuery('<option />', { value: i, text: 'dataset: ' + i + " " + label }));
     }
     
-    plot = render1dplot(toPlot, transform, 'plotgrid');
+    plot = render1dplot(toPlot, transform, 'plotgrid', plot_options);
 
     var selectedIndex;
     if ( transform == 'log') { selectedIndex = 1 }
@@ -558,7 +559,7 @@ function update1dPlot(plot, toPlots, target_id, plotnum) {
     return plot; 
 }
 
-function update2dPlot(plot, toPlots, target_id, plotnum) {
+function update2dPlot(plot, toPlots, target_id, plotnum, plot_options) {
     if (!plot || !plot.hasOwnProperty("type") || plot.type!='2d'){
         var plotdiv = document.getElementById(target_id);
         plotdiv.innerHTML = "";
@@ -606,7 +607,8 @@ function update2dPlot(plot, toPlots, target_id, plotnum) {
         jQuery(document.getElementById('plot_selectnum')).append(jQuery('<option />', { value: i, text: 'dataset: ' + i + " " + zlabel }));
     }
     
-    plot = renderImageData2(toPlot, transform, 'plotgrid', {'fixedAspect': {'fixAspect': fixAspect, 'aspectRatio': aspectRatio}});
+    jQuery.extend(true, plot_options, {'fixedAspect': {'fixAspect': fixAspect, 'aspectRatio': aspectRatio}});
+    plot = renderImageData2(toPlot, transform, 'plotgrid', plot_options);
     colorbar = renderImageColorbar2(plot.series[0], 'colorbar');
     plot2d.series[0].zoom_to();
     plot2d.replot();
@@ -680,7 +682,9 @@ var toPlots_input = null;
 var myndgridpanel = null;
 var errorbarsOn = false; //true will turn errorbars on for ndplotting.
 
-function plottingAPI(toPlots, plotid_prefix) {
+function plottingAPI(toPlots, plotid_prefix, plot_options) {
+    // plot_options are passed to the individual plot renderers
+    var plot_options = plot_options || {};
     $.jqplot.config.enablePlugins = true;
     toPlots_input = toPlots;
     if (debug) console.log(toPlots.constructor.name);
@@ -700,18 +704,18 @@ function plottingAPI(toPlots, plotid_prefix) {
     
     switch (plot_type) {
         case '2d':
-            plot = update2dPlot(plot, toPlots, plotid_prefix);
+            plot = update2dPlot(plot, toPlots, plotid_prefix, 0, plot_options);
             break;
         
         case '1d':
-            plot = update1dPlot(plot, toPlots, plotid_prefix);
+            plot = update1dPlot(plot, toPlots, plotid_prefix, 0, plot_options);
             break;
         
         case 'nd': 
             var toPlot = toPlots;
             var plotid = plotid_prefix + '_nd';
             
-            plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, true); 
+            plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, true, plot_options); 
             //with create=true, myndgridpanel will be created and not null.
 
             //Listener for clicking the Toggle Errorbar button.
@@ -914,7 +918,7 @@ function get(arr, i) {
     }
 }
 
-function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
+function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create, plot_options) {
     if (create || !plot || !plot.hasOwnProperty("type") || plot.type!='nd'){
         var plotdiv = document.getElementById(plotid_prefix);
         plotdiv.innerHTML = "";  //removing the "I am a plot." from plotwindow.html's div
@@ -948,7 +952,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
     } 
 
     target_id = plotid + '_target';
-    series = new Array();
+    var series = new Array();
     var markerOptionsArray = ['filledSquare', 'circle', 'diamond', 'x'];
     var numberOptions = 4; // markerOptionsArray.length; //hardcoding for speed
     var markerIndex = 0;
@@ -1014,7 +1018,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create) {
     }
 
     var transform = 'lin'; //For now, only setting to 'log' will set it. Defaults to linear
-    plot = renderndplot(data, transform, target_id);
+    plot = renderndplot(data, transform, target_id, plot_options);
     return plot;
 }
 
