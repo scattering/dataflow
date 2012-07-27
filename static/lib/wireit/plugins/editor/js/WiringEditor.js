@@ -9,6 +9,9 @@
 	 * @constructor
 	 * @param {Object} options
 	 */
+    updateFilesMetadata = function (response) {
+        console.log(response);
+    };
 	WireIt.WiringEditor = function(options) {
 
 		/**
@@ -524,7 +527,7 @@
 			var that = this;
 			function makePlotWindow() {
 			    if (!that.plotWindow || !that.plotWindow.window || that.plotWindow.window.closed) {
-			        that.plotWindow = window.open("/plotWindow/", "", "status=1,width=700,height=500"); }
+			        that.plotWindow = window.open("/plotWindow/", "", "status=1,width=800,height=450"); }
 			}
 			
 			var unfilled_data = [];
@@ -582,7 +585,7 @@
 		runAndSave: function(reductionInstance, clickedOn, dataname) {
 		    if (!dataname) {
                 function process_result(btn, text) {
-                    if (btn == 'ok' && text != ""){
+                    if (btn == 'ok' && text != "") {
                         editor.runAndSave(reductionInstance, clickedOn, text);
                     } 
                 }
@@ -598,11 +601,28 @@
 				wires: toReduce.wires,
 				language: toReduce.languageName
 			};
-		    var data = { toReduce: toReduce,
+		    var datadict = { toReduce: toReduce,
 		                 new_wiring:  tempSavedWiring,
 		                 experiment_id: this.launchedFromExperimentPage,
-		                 dataname: dataname }
-		    this.adapter.saveData(data);		    
+		                 dataname: dataname };
+
+            var callbacksdict = {
+                success: function () {
+                    $.ajax({
+                        url: '/saveUpdate/',
+                        type: 'GET',
+                        data: { 'experiment_id': this.launchedFromExperimentPage },
+                        success: function(response) {
+                            updateFilesMetadata(response);
+                        },
+                        failure: function(response) {
+                            console.log('failure: ', response);
+                        }
+                    });
+                }, 
+                failure: function(response) { console.log('failure: ', response); }
+            };
+		    this.adapter.saveData(datadict, callbacksdict);		    
 		},
 		
 		/**

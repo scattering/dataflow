@@ -43,8 +43,7 @@ print "PBR imported: ", PBR_INS.id
 from ...reduction.tripleaxis.data_abstraction import ncnr_filereader
 from ...reduction.tripleaxis.data_abstraction import chalk_filereader
 from ...reduction.tripleaxis.data_abstraction import hfir_filereader
-
-
+from ...reduction.tripleaxis.data_abstraction import TripleAxis
 from ...dataflow import wireit
 
 import random
@@ -231,8 +230,6 @@ def getNCNRdirectories(request):
 
 def displayFileLoad(request):
     return render_to_response('FileUpload/FileTreeTest.html', locals())
-
-
 
 
 sample_data = {
@@ -730,11 +727,12 @@ def uploadFiles(request):
                 new_file = new_files[0]
             else:
                 new_file = File.objects.create(name=s_sha1.hexdigest(), friendly_name=friendly_name, location=location, datatype=datatype_id)
-                
-            add_metadata_to_file(new_file, dobj)
+                   
+            add_metadata_to_file(new_file, dobj) #THIS IS THE TIME CONSUMER!
             if experiment is not None:
                 #print "experiment id: ", request.POST[u'experiment_id']
-                experiment.Files.add(new_file)    
+                experiment.Files.add(new_file)
+
                 
         """    
             new_files = File.objects.filter(name=file_sha1.hexdigest())
@@ -841,7 +839,17 @@ def call_appropriate_filereader(filestr, friendly_name=None, fileExt=None):
 ## The intermediate template 'editorRedirect.html' is used so that we can redirect to /editor/ while preserving 
 ## the language selection.
 
-## HAVING TROUBLE SENDING LIST OF STRINGS AS CONTEXT TO THE EDITOR
+def return_files_metadata(request):
+    """
+    Returns FILES and METADATA
+    """
+    if request.GET.has_key('experiment_id'):
+        experiment_id = int(request.GET['experiment_id'])
+        experiment = Experiment.objects.get(id=experiment_id)
+        file_list = experiment.Files.all()
+        file_keys = [[fl.name, fl.friendly_name] for fl in file_list]
+        return simplejson.dumps(file_keys), return_metadata(experiment_id)
+
 #@csrf_exempt 
 def displayEditor(request):
     context = RequestContext(request)
@@ -864,9 +872,10 @@ def displayEditor(request):
         file_context['experiment_id'] = experiment_id
         # not using simplejson here because for some reason the old version of simplejson on danse
         # does not respect key order for OrderedDict.
-        
+    
         #try:
         file_context['language_actual'] = json.dumps(wireit.instrument_to_wireit_language(instrument_class_by_language[language_name]))
+
         '''        
         except:
             #TODO 6/11/2012 - this redirects --> need to convert into popup if possible!

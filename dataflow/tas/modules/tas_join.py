@@ -15,10 +15,10 @@ def join_module(id=None, datatype=None, action=None,
     icon = {
         'URI': config.IMAGES + 'TAS/join.png',
         'image': config.IMAGES + 'TAS/join.png',
-        'width': 'auto', 
+        'width': 64, #'auto', 
         'terminals': {
             'input': (-12, 16, -1, 0),
-            'output': (48, 16, 1, 0),
+            'output': (48, 16, 2, 0),
         }
     }
     
@@ -37,7 +37,7 @@ def join_module(id=None, datatype=None, action=None,
              description='Combined data',
              ),
     ]
-    
+    '''
     fields = {
         'xaxis': {
             "type": "string",
@@ -45,17 +45,6 @@ def join_module(id=None, datatype=None, action=None,
             "name": "xaxis",
             "value": '',
         }, 
-        '''
-        'xaxis': {
-            "type": "List",
-            "label": "X axis for 2D plotting",
-            "name": "xaxis",
-            "value": '',
-            "choices": ['focus_pg', 'elevation', 'ei', 'translation', 'focus_cu', 'filter_translation',
-                        'filter_tilt', 'filter_rotation', 'ei_cancel', 'sample_guide_field_rotation', ], 
-            #TODO get the choices from metadata!!!!!!!!!!
-        }, 
-        '''
         'yaxis': {
             "type": "string",
             "label": "Y axis for 2D plotting",
@@ -81,7 +70,7 @@ def join_module(id=None, datatype=None, action=None,
             "value": None,
         }
     }
-    
+    '''
     # Combine everything into a module.
     module = Module(id=id,
                   name='Join',

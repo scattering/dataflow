@@ -18,7 +18,7 @@ if 1:
     from .modules.tas_join import join_module
     from .modules.tas_subtract import subtract_module
     from ..modules.save import save_module
-    from .modules.tas_load import load_module
+    from ..modules.load import load_module
     from .modules.tas_extract import extract_module
     from .modules.loadchalk import load_chalk_module
     from .modules.tas_normalize_monitor import normalize_monitor_module
@@ -45,7 +45,7 @@ if 0:
     from dataflow.dataflow.tas.modules.tas_join import join_module
     from dataflow.dataflow.tas.modules.tas_subtractimport import subtract_module
     from dataflow.dataflow.modules.save import save_module
-    from dataflow.dataflow.tas.modules.tas_load import load_module
+    from dataflow.dataflow.modules.load import load_module
     from dataflow.dataflow.tas.modules.tas_normalize_monitor import normalize_monitor_module
     from dataflow.dataflow.tas.modules.tas_detailed_balance import detailed_balance_module
     from dataflow.dataflow.tas.modules.tas_monitor_correction import monitor_correction_module
@@ -55,7 +55,9 @@ if 0:
 
 TAS_DATA = 'data1d.tas'
 xtype = 'AutosizeImageContainer'
-data1d = Data(TAS_DATA, data_abstraction.TripleAxis, loaders=[{'function':data_abstraction.autoloader, 'id':'loadTAS'}])
+data1d = Data(TAS_DATA, data_abstraction.TripleAxis, loaders=[{'function':data_abstraction.autoloader, 'id':'loadTAS'}, 
+                                                              {'function':data_abstraction.chalk_autoloader, 'id':'loadChalkRiver'}])
+
 # Reduction operations may refer to data from other objects, but may not
 # modify it.  Instead of modifying, first copy the data and then work on
 # the copy.
@@ -88,7 +90,7 @@ data1d = Data(TAS_DATA, data_abstraction.TripleAxis, loaders=[{'function':data_a
 def get_friendly_name(fh):
     from ...apps.tracks.models import File
     return File.objects.get(name=str(fh)).friendly_name
-
+'''
 def _load_data(name):
     (dirName, fileName) = os.path.split(name)
     friendlyName = get_friendly_name(fileName)
@@ -105,6 +107,7 @@ def load_action(files=[], intent=None, position=None, xtype=None, **kwargs):
         else:
             result.append(subresult)
     return dict(output=result)
+'''
 ################################################################################
 # NOTE: 02/03/2012 bbm
 # this is what was in "load_action" before
@@ -116,10 +119,9 @@ def load_action(files=[], intent=None, position=None, xtype=None, **kwargs):
 # dataflow/dataflow/offspecular/instruments.py
 ################################################################################
 
-load = load_module(id='tas.load', datatype=TAS_DATA,
-                   version='1.0', action=load_action,)
+load = load_module(id='tas.load', datatype=TAS_DATA, version='1.0')
 
-
+'''
 def _load_chalk_data(aof_filename, orient1, orient2, acf_filename=None):
     #(dirName, fileName) = os.path.split(name)
     #friendlyName = get_friendly_name(fileName)
@@ -196,7 +198,6 @@ loadchalk = load_chalk_module(id='tas.loadchalk', datatype=TAS_DATA,
                    version='1.0', action=load_chalk_action,)
 
 
-'''
 def extract_action(input, data_objects=[], **kwargs):
     """ isolates/extracts the given list of objects """
     print "extracting", data_objects
@@ -234,6 +235,7 @@ fields = {'ext': {
 save = save_module(id='tas.save', datatype=TAS_DATA,
                    version='1.0', action=save_action,
                    fields=fields)
+save.xtype = 'SaveContainer'
     
 def join_action(input, xaxis='', yaxis='', num_bins=0, xstep=None, ystep=None, **kwargs):
     # This is confusing because load returns a bundle and join, which can
@@ -262,20 +264,24 @@ def join_action(input, xaxis='', yaxis='', num_bins=0, xstep=None, ystep=None, *
     joinedtas.ystep = ystep
     return dict(output=[joinedtas])
 
-'''
+
 fields = {
+    #TODO get the choices from the data object, NOT hardcoded in. 7/25/2012
     'xaxis': {
         "type": "List",
         "label": "X axis for 2D plotting",
         "name": "xaxis",
         "value": '',
-        "choices": [data_abstraction.
+        "choices": ["h", "k", "l", "q", "e", "ef", "focus_pg", "elevation", "translation", "focus_cu", "filter_translation", "filter_tilt", "filter_rotation", "ei_cancel", "sample_guide_field_rotatation", "flipper_state", "vsample", "eta", "hsample", "zeta", "ei_flip", "ef_guide", "sample_lower_translation", "analyzer_rotation", "sample_lower_tilt", "sample_elevator", "sample_upper_tilt", "sample_two_theta", "analyzer_theta", "sample_upper_translation", "monochromator_theta", "monochromator_two_theta", "dfm_rotation", "analyzer_two_theta", "sample_theta", "back_slit_width", "back_slit_height", "analyzerblade0", "analyzerblade1", "analyzerblade2", "analyzerblade3", "analyzerblade4", "analyzerblade5", "analyzerblade6", "analyzerblade7", "temperature_control_reading", "temperature_heater_power", "temperature", "temperature_setpoint", "soller_collimator", "radial_collimator", "post_analyzer_collimator", "pre_analyzer_collimator", "post_monochromator_collimator", "pre_monochromator_collimator", "aperture_horizontal", "aperture_vertical", 
+"orient2", "ei", "orient3", "orient1", "monitor", "timestamp", "duration", "monitor2"],
     }, 
     'yaxis': {
-        "type": "string",
+        "type": "List",
         "label": "Y axis for 2D plotting",
         "name": "yaxis",
         "value": '',
+        "choices": ["e", "ef", "h", "k", "l", "q", "focus_pg", "elevation", "translation", "focus_cu", "filter_translation", "filter_tilt", "filter_rotation", "ei_cancel", "sample_guide_field_rotatation", "flipper_state", "vsample", "eta", "hsample", "zeta", "ei_flip", "ef_guide", "sample_lower_translation", "analyzer_rotation", "sample_lower_tilt", "sample_elevator", "sample_upper_tilt", "sample_two_theta", "analyzer_theta", "sample_upper_translation", "monochromator_theta", "monochromator_two_theta", "dfm_rotation", "analyzer_two_theta", "sample_theta", "back_slit_width", "back_slit_height", "analyzerblade0", "analyzerblade1", "analyzerblade2", "analyzerblade3", "analyzerblade4", "analyzerblade5", "analyzerblade6", "analyzerblade7", "temperature_control_reading", "temperature_heater_power", "temperature", "temperature_setpoint", "soller_collimator", "radial_collimator", "post_analyzer_collimator", "pre_analyzer_collimator", "post_monochromator_collimator", "pre_monochromator_collimator", "aperture_horizontal", "aperture_vertical", 
+"orient2", "ei", "orient3", "orient1", "monitor", "timestamp", "duration", "monitor2"],
     },
     'num_bins': {
         "type": "float",
@@ -296,13 +302,12 @@ fields = {
         "value": None,
     }
 }
-'''
 
 
-join = join_module(id='tas.join', datatype=TAS_DATA,
-                   version='1.0', action=join_action, xtype=xtype, 
-                                            filterModule=data_abstraction.join)
 
+join = join_module(id='tas.join', datatype=TAS_DATA, fields=fields,
+                   version='1.0', action=join_action, filterModule=data_abstraction.join)
+join.xtype = 'JoinContainer'
 
 def subtract_action(signal, background, scan_variable=None, **kwargs):
     print "SUBTRACTING"
@@ -376,7 +381,7 @@ volumecorrection = volume_correction_module(id='tas.volume_correction', datatype
 TAS = Instrument(id='ncnr.tas',
                  name='tas',
                  archive=config.NCNR_DATA + '/tas',
-                 menu=[('Input', [load, loadchalk, save]),
+                 menu=[('Input', [load, save]),
                        ('Reduction', [join, subtract, normalizemonitor, detailedbalance,
                                       monitorcorrection, volumecorrection])
                        ],

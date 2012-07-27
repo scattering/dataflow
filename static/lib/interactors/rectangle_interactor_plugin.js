@@ -463,4 +463,27 @@
         }
     });
     
+    $.jqplot.CursorInteractor = function() {
+        $.jqplot.InteractorPlugin.call(this);
+    };
+    $.jqplot.CursorInteractor.prototype = new $.jqplot.InteractorPlugin;
+    $.jqplot.CursorInteractor.prototype.constructor = $.jqplot.CursorInteractor;
+    $.jqplot.InteractorPluginSubtypes.Cursor = $.jqplot.CursorInteractor;
+    $.extend($.jqplot.CursorInteractor.prototype, {
+        init: function(options) {
+            $.jqplot.InteractorPlugin.prototype.init.call(this, options);
+            this.x = 0.0;
+            this.y = 0.0;
+            this.r = 10.0;
+            this.color = "yellow";
+            $.extend(this, options);
+            this.p1 = new $.jqplot.PluginPoint(); this.p1.initialize(this, this.x, this.y, this.r);
+            this.p1.color = this.color;
+            this.grobs.push(this.p1);
+        },
+        update: function(pos) {
+            this.redraw();
+        }
+    });
+    
 })(jQuery);
