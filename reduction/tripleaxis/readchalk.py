@@ -1,6 +1,7 @@
 import sys, os
 import re,copy
 import numpy as np
+import zipfile
 #from matplotlib import pylab
 from matplotlib.ticker import FormatStrFormatter
 import matplotlib.delaunay as D
@@ -149,6 +150,10 @@ def metawrapper(metadata,key,value):
         metadata[key]=[]
         metadata[key].append(value)
 
+
+
+
+
 def readacf(myfilestr, orient1, orient2, preread_data_list):
     """
     Reads in a .acf file. See readaof(...). Requires a .aof file to be read in first,
@@ -156,19 +161,36 @@ def readacf(myfilestr, orient1, orient2, preread_data_list):
     """
     return readaof(myfilestr, orient1, orient2, preread_data_list=preread_data_list)
 
-def readaof(myfilestr, orient1, orient2, preread_data_list=None):
+def readaof(myfilestr, orient1, orient2, preread_data_list=None, unziped=None):
     """
     Reads data from a chalk river .acf or .aof file.
     Returns data_list, a list of dictionaries: [metadata, data]
     
-    myfilestr --> provided .aof or .acf file
+    myfilestr --> provided .aof or .acf file (can be contained in a zip)
     orient1 --> first basis vector (list/array/tuple) with [h,k,l] indices
     orient2 --> second basis vector (list/array/tuple) with [h,k,l] indices
     preread_data_list --> if readaof was previously called on a file, its data 
                           can be passed back in here and myfilestr's data will
                           be appended to it. (e.g. load a .aof then a .acf)
+    unziped --> the unziped zipfile used to open myfilestr if it's in a zip
     """    
-    myfile = open(myfilestr,'r')
+    
+    def update_extrema(metadata, field, value):
+        if not field in metadata['extrema'].keys():
+            # if it doesn't have a min, it shouldn't have a max either. 
+            # if no min/max, then make the current value the min and max
+            metadata['extrema'][field] = [value, value]
+        else:
+            if value < metadata['extrema'][field][0]: # val < min
+                metadata['extrema'][field][0] = value
+            if value > metadata['extrema'][field][1]: # val > max
+                metadata['extrema'][field][1] = value  
+                            
+    if unziped:
+        myfile = unziped.open(myfilestr, 'r')
+    else:
+        myfile = open(myfilestr,'r')
+        
     fileName, fileExt = os.path.splitext(os.path.basename(myfilestr))
     fileExt = fileExt.lower()
     
@@ -212,7 +234,7 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None):
         else:
         '''
 
-        # TODO BEGIN: get back to this with Mon_[] and add name/comment to metadata
+        # TODO? get back to this with Mon_[] and add name/comment to metadata
         i=0
         while i < len(tokenized)-1:
             if tokenized[i].find('=')>=0:
@@ -242,7 +264,7 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None):
             if fileExt=='.aof':
                 get_tokenized_line(myfile,returnline=returnline)
             continue
-        # TODO END
+
         
         if tokenized[0]=='mode':
             if fileExt=='.aof':
@@ -263,7 +285,7 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None):
             continue
             
         # For the first line in a run
-        if returnline[0].find('=')<0 and not tokenized[0]=='point':
+        if returnline[0].find('=')<0 and not tokenized[0]=='point':               
             for i in range(0, len(tokenized)-1, 2):
                 field = tokenized[i].lower()
                 if field == 'run':
@@ -272,10 +294,11 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None):
                         run_num = int(tokenized[i + 1])
                         metadata = preread_data_list[run_num - 1][0]
                         data = preread_data_list[run_num - 1][1] 
+                        filestring = metadata['filename']
                     else:
-                        data={}
-                        metadata={}
-                        filestring = fileName + "_run" + repr(int(tokenized[i+1])) # creating filename - still need to append channel
+                        data = {}
+                        metadata = {'extrema': {}} #initializing metadata['extrema'] dict
+                        filestring = fileName + "_run" + tokenized[i+1].zfill(3) # creating filename - still need to append channel in acf                   
                         metadata['temperature_units'] = 'K' # setting temperature to Kelvin by default.
                         if orient1:
                             metadata['orient1'] = {'h': orient1[0], 'k': orient1[1], 'l': orient1[2]}
@@ -301,8 +324,9 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None):
             
             #start reading points
             myFlag2 = True
-            currpoint = 1
+            currpoint = None #these points are delt with as strings
             prevpoint = None
+            firstPoint = None
             overshot = False  #to deal with when we've reached the next point...
             
             #loop through all data points in the run
@@ -312,6 +336,7 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None):
                 overshot=False
                 if tokenized==[] or tokenized==None: # at end of this data run; break 
                     myFlag2=False
+                    data_list.append([metadata, data])
                     #continue
                     break 
                 else:
@@ -320,6 +345,7 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None):
                     if fileExt == '.aof':
                         for i in range(len(first_headers)):
                             field = first_headers[i]
+                            update_extrema(metadata, field, float(tokenized[i]))
                             if data.has_key(field):
                                 data[field].append(float(tokenized[i]))
                             else:
@@ -327,6 +353,8 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None):
                     
                     currpoint = tokenized[0]
                     prevpoint = tokenized[0]
+                    if firstPoint == None:
+                        firstPoint = tokenized[0]
                     polarized_flag = True
                     
                     # if data is on one line, this loop should always go ONE time only
@@ -338,7 +366,7 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None):
                         currpoint = tokenized[0]
                         
                         if currpoint == prevpoint:
-                            if int(currpoint) == 1:
+                            if currpoint == firstPoint:
                                 #first time through, determine channel
                                 #WARNING: assumes that the channel will NOT change during a run
                                 '''
@@ -371,15 +399,16 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None):
                                         channel = 'mm'
                                         
                                     filestring += "_" + channel # completing the filename
-                                metadata['filename'] = filestring                                
+                                metadata['filename'] = filestring
 
                             for i in range(len(second_headers)):
                                 field = second_headers[i]
                                 if not (i == 1 and  i == 3 and fileExt == '.acf'):
                                     # don't recopy dbhf (i=1) and sbhf (i=3) --> already there from .aof
-                                    try:
+                                    update_extrema(metadata, field, float(tokenized[i]))
+                                    if data.has_key(field):
                                         data[field].append(float(tokenized[i]))
-                                    except:
+                                    else:
                                         data[field] = [float(tokenized[i])]
 
                                             
@@ -390,7 +419,7 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None):
                 #currpoint = tokenized[0]
                 #prevpoint = tokenized[0]                    
             
-        data_list.append([metadata, data])
+        #data_list.append([metadata, data])
             
     return data_list
 
@@ -441,7 +470,7 @@ def readruns(aof_file, orient1, orient2, acf_file=None):
     Stores the data in format similar to that of other readers by producing a
     Data object.
     """
-
+    
     myfilestr = aof_file
     data_list = readaof(myfilestr, orient1, orient2)
     
@@ -458,7 +487,43 @@ def readruns(aof_file, orient1, orient2, acf_file=None):
     
     return mydata
     
-
+    
+def readzip(chalkzip, orient1, orient2):
+    """
+    Reads data from a zip file that may contain .aof and/or .acf files.
+    Stores the data in format similar to that of other readers by producing a
+    Data object.
+    """
+    
+    # Creates dictionary mapping filename to paths
+    aofdict = {}
+    acfdict = {}
+    unziped = zipfile.ZipFile(chalkzip, 'r')
+    
+    for chalkfile in unziped.namelist():
+        fileName, fileExt = os.path.splitext(os.path.basename(chalkfile))
+        fileExt = fileExt.lower()
+        if fileExt == '.aof':
+            aofdict[fileName] = chalkfile
+        elif fileExt == '.acf':
+            acfdict[fileName] = chalkfile
+            
+    mydata = []
+    for fileName in aofdict.keys():
+        # Read the aof file
+        data_list = readaof(aofdict[fileName], orient1, orient2, unziped=unziped)
+        
+        # if this aof file has a corresponding acf file, add its data
+        if fileName in acfdict.keys():
+            data_list = readaof(acfdict[fileName], orient1, orient2, preread_data_list=data_list, unziped=unziped)
+        
+        # translate the fields and add Data objects to mydata list
+        for i in range(len(data_list)):
+            translate_fields(data_list[i][0], data_list[i][1])
+            mydata.append(Data(data_list[i][0], data_list[i][1]))        
+    
+    return mydata
+    
 
 if __name__=='__main__':
     if 1:

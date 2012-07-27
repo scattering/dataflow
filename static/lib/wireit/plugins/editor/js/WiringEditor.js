@@ -618,7 +618,7 @@
                         failure: function(response) {
                             console.log('failure: ', response);
                         }
-                    });                
+                    });
                 }, 
                 failure: function(response) { console.log('failure: ', response); }
             };

@@ -14,7 +14,7 @@ AutosizeImageContainer = function(opts, layer) {
             for (var i=0; i<number; i++) {
                 locs.push(Math.round(i*spacing));
             }
-        }  
+        }
         return locs;
     }
     
@@ -59,6 +59,30 @@ AutosizeImageContainer = function(opts, layer) {
 YAHOO.lang.extend(AutosizeImageContainer, WireIt.ImageContainer, {
     xtype: 'AutosizeImageContainer',
 });
+
+// javascript to load in drop-down list of fields for join.
+JoinContainer = function(opts, layer) {
+    JoinContainer.superclass.constructor.call(this, opts, layer);
+
+    //Populates the xaxis and yaxis choices drop-down menus for the config
+    //DEPENDENCY: if editor.FAT.METADATA is modified (ie no longer an array) this must be fixed!!!
+    fields_to_remove = ["Available Files", "counts", "primary_detector"];
+    try {
+        choices = editor.FAT.METADATA[0].slice(0); //copy of metadata field headers array
+        for (var i = 0; i < fields_to_remove.length; ++i) {
+            index = choices.indexOf(fields_to_remove[i]);
+            if (index >= 0)
+                choices.splice(index, 1); //remove the field if found
+        }
+        
+        this.fields.xaxis.choices = choices
+        this.fields.yaxis.choices = choices
+    } catch (err) {}
+};
+YAHOO.lang.extend(JoinContainer, AutosizeImageContainer, {
+    xtype: 'JoinContainer',
+});
+
 
 SaveContainer = function(opts, layer) {
     SaveContainer.superclass.constructor.call(this, opts, layer);
@@ -127,6 +151,13 @@ YAHOO.lang.extend(SaveContainer, WireIt.Container, {
         editor.getCSV(reductionInstance, clickedOn);
     },
 });
+
+
+
+
+
+
+
 
 SliceContainer = function(opts, layer) {
     jQuery.extend(true, opts, {

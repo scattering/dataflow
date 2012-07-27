@@ -2190,7 +2190,7 @@ def bin_all_fields(tas, xarr, xbin):
     
 
 
-def filereader(filename, orient1=None, orient2=None, acf_file=None, friendly_name=None):
+def filereader(filename, friendly_name=None):
     filestr = filename
     instrument = None
     if friendly_name:
@@ -2200,17 +2200,25 @@ def filereader(filename, orient1=None, orient2=None, acf_file=None, friendly_nam
     
     if fileExt in ['.bt2', '.bt4', '.bt7', '.bt9', '.ng5']:
         instrument = ncnr_filereader(filestr, friendly_name=friendly_name)
-    #elif fileExt in ['.aof', '.acf']:
-    #    instrument = chalk_filereader(filestr, orient1, orient2, acf_file=acf_file) #currently returns a tas list!!!
     elif fileExt in ['.dat']:
         instrument = hfir_filereader(filestr)
-    elif fileExt in ['.aof']:
-        instrument = chalk_filereader(filename, orient1, orient2, acf_filename=acf_filename)
+    #elif fileExt in ['.aof']:
+    #    instrument = chalk_filereader(filename, orient1, orient2, acf_filename=acf_filename)
     
     return instrument
 
 def autoloader(filedescriptors):
     result = [filereader(fd['filename'], friendly_name=fd['friendly_name']) for fd in filedescriptors]
+    return result
+
+def chalk_autoloader(filedescriptors):
+    result = []
+    for fd in filedescriptors:
+        #try:
+        result += chalk_zip_filereader(fd['filename'], None, None)
+        #except:
+        #    pass
+        #result = [chalk_filereader(fd['filename'], friendly_name=fd['friendly_name']) for fd in filedescriptors]
     return result
 
 def ncnr_filereader(filename, friendly_name=None):
@@ -2220,7 +2228,19 @@ def ncnr_filereader(filename, friendly_name=None):
     instrument = TripleAxis()
     translate(instrument, mydata)
     #instrument.project_into_scattering_plane() #generate eta and zeta
-    return instrument    
+    return instrument
+
+def chalk_zip_filereader(chalkzip, orient1, orient2):
+    mydata = readchalk.readzip(chalkzip, orient1, orient2)
+    
+    instrument_list = []
+    for i in range(len(mydata)):
+        instrument = TripleAxis()
+        translate(instrument, mydata[i])
+        #instrument.generate_hkl_from_projection()
+        instrument_list.append(instrument)
+        
+    return instrument_list
 
 def chalk_filereader(aof_filename, orient1, orient2, acf_filename=None):
     
@@ -2234,6 +2254,7 @@ def chalk_filereader(aof_filename, orient1, orient2, acf_filename=None):
         instrument_list.append(instrument)
         
     return instrument_list
+
 
 def hfir_filereader(filename):
     mydata = readhfir.readfile(filename)
@@ -2548,6 +2569,7 @@ if __name__ == "__main__":
         np.savetxt("datatestq.txt", data)        
         
         print 'done'
+    
     
     if 0:
         import bumps

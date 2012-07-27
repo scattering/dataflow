@@ -55,7 +55,9 @@ if 0:
 
 TAS_DATA = 'data1d.tas'
 xtype = 'AutosizeImageContainer'
-data1d = Data(TAS_DATA, data_abstraction.TripleAxis, loaders=[{'function':data_abstraction.autoloader, 'id':'loadTAS'}])
+data1d = Data(TAS_DATA, data_abstraction.TripleAxis, loaders=[{'function':data_abstraction.autoloader, 'id':'loadTAS'}, 
+                                                              {'function':data_abstraction.chalk_autoloader, 'id':'loadChalkRiver'}])
+
 # Reduction operations may refer to data from other objects, but may not
 # modify it.  Instead of modifying, first copy the data and then work on
 # the copy.
@@ -264,18 +266,22 @@ def join_action(input, xaxis='', yaxis='', num_bins=0, xstep=None, ystep=None, *
 
 
 fields = {
+    #TODO get the choices from the data object, NOT hardcoded in. 7/25/2012
     'xaxis': {
         "type": "List",
         "label": "X axis for 2D plotting",
         "name": "xaxis",
         "value": '',
-        "choices": []#data_abstraction.TripleAxis.get_field_names()]
+        "choices": ["h", "k", "l", "q", "e", "ef", "focus_pg", "elevation", "translation", "focus_cu", "filter_translation", "filter_tilt", "filter_rotation", "ei_cancel", "sample_guide_field_rotatation", "flipper_state", "vsample", "eta", "hsample", "zeta", "ei_flip", "ef_guide", "sample_lower_translation", "analyzer_rotation", "sample_lower_tilt", "sample_elevator", "sample_upper_tilt", "sample_two_theta", "analyzer_theta", "sample_upper_translation", "monochromator_theta", "monochromator_two_theta", "dfm_rotation", "analyzer_two_theta", "sample_theta", "back_slit_width", "back_slit_height", "analyzerblade0", "analyzerblade1", "analyzerblade2", "analyzerblade3", "analyzerblade4", "analyzerblade5", "analyzerblade6", "analyzerblade7", "temperature_control_reading", "temperature_heater_power", "temperature", "temperature_setpoint", "soller_collimator", "radial_collimator", "post_analyzer_collimator", "pre_analyzer_collimator", "post_monochromator_collimator", "pre_monochromator_collimator", "aperture_horizontal", "aperture_vertical", 
+"orient2", "ei", "orient3", "orient1", "monitor", "timestamp", "duration", "monitor2"],
     }, 
     'yaxis': {
-        "type": "string",
+        "type": "List",
         "label": "Y axis for 2D plotting",
         "name": "yaxis",
         "value": '',
+        "choices": ["e", "ef", "h", "k", "l", "q", "focus_pg", "elevation", "translation", "focus_cu", "filter_translation", "filter_tilt", "filter_rotation", "ei_cancel", "sample_guide_field_rotatation", "flipper_state", "vsample", "eta", "hsample", "zeta", "ei_flip", "ef_guide", "sample_lower_translation", "analyzer_rotation", "sample_lower_tilt", "sample_elevator", "sample_upper_tilt", "sample_two_theta", "analyzer_theta", "sample_upper_translation", "monochromator_theta", "monochromator_two_theta", "dfm_rotation", "analyzer_two_theta", "sample_theta", "back_slit_width", "back_slit_height", "analyzerblade0", "analyzerblade1", "analyzerblade2", "analyzerblade3", "analyzerblade4", "analyzerblade5", "analyzerblade6", "analyzerblade7", "temperature_control_reading", "temperature_heater_power", "temperature", "temperature_setpoint", "soller_collimator", "radial_collimator", "post_analyzer_collimator", "pre_analyzer_collimator", "post_monochromator_collimator", "pre_monochromator_collimator", "aperture_horizontal", "aperture_vertical", 
+"orient2", "ei", "orient3", "orient1", "monitor", "timestamp", "duration", "monitor2"],
     },
     'num_bins': {
         "type": "float",
@@ -299,10 +305,9 @@ fields = {
 
 
 
-join = join_module(id='tas.join', datatype=TAS_DATA,
-                   version='1.0', action=join_action, xtype=xtype, 
-                                            filterModule=data_abstraction.join)
-
+join = join_module(id='tas.join', datatype=TAS_DATA, fields=fields,
+                   version='1.0', action=join_action, filterModule=data_abstraction.join)
+join.xtype = 'JoinContainer'
 
 def subtract_action(signal, background, scan_variable=None, **kwargs):
     print "SUBTRACTING"

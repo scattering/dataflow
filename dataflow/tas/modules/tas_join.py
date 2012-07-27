@@ -15,10 +15,10 @@ def join_module(id=None, datatype=None, action=None,
     icon = {
         'URI': config.IMAGES + 'TAS/join.png',
         'image': config.IMAGES + 'TAS/join.png',
-        'width': 'auto', 
+        'width': 64, #'auto', 
         'terminals': {
             'input': (-12, 16, -1, 0),
-            'output': (48, 16, 1, 0),
+            'output': (48, 16, 2, 0),
         }
     }
     
