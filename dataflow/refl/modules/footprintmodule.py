@@ -18,7 +18,6 @@ def footprint_module(id=None, datatype=None, action=None,
         }
     }
     
-    #xtype = "FootprintContainer"
     terminals = [
         dict(id='input',
             datatype=datatype,

@@ -14,11 +14,10 @@ def footprint_module(id=None, datatype=None, action=None,
         'image': config.IMAGES + config.ANDR_FOLDER + 'autgrid_image.png',
         'terminals': {
             'input': (None, None, -1, 0),
-            'output': (None, None, 1, 0);
+            'output': (None, None, 1, 0)
         }
     }
     
-    xtype = "FootprintContainer"
     terminals = [
         dict(id='input',
             datatype=datatype,
@@ -35,7 +34,28 @@ def footprint_module(id=None, datatype=None, action=None,
             )
     ]
     
-    fields = {} #what does this do?
+    fields = {
+        "beginning": {
+            "type":"string",
+            "label":"Beginning of Interval",
+            "name":"beginning",
+            "value":"0.0"},
+        "end": {
+            "type":"string",
+            "label":"End of Interval",
+            "name":"end",
+            "value":"1.0"},
+        "slope": {
+            "type":"string",
+            "label":"Slope of Line",
+            "name":"slope",
+            "value":"0.1"},
+        "intercept": {
+            "type":"string",
+            "label":"y-Intercept",
+            "name":"intercept",
+            "value":"0.0"}
+    }
     
     module = Module(id=id,
                     name='Footprint Data',
@@ -48,5 +68,5 @@ def footprint_module(id=None, datatype=None, action=None,
                     filterModule=filterModule,
                     xtype=xtype
                     )
-module.LABEL_WIDTH = 150
-return module
+    module.LABEL_WIDTH = 150
+    return module

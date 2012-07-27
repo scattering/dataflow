@@ -4,8 +4,14 @@
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
         <title>Plot from Dataflow</title>
         
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="../ext/resources/css/ext-all.css" />
+        
         <!-- JQPLOT -->
-        <script type="text/javascript" src="jqplot/jquery-1.5.1.js"></script>
+        <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/start/jquery-ui.css" type="text/css" rel="Stylesheet" />
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js" type="text/javascript"></script>
+        <!--script type="text/javascript" src="jqplot/jquery-1.5.1.js"></script-->
         <script type="text/javascript" src="jqplot/jquery.jqplot.js"></script>
 		<script type="text/javascript" src="jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
 		<script type="text/javascript" src="jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
@@ -29,6 +35,9 @@
         <!-- Uniq Array -->
 		<script type="text/javascript" src="../UniqArray.js"></script>
 		<script type="text/javascript" src="../js-object-length.js"></script>
+		
+		<!-- EXTJS -->
+        <script type="text/javascript" src="../ext/ext-all.js"></script>
 		
 		<!-- <script type="text/javascript" src="test_data2.js"></script> -->
 		<script type="text/javascript">
@@ -98,47 +107,103 @@
 		        document.getElementById('plot').style.width = ((width-100) * 0.59).toString() + "px";
 		        
 		        var plotheight = ((height-50) * 0.49).toString() + "px";
-		        document.getElementById('upper').style.height = plotheight;
-		        document.getElementById('lower').style.height = plotheight;
+		        //document.getElementById('lower').style.height = plotheight;
 		        document.getElementById('plot').style.height = plotheight;
 		    };
 		    
-		    replot_all = function() {
+		    /*replot_all = function() {
   		        plot.replot(); 
-  		    };
+  		    };*/
   		    
   		    parseConfig = function(cfg) {
   		      // nothing yet 
 		    };
 		       
 		    window.onload = function() {
-		        fit_plots();
-		        update_plot(); // delete later
-		        /*if (toPlot) {
-		            
-		            var dims = toPlot[0].dims;
+		        //fit_plots();
+		        if (toPlot) {
+		            //var dims = toPlot['series']['data'][xlabel]['values'].dims; // Is probably not necessary since it's a one dimensional array
 		            // configuration from tracksConfigs supersedes the default from getConfig()
 		            cfg = {}; //{xmin: dims.xmin, xmax: dims.xmax, ymin: dims.ymin, ymax: dims.ymax};
-		            var all_cfg = container.getConfig();
+		            var all_cfg = container.getConfig().groups;
 		            if (reductionInstance in all_cfg) jQuery.extend(cfg, all_cfg[reductionInstance]);
-		            var lims = {xmin: dims.xmin, xmax: dims.xmax, ymin: dims.ymin, ymax: dims.ymax};
-		            for (var lim in lims) {
+		            //var lims = {slope: dims.xmin, intercept: dims.xmax, beginning: dims.ymin, end: dims.ymax};
+		            /*for (var lim in lims) {
 		                
 		                if (!(lim in cfg)) { cfg[lim] = {} };
                         if (!('value' in cfg[lim]) || cfg[lim]['value'].trim().length == 0) { cfg[lim]['value'] = lims[lim].toString(); };
-		            } 
+		            }*/ 
                     
-                    update_selectors(toPlot);
-		            update_plot(toPlot[0]);
+                    //update_selectors(toPlot);
+                    
+		            plottingAPI(toPlot, 'plot'); // creates plot with data.
+		            plot.options.interactors = [];
+		            plot.options.interactors.push({ type: 'Line', name: 'line', xmin: 1.0, ymin: 1.0, xmax: 4.0, ymax: 4.0});
+		            plot.options.interactors.push({ type: 'Interval', name: 'interval', x02: 3.0});
+		            $.jqplot.InteractorPlugin.pluginit.call(plot, 'plot', [], plot.options);
+		            plot.replot();
 		            
-		        } else {
+		            plot.plugins.cursor.zoom= false;
+		        
+		            var linePlugin = plot.plugins.interactors.line;
+		            var interval = plot.plugins.interactors.interval;
+		            
+		            // The variables linex1, liney1, linex2, and liney2 keep track of the old location of the point but
+                    // are not actually placed in the Slice Region
+                    var linex1 = new pointTextControl(linePlugin.p1, 'x', 'x<sub>P1</sub> ', 5);
+		            linex1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            //document.getElementById('footcontrols').appendChild(linex1.div);
+		            var liney1 = new pointTextControl(linePlugin.p1, 'y', 'y<sub>P1</sub> ', 5);
+		            liney1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+                    //document.getElementById('footcontrols').appendChild(liney1.div);
+		            var linex2 = new pointTextControl(linePlugin.p2, 'x', 'x<sub>P2</sub> ', 5);
+		            linex2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+	                //document.getElementById('footcontrols').appendChild(linex2.div); 
+		            var liney2 = new pointTextControl(linePlugin.p2, 'y', 'y<sub>P2</sub> ', 5);
+		            liney2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            //document.getElementById('footcontrols').appendChild(liney2.div);
+		            var lineslope = new slopeTextControl(linePlugin, linex1, liney1, linex2, liney2, 'slope ', 5);
+		            lineslope.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(lineslope.div);
+		            var lineinter = new interceptTextControl(linePlugin, liney1, liney2, 'y-intercept ', 5);
+		            lineinter.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(lineinter.div);
+		            
+		            var vert1 = new pointTextControl(interval.p1, 'x', 'Start of Interval ', 5);
+		            vert1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(vert1.div);
+		            var vert2 = new pointTextControl(interval.p2, 'x', 'End of Interval ', 5);
+		            vert2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
+		            document.getElementById('footcontrols').appendChild(vert2.div);	            
+		            
+                    var hr = document.createElement('div'); hr.innerHTML = "<hr>";
+                    document.getElementById('footcontrols').appendChild(hr);
+                    
+                    var submitbutton = document.createElement('input');
+                    submitbutton.setAttribute('type', 'button');
+                    submitbutton.setAttribute('value', 'Submit Changes');
+                    var submitChanges = function() {
+                        cfg.slope.value = lineslope.textbox.value;
+                        cfg.intercept.value = lineinter.textbox.value;
+                        cfg.beginning.value = vert1.textbox.value;
+                        cfg.end.value = vert2.textbox.value;
+                        
+                        if (!('groups' in container)) container.groups = {};
+                        if (!(reductionInstance in container.groups)) container.groups[reductionInstance] = {};
+                        jQuery.extend(container.groups[reductionInstance], cfg);
+                    };
+                    submitbutton.onclick = submitChanges;                    
+                    document.getElementById('footcontrols').appendChild(submitbutton);
+		            
+		        }
+		        else {
 		            alert('no data to plot!');
-		        }*/
+		        }
 		        //update_plot(testdata);
 		        
 		    }
 		    
-		    window.onresize = function() { fit_plots(); replot_all(); };
+		    window.onresize = function() { /*fit_plots(); update_plot();*/ };
 		    
 		    /*update_selectors = function(toPlots) {
 		        document.getElementById('plot_selectnum').innerHTML = "";
@@ -164,9 +229,9 @@
                 jQuery('#plot_selectnum').change({}, onchange);
                 jQuery('#plot_selectz').change({}, onchange);
 		    }*/
-		    update_plot = function(/*toPlot,*/ transform) {
+		    /*update_plot = function(toPlot, transform) {
 		        debug = false;
-		        /*data = toPlot;
+		        data = toPlot;
 		        if (data.binary_fp && data.z_binary_array == undefined) {
 		            if (plot && plot.series && plot.series[0]) { 
 		                plot.series[0].show=false; 
@@ -174,66 +239,31 @@
 		            }
 		            getBinaryData(data, function() { update_plot(data) })
 		            return
-		        } */
-		        if (plot == null) {
-		            // then initialize all the plot objects
-		            plot = $.jqplot('plot', [[[0,0],[1,1],[2,2],[3,5],[4,9],[5,2]]], {
-		                //cursor: {show: true, zoom: false},
-		                sortData: false,
-		                interactors: [{ type:'Line', 
-		                                name:'line',
-		                                xmin: 1.0,
-		                                ymin: 1.0,
-		                                xmax: 4.0,
-		                                ymax: 4.0},
-		                              { type:'Interval',
-		                                name:'interval',
-		                                x02: 3.0}],
-		                //renderer: $.jqplot.heatmapRender,
-		                series: [ {shadow: false, padding: 0} ],
-                        grid: {shadow: false},
-                        axesDefaults: {
-		                    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
-                            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
-                            tickOptions: {formatString: "%.3g", _styles: {right: 0}}
-                        },
-                        axes:{ 
-                            xaxis:{ label: /*toPlot.xlabel*/ 'x-axis' },
-                            yaxis:{ label: /*toPlot.ylabel*/ 'y-axis' }
-                        },
-		                seriesDefaults:{
-		                    shadow: false,
-                            /*renderer:$.jqplot.heatmapRenderer,
-                            rendererOptions: {
-                                transform: toPlot.transform || 'lin',
-                                dims: { xmin: 0.0,
-                                        ymin: 0.0,
-                                        xmax: 5.0,
-                                        ymax: 5.0},
-                                //dims: data.dims,
-                                //display_dims: { xmin: data.dims.xmin-1,
-                                //                ymin: data.dims.ymin-1,
-                                //                ymax: data.dims.ymax+1,
-                                //                xmax: data.dims.xmax+1}
-                            },*/
-                        }
-		                
-		            });
+		        }
+		        if(plot == null) {
+		            plottingAPI(toPlot, 'plot'); // creates plot with data.
+		            plot.options.interactors = [];
+		            plot.options.interactors.push({ type: 'Line', name: 'line', xmin: 1.0, ymin: 1.0, xmax: 4.0, ymax: 4.0});
+		            plot.options.interactors.push({ type: 'Interval', name: 'interval', x02: 3.0});
+		            $.jqplot.InteractorPlugin.pluginit.call(plot, 'plot', [], plot.options);
+		            plot.replot();
 		            
+		            plot.plugins.cursor.zoom= false;
+		        
 		            var linePlugin = plot.plugins.interactors.line;
-		            var interval = plot.plugins.interval;
+		            var interval = plot.plugins.interactors.interval;
 		            
 		            // The variables linex1, liney1, linex2, and liney2 keep track of the old location of the point but
-		            // are not actually placed in the Slice Region
-		            var linex1 = new pointTextControl(linePlugin.p1, 'x', 'x<sub>P1</sub> ', 5);
+                    // are not actually placed in the Slice Region
+                    var linex1 = new pointTextControl(linePlugin.p1, 'x', 'x<sub>P1</sub> ', 5);
 		            linex1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
 		            //document.getElementById('footcontrols').appendChild(linex1.div);
 		            var liney1 = new pointTextControl(linePlugin.p1, 'y', 'y<sub>P1</sub> ', 5);
 		            liney1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
-		            //document.getElementById('footcontrols').appendChild(liney1.div);
+                    //document.getElementById('footcontrols').appendChild(liney1.div);
 		            var linex2 = new pointTextControl(linePlugin.p2, 'x', 'x<sub>P2</sub> ', 5);
 		            linex2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
-		            //document.getElementById('footcontrols').appendChild(linex2.div); 
+	                //document.getElementById('footcontrols').appendChild(linex2.div); 
 		            var liney2 = new pointTextControl(linePlugin.p2, 'y', 'y<sub>P2</sub> ', 5);
 		            liney2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
 		            //document.getElementById('footcontrols').appendChild(liney2.div);
@@ -244,7 +274,6 @@
 		            lineinter.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
 		            document.getElementById('footcontrols').appendChild(lineinter.div);
 		            
-		            var interval = plot.plugins.interactors.interval;
 		            var vert1 = new pointTextControl(interval.p1, 'x', 'Start of Interval ', 5);
 		            vert1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
 		            document.getElementById('footcontrols').appendChild(vert1.div);
@@ -255,94 +284,27 @@
                     var hr = document.createElement('div'); hr.innerHTML = "<hr>";
                     document.getElementById('footcontrols').appendChild(hr);
                     
-                    /*var maxbutton = document.createElement('input');
-                    maxbutton.setAttribute('type', 'button');
-                    maxbutton.setAttribute('value', 'Maximize to data');
-                    var maximize = function () {
-                        xminctl.update({x: plot.series[0].dims.xmin});
-                        xminctl.update_external();
-                        ymaxctl.update({y: plot.series[0].dims.ymax});
-                        ymaxctl.update_external();
-                        xmaxctl.update({x: plot.series[0].dims.xmax});
-                        xmaxctl.update_external();
-                        yminctl.update({y: plot.series[0].dims.ymin});
-                        yminctl.update_external();
-                    }
-                    maxbutton.onclick = maximize;                  
-                    document.getElementById('slicecontrols').appendChild(maxbutton);*/
-                    
-                    /*var submitbutton = document.createElement('input');
+                    var submitbutton = document.createElement('input');
                     submitbutton.setAttribute('type', 'button');
                     submitbutton.setAttribute('value', 'Submit Changes');
                     var submitChanges = function() {
-                        cfg.xmax.value = xmaxctl.textbox.value;
-                        cfg.xmin.value = xminctl.textbox.value;
-                        cfg.ymin.value = yminctl.textbox.value;
-                        cfg.ymax.value = ymaxctl.textbox.value;
+                        cfg.slope.value = lineslope.textbox.value;
+                        cfg.intercept.value = lineinter.textbox.value;
+                        cfg.beginning.value = vert1.textbox.value;
+                        cfg.end.value = vert2.textbox.value;
                         
-                        if (!('tracksConfigs' in container)) container.tracksConfigs = {};
-                        if (!(reductionInstance in container.tracksConfigs)) container.tracksConfigs[reductionInstance] = {};
-                        jQuery.extend(container.tracksConfigs[reductionInstance], cfg);
+                        if (!('groups' in container)) container.groups = {};
+                        if (!(reductionInstance in container.groups)) container.groups[reductionInstance] = {};
+                        jQuery.extend(container.groups[reductionInstance], cfg);
                     };
                     submitbutton.onclick = submitChanges;                    
-                    document.getElementById('footcontrols').appendChild(submitbutton);  
-                                       
-                    slice_listener = function(series) {
-		                slicebox.p1.listeners.push(this);
-		                slicebox.p3.listeners.push(this);
-		                var p0 = series;
-		                this.update = function(pos) {
-		                    var width = p0.dims.xdim;
-                            var height = p0.dims.ydim;
-		                    //console.log(slicebox.p1.coords.x, p0.dims.xmin, p0.dims.xdim);
-		                    i_min = Math.floor((slicebox.p1.coords.x - p0.dims.xmin) / p0.dims.dx);
-		                    i_min = Math.min(Math.max(i_min, 0), p0.dims.xdim);
-		                    i_max = Math.ceil((slicebox.p3.coords.x - p0.dims.xmin) / p0.dims.dx);
-		                    i_max = Math.max(Math.min(i_max, p0.dims.xdim), 0);
-		                    j_min = Math.floor((slicebox.p3.coords.y - p0.dims.ymin) / p0.dims.dy);
-		                    j_min = Math.min(Math.max(j_min, 0), p0.dims.ydim);
-		                    j_max = Math.ceil((slicebox.p1.coords.y - p0.dims.ymin) / p0.dims.dy);
-		                    j_max = Math.max(Math.min(j_max, p0.dims.ydim), 0);
-		                    var xdata = [], ydata = [];
-		                    for (var c=i_min; c <=i_max-1; c++) {
-		                        xdata.push([p0.dims.xmin + c*p0.dims.dx, p0.cumsum_x[c][j_max] - p0.cumsum_x[c][j_min]]);
-		                    }
-		                    for (var r=j_min; r<=j_max-1; r++) {
-		                        ydata.push([p0.cumsum_y[i_max][r] - p0.cumsum_y[i_min][r], p0.dims.ymin + r*p0.dims.dy]);
-		                    }
-		                };
-		                return this;  
-		            };
-		            sl = slice_listener(plot.series[0]);
-		            plot.series[0].generate_cumsums()
-		            //generate_cumsums(plot.series[0]);
-		            sl.update();
-		            //maximize();*/
-		        }
-		        else {
-		            // no need to recreate everything... just update the data.
-		            plot.series[0].show = true;
-		            plot.series[0].set_data(toPlot.z[0], toPlot.dims);
-		            plot.series[0].set_transform(transform || toPlot.transform);
-                    plot.series[0]._xaxis.labelOptions.label = toPlot.xlabel;
-                    plot.series[0]._yaxis.labelOptions.label = toPlot.ylabel;
-                    plot.plugins._interactor.zoomMax();
-                    sl = slice_listener(plot.series[0]);
-		            plot.series[0].generate_cumsums();
-		            //generate_cumsums(plot.series[0]);
-		            sl.update();
-		            
-		            /*
-		            plot.series[0].set_data(toPlot.z[0], toPlot.dims);
-		            plot.series[0].set_transform(transform || toPlot.transform);
-		            plot.plugins._interactor.zoomMax();
-                    colorbar.series[0].dims = toPlot.dims;
-                    colorbar.series[0].set_ztransform(transform);
-                    colorbar.plugins._interactor.zoomMax();
-                    */
-		        }
-		    }
-		    
+                    document.getElementById('footcontrols').appendChild(submitbutton);
+                }
+                else {
+                    plottingAPI(window.opener.toPlot, 'plot');
+                }                               
+		    }*/
+                    
 		    slopeTextControl = function(linePlugin, x1, y1, x2, y2, label, precision) {
 		        var precision = precision || 3;
 		        this.precision = precision;
@@ -482,19 +444,15 @@
             
         </script>
     </head>
-    <body>
-        <div id="upper" style="display: block; width: 100%; height: 352px;">
-	        <div id="plot" style="display: inline-block; width: 500px; height: 350px; padding: 0; margin:0;"></div>
+    <body >
+<!--        <div id="upper" style="display: block; width: 100%; height: 450px;">-->
+<!--            <div id="plot" style="display: block; width: 100%; height: 450px; padding: 0; margin:0;">	       -->
+        <div id='plot'>
+        </div>
+        <hr>
+<!--	        </div>-->
 	    </div>
-	    <!--<div id="controls" style="display: block; width: 100%;">
-	        <select id="plot_selectz">
-	            <option value='lin'>lin</option>
-	            <option value='log'>log</option>
-	        </select>
-	        <select id="plot_selectnum"></select>
-	    </div>-->
-	    <div id="lower" style="display: block; width: 100%; height: 350px;">
-	        <div id="footcontrols" style="display: inline-block; width: 39%; text-align: center;">Footprint Control Region:<hr></div>
-	    </div>	    
+<!--	    <div id="footcontrols" style="display: block; width: 100%; text-align: center;">Footprint Control Region:<hr></div>   -->
+    <div id="footcontrols" style="text-align: center;">Footprint Control Region:<hr></div>
     </body>
 </html>

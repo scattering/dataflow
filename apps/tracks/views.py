@@ -470,6 +470,9 @@ def setupReduction(data):
 def runReduction(request):
     data = simplejson.loads(request.POST['data'])
     template, config, nodenum, terminal_id = setupReduction(data)
+    print "template:", template
+    print "config:", config
+    print "terminal_id:", terminal_id
     
     result = get_plottable(template, config, nodenum, terminal_id)
     

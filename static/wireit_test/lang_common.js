@@ -277,3 +277,63 @@ YAHOO.lang.extend(ExtractContainer, WireIt.Container, {
         
     }
 });
+
+FootprintCorrectContainer = function(opts, layer) {
+    jQuery.extend(true, opts, {
+        'height': 16,
+        'width': 120,
+        'terminals': [{
+            "name": "input", 
+            "offsetPosition": {"left": -16, "top": 16}, 
+          }, 
+          {
+            "name": "output", 
+            "offsetPosition": {"right": -16, "top": 16}, 
+          }
+        ]
+    });  
+    FootprintCorrectContainer.superclass.constructor.call(this, opts, layer);
+
+    var content = document.createElement('div');
+    content.innerHTML = '';
+    //var saveButton = document.createElement('img');
+    var footprintcorrectButton = document.createElement('button');
+    footprintcorrectButton.value = 'footprintcorrect';
+    footprintcorrectButton.innerHTML = 'Footprint Correct';
+    //saveButton.src = this.image;
+    content.appendChild(footprintcorrectButton);
+    this.setBody(content);
+    YAHOO.util.Event.addListener(footprintcorrectButton, 'click', this.openFootprintCorrectWindow, this, true);
+};
+
+YAHOO.lang.extend(FootprintCorrectContainer, WireIt.Container, {
+    xtype: 'FootprintCorrectContainer',
+    openFootprintCorrectWindow: function(e, f) {
+        var reductionInstance = editor.reductionInstance;
+        var wires = f.wires;
+        if (wires.length == 0) {
+            alert('no data to get (no wires in)');
+            return
+        } else {
+            var wire_in = f.wires[0];
+            clickedOn = {'source': wire_in.src,'target': wire_in.tgt};
+        }
+        var toReduce = editor.generateReductionRecipe(reductionInstance, clickedOn);
+        f.getConfig();
+        editor.adapter.runReduction(toReduce, {
+            success: function(result) { 
+                //toPlot = result;
+                var footprintcorrectWindow = window.open("/static/lib/plotting/footprintcorrectwindow.html", "", "status=1,width=1024,height=768");
+		        footprintcorrectWindow.toPlot = result;
+		        footprintcorrectWindow.container = f;
+                footprintcorrectWindow.reductionInstance = reductionInstance;
+            },
+            failure: editor.runModuleFailure,
+            scope: editor}
+        );
+        
+        //console.log('save click:', e);
+        //alert('save to server not yet implemented.  Try downloading CSV version of data');
+        
+    }
+});

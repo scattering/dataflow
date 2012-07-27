@@ -42,12 +42,14 @@ SPEC_DATA = 'refl.data1d'
 data1d = Data(SPEC_DATA, FilterableMetaArray, loaders=[{'function':LoadICPMany, 'id':'LoadICPData'}])
 
 # FootprintCorrection module
-def footprint_action(input=[], start="", end="", slope="", intercept=""):
+def footprint_action(input=[], start="0.0", end="3.0", slope="1.0", intercept="0.0", **kwargs):
     print "applying footprint correction"
-    return dict(output=FootprintCorrection().apply(input, start, end, slope, intercept))
+    return dict(output=FootprintCorrection(input, start=start, end=end, slope=slope, intercept=intercept))
     
 footprint = footprint_module(id='refl.footprint', datatype='refl.data1d',
                     version='1.0', action=footprint_action, filterModule=FootprintCorrection)
+
+footprint.xtype = 'FootprintCorrectContainer'
 
 #normalize = normalize_module(id='refl.normalize', datatype='data1d.refl',
 #                             version='1.0', action=normalize_action)

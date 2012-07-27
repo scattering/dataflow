@@ -1,7 +1,23 @@
 from numpy import ndarray, zeros
-import os
+import os, types
 from FilterableMetaArray import FilterableMetaArray as MetaArray
 from reduction.formats import load
+
+def autoApplyToList(apply):
+    """ 
+    decorator for 'apply' method - if a list of data objects is given
+    as the first argument, applies the filter to each item one at a time.
+    """
+    
+    def newfunc(data, *args, **kwargs):
+        if type(data) is types.ListType:
+            result = []
+            for datum in data:
+                result.append(apply(datum, *args, **kwargs))
+            return result
+        else:
+            return apply(data, *args, **kwargs)
+    return newfunc
 
 def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     """ 
@@ -54,16 +70,30 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     # data_array[:,:,4]... I wish!!!  Have to do by hand.
     data = MetaArray(data_array, dtype='float', info=info)
     return data
-
-def FootprintCorrection(DataArray, start, finish, slope, intercept):
+    
+@autoApplyToList
+def FootprintCorrection(input, start='0', end='0', slope='0', intercept='0'):
     """ 
-    Iterates through MetaArray (beginning at "start" and ending at "finish") and adds footprint correction to each value.
+    Makes copy of DataArray, iterates through it (beginning at "start" and ending at "finish"), and adds footprint correction to each value.
     Returns resulting data values as a MetaArray.
     """
-    data = MetaArray(DataArray.view(ndarray).copy(), DataArray.dtype, DataArray.infoCopy())
-    counts = data[0][start:finish, 0] # interval of data specified by start and finish
+    data = MetaArray(input.view(ndarray).copy(), input.dtype, input.infoCopy())
+    start = float(start)
+    end = float(end)
+    slope = float(slope)
+    intercept = float(intercept)
+    
+    """
+    mask = (xaxisvalues > start) and (xaxisvalues < end)
+    data[0][mask] += data[0][mask] * slope + intercept
+    """
+    
+    
+    mask = (data[0] >= start) * (data[0] <= end)
+    counts = data[0][mask, 0]
+    #counts = data[0][start:end, 0] # interval of data specified by start and finish
     ccounts = (counts * slope) + intercept # applying footprint correction 
-    data[0][start:finish, 0] = ccounts # replacing original data in specified interval with corrected data
+    #data[0][start:end, 0] = ccounts # replacing original data in specified interval with corrected data
     return data
     
     
