@@ -780,9 +780,6 @@ class TripleAxis(object):
             detector.measurement = detector.measurement * np.exp(-beta * E / 2)
         return
     def normalize_monitor(self, monitor):
-        # Turns out iterating through self.detectors makes detector a copy,
-        # and doesn't actually modify self.detectors -> could be the 'yield'
-        # statement producing a generator...
         mon0 = self.time.monitor.measurement
         
         try: #in the event mon0 is an array of values, select the first one to normalize to
