@@ -413,7 +413,7 @@ function renderndplot(data, transform, plotid, plot_options) {
         legend: {
             show: true,
             parent: this,
-            placement: 'outside',
+            placement: 'outsideGrid',
             xoffset: 10,
             renderer: $.jqplot.InteractiveLegendRenderer
         },
@@ -841,6 +841,7 @@ function makeNdPlotSelector(toPlot, plotid, plotid_prefix) {
 function createNdPlotRegion(plotid, renderTo) {
     var div = document.createElement('div');
     div.setAttribute('id', plotid);
+    //div.setAttribute('style', 'display: block; width: 550; height: 350;');
     div.setAttribute('class', 'plot-region');
     var divy = document.createElement('div');
     divy.setAttribute('id', plotid + '_divy');
@@ -853,7 +854,7 @@ function createNdPlotRegion(plotid, renderTo) {
     //divc.setAttribute('class', 'plot-axis plot-axis-c');
     var divtarget = document.createElement('div');
     divtarget.setAttribute('id', plotid + '_target');
-    divtarget.setAttribute('style', 'display: block; width: 450; height: 350;');
+    //divtarget.setAttribute('style', 'display: block; width: 450; height: 350;');
     divtarget.setAttribute('class', 'plot-target');
     var selecty = document.createElement('select');
     selecty.setAttribute('id', plotid + '_selecty');
@@ -926,9 +927,10 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create, plot_options)
         myndgridpanel = makeNdPlotSelector(toPlot, plotid, plotid_prefix);  //creates gridpanel file selector
         
         myplotpanel = new Ext.panel.Panel({
-            //height: 350,
-            //width: 500,
+            height: 410,
+            //width: 565,
             flex: 1,
+            //autoheight: true,
             contentEl: myplotdiv,
         });
         
@@ -1026,15 +1028,15 @@ function create2dPlotRegion(plotid, renderTo) {
     var div = document.createElement('div');
     div.setAttribute('id', plotid);
     div.setAttribute('class', 'plot-region');
-    var divy = document.createElement('div');
-    divy.setAttribute('id', plotid + '_divy');
-    divy.setAttribute('class', 'plot-axis plot-axis-y');
-    var divx = document.createElement('div');
-    divx.setAttribute('id', plotid + '_divx');
-    divx.setAttribute('class', 'plot-axis plot-axis-x');
-    var divc = document.createElement('div');
-    divc.setAttribute('id', plotid + '_divc');
-    divc.setAttribute('class', 'plot-axis plot-axis-c');
+//    var divy = document.createElement('div');
+//    divy.setAttribute('id', plotid + '_divy');
+//    divy.setAttribute('class', 'plot-axis plot-axis-y');
+//    var divx = document.createElement('div');
+//    divx.setAttribute('id', plotid + '_divx');
+//    divx.setAttribute('class', 'plot-axis plot-axis-x');
+//    var divc = document.createElement('div');
+//    divc.setAttribute('id', plotid + '_divc');
+//    divc.setAttribute('class', 'plot-axis plot-axis-c');
     var divtarget = document.createElement('div');
     divtarget.setAttribute('id', plotid + '_target');
     divtarget.setAttribute('class', 'plot-target');
@@ -1050,32 +1052,32 @@ function create2dPlotRegion(plotid, renderTo) {
     updatebutton.setAttribute('type', 'submit');
     updatebutton.setAttribute('value', 'Update plot ');
     
-    var colorbar = document.createElement('canvas');
-    colorbar.setAttribute('width', 60);
-    colorbar.setAttribute('height', 500);
-    colorbar.setAttribute('id', plotid + '_colorbar');
-    colorbar.setAttribute('class', 'plot-colorbar');
-    var invis = document.createElement('canvas');
-    invis.setAttribute('id', plotid + '_invis');
-    invis.setAttribute('class', 'plot-invis');
-    invis.hidden = true;
-    var colorbarinvis = document.createElement('canvas');
-    colorbarinvis.setAttribute('width', 1);
-    colorbarinvis.setAttribute('id', plotid + '_colorbar_invis');
-    colorbarinvis.setAttribute('class', 'plot-invis plot-colorbar-invis');
-    colorbarinvis.hidden = true;
+//    var colorbar = document.createElement('canvas');
+//    colorbar.setAttribute('width', 60);
+//    colorbar.setAttribute('height', 500);
+//    colorbar.setAttribute('id', plotid + '_colorbar');
+//    colorbar.setAttribute('class', 'plot-colorbar');
+//    var invis = document.createElement('canvas');
+//    invis.setAttribute('id', plotid + '_invis');
+//    invis.setAttribute('class', 'plot-invis');
+//    invis.hidden = true;
+//    var colorbarinvis = document.createElement('canvas');
+//    colorbarinvis.setAttribute('width', 1);
+//    colorbarinvis.setAttribute('id', plotid + '_colorbar_invis');
+//    colorbarinvis.setAttribute('class', 'plot-invis plot-colorbar-invis');
+//    colorbarinvis.hidden = true;
 
     
-    divy.appendChild(selecty);
-    divx.appendChild(selectx);
-    divx.appendChild(updatebutton);
-    div.appendChild(divy);
+    div.appendChild(selecty);
+    div.appendChild(selectx);
+    div.appendChild(updatebutton);
+    //div.appendChild(divy);
     div.appendChild(divtarget);
-    div.appendChild(colorbar);
-    div.appendChild(divc);
-    div.appendChild(divx);
-    divc.appendChild(invis);
-    divc.appendChild(colorbarinvis);
+    //div.appendChild(colorbar);
+    //div.appendChild(divc);
+    //div.appendChild(divx);
+    //divc.appendChild(invis);
+    //divc.appendChild(colorbarinvis);
     
     return div;
 }

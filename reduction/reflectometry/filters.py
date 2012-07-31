@@ -87,7 +87,6 @@ def FootprintCorrection(input, start='0', end='0', slope='0', intercept='0'):
     mask = (xaxisvalues > start) and (xaxisvalues < end)
     data[0][mask] += data[0][mask] * slope + intercept
     """
-    
     endpoint = data['Measurements':'counts'][data.axisValues(0) > end][0]
     
     mask = logical_and((data.axisValues(0) >= start), (data.axisValues(0) <= end))

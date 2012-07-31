@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger #paging for lists
 from django.core.exceptions import ObjectDoesNotExist
 import cStringIO, gzip
-
+from django.db import transaction
 import hashlib,os
 import types
 import tempfile
@@ -727,55 +727,51 @@ def uploadFiles(request):
                 new_file = new_files[0]
             else:
                 new_file = File.objects.create(name=s_sha1.hexdigest(), friendly_name=friendly_name, location=location, datatype=datatype_id)
-                   
-            add_metadata_to_file(new_file, dobj) #THIS IS THE TIME CONSUMER!
-            if experiment is not None:
-                #print "experiment id: ", request.POST[u'experiment_id']
-                experiment.Files.add(new_file)
-
+                add_metadata_to_file(new_file, dobj)
                 
-        """    
-            new_files = File.objects.filter(name=file_sha1.hexdigest())
-            if len(new_files) > 0:
-                new_file = new_files[0]
-            else:
-                new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location)
-
             if experiment is not None:
                 #print "experiment id: ", request.POST[u'experiment_id']
                 experiment.Files.add(new_file)
-        """
+
     return HttpResponse('OK') 
 
+
+@transaction.commit_on_success
 def add_metadata_to_file(new_file, instrument):
     """
     Adds the metadata extrema from the provided instrument to the provided file.
-    Metadata is stored 
+    Metadata is stored as key-value pairs as specified in models.py.
+    NOTE: ONLY CALL FOR NEW FILES --> will be inefficient if the metadata object already exists
     """
     extrema = instrument.get_extrema()
     for key in extrema.keys():
-        # Assumes that all keys (ie field headers) are strings/chars
-        keymin = key + '_min'
+        # Assumes that all keys (ie field headers) are strings/chars       
+        new_metadata = Metadata.objects.create(Myfile=new_file, Key=key + '_min', Value=extrema[key][0])
+        new_file.metadata.add(new_metadata)
+        new_metadata = Metadata.objects.create(Myfile=new_file, Key=key + '_max', Value=extrema[key][1])
+        new_file.metadata.add(new_metadata)
         
+        
+        """
         # finds the unique location of this key in the database if it was previously loaded.
         # sorts on the file's unique hash then key value. Does this for both min and max.
         existing_metadata = Metadata.objects.filter(Myfile=new_file.name).filter(Key=keymin)
+        
         if existing_metadata: 
             # if there is a metadata object in the database already, update its value
             existing_metadata[0].Value = extrema[key][0]
         else:
             new_metadata_min = Metadata.objects.create(Myfile=new_file, Key=keymin, Value=extrema[key][0])
             new_file.metadata.add(new_metadata_min)
-        
         keymax = key + '_max'
-        existing_metadata = Metadata.objects.filter(Myfile=new_file.name).filter(Key=keymax)
+        existing_metadata = files.filter(Key=keymax)
         if existing_metadata: 
             # if there is a metadata object in the database already, update its value
             existing_metadata[0].Value = extrema[key][1]                    
         else:
             new_metadata_max = Metadata.objects.create(Myfile=new_file, Key=keymax, Value=extrema[key][1])
             new_file.metadata.add(new_metadata_max)
-
+        """
     
 def call_appropriate_filereader(filestr, friendly_name=None, fileExt=None):
     """
@@ -846,9 +842,13 @@ def return_files_metadata(request):
     if request.GET.has_key('experiment_id'):
         experiment_id = int(request.GET['experiment_id'])
         experiment = Experiment.objects.get(id=experiment_id)
+        
         file_list = experiment.Files.all()
         file_keys = [[fl.name, fl.friendly_name] for fl in file_list]
-        return simplejson.dumps(file_keys), return_metadata(experiment_id)
+        file_metadata = return_metadata(experiment_id)
+        result = {'file_keys': file_keys, 'file_metadata': file_metadata}
+        return HttpResponse(simplejson.dumps(result))    
+        #return simplejson.dumps(file_keys),return_metadata(experiment_id) 
 
 #@csrf_exempt 
 def displayEditor(request):

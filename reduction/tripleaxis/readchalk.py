@@ -304,7 +304,10 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None, unziped=None):
                             metadata['orient1'] = {'h': orient1[0], 'k': orient1[1], 'l': orient1[2]}
                         if orient2:
                             metadata['orient2'] = {'h': orient2[0], 'k': orient2[1], 'l': orient2[2]}
-                        metadata[field] = int(tokenized[i+1])
+                        try:
+                            metadata[field] = int(tokenized[i+1])
+                        except ValueError:
+                            metadata[field] = int(tokenized[i+2])
                 elif field == 'date':
                     date_info = tokenized[i+1].split('-')
                     metadata['day'] = date_info[0]

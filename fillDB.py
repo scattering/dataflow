@@ -7,7 +7,7 @@ if len(Instrument.objects.all()) < 1:
         Instrument.objects.create(Name='asterix', instrument_class='asterix')
         Instrument.objects.create(Name='NCNR PBR', instrument_class='refl')
 
-if len(Facility.objects.all()) == 0:
+if len(Facility.objects.all()) < 1:
         Facility.objects.create(Name='NCNR')
         Facility.objects.create(Name='HFIR')
         Facility.objects.create(Name='Chalk River')
