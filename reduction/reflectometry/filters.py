@@ -1,6 +1,6 @@
-from numpy import ndarray, zeros
+from numpy import ndarray, zeros, logical_and, sum
 import os, types
-from FilterableMetaArray import FilterableMetaArray as MetaArray
+from ..offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
 from reduction.formats import load
 
 def autoApplyToList(apply):
@@ -88,11 +88,19 @@ def FootprintCorrection(input, start='0', end='0', slope='0', intercept='0'):
     data[0][mask] += data[0][mask] * slope + intercept
     """
     
+    endpoint = data['Measurements':'counts'][data.axisValues(0) > end][0]
     
-    mask = (data[0] >= start) * (data[0] <= end)
-    counts = data[0][mask, 0]
+    mask = logical_and((data.axisValues(0) >= start), (data.axisValues(0) <= end))
+    xvalues = data.axisValues(0)[mask]
+    counts = data['Measurements':'counts'][mask]
+    #monitor = data['Measurements':'monitor']
+    #avg_monitor = sum(monitor) / monitor.shape[0]
     #counts = data[0][start:end, 0] # interval of data specified by start and finish
-    ccounts = (counts * slope) + intercept # applying footprint correction 
+    #print 'before correction: ', data['Measurements':'counts'][mask]
+    counts = counts * endpoint / ((xvalues * slope) + intercept) # applying footprint correction
+    data['Measurements':'counts'][mask] = counts
+    #print 'after correction: ', data['Measurements':'counts'][mask]
+    #monitor[mask]  += ... oops - we need to know the max of the monitor to do this.
     #data[0][start:end, 0] = ccounts # replacing original data in specified interval with corrected data
     return data
     
