@@ -526,6 +526,7 @@
 			function makePlotWindow() {
 			    if (!that.plotWindow || !that.plotWindow.window || that.plotWindow.window.closed) {
 			        that.plotWindow = window.open("/plotWindow/", "", "status=1,width=800,height=450"); }
+			    else { that.plotWindow.onload(); }
 			}
 			
 			var unfilled_data = [];
