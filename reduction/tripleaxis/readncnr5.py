@@ -319,13 +319,13 @@ class datareader(object):
                 for i in N.arange(len(tokenized)):
                         field=tokenized[i].lower()
                         if field=='Q(x)'.lower():
-                                field='Qx'.lower()
+                                field = 'h' #field='Qx'.lower()
                         if field=='Q(y)'.lower():
-                                field='Qy'.lower()
+                                field = 'k' #field='Qy'.lower()
                         if field=='Q(z)'.lower():
-                                field='Qz'.lower()
+                                field = 'l' #field='Qz'.lower()
                         if field=='T-act'.lower():
-                                field='Temp'.lower()
+                                field = 'temp' #field='Temp'.lower()
                         self.columndict[field]=[]
                         self.columnlist.append(field)
                 return
@@ -388,13 +388,13 @@ class datareader(object):
                 for i in N.arange(1,len(tokenized)):
                         field=tokenized[i]
                         if field=='QX':
-                                field='Qx'.lower()
+                                field = 'h' #field='Qx'.lower()
                         if field=='QY':
-                                field='Qy'.lower()
+                                field = 'k' #field='Qy'.lower()
                         if field=='QZ':
-                                field='Qz'.lower()
+                                field = 'l' #field='Qz'.lower()
                         if field=='T-act':
-                                field='Temp'.lower()
+                                field = 'temp' #field='Temp'.lower()
                         self.columndict[field]=[]
                         self.columnlist.append(field)
                 #In old bt7 files, there was no timestamp, so add one for those, otherwise use the one in the file

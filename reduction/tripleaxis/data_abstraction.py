@@ -1287,10 +1287,13 @@ def translate_physical_motors(tas, dataset):
     #translate_dict['hkl']='hkl'
     #In older versions, we cannot trust h,k,l, hkl, etc. because we don't know if we went where we wanted. 
     #Should translate to magnitude of q before hand
-    translate_dict['h'] = 'qx'
-    translate_dict['k'] = 'qy'
-    translate_dict['l'] = 'qz'
-    translate_dict['e'] = 'e'   
+    translate_dict['h'] = 'h'
+    translate_dict['k'] = 'k'
+    translate_dict['l'] = 'l'
+    #translate_dict['h'] = 'qx'
+    #translate_dict['k'] = 'qy'
+    #translate_dict['l'] = 'qz'    
+    translate_dict['e'] = 'e'
     map_motors(translate_dict, tas, tas.physical_motors, dataset)
     #map_motors(translate_dict,bt7.physical_motors,dataset)
     
