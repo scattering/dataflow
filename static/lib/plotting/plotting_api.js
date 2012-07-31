@@ -217,6 +217,7 @@ function transformData(transform) {
             }
         }
         this.axes.yaxis.resetScale();
+        this.axes.yaxis.labelOptions.label = "Log10(" + this.options.axes.yaxis.label + ")"
         //this.axes.yaxis.renderer = new $.jqplot.LogAxisRenderer();
         this.replot();
     } else { // transform == 'lin'
@@ -228,6 +229,7 @@ function transformData(transform) {
             }
         }
         this.axes.yaxis.resetScale();
+        this.axes.yaxis.labelOptions.label = this.options.axes.yaxis.label
         //this.axes.yaxis.renderer = new $.jqplot.LinearAxisRenderer();
         this.replot();
     }
