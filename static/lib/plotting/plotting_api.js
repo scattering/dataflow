@@ -217,7 +217,7 @@ function transformData(transform) {
             }
         }
         this.axes.yaxis.resetScale();
-        this.axes.yaxis.renderer = new $.jqplot.LogAxisRenderer();
+        //this.axes.yaxis.renderer = new $.jqplot.LogAxisRenderer();
         this.replot();
     } else { // transform == 'lin'
         for (var i=0; i<this.series.length; i++) {
@@ -228,7 +228,7 @@ function transformData(transform) {
             }
         }
         this.axes.yaxis.resetScale();
-        this.axes.yaxis.renderer = new $.jqplot.LinearAxisRenderer();
+        //this.axes.yaxis.renderer = new $.jqplot.LinearAxisRenderer();
         this.replot();
     }
     this.transform = transform;
@@ -243,7 +243,7 @@ function render1dplot(data, transform, plotid, plot_options) {
     
     var options = {
         title: data.title,
-        seriesDefaults: {shadow: false, markerOptions: {shadow: false, size: 4}},
+        seriesDefaults: {shadow: false, markerOptions: {shadow: false, size: 4}, breakOnNull:true},
         axes:{
           xaxis:{
             renderer: $.jqplot.LinearAxisRenderer,  // renderer to use to draw the axis,
@@ -379,7 +379,7 @@ function renderndplot(data, transform, plotid, plot_options) {
     
     var options = {
         title: data.title,
-        seriesDefaults: {shadow: false, markerOptions: {shadow: false, size: 4}},
+        seriesDefaults: {shadow: false, markerOptions: {shadow: false, size: 4}, breakOnNull:true},
         axes:{
           xaxis:{
             renderer: $.jqplot.LinearAxisRenderer,  // renderer to use to draw the axis,

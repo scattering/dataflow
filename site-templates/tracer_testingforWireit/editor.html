@@ -397,7 +397,7 @@
 						return false;
 					},
 					WireIt.Container.prototype.getConfig = function() {
-						configs = {'fields': {}, 'groups': {}, terminals: []};
+						configs = {'fields': {}, 'groups': {}};
 						jQuery.extend(true, configs.fields, this.fields); // copy of fields
 						jQuery.extend(true, configs.groups, this.groups);
 						// now add default values into each group
