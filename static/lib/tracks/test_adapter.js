@@ -202,27 +202,28 @@ test_adapter = {
 		}
         YAHOO.util.Connect.initHeader('X-CSRFToken', getCookie('csrftoken'));
         YAHOO.util.Connect.asyncRequest(method, url, {
-			success: function(o) {
-				var s = o.responseText;
-				         // CHANGED (7/5/11), JSON parsing was not working
-					 try { r = YAHOO.lang.JSON.parse(s) }
-					 catch(ex) { console.log('parse error in test_adapter:', ex); }
-					 //r = eval('(function() { return ' + s + '; })()');
-			 	callbacks.success.call(callbacks.scope, r);
-			},
-			failure: function(o) {
-			    var s = o.responseText;
-				//         // CHANGED (7/5/11), JSON parsing was not working
-				var errorStr = o.status + " " + o.statusText;
-				try { 
-				    r = YAHOO.lang.JSON.parse(s);
-				    errorStr = r.errorStr;
-				} 
-				catch(ex) {}
+            success: function(o) {
+                var s = o.responseText;
+                var r = ""; //7/31/12, r was not being set always, causing errors. I think r="" will be ok.
+                 // CHANGED (7/5/11), JSON parsing was not working
+                try { r = YAHOO.lang.JSON.parse(s) }
+                catch(ex) { console.log('parse error in test_adapter:', ex); }
+                //r = eval('(function() { return ' + s + '; })()');
+                callbacks.success.call(callbacks.scope, r);
+            },
+            failure: function(o) {
+                var s = o.responseText;
+                //         // CHANGED (7/5/11), JSON parsing was not working
+                var errorStr = o.status + " " + o.statusText;
+                try { 
+                    r = YAHOO.lang.JSON.parse(s);
+                    errorStr = r.errorStr;
+                } 
+                catch(ex) {}
 
-				callbacks.failure.call(callbacks.scope, errorStr);
-			}
-		}, postData); 
-	}
+                callbacks.failure.call(callbacks.scope, errorStr);
+            }
+        }, postData); 
+    }
 	
 };

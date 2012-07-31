@@ -9,9 +9,7 @@
 	 * @constructor
 	 * @param {Object} options
 	 */
-    updateFilesMetadata = function (response) {
-        console.log(response);
-    };
+
 	WireIt.WiringEditor = function(options) {
 
 		/**
@@ -613,10 +611,19 @@
                         type: 'GET',
                         data: { 'experiment_id': this.launchedFromExperimentPage },
                         success: function(response) {
-                            updateFilesMetadata(response);
+                            //Updating METADATA, FILES, and FILES_DICT
+                            var resultdict = Ext.decode(response);
+                            editor.FAT.METADATA = Ext.decode(resultdict.file_metadata); //passed as string
+                            var FILES = resultdict.file_keys;
+                            editor.FAT.FILES = FILES;
+                            var FILE_DICT = {};
+                            for (var i in FILES) {
+                                FILE_DICT[FILES[i][1]]=FILES[i][0];
+                            }
+                            editor.FAT.FILE_DICT = FILE_DICT;
                         },
                         failure: function(response) {
-                            console.log('failure: ', response);
+                            console.log('save failure: ', response);
                         }
                     });
                 }, 

@@ -842,9 +842,13 @@ def return_files_metadata(request):
     if request.GET.has_key('experiment_id'):
         experiment_id = int(request.GET['experiment_id'])
         experiment = Experiment.objects.get(id=experiment_id)
+        
         file_list = experiment.Files.all()
         file_keys = [[fl.name, fl.friendly_name] for fl in file_list]
-        return simplejson.dumps(file_keys), return_metadata(experiment_id)
+        file_metadata = return_metadata(experiment_id)
+        result = {'file_keys': file_keys, 'file_metadata': file_metadata}
+        return HttpResponse(simplejson.dumps(result))    
+        #return simplejson.dumps(file_keys),return_metadata(experiment_id) 
 
 #@csrf_exempt 
 def displayEditor(request):
