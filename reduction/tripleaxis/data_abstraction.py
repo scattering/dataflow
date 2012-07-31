@@ -836,7 +836,6 @@ class TripleAxis(object):
         return pickle.loads(str_version)
 
     def get_plottable(self):
-        #For now, hardcodes None into the variances until uncertainty can be fixed
         orderx = []
         ordery = []
         data = {}
@@ -844,8 +843,6 @@ class TripleAxis(object):
         print repr(self.xaxis) + " " + repr(self.yaxis) + " " + repr(self.num_bins) + \
               repr(self.xstep) + " " + repr(self.ystep)
         print self.__dict__.keys()
-        #self.xaxis='h'
-        #self.yaxis='e' #self.physical_motors.k
         if self.xaxis != '' and self.yaxis != '':
             print "2d plotting"
             xarr = None
@@ -884,10 +881,10 @@ class TripleAxis(object):
             #xi, yi, zi = regular_gridding.regularlyGrid(xarr, yarr, self.detectors.primary_detector.measurement.x, xstart=xstart, xfinal=xfinal, xstep=xstep, ystart=ystart, yfinal=yfinal, ystep=ystep)		                               
 
             zi = zi.T
-            if LOCAL:
-                pylab.Figure()
-                pylab.pcolormesh(xi,yi,zi)
-                pylab.show()
+            #if LOCAL:
+            #    pylab.Figure()
+            #    pylab.pcolormesh(xi,yi,zi)
+            #    pylab.show()
             plottable_data = {
                 'type': '2d',
                 'z':  [zi.tolist()],
@@ -1287,10 +1284,13 @@ def translate_physical_motors(tas, dataset):
     #translate_dict['hkl']='hkl'
     #In older versions, we cannot trust h,k,l, hkl, etc. because we don't know if we went where we wanted. 
     #Should translate to magnitude of q before hand
-    translate_dict['h'] = 'qx'
-    translate_dict['k'] = 'qy'
-    translate_dict['l'] = 'qz'
-    translate_dict['e'] = 'e'   
+    translate_dict['h'] = 'h'
+    translate_dict['k'] = 'k'
+    translate_dict['l'] = 'l'
+    #translate_dict['h'] = 'qx'
+    #translate_dict['k'] = 'qy'
+    #translate_dict['l'] = 'qz'    
+    translate_dict['e'] = 'e'
     map_motors(translate_dict, tas, tas.physical_motors, dataset)
     #map_motors(translate_dict,bt7.physical_motors,dataset)
     

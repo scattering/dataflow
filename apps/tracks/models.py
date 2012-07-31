@@ -78,7 +78,7 @@ class Instrument(models.Model):
         return self.Name
 
 class Facility(models.Model):
-    Name = models.CharField(max_length=50) #e.g., NCNR, HFIR, 
+    Name = models.CharField(max_length=50) #e.g., NCNR, HFIR, Chalk River
     instruments = models.ManyToManyField('Instrument', null=True)
     def __unicode__(self):
         return self.Name

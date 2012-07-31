@@ -936,12 +936,19 @@ def editProject(request, project_id):
     elif request.POST.has_key('new_experiment'):
         new_exp = Experiment.objects.create(ProposalNum=request.POST['new_experiment'], project=Project.objects.get(id=project_id))
         new_exp.users.add(request.user)
+        '''
+        # No longer using instrument name when creating an experiment! Only instrument_class matters.
+        # This segment was replaced by the instrument class 'if' segment below.
         if request.POST.has_key('instrument_name'):
             if request.POST['instrument_name']:
                 instrument = Instrument.objects.get(id=request.POST['instrument_name'])
                 instrument_class = instrument.instrument_class
                 new_exp.instrument = instrument
                 new_exp.save()
+        '''
+        if request.POST.has_key('instrument_class') and request.POST['instrument_class']:
+            new_exp.instrument = Instrument.objects.get(instrument_class=request.POST['instrument_class'])
+            new_exp.save()
         if request.POST.has_key('facility'):
             if request.POST['facility']:
                 facility = Facility.objects.get(id=request.POST['facility'])
@@ -1023,7 +1030,8 @@ def editExperiment(request, experiment_id):
         instrument_class = experiment.instrument.instrument_class
     else:
         instrument_class = None
-    form1 = experimentForm1(initial={'facility':facility, 'instrument_class':instrument_class, 'instrument_name':instrument, })
+    form1 = experimentForm1(initial={'facility':facility, 'instrument_class':instrument_class})
+    #form1 = experimentForm1(initial={'facility':facility, 'instrument_class':instrument_class, 'instrument_name':instrument, })
     loaders = []
     for dt in instrument_class_by_language[instrument_class].datatypes:
         loaders.extend([l['id'] for l in dt.loaders])
