@@ -174,11 +174,18 @@
 		            force_inbounds.call(p1);
 		            force_inbounds.call(p2);
 		            
-		            plot.options.interactors = [];
-		            plot.options.interactors.push({ type: 'Line', name: 'line', xmin: p1.x, ymin: p1.y, xmax: p2.x, ymax: p2.y});
-		            plot.options.interactors.push({ type: 'Interval', name: 'interval', x01: cfg.beginning.value,  x02: cfg.end.value});
-		            $.jqplot.InteractorPlugin.pluginit.call(plot, 'plot', [], plot.options);
-		            plot.replot();
+		            var plot_options = { interactors: [
+		                { type: 'Line', name: 'line', xmin: p1.x, ymin: p1.y, xmax: p2.x, ymax: p2.y},
+		                { type: 'Interval', name: 'interval', x01: cfg.beginning.value,  x02: cfg.end.value}
+		                ]
+		            }
+		                
+	                //$.jqplot.InteractorPlugin.pluginit.call(plot, 'plot', [], plot_options);
+	                //plot.replot();
+	                
+	                plottingAPI(toPlot, 'plot', plot_options);
+	                
+	                
 		            
 		            plot.plugins.cursor.zoom= false;
 		        

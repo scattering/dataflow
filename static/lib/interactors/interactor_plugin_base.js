@@ -155,7 +155,6 @@
             this.state = null;
             this.plot = null;
             this.translatable = true;
-            this.allow_pan = true;
 
             this.grobs = [];
             this.mousedown = false;
@@ -166,6 +165,8 @@
             this.color = this.color1;
             
             this.rc = 1;//Math.random();
+            this.scrollZoom = true;
+            this.dragPan = true;
             $.extend(true, this, options);
             this.notMaster = false;
             this.interactors = []; // number of interactors
@@ -318,14 +319,16 @@
         },
         
         onMouseWheel: function(e) {
-            if (e.preventDefault) e.preventDefault();
-            if (e.stopPropagation) e.stopPropagation();
-            var pos = this.getMouse(e);
-            var dzoom;
-            if (e.wheelDelta) { dzoom = e.wheelDelta; }
-            else if (e.detail) { dzoom = e.detail * -40; }
-            else { dzoom = 0 } 
-            this.zoomPlot(dzoom, pos);
+            if (this.scrollZoom) {
+                if (e.preventDefault) e.preventDefault();
+                if (e.stopPropagation) e.stopPropagation();
+                var pos = this.getMouse(e);
+                var dzoom;
+                if (e.wheelDelta) { dzoom = e.wheelDelta; }
+                else if (e.detail) { dzoom = e.detail * -40; }
+                else { dzoom = 0 } 
+                this.zoomPlot(dzoom, pos);
+            }
         },
         
         onMouseMove: function(e) {
@@ -364,7 +367,7 @@
         },
         
         onEmptyDrag: function(pos) {
-            if (this.allow_pan == true) this.panPlot(pos);
+            if (this.dragPan == true) this.panPlot(pos);
         },
         
         zoomMax: function() {

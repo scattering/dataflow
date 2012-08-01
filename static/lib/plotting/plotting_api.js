@@ -427,6 +427,7 @@ function renderndplot(data, transform, plotid, plot_options) {
     
     jQuery.extend(true, options, data.options);
     jQuery.extend(true, options, plot_options);
+    
     //jQuery(plotid).empty(); // empty the jqplot div in the DOM. Seemed unnecessary. 7/17/2012
     plotnd = jQuery.jqplot(plotid, data.data, options);
 
@@ -726,7 +727,7 @@ function plottingAPI(toPlots, plotid_prefix, plot_options) {
                 function (e) {
                     var toPlot = getSelectedPlots();
                     errorbarsOn = !errorbarsOn; //toggle
-                    plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, false);
+                    plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, false, plot_options);
                 }
             );
             // logscale
@@ -741,13 +742,13 @@ function plottingAPI(toPlots, plotid_prefix, plot_options) {
             jQuery(document.getElementById(plotid + '_selectx')).change(
                 function (e) {
                     var toPlot = getSelectedPlots();
-                    plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, false);
+                    plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, false, plot_options);
                 }
             );
             jQuery(document.getElementById(plotid + '_selecty')).change(
                 function (e) {
                     var toPlot = getSelectedPlots();
-                    plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, false);
+                    plot = updateNdPlot(plot, toPlot, plotid, plotid_prefix, false, plot_options);
                 }
             );
             jQuery(document.getElementById(plotid)).keypress(
@@ -774,7 +775,7 @@ function getSelectedPlots(){
 }
 
 
-function makeNdPlotSelector(toPlot, plotid, plotid_prefix) {
+function makeNdPlotSelector(toPlot, plotid, plotid_prefix, plot_options) {
     /* Creates the plotgrid by instantiating the columns and store based on the passed objects
        Currently for ndplotting only. */
     //Creating store and grid.
@@ -795,7 +796,7 @@ function makeNdPlotSelector(toPlot, plotid, plotid_prefix) {
                     recordToPlots.push(record.data.toPlotObj);
                 });
                 //plot = updateNdPlot(plot, recordToPlots, plotid, plotid_prefix, false);
-                plot = updateNdPlot(plot, recordToPlots, 'plot_nd', 'plot', false);
+                plot = updateNdPlot(plot, recordToPlots, 'plot_nd', 'plot', false, plot_options);
             }
         }
     });
@@ -926,7 +927,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create, plot_options)
         var plotdiv = document.getElementById(plotid_prefix);
         plotdiv.innerHTML = "";  //removing the "I am a plot." from plotwindow.html's div
         myplotdiv = createNdPlotRegion(plotid);  //creates plot div
-        myndgridpanel = makeNdPlotSelector(toPlot, plotid, plotid_prefix);  //creates gridpanel file selector
+        myndgridpanel = makeNdPlotSelector(toPlot, plotid, plotid_prefix, plot_options);  //creates gridpanel file selector
         
         myplotpanel = new Ext.panel.Panel({
             height: 410,
