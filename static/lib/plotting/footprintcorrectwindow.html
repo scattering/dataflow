@@ -17,7 +17,6 @@
 		<script type="text/javascript" src="jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
 		<script type="text/javascript" src="jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
 		<script type="text/javascript" src="jqplot/plugins/jqplot.errorbarRenderer.js"></script>
-		<script type="text/javascript" src="jqplot/plugins/jqplot.pcolorRenderer.js"></script>
 		<script type="text/javascript" src="jqplot/plugins/jqplot.cursor.js"></script>
 		<script type="text/javascript" src="palettes.js"></script>
 		<script type="text/javascript" src="plotting_api.js"></script>
@@ -172,9 +171,7 @@
 		                    this.x = (this.y - parseFloat(cfg.intercept.value)) / parseFloat(cfg.slope.value);
 		                }
 		            }
-		            console.log(p1.x, p1.y);
 		            force_inbounds.call(p1);
-		            console.log(p1.x, p1.y);
 		            force_inbounds.call(p2);
 		            
 		            plot.options.interactors = [];
@@ -269,81 +266,7 @@
                 jQuery('#plot_selectnum').change({}, onchange);
                 jQuery('#plot_selectz').change({}, onchange);
 		    }*/
-		    /*update_plot = function(toPlot, transform) {
-		        debug = false;
-		        data = toPlot;
-		        if (data.binary_fp && data.z_binary_array == undefined) {
-		            if (plot && plot.series && plot.series[0]) { 
-		                plot.series[0].show=false; 
-		                plot.replot();
-		            }
-		            getBinaryData(data, function() { update_plot(data) })
-		            return
-		        }
-		        if(plot == null) {
-		            plottingAPI(toPlot, 'plot'); // creates plot with data.
-		            plot.options.interactors = [];
-		            plot.options.interactors.push({ type: 'Line', name: 'line', xmin: 1.0, ymin: 1.0, xmax: 4.0, ymax: 4.0});
-		            plot.options.interactors.push({ type: 'Interval', name: 'interval', x02: 3.0});
-		            $.jqplot.InteractorPlugin.pluginit.call(plot, 'plot', [], plot.options);
-		            plot.replot();
-		            
-		            plot.plugins.cursor.zoom= false;
-		        
-		            var linePlugin = plot.plugins.interactors.line;
-		            var interval = plot.plugins.interactors.interval;
-		            
-		            // The variables linex1, liney1, linex2, and liney2 keep track of the old location of the point but
-                    // are not actually placed in the Slice Region
-                    var linex1 = new pointTextControl(linePlugin.p1, 'x', 'x<sub>P1</sub> ', 5);
-		            linex1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
-		            //document.getElementById('footcontrols').appendChild(linex1.div);
-		            var liney1 = new pointTextControl(linePlugin.p1, 'y', 'y<sub>P1</sub> ', 5);
-		            liney1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
-                    //document.getElementById('footcontrols').appendChild(liney1.div);
-		            var linex2 = new pointTextControl(linePlugin.p2, 'x', 'x<sub>P2</sub> ', 5);
-		            linex2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
-	                //document.getElementById('footcontrols').appendChild(linex2.div); 
-		            var liney2 = new pointTextControl(linePlugin.p2, 'y', 'y<sub>P2</sub> ', 5);
-		            liney2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
-		            //document.getElementById('footcontrols').appendChild(liney2.div);
-		            var lineslope = new slopeTextControl(linePlugin, linex1, liney1, linex2, liney2, 'slope ', 5);
-		            lineslope.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
-		            document.getElementById('footcontrols').appendChild(lineslope.div);
-		            var lineinter = new interceptTextControl(linePlugin, liney1, liney2, 'y-intercept ', 5);
-		            lineinter.div.setAttribute('style', 'display: block; text-align: center; width: 100%; padding: 5px 10px;');
-		            document.getElementById('footcontrols').appendChild(lineinter.div);
-		            
-		            var vert1 = new pointTextControl(interval.p1, 'x', 'Start of Interval ', 5);
-		            vert1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
-		            document.getElementById('footcontrols').appendChild(vert1.div);
-		            var vert2 = new pointTextControl(interval.p2, 'x', 'End of Interval ', 5);
-		            vert2.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
-		            document.getElementById('footcontrols').appendChild(vert2.div);	            
-		            
-                    var hr = document.createElement('div'); hr.innerHTML = "<hr>";
-                    document.getElementById('footcontrols').appendChild(hr);
-                    
-                    var submitbutton = document.createElement('input');
-                    submitbutton.setAttribute('type', 'button');
-                    submitbutton.setAttribute('value', 'Submit Changes');
-                    var submitChanges = function() {
-                        cfg.slope.value = lineslope.textbox.value;
-                        cfg.intercept.value = lineinter.textbox.value;
-                        cfg.beginning.value = vert1.textbox.value;
-                        cfg.end.value = vert2.textbox.value;
-                        
-                        if (!('groups' in container)) container.groups = {};
-                        if (!(reductionInstance in container.groups)) container.groups[reductionInstance] = {};
-                        jQuery.extend(container.groups[reductionInstance], cfg);
-                    };
-                    submitbutton.onclick = submitChanges;                    
-                    document.getElementById('footcontrols').appendChild(submitbutton);
-                }
-                else {
-                    plottingAPI(window.opener.toPlot, 'plot');
-                }                               
-		    }*/
+		   
                     
 		    slopeTextControl = function(linePlugin, x1, y1, x2, y2, label, precision) {
 		        var precision = precision || 3;
@@ -484,7 +407,7 @@
             
         </script>
     </head>
-    <body id="woot" class="yui-skin-sam">
+    <body>
 <!--        <div id="upper" style="display: block; width: 100%; height: 450px;">-->
 <!--            <div id="plot" style="display: block; width: 100%; height: 450px; padding: 0; margin:0;">	       -->
         <div id='plot'>

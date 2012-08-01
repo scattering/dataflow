@@ -3,7 +3,7 @@
 // # by Ophir Lifshitz #
 // # Aug, 2011         #
 // #####################
-debug = true;
+debug = false;
 
 (function($) {
     function toArray(obj) {
