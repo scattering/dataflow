@@ -386,7 +386,7 @@
 					WireIt.Container.prototype.onMouseDown = function(e) {
 						//console.log('clicked on container')
                         // MACs did not register ctrl-click as e.which == 3, therefore checks if ctrl is pressed with click. Can configure for altKey==True if we want...
-                        if (!e || (e.which == 1 and !e.ctrlKey)) { return false; } // only catch non-left-clicks
+                        if (!e || (e.which == 1 && !e.ctrlKey)) { return false; } // only catch non-left-clicks
 						if(!this.groups)
 							this.groups = {};
 						if(!this.groups[editor.reductionInstance])

@@ -124,9 +124,8 @@
 		        if (toPlot) {
 		            //var dims = toPlot['series']['data'][xlabel]['values'].dims; // Is probably not necessary since it's a one dimensional array
 		            // configuration from tracksConfigs supersedes the default from getConfig()
-		            cfg = {}; //{xmin: dims.xmin, xmax: dims.xmax, ymin: dims.ymin, ymax: dims.ymax};
-		            var all_cfg = container.getConfig().groups;
-		            if (reductionInstance in all_cfg) jQuery.extend(cfg, all_cfg[reductionInstance]);
+		            
+		                
 		            //var lims = {slope: dims.xmin, intercept: dims.xmax, beginning: dims.ymin, end: dims.ymax};
 		            /*for (var lim in lims) {
 		                
@@ -137,9 +136,50 @@
                     //update_selectors(toPlot);
                     
 		            plottingAPI(toPlot, 'plot'); // creates plot with data.
+		            
+		            var xmin = plot.axes.xaxis.min;
+		            var xmax = plot.axes.xaxis.max;
+		            var ymin = plot.axes.yaxis.min;
+		            var ymax = plot.axes.yaxis.max;
+		            var plotxrange = (xmax - xmin);
+		            var plotyrange = (ymax - ymin);
+		            
+		            // set xmin, xmax to be 10% from edges of plot by default
+		            cfg = {};
+		            cfg.beginning = {value: xmin + 0.1 * plotxrange};
+		            cfg.end = {value: xmax - 0.1 * plotxrange};
+		            cfg.slope = {value: 0.5 * plotyrange/plotxrange};
+		            cfg.intercept = {value: ymin + 0.1 * plotyrange - (xmin * cfg.slope.value)};
+		            
+		            //cfg = {} //{xmin: dims.xmin, xmax: dims.xmax, ymin: dims.ymin, ymax: dims.ymax};
+		            var all_cfg = container.getConfig().groups;
+		            if (reductionInstance in all_cfg) jQuery.extend(cfg, all_cfg[reductionInstance]);
+		            
+		            var p1 = {};
+		            p1.x = xmin + 0.05 * plotxrange;
+		            p1.y = parseFloat(cfg.slope.value) * p1.x + parseFloat(cfg.intercept.value);
+		            var p2 = {};
+		            p2.x = xmax - 0.05 * plotxrange;
+		            p2.y = parseFloat(cfg.slope.value) * p2.x + parseFloat(cfg.intercept.value);
+
+		            function force_inbounds() {
+		                if (this.y < ymin) {
+		                    this.y = ymin + 0.05 * plotyrange;
+		                    this.x = (this.y - parseFloat(cfg.intercept.value)) / parseFloat(cfg.slope.value);
+		                }
+		                if (this.y > ymax) {
+		                    this.y = ymax - 0.05 * plotyrange;
+		                    this.x = (this.y - parseFloat(cfg.intercept.value)) / parseFloat(cfg.slope.value);
+		                }
+		            }
+		            console.log(p1.x, p1.y);
+		            force_inbounds.call(p1);
+		            console.log(p1.x, p1.y);
+		            force_inbounds.call(p2);
+		            
 		            plot.options.interactors = [];
-		            plot.options.interactors.push({ type: 'Line', name: 'line', xmin: 1.0, ymin: 1.0, xmax: 4.0, ymax: 4.0});
-		            plot.options.interactors.push({ type: 'Interval', name: 'interval', x02: 3.0});
+		            plot.options.interactors.push({ type: 'Line', name: 'line', xmin: p1.x, ymin: p1.y, xmax: p2.x, ymax: p2.y});
+		            plot.options.interactors.push({ type: 'Interval', name: 'interval', x01: cfg.beginning.value,  x02: cfg.end.value});
 		            $.jqplot.InteractorPlugin.pluginit.call(plot, 'plot', [], plot.options);
 		            plot.replot();
 		            

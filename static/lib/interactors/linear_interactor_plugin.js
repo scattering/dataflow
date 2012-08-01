@@ -14,26 +14,40 @@
     $.jqplot.LinearInteractorPlugin.prototype = new $.jqplot.InteractorPlugin();
     $.jqplot.LinearInteractorPlugin.prototype.constructor = $.jqplot.LinearInteractorPlugin;
     $.jqplot.InteractorPluginSubtypes.Line = $.jqplot.LinearInteractorPlugin;
+    $.extend($.jqplot.LinearInteractorPlugin.prototype, {
+        init: function(options) {
+    //$.jqplot.LinearInteractorPlugin.prototype.init = function(options) {
+            $.jqplot.InteractorPlugin.prototype.init.call(this, options);
+            this.xmin = 0.0;
+            this.ymin = 0.0;
+            this.xmax = 1.0;
+            this.ymax = 1.0;
+            this.slope = 1.0;
+            $.extend(this, options);
+            this.slope = (this.ymax - this.ymin) / (this.xmax - this.xmin);
+            this.intercept = (this.ymax - this.ymin) - (this.slope * (this.xmax - this.xmin));
+            
+            this.p1 = new $.jqplot.PluginPoint(); this.p1.initialize(this, this.xmin, this.ymin);
+            this.p2 = new $.jqplot.PluginPoint(); this.p2.initialize(this, this.xmax, this.ymax);
+            
+            this.linear = new $.jqplot.Linear(); this.linear.initialize(this, this.p1, this.p2, 4);
+            
+            this.grobs.push(this.linear, this.p1, this.p2);
+            
+            //this.redraw();              
+        },
+        getSlope: function() {
+            this.slope = (this.p2.coords.y - this.p1.coords.y) / (this.p2.coords.x - this.p1.coords.x);
+            return this.slope;
+        },
+        getIntercept: function() {
+            var slope = this.getSlope();
+            this.intercept = (this.p2.coords.y - this.p1.coords.y) - (slope *  (this.p2.coords.x - this.p1.coords.x));
+            return this.intercept;
+        }
+        
+    });
     
-    $.jqplot.LinearInteractorPlugin.prototype.init = function(options) {
-        $.jqplot.InteractorPlugin.prototype.init.call(this, options);
-        this.xmin = 0.0;
-        this.ymin = 0.0;
-        this.xmax = 1.0;
-        this.ymax = 1.0;
-        this.slope = 1.0;
-        $.extend(this, options);
-        this.slope = (this.ymax - this.ymin) / (this.xmax - this.xmin);
-        this.intercept = (this.ymax - this.ymin) - (this.slope * (this.xmax - this.xmin));
-        
-        this.p1 = new $.jqplot.PluginPoint(); this.p1.initialize(this, this.xmin, this.ymin);
-        this.p2 = new $.jqplot.PluginPoint(); this.p2.initialize(this, this.xmax, this.ymax);
-        
-        this.linear = new $.jqplot.Linear(); this.linear.initialize(this, this.p1, this.p2, 4);
-        
-        this.grobs.push(this.linear, this.p1, this.p2);
-        
-        //this.redraw();              
-    }
+    $.jqplot.LinearInteractorPlugin.prototype.init
     
 })(jQuery);
