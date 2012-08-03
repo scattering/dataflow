@@ -28,6 +28,16 @@
         
         this.p1 = new $.jqplot.PluginPoint(); this.p1.initialize(this, this.xmin, this.ymin);
         this.p2 = new $.jqplot.PluginPoint(); this.p2.initialize(this, this.xmax, this.ymax);
+
+        this.p1.move = function(dp) {
+            var dpos = {x: dp.x || 0, y: dp.y || 0 };
+            this.translateBy(dpos);
+        };
+        
+        this.p2.move = function(dp) {
+            var dpos = {x: dp.x || 0, y: dp.y || 0 };
+            this.translateBy(dpos);
+        }; 
         
         this.segment = new $.jqplot.Segment(); this.segment.initialize(this, this.p1, this.p2, 4);
         

@@ -608,14 +608,15 @@ segment_listener = function(series, original_data) {
         $.ajax({
             url: '/calculateSlice/',
             type: 'GET',
-            data: {'x1' : myInteractor.p1._x0, 'y1' : myInteractor.p1._y0, 'x2' : myInteractor.p2._x0, 'y2': myInteractor.p2._y0, 'xarr': Ext.encode(original_data.xarr), 'yarr': Ext.encode(original_data.yarr), 'zarr': Ext.encode(original_data.zarr)},
+            data: {'x1' : myInteractor.p1.coords.x, 'y1' : myInteractor.p1.coords.y, 'x2' : myInteractor.p2.coords.x, 'y2': myInteractor.p2.coords.y, 'xarr': Ext.encode(original_data.xarr), 'yarr': Ext.encode(original_data.yarr), 'zarr': Ext.encode(original_data.zarr)},
             success: function(response) {
                 var result = Ext.decode(response);
-                var x = result['line_x'];
-                var y = result['line_y'];
+                console.log(myInteractor.p1._x0+ "," + myInteractor.p1._y0+" ------- " +myInteractor.p2._x0+ "," + myInteractor.p2._y0);
+                var x = result['line_y'];
+                var z = result['zout'];
                 var xdata = [];
                 for (var i = 0; i < x.length; ++i){
-                    xdata.push([x[i], y[i]]);
+                    xdata.push([x[i], z[i]]);
                 }
                 slicePlot.series[0].data = xdata;
                 slicePlot.resetAxesScale();
