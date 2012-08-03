@@ -25,6 +25,9 @@ urlpatterns = patterns(REPO_ROOT + '.apps.tracks.views',
     ('^metadatajson/$', 'return_metadata'),
     ('^test_table/$','testTable'),
 
+    # nd-plot interactor calculations
+    ('^calculateSlice/', 'calculate_segment_interactor'),
+
     # Wiring editor display urls
     ('^editor/$', 'displayEditor'),
     ('^editor/langSelect/$', 'languageSelect'),

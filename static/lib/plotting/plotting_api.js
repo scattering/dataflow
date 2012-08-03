@@ -16,6 +16,8 @@ var types = { lin: {
 var plots = [];
 var plot = null; // starting with just one plot.
 var stage = 1;
+var myInteractor = null;
+
 function DataSeries(props) {
   props.matrixfy = function(format) {
     return matrixfy(this.dims, this.func, format);
@@ -408,8 +410,8 @@ function renderndplot(data, transform, plotid, plot_options) {
             show: true,
             zoom: true,
             clickReset: true,
-            tooltipLocation:'se',
-            tooltipOffset: -60,
+            tooltipLocation:'ne',
+            tooltipOffset: -40,
             useAxesFormatters: false,
         },
         legend: {
@@ -421,7 +423,7 @@ function renderndplot(data, transform, plotid, plot_options) {
         },
         grid: {shadow: false},
         sortData: false,
-        //interactors: [ {type: 'Rectangle', name: 'rectangle'} ],
+        //interactors: [ {type: 'Line', name: 'line'} ],
         type: 'nd'
     };
     
@@ -560,6 +562,99 @@ function update1dPlot(plot, toPlots, target_id, plotnum, plot_options) {
     
     return plot; 
 }
+
+function updateTas2dPlot(toPlot, toPlots, target_id, plotnum, plot_options) {
+    plot_options['interactors'] = [ {type: 'Segment', name: 'segment'} ];
+    plot_options['cursor'] = {
+        show: true,
+        zoom: false,
+        clickReset: true,
+        tooltipLocation:'se',
+        tooltipOffset: -60,
+        useAxesFormatters: false,
+    };
+    plot = update2dPlot(toPlot, toPlots, target_id, plotnum, plot_options);
+    plot.type = 'tas_2d';
+
+    //creating slice plot from the segment interactor
+    //TODO currently set up for only xaxis. Configure with dropdown for x and y
+    slicePlot = $.jqplot('sliceplot', [[1,2]], {
+        cursor: {show: true, zoom: true},
+        grid: {shadow: false}, 
+        sortData: false, 
+        series: [ {shadow: false, color: 'blue', markerOptions: {shadow: false, size: 4}} ],
+        axesDefaults: {
+            labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+            tickOptions: {formatString: "%.3g", _styles: {right: 0}}
+        },
+        axes: {axis: {label: plot.axes.xaxis.xlabel}, yaxis: {label: 'detector counts'}}
+    });
+
+    myInteractor = plot.plugins.interactors.segment; //reference to the segment interactor
+    var sl = segment_listener(plot.series[0], toPlots[plotnum].original_data);
+    sl.update();
+    //reseting interactor and plot
+    //myInteractor = null;
+    //$('sliceplot').empty();
+
+    return plot;
+}
+segment_listener = function(series, original_data) {
+    myInteractor.p1.listeners.push(this);
+    myInteractor.p2.listeners.push(this);
+    //var p0 = series;
+    this.update = function(pos) {
+        $.ajax({
+            url: '/calculateSlice/',
+            type: 'GET',
+            data: {'x1' : myInteractor.p1._x0, 'y1' : myInteractor.p1._y0, 'x2' : myInteractor.p2._x0, 'y2': myInteractor.p2._y0, 'xarr': Ext.encode(original_data.xarr), 'yarr': Ext.encode(original_data.yarr), 'zarr': Ext.encode(original_data.zarr)},
+            success: function(response) {
+                var result = Ext.decode(response);
+                var x = result['line_x'];
+                var y = result['line_y'];
+                var xdata = [];
+                for (var i = 0; i < x.length; ++i){
+                    xdata.push([x[i], y[i]]);
+                }
+                slicePlot.series[0].data = xdata;
+                slicePlot.resetAxesScale();
+                slicePlot.grid._offsets.left = slicePlot.axes.yaxis._elem.width();
+                slicePlot.replot();
+                //successfunction(); 
+            },
+            failure: function(response) {
+                alert('Segment point locations are invalid!');
+            }
+        });
+        /*function successfunction(response) {
+            slicePlot.series[0].data = xdata;
+            slicePlot.resetAxesScale();
+            slicePlot.grid._offsets.left = slicePlot.axes.yaxis._elem.width();
+            slicePlot.replot();
+        }*/
+        /*
+        var width = p0.dims.xdim;
+        var height = p0.dims.ydim;
+        i_min = Math.floor((myInteractor.p1.coords.x - p0.dims.xmin) / p0.dims.dx);
+        i_min = Math.min(Math.max(i_min, 0), p0.dims.xdim);
+        i_max = Math.ceil((myInteractor.p2.coords.x - p0.dims.xmin) / p0.dims.dx);
+        i_max = Math.max(Math.min(i_max, p0.dims.xdim), 0);
+        j_min = Math.floor((myInteractor.p2.coords.y - p0.dims.ymin) / p0.dims.dy);
+        j_min = Math.min(Math.max(j_min, 0), p0.dims.ydim);
+        j_max = Math.ceil((myInteractor.p1.coords.y - p0.dims.ymin) / p0.dims.dy);
+        j_max = Math.max(Math.min(j_max, p0.dims.ydim), 0);
+        var xdata = [];
+        for (var c=i_min; c <=i_max-1; c++) {
+            xdata.push([p0.dims.xmin + c*p0.dims.dx, p0.cumsum_x[c][j_max] - p0.cumsum_x[c][j_min]]);
+        }
+        */
+    };
+    return this;  
+};
+
+
+
 
 function update2dPlot(plot, toPlots, target_id, plotnum, plot_options) {
     if (!plot || !plot.hasOwnProperty("type") || plot.type!='2d'){
@@ -705,6 +800,10 @@ function plottingAPI(toPlots, plotid_prefix, plot_options) {
     plot_type = toPlots[0].type
     
     switch (plot_type) {
+        case 'tas_2d':
+            plot = updateTas2dPlot(plot, toPlots, plotid_prefix, 0, plot_options);
+            break;
+
         case '2d':
             plot = update2dPlot(plot, toPlots, plotid_prefix, 0, plot_options);
             break;
@@ -967,7 +1066,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create, plot_options)
     toPlotlength = toPlot.length;
 
     var data = {};
-    data.data = series; //reference to series; CAUTION: be careful if changing this!!
+    data.data = series;
     data.title = (toPlotlength > 0) ? toPlot[0].title : "Empty plot";
     data.options = {series: []}; // legend names/labels go in the 'series' option
     data.xlabel = quantityx;
@@ -1017,7 +1116,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create, plot_options)
     
     if (series.length == 0) {
         //if there are no files selected to plot, origin  and hide the legend.
-        series = [[[0,0]]];  //NOTE: this works because data.data = series (by reference!)
+        data.data = [[[0,0]]];
         data.options.legend = {show: false};
     }
 

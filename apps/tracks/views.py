@@ -1,3 +1,6 @@
+## adds default objects to DB
+from ... import fillDB
+
 from django.shortcuts import render_to_response, render
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.utils import simplejson
@@ -17,9 +20,6 @@ import tempfile
 ## models
 from django.contrib.auth.models import User 
 from models import * #add models by name
-
-## adds test objects to DB
-from ... import fillDB
 
 
 #from ...apps.fileview import testftp
@@ -46,8 +46,12 @@ from ...reduction.tripleaxis.data_abstraction import hfir_filereader
 from ...reduction.tripleaxis.data_abstraction import TripleAxis
 from ...dataflow import wireit
 
+# Used for segment interactor calculations
+from ...reduction.common import linegen
+
 import random
 from numpy import NaN
+from numpy import array
 
 from django.conf import settings
 FILES_DIR=settings.FILES_DIR
@@ -87,6 +91,28 @@ def testTable(request):
 def return_data(request):
     dataArray=[['file name','database id','sha1','x','y','z'],[NaN,NaN,NaN,10,10,10],[NaN,NaN,NaN,-10,-10,-10],['file3','1','sh1','1,9','2,3','3,4'],['file2','1','sh2','4,5','2,3','5,5']]    
     return HttpResponse(simplejson.dumps(dataArray))
+
+def calculate_segment_interactor(request):
+    #point1=(.514,.494)
+    #point2=(.492,.51)
+    #xt, yt, zorigt = readmeshfiles(mydirectory,'dmesh',myend)
+
+    try:
+        point1 = (float(request.GET['x1']), float(request.GET['y1']))
+        point2 = (float(request.GET['x2']), float(request.GET['y2']))
+        xarr = array(simplejson.loads(request.GET['xarr']))
+        yarr = array(simplejson.loads(request.GET['yarr']))
+        zarr = array(simplejson.loads(request.GET['zarr']))
+        
+        myline = linegen.line_interp(point1, point2, divisions=50)
+        xout, yout, zout = myline.interp(xarr, yarr, zarr)
+        line_x = myline.line_x
+        line_y = myline.line_y 
+        #pylab.plot(line_x,line_y,'red',linewidth=3.0)
+        #ax.set_ylim(ylim); ax.set_xlim(xlim)
+        return HttpResponse(simplejson.dumps({'line_x': line_x, 'line_y': line_y}))
+    except:
+        pass
 
 def return_metadata(experiment_id):
     """

@@ -10,12 +10,12 @@
         };
     };
     
-    $.jqplot.LinearInteractorPlugin = function() {};
-    $.jqplot.LinearInteractorPlugin.prototype = new $.jqplot.InteractorPlugin();
-    $.jqplot.LinearInteractorPlugin.prototype.constructor = $.jqplot.LinearInteractorPlugin;
-    $.jqplot.InteractorPluginSubtypes.Line = $.jqplot.LinearInteractorPlugin;
+    $.jqplot.SegmentInteractorPlugin = function() {};
+    $.jqplot.SegmentInteractorPlugin.prototype = new $.jqplot.InteractorPlugin();
+    $.jqplot.SegmentInteractorPlugin.prototype.constructor = $.jqplot.SegmentInteractorPlugin;
+    $.jqplot.InteractorPluginSubtypes.Segment = $.jqplot.SegmentInteractorPlugin;
     
-    $.jqplot.LinearInteractorPlugin.prototype.init = function(options) {
+    $.jqplot.SegmentInteractorPlugin.prototype.init = function(options) {
         $.jqplot.InteractorPlugin.prototype.init.call(this, options);
         this.xmin = 0.0;
         this.ymin = 0.0;
@@ -29,9 +29,9 @@
         this.p1 = new $.jqplot.PluginPoint(); this.p1.initialize(this, this.xmin, this.ymin);
         this.p2 = new $.jqplot.PluginPoint(); this.p2.initialize(this, this.xmax, this.ymax);
         
-        this.linear = new $.jqplot.Linear(); this.linear.initialize(this, this.p1, this.p2, 4);
+        this.segment = new $.jqplot.Segment(); this.segment.initialize(this, this.p1, this.p2, 4);
         
-        this.grobs.push(this.linear, this.p1, this.p2);
+        this.grobs.push(this.segment, this.p1, this.p2);
         
         //this.redraw();
     }
