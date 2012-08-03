@@ -622,6 +622,7 @@ segment_listener = function(series, original_data) {
                 slicePlot.resetAxesScale();
                 slicePlot.grid._offsets.left = slicePlot.axes.yaxis._elem.width();
                 slicePlot.replot();
+                //UPDATE X AXIS
                 //successfunction(); 
             },
             failure: function(response) {
