@@ -602,7 +602,7 @@ function updateTas2dPlot(toPlot, toPlots, target_id, plotnum, plot_options) {
             tickRenderer: $.jqplot.CanvasAxisTickRenderer,
             tickOptions: {formatString: "%.3g", _styles: {right: 0}}
         },
-        axes: {xaxis: {label: plot.axes.yaxis.label}, yaxis: {label: 'detector counts'}}
+        axes: {xaxis: {label: plot.axes.xaxis.label}, yaxis: {label: 'detector counts'}}
     });
 
     //Creating drop-down to change x-axis for interactor plot
@@ -669,10 +669,22 @@ initialize_interactor_listeners = function(series, original_data) {
                 for (var i = 0; i < x.length; ++i){
                     xdata.push([x[i], z[i]]);
                 }
-                slicePlot.series[0].data = xdata;
-                slicePlot.resetAxesScale();
-                slicePlot.axes.xaxis.label = select_div.value; //div configured so value = axis label
-                slicePlot.replot();
+                //slicePlot.series[0].data = xdata;
+                //slicePlot.resetAxesScale();
+                slicePlot = $.jqplot('interactor_plotgrid', [xdata], {
+                    cursor: {show: true, zoom: true},
+                    grid: {shadow: false}, 
+                    sortData: false, 
+                    series: [ {shadow: false, color: 'blue', markerOptions: {shadow: false, size: 4}} ],
+                    axesDefaults: {
+                        labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                        tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                        tickOptions: {formatString: "%.3g", _styles: {right: 0}}
+                    },
+                    axes: {xaxis: {label: select_div.value}, yaxis: {label: 'detector counts'}}
+                });
+                //slicePlot.axes.xaxis.label = select_div.value; //div configured so value = axis label
+                slicePlot.replot({resetAxes : true});
 
                 // Setting inner HTML to indicate that all queued plot ajax requests have finished
                 --number_of_ajax_running;
