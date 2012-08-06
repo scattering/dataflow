@@ -565,7 +565,15 @@ function update1dPlot(plot, toPlots, target_id, plotnum, plot_options) {
 }
 
 function updateTas2dPlot(toPlot, toPlots, target_id, plotnum, plot_options) {
-    plot_options['interactors'] = [ {type: 'Segment', name: 'segment'} ];
+    // Setting intial interactor points to be within the data range but offset from the corners of the data
+    var dims = toPlots[0].dims; 
+    var xoffset = (dims.xmax - dims.xmin) / 8.0; //Arbitrarily offset by 1/8 of width
+    var yoffset = (dims.ymax - dims.ymin) / 8.0; //Arbitrarily offset by 1/8 of height
+    var xmin = dims.xmin + xoffset;
+    var ymin = dims.ymin + yoffset;
+    var xmax = dims.xmax - xoffset;
+    var ymax = dims.ymax - yoffset;
+    plot_options['interactors'] = [ {type: 'Segment', name: 'segment', xmin: xmin, ymin: ymin, xmax: xmax, ymax: ymax} ];
     plot_options['cursor'] = {
         show: true,
         zoom: false,
@@ -589,30 +597,37 @@ function updateTas2dPlot(toPlot, toPlots, target_id, plotnum, plot_options) {
             tickRenderer: $.jqplot.CanvasAxisTickRenderer,
             tickOptions: {formatString: "%.3g", _styles: {right: 0}}
         },
-        axes: {axis: {label: plot.axes.xaxis.xlabel}, yaxis: {label: 'detector counts'}}
+        axes: {xaxis: {label: plot.axes.yaxis.label}, yaxis: {label: 'detector counts'}}
     });
 
     myInteractor = plot.plugins.interactors.segment; //reference to the segment interactor
-    var sl = segment_listener(plot.series[0], toPlots[plotnum].original_data);
-    sl.update();
-    //reseting interactor and plot
-    //myInteractor = null;
-    //$('sliceplot').empty();
+    var s1 = initialize_interactor_listeners(plot.series[0], toPlots[plotnum].original_data);
+    s1.updateInteractorPlot(); //intially update the interactor to appropriately plot its initial location.
 
     return plot;
 }
-segment_listener = function(series, original_data) {
-    myInteractor.p1.listeners.push(this);
-    myInteractor.p2.listeners.push(this);
-    //var p0 = series;
-    this.update = function(pos) {
+
+//This is a slightly unorthodox setup for
+initialize_interactor_listeners = function(series, original_data) {
+    //Setting up listeners for when the point is droped, ie mouse released
+    myInteractor.p1.onDrop = function (e, pos) {
+        updateInteractorPlot();
+    };
+    myInteractor.p2.onDrop = function (e, pos) {
+        updateInteractorPlot();
+    };
+    myInteractor.segment.onDrop = function (e, pos) {
+        updateInteractorPlot();
+    };
+
+    this.updateInteractorPlot = function() {
         $.ajax({
             url: '/calculateSlice/',
             type: 'GET',
             data: {'x1' : myInteractor.p1.coords.x, 'y1' : myInteractor.p1.coords.y, 'x2' : myInteractor.p2.coords.x, 'y2': myInteractor.p2.coords.y, 'xarr': Ext.encode(original_data.xarr), 'yarr': Ext.encode(original_data.yarr), 'zarr': Ext.encode(original_data.zarr)},
             success: function(response) {
+                //on success, replots the interactor plot.
                 var result = Ext.decode(response);
-                console.log(myInteractor.p1._x0+ "," + myInteractor.p1._y0+" ------- " +myInteractor.p2._x0+ "," + myInteractor.p2._y0);
                 var x = result['line_y'];
                 var z = result['zout'];
                 var xdata = [];
@@ -621,40 +636,20 @@ segment_listener = function(series, original_data) {
                 }
                 slicePlot.series[0].data = xdata;
                 slicePlot.resetAxesScale();
-                slicePlot.grid._offsets.left = slicePlot.axes.yaxis._elem.width();
+                //slicePlot.grid._offsets.left = slicePlot.axes.yaxis._elem.width();
                 slicePlot.replot();
                 //UPDATE X AXIS
-                //successfunction(); 
             },
             failure: function(response) {
                 alert('Segment point locations are invalid!');
             }
         });
-        /*function successfunction(response) {
-            slicePlot.series[0].data = xdata;
-            slicePlot.resetAxesScale();
-            slicePlot.grid._offsets.left = slicePlot.axes.yaxis._elem.width();
-            slicePlot.replot();
-        }*/
-        /*
-        var width = p0.dims.xdim;
-        var height = p0.dims.ydim;
-        i_min = Math.floor((myInteractor.p1.coords.x - p0.dims.xmin) / p0.dims.dx);
-        i_min = Math.min(Math.max(i_min, 0), p0.dims.xdim);
-        i_max = Math.ceil((myInteractor.p2.coords.x - p0.dims.xmin) / p0.dims.dx);
-        i_max = Math.max(Math.min(i_max, p0.dims.xdim), 0);
-        j_min = Math.floor((myInteractor.p2.coords.y - p0.dims.ymin) / p0.dims.dy);
-        j_min = Math.min(Math.max(j_min, 0), p0.dims.ydim);
-        j_max = Math.ceil((myInteractor.p1.coords.y - p0.dims.ymin) / p0.dims.dy);
-        j_max = Math.max(Math.min(j_max, p0.dims.ydim), 0);
-        var xdata = [];
-        for (var c=i_min; c <=i_max-1; c++) {
-            xdata.push([p0.dims.xmin + c*p0.dims.dx, p0.cumsum_x[c][j_max] - p0.cumsum_x[c][j_min]]);
-        }
-        */
     };
-    return this;  
+    return this;
 };
+
+
+
 
 
 

@@ -920,7 +920,7 @@ class TripleAxis(object):
                     for field in value:
 
                         val = field.measurement.x
-                        err = field.measurement.variance
+                        err = field.measurement.dx
 
                         vals = []
                         errs = []
@@ -957,7 +957,7 @@ class TripleAxis(object):
                         else:
                             orderx.append({'key': field.name, 'label': field.name})
                         val = field.measurement.x
-                        err = field.measurement.variance
+                        err = field.measurement.dx
                         if type(val) == np.ndarray:
                             val = val.tolist()
                         elif val == None:

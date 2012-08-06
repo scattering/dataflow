@@ -17,11 +17,11 @@
     
     $.jqplot.SegmentInteractorPlugin.prototype.init = function(options) {
         $.jqplot.InteractorPlugin.prototype.init.call(this, options);
-        this.xmin = 0.0;
-        this.ymin = 0.0;
-        this.xmax = 1.0;
-        this.ymax = 1.0;
-        this.slope = 1.0;
+        this.xmin = options.xmin || 0.0;
+        this.ymin = options.ymin || 0.0;
+        this.xmax = options.xmax || 1.0;
+        this.ymax = options.ymax || 1.0;
+        //this.slope = 1.0;
         $.extend(this, options);
         this.slope = (this.ymax - this.ymin) / (this.xmax - this.xmin);
         this.intercept = (this.ymax - this.ymin) - (this.slope * (this.xmax - this.xmin));
