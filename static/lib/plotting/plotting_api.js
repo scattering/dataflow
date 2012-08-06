@@ -582,12 +582,17 @@ function updateTas2dPlot(toPlot, toPlots, target_id, plotnum, plot_options) {
         tooltipOffset: -60,
         useAxesFormatters: false,
     };
+
+    //Creates div to contain plot
+    var plotdiv = document.getElementById('sliceplot');
+    jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 550px; height: 350px;", id:"interactor_plotgrid"}));
+
+    //updates plot just like ordinary 2d plots
     plot = update2dPlot(toPlot, toPlots, target_id, plotnum, plot_options);
     plot.type = 'tas_2d';
 
-    //creating slice plot from the segment interactor
-    //TODO currently set up for only xaxis. Configure with dropdown for x and y
-    slicePlot = $.jqplot('sliceplot', [[1,2]], {
+    //Creating slice plot from the segment interactor
+    slicePlot = $.jqplot('interactor_plotgrid', [[1,2]], {
         cursor: {show: true, zoom: true},
         grid: {shadow: false}, 
         sortData: false, 
@@ -600,6 +605,20 @@ function updateTas2dPlot(toPlot, toPlots, target_id, plotnum, plot_options) {
         axes: {xaxis: {label: plot.axes.yaxis.label}, yaxis: {label: 'detector counts'}}
     });
 
+    //Creating drop-down to change x-axis for interactor plot
+    //Creating div to indicate when the interactor plot is updating.
+    jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 600px; height: 50px;", id:"interactorplotbuttons"}));
+    jQuery(document.getElementById('interactorplotbuttons')).append(document.createTextNode('Choose x-axis: '));
+    jQuery(document.getElementById('interactorplotbuttons')).append(jQuery('<select />', {id:"plot_select_xaxis"}));
+    jQuery(document.getElementById('interactorplotbuttons')).append(jQuery('<div />', {style:"float: right; width: 300px; height: 25px; padding-top: 5px", id:"interactor_update_div", innerHTML: " Plot updated. Move interactor to update plot. "}));
+    //NOTE: do NOT change ordering: x axis must be labeled first (based on success function of ajax request)
+    jQuery(document.getElementById('plot_select_xaxis')).append(jQuery('<option />', { value: plot.axes.xaxis.label, text: plot.axes.xaxis.label }));
+    jQuery(document.getElementById('plot_select_xaxis')).append(jQuery('<option />', { value: plot.axes.yaxis.label, text: plot.axes.yaxis.label }));
+    //add listener for the x-axis select. 
+    document.getElementById('plot_select_xaxis').addEventListener("change", selectHandler, false);
+    
+
+
     myInteractor = plot.plugins.interactors.segment; //reference to the segment interactor
     var s1 = initialize_interactor_listeners(plot.series[0], toPlots[plotnum].original_data);
     s1.updateInteractorPlot(); //intially update the interactor to appropriately plot its initial location.
@@ -607,9 +626,17 @@ function updateTas2dPlot(toPlot, toPlots, target_id, plotnum, plot_options) {
     return plot;
 }
 
-//This is a slightly unorthodox setup for
+//If the interactor plot x-axis is changed, update the plot
+selectHandler = function (event) {
+    if (event.hasOwnProperty('type') && event.type == "change") {
+        updateInteractorPlot();
+    }
+};
+
 initialize_interactor_listeners = function(series, original_data) {
     //Setting up listeners for when the point is droped, ie mouse released
+    var number_of_ajax_running = 0;
+
     myInteractor.p1.onDrop = function (e, pos) {
         updateInteractorPlot();
     };
@@ -621,6 +648,11 @@ initialize_interactor_listeners = function(series, original_data) {
     };
 
     this.updateInteractorPlot = function() {
+        // Setting inner HTML to indicate that plot is updating
+        ++number_of_ajax_running;
+        if (number_of_ajax_running > 0) 
+            document.getElementById('interactor_update_div').innerHTML = " Updating Plot... ";
+
         $.ajax({
             url: '/calculateSlice/',
             type: 'GET',
@@ -628,7 +660,10 @@ initialize_interactor_listeners = function(series, original_data) {
             success: function(response) {
                 //on success, replots the interactor plot.
                 var result = Ext.decode(response);
-                var x = result['line_y'];
+                var select_div = jQuery(document.getElementById('plot_select_xaxis'))[0];
+
+                // selectedIndex=0 when x-axis is chosen; selectedIndex=1 when y-axis is chosen
+                var x = result[select_div.selectedIndex ? 'line_y' : 'line_x'];
                 var z = result['zout'];
                 var xdata = [];
                 for (var i = 0; i < x.length; ++i){
@@ -636,9 +671,14 @@ initialize_interactor_listeners = function(series, original_data) {
                 }
                 slicePlot.series[0].data = xdata;
                 slicePlot.resetAxesScale();
-                //slicePlot.grid._offsets.left = slicePlot.axes.yaxis._elem.width();
+                slicePlot.axes.xaxis.label = select_div.value; //div configured so value = axis label
                 slicePlot.replot();
-                //UPDATE X AXIS
+
+                // Setting inner HTML to indicate that all queued plot ajax requests have finished
+                --number_of_ajax_running;
+                if (number_of_ajax_running < 1) {
+                    document.getElementById('interactor_update_div').innerHTML = " Plot updated. Move interactor to update plot. ";
+                }
             },
             failure: function(response) {
                 alert('Segment point locations are invalid!');
@@ -647,12 +687,6 @@ initialize_interactor_listeners = function(series, original_data) {
     };
     return this;
 };
-
-
-
-
-
-
 
 function update2dPlot(plot, toPlots, target_id, plotnum, plot_options) {
     if (!plot || !plot.hasOwnProperty("type") || plot.type!='2d'){
