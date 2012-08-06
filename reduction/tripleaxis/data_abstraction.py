@@ -2040,14 +2040,14 @@ def normalize_monitor(tas_list, monitor=None):
     or on the first TripleAxis's monitor if none is specified
     """
     if not monitor:
-        monitor = tas_list[0].time.monitor.measurement
+        monitor = tas_list[0].time.monitor.measurement.x
         tas_list_ptr = tas_list[1:] #no need to normalize the first one
     else:
         tas_list_ptr = tas_list
         
     for tas in tas_list_ptr:
-        monitor_scalar = tas.time.monitor.measurement / monitor
-        if not monitor_scalar == 1:
+        monitor_scalar = uncertainty.Measurement(tas.time.monitor.measurement.x / monitor, 0.0)
+        if not monitor_scalar.x == 1:
             for detector in tas.detectors:
                 detector.measurement = detector.measurement * monitor_scalar
 
