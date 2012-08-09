@@ -1010,6 +1010,10 @@ def hdf_to_dict(hdf_obj, convert_i1_tostr=True):
             out_dict[key] = hdf_to_dict(val)
     return out_dict
 
+def LoadAsterixMany(filedescriptors):
+    result = [LoadAsterixRawHDF(fd['filename'], friendly_name=fd['friendly_name']) for fd in filedescriptors]
+    return result
+
 def LoadAsterixRawHDF(filename, path=None, friendly_name="", format="HDF5", **kwargs):
     if path == None:
         path = os.getcwd()
