@@ -102,9 +102,30 @@ def FootprintCorrection(input, start='0', end='0', slope='0', intercept='0'):
     #monitor[mask]  += ... oops - we need to know the max of the monitor to do this.
     #data[0][start:end, 0] = ccounts # replacing original data in specified interval with corrected data
     return data
-    
-    
-    
+
+@autoApplyToList    
+def BackgroundSubtraction(input, background='0'):
+    """
+    Makes copy of input (DataArray) and subtracts "background" from "counts" values.
+    """
+    data = MetaArray(input.view(ndarray).copy(), input.dtype, input.infoCopy())
+    counts = data['Measurements':'counts']
+    background = float(background)
+    counts = counts - background
+    data['Measurements':'counts'] = counts
+    return data
+
+@autoApplyToList    
+def NormalizeToMonitor(input):
+    """
+    divide all the counts columns by monitor and output as normcounts, with stat. error
+    """        
+    data = MetaArray(input.view(ndarray).copy(), input.dtype, input.infoCopy())
+    counts = data['Measurements':'counts']
+    monitor = data['Measurements':'monitor']
+    data['Measurements'].append('normcounts')
+    data['Measurements':'normcounts'] = counts/monitor
+    return data
     
     
    

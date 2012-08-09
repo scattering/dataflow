@@ -16,6 +16,8 @@ var types = { lin: {
 var plots = [];
 var plot = null; // starting with just one plot.
 var stage = 1;
+var myInteractor = null;
+
 function DataSeries(props) {
   props.matrixfy = function(format) {
     return matrixfy(this.dims, this.func, format);
@@ -408,8 +410,8 @@ function renderndplot(data, transform, plotid, plot_options) {
             show: true,
             zoom: true,
             clickReset: true,
-            tooltipLocation:'se',
-            tooltipOffset: -60,
+            tooltipLocation:'ne',
+            tooltipOffset: -40,
             useAxesFormatters: false,
         },
         legend: {
@@ -421,7 +423,7 @@ function renderndplot(data, transform, plotid, plot_options) {
         },
         grid: {shadow: false},
         sortData: false,
-        //interactors: [ {type: 'Rectangle', name: 'rectangle'} ],
+        //interactors: [ {type: 'Line', name: 'line'} ],
         type: 'nd'
     };
     
@@ -561,6 +563,142 @@ function update1dPlot(plot, toPlots, target_id, plotnum, plot_options) {
     
     return plot; 
 }
+
+function updateTas2dPlot(toPlot, toPlots, target_id, plotnum, plot_options) {
+    // Setting intial interactor points to be within the data range but offset from the corners of the data
+    var dims = toPlots[0].dims; 
+    var xoffset = (dims.xmax - dims.xmin) / 8.0; //Arbitrarily offset by 1/8 of width
+    var yoffset = (dims.ymax - dims.ymin) / 8.0; //Arbitrarily offset by 1/8 of height
+    var xmin = dims.xmin + xoffset;
+    var ymin = dims.ymin + yoffset;
+    var xmax = dims.xmax - xoffset;
+    var ymax = dims.ymax - yoffset;
+    plot_options['interactors'] = [ {type: 'Segment', name: 'segment', xmin: xmin, ymin: ymin, xmax: xmax, ymax: ymax} ];
+    plot_options['cursor'] = {
+        show: true,
+        zoom: false,
+        clickReset: true,
+        tooltipLocation:'se',
+        tooltipOffset: -60,
+        useAxesFormatters: false,
+    };
+
+    //Creates div to contain plot
+    var plotdiv = document.getElementById('sliceplot');
+    jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 550px; height: 350px;", id:"interactor_plotgrid"}));
+
+    //updates plot just like ordinary 2d plots
+    plot = update2dPlot(toPlot, toPlots, target_id, plotnum, plot_options);
+    plot.type = 'tas_2d';
+
+    //Creating slice plot from the segment interactor
+    slicePlot = $.jqplot('interactor_plotgrid', [[1,2]], {
+        cursor: {show: true, zoom: true},
+        grid: {shadow: false}, 
+        sortData: false, 
+        series: [ {shadow: false, color: 'blue', markerOptions: {shadow: false, size: 4}} ],
+        axesDefaults: {
+            labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+            tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+            tickOptions: {formatString: "%.3g", _styles: {right: 0}}
+        },
+        axes: {xaxis: {label: plot.axes.xaxis.label}, yaxis: {label: 'detector counts'}}
+    });
+
+    //Creating drop-down to change x-axis for interactor plot
+    //Creating div to indicate when the interactor plot is updating.
+    jQuery(plotdiv).append(jQuery('<div />', {style:"display: block; width: 600px; height: 50px;", id:"interactorplotbuttons"}));
+    jQuery(document.getElementById('interactorplotbuttons')).append(document.createTextNode('Choose x-axis: '));
+    jQuery(document.getElementById('interactorplotbuttons')).append(jQuery('<select />', {id:"plot_select_xaxis"}));
+    jQuery(document.getElementById('interactorplotbuttons')).append(jQuery('<div />', {style:"float: right; width: 300px; height: 25px; padding-top: 5px", id:"interactor_update_div", innerHTML: " Plot updated. Move interactor to update plot. "}));
+    //NOTE: do NOT change ordering: x axis must be labeled first (based on success function of ajax request)
+    jQuery(document.getElementById('plot_select_xaxis')).append(jQuery('<option />', { value: plot.axes.xaxis.label, text: plot.axes.xaxis.label }));
+    jQuery(document.getElementById('plot_select_xaxis')).append(jQuery('<option />', { value: plot.axes.yaxis.label, text: plot.axes.yaxis.label }));
+    //add listener for the x-axis select. 
+    document.getElementById('plot_select_xaxis').addEventListener("change", selectHandler, false);
+    
+
+
+    myInteractor = plot.plugins.interactors.segment; //reference to the segment interactor
+    var s1 = initialize_interactor_listeners(plot.series[0], toPlots[plotnum].original_data);
+    s1.updateInteractorPlot(); //intially update the interactor to appropriately plot its initial location.
+
+    return plot;
+}
+
+//If the interactor plot x-axis is changed, update the plot
+selectHandler = function (event) {
+    if (event.hasOwnProperty('type') && event.type == "change") {
+        updateInteractorPlot();
+    }
+};
+
+initialize_interactor_listeners = function(series, original_data) {
+    //Setting up listeners for when the point is droped, ie mouse released
+    var number_of_ajax_running = 0;
+
+    myInteractor.p1.onDrop = function (e, pos) {
+        updateInteractorPlot();
+    };
+    myInteractor.p2.onDrop = function (e, pos) {
+        updateInteractorPlot();
+    };
+    myInteractor.segment.onDrop = function (e, pos) {
+        updateInteractorPlot();
+    };
+
+    this.updateInteractorPlot = function() {
+        // Setting inner HTML to indicate that plot is updating
+        ++number_of_ajax_running;
+        if (number_of_ajax_running > 0) 
+            document.getElementById('interactor_update_div').innerHTML = " Updating Plot... ";
+
+        $.ajax({
+            url: '/calculateSlice/',
+            type: 'GET',
+            data: {'x1' : myInteractor.p1.coords.x, 'y1' : myInteractor.p1.coords.y, 'x2' : myInteractor.p2.coords.x, 'y2': myInteractor.p2.coords.y, 'xarr': Ext.encode(original_data.xarr), 'yarr': Ext.encode(original_data.yarr), 'zarr': Ext.encode(original_data.zarr)},
+            success: function(response) {
+                //on success, replots the interactor plot.
+                var result = Ext.decode(response);
+                var select_div = jQuery(document.getElementById('plot_select_xaxis'))[0];
+
+                // selectedIndex=0 when x-axis is chosen; selectedIndex=1 when y-axis is chosen
+                var x = result[select_div.selectedIndex ? 'line_y' : 'line_x'];
+                var z = result['zout'];
+                var xdata = [];
+                for (var i = 0; i < x.length; ++i){
+                    xdata.push([x[i], z[i]]);
+                }
+                //slicePlot.series[0].data = xdata;
+                //slicePlot.resetAxesScale();
+                slicePlot = $.jqplot('interactor_plotgrid', [xdata], {
+                    cursor: {show: true, zoom: true},
+                    grid: {shadow: false}, 
+                    sortData: false, 
+                    series: [ {shadow: false, color: 'blue', markerOptions: {shadow: false, size: 4}} ],
+                    axesDefaults: {
+                        labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                        tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                        tickOptions: {formatString: "%.3g", _styles: {right: 0}}
+                    },
+                    axes: {xaxis: {label: select_div.value}, yaxis: {label: 'detector counts'}}
+                });
+                //slicePlot.axes.xaxis.label = select_div.value; //div configured so value = axis label
+                slicePlot.replot({resetAxes : true});
+
+                // Setting inner HTML to indicate that all queued plot ajax requests have finished
+                --number_of_ajax_running;
+                if (number_of_ajax_running < 1) {
+                    document.getElementById('interactor_update_div').innerHTML = " Plot updated. Move interactor to update plot. ";
+                }
+            },
+            failure: function(response) {
+                alert('Segment point locations are invalid!');
+            }
+        });
+    };
+    return this;
+};
 
 function update2dPlot(plot, toPlots, target_id, plotnum, plot_options) {
     if (!plot || !plot.hasOwnProperty("type") || plot.type!='2d'){
@@ -706,6 +844,10 @@ function plottingAPI(toPlots, plotid_prefix, plot_options) {
     plot_type = toPlots[0].type
     
     switch (plot_type) {
+        case 'tas_2d':
+            plot = updateTas2dPlot(plot, toPlots, plotid_prefix, 0, plot_options);
+            break;
+
         case '2d':
             plot = update2dPlot(plot, toPlots, plotid_prefix, 0, plot_options);
             break;
@@ -968,7 +1110,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create, plot_options)
     toPlotlength = toPlot.length;
 
     var data = {};
-    data.data = series; //reference to series; CAUTION: be careful if changing this!!
+    data.data = series;
     data.title = (toPlotlength > 0) ? toPlot[0].title : "Empty plot";
     data.options = {series: []}; // legend names/labels go in the 'series' option
     data.xlabel = quantityx;
@@ -1018,7 +1160,7 @@ function updateNdPlot(plot, toPlot, plotid, plotid_prefix, create, plot_options)
     
     if (series.length == 0) {
         //if there are no files selected to plot, origin  and hide the legend.
-        series = [[[0,0]]];  //NOTE: this works because data.data = series (by reference!)
+        data.data = [[[0,0]]];
         data.options.legend = {show: false};
     }
 

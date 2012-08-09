@@ -21,13 +21,16 @@
         <script type="text/javascript" src="../static/lib/plotting/jqplot/jquery.jqplot.InteractiveLegend.js"></script>
         <script type="text/javascript" src="../static/lib/plotting/jqplot/plugins/jqplot.mobile.js"></script>
         <script type="text/javascript" src="../static/lib/plotting/palettes.js"></script>
+        <script type="text/javascript" src="../static/lib/plotting/tas_plotting_api.js"></script>
         <script type="text/javascript" src="../static/lib/plotting/plotting_api.js"></script>
         <script type="text/javascript" src="../static/lib/plotting/heatmapRenderer.js"></script>
         <script type="text/javascript" src="../static/lib/plotting/colorbarRenderer.js"></script>
+
         <!-- Interactors -->
         <script type="text/javascript" src="../static/lib/interactors/interactors_nonprototype.js"></script>
         <script type="text/javascript" src="../static/lib/interactors/interactor_plugin_base.js"></script>
         <script type="text/javascript" src="../static/lib/interactors/rectangle_interactor_plugin.js"></script>
+        <script type="text/javascript" src="../static/lib/interactors/segment_interactor_plugin.js"></script>
 
         <!-- EXTJS -->
         <script type="text/javascript" src="../static/lib/ext/ext-all.js"></script>
@@ -71,6 +74,7 @@
                     plottingAPI(window.opener.toPlot, 'plot');
                     //console.log(document.getElementById('plot'));
                 }
+                //var linear_interactor = $.jqplot.LinearInteractorPlugin();
 
                 jQuery(".slidingDiv").hide();
                 jQuery('.show_hide').click(function(){
@@ -85,6 +89,6 @@
         <div id="plot">
             I am a plot.
         </div>
-        
+        <div id="sliceplot"></div>
     </body>
 </html>

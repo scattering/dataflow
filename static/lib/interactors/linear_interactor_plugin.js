@@ -46,8 +46,15 @@
             return this.intercept;
         }
         
+/*
+        this.grobs.push(this.linear, this.p1, this.p2);
+        
+        //this.redraw();
+    }
+*/
     });
     
     $.jqplot.LinearInteractorPlugin.prototype.init
+
     
 })(jQuery);
