@@ -95,8 +95,8 @@ def get_friendly_name(fh):
     return fh
 
 OSPEC_DATA = 'ospec.data2d'
-data2d = Data(OSPEC_DATA, FilterableMetaArray, loaders=[{'function':LoadICPMany, 'id':'LoadICPData'}])
-ast_data2d = Data('ospec.asterix.data2d', FilterableMetaArray, loaders=[{'function':LoadAsterixMany, 'id':'LoadAsterix'}])
+data2d = Data(OSPEC_DATA, FilterableMetaArray, loaders=[{'function':LoadICPMany, 'id':'LoadICPData'}, {'function':LoadAsterixMany, 'id':'LoadAsterix'}])
+#ast_data2d = Data('ospec.asterix.data2d', FilterableMetaArray, loaders=[{'function':LoadAsterixMany, 'id':'LoadAsterix'}])
 OSPEC_DATA_HE3 = OSPEC_DATA + '.he3'
 datahe3 = Data(OSPEC_DATA_HE3, He3AnalyzerCollection, loaders=[{'function':He3AnalyzerCollection, 'id':'LoadHe3'}])
 OSPEC_DATA_TIMESTAMP = OSPEC_DATA + '.timestamp'
@@ -475,7 +475,7 @@ ASTERIX = Instrument(id='lansce.ospec.asterix',
                        ('Polarization reduction', [correct_polarized]),
                        ],
                  requires=[],
-                 datatypes=[ast_data2d],
+                 datatypes=[data2d],
                  )
                  
 instrmnts = [ANDR,ASTERIX]
