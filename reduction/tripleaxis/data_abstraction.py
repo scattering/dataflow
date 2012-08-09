@@ -876,8 +876,8 @@ class TripleAxis(object):
             '''
             
             #Brian's plotting requires edges=False (5/25/2012)
-            xi, yi, zi = rebin2.rebin_2D(xarr, yarr, self.detectors.primary_detector.measurement.x, \
-                                         num_bins=self.num_bins, xstep=self.xstep, ystep=self.ystep, edges=False)
+            zarr = self.detectors.primary_detector.measurement.x
+            xi, yi, zi = rebin2.rebin_2D(xarr, yarr, zarr, num_bins=self.num_bins, xstep=self.xstep, ystep=self.ystep, edges=False)
             #xi, yi, zi = regular_gridding.regularlyGrid(xarr, yarr, self.detectors.primary_detector.measurement.x, xstart=xstart, xfinal=xfinal, xstep=xstep, ystart=ystart, yfinal=yfinal, ystep=ystep)		                               
 
             zi = zi.T
@@ -886,7 +886,7 @@ class TripleAxis(object):
             #    pylab.pcolormesh(xi,yi,zi)
             #    pylab.show()
             plottable_data = {
-                'type': '2d',
+                'type': 'tas_2d',
                 'z':  [zi.tolist()],
                 'title': 'TripleAxis Reduction Plot',
                 'transform': 'lin',
@@ -899,7 +899,12 @@ class TripleAxis(object):
                     'ydim': len(yi),
                     'zmin': zi.min(),
                     'zmax': zi.max(),
-                    },
+                },
+                'original_data': {
+                    'xarr': xarr.tolist(),
+                    'yarr': yarr.tolist(),
+                    'zarr': zarr.tolist(),
+                },
                 'xlabel': self.xaxis,
                 'ylabel': self.yaxis,
                 'zlabel': 'Intensity (I)',
@@ -915,7 +920,7 @@ class TripleAxis(object):
                     for field in value:
 
                         val = field.measurement.x
-                        err = field.measurement.variance
+                        err = field.measurement.dx
 
                         vals = []
                         errs = []
@@ -952,7 +957,7 @@ class TripleAxis(object):
                         else:
                             orderx.append({'key': field.name, 'label': field.name})
                         val = field.measurement.x
-                        err = field.measurement.variance
+                        err = field.measurement.dx
                         if type(val) == np.ndarray:
                             val = val.tolist()
                         elif val == None:
@@ -2035,14 +2040,14 @@ def normalize_monitor(tas_list, monitor=None):
     or on the first TripleAxis's monitor if none is specified
     """
     if not monitor:
-        monitor = tas_list[0].time.monitor.measurement
+        monitor = tas_list[0].time.monitor.measurement.x
         tas_list_ptr = tas_list[1:] #no need to normalize the first one
     else:
         tas_list_ptr = tas_list
         
     for tas in tas_list_ptr:
-        monitor_scalar = tas.time.monitor.measurement / monitor
-        if not monitor_scalar == 1:
+        monitor_scalar = uncertainty.Measurement(tas.time.monitor.measurement.x / monitor, 0.0)
+        if not monitor_scalar.x == 1:
             for detector in tas.detectors:
                 detector.measurement = detector.measurement * monitor_scalar
 
