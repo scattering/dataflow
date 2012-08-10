@@ -44,7 +44,7 @@ module_imports = [
     ("dataflow.offspecular.modules.collapse_data", "collapse_data_module"),
     ("dataflow.calc", ["run_template", "get_plottable", "calc_single"]),
     ("dataflow.core", ["Data", "Instrument", "Template", "register_instrument"]),
-    ("reduction.offspecular.filters", ["LoadICPData", "LoadICPMany", "LoadAsterixRawHDF", "LoadAsterixSpectrum", "Autogrid", "Combine", "Subtract", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "CollapseData", "WiggleCorrection", "SmoothData", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz"]),
+    ("reduction.offspecular.filters", ["LoadICPData", "LoadICPMany", "LoadAsterixRawHDF", "LoadAsterixMany", "LoadAsterixSpectrum", "Autogrid", "Combine", "Subtract", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "CollapseData", "WiggleCorrection", "SmoothData", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz"]),
     ("reduction.offspecular.he3analyzer", "He3AnalyzerCollection"),
     ("reduction.offspecular.FilterableMetaArray", "FilterableMetaArray"),
 ]
@@ -95,7 +95,8 @@ def get_friendly_name(fh):
     return fh
 
 OSPEC_DATA = 'ospec.data2d'
-data2d = Data(OSPEC_DATA, FilterableMetaArray, loaders=[{'function':LoadICPMany, 'id':'LoadICPData'}])
+data2d = Data(OSPEC_DATA, FilterableMetaArray, loaders=[{'function':LoadICPMany, 'id':'LoadICPData'}, {'function':LoadAsterixMany, 'id':'LoadAsterix'}])
+#ast_data2d = Data('ospec.asterix.data2d', FilterableMetaArray, loaders=[{'function':LoadAsterixMany, 'id':'LoadAsterix'}])
 OSPEC_DATA_HE3 = OSPEC_DATA + '.he3'
 datahe3 = Data(OSPEC_DATA_HE3, He3AnalyzerCollection, loaders=[{'function':He3AnalyzerCollection, 'id':'LoadHe3'}])
 OSPEC_DATA_TIMESTAMP = OSPEC_DATA + '.timestamp'
@@ -469,7 +470,7 @@ ANDR = Instrument(id='ncnr.ospec.andr',
 ASTERIX = Instrument(id='lansce.ospec.asterix',
                  name='asterix',
                  archive=config.NCNR_DATA + '/andr',
-                 menu=[('Input', [load_asterix, load_asterix_spectrum, save]),
+                 menu=[('Input', [load, load_asterix_spectrum, save]),
                        ('Reduction', [autogrid, combine, offset, shift_data, tof_to_wavelength, asterix_pixels_two_theta, two_theta_lambda_qxqz, mask_data, collapse_data, slice_data, normalize_to_monitor, asterix_correct_spectrum]),
                        ('Polarization reduction', [correct_polarized]),
                        ],
