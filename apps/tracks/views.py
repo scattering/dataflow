@@ -340,7 +340,7 @@ def saveWiring(request):
             return reply
     else:
         if len(Template.objects.filter(Title=new_wiring['name'])) > 0:
-            reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'this name exists, please use another'}))
+            reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'This name exists, please use another.'}))
             reply.status_code = 500
             return reply
         temp = Template.objects.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring))
