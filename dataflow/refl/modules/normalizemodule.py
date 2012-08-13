@@ -6,19 +6,18 @@ from ... import config
 from ...core import Module
 
 def normalize_module(id=None, datatype=None, action=None,
-                    version='0.0', fields=[], xtype=None, **kwargs):
+                    version='0.0', fields=[], xtype=None, filterModule=None, **kwargs):
     """Module for normalizing counts to monitor"""
     
     icon = {
         'URI': config.IMAGES + config.ANDR_FOLDER + 'normalize_icon.png',
         'image': config.IMAGES + config.ANDR_FOLDER + 'normalize_image.png',
         'terminals': {
-            'input' : (None, None, -1, 0),
+            'input': (None, None, -1, 0),
             'output': (None, None, 1, 0)
         }
     }
     
-    xtype = 'AutosizeImageContainer'
     terminals = [
         dict(id='input',
             datatype=datatype,
@@ -43,6 +42,7 @@ def normalize_module(id=None, datatype=None, action=None,
                     fields=fields,
                     action=action,
                     xtype=xtype,
+                    filterModule=filterModule,
                     **kwargs
                     )
     module.LABEL_WIDTH = 80

@@ -395,30 +395,3 @@ YAHOO.lang.extend(BackgroundSubtractContainer, WireIt.Container, {
     xtype: 'BackgroundSubtractContainer'
     }
 );
-
-NormalizeContainer = function(opts, layer) {
-    jQuery.extend(true, opts, {
-        'height': 16,
-        'width': 120,
-        'terminals': [{
-            "name": "input", 
-            "offsetPosition": {"left": -16, "top": 16}, 
-          }, 
-          {
-            "name": "output", 
-            "offsetPosition": {"right": -16, "top": 16}, 
-          }
-        ]
-    });  
-    NormalizeContainer.superclass.constructor.call(this, opts, layer);
-    
-    var content = document.createElement('div');
-    content.innerHTML = '';
-    //var saveButton = document.createElement('img');
-    this.setBody(content);
-};
-
-YAHOO.lang.extend(NormalizeContainer, WireIt.Container, {
-    xtype: 'NormalizeContainer'
-    }
-);
