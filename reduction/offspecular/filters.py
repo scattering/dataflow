@@ -1010,6 +1010,10 @@ def hdf_to_dict(hdf_obj, convert_i1_tostr=True):
             out_dict[key] = hdf_to_dict(val)
     return out_dict
 
+def LoadAsterixMany(filedescriptors):
+    result = [LoadAsterixRawHDF(fd['filename'], friendly_name=fd['friendly_name']) for fd in filedescriptors]
+    return result
+
 def LoadAsterixRawHDF(filename, path=None, friendly_name="", format="HDF5", **kwargs):
     if path == None:
         path = os.getcwd()
@@ -1070,7 +1074,9 @@ def LoadAsterixRawHDF(filename, path=None, friendly_name="", format="HDF5", **kw
         print "temp file removed"
         
     #return output_objs
-    return MetaArray(data_array[:], dtype='float', info=info[:])
+    new_data = MetaArray(data_array[:], dtype='float', info=info[:])
+    new_data.friendly_name = friendly_name # goes away on dumps/loads... just for initial object.
+    return new_data
 
 
 def SuperLoadAsterixHDF(filename, friendly_name="", path=None, center_pixel = 145.0, wl_over_tof=1.9050372144288577e-5, pixel_width_over_dist = 0.0195458*pi/180., format="HDF5"):

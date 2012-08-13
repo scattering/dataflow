@@ -669,8 +669,7 @@ initialize_interactor_listeners = function(series, original_data) {
                 for (var i = 0; i < x.length; ++i){
                     xdata.push([x[i], z[i]]);
                 }
-                //slicePlot.series[0].data = xdata;
-                //slicePlot.resetAxesScale();
+
                 slicePlot = $.jqplot('interactor_plotgrid', [xdata], {
                     cursor: {show: true, zoom: true},
                     grid: {shadow: false}, 

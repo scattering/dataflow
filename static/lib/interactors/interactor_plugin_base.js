@@ -587,20 +587,23 @@
             return this.coords;
         },
         
-        update: function(coords, fix_x, fix_y) {
-            var coords = coords || this.coords;
-            var newpos = this.putCoords(coords);
-            if ('x' in newpos) this.pos.x = newpos.x;
-            if ('y' in newpos) this.pos.y = newpos.y;
-            this.coords = coords;
-            this.updateListeners();
+        update: function(coords, updated_already) {
+            if (updated_already && updated_already.indexOf && updated_already.indexOf(this) == -1) {
+                var coords = coords || this.coords;
+                var newpos = this.putCoords(coords);
+                if ('x' in newpos) this.pos.x = newpos.x;
+                if ('y' in newpos) this.pos.y = newpos.y;
+                this.coords = coords;
+                updated_already.push(this);
+                this.updateListeners(updated_already);
 //            var mypos = this.pos;
 //            var dpos = {x: newpos.x-mypos.x, y: newpos.y-mypos.y};
 
 //            if (fix_x) { dpos.x = 0; };
 //            if (fix_y) { dpos.y = 0; };
 //            this.translateBy(dpos);
-            this.parent.redraw();
+                this.parent.redraw();
+            }
         },
         
         translateBy: function(dpos) {
@@ -612,9 +615,10 @@
             this.updateListeners();
         },
         
-        updateListeners: function() {
+        updateListeners: function(updated_already) {
+            var updated_already = updated_already || [this];
             for (var i in this.listeners) {
-                this.listeners[i].update(this.coords, [this]);
+                this.listeners[i].update(this.coords, updated_already);
             }
         },
         
