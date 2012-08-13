@@ -115,7 +115,7 @@ def email_collaborator(request):
         if len(user_name) < 1:
             user_name = user.email #if the user hasn't provided a name, use their email
             
-        ctx_dict = {'email_activation_key': request.POST['collaborator_email'] + '' + project.activation_key, 
+        ctx_dict = {'email_activation_key': request.POST['collaborator_email'] + ';' + project.activation_key, 
                     'site': site, 
                     'user': user_name,
                     'project_activate': 'apps.tracks.views.add_collaborator'}
