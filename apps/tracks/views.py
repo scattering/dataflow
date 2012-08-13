@@ -16,6 +16,7 @@ from django.db import transaction
 import hashlib,os
 import types
 import tempfile
+from django.core.mail import send_mail
 
 ## models
 from django.contrib.auth.models import User 
@@ -53,6 +54,7 @@ import random
 from numpy import NaN
 from numpy import array
 import numpy as np
+import hmac
 
 from django.conf import settings
 FILES_DIR=settings.FILES_DIR
@@ -93,12 +95,77 @@ def return_data(request):
     dataArray=[['file name','database id','sha1','x','y','z'],[NaN,NaN,NaN,10,10,10],[NaN,NaN,NaN,-10,-10,-10],['file3','1','sh1','1,9','2,3','3,4'],['file2','1','sh2','4,5','2,3','5,5']]    
     return HttpResponse(simplejson.dumps(dataArray))
 
+def email_collaborator(request):
+    """ Sends an email to a collaborator to give them access to a project via a link"""
+    if request.POST.has_key('project_id') and \
+       request.POST.has_key('collaborator_email') and \
+       request.POST.has_key('user_id'):
+        from django.contrib.sites.models import RequestSite
+        from django.contrib.sites.models import Site
+        from django.template.loader import render_to_string
+        
+        #getting the site --- is there an easier way?
+        if Site._meta.installed:
+            site = Site.objects.get_current()
+        else:
+            site = RequestSite(request)
+        project = Project.objects.get(id=request.POST['project_id'])
+        user = User.objects.get(id=request.POST['user_id'])
+        user_name = user.get_full_name()
+        if len(user_name) < 1:
+            user_name = user.email #if the user hasn't provided a name, use their email
+            
+        ctx_dict = {'email_activation_key': request.POST['collaborator_email'] + '' + project.activation_key, 
+                    'site': site, 
+                    'user': user_name,
+                    'project_activate': 'apps.tracks.views.add_collaborator'}
+        subject = render_to_string('registration/collaborate/activation_email_subject.txt', ctx_dict)
+        
+        # Email subject *must not* contain newlines
+        subject = ''.join(subject.splitlines())
+        
+        message = render_to_string('registration/collaborate/activation_email.txt', ctx_dict)
+        
+        #user.email_user(subject, message, settings.DEFAULT_FROM_EMAIL)
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [request.POST['collaborator_email']])
+    return HttpResponse('')
+        
+
+#def add_collaborator(request, email_address, activation_key):
+def add_collaborator(request, email_activation_key=None):
+    """ When a collaborator clicks the link sent by the email_collaborator function,
+        this function will be called. If they have an existing account (based on email)
+        they will be directed to the project. If not, a temporary account will be
+        created for them (with an unusable password, ie they'll be prompted to set it).
+        
+        email_activation_key: has the form 'email;activationkey' (separated by semicolon)
+    """
+    email_address, activation_key = email_activation_key.split(';')
+    if request.user.is_authenticated():
+        collaborators = [request.user]
+    else:
+        collaborators = User.objects.filter(email=email_address)
+        
+    projects = Project.objects.filter(activation_key=activation_key)
+    if len(projects) > 0:
+        if len(collaborators) > 0:
+            project[0].users.add(collaborators[0]) #adds user to project
+            return HttpResponseRedirect('userProjects/displayProjects.html')
+        else:
+            collaborator = User.objects.create(username=email_address,
+                                               first_name = '',
+                                               last_name = '',
+                                               email = email_address,
+                                               password = None)
+            project[0].users.add(collaborator)
+            return HttpResponseRedirect('userProjects/displayProjects.html')
+            #return HttpResponseRedirect(profile/edit)
+    else:
+        # no project with this activation_key exists (project could have been deleted)
+        #TODO: create an error page!!!!
+        pass
 
 def calculate_segment_interactor(request):
-    #point1=(.514,.494)
-    #point2=(.492,.51)
-    #xt, yt, zorigt = readmeshfiles(mydirectory,'dmesh',myend)
-
     #try:
     point1 = (float(request.GET['x1']), float(request.GET['y1']))
     point2 = (float(request.GET['x2']), float(request.GET['y2']))
@@ -109,9 +176,8 @@ def calculate_segment_interactor(request):
     myline = linegen.line_interp(point1, point2, divisions=5)
     xout, yout, zout = myline.interp(xarr, yarr, zarr)
     line_x = myline.line_x
-    line_y = myline.line_y 
-    #pylab.plot(line_x,line_y,'red',linewidth=3.0)
-    #ax.set_ylim(ylim); ax.set_xlim(xlim)
+    line_y = myline.line_y
+    
     zout[np.isnan(zout)] = 0.
     return HttpResponse(simplejson.dumps({'line_x': line_x.tolist(), 'line_y': line_y.tolist(), 'zout': zout.tolist()}))
     #except:
@@ -942,6 +1008,11 @@ def myProjects(request):
         #deleted, then he next one made would be 7 again.
     elif request.POST.has_key('new_project'):
         newproj = Project.objects.create(Title=request.POST['new_project'])
+        # importing secret key here only to minimize its visibility...
+        from ...settings import SECRET_KEY
+        msg = str(newproj.Title) + ';' + str(newproj.id) #creating activation_key based on project Title and id
+        newproj.activation_key = hmac.new(SECRET_KEY, msg, hashlib.sha1).hexdigest()
+        newproj.save()
         newproj.users.add(request.user)
     project_list = Project.objects.filter(users=request.user)
     paginator = Paginator(project_list, 10) #10 projects per pages
