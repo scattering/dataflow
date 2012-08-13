@@ -66,12 +66,14 @@ background = background_module(id='refl.background', datatype='refl.data1d',
 background.xtype = 'BackgroundSubtractContainer'
 
 # NormalizeToMonitor module
-def normalize_action(input=[]):
+def normalize_action(input=[], **kwargs):
     print "normalizing"
     return dict(output=NormalizeToMonitor(input))
     
 normalize = normalize_module(id='refl.normalize', datatype='refl.data1d',
-                             version='1.0', action=normalize_action)
+                    version='1.0', action=normalize_action, filterModule=NormalizeToMonitor)
+
+normalize.xtype = 'AutosizeImageContainer'
 
 # Load module
 load = load_module(id='refl.load', datatype=SPEC_DATA,

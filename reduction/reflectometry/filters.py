@@ -119,13 +119,26 @@ def BackgroundSubtraction(input, background='0'):
 def NormalizeToMonitor(input):
     """
     divide all the counts columns by monitor and output as normcounts, with stat. error
-    """        
-    data = MetaArray(input.view(ndarray).copy(), input.dtype, input.infoCopy())
-    counts = data['Measurements':'counts']
-    monitor = data['Measurements':'monitor']
-    data['Measurements'].append('normcounts')
-    data['Measurements':'normcounts'] = counts/monitor
-    return data
+    """
+    output = zeros(input.shape[:-1] + (5,), dtype=float)      
+    copy = input.infoCopy()
+    copy[1]['cols'].extend([{'name':'normcounts'}])
+    
+    counts = input['Measurements':'counts']
+    monitor = input['Measurements':'monitor']
+    norm = counts/monitor   
+    pixels = input['Measurements':'pixels']
+    time = input['Measurements':'count_time']
+    
+    for x in range(0, output.shape[0]):
+        output[x][0] = counts[x]
+        output[x][1] = pixels[x]
+        output[x][2] = monitor[x]
+        output[x][3] = time[x]
+        output[x][4] = norm[x]
+    
+    result = MetaArray(output, output.dtype, copy)
+    return result
     
     
    
