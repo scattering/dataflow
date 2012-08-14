@@ -39,28 +39,24 @@
             // Prompt user for collaborator's email.
             var collaborator_email = prompt("With whom do you want to share Project: " + projectname + "? Enter their email: ", "");
 
-            // Do a better check for a valid email?
-            if (collaborator_email.length > 0) {
+            // Does a null check if they cancel and a length test to check if they entered something.
+            // Do a better validation for a valid email here or perhaps in the URL reverse lookup regex?
+            if (collaborator_email == null) {
+                // Do nothing - they canceled the prompt.
+            } else if (collaborator_email.length > 0) {
                 $.ajax({
                     url: '/project/collaborate/',
                     type: 'POST',
                     data: {'collaborator_email': collaborator_email, 'user_id' : userid, 'project_id' : projectid},
                     success: function(response) {
-                        successfunction(); 
+                        successfunction(response); 
                     },
                     failure: function() {
                         alert("Failed to contact server. Unable to process request.");
                     }
                 });
-                successfunction = function () {
-                    /*inputs = $('input');
-                    //skip first and last inputs -- only care about the projects
-                    for (var i = 1; i < inputs.length - 1; ++i) { 
-                        if (parseInt(inputs[i].getAttribute('id')) === projectid) {
-                            $(inputs[i].parentElement).remove(); //removes the list <li> element for deleted project
-                            break;
-                        }
-                    }*/
+                successfunction = function (response) {
+                    //NOTE: doesn't reach success function in local testing... email fails
                     alert("An email has been sent to " + collaborator_email);
                 };
             } else { 
@@ -77,7 +73,7 @@
 			    {% csrf_token %}
 		        <ul>
 		        {% for project in projects.object_list %}
-            		<li><input type="button" id="{{project.id}}" value="Delete project" onclick="deleteProject('{{project}}', {{project.id}})" /><body>  <<< </body><input type="button" value="Share project" onclick="shareProject({{user.id}}, '{{project}}', {{project.id}})" /><body> >>>  ..... </body> <a href="editProject/{{project.id}}/">{{ project }}</a></li>
+            		<li><input type="button" id="{{project.id}}" value="Delete project" onclick="deleteProject('{{project}}', {{project.id}})" /><body>  <<<</body><input type="button" value="Share project" onclick="shareProject({{user.id}}, '{{project}}', {{project.id}})" /><body>>>>  ..... </body> <a href="editProject/{{project.id}}/">{{ project }}</a> <body id="usersdiv">(Users: {% for username in project.users.all %}{% if not forloop.first %},{% endif %} {{username.get_full_name}}{% endfor %})</body></li>
 		        {% endfor %}
             		<li>{{ form.new_project }} <input type="submit" value="Create project" /></li>
 		        </ul>
