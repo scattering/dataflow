@@ -100,11 +100,11 @@ def email_collaborator(request):
     if request.POST.has_key('project_id') and \
        request.POST.has_key('collaborator_email') and \
        request.POST.has_key('user_id'):
-        from django.contrib.sites.models import RequestSite
-        from django.contrib.sites.models import Site
         from django.template.loader import render_to_string
+        from django.contrib.sites.models import RequestSite
+        from django.contrib.sites.models import Site        
         
-        #getting the site --- is there an easier way?
+        # getting the site
         if Site._meta.installed:
             site = Site.objects.get_current()
         else:
@@ -128,7 +128,7 @@ def email_collaborator(request):
         
         #user.email_user(subject, message, settings.DEFAULT_FROM_EMAIL)
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [request.POST['collaborator_email']])
-    return HttpResponse('')
+        return HttpResponse('OK')
         
 
 #def add_collaborator(request, email_address, activation_key):
@@ -140,25 +140,28 @@ def add_collaborator(request, email_activation_key=None):
         
         email_activation_key: has the form 'email;activationkey' (separated by semicolon)
     """
-    email_address, activation_key = email_activation_key.split(';')
-    if request.user.is_authenticated():
-        collaborators = [request.user]
-    else:
-        collaborators = User.objects.filter(email=email_address)
-        
+    email_address, activation_key = email_activation_key.split(';')        
     projects = Project.objects.filter(activation_key=activation_key)
-    if len(projects) > 0:
+    #if there is in fact a project with this activation key:
+    if len(projects) > 0: 
+        # if the user is logged in already, the project is added to their account
+        # as opposed to adding it to the email (and maybe creating an account for the email)
+        if request.user.is_authenticated():
+            collaborators = [request.user]
+        else:
+            collaborators = User.objects.filter(email=email_address)
+            
         if len(collaborators) > 0:
-            project[0].users.add(collaborators[0]) #adds user to project
-            return HttpResponseRedirect('userProjects/displayProjects.html')
+            projects[0].users.add(collaborators[0]) #adds user to project
+            return HttpResponseRedirect('/myProjects/')
         else:
             collaborator = User.objects.create(username=email_address,
                                                first_name = '',
                                                last_name = '',
                                                email = email_address,
                                                password = None)
-            project[0].users.add(collaborator)
-            return HttpResponseRedirect('userProjects/displayProjects.html')
+            projects[0].users.add(collaborator)
+            return HttpResponseRedirect('/myProjects/')
             #return HttpResponseRedirect(profile/edit)
     else:
         # no project with this activation_key exists (project could have been deleted)
