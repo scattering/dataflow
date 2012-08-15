@@ -39,7 +39,7 @@
         <script type="text/javascript" src="../ext/ext-all.js"></script>
 		
 		<!-- <script type="text/javascript" src="test_data2.js"></script> -->
-		<script type="text/javascript">
+		<script type="text/javascript"> // script for user data
 		    function getCookie(name) {
                 var cookieValue = null;
                 if (document.cookie && document.cookie != '') {
@@ -97,7 +97,7 @@
                 oReq.send("binary_fp="+unfilled_data.binary_fp);
             }
         </script>
-        <script type="text/javascript">
+        <script type="text/javascript"> // actual graphing with interactors occurs in this script
 		    var plot;
 
             fit_plots = function() {
@@ -118,7 +118,7 @@
   		      // nothing yet 
 		    };
 		       
-		    window.onload = function() {
+		    window.onload = function() { // what to do when footprintcorrectwindow loads
 		        //fit_plots();
 		        if (toPlot) {
 		            //var dims = toPlot['series']['data'][xlabel]['values'].dims; // Is probably not necessary since it's a one dimensional array
@@ -134,9 +134,9 @@
                     
                     //update_selectors(toPlot);
                     
-		            plottingAPI(toPlot, 'plot'); // creates plot with data.
-		            
-		            var xmin = plot.axes.xaxis.min;
+		            plottingAPI(toPlot, 'plot'); // creates plot with data titled 'plot'
+		            		            
+		            var xmin = plot.axes.xaxis.min;  // dimensions of plot
 		            var xmax = plot.axes.xaxis.max;
 		            var ymin = plot.axes.yaxis.min;
 		            var ymax = plot.axes.yaxis.max;
@@ -154,6 +154,7 @@
 		            var all_cfg = container.getConfig().groups;
 		            if (reductionInstance in all_cfg) jQuery.extend(cfg, all_cfg[reductionInstance]);
 		            
+		            // points used to plot line interactor
 		            var p1 = {};
 		            p1.x = xmin + 0.05 * plotxrange;
 		            p1.y = parseFloat(cfg.slope.value) * p1.x + parseFloat(cfg.intercept.value);
@@ -174,7 +175,7 @@
 		            force_inbounds.call(p1);
 		            force_inbounds.call(p2);
 		            
-		            var plot_options = { interactors: [
+		            var plot_options = { interactors: [  // tells 'plot' which interactor plugins to plot
 		                { type: 'Line', name: 'line', xmin: p1.x, ymin: p1.y, xmax: p2.x, ymax: p2.y},
 		                { type: 'Interval', name: 'interval', x01: cfg.beginning.value,  x02: cfg.end.value}
 		                ]
@@ -183,18 +184,18 @@
 	                //$.jqplot.InteractorPlugin.pluginit.call(plot, 'plot', [], plot_options);
 	                //plot.replot();
 	                
-	                plottingAPI(toPlot, 'plot', plot_options);
+	                plottingAPI(toPlot, 'plot', plot_options); // creates plot with data titled 'plot' with interactor plugins
 	                
 	                
 		            
 		            plot.plugins.cursor.zoom= false;
 		        
-		            var linePlugin = plot.plugins.interactors.line;
-		            var interval = plot.plugins.interactors.interval;
+		            var linePlugin = plot.plugins.interactors.line; // local pointer to line interactor plugin
+		            var interval = plot.plugins.interactors.interval; // local pointer to interval interactor pluging
 		            
-		            // The variables linex1, liney1, linex2, and liney2 keep track of the old location of the point but
-                    // are not actually placed in the Slice Region
-                    var linex1 = new pointTextControl(linePlugin.p1, 'x', 'x<sub>P1</sub> ', 5);
+		            // The variables linex1, liney1, linex2, and liney2 keep track of the old location of the points but
+                    // are not actually placed in the 'footcontrols' region
+                    var linex1 = new pointTextControl(linePlugin.p1, 'x', 'x<sub>P1</sub> ', 5); // creates textbox for point of line interactor plugin
 		            linex1.div.setAttribute('style', 'display: block; text align: center; width: 100%; padding: 5px 10px;');
 		            //document.getElementById('footcontrols').appendChild(linex1.div);
 		            var liney1 = new pointTextControl(linePlugin.p1, 'y', 'y<sub>P1</sub> ', 5);
@@ -223,10 +224,10 @@
                     var hr = document.createElement('div'); hr.innerHTML = "<hr>";
                     document.getElementById('footcontrols').appendChild(hr);
                     
-                    var submitbutton = document.createElement('input');
+                    var submitbutton = document.createElement('input'); // creates 'Submit Changes' button
                     submitbutton.setAttribute('type', 'button');
                     submitbutton.setAttribute('value', 'Submit Changes');
-                    var submitChanges = function() {
+                    var submitChanges = function() { // makes 'footprintcorrectwindow' remember values in textboxes when 'Submit Changes' button is clicked
                         cfg.slope.value = lineslope.textbox.value;
                         cfg.intercept.value = lineinter.textbox.value;
                         cfg.beginning.value = vert1.textbox.value;
@@ -275,7 +276,7 @@
 		    }*/
 		   
                     
-		    slopeTextControl = function(linePlugin, x1, y1, x2, y2, label, precision) {
+		    slopeTextControl = function(linePlugin, x1, y1, x2, y2, label, precision) {  // defines slopeTextControl textbox
 		        var precision = precision || 3;
 		        this.precision = precision;
 		        this.slope = linePlugin.slope;
@@ -290,7 +291,7 @@
 		        this.div.setAttribute('id', 'slopeTextControl_' + label);
 		        this.div.setAttribute('style', 'display: inline; padding: 5px 10px;');
 		        this.textbox = textbox;
-		        this.update = function(pos) {
+		        this.update = function(pos) { // updates value in textbox when slope of line interactor plugin is changed (automatically called when user moves line)
 		            var p1 = linePlugin.p1;
 		            var p2 = linePlugin.p2;
 		            var rise = p2.getCoords()['y'] - p1.getCoords()['y'];
@@ -300,7 +301,7 @@
 		            textbox.value = (linePlugin.slope).toPrecision(precision);
 		        }
 		        var me = this;
-		        this.update_external = function() {
+		        this.update_external = function() { // updates points of line interactor plugin on actual graph
 		            var newSlope = parseFloat(textbox.value);
 		            linePlugin.slope = newSlope;
 		            var intercept = linePlugin.intercept;
@@ -314,18 +315,18 @@
 		            
 		            textbox.value = (linePlugin.slope).toPrecision(precision); 
 		        }
-		        textbox.onchange = this.update_external;
+		        textbox.onchange = this.update_external; // calls 'update_external' function when value in textbox is changed
 		        
-		        var p1 = linePlugin.p1;
+		        var p1 = linePlugin.p1; 
 		        var p2 = linePlugin.p2;
-		        p1.listeners.push(this);
+		        p1.listeners.push(this); // connects plugin points of line interactor plugin to textbox
 		        p2.listeners.push(this);
-		        var rise = p2.getCoords()['y'] - p1.getCoords()['y'];
+		        var rise = p2.getCoords()['y'] - p1.getCoords()['y']; // calculates initial slope of line interactor plugin when graph is first loaded
 		        var run = p2.getCoords()['x'] - p1.getCoords()['x'];
 		        this.update(rise / run);
 		        return this;
 		    }
-		    interceptTextControl = function(linePlugin, y1, y2, label, precision) {
+		    interceptTextControl = function(linePlugin, y1, y2, label, precision) { // defines interceptTextControl textbox 
 		        var precision = precision || 3;
 		        this.precision = precision;
 		        this.intercept = linePlugin.intercept;
@@ -340,7 +341,7 @@
 		        this.div.setAttribute('id', 'intTextControl_' + label);
 		        this.div.setAttribute('style', 'display: inline; padding: 5px 10px;');
 		        this.textbox = textbox;
-		        this.update = function(pos) {
+		        this.update = function(pos) {  // updates value in textbox when y-intercept of line interactor plugin is changed (auto called when user moves line)
 		            var p1 = linePlugin.p1;
 		            var p2 = linePlugin.p2;
 		            var rise = p2.getCoords()['y'] - p1.getCoords()['y'];
@@ -351,7 +352,7 @@
 		            textbox.value = (linePlugin.intercept).toPrecision(precision);
 		        }
 		        var me = this;
-		        this.update_external = function() {
+		        this.update_external = function() { // graphically updates points of line interactor plugin when value in textbox is changed
 		            var newInt = parseFloat(textbox.value);
 		            dInt = (newInt - linePlugin.intercept);
 		            linePlugin.intercept = newInt; 
@@ -363,19 +364,19 @@
 		           
 		            textbox.value = (linePlugin.intercept).toPrecision(precision);
 		        }
-		        textbox.onchange = this.update_external;
+		        textbox.onchange = this.update_external; // calls 'update_external' function when textbox value is changed
 		        
-		        var p1 = linePlugin.p1;
+		        var p1 = linePlugin.p1; 
 		        var p2 = linePlugin.p2;
-		        p1.listeners.push(this);
+		        p1.listeners.push(this);  // connects plugin points of line interactor plugin to textboxes
 		        p2.listeners.push(this);
-		        var rise = p2.getCoords()['y'] - p1.getCoords()['y'];
+		        var rise = p2.getCoords()['y'] - p1.getCoords()['y']; // calculates initial y-intercept of line interactor plugin when graph is first loaded
 		        var run = p2.getCoords()['x'] - p1.getCoords()['x'];
 		        var slope = rise / run;
 		        this.update((p1.getCoords()['y'] - (slope * p1.getCoords()['x'])));
 		        return this;
 		    }
-		    pointTextControl = function(p, coord, label, precision) {
+		    pointTextControl = function(p, coord, label, precision) { // defines pointTextControl textbox
                 // coord should be 'x' or 'y'
                 var precision = precision || 3;
                 this.precision = precision;
@@ -394,11 +395,11 @@
                 this.div.setAttribute('style', 'display: inline; padding: 5px 10px;');
                 //this.div.setAttribute('style', 'position: relative; float: left; padding: 5px; text-align: top;');
                 this.textbox = textbox;
-                this.update = function(pos) {
+                this.update = function(pos) { // updates value in textbox when point is moved (automatically called when user moves points)
                     textbox.value = pos[coord].toPrecision(precision);
                 }
                 var me = this;
-                this.update_external = function() {
+                this.update_external = function() {  // graphically updates point when value in textbox is changed
                     var mypos = {}; mypos[coord] = textbox.value;
                     var newpos = p.putCoords ? p.putCoords(mypos) : mypos;
                     var dpos = {}; dpos[coord] = newpos[coord] - p.pos[coord];
@@ -406,8 +407,8 @@
                     p.parent.onDrag();  // centers
                     p.parent.redraw();
                 }
-                textbox.onchange = this.update_external;
-                p.listeners.push(this);
+                textbox.onchange = this.update_external; // calls 'update_external' function when textbox value is changed
+                p.listeners.push(this); // connects textbox to plugin point
                 this.update(p.getCoords());
                 return this;
             }

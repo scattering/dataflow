@@ -5,11 +5,11 @@ Applies footprint correction to data set
 from ... import config
 from ...core import Module
 
-def footprint_module(id=None, datatype=None, action=None,
+def footprint_module(id=None, datatype=None, action=None,  # Footprint module constructor
                     version='0.0', fields=[], xtype=None, filterModule=None):
     """Module for correcting a dataset"""
     
-    icon = {
+    icon = {  # how the module will look
         'URI': config.IMAGES + config.ANDR_FOLDER + 'autogrid.png',
         'image': config.IMAGES + config.ANDR_FOLDER + 'autgrid_image.png',
         'terminals': {
@@ -18,7 +18,7 @@ def footprint_module(id=None, datatype=None, action=None,
         }
     }
     
-    terminals = [
+    terminals = [   # the terminals of the module where the wires connect
         dict(id='input',
             datatype=datatype,
             use='in',
@@ -34,7 +34,7 @@ def footprint_module(id=None, datatype=None, action=None,
             )
     ]
     
-    fields = {
+    fields = {  # fields to be displayed by clicking on module
         "beginning": {
             "type":"string",
             "label":"Beginning of Interval",
@@ -57,7 +57,7 @@ def footprint_module(id=None, datatype=None, action=None,
             "value":""}
     }
     
-    module = Module(id=id,
+    module = Module(id=id,  # creates customized module 
                     name='Footprint Data',
                     version=version,
                     description=action.__doc__,

@@ -46,34 +46,34 @@ SPEC_DATA = 'refl.data1d'
 data1d = Data(SPEC_DATA, FilterableMetaArray, loaders=[{'function':LoadICPMany, 'id':'LoadICPData'}])
 
 # FootprintCorrection module
-def footprint_action(input=[], start="0.0", end="3.0", slope="1.0", intercept="0.0", **kwargs):
+def footprint_action(input=[], start="0.0", end="3.0", slope="1.0", intercept="0.0", **kwargs): # executes the FootprintCorrection function
     print "applying footprint correction"
     return dict(output=FootprintCorrection(input, start=start, end=end, slope=slope, intercept=intercept))
     
-footprint = footprint_module(id='refl.footprint', datatype='refl.data1d',
+footprint = footprint_module(id='refl.footprint', datatype='refl.data1d',  # adds FootprintCorrection module option to menu
                     version='1.0', action=footprint_action, filterModule=FootprintCorrection)
 
-footprint.xtype = 'FootprintCorrectContainer'
+footprint.xtype = 'FootprintCorrectContainer' # indicates what module box to use for this module
 
 # BackgroundSubtraction module
-def background_action(input=[], background="1.0", **kwargs):
+def background_action(input=[], background="1.0", **kwargs): # executes BackgroundSubtract function
     print "applying background subtraction"
     return dict(output=BackgroundSubtraction(input, background=background))
 
-background = background_module(id='refl.background', datatype='refl.data1d',
+background = background_module(id='refl.background', datatype='refl.data1d', # adds Background module option to menu
                     version='1.0', action=background_action, filterModule=BackgroundSubtraction)
                     
-background.xtype = 'BackgroundSubtractContainer'
+background.xtype = 'BackgroundSubtractContainer' # indicates which module box to use for this module
 
 # NormalizeToMonitor module
-def normalize_action(input=[], **kwargs):
+def normalize_action(input=[], **kwargs): # executes NormalizeToMonitor function
     print "normalizing"
     return dict(output=NormalizeToMonitor(input))
     
-normalize = normalize_module(id='refl.normalize', datatype='refl.data1d',
+normalize = normalize_module(id='refl.normalize', datatype='refl.data1d', # adds Normalize module option to menu
                     version='1.0', action=normalize_action, filterModule=NormalizeToMonitor)
 
-normalize.xtype = 'AutosizeImageContainer'
+normalize.xtype = 'AutosizeImageContainer' # indicates which module box to use for this module
 
 # Load module
 load = load_module(id='refl.load', datatype=SPEC_DATA,
@@ -87,17 +87,17 @@ save = save_module(id='refl.save', datatype=SPEC_DATA,
                    version='1.0', action=None)
 save.xtype = 'SaveContainer'
 
-input = [load, save]
+input = [load, save] # places Load and Save module options in one list
 
 
 
 #reduction = [join, scale, subtract, normalize, footprint, polcor]
-reduction = [footprint, background, normalize]
+reduction = [footprint, background, normalize] # places FootprintCorrection, Background, and Normalize module options in another list
 
-PBR = Instrument(id='ncnr.refl.pbr',
+PBR = Instrument(id='ncnr.refl.pbr', # creates instrument with module option lists 'Input' and 'Reduction'
                  name='refl',
                  archive='http://www.ncnr/nist.gov/data/pbr',
-                 menu=[
+                 menu=[  # takes 'input' and 'reduction' lists and places both in menu for PBR instrument
                        ('Input', input),
                        ('Reduction', reduction),
                       ],
@@ -107,4 +107,4 @@ PBR = Instrument(id='ncnr.refl.pbr',
 
 instruments = [PBR]
 for instrument in instruments:
-        register_instrument(instrument)
+        register_instrument(instrument) # instrument is registered

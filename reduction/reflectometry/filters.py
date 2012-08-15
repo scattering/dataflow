@@ -28,7 +28,7 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     """
     lookup = {"a":"_down_down", "b":"_up_down", "c":"_down_up", "d":"_up_up", "g": ""}
     if path == None:
-        path = os.getcwd()
+        path = os.getcwd() # if 'path' is not specified, then the actual path of the current directory is found
     file_obj = load(os.path.join(path, filename), format='NCNR NG-1')
     if not (len(file_obj.detector.counts.shape) == 2):
         # not a 2D object!
@@ -49,7 +49,7 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
 
         
     creation_story += ")" 
-    info = [{"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x, "det_angle":file_obj.detector.angle_x },
+    info = [{"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x, "det_angle":file_obj.detector.angle_x }, # FilterableMetaArray information
             {"name": "xpixel", "units": "pixels", "values": range(xpixels) },
             {"name": "Measurements", "cols": [
                     {"name": "counts"},
@@ -77,11 +77,11 @@ def FootprintCorrection(input, start='0', end='0', slope='0', intercept='0'):
     Makes copy of DataArray, iterates through it (beginning at "start" and ending at "finish"), and adds footprint correction to each value.
     Returns resulting data values as a MetaArray.
     """
-    data = MetaArray(input.view(ndarray).copy(), input.dtype, input.infoCopy())
-    start = float(start)
-    end = float(end)
-    slope = float(slope)
-    intercept = float(intercept)
+    data = MetaArray(input.view(ndarray).copy(), input.dtype, input.infoCopy())  # creates copy of input array
+    start = float(start) # beginning of footprint region
+    end = float(end) # end of footprint region
+    slope = float(slope) # slope of line interactor plugin
+    intercept = float(intercept) # y-intercept of line interactor plugin
     
     """
     mask = (xaxisvalues > start) and (xaxisvalues < end)
@@ -89,15 +89,15 @@ def FootprintCorrection(input, start='0', end='0', slope='0', intercept='0'):
     """
     endpoint = data['Measurements':'counts'][data.axisValues(0) > end][0]
     
-    mask = logical_and((data.axisValues(0) >= start), (data.axisValues(0) <= end))
-    xvalues = data.axisValues(0)[mask]
-    counts = data['Measurements':'counts'][mask]
+    mask = logical_and((data.axisValues(0) >= start), (data.axisValues(0) <= end)) # 'mask' defines interval of footprint region
+    xvalues = data.axisValues(0)[mask] # interval of x-values used to calculate footprint region
+    counts = data['Measurements':'counts'][mask] # values in footprint region that will be adjusted
     #monitor = data['Measurements':'monitor']
     #avg_monitor = sum(monitor) / monitor.shape[0]
     #counts = data[0][start:end, 0] # interval of data specified by start and finish
     #print 'before correction: ', data['Measurements':'counts'][mask]
     counts = counts * endpoint / ((xvalues * slope) + intercept) # applying footprint correction
-    data['Measurements':'counts'][mask] = counts
+    data['Measurements':'counts'][mask] = counts # replaces original counts values in footprint region with adjusted values
     #print 'after correction: ', data['Measurements':'counts'][mask]
     #monitor[mask]  += ... oops - we need to know the max of the monitor to do this.
     #data[0][start:end, 0] = ccounts # replacing original data in specified interval with corrected data
@@ -108,36 +108,36 @@ def BackgroundSubtraction(input, background='0'):
     """
     Makes copy of input (DataArray) and subtracts "background" from "counts" values.
     """
-    data = MetaArray(input.view(ndarray).copy(), input.dtype, input.infoCopy())
+    data = MetaArray(input.view(ndarray).copy(), input.dtype, input.infoCopy()) # creates copy of input array
     counts = data['Measurements':'counts']
-    background = float(background)
+    background = float(background) # turns string argument 'background' into its decimal value
     counts = counts - background
-    data['Measurements':'counts'] = counts
+    data['Measurements':'counts'] = counts # updates data array with updated 'counts' values
     return data
 
 @autoApplyToList    
 def NormalizeToMonitor(input):
     """
-    divide all the counts columns by monitor and output as normcounts, with stat. error
+    Divides all the 'counts' values by the 'monitor' values and outputs the result as 'normcounts'
     """
-    output = zeros(input.shape[:-1] + (5,), dtype=float)      
-    copy = input.infoCopy()
-    copy[1]['cols'].extend([{'name':'normcounts'}])
+    output = zeros(input.shape[:-1] + (5,), dtype=float) # creates array of zeros with same number of rows but with an extra column      
+    copy = input.infoCopy() # makes copy of original FilterableMetaArray information
+    copy[1]['cols'].extend([{'name':'normcounts'}]) # adds 'normcounts' label to copied information
     
-    counts = input['Measurements':'counts']
+    counts = input['Measurements':'counts']  # pointers to data of original input array
     monitor = input['Measurements':'monitor']
     norm = counts/monitor   
     pixels = input['Measurements':'pixels']
     time = input['Measurements':'count_time']
     
-    for x in range(0, output.shape[0]):
+    for x in range(0, output.shape[0]):  # traverses through array of zeros and replaces zeros with the original values in their original positions
         output[x][0] = counts[x]
         output[x][1] = pixels[x]
         output[x][2] = monitor[x]
         output[x][3] = time[x]
-        output[x][4] = norm[x]
+        output[x][4] = norm[x] # adds new 'normcounts' values
     
-    result = MetaArray(output, output.dtype, copy)
+    result = MetaArray(output, output.dtype, copy) # creates new FilterableMetaArray object with update info and updated array values
     return result
     
     
