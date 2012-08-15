@@ -23,7 +23,7 @@ from django.contrib.auth.models import User
 from models import * #add models by name
 
 
-#from ...apps.fileview import testftp
+from ...apps.fileview import testftp
 
 from ...dataflow import wireit
 from ...dataflow.core import lookup_module, lookup_datatype
@@ -78,6 +78,9 @@ def showInteractors(request):
 
 def showPlotWindow(request):
     return render_to_response('plotwindow.html')
+
+def showFTPloader(request):
+    return render_to_response('FTPloader.html')
 
 def showSliceWindow(request):
     return render_to_response('slicewindow.html')
@@ -323,8 +326,16 @@ store = [{
             #"children":[{}],
         }]
     }]
-def getNCNRdirectories(request):
-    return HttpResponse(simplejson.dumps(testftp.runMe()))  #testftp.runMe()
+
+def getFTPdirectories(request):
+    if request.GET.has_key('address'):
+        address = request.GET['address']
+        if request.GET.has_key('directory'):
+            directory = request.GET['directory']
+        else:
+            directory = '/'
+        return HttpResponse(simplejson.dumps(testftp.runFTP(address, directory)))
+
 
 def displayFileLoad(request):
     return render_to_response('FileUpload/FileTreeTest.html', locals())
@@ -753,7 +764,14 @@ def uploadFiles(request):
 
     return HttpResponse('OK')
 
-"""    
+"""
+def uploadFTPFiles(request):
+    if request.GET.has_key('filepaths'):
+        myrequest = {}
+        myrequest['FILES'] = testftp.getFiles(request.GET['filepaths'])
+        uploadFiles(myrequest)
+        #need to add POST.experiment_id, POST.instrument_class, POST.loader_id
+
 def uploadFiles(request):
     location = FILES_DIR
     if request.POST.has_key(u'experiment_id'):
