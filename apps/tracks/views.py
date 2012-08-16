@@ -767,10 +767,12 @@ def uploadFiles(request):
 """
 def uploadFTPFiles(request):
     if request.GET.has_key('filepaths'):
-        myrequest = {}
-        myrequest['FILES'] = testftp.getFiles(request.GET['filepaths'])
+        myrequest = {'FILES': {'FTP_FILES': testftp.getFiles(request.GET['filepaths'])} }
+        myrequest['POST'] = {'experiment_id': request.POST['experiment_id']}
+        myrequest['POST']['instrument_class'] = request.POST['instrument_class']
+        myrequest['POST']['loader_id'] = request.POST['loader_id']
         uploadFiles(myrequest)
-        #need to add POST.experiment_id, POST.instrument_class, POST.loader_id
+        
 
 def uploadFiles(request):
     location = FILES_DIR
@@ -795,7 +797,10 @@ def uploadFiles(request):
             tmp_file, tmp_path = tempfile.mkstemp()
             open(tmp_path, 'wb').write(file_contents)
             file_descriptors.append({'filename': tmp_path, 'friendly_name': f.name})
+    elif request.FILES.has_key('FTP_FILES'):
+        file_descriptors = request.FILES['FTP_FILES']
         
+    if file_descriptors: #only has file_descriptors if it has 'FILES' or 'FTP_FILES'
         print file_descriptors
         instrument_class = request.POST[u'instrument_class']    
         loader_id = request.POST[u'loader_id']

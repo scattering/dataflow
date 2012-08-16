@@ -75,7 +75,7 @@ def toJson(file_object, isexpanded=False):
     global finalString;
     finalString += '{"id":%s,' %file_object.id
     finalString += '"text":"%s",' %file_object.path.split('/')[-1]
-        
+    finalString += '"path":"%s",' %file_object.path
     if file_object.leaf:
         finalString += '"leaf":True},'
     else:
@@ -89,15 +89,21 @@ def toJson(file_object, isexpanded=False):
 def getFiles(filepaths):
     """
     Fetches a set of binary files whose paths are given by ``filepaths``.
-    TODO: TEST THIS!!!!
+    TODO: TEST THIS!!!! 8/15/2012
     """
-    binaryFiles = []
+    file_descriptors = []
     for filepath in filepaths:
         tmp_file, tmp_path = tempfile.mkstemp()
-        outfile = open(tmp_path, 'wb') #.write(file_contents)      
+        outfile = open(tmp_path, 'wb') #.write(file_contents)
         ftp.retrbinary("RETR " + filepath, outfile.write)
-        binaryFiles.append(outfile)
-    return binaryFiles
+        dirs = filepath.split('/')
+        if len(dirs[-1]) > 0:
+            fname = dirs[-1]
+        else:
+            fname = dirs[-2]
+        file_descriptors.append({'filename': tmp_path, 'friendly_name': fname})
+    return file_descriptors
+
 
 
 def runMe():
