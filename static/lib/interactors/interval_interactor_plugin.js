@@ -1,4 +1,6 @@
 
+// Requires interactors_nonprototype.js
+// Requires interactors_plugin_base.js
 // Requires reflectivity_sim.js
 
 (function($) { 
@@ -14,12 +16,13 @@
     };
     
     
-    $.jqplot.IntervalInteractorPlugin = function() {};
-    $.jqplot.IntervalInteractorPlugin.prototype = new $.jqplot.InteractorPlugin();
-    $.jqplot.IntervalInteractorPlugin.prototype.constructor = $.jqplot.IntervalInteractorPlugin;
-    $.jqplot.InteractorPluginSubtypes.Interval = $.jqplot.IntervalInteractorPlugin;
+    $.jqplot.IntervalInteractorPlugin = function() {}; // defines IntervalInteractorPlugin
+    $.jqplot.IntervalInteractorPlugin.prototype = new $.jqplot.InteractorPlugin(); // IntervalInteractorPlugin inherits from InteractorPlugin
+    $.jqplot.IntervalInteractorPlugin.prototype.constructor = $.jqplot.IntervalInteractorPlugin; // how IntervalInteractorPlugin will be called
+    $.jqplot.InteractorPluginSubtypes.Interval = $.jqplot.IntervalInteractorPlugin; // entry for IntervalInteractorPlugin in InteractorPluginSubtypes list
+                                                                                    // labeled 'Interval'
     
-    $.jqplot.IntervalInteractorPlugin.prototype.init = function(options) {
+    $.jqplot.IntervalInteractorPlugin.prototype.init = function(options) { // what happens once IntervalInteractorPlugin is instantiated
         $.jqplot.InteractorPlugin.prototype.init.call(this, options);
        
         this.width1 = 4;
@@ -32,7 +35,7 @@
         $.extend(this, options);
         
         // vertical line 1
-        this.p1 = new $.jqplot.PluginPoint();
+        this.p1 = new $.jqplot.PluginPoint(); // creates PluginPoint that corresponds to vertical line
         this.p1.initialize(this, this.x01, 0);
         this.p1.color1 = this.color1;
         this.p1.color2 = this.color2;
@@ -42,7 +45,7 @@
         this.vline1.color2 = this.color2;
         this.grobs.push(this.vline1);
         this.grobs.push(this.p1);
-        function render_centeredy(ctx) {
+        function render_centeredy(ctx) { // renders PluginPoint
             var height = ctx.canvas.height;
             var width = ctx.canvas.width;
             ctx.fillStyle = this.color;
@@ -59,7 +62,7 @@
         }
         this.p1.render = render_centeredy
         
-        this.p1.move = function(dpos) {
+        this.p1.move = function(dpos) { // function called when PluginPoint is clicked and dragged
             this.translateBy(dpos);
             this.parent.redraw();
         }
@@ -84,7 +87,7 @@
             //this.parent.update();
         }
         
-        this.rect = new $.jqplot.Segment(); this.rect.initialize(this, this.p1, this.p2);
+        this.rect = new $.jqplot.Segment(); this.rect.initialize(this, this.p1, this.p2); // creates rectangle for the shaded region between the lines
         this.rect.color1 = this.color1;
         this.rect.color2 = this.color2;
         //this.rect = new $.jqplot.Rectangle(); this.rect.initialize(this, this.p1, this.p3, this.p2, this.p4); // Rectangle assumes that the second and fourth
