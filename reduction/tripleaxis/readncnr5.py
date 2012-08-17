@@ -333,6 +333,17 @@ class datareader(object):
         def determinefiletype(self,myfile):
         #get first line
                 tokenized=get_tokenized_line(myfile)
+                #Handling for older files whose dates are 'day-month-year' e.g. '23-apr-1994'
+                thedate = tokenized[1].split('-')
+                if len(thedate) > 1:
+                        #we want order: month, day, year
+                        #inserting in reverse order: year --> day --> month
+                        tokenized.pop(1) #remove the date string
+                        tokenized.insert(1, thedate[2])
+                        tokenized.insert(1, thedate[0])
+                        tokenized.insert(1, thedate[1])
+                        
+                        
                 self.metadata['monitor_base']=float(tokenized[6])
                 self.metadata['monitor_prefactor']=float(tokenized[7])
                 self.metadata['monitor']=self.metadata['monitor_base']*self.metadata['monitor_prefactor']

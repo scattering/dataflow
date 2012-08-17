@@ -87,7 +87,7 @@ def toJson(file_object, isexpanded=False):
             toJson(i) # does not expand children directories.
         finalString += ']},'
 
-def getFiles(address, filepaths):
+def getFiles(address, filepaths, username='', password=''):
     """
     Fetches a set of binary files whose paths are given by ``filepaths``.
     Returns: a dictionary ``file_descriptors`` where each element has:
@@ -96,7 +96,7 @@ def getFiles(address, filepaths):
              NOTE: this is the current setup used to upload files. 8/17/2012
     """
     ftp = FTP(address)
-    ftp.login()
+    ftp.login(user=username, passwd=password)
     file_descriptors = []
     for filepath in filepaths:
         tmp_file, tmp_path = tempfile.mkstemp()
@@ -113,7 +113,7 @@ def getFiles(address, filepaths):
 
 
 
-def runFTP(address, directory):
+def runFTP(address, directory,  username='', password=''):
     """
     FTP into a given ``address`` and change into the directory ``directory``.
     This will provide the set of files and directories within ``directory``.
@@ -123,7 +123,7 @@ def runFTP(address, directory):
     
     finalString = '['
     ftp = FTP(address)
-    ftp.login()
+    ftp.login(user=username, passwd=password)
     ftp.cwd(directory)
     
     root = FTPfile(id_counter, ftp.pwd(), [], False)

@@ -20,6 +20,7 @@ from django.core.mail import send_mail
 
 ## models
 from django.contrib.auth.models import User 
+from django.contrib.auth import authenticate, login
 from models import * #add models by name
 
 
@@ -158,12 +159,23 @@ def add_collaborator(request, email_activation_key=None):
             projects[0].users.add(collaborators[0]) #adds user to project
             return HttpResponseRedirect('/myProjects/')
         else:
+            random_pass=User.objects.make_random_password(10)
             collaborator = User.objects.create(username=email_address,
                                                first_name = '',
                                                last_name = '',
-                                               email = email_address,
-                                               password = None)
+                                               email = email_address
+                                               )
+            collaborator.set_password(random_pass)
+            #collaborator.set_unusable_password()
+            collaborator.save()
             projects[0].users.add(collaborator)
+            user = authenticate(username=email_address,password=random_pass)
+            login(request, user)
+            
+            #message=r'Your username is this email.address.   Please reset your password the first time you log in.  Have fun!'
+            #send_mail(r'Welcome to DrNeutron!', message, settings.DEFAULT_FROM_EMAIL, [email_address])
+            #We want redirect to http://www.drneutron.org/password/reset/confirm/yourhashhere/
+            
             return HttpResponseRedirect('/myProjects/')
             #return HttpResponseRedirect(profile/edit)
     else:
@@ -328,13 +340,17 @@ store = [{
     }]
 
 def getFTPdirectories(request):
-    if request.GET.has_key('address'):
+    if request.GET.has_key('address') and request.GET.has_key('username') and request.GET.has_key('password'):
         address = request.GET['address']
+        username = request.GET['username']
+        password = request.GET['password']
         if request.GET.has_key('directory'):
             directory = request.GET['directory']
         else:
             directory = '/'
-        return HttpResponse(simplejson.dumps(testftp.runFTP(address, directory)))
+        return HttpResponse(simplejson.dumps(testftp.runFTP(address, directory, username=username, password=password)))
+    
+    return HttpResponse('Improper request')
 
 
 def displayFileLoad(request):
@@ -697,16 +713,20 @@ def uploadFTPFiles(request):
     and paths to the files to get (``filepaths``), the files will be retrieved from
     the ``address`` via FTP and uploaded.
     """
-    if request.POST.has_key('address') and request.POST.has_key('experiment_id') and \
+    if request.POST.has_key('address') and request.POST.has_key('username') and \
+       request.POST.has_key('password') and request.POST.has_key('experiment_id') and \
        request.POST.has_key('instrument_class') and request.POST.has_key('loader_id') and \
        request.POST.has_key('filepaths'):
         filepaths = simplejson.loads(request.POST['filepaths']) #given as a string of a list
+        username = request.POST['username']
+        password = request.POST['password']
         
-        file_descriptors = testftp.getFiles(request.POST['address'], filepaths)
+        file_descriptors = testftp.getFiles(request.POST['address'], filepaths, username=username, password=password)
         experiment_id = request.POST['experiment_id']
         instrument_class = request.POST['instrument_class']
         loader_id = request.POST['loader_id']
         uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id) #upload the files
+    
     return HttpResponse('OK')
         
 

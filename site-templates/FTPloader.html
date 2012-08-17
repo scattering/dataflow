@@ -17,6 +17,8 @@
             window.onload = function() {
                 Ext.onReady(function() {
                     FTPAddress = '';
+                    FTPUsername = '';
+                    FTPPassword = '';
 
                     myTreeStore = Ext.create('Ext.data.TreeStore', {});
 
@@ -29,7 +31,7 @@
                         width: 400,
                         store: myTreeStore,
                         multiSelect: true,
-                        padding: '0 5 0 0', //right padding for the button
+                        padding: '0 10 0 0', //right padding for the button
                         listeners: {
                             beforeitemexpand: function(node) {
                                 var clickedNode = node; //myTreeStore.getNodeById(parseInt(node.data.id));
@@ -46,7 +48,10 @@
                                     $.ajax({
                                         url: '/loadFiles/getFTPdirs/',
                                         type: 'GET',
-                                        data: {'address': FTPAddress, 'directory': clickedNode.data.path},
+                                        data: {'address': FTPAddress, 
+                                               'username': FTPUsername, 
+                                               'password': FTPPassword, 
+                                               'directory': clickedNode.data.path},
                                         success: function(response) {
                                             updateDirectory(response);
                                         }
@@ -72,8 +77,8 @@
                         name: 'FTP Address',
                         fieldLabel: 'FTP Address',
                         allowBlank: true,
-                        //padding: '0 0 0 5',
                         width: 600,
+                        labelWidth: 80, //defaults to 100
                         enableKeyEvents: true,
                         onKeyPress: function (event) {
                             if (event.keyCode == event.ENTER) { //event.ENTER = 13
@@ -82,13 +87,13 @@
                             }
                         }
                     });
-                    var upperPanel = Ext.create('Ext.form.Panel', {
+                    var innerUpperTopPanel = Ext.create('Ext.form.Panel', {
                         width: 800,
                         height: 30,
                         border: false,
                         padding: 2,
                         layout: {
-                            type: 'hbox',  // Arrange child items horizontally
+                            type: 'hbox',
                         },
                         items: [FTPAddressEditor, {
                             xtype: 'button',
@@ -98,19 +103,24 @@
                                 $.ajax({
                                     url: '/loadFiles/getFTPdirs/',
                                     type: 'GET',
-                                    data: {'address': FTPAddressEditor.value, 'directory': '/'},
+                                    data: {'address': FTPAddressEditor.value, 
+                                           'username': FTPUsernameEditor.value,
+                                           'password': FTPPasswordEditor.value,
+                                           'directory': '/'},
                                     success: function(response) {
                                         var treedata = Ext.decode(response)[0];
                                         myTreeStore.setRootNode(treedata); 
-                                        // setRootNode does NOT set our custom 'path' field, so must add it
-                                        // manually. This is necessary since tree.Panel.reconfigure does NOT
-                                        // work in Extjs v4.1 yet. Sets 'path' of root and its children.
+                                        // setRootNode does NOT set our custom 'path' attribute, so must add
+                                        // it manually. This is necessary since tree.Panel.reconfigure does
+                                        // NOT work in Extjs v4.1. Sets 'path' of root and its children.
                                         myTreeStore.tree.root.data.path = treedata.path;
                                         for (var i=0; i < treedata.children.length; ++i) {
                                             myTreeStore.tree.root.childNodes[i].data.path = treedata.children[i].path;
                                         }
                                         
                                         FTPAddress = FTPAddressEditor.value; //only updates on success
+                                        FTPUsername = FTPUsernameEditor.value;
+                                        FTPPassword = FTPPasswordEditor.value;
                                     },
                                     failure: function () {
                                         //THIS IS AJAX FAILURE, NOT FTP FAILURE
@@ -120,6 +130,58 @@
                                 });
                             }
                         }]
+                    });
+                    var FTPUsernameEditor = new Ext.form.TextField({
+                        name: 'FTP Login Username',
+                        fieldLabel: 'FTP Login Username',
+                        allowBlank: true,
+                        width: 340,
+                        labelWidth: 120, 
+                        //padding: '0 20 0 0',
+                        enableKeyEvents: true,
+                        onKeyPress: function (event) {
+                            if (event.keyCode == event.ENTER) { //event.ENTER = 13
+                                //if ``Enter`` is pressed, the button will be clicked.
+                                $(FTPAddressButton).click();
+                            }
+                        }
+                    });
+                    var FTPPasswordEditor = new Ext.form.TextField({
+                        name: 'FTP Login Password',
+                        fieldLabel: 'FTP Login Password',
+                        allowBlank: true,
+                        width: 300,
+                        labelWidth: 120, 
+                        inputType: 'password',
+                        enableKeyEvents: true, 
+                        onKeyPress: function (event) {
+                            if (event.keyCode == event.ENTER) { //event.ENTER = 13
+                                //if ``Enter`` is pressed, the button will be clicked.
+                                $(FTPAddressButton).click();
+                            }
+                        }
+                    });
+                    var innerUpperBotPanel = Ext.create('Ext.form.Panel', {
+                        width: 800,
+                        height: 70,
+                        border: false,
+                        padding: 2,
+                        layout: {
+                            type: 'hbox',
+                            //padding: '0 15 0 0', 
+                        },
+                        items: [FTPUsernameEditor, FTPPasswordEditor]
+                    });
+                    var upperPanel = Ext.create('Ext.form.Panel', {
+                        width: 800,
+                        height: 120,
+                        border: false,
+                        padding: 2,
+                        layout: {
+                            type: 'vbox',
+                            //padding: 5
+                        },
+                        items: [innerUpperTopPanel, innerUpperBotPanel]
                     });
 
                     grid_store = Ext.create('Ext.data.Store', {
@@ -174,9 +236,11 @@
                                     $.ajax({
                                         url: '/uploadFTPFiles/',
                                         type: 'POST',
-                                        data: {'address': FTPAddress, 
+                                        data: {'address': FTPAddress,
+                                               'username': FTPUsername,
+                                               'password': FTPPassword,
                                                'experiment_id': experiment_id,
-                                               'instrument_class': instrument_class, 
+                                               'instrument_class': instrument_class,
                                                'loader_id': loader_id,
                                                'filepaths': Ext.encode(filepaths)
                                         },
@@ -186,15 +250,14 @@
                                         }
                                     });
                                 } else {
-                                    alert("No files selected to upload.);
+                                    alert("No files selected to upload.");
                                 }
                             }
                         }]
                     });
 
-                    var addButton = {
+                    var addButton = Ext.create('Ext.button.Button', {
                         //button to add files from the FTP tree
-                        xtype: 'button',
                         width: 40,
                         scale: 'medium',
                         text: '>>>',
@@ -205,7 +268,20 @@
                                 grid_store.add({'file': selitems[i].data.text, 'path': selitems[i].data.path})
                             }
                         }
-                    };
+                    });
+
+                    //panel between the tree and grid_panel - bit of a hack here...  used to simply move 
+                    //the addButton down vertically; easier than creating div elements to use alignTo()
+                    var buttonSpacingPanel = Ext.create('Ext.panel.Panel', {
+                        border: false,
+                        height: 500,
+                        width: 40,
+                        layout: {
+                            type: 'vbox',
+                            padding: '250 0 0 0'
+                        },
+                        items: addButton
+                    });
                     var lowerPanel = Ext.create('Ext.panel.Panel', {
                         bodyPadding: 5,
                         border: false,
@@ -218,7 +294,7 @@
                         },
                         items: [
                             tree, 
-                            addButton,
+                            buttonSpacingPanel,
                             innerRightPanel
                         ]
                     });
@@ -227,7 +303,7 @@
                         title: 'Select Files to Upload',
                         bodyPadding: 5,
                         width: 830,
-                        height: 600,
+                        height: 690,
                         renderTo: 'FTPtreediv',
                         layout: {
                             type: 'vbox',       // Arrange child items horizontally

@@ -73,7 +73,7 @@
 			    {% csrf_token %}
 		        <ul>
 		        {% for project in projects.object_list %}
-            		<li><input type="button" id="{{project.id}}" value="Delete project" onclick="deleteProject('{{project}}', {{project.id}})" /><body>  <<<</body><input type="button" value="Share project" onclick="shareProject({{user.id}}, '{{project}}', {{project.id}})" /><body>>>>  ..... </body> <a href="editProject/{{project.id}}/">{{ project }}</a> <body id="usersdiv">(Users: {% for username in project.users.all %}{% if not forloop.first %},{% endif %} {{username.get_full_name}}{% endfor %})</body></li>
+            		<li><input type="button" id="{{project.id}}" value="Delete project" onclick="deleteProject('{{project}}', {{project.id}})" /><body>  <<<</body><input type="button" value="Share project" onclick="shareProject({{user.id}}, '{{project}}', {{project.id}})" /><body>>>>  ..... </body> <a href="editProject/{{project.id}}/">{{ project }}</a> <body id="usersdiv">(Users: {% for username in project.users.all %}{% if not forloop.first %},{% endif %} {{username.email}}{% endfor %})</body></li>
 		        {% endfor %}
             		<li>{{ form.new_project }} <input type="submit" value="Create project" /></li>
 		        </ul>
