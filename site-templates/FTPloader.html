@@ -104,8 +104,8 @@
                                     url: '/loadFiles/getFTPdirs/',
                                     type: 'GET',
                                     data: {'address': FTPAddressEditor.value, 
-                                           'username': FTPUsernameEditor.value,
-                                           'password': FTPPasswordEditor.value,
+                                           'username': FTPUsernameEditor.value ? FTPUsernameEditor.value : '', //empty textbox = undefined, and undefined will not be sent as an ajax parameter.
+                                           'password': FTPPasswordEditor.value ? FTPPasswordEditor.value : '',
                                            'directory': '/'},
                                     success: function(response) {
                                         var treedata = Ext.decode(response)[0];
@@ -119,8 +119,8 @@
                                         }
                                         
                                         FTPAddress = FTPAddressEditor.value; //only updates on success
-                                        FTPUsername = FTPUsernameEditor.value;
-                                        FTPPassword = FTPPasswordEditor.value;
+                                        FTPUsername = FTPUsernameEditor.value || ''; //empty textbox = undefined
+                                        FTPPassword = FTPPasswordEditor.value || '';
                                     },
                                     failure: function () {
                                         //THIS IS AJAX FAILURE, NOT FTP FAILURE
@@ -163,7 +163,7 @@
                     });
                     var innerUpperBotPanel = Ext.create('Ext.form.Panel', {
                         width: 800,
-                        height: 70,
+                        height: 30,
                         border: false,
                         padding: 2,
                         layout: {
@@ -174,14 +174,26 @@
                     });
                     var upperPanel = Ext.create('Ext.form.Panel', {
                         width: 800,
-                        height: 120,
+                        height: 150,
                         border: false,
                         padding: 2,
                         layout: {
                             type: 'vbox',
                             //padding: 5
                         },
-                        items: [innerUpperTopPanel, innerUpperBotPanel]
+                        items: [
+                            {
+                                html: 'Enter the FTP address and a username (blank defaults to "anonymous") and password (blank defaults to ""). Navigate the FTP File Chooser to the desired files, select them, and click the ">>>" button to add them to be uploaded. Double click individual files to add/remove them to be uploaded. Click "Upload Files" to upload them to Dataflow.', 
+                                border: false,
+                            },
+                            {
+                                html: '<< NOTE: loading bars not showing at this time; please be patient when uploading large file sets >>', 
+                                padding: '0 0 5 0', //padding to offset panel below
+                                border: false,
+                            },
+                            innerUpperTopPanel, 
+                            innerUpperBotPanel
+                        ]
                     });
 
                     grid_store = Ext.create('Ext.data.Store', {
@@ -247,6 +259,10 @@
                                         success: function(response) {
                                             //on successful upload, remove all already-uploaded files from the grid
                                             grid_store.removeAll();
+                                            
+                                            //reload editExperiment.html - no loading bars shown, but the uploaded
+                                            // files will appear when done loading.
+                                            window.opener.location.reload(true); 
                                         }
                                     });
                                 } else {
@@ -289,8 +305,6 @@
                         height: 550,
                         layout: {
                             type: 'hbox',       // Arrange child items horizontally
-                            //align: 'stretch',   // Each takes up full width
-                            //padding: 5
                         },
                         items: [
                             tree, 
@@ -298,12 +312,11 @@
                             innerRightPanel
                         ]
                     });
-                    //addButton.alignTo();
                     outerPanel = Ext.create('Ext.panel.Panel', {
                         title: 'Select Files to Upload',
                         bodyPadding: 5,
                         width: 830,
-                        height: 690,
+                        height: 720,
                         renderTo: 'FTPtreediv',
                         layout: {
                             type: 'vbox',       // Arrange child items horizontally
