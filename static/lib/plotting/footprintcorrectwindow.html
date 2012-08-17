@@ -227,7 +227,7 @@
                     var submitbutton = document.createElement('input'); // creates 'Submit Changes' button
                     submitbutton.setAttribute('type', 'button');
                     submitbutton.setAttribute('value', 'Submit Changes');
-                    var submitChanges = function() { // makes 'footprintcorrectwindow' remember values in textboxes when 'Submit Changes' button is clicked
+                    var submitChanges = function() { // makes 'footprintcorrectwindow' remember values currently in textboxes when 'Submit Changes' button is clicked
                         cfg.slope.value = lineslope.textbox.value;
                         cfg.intercept.value = lineinter.textbox.value;
                         cfg.beginning.value = vert1.textbox.value;
@@ -301,7 +301,7 @@
 		            textbox.value = (linePlugin.slope).toPrecision(precision);
 		        }
 		        var me = this;
-		        this.update_external = function() { // updates points of line interactor plugin on actual graph
+		        this.update_external = function() { // updates points of line interactor plugin on actual graph (see 'textbox.onchange' below)
 		            var newSlope = parseFloat(textbox.value);
 		            linePlugin.slope = newSlope;
 		            var intercept = linePlugin.intercept;
@@ -352,7 +352,7 @@
 		            textbox.value = (linePlugin.intercept).toPrecision(precision);
 		        }
 		        var me = this;
-		        this.update_external = function() { // graphically updates points of line interactor plugin when value in textbox is changed
+		        this.update_external = function() { // graphically updates points of line interactor plugin when value in textbox is changed 
 		            var newInt = parseFloat(textbox.value);
 		            dInt = (newInt - linePlugin.intercept);
 		            linePlugin.intercept = newInt; 
@@ -395,11 +395,11 @@
                 this.div.setAttribute('style', 'display: inline; padding: 5px 10px;');
                 //this.div.setAttribute('style', 'position: relative; float: left; padding: 5px; text-align: top;');
                 this.textbox = textbox;
-                this.update = function(pos) { // updates value in textbox when point is moved (automatically called when user moves points)
+                this.update = function(pos) { // updates value in textbox when point is moved (automatically called when user manually moves points)
                     textbox.value = pos[coord].toPrecision(precision);
                 }
                 var me = this;
-                this.update_external = function() {  // graphically updates point when value in textbox is changed
+                this.update_external = function() {  // graphically updates point when value in textbox is changed (see 'textbox.onchange' below)
                     var mypos = {}; mypos[coord] = textbox.value;
                     var newpos = p.putCoords ? p.putCoords(mypos) : mypos;
                     var dpos = {}; dpos[coord] = newpos[coord] - p.pos[coord];

@@ -34,7 +34,7 @@ def footprint_module(id=None, datatype=None, action=None,  # Footprint module co
             )
     ]
     
-    fields = {  # fields to be displayed by clicking on module
+    fields = {  # fields that will appear when user right clicks module
         "beginning": {
             "type":"string",
             "label":"Beginning of Interval",

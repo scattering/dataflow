@@ -28,15 +28,15 @@
             this.ymax = 1.0;
             this.slope = 1.0;
             $.extend(this, options);
-            this.slope = (this.ymax - this.ymin) / (this.xmax - this.xmin);
-            this.intercept = (this.ymax - this.ymin) - (this.slope * (this.xmax - this.xmin));
+            this.slope = (this.ymax - this.ymin) / (this.xmax - this.xmin); // calculates initial slope of line 
+            this.intercept = (this.ymax - this.ymin) - (this.slope * (this.xmax - this.xmin)); // calculates initial y-intercept of line
             
-            this.p1 = new $.jqplot.PluginPoint(); this.p1.initialize(this, this.xmin, this.ymin); // creates two plugin points
+            this.p1 = new $.jqplot.PluginPoint(); this.p1.initialize(this, this.xmin, this.ymin); // creates two plugin points for the line
             this.p2 = new $.jqplot.PluginPoint(); this.p2.initialize(this, this.xmax, this.ymax);
             
             this.linear = new $.jqplot.Linear(); this.linear.initialize(this, this.p1, this.p2, 4); // creates a line using both plugin points
             
-            this.grobs.push(this.linear, this.p1, this.p2);
+            this.grobs.push(this.linear, this.p1, this.p2); // adds line interactor (PluginPoints, line) to list of interactors on graph
             
             //this.redraw();              
         },
