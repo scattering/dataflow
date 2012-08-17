@@ -1,0 +1,22 @@
+<html>
+<title>Title!</title>
+<head>
+
+    <script type="text/javascript" src="../../static/lib/ext/ext-all.js"></script>
+
+    <script type="text/javascript">
+        console.log('starting');
+        var webworker = new Worker('loadwebworkertest.js');
+
+        webworker.addEventListener('message', function(e) {
+          console.log('Worker said: ', e.data);
+        }, false);
+
+        webworker.postMessage('Hello World');
+    </script>
+
+    <body>
+    Body
+    </body>
+</head>
+</html>
