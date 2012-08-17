@@ -34,7 +34,7 @@ def background_module(id=None, datatype=None, action=None,  # Background module 
             )
     ]
     
-    fields = {  # field to appear after clicking module
+    fields = {  # field that will appear when user right clicks module
         "background": {
             "type":"string",
             "label":"Background Value",

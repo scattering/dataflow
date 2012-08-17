@@ -89,9 +89,9 @@ def FootprintCorrection(input, start='0', end='0', slope='0', intercept='0'):
     """
     endpoint = data['Measurements':'counts'][data.axisValues(0) > end][0]
     
-    mask = logical_and((data.axisValues(0) >= start), (data.axisValues(0) <= end)) # 'mask' defines interval of footprint region
-    xvalues = data.axisValues(0)[mask] # interval of x-values used to calculate footprint region
-    counts = data['Measurements':'counts'][mask] # values in footprint region that will be adjusted
+    mask = logical_and((data.axisValues(0) >= start), (data.axisValues(0) <= end)) # 'mask' defines interval of footprint region in input array
+    xvalues = data.axisValues(0)[mask] # interval of x-values in input array that will be used to calculate footprint region
+    counts = data['Measurements':'counts'][mask] # values in footprint region of input array that will be adjusted
     #monitor = data['Measurements':'monitor']
     #avg_monitor = sum(monitor) / monitor.shape[0]
     #counts = data[0][start:end, 0] # interval of data specified by start and finish
@@ -109,9 +109,9 @@ def BackgroundSubtraction(input, background='0'):
     Makes copy of input (DataArray) and subtracts "background" from "counts" values.
     """
     data = MetaArray(input.view(ndarray).copy(), input.dtype, input.infoCopy()) # creates copy of input array
-    counts = data['Measurements':'counts']
+    counts = data['Measurements':'counts']  # the counts values in 'data' array
     background = float(background) # turns string argument 'background' into its decimal value
-    counts = counts - background
+    counts = counts - background # applies BackgroundSubtraction
     data['Measurements':'counts'] = counts # updates data array with updated 'counts' values
     return data
 
@@ -126,18 +126,18 @@ def NormalizeToMonitor(input):
     
     counts = input['Measurements':'counts']  # pointers to data of original input array
     monitor = input['Measurements':'monitor']
-    norm = counts/monitor   
+    norm = counts/monitor   # new 'normcounts' values
     pixels = input['Measurements':'pixels']
     time = input['Measurements':'count_time']
     
-    for x in range(0, output.shape[0]):  # traverses through array of zeros and replaces zeros with the original values in their original positions
+    for x in range(0, output.shape[0]):  # traverses through the array of zeros and replaces the zeros with the original values of the original input array
         output[x][0] = counts[x]
         output[x][1] = pixels[x]
         output[x][2] = monitor[x]
         output[x][3] = time[x]
         output[x][4] = norm[x] # adds new 'normcounts' values
     
-    result = MetaArray(output, output.dtype, copy) # creates new FilterableMetaArray object with update info and updated array values
+    result = MetaArray(output, output.dtype, copy) # creates new FilterableMetaArray object with updated info and updated array values
     return result
     
     

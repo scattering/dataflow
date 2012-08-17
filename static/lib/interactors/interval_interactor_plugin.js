@@ -35,17 +35,17 @@
         $.extend(this, options);
         
         // vertical line 1
-        this.p1 = new $.jqplot.PluginPoint(); // creates PluginPoint that corresponds to vertical line
+        this.p1 = new $.jqplot.PluginPoint(); // creates first PluginPoint that corresponds to vertical line 1
         this.p1.initialize(this, this.x01, 0);
-        this.p1.color1 = this.color1;
-        this.p1.color2 = this.color2;
+        this.p1.color1 = this.color1; // color when not clicked
+        this.p1.color2 = this.color2; // color when clicked
         this.vline1 = new $.jqplot.VerticalLine();
         this.vline1.initialize(this, this.p1, this.width1);
-        this.vline1.color1 = this.color1;
-        this.vline1.color2 = this.color2;
-        this.grobs.push(this.vline1);
+        this.vline1.color1 = this.color1; // color when not clicked
+        this.vline1.color2 = this.color2; // color when clicked
+        this.grobs.push(this.vline1); // adds PluginPoint and its corresponding vertical line to list of interactors on graph
         this.grobs.push(this.p1);
-        function render_centeredy(ctx) { // renders PluginPoint
+        function render_centeredy(ctx) { // makes PluginPoint visible
             var height = ctx.canvas.height;
             var width = ctx.canvas.width;
             ctx.fillStyle = this.color;
@@ -62,24 +62,24 @@
         }
         this.p1.render = render_centeredy
         
-        this.p1.move = function(dpos) { // function called when PluginPoint is clicked and dragged
+        this.p1.move = function(dpos) { // function called when first PluginPoint is clicked and dragged
             this.translateBy(dpos);
             this.parent.redraw();
         }
          
         // vertical line 2
-        this.p2 = new $.jqplot.PluginPoint();
+        this.p2 = new $.jqplot.PluginPoint(); // creates second PluginPoint that corresponds to vertical line 2
         this.p2.initialize(this, this.x02, 0);
-        this.p2.color1 = this.color1;
-        this.p2.color2 = this.color2;
+        this.p2.color1 = this.color1; // color when not clicked
+        this.p2.color2 = this.color2; // color when clicked
         this.vline2 = new $.jqplot.VerticalLine();
         this.vline2.initialize(this, this.p2, this.width2);
-        this.vline2.color1 = this.color1;
-        this.vline2.color2 = this.color2;
-        this.grobs.push(this.vline2);
+        this.vline2.color1 = this.color1; // color when not clicked
+        this.vline2.color2 = this.color2; // color when clicked
+        this.grobs.push(this.vline2); // adds PluginPoint and its corresponding vertical line to list of interactors on graph
         this.grobs.push(this.p2);
-        this.p2.render = render_centeredy
-        this.p2.move = function(dpos) {
+        this.p2.render = render_centeredy // makes PluginPoint visible ('render_centeredy' defined above)
+        this.p2.move = function(dpos) { // function called when second PluginPoint is clicked and dragged
             //this.dpos.y = 0;
             this.translateBy(dpos);
             this.parent.redraw();
@@ -113,7 +113,7 @@
             ctx.globalAlpha = 0.6;
         }
         
-        this.grobs.push(this.rect);
+        this.grobs.push(this.rect); // adds rectangle to list of interactors on graph
         
     }           
 })(jQuery);
