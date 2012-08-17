@@ -23,7 +23,7 @@ from django.contrib.auth.models import User
 from models import * #add models by name
 
 
-#from ...apps.fileview import testftp
+from ...apps.fileview import testftp
 
 from ...dataflow import wireit
 from ...dataflow.core import lookup_module, lookup_datatype
@@ -78,6 +78,9 @@ def showInteractors(request):
 
 def showPlotWindow(request):
     return render_to_response('plotwindow.html')
+
+def showFTPloader(request):
+    return render_to_response('FTPloader.html')
 
 def showSliceWindow(request):
     return render_to_response('slicewindow.html')
@@ -323,8 +326,16 @@ store = [{
             #"children":[{}],
         }]
     }]
-def getNCNRdirectories(request):
-    return HttpResponse(simplejson.dumps(testftp.runMe()))  #testftp.runMe()
+
+def getFTPdirectories(request):
+    if request.GET.has_key('address'):
+        address = request.GET['address']
+        if request.GET.has_key('directory'):
+            directory = request.GET['directory']
+        else:
+            directory = '/'
+        return HttpResponse(simplejson.dumps(testftp.runFTP(address, directory)))
+
 
 def displayFileLoad(request):
     return render_to_response('FileUpload/FileTreeTest.html', locals())
@@ -753,7 +764,16 @@ def uploadFiles(request):
 
     return HttpResponse('OK')
 
-"""    
+"""
+def uploadFTPFiles(request):
+    if request.GET.has_key('filepaths'):
+        myrequest = {'FILES': {'FTP_FILES': testftp.getFiles(request.GET['filepaths'])} }
+        myrequest['POST'] = {'experiment_id': request.POST['experiment_id']}
+        myrequest['POST']['instrument_class'] = request.POST['instrument_class']
+        myrequest['POST']['loader_id'] = request.POST['loader_id']
+        uploadFiles(myrequest)
+        
+
 def uploadFiles(request):
     location = FILES_DIR
     if request.POST.has_key(u'experiment_id'):
@@ -777,7 +797,10 @@ def uploadFiles(request):
             tmp_file, tmp_path = tempfile.mkstemp()
             open(tmp_path, 'wb').write(file_contents)
             file_descriptors.append({'filename': tmp_path, 'friendly_name': f.name})
+    elif request.FILES.has_key('FTP_FILES'):
+        file_descriptors = request.FILES['FTP_FILES']
         
+    if file_descriptors: #only has file_descriptors if it has 'FILES' or 'FTP_FILES'
         print file_descriptors
         instrument_class = request.POST[u'instrument_class']    
         loader_id = request.POST[u'loader_id']

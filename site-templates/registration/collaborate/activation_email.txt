@@ -1,0 +1,4 @@
+{% load i18n %}
+{{ user }}{% trans " would like to share a Dataflow project with you. Click the link below to access the project:" %} 
+
+http://{{ site.domain }}{% url dataflow.apps.tracks.views.add_collaborator email_activation_key=email_activation_key %}

@@ -45,10 +45,13 @@ urlpatterns = patterns(REPO_ROOT + '.apps.tracks.views',
     ('^editor/uploadFiles/$', 'uploadFiles'),
     ('^editor/getCSV/$', 'getCSV'),
 
+    # FTP side loader
+    ('^FTPloader/$', 'showFTPloader'),
+    ('^loadFiles/getFTPdirs/', 'getFTPdirectories'),
+    ('^uploadFTPFiles/$', 'uploadFTPFiles'),
 
     # File loader display urls (testing, 7/6)
     ('^loadFiles/$', 'displayFileLoad'),
-    ('^loadFiles/getNCNRdirs/', 'getNCNRdirectories'),
     ('^saveUpdate/$', 'return_files_metadata'),
 
     # user projects/experiments/instruments/files interactions
