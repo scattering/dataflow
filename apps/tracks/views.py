@@ -691,97 +691,33 @@ def filesExist(request):
     return HttpResponse(simplejson.dumps(existences))
 
 
-"""
-def uploadFiles(request):
-    # TODO: In the process of storing instrument objects instead of raw files
-    # TODO: THIS WHOLE METHOD WILL NEED TO BE REDONE    
-    location = FILES_DIR
-    if request.POST.has_key(u'experiment_id'):
-        experiment_id = request.POST[u'experiment_id']
-        experiment = Experiment.objects.get(id=experiment_id)
-    else:
-        experiment = None
-
-    if request.FILES.has_key('FILES'):
-        file_data = request.FILES.getlist('FILES')
-        aofchalkfiles = []
-        acfchalkfiles = []
-        for f in file_data:
-            #due to the strange nature of chalk river files, those are handled separately
-            #appends all chalkriver files
-            fileExt = os.path.splitext(f.name)[1].lower()
-            if fileExt == '.aof':
-                aofchalkfiles.append(f)
-                continue
-            if fileExt == '.acf':
-                acfchalkfiles.append(f)
-                continue
-                
-            file_data = f.read()
-            file_sha1 = hashlib.sha1(file_data)
-
-            write_here = os.path.join(location,file_sha1.hexdigest())
-            open(write_here, 'w').write(file_data)
-
-            new_files = File.objects.filter(name=file_sha1.hexdigest())
-            
-            if len(new_files) > 0:
-                new_file = new_files[0]
-            else:
-                new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location, template_representation="", datatype="")
-                
-            # extract's the instrument's metadata to put into the File model
-            data_object = call_appropriate_filereader(write_here, friendly_name=f.name, fileExt=fileExt)
-            add_metadata_to_file(new_file, file_sha1, data_object)
-            
-            if experiment is not None:
-                experiment.Files.add(new_file)
-        '''
-        for aoffile in aofchalkfiles:
-            
-            #NOTE: to link a .acf and .aof file, their names have to be EXACTLY the same (case sensitive)
-            #NOTE: .acf files loaded without a corresponding .aof file are not read nor used.
-            acf_filename = None
-            aofname = os.path.splitext(aoffile.name)[0]
-            for acffile in acfchalkfiles:
-                acfname = os.path.splitext(acffile.name)[0]
-                if acfname === aofname:
-                    acfchalkfiles.remove(acffile)
-                    acf_filename = acffile
-                    break      
-                   
-            file_data = aoffile.read()
-            file_sha1 = hashlib.sha1(file_data)
-    
-            write_here = os.path.join(location,file_sha1.hexdigest())
-            open(write_here, 'w').write(file_data)
-            
-            instruments = chalk_filereader(write_here, acf_filename=acf_filename)
-            
-            # TODO: INCOMPLETE CHALK RIVER LOADING
-
-        '''
-
-    return HttpResponse('OK')
-
-"""
 def uploadFTPFiles(request):
-    if request.GET.has_key('filepaths'):
-        myrequest = {'FILES': {'FTP_FILES': testftp.getFiles(request.GET['filepaths'])} }
-        myrequest['POST'] = {'experiment_id': request.POST['experiment_id']}
-        myrequest['POST']['instrument_class'] = request.POST['instrument_class']
-        myrequest['POST']['loader_id'] = request.POST['loader_id']
-        uploadFiles(myrequest)
+    """
+    Given an FTP ``address``, ``experiment_id``, ``instrument_class``, ``loader_id``,
+    and paths to the files to get (``filepaths``), the files will be retrieved from
+    the ``address`` via FTP and uploaded.
+    """
+    if request.POST.has_key('address') and request.POST.has_key('experiment_id') and \
+       request.POST.has_key('instrument_class') and request.POST.has_key('loader_id') and \
+       request.POST.has_key('filepaths'):
+        filepaths = simplejson.loads(request.POST['filepaths']) #given as a string of a list
+        
+        file_descriptors = testftp.getFiles(request.POST['address'], filepaths)
+        experiment_id = request.POST['experiment_id']
+        instrument_class = request.POST['instrument_class']
+        loader_id = request.POST['loader_id']
+        uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id) #upload the files
+    return HttpResponse('OK')
         
 
 def uploadFiles(request):
-    location = FILES_DIR
-    if request.POST.has_key(u'experiment_id'):
-        experiment_id = request.POST[u'experiment_id']
-        experiment = Experiment.objects.get(id=experiment_id)
-    else:
-        experiment = None
-
+    """
+    Uploads files to Dataflow. To upload files, ``request`` must have:
+        request.POST.FILES.FILES
+        request.POST.instrument_class
+        request.POST.experiment_id
+        request.POST.loader_id
+    """
     if request.FILES.has_key('FILES'):
         #instrument_class = request.POST[u'instrument_class']
         #instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX }
@@ -797,30 +733,48 @@ def uploadFiles(request):
             tmp_file, tmp_path = tempfile.mkstemp()
             open(tmp_path, 'wb').write(file_contents)
             file_descriptors.append({'filename': tmp_path, 'friendly_name': f.name})
-    elif request.FILES.has_key('FTP_FILES'):
-        file_descriptors = request.FILES['FTP_FILES']
         
     if file_descriptors: #only has file_descriptors if it has 'FILES' or 'FTP_FILES'
-        print file_descriptors
         instrument_class = request.POST[u'instrument_class']    
         loader_id = request.POST[u'loader_id']
-        loader_function = None
-        datatype_id = None
-        for dt in instrument_class_by_language[instrument_class].datatypes:
-            for l in dt.loaders:
-                if l['id'] == loader_id:
-                    loader_function = l['function']
-                    datatype_id = dt.id
-                    break
-        dataObjects = loader_function(file_descriptors)
-        for fd in file_descriptors:
-            os.remove(fd['filename'])
+        experiment_id = request.POST[u'experiment_id']
+        uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
 
-        for dobj in dataObjects:
-            # you'll want your data objects to take friendly_name as an argument (required above)
-            # and pass it to an attribute called "friendly_name"
-            # This allows for files that have many subsets of data in them to generate 
-            # their own "friendly_name" for each dataset, in the manner of your choosing.
+    return HttpResponse('OK') 
+
+def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id):
+    """
+    Uploads the files (as specified by ``file_descriptors``) to Dataflow. Additional
+    parameters required as well. uploadFiles was extracted into this auxiliary method to
+    allow uploading manually (such as used by uploadFTPFiles), not just via WSGIRequest.
+    
+    Returns: nothing
+    """    
+    try:
+        experiment = Experiment.objects.get(id=experiment_id)
+    except:
+        experiment = None #in the event the id does not match an experiment
+    location = FILES_DIR
+    loader_function = None
+    datatype_id = None
+    for dt in instrument_class_by_language[instrument_class].datatypes:
+        for l in dt.loaders:
+            if l['id'] == loader_id:
+                loader_function = l['function']
+                datatype_id = dt.id
+                break
+    dataObjects = loader_function(file_descriptors)
+    for fd in file_descriptors:
+        os.remove(fd['filename'])
+
+    for dobj in dataObjects:
+        # you'll want your data objects to take friendly_name as an argument (required above)
+        # and pass it to an attribute called "friendly_name"
+        # This allows for files that have many subsets of data in them to generate 
+        # their own "friendly_name" for each dataset, in the manner of your choosing.
+        if dobj:
+            #If the file uploaded was not uploadable with the selected loader, dobj=None
+            #TODO: need to send an error to the user and notify them that the file was no good
             friendly_name = dobj.friendly_name if hasattr(dobj, 'friendly_name') else "data"
             serialized = dobj.dumps()
             s_sha1 = hashlib.sha1(serialized)
@@ -832,7 +786,7 @@ def uploadFiles(request):
             string = StringIO.StringIO()
             string.write(serialized)
             string.seek(0)
-
+    
             file_path = os.path.join(FILES_DIR, filename)
             tar = tarfile.open(file_path,"w:gz")
             info = tarfile.TarInfo(name=friendly_name)
@@ -852,10 +806,7 @@ def uploadFiles(request):
                 
             if experiment is not None:
                 #print "experiment id: ", request.POST[u'experiment_id']
-                experiment.Files.add(new_file)
-
-    return HttpResponse('OK') 
-
+                experiment.Files.add(new_file)                   
 
 @transaction.commit_on_success
 def add_metadata_to_file(new_file, instrument):

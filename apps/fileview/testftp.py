@@ -3,6 +3,7 @@ from FTPfileclass import FTPfile
 from django.utils import simplejson
 import sys
 import ast
+import tempfile
 
 
 ##need to think about how to do this recursion (probably first create some sort of 
@@ -86,11 +87,16 @@ def toJson(file_object, isexpanded=False):
             toJson(i) # does not expand children directories.
         finalString += ']},'
 
-def getFiles(filepaths):
+def getFiles(address, filepaths):
     """
     Fetches a set of binary files whose paths are given by ``filepaths``.
-    TODO: TEST THIS!!!! 8/15/2012
+    Returns: a dictionary ``file_descriptors`` where each element has:
+             'filename': path to file
+             'friendly_name': file's friendly name
+             NOTE: this is the current setup used to upload files. 8/17/2012
     """
+    ftp = FTP(address)
+    ftp.login()
     file_descriptors = []
     for filepath in filepaths:
         tmp_file, tmp_path = tempfile.mkstemp()
@@ -102,42 +108,9 @@ def getFiles(filepaths):
         else:
             fname = dirs[-2]
         file_descriptors.append({'filename': tmp_path, 'friendly_name': fname})
+    ftp.quit()
     return file_descriptors
 
-
-
-def runMe():
-    global finalString;
-    global ftp;
-    
-    finalString = '['
-    ftp=FTP('ftp.ncnr.nist.gov')
-    ftp.login()
-    ftp.cwd('pub')
-    
-    root = FTPfile(id_counter,ftp.pwd(),[],False)
-    children = getChildren(root.path)
-
-    ftp.quit()
-
-    if children:
-        root.setChildren(children)
-    else:
-        root.isLeaf() #isLeaf sets to leaf
-    #print root
-    #for i in root.children:
-    #	print i.id, i
-    #print root.children
-    #print ftp.nlst()
-    #setupTree(root)
-    toJson(root)
-    finalString += ']'
-    #write=open('ftpDir.txt','w')
-    #write.write(finalString)
-    #write.close()
-    #print finalString
-    #return finalString
-    return ast.literal_eval(finalString)
 
 
 def runFTP(address, directory):
@@ -186,6 +159,40 @@ def runFullRecursionFTP(address):
     ftp.quit()
     toJson(root)
     finalString += ']'
+    return ast.literal_eval(finalString)
+
+#Old method; Not being used currently 8/17/2012
+def runMe():
+    global finalString;
+    global ftp;
+    
+    finalString = '['
+    ftp=FTP('ftp.ncnr.nist.gov')
+    ftp.login()
+    ftp.cwd('pub')
+    
+    root = FTPfile(id_counter,ftp.pwd(),[],False)
+    children = getChildren(root.path)
+
+    ftp.quit()
+
+    if children:
+        root.setChildren(children)
+    else:
+        root.isLeaf() #isLeaf sets to leaf
+    #print root
+    #for i in root.children:
+    #	print i.id, i
+    #print root.children
+    #print ftp.nlst()
+    #setupTree(root)
+    toJson(root)
+    finalString += ']'
+    #write=open('ftpDir.txt','w')
+    #write.write(finalString)
+    #write.close()
+    #print finalString
+    #return finalString
     return ast.literal_eval(finalString)
 
 
