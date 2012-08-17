@@ -1,0 +1,30 @@
+DATAFLOW MANUAL
+===============
+
+Instrument: TripleAxis
+
+Main Menu: 
+- Login: If you have an account, supply your username and password to login. Otherwise, register for an account. If already logged in, you may select 'My Projects' to bypass login.
+
+
+- My Projects: Redirected to this page if login is successful. Project management is handled at this page.
+-- To create a new project, type your desired project name into the textbox and click the adjacent 'Create Project' button. 
+-- To delete a project, click its respective 'Delete Project' button.
+-- To select a project, click its name in the list - it will link to its Edit Project page.
+
+
+- Edit Project: Within your project, you may create multiple experiments
+-- To create a new experiment, select a Facility, Instrument class, and Instrument name and type in a name for the experiment under 'New experiment', then click the 'Create experiment'
+-- To delete an experiment, click its respective 'Delete experiment' button.
+-- To select an experiment, click its name on the list - it will link to its Edit Experiment page.
+
+
+- Edit Experiment: Within your experiment, you may select any saved templates or use the default one.
+-- To upload files, choose a loader (choices provided based on choice of instrument class) and click 'Choose Files' and select the files to upload.
+-- To remove files, check the files to be removed and click 'Remove checked files'.
+
+
+- Experiment Editor: 
+-- Module Panel: Drag modules from the module panel on left onto the work canvas in the middle.
+---- 
+
