@@ -68,11 +68,12 @@ class line_interp:
         y=yt[:,zorigt>=0.0]
         z=zorigt[:,zorigt>=0.0]
         cens,edg,tri,neig = D.delaunay(x,y)
-        
-        for t in tri:
-            # t[0], t[1], t[2] are the points indexes of the triangle
-            t_i = [t[0], t[1], t[2], t[0]]
-            pylab.plot(x[t_i],y[t_i])
+        if 0:
+            #plot triangulation
+            for t in tri:
+                # t[0], t[1], t[2] are the points indexes of the triangle
+                t_i = [t[0], t[1], t[2], t[0]]
+                pylab.plot(x[t_i],y[t_i])
         
         #pylab.plot(x,y,'o')
         #pylab.show()        
