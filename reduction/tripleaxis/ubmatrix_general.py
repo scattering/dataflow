@@ -33,7 +33,7 @@ from openopt import SNLE
 th->sample theta
 tth->sample two theta
 
-""""
+"""
 
 def rtan(y,x):
     if x == 0. and y == 0.:
@@ -247,7 +247,18 @@ def make_orthonormal(o1, o2):
     o3 = np.cross(o1, o2)
     o3 = o3 / np.linalg.norm(o3)
     o2 = np.cross(o3, o1)
-    return o1, o2, o3
+    return o1, o2, o3 
+
+def find_second_orientation(o1,o2,a3, scattering_sense_omega=1):
+    """Given two vectors which define a scattering plane, use the a3 position of the second vector to determine a3 for the second vector.  The defaults scattering sense is 
+    for a tilt stage using a right handed coordinate system
+    """
+    o1p,o2p,o3p=make_orthonormal(o1,o2)
+    o2p=np.linalg.norm(o1)*o2p  #This makes o2 the same magnitude as o1
+    a3p=a3+90.0*scattering_sense_omega #given that o2p is the same magnitude as o1 and both are in the same scattering plane, then they only can differ by 90 degrees.  I hope I have the sign correct...
+    return o2p, a3p
+
+
 
 def calc_plane(p, h, k, l, normalize=True):
     o1 = np.array([p[0], p[1], p[2]])

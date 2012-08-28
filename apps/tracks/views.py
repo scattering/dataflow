@@ -784,8 +784,12 @@ def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
                 datatype_id = dt.id
                 break
     dataObjects = loader_function(file_descriptors)
-    for fd in file_descriptors:
-        os.remove(fd['filename'])
+    try:
+        for fd in file_descriptors:
+            os.remove(fd['filename'])
+    except WindowsError:
+        print 'windows ack!'
+        #os.remove issues
 
     for dobj in dataObjects:
         # you'll want your data objects to take friendly_name as an argument (required above)
