@@ -992,7 +992,53 @@ class TripleAxis(object):
         #self.yaxis = ''
         return simplejson.dumps(plottable_data)
     
+    def get_csv(self):
+        if len(self.shape) == 3:
+            num_cols = self.shape[2]
+            new_array = empty((self.shape[0] * self.shape[1], num_cols + 2))
+            new_array[:,0] = (self._info[0]['values'][:,newaxis] * ones((self.shape[0], self.shape[1]))).ravel()
+            new_array[:,1] = (self._info[1]['values'][newaxis,:] * ones((self.shape[0], self.shape[1]))).ravel()
+            data_names = []
+            data_names.append(self._info[0]['name']) # xlabel
+            data_names.append(self._info[1]['name']) # ylabel
+            
+            for i in range(num_cols):
+                new_array[:,i+2] = self[:,:,i].view(ndarray).ravel()
+                data_names.append(self._info[2]['cols'][i]['name'])
+            
+            outstr = StringIO()
+            outstr.write('#' + '\t'.join(data_names) + '\n')
+            savetxt(outstr, new_array, delimiter='\t', newline='\n')
+            
+            outstr.seek(0)
+            return_val = outstr.read()
+            outstr.close()
+            
+            return return_val
     
+        elif len(self.shape) == 2:
+            num_cols = self.shape[1]
+            new_array = empty((self.shape[0], num_cols + 1))
+            new_array[:,0] = (self._info[0]['values'])
+            data_names = []
+            data_names.append(self._info[0]['name']) # xlabel
+            
+            for i in range(num_cols):
+                new_array[:,i+1] = self[:,i].view(ndarray)
+                data_names.append(self._info[1]['cols'][i]['name'])
+            
+            outstr = StringIO()
+            outstr.write('#' + '\t'.join(data_names) + '\n')
+            savetxt(outstr, new_array, delimiter='\t')
+            
+            outstr.seek(0)
+            return_val = outstr.read()
+            outstr.close()
+            return return_val
+            
+        else:
+            print "can only handle 1d or 2d data"
+            return    
     
     
     def get_field_names(self):
