@@ -57,19 +57,20 @@ def build_problem(mydirectory,myfilebase,myend):
             peak.yc.range(-0.55,-0.4)
     else:
         # Peak centers lie on a line
-        theta=Parameter(45, name="theta")
-        theta.range(0,90)
-        peak1.xc.range(0.45,0.55)
-        peak1.yc.range(0.45,0.55)
+        alpha=Parameter(45.0, name="alpha")
+        alpha.range(0.,90.)
+        peak1.xc.range(0.45,0.50)
+        peak1.yc.range(0.48,0.50)
+        #peak1.yc.range(-0.55,-0.4)
         for i,peak in enumerate(M.parts[1:-1]):
             delta=Parameter(.0045, name="delta-%d"%(i+1))
             delta.range(0.0,0.015)
-            peak.xc = peak1.xc + delta*pmath.cosd(theta)
-            peak.yc = peak1.yc + delta*pmath.sind(theta)
+            peak.xc = peak1.xc + delta*pmath.cosd(alpha)
+            peak.yc = peak1.yc + delta*pmath.sind(alpha)
 
         # Initial values
         cx, cy = 0.4996-0.4957, -0.4849+0.4917
-        theta.value = np.degrees(np.arctan2(cy,cx))
+        alpha.value = np.degrees(np.arctan2(cy,cx))
         delta.value = np.sqrt(cx**2+cy**2)
         peak1.xc.value,peak1.yc.value = 0.4957,-0.4917
 
@@ -85,12 +86,12 @@ def build_problem(mydirectory,myfilebase,myend):
 
     # Peak intensity varies
     for peak in M.parts[:-1]:
-        peak.A.range(0.15*signal,1.1*signal)
+        peak.A.range(0.10*signal,1.1*signal)
 
     # Peak shape is the same across all peaks
-    peak1.s1.range(0.002,0.02)
-    peak1.s2.range(0.002,0.02)
-    peak1.theta.range(-90, -0)
+    peak1.s1.range(0.002,0.004)
+    peak1.s2.range(0.002,0.004)
+    peak1.theta.range(0, 90)
     for peak in M.parts[1:-1]:
         peak.s1 = peak1.s1
         peak.s2 = peak1.s2
@@ -98,7 +99,7 @@ def build_problem(mydirectory,myfilebase,myend):
 
     if 1:
         print "shape",peak1.s1.value,peak1.s2.value,peak1.theta.value
-        print "centers theta,delta",theta.value,delta.value
+        print "centers alpha,delta",alpha.value,delta.value
         print "centers",(peak1.xc.value,peak1.yc.value),\
             (M.parts[1].xc.value,M.parts[1].yc.value)
     return FitProblem(M)
@@ -113,7 +114,7 @@ if 1:
     mydirectory=r'D:\BiFeO3film\Mar27_2011'
     myend='bt9'
     problem=build_problem(mydirectory,'meshm',myend)
-    fitdriver = FitDriver(DreamFit, problem=problem, burn=1000)
+    fitdriver = FitDriver(DreamFit, problem=problem, burn=3000)
     #mapper = MPMapper
     #fitdriver.mapper = mapper.start_mapper(problem, ())    
     
