@@ -16,16 +16,23 @@ def plot(X,Y,theory,data,err):
     #print "delta",(data-theory)[1:6,1:6]
     resid = (data-theory)/(err+1)
     if len(data.shape) == 1:
-        xmesh, ymesh, data_mesh = rebin2.rebin_2D(X, Y, data, num_bins=20)
-        xmesh, ymesh, theory_mesh = rebin2.rebin_2D(X, Y, theory, num_bins=20)
-        xmesh, ymesh, resid_mesh = rebin2.rebin_2D(X, Y, resid, num_bins=20)
+        #print "rebinning"
+        bins=20
+        xmesh, ymesh, data_mesh = rebin2.rebin_2D(X, Y, data, num_bins=bins)
+        xmesh, ymesh, theory_mesh = rebin2.rebin_2D(X, Y, theory, num_bins=bins)
+        xmesh, ymesh, resid_mesh = rebin2.rebin_2D(X, Y, resid, num_bins=bins)
+        resid1d = resid
         X, Y, theory, data, resid = xmesh, ymesh, theory_mesh, data_mesh, resid_mesh
     pylab.subplot(131)
-    pylab.pcolormesh(X,Y, data)
+    vmin = 0
+    vmax = np.max(data)*1.1
+    pylab.pcolormesh(X,Y, data, vmin=vmin, vmax=vmax)
     pylab.subplot(132)
-    pylab.pcolormesh(X,Y, theory)
+    pylab.pcolormesh(X,Y, theory, vmin=vmin, vmax=vmax)
     pylab.subplot(133)
-    pylab.pcolormesh(X,Y, resid)
+    vmax = np.max(np.abs(resid))
+    pylab.pcolormesh(X,Y, resid, vmin=-vmax, vmax=vmax)
+    pylab.colorbar()
 
 class Gaussian(object):
     def __init__(self, A=1, xc=0, yc=0, s1=1, s2=1, theta=0, name=""):
@@ -58,9 +65,9 @@ class Gaussian(object):
         #normalization=1.0/(2*np.pi*s1*s2)
         #print "norm",np.sum(Zf)*normalization
         total = np.sum(Zf)
-        if np.isnan(total) or total==0:
-            print "G(A,s1,s2,t,xc,yc) ->",total,(height,s1,s2,t,xc,yc)
-            print "a,b,c",a,b,c
+        #if np.isnan(total) or total==0:
+            #print "G(A,s1,s2,t,xc,yc) ->",total,(height,s1,s2,t,xc,yc)
+            #print "a,b,c",a,b,c
         return Zf/total*abs(height) if total>0 else np.zeros_like(x)
 
 class Background(object):

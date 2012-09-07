@@ -1,3 +1,4 @@
+import sys
 import re
 import numpy as np
 import readncnr5 
@@ -5,7 +6,7 @@ import scriptutil as SU
 import bumps
 from bumps.fitters import FIT_OPTIONS, FitDriver, DreamFit, StepMonitor, ConsoleMonitor
 import bumps.modelfn, bumps.fitproblem
-from peaks import Peaks, Gaussian, Background
+from Ppeaks import Peaks, Gaussian, Background, Data
 from bumps.names import Parameter, FitProblem
 from bumps import pmath
 
@@ -16,42 +17,43 @@ def read_data(mydirectory,myfilebase,myend):
     flist = SU.ffind(mydirectory, shellglobs=(myfilebaseglob,))
     #SU.printr(flist)
     mydatareader=readncnr5.datareader()
-    Qx=[]
-    Qy=[]
-    Qz=[]
-    Counts=[]
-    Errs=[]
-    mon0=240000.0
+    datasets = []
     for currfile in sorted(flist):
+        print currfile
         mydata=mydatareader.readbuffer(currfile)
         mon=mydata.metadata['monitor']*mydata.metadata['monitor_prefactor']
-        H,K,L,I = [np.array(mydata.data[s]) for s in 'h','k','l','counts']
-        idx = I >= 1
-        print currfile
-        print "exclude index", np.nonzero(~idx)[0], "counts",I[~idx],"monitors",mon
-        Qx.append(H[idx])
-        Qy.append(K[idx])
-        Qz.append(L[idx])
-        Counts.append(I[idx]*mon0/mon)
-        Errs.append(np.sqrt(I[idx])*mon0/mon)
+        H,K,L = [np.array(mydata.data[s]) for s in 'h','k','l']
+        I = np.array(mydata.data['counts'],'int32')
+        datasets.append( (H,K,I,np.ones_like(I)*mon) )
 
-    return [np.concatenate(V) for V in Qx,Qy,Counts,Errs]
+    return Data(*[np.concatenate(V) for V in zip(*datasets)])
 
-def build_problem(mydirectory,myfilebase,myend):
+def build_problem(mydirectory,myfilebase,myend,cost="poisson"):
 
+    monitor_efficiency = 0.1
+    resolution = 0.001
+    scale = resolution**2/monitor_efficiency
+    scale = 1e-6
     M = Peaks([Gaussian(name="G1-"),
                Gaussian(name="G2-"),
                #Gaussian(name="G3-"),
                #Gaussian(name="G4-"),
                Background()],
-               *read_data(mydirectory,myfilebase,myend))
-    background = np.min(M.data)
-    background += np.sqrt(background)
-    signal = np.sum(M.data) - M.data.size*background
-    M.parts[-1].C.value = background
-    M.parts[-1].C.range(0,200)
-    peak1 = M.parts[0]
+               scale,
+               data=read_data(mydirectory,myfilebase,myend),
+               #cost='poisson',
+               cost=cost,
+               )
 
+    # Peak intensity and background
+    background = 1
+    M.parts[-1].C.value = background
+    M.parts[-1].C.range(0,1000)
+    for peak in M.parts[:-1]:
+        peak.A.value = 1./(len(M.parts)-1)  # Equal size peaks
+        peak.A.range(0,1)
+
+    peak1 = M.parts[0]
     if 0:
         # Peak centers are independent
         for peak in M.parts[:-1]:
@@ -74,11 +76,9 @@ def build_problem(mydirectory,myfilebase,myend):
         cx, cy = 0.4996-0.4957, -0.4849+0.4917
         alpha.value = np.degrees(np.arctan2(cy,cx))
         delta.value = np.sqrt(cx**2+cy**2)
-        peak1.xc.value,peak1.yc.value = 0.4957,-0.4917
+        peak1.xc.value,peak1.yc.value = 0.4957,0.4917
 
-    # Initial values
-    for peak in M.parts[:-1]:
-        peak.A.value = signal/(len(M.parts)-1)  # Equal size peaks
+    # Peak location and shape
     dx, dy = 0.4997-0.4903, -0.4969+0.4851
     dxm, dym = 0.4951-0.4960, -0.4941+0.4879
     peak1.s1.value = np.sqrt(dx**2+dy**2)/2.35/2
@@ -86,14 +86,11 @@ def build_problem(mydirectory,myfilebase,myend):
     peak1.theta.value = np.degrees(np.arctan2(dy,dx))
 
 
-    # Peak intensity varies
-    for peak in M.parts[:-1]:
-        peak.A.range(0.10*signal,1.1*signal)
 
     # Peak shape is the same across all peaks
     peak1.s1.range(0.001,0.010)
-    peak1.s2.range(0.001,0.004)
-    peak1.theta.range(0, 90)
+    peak1.s2.range(0.001,0.010)
+    peak1.theta.range(-90, 90)
     for peak in M.parts[1:-1]:
         peak.s1 = peak1.s1
         peak.s2 = peak1.s2
@@ -116,7 +113,16 @@ if 1:
     #mydirectory=r'D:\BiFeO3film\Mar27_2011'
     mydirectory=r'/net/charlotte/var/ftp/pub/ncnrdata/bt9/201102/ylem/BiFeO3film/Mar27_2011'
     myend='bt9'
-    problem=build_problem(mydirectory,'meshm',myend)
+    dataset = "mesh" +  (sys.argv[1] if len(sys.argv) > 1 else "g")
+    cost = sys.argv[2] if len(sys.argv) > 2 else "poisson"
+    problem=build_problem(mydirectory,dataset,myend,cost)
+    peak1 = problem.fitness.parts[0]
+    if dataset[4] in 'tu':
+        peak1.xc.value = -0.49
+        peak1.xc.range(-0.55,-0.4)
+    if dataset[4] in 't': 
+        peak1.yc.value = -0.49
+        peak1.yc.range(-0.55,-0.4)
 
 if __name__ == "__main__":
     fitdriver = FitDriver(DreamFit, problem=problem, burn=50000)
