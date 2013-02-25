@@ -747,7 +747,7 @@ class PixelsToTwotheta(Filter2D):
     def apply(self, data, pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6):
         print " inside PixelsToTwoTheta "
         new_info = data.infoCopy()
-        det_angle = new_info[0].pop('det_angle') # read and get rid of it!
+        det_angle = new_info[-1].pop('det_angle') # read and get rid of it!
         # det_angle should be a vector of the same length as the other axis (usually theta)
         # or else just a float, in which case the detector is not moving!
         ndim = len(new_info) - 2 # last two entries in info are for metadata
@@ -1247,7 +1247,7 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
     
     info = []
     if ndims == 2: # one of the dimensions has been collapsed.
-        info.append({"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x, "det_angle":file_obj.detector.angle_x })
+        info.append({"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x })
         info.append({"name": "xpixel", "units": "pixels", "values": range(xpixels) })
         info.extend([
                 {"name": "Measurements", "cols": [
@@ -1256,7 +1256,7 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
                         {"name": "monitor"},
                         {"name": "count_time"}]},
                 {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date, "friendly_name": friendly_name,
-                 "CreationStory":creation_story, "path":path}]
+                 "CreationStory":creation_story, "path":path, "det_angle":file_obj.detector.angle_x}]
             )
         data_array = zeros(dims + (4,))
         mon = file_obj.monitor.counts
@@ -1279,7 +1279,7 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
             samp_angle = file_obj.sample.angle_x[i]
             det_angle = file_obj.detector.angle_x[i]
             info = []
-            info.append({"name": "xpixel", "units": "pixels", "values": range(xpixels), "samp_angle": samp_angle, "det_angle": det_angle })
+            info.append({"name": "xpixel", "units": "pixels", "values": range(xpixels) })
             info.append({"name": "ypixel", "units": "pixels", "values": range(ypixels) })
             info.extend([
                 {"name": "Measurements", "cols": [
@@ -1288,7 +1288,7 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
                         {"name": "monitor"},
                         {"name": "count_time"}]},
                 {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date, "friendly_name": friendly_name,
-                 "CreationStory":creation_story, "path":path}]
+                 "CreationStory":creation_story, "path":path, "samp_angle": samp_angle, "det_angle": det_angle}]
             )
             data_array = zeros((xpixels, ypixels, 4))
             mon = file_obj.monitor.counts[i]
