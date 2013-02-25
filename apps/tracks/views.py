@@ -796,7 +796,7 @@ def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
         # and pass it to an attribute called "friendly_name"
         # This allows for files that have many subsets of data in them to generate 
         # their own "friendly_name" for each dataset, in the manner of your choosing.
-        if dobj:
+        if dobj is not None:
             #If the file uploaded was not uploadable with the selected loader, dobj=None
             #TODO: need to send an error to the user and notify them that the file was no good
             friendly_name = dobj.friendly_name if hasattr(dobj, 'friendly_name') else "data"

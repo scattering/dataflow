@@ -1201,9 +1201,14 @@ def LoadAsterixSpectrum(filename, friendly_name="", path=None):
     return spec
 
 def LoadICPMany(filedescriptors):
-    result = [LoadICPData(fd['filename'], friendly_name=fd['friendly_name']) for fd in filedescriptors]
-    return result
-        
+    result = []
+    for fd in filedescriptors:
+        new_data = LoadICPData(fd['filename'], friendly_name=fd['friendly_name'])
+        if type(new_data) is types.ListType:
+            result.extend(new_data)
+        else:
+            result.append(new_data)
+    return result        
 
 def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolState=''):
     """ 
@@ -1225,43 +1230,77 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
     # force PolState to a regularized version:
     if not PolState in lookup.values():
         PolState = ''
-    datalen = file_obj.detector.counts.shape[0]
-    if ndims == 2:    
+    #datalen = file_obj.detector.counts.shape[0]
+    if ndims >= 2:    
         xpixels = file_obj.detector.counts.shape[1]
+    if ndims >= 3:
+        frames = file_obj.detector.counts.shape[0]
+        ypixels = file_obj.detector.counts.shape[2]
+        
     creation_story = "LoadICPData('{fn}', path='{p}', auto_PolState={aPS}, PolState='{PS}'".format(fn=filename, p=path, aPS=auto_PolState, PS=PolState)
 
 # doesn't really matter; changing so that each keyword (whether it took the default value
 # provided or not) will be defined
 #    if not PolState == '':
 #        creation_story += ", PolState='{0}'".format(PolState)
-
-        
     creation_story += ")" 
-    info = [{"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x, "det_angle":file_obj.detector.angle_x }]
-    if ndims == 2:
+    
+    info = []
+    if ndims == 2: # one of the dimensions has been collapsed.
+        info.append({"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x, "det_angle":file_obj.detector.angle_x })
         info.append({"name": "xpixel", "units": "pixels", "values": range(xpixels) })
-    info.extend([
-            {"name": "Measurements", "cols": [
-                    {"name": "counts"},
-                    {"name": "pixels"},
-                    {"name": "monitor"},
-                    {"name": "count_time"}]},
-            {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date, "friendly_name": friendly_name,
-             "CreationStory":creation_story, "path":path}]
-        )
-    data_array = zeros(dims + (4,))
-    mon = file_obj.monitor.counts
-    count_time = file_obj.monitor.count_time
-    if ndims == 2:
-        mon.shape += (1,) # broadcast the monitor over the other dimension
-        count_time.shape += (1,)
-    data_array[..., 0] = file_obj.detector.counts
-    data_array[..., 1] = 1
-    data_array[..., 2] = mon
-    data_array[..., 3] = count_time
-    # data_array[:,:,4]... I wish!!!  Have to do by hand.
-    data = MetaArray(data_array, dtype='float', info=info)
-    data.friendly_name = friendly_name # goes away on dumps/loads... just for initial object.
+        info.extend([
+                {"name": "Measurements", "cols": [
+                        {"name": "counts"},
+                        {"name": "pixels"},
+                        {"name": "monitor"},
+                        {"name": "count_time"}]},
+                {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date, "friendly_name": friendly_name,
+                 "CreationStory":creation_story, "path":path}]
+            )
+        data_array = zeros(dims + (4,))
+        mon = file_obj.monitor.counts
+        count_time = file_obj.monitor.count_time
+        if ndims == 2:
+            mon.shape += (1,) # broadcast the monitor over the other dimension
+            count_time.shape += (1,)
+        data_array[..., 0] = file_obj.detector.counts
+        data_array[..., 1] = 1
+        data_array[..., 2] = mon
+        data_array[..., 3] = count_time
+        # data_array[:,:,4]... I wish!!!  Have to do by hand.
+        data = MetaArray(data_array, dtype='float', info=info)
+        data.friendly_name = friendly_name # goes away on dumps/loads... just for initial object.
+        
+    if ndims == 3: # then it's an unsummed collection of detector shots.  Should be one sample and detector angle per frame
+        infos = []
+        data = []
+        for i in range(frames):
+            samp_angle = file_obj.sample.angle_x[i]
+            det_angle = file_obj.detector.angle_x[i]
+            info = []
+            info.append({"name": "xpixel", "units": "pixels", "values": range(xpixels), "samp_angle": samp_angle, "det_angle": det_angle })
+            info.append({"name": "ypixel", "units": "pixels", "values": range(ypixels) })
+            info.extend([
+                {"name": "Measurements", "cols": [
+                        {"name": "counts"},
+                        {"name": "pixels"},
+                        {"name": "monitor"},
+                        {"name": "count_time"}]},
+                {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date, "friendly_name": friendly_name,
+                 "CreationStory":creation_story, "path":path}]
+            )
+            data_array = zeros((xpixels, ypixels, 4))
+            mon = file_obj.monitor.counts[i]
+            count_time = file_obj.monitor.count_time[i]
+            data_array[..., 0] = file_obj.detector.counts[i]
+            data_array[..., 1] = 1
+            data_array[..., 2] = mon
+            data_array[..., 3] = count_time
+            # data_array[:,:,4]... I wish!!!  Have to do by hand.
+            subdata = MetaArray(data_array, dtype='float', info=info)
+            subdata.friendly_name = friendly_name + ("_%d" % i) # goes away on dumps/loads... just for initial object.
+            data.append(subdata)
     return data                   
 
 class InsertTimestamps(Filter2D):
