@@ -10,9 +10,10 @@ import os
 
 def readNCNRSensitivity(inputfile):
     
-    f = open(inputfile, 'rb')
-    data = f.read()
-    f.close()
+    if hasattr(inputfile, 'read'):
+        data = inputfile.read()
+    else:
+        data = open(inputfile, 'rb').read()
     
     #skip the fake header and just read the data
     #data is 32bit VAX floats
@@ -51,18 +52,21 @@ def readNCNRSensitivity(inputfile):
     return detdata
 
 
-def readNCNRData(inputfile):
+def readNCNRData(inputfile, file_obj=None):
     
-    f = open(inputfile, 'rb')
-    data = f.read()
-    f.close()
+    metadata = {}
+    if file_obj is not None and hasattr(file_obj, 'read'):
+        data = file_obj.read()
+    else:
+        data = open(inputfile, 'rb').read()
+    
+    metadata['run.filename'] = os.path.basename(inputfile)
     
     #filename
     dat = struct.unpack('<21s',data[2:23])
     filename = dat[0].replace(' ','')
     
     #metadata
-    metadata = {'run.filename': os.path.basename(inputfile)}
     reals = {}
     
     formatstring = '<4i4s4s4s4s20s3s11s1s8s' #run

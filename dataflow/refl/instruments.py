@@ -11,12 +11,14 @@ from ..modules.save import save_module
 from .modules.footprintmodule import footprint_module
 from .modules.backgroundmodule import background_module
 from .modules.normalizemodule import normalize_module
+from .modules.normalizetimemodule import normalize_time_module
 #from dataflow.reduction.reflectometry.filters import FootprintCorrection
 from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray
 from ...reduction.offspecular.filters import LoadICPMany, LoadICPData
 from ...reduction.reflectometry.filters import FootprintCorrection
 from ...reduction.reflectometry.filters import BackgroundSubtraction
 from ...reduction.reflectometry.filters import NormalizeToMonitor
+from ...reduction.reflectometry.filters import NormalizeToTime
 
 #def join_action(input=None):
 #    print "combining", input
@@ -66,12 +68,19 @@ background = background_module(id='refl.background', datatype='refl.data1d',
 background.xtype = 'BackgroundSubtractContainer'
 
 # NormalizeToMonitor module
-def normalize_action(input=[]):
+def normalize_action(input=[], **kwargs):
     print "normalizing"
     return dict(output=NormalizeToMonitor(input))
     
 normalize = normalize_module(id='refl.normalize', datatype='refl.data1d',
                              version='1.0', action=normalize_action)
+# NormalizeToTime module
+def normalize_time_action(input=[], **kwargs):
+    print "normalizing"
+    return dict(output=NormalizeToTime(input))
+    
+normalize_time = normalize_time_module(id='refl.normalizetime', datatype='refl.data1d',
+                             version='1.0', action=normalize_time_action)
 
 # Load module
 load = load_module(id='refl.load', datatype=SPEC_DATA,
@@ -90,7 +99,7 @@ input = [load, save]
 
 
 #reduction = [join, scale, subtract, normalize, footprint, polcor]
-reduction = [footprint, background, normalize]
+reduction = [footprint, background, normalize, normalize_time]
 
 PBR = Instrument(id='ncnr.refl.pbr',
                  name='refl',

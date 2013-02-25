@@ -30,8 +30,8 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     if path == None:
         path = os.getcwd()
     file_obj = load(os.path.join(path, filename), format='NCNR NG-1')
-    if not (len(file_obj.detector.counts.shape) == 2):
-        # not a 2D object!
+    if not (len(file_obj.detector.counts.shape) == 1):
+        # not a 1D object!
         return
     if auto_PolState:
         key = filename[-2] # na1, ca1 etc. are --, nc1, cc1 are -+...
@@ -39,7 +39,7 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     # force PolState to a regularized version:
     if not PolState in lookup.values():
         PolState = ''
-    datalen, xpixels = file_obj.detector.counts.shape
+    datalen = file_obj.detector.counts.shape[0]
     creation_story = "LoadICPData('{fn}', path='{p}', auto_PolState={aPS}, PolState='{PS}'".format(fn=filename, p=path, aPS=auto_PolState, PS=PolState)
 
 # doesn't really matter; changing so that each keyword (whether it took the default value
@@ -50,7 +50,6 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
         
     creation_story += ")" 
     info = [{"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x, "det_angle":file_obj.detector.angle_x },
-            {"name": "xpixel", "units": "pixels", "values": range(xpixels) },
             {"name": "Measurements", "cols": [
                     {"name": "counts"},
                     {"name": "pixels"},
@@ -58,15 +57,15 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
                     {"name": "count_time"}]},
             {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date,
              "CreationStory":creation_story, "path":path}]
-    data_array = zeros((datalen, xpixels, 4))
+    data_array = zeros((datalen, 4))
     mon = file_obj.monitor.counts
-    mon.shape += (1,) # broadcast the monitor over the other dimension
+    #mon.shape += (1,) # broadcast the monitor over the other dimension
     count_time = file_obj.monitor.count_time
-    count_time.shape += (1,)
-    data_array[:, :, 0] = file_obj.detector.counts
-    data_array[:, :, 1] = 1
-    data_array[:, :, 2] = mon
-    data_array[:, :, 3] = count_time
+    #count_time.shape += (1,)
+    data_array[:, 0] = file_obj.detector.counts
+    data_array[:, 1] = 1
+    data_array[:, 2] = mon
+    data_array[:, 3] = count_time
     # data_array[:,:,4]... I wish!!!  Have to do by hand.
     data = MetaArray(data_array, dtype='float', info=info)
     return data
@@ -87,7 +86,8 @@ def FootprintCorrection(input, start='0', end='0', slope='0', intercept='0'):
     mask = (xaxisvalues > start) and (xaxisvalues < end)
     data[0][mask] += data[0][mask] * slope + intercept
     """
-    endpoint = data['Measurements':'counts'][data.axisValues(0) > end][0]
+    #endpoint = data['Measurements':'counts'][data.axisValues(0) > end][0]
+    endpoint = end * slope + intercept
     
     mask = logical_and((data.axisValues(0) >= start), (data.axisValues(0) <= end))
     xvalues = data.axisValues(0)[mask]
@@ -119,13 +119,32 @@ def BackgroundSubtraction(input, background='0'):
 def NormalizeToMonitor(input):
     """
     divide all the counts columns by monitor and output as normcounts, with stat. error
-    """        
-    data = MetaArray(input.view(ndarray).copy(), input.dtype, input.infoCopy())
-    counts = data['Measurements':'counts']
-    monitor = data['Measurements':'monitor']
-    data['Measurements'].append('normcounts')
-    data['Measurements':'normcounts'] = counts/monitor
-    return data
+    """ 
+    new_array = input.view(ndarray).copy()
+    new_array.resize((input.shape[0], input.shape[1] + 1))
+    new_info = input.infoCopy()
+    new_info[-2]['cols'].append({"name":"normcounts_monitor"})
     
+    counts = input['Measurements':'counts']
+    monitor = input['Measurements':'monitor']
+    new_array[:,-1] = counts/monitor
+    new_data = MetaArray(new_array, input.dtype, new_info)
+    return new_data
+    
+@autoApplyToList    
+def NormalizeToTime(input):
+    """
+    divide all the counts columns by monitor and output as normcounts, with stat. error
+    """        
+    new_array = input.view(ndarray).copy()
+    new_array.resize((input.shape[0], input.shape[1] + 1))
+    new_info = input.infoCopy()
+    new_info[-2]['cols'].append({"name":"normcounts_time"})
+    
+    counts = input['Measurements':'counts']
+    count_time = input['Measurements':'count_time']
+    new_array[:,-1] = counts/count_time
+    new_data = MetaArray(new_array, input.dtype, new_info)
+    return new_data
     
    

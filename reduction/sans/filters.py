@@ -208,10 +208,10 @@ class div(object):
     @classmethod
     def loads(cls, str): 
         return pickle.loads(str)
-def read_sample(myfilestr="MAY06001.SA3_CM_D545"):
+def read_sample(myfilestr="MAY06001.SA3_CM_D545", file_obj=None):
     """Reads in a raw SANS datafile and returns a SansData
 """
-    detdata,meta=data.readNCNRData(myfilestr) #note that it should be None for the default
+    detdata,meta=data.readNCNRData(myfilestr, file_obj=file_obj) #note that it should be None for the default
     return SansData(data = detdata, metadata = meta)
 
 def read_div(myfilestr="test.div"):
