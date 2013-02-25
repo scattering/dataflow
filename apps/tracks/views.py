@@ -16,13 +16,15 @@ from django.db import transaction
 import hashlib,os
 import types
 import tempfile
+from django.core.mail import send_mail
 
 ## models
 from django.contrib.auth.models import User 
+from django.contrib.auth import authenticate, login
 from models import * #add models by name
 
 
-#from ...apps.fileview import testftp
+from ...apps.fileview import testftp
 
 from ...dataflow import wireit
 from ...dataflow.core import lookup_module, lookup_datatype
@@ -53,6 +55,7 @@ import random
 from numpy import NaN
 from numpy import array
 import numpy as np
+import hmac
 
 from django.conf import settings
 FILES_DIR=settings.FILES_DIR
@@ -77,6 +80,9 @@ def showInteractors(request):
 def showPlotWindow(request):
     return render_to_response('plotwindow.html')
 
+def showFTPloader(request):
+    return render_to_response('FTPloader.html')
+
 def showSliceWindow(request):
     return render_to_response('slicewindow.html')
 
@@ -93,12 +99,91 @@ def return_data(request):
     dataArray=[['file name','database id','sha1','x','y','z'],[NaN,NaN,NaN,10,10,10],[NaN,NaN,NaN,-10,-10,-10],['file3','1','sh1','1,9','2,3','3,4'],['file2','1','sh2','4,5','2,3','5,5']]    
     return HttpResponse(simplejson.dumps(dataArray))
 
+def email_collaborator(request):
+    """ Sends an email to a collaborator to give them access to a project via a link"""
+    if request.POST.has_key('project_id') and \
+       request.POST.has_key('collaborator_email') and \
+       request.POST.has_key('user_id'):
+        from django.template.loader import render_to_string
+        from django.contrib.sites.models import RequestSite
+        from django.contrib.sites.models import Site        
+        
+        # getting the site
+        if Site._meta.installed:
+            site = Site.objects.get_current()
+        else:
+            site = RequestSite(request)
+        project = Project.objects.get(id=request.POST['project_id'])
+        user = User.objects.get(id=request.POST['user_id'])
+        user_name = user.get_full_name()
+        if len(user_name) < 1:
+            user_name = user.email #if the user hasn't provided a name, use their email
+            
+        ctx_dict = {'email_activation_key': request.POST['collaborator_email'] + ';' + project.activation_key, 
+                    'site': site, 
+                    'user': user_name,
+                    'project_activate': 'apps.tracks.views.add_collaborator'}
+        subject = render_to_string('registration/collaborate/activation_email_subject.txt', ctx_dict)
+        
+        # Email subject *must not* contain newlines
+        subject = ''.join(subject.splitlines())
+        
+        message = render_to_string('registration/collaborate/activation_email.txt', ctx_dict)
+        
+        #user.email_user(subject, message, settings.DEFAULT_FROM_EMAIL)
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [request.POST['collaborator_email']])
+        return HttpResponse('OK')
+        
+
+#def add_collaborator(request, email_address, activation_key):
+def add_collaborator(request, email_activation_key=None):
+    """ When a collaborator clicks the link sent by the email_collaborator function,
+        this function will be called. If they have an existing account (based on email)
+        they will be directed to the project. If not, a temporary account will be
+        created for them (with an unusable password, ie they'll be prompted to set it).
+        
+        email_activation_key: has the form 'email;activationkey' (separated by semicolon)
+    """
+    email_address, activation_key = email_activation_key.split(';')        
+    projects = Project.objects.filter(activation_key=activation_key)
+    #if there is in fact a project with this activation key:
+    if len(projects) > 0: 
+        # if the user is logged in already, the project is added to their account
+        # as opposed to adding it to the email (and maybe creating an account for the email)
+        if request.user.is_authenticated():
+            collaborators = [request.user]
+        else:
+            collaborators = User.objects.filter(email=email_address)
+            
+        if len(collaborators) > 0:
+            projects[0].users.add(collaborators[0]) #adds user to project
+            return HttpResponseRedirect('/myProjects/')
+        else:
+            random_pass=User.objects.make_random_password(10)
+            collaborator = User.objects.create(username=email_address,
+                                               first_name = '',
+                                               last_name = '',
+                                               email = email_address
+                                               )
+            collaborator.set_password(random_pass)
+            #collaborator.set_unusable_password()
+            collaborator.save()
+            projects[0].users.add(collaborator)
+            user = authenticate(username=email_address,password=random_pass)
+            login(request, user)
+            
+            #message=r'Your username is this email.address.   Please reset your password the first time you log in.  Have fun!'
+            #send_mail(r'Welcome to DrNeutron!', message, settings.DEFAULT_FROM_EMAIL, [email_address])
+            #We want redirect to http://www.drneutron.org/password/reset/confirm/yourhashhere/
+            
+            return HttpResponseRedirect('/myProjects/')
+            #return HttpResponseRedirect(profile/edit)
+    else:
+        # no project with this activation_key exists (project could have been deleted)
+        #TODO: create an error page!!!!
+        pass
 
 def calculate_segment_interactor(request):
-    #point1=(.514,.494)
-    #point2=(.492,.51)
-    #xt, yt, zorigt = readmeshfiles(mydirectory,'dmesh',myend)
-
     #try:
     point1 = (float(request.GET['x1']), float(request.GET['y1']))
     point2 = (float(request.GET['x2']), float(request.GET['y2']))
@@ -109,9 +194,8 @@ def calculate_segment_interactor(request):
     myline = linegen.line_interp(point1, point2, divisions=5)
     xout, yout, zout = myline.interp(xarr, yarr, zarr)
     line_x = myline.line_x
-    line_y = myline.line_y 
-    #pylab.plot(line_x,line_y,'red',linewidth=3.0)
-    #ax.set_ylim(ylim); ax.set_xlim(xlim)
+    line_y = myline.line_y
+    
     zout[np.isnan(zout)] = 0.
     return HttpResponse(simplejson.dumps({'line_x': line_x.tolist(), 'line_y': line_y.tolist(), 'zout': zout.tolist()}))
     #except:
@@ -254,8 +338,20 @@ store = [{
             #"children":[{}],
         }]
     }]
-def getNCNRdirectories(request):
-    return HttpResponse(simplejson.dumps(testftp.runMe()))  #testftp.runMe()
+
+def getFTPdirectories(request):
+    if request.GET.has_key('address') and request.GET.has_key('username') and request.GET.has_key('password'):
+        address = request.GET['address']
+        username = request.GET['username']
+        password = request.GET['password']
+        if request.GET.has_key('directory'):
+            directory = request.GET['directory']
+        else:
+            directory = '/'
+        return HttpResponse(simplejson.dumps(testftp.runFTP(address, directory, username=username, password=password)))
+    
+    return HttpResponse('Improper request')
+
 
 def displayFileLoad(request):
     return render_to_response('FileUpload/FileTreeTest.html', locals())
@@ -340,7 +436,7 @@ def saveWiring(request):
             return reply
     else:
         if len(Template.objects.filter(Title=new_wiring['name'])) > 0:
-            reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'this name exists, please use another'}))
+            reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'This name exists, please use another.'}))
             reply.status_code = 500
             return reply
         temp = Template.objects.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring))
@@ -611,88 +707,37 @@ def filesExist(request):
     return HttpResponse(simplejson.dumps(existences))
 
 
-"""
-def uploadFiles(request):
-    # TODO: In the process of storing instrument objects instead of raw files
-    # TODO: THIS WHOLE METHOD WILL NEED TO BE REDONE    
-    location = FILES_DIR
-    if request.POST.has_key(u'experiment_id'):
-        experiment_id = request.POST[u'experiment_id']
-        experiment = Experiment.objects.get(id=experiment_id)
-    else:
-        experiment = None
-
-    if request.FILES.has_key('FILES'):
-        file_data = request.FILES.getlist('FILES')
-        aofchalkfiles = []
-        acfchalkfiles = []
-        for f in file_data:
-            #due to the strange nature of chalk river files, those are handled separately
-            #appends all chalkriver files
-            fileExt = os.path.splitext(f.name)[1].lower()
-            if fileExt == '.aof':
-                aofchalkfiles.append(f)
-                continue
-            if fileExt == '.acf':
-                acfchalkfiles.append(f)
-                continue
-                
-            file_data = f.read()
-            file_sha1 = hashlib.sha1(file_data)
-
-            write_here = os.path.join(location,file_sha1.hexdigest())
-            open(write_here, 'w').write(file_data)
-
-            new_files = File.objects.filter(name=file_sha1.hexdigest())
-            
-            if len(new_files) > 0:
-                new_file = new_files[0]
-            else:
-                new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=location, template_representation="", datatype="")
-                
-            # extract's the instrument's metadata to put into the File model
-            data_object = call_appropriate_filereader(write_here, friendly_name=f.name, fileExt=fileExt)
-            add_metadata_to_file(new_file, file_sha1, data_object)
-            
-            if experiment is not None:
-                experiment.Files.add(new_file)
-        '''
-        for aoffile in aofchalkfiles:
-            
-            #NOTE: to link a .acf and .aof file, their names have to be EXACTLY the same (case sensitive)
-            #NOTE: .acf files loaded without a corresponding .aof file are not read nor used.
-            acf_filename = None
-            aofname = os.path.splitext(aoffile.name)[0]
-            for acffile in acfchalkfiles:
-                acfname = os.path.splitext(acffile.name)[0]
-                if acfname === aofname:
-                    acfchalkfiles.remove(acffile)
-                    acf_filename = acffile
-                    break      
-                   
-            file_data = aoffile.read()
-            file_sha1 = hashlib.sha1(file_data)
+def uploadFTPFiles(request):
+    """
+    Given an FTP ``address``, ``experiment_id``, ``instrument_class``, ``loader_id``,
+    and paths to the files to get (``filepaths``), the files will be retrieved from
+    the ``address`` via FTP and uploaded.
+    """
+    if request.POST.has_key('address') and request.POST.has_key('username') and \
+       request.POST.has_key('password') and request.POST.has_key('experiment_id') and \
+       request.POST.has_key('instrument_class') and request.POST.has_key('loader_id') and \
+       request.POST.has_key('filepaths'):
+        filepaths = simplejson.loads(request.POST['filepaths']) #given as a string of a list
+        username = request.POST['username']
+        password = request.POST['password']
+        
+        file_descriptors = testftp.getFiles(request.POST['address'], filepaths, username=username, password=password)
+        experiment_id = request.POST['experiment_id']
+        instrument_class = request.POST['instrument_class']
+        loader_id = request.POST['loader_id']
+        uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id) #upload the files
     
-            write_here = os.path.join(location,file_sha1.hexdigest())
-            open(write_here, 'w').write(file_data)
-            
-            instruments = chalk_filereader(write_here, acf_filename=acf_filename)
-            
-            # TODO: INCOMPLETE CHALK RIVER LOADING
-
-        '''
-
     return HttpResponse('OK')
+        
 
-"""    
 def uploadFiles(request):
-    location = FILES_DIR
-    if request.POST.has_key(u'experiment_id'):
-        experiment_id = request.POST[u'experiment_id']
-        experiment = Experiment.objects.get(id=experiment_id)
-    else:
-        experiment = None
-
+    """
+    Uploads files to Dataflow. To upload files, ``request`` must have:
+        request.POST.FILES.FILES
+        request.POST.instrument_class
+        request.POST.experiment_id
+        request.POST.loader_id
+    """
     if request.FILES.has_key('FILES'):
         #instrument_class = request.POST[u'instrument_class']
         #instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX }
@@ -709,26 +754,51 @@ def uploadFiles(request):
             open(tmp_path, 'wb').write(file_contents)
             file_descriptors.append({'filename': tmp_path, 'friendly_name': f.name})
         
-        print file_descriptors
+    if file_descriptors: #only has file_descriptors if it has 'FILES' or 'FTP_FILES'
         instrument_class = request.POST[u'instrument_class']    
         loader_id = request.POST[u'loader_id']
-        loader_function = None
-        datatype_id = None
-        for dt in instrument_class_by_language[instrument_class].datatypes:
-            for l in dt.loaders:
-                if l['id'] == loader_id:
-                    loader_function = l['function']
-                    datatype_id = dt.id
-                    break
-        dataObjects = loader_function(file_descriptors)
+        experiment_id = request.POST[u'experiment_id']
+        uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
+
+    return HttpResponse('OK') 
+
+def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id):
+    """
+    Uploads the files (as specified by ``file_descriptors``) to Dataflow. Additional
+    parameters required as well. uploadFiles was extracted into this auxiliary method to
+    allow uploading manually (such as used by uploadFTPFiles), not just via WSGIRequest.
+    
+    Returns: nothing
+    """    
+    try:
+        experiment = Experiment.objects.get(id=experiment_id)
+    except:
+        experiment = None #in the event the id does not match an experiment
+    location = FILES_DIR
+    loader_function = None
+    datatype_id = None
+    for dt in instrument_class_by_language[instrument_class].datatypes:
+        for l in dt.loaders:
+            if l['id'] == loader_id:
+                loader_function = l['function']
+                datatype_id = dt.id
+                break
+    dataObjects = loader_function(file_descriptors)
+    try:
         for fd in file_descriptors:
             os.remove(fd['filename'])
+    except WindowsError:
+        print 'windows ack!'
+        #os.remove issues
 
-        for dobj in dataObjects:
-            # you'll want your data objects to take friendly_name as an argument (required above)
-            # and pass it to an attribute called "friendly_name"
-            # This allows for files that have many subsets of data in them to generate 
-            # their own "friendly_name" for each dataset, in the manner of your choosing.
+    for dobj in dataObjects:
+        # you'll want your data objects to take friendly_name as an argument (required above)
+        # and pass it to an attribute called "friendly_name"
+        # This allows for files that have many subsets of data in them to generate 
+        # their own "friendly_name" for each dataset, in the manner of your choosing.
+        if dobj:
+            #If the file uploaded was not uploadable with the selected loader, dobj=None
+            #TODO: need to send an error to the user and notify them that the file was no good
             friendly_name = dobj.friendly_name if hasattr(dobj, 'friendly_name') else "data"
             serialized = dobj.dumps()
             s_sha1 = hashlib.sha1(serialized)
@@ -740,7 +810,7 @@ def uploadFiles(request):
             string = StringIO.StringIO()
             string.write(serialized)
             string.seek(0)
-
+    
             file_path = os.path.join(FILES_DIR, filename)
             tar = tarfile.open(file_path,"w:gz")
             info = tarfile.TarInfo(name=friendly_name)
@@ -760,10 +830,7 @@ def uploadFiles(request):
                 
             if experiment is not None:
                 #print "experiment id: ", request.POST[u'experiment_id']
-                experiment.Files.add(new_file)
-
-    return HttpResponse('OK') 
-
+                experiment.Files.add(new_file)                   
 
 @transaction.commit_on_success
 def add_metadata_to_file(new_file, instrument):
@@ -942,6 +1009,11 @@ def myProjects(request):
         #deleted, then he next one made would be 7 again.
     elif request.POST.has_key('new_project'):
         newproj = Project.objects.create(Title=request.POST['new_project'])
+        # importing secret key here only to minimize its visibility...
+        from ...settings import SECRET_KEY
+        msg = str(newproj.Title) + ';' + str(newproj.id) #creating activation_key based on project Title and id
+        newproj.activation_key = hmac.new(SECRET_KEY, msg, hashlib.sha1).hexdigest()
+        newproj.save()
         newproj.users.add(request.user)
     project_list = Project.objects.filter(users=request.user)
     paginator = Paginator(project_list, 10) #10 projects per pages

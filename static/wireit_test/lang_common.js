@@ -309,8 +309,8 @@ YAHOO.lang.extend(ExtractContainer, WireIt.Container, {
     }
 });
 
-FootprintCorrectContainer = function(opts, layer) {
-    jQuery.extend(true, opts, {
+FootprintCorrectContainer = function(opts, layer) {  // defines FootprintCorrectContainer
+    jQuery.extend(true, opts, {  // sets wire terminal locations and size of FootprintCorrect module
         'height': 16,
         'width': 120,
         'terminals': [{
@@ -328,18 +328,18 @@ FootprintCorrectContainer = function(opts, layer) {
     var content = document.createElement('div');
     content.innerHTML = '';
     //var saveButton = document.createElement('img');
-    var footprintcorrectButton = document.createElement('button');
+    var footprintcorrectButton = document.createElement('button');  // creates button for module
     footprintcorrectButton.value = 'footprintcorrect';
     footprintcorrectButton.innerHTML = 'Footprint Correct';
     //saveButton.src = this.image;
     content.appendChild(footprintcorrectButton);
     this.setBody(content);
-    YAHOO.util.Event.addListener(footprintcorrectButton, 'click', this.openFootprintCorrectWindow, this, true);
+    YAHOO.util.Event.addListener(footprintcorrectButton, 'click', this.openFootprintCorrectWindow, this, true); // function called when button is clicked
 };
 
-YAHOO.lang.extend(FootprintCorrectContainer, WireIt.Container, {
+YAHOO.lang.extend(FootprintCorrectContainer, WireIt.Container, { // 'extends' FootprintCorrectContainer defined above
     xtype: 'FootprintCorrectContainer',
-    openFootprintCorrectWindow: function(e, f) {
+    openFootprintCorrectWindow: function(e, f) {  // what happens once button is clicked
         var reductionInstance = editor.reductionInstance;
         var wires = f.wires;
         if (wires.length == 0) {
@@ -354,8 +354,8 @@ YAHOO.lang.extend(FootprintCorrectContainer, WireIt.Container, {
         editor.adapter.runReduction(toReduce, {
             success: function(result) { 
                 //toPlot = result;
-                var footprintcorrectWindow = window.open("/static/lib/plotting/footprintcorrectwindow.html", "", "status=1,width=1024,height=768");
-		        footprintcorrectWindow.toPlot = result;
+                var footprintcorrectWindow = window.open("/static/lib/plotting/footprintcorrectwindow.html", "", "status=1,width=1024,height=768"); // opens window
+		        footprintcorrectWindow.toPlot = result; // passes results so that 'footprintcorrectWindow' can use them
 		        footprintcorrectWindow.container = f;
                 footprintcorrectWindow.reductionInstance = reductionInstance;
             },
@@ -369,8 +369,8 @@ YAHOO.lang.extend(FootprintCorrectContainer, WireIt.Container, {
     }
 });
 
-BackgroundSubtractContainer = function(opts, layer) {
-    jQuery.extend(true, opts, {
+BackgroundSubtractContainer = function(opts, layer) {  // defines BackgroundContainer
+    jQuery.extend(true, opts, { // sets terminal locations and size of Background module
         'height': 16,
         'width': 120,
         'terminals': [{
@@ -385,40 +385,13 @@ BackgroundSubtractContainer = function(opts, layer) {
     });  
     BackgroundSubtractContainer.superclass.constructor.call(this, opts, layer);
     
-    var content = document.createElement('div');
+    var content = document.createElement('div'); // shows a blank module
     content.innerHTML = '';
     //var saveButton = document.createElement('img');
     this.setBody(content);
 };
 
-YAHOO.lang.extend(BackgroundSubtractContainer, WireIt.Container, {
+YAHOO.lang.extend(BackgroundSubtractContainer, WireIt.Container, { // 'extends' BackgroundSubtractContainer defined above
     xtype: 'BackgroundSubtractContainer'
-    }
-);
-
-NormalizeContainer = function(opts, layer) {
-    jQuery.extend(true, opts, {
-        'height': 16,
-        'width': 120,
-        'terminals': [{
-            "name": "input", 
-            "offsetPosition": {"left": -16, "top": 16}, 
-          }, 
-          {
-            "name": "output", 
-            "offsetPosition": {"right": -16, "top": 16}, 
-          }
-        ]
-    });  
-    NormalizeContainer.superclass.constructor.call(this, opts, layer);
-    
-    var content = document.createElement('div');
-    content.innerHTML = '';
-    //var saveButton = document.createElement('img');
-    this.setBody(content);
-};
-
-YAHOO.lang.extend(NormalizeContainer, WireIt.Container, {
-    xtype: 'NormalizeContainer'
     }
 );

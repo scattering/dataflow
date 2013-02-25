@@ -49,7 +49,8 @@ class Project(models.Model):
     #permissions = models.ForeignKey(Permission, null=True)
     #experiments = models.ForeignKey('Experiment', null=True)
     templateInstances = models.ManyToManyField('Template', null=True) # are the templates here and  								          # under Instruments meant to be different
-
+    activation_key = models.CharField(max_length=40)
+    
     def __unicode__(self):
         return self.Title
 

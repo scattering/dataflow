@@ -24,6 +24,11 @@ urlpatterns = patterns(REPO_ROOT + '.apps.tracks.views',
     ('^json/$','return_data'),
     ('^metadatajson/$', 'return_metadata'),
     ('^test_table/$','testTable'),
+    
+    #collaboration
+    ('^project/collaborate/$', 'email_collaborator'),
+    #('^project/join_collaboration/(?P<email_address>\[A-Za-z0-9_@.]+)/(?P<activation_key>\w+)$', 'add_collaborator'),
+    ('^project/join_collaboration/(?P<email_activation_key>.+)$', 'add_collaborator'),
 
     # nd-plot interactor calculations
     ('^calculateSlice/', 'calculate_segment_interactor'),
@@ -40,10 +45,13 @@ urlpatterns = patterns(REPO_ROOT + '.apps.tracks.views',
     ('^editor/uploadFiles/$', 'uploadFiles'),
     ('^editor/getCSV/$', 'getCSV'),
 
+    # FTP side loader
+    ('^FTPloader/$', 'showFTPloader'),
+    ('^loadFiles/getFTPdirs/', 'getFTPdirectories'),
+    ('^uploadFTPFiles/$', 'uploadFTPFiles'),
 
     # File loader display urls (testing, 7/6)
     ('^loadFiles/$', 'displayFileLoad'),
-    ('^loadFiles/getNCNRdirs/', 'getNCNRdirectories'),
     ('^saveUpdate/$', 'return_files_metadata'),
 
     # user projects/experiments/instruments/files interactions

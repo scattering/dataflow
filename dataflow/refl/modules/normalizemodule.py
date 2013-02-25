@@ -5,21 +5,20 @@ Normalize counts column to monitor
 from ... import config
 from ...core import Module
 
-def normalize_module(id=None, datatype=None, action=None,
-                    version='0.0', fields=[], xtype=None, **kwargs):
+def normalize_module(id=None, datatype=None, action=None,  # normalize module constructor
+                    version='0.0', fields=[], xtype=None, filterModule=None, **kwargs):
     """Module for normalizing counts to monitor"""
     
-    icon = {
+    icon = {  # how the module will look
         'URI': config.IMAGES + config.ANDR_FOLDER + 'normalize_icon.png',
         'image': config.IMAGES + config.ANDR_FOLDER + 'normalize_image.png',
         'terminals': {
-            'input' : (None, None, -1, 0),
+            'input': (None, None, -1, 0),
             'output': (None, None, 1, 0)
         }
     }
     
-    xtype = 'AutosizeImageContainer'
-    terminals = [
+    terminals = [  # terminals for the wires
         dict(id='input',
             datatype=datatype,
             use='in',
@@ -34,7 +33,9 @@ def normalize_module(id=None, datatype=None, action=None,
             )
     ]
     
-    module = Module(id=id,
+    # no fields needed because NormalizeToMonitor function does not require any arguments
+    
+    module = Module(id=id,  # creates NormalizeToMonitor module
                     name='Normalize to Monitor',
                     version=version,
                     description=action.__doc__,
@@ -43,6 +44,7 @@ def normalize_module(id=None, datatype=None, action=None,
                     fields=fields,
                     action=action,
                     xtype=xtype,
+                    filterModule=filterModule,
                     **kwargs
                     )
     module.LABEL_WIDTH = 80

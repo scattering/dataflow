@@ -1,4 +1,7 @@
 from apps.tracks.models import *
+from django.contrib.sites.models import RequestSite
+from django.contrib.sites.models import Site
+    
 if len(Instrument.objects.all()) < 1:
         Instrument.objects.create(Name='TripleAxis', instrument_class='tas')
         Instrument.objects.create(Name='ng3', instrument_class='sans')
@@ -11,7 +14,19 @@ if len(Facility.objects.all()) < 1:
         Facility.objects.create(Name='NCNR')
         Facility.objects.create(Name='HFIR')
         Facility.objects.create(Name='Chalk River')
-
+        
+# There is probably a better way to set the default domain and name.
+if Site._meta.installed:
+        mysite = Site.objects.get_current()
+else:
+        mysite = RequestSite(request)
+if mysite.domain == '':
+        mysite.domain = 'drneutron.org'
+        mysite.save()
+if mysite.name == '':
+        mysite.name = 'drneutron.org'
+        mysite.save()
+        
 #if len(Template.objects.all()) == 0:
 #        temp = Template.objects.create(Title='testTemplate')
 #        temp.metadata.add(User.objects.get(id=1))

@@ -35,7 +35,15 @@
     <script type="text/javascript" src="/static/lib/tracks/test_adapter.js"></script>
     <script type="text/javascript" src="/static/lib/sha1.js"></script>
     <script type="text/javascript" src="/static/lib/sendFile.js"></script>
+
+    <script type="text/javascript" src="/static/lib/plotting/jqplot/jquery-1.5.1.min.js"></script>
+    <script type="text/javascript" src="/static/lib/ajaxCSRFfix.js"></script>
+
+    <!-- ExtJS -->
+    <script type="text/javascript" src="/static/lib/ext/ext-all.js"></script>
     
+    <!-- <script type="text/javascript" src="/apps/fileview/FileTreeTest.js"></script> -->
+
     <script type="text/javascript">
 
         experiment_id = {{ experiment.id }};
@@ -105,6 +113,12 @@
                     items[i].checked = checked;
                 };
             };
+
+            makeFTPLoaderWindow = function() {
+			    if (!this.FTPLoaderWindow || !this.FTPLoaderWindow.window || this.FTPLoaderWindow.window.closed) {
+			        this.FTPLoaderWindow = window.open("/FTPloader/", "", "width=830, height=720"); 
+			    } else { this.FTPLoaderWindow.onload(); }
+            };
             
             input.addEventListener("change", function(){
                 // disable the input
@@ -168,6 +182,7 @@
             }, false);         
             
         };
+
     </script>
 {% endblock %}
 {% block content %}
@@ -226,7 +241,10 @@
 		        	    <p>There are currently 0 files. Please add files below.</p>
 	        	    {% endif %}
 	        	    <h3 class="alt">{{ form2.new_files.label }}:  {{ form2.loaders }}</h3>
-	        	    <p>{{ form2.new_files }}</p>
+	        	    <p>
+                        {{ form2.new_files }}
+                        <input type="button" value="Open FTP Loader"  onclick="makeFTPLoaderWindow()" />
+                    </p>
 	        	    <div id='progress_div'></div>
 <!-- 	        	    <p><input type="button" onclick="check_existence(document.getElementById('new_files').files)" value="Add selected files" /></p>  -->
 	            </div>

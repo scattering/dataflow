@@ -28,7 +28,7 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
     """
     lookup = {"a":"_down_down", "b":"_up_down", "c":"_down_up", "d":"_up_up", "g": ""}
     if path == None:
-        path = os.getcwd()
+        path = os.getcwd() # if 'path' is not specified, then the actual path of the current directory is found
     file_obj = load(os.path.join(path, filename), format='NCNR NG-1')
     if not (len(file_obj.detector.counts.shape) == 1):
         # not a 1D object!
@@ -76,11 +76,11 @@ def FootprintCorrection(input, start='0', end='0', slope='0', intercept='0'):
     Makes copy of DataArray, iterates through it (beginning at "start" and ending at "finish"), and adds footprint correction to each value.
     Returns resulting data values as a MetaArray.
     """
-    data = MetaArray(input.view(ndarray).copy(), input.dtype, input.infoCopy())
-    start = float(start)
-    end = float(end)
-    slope = float(slope)
-    intercept = float(intercept)
+    data = MetaArray(input.view(ndarray).copy(), input.dtype, input.infoCopy())  # creates copy of input array
+    start = float(start) # beginning of footprint region
+    end = float(end) # end of footprint region
+    slope = float(slope) # slope of line interactor plugin
+    intercept = float(intercept) # y-intercept of line interactor plugin
     
     """
     mask = (xaxisvalues > start) and (xaxisvalues < end)
@@ -89,15 +89,15 @@ def FootprintCorrection(input, start='0', end='0', slope='0', intercept='0'):
     #endpoint = data['Measurements':'counts'][data.axisValues(0) > end][0]
     endpoint = end * slope + intercept
     
-    mask = logical_and((data.axisValues(0) >= start), (data.axisValues(0) <= end))
-    xvalues = data.axisValues(0)[mask]
-    counts = data['Measurements':'counts'][mask]
+    mask = logical_and((data.axisValues(0) >= start), (data.axisValues(0) <= end)) # 'mask' defines interval of footprint region in input array
+    xvalues = data.axisValues(0)[mask] # interval of x-values in input array that will be used to calculate footprint region
+    counts = data['Measurements':'counts'][mask] # values in footprint region of input array that will be adjusted
     #monitor = data['Measurements':'monitor']
     #avg_monitor = sum(monitor) / monitor.shape[0]
     #counts = data[0][start:end, 0] # interval of data specified by start and finish
     #print 'before correction: ', data['Measurements':'counts'][mask]
     counts = counts * endpoint / ((xvalues * slope) + intercept) # applying footprint correction
-    data['Measurements':'counts'][mask] = counts
+    data['Measurements':'counts'][mask] = counts # replaces original counts values in footprint region with adjusted values
     #print 'after correction: ', data['Measurements':'counts'][mask]
     #monitor[mask]  += ... oops - we need to know the max of the monitor to do this.
     #data[0][start:end, 0] = ccounts # replacing original data in specified interval with corrected data
@@ -108,11 +108,11 @@ def BackgroundSubtraction(input, background='0'):
     """
     Makes copy of input (DataArray) and subtracts "background" from "counts" values.
     """
-    data = MetaArray(input.view(ndarray).copy(), input.dtype, input.infoCopy())
-    counts = data['Measurements':'counts']
-    background = float(background)
-    counts = counts - background
-    data['Measurements':'counts'] = counts
+    data = MetaArray(input.view(ndarray).copy(), input.dtype, input.infoCopy()) # creates copy of input array
+    counts = data['Measurements':'counts']  # the counts values in 'data' array
+    background = float(background) # turns string argument 'background' into its decimal value
+    counts = counts - background # applies BackgroundSubtraction
+    data['Measurements':'counts'] = counts # updates data array with updated 'counts' values
     return data
 
 @autoApplyToList    
@@ -140,7 +140,6 @@ def NormalizeToTime(input):
     new_array.resize((input.shape[0], input.shape[1] + 1))
     new_info = input.infoCopy()
     new_info[-2]['cols'].append({"name":"normcounts_time"})
-    
     counts = input['Measurements':'counts']
     count_time = input['Measurements':'count_time']
     new_array[:,-1] = counts/count_time

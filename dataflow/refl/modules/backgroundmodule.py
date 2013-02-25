@@ -5,11 +5,11 @@ Applies BackgroundSubtraction to data set
 from ... import config
 from ...core import Module
 
-def background_module(id=None, datatype=None, action=None,
+def background_module(id=None, datatype=None, action=None,  # Background module constructor
                     version='0.0', fields=[], xtype=None, filterModule=None):
     """Module for subtracting background value from a dataset"""
     
-    icon = {
+    icon = {  # how the module will look
         'URI': config.IMAGES + config.ANDR_FOLDER + 'autogrid.png',
         'image': config.IMAGES + config.ANDR_FOLDER + 'autgrid_image.png',
         'terminals': {
@@ -18,7 +18,7 @@ def background_module(id=None, datatype=None, action=None,
         }
     }
     
-    terminals = [
+    terminals = [  # terminals for wires
         dict(id='input',
             datatype=datatype,
             use='in',
@@ -34,7 +34,7 @@ def background_module(id=None, datatype=None, action=None,
             )
     ]
     
-    fields = {
+    fields = {  # field that will appear when user right clicks module
         "background": {
             "type":"string",
             "label":"Background Value",
@@ -42,7 +42,7 @@ def background_module(id=None, datatype=None, action=None,
             "value":""}
     }
     
-    module = Module(id=id,
+    module = Module(id=id,  # creates Background Module
                     name='Background Data',
                     version=version,
                     description=action.__doc__,

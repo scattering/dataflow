@@ -1,6 +1,0 @@
-@misc{django_website,
-organization = {Django Software Foundation},
-Title = {Django high-level Python Web framework},
-URL = {http://www.djangoproject.com},
-}
-
