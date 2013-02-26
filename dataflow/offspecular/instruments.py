@@ -31,6 +31,7 @@ module_imports = [
     ("dataflow.offspecular.modules.pixels_two_theta", "pixels_two_theta_module"),
     ("dataflow.offspecular.modules.asterix_pixels_two_theta", "asterix_pixels_two_theta_module"),
     ("dataflow.offspecular.modules.theta_two_theta_qxqz", "theta_two_theta_qxqz_module"),
+    ("dataflow.offspecular.modules.twotheta_q", "twotheta_q_module"),
     ("dataflow.offspecular.modules.two_theta_lambda_qxqz", "two_theta_lambda_qxqz_module"),
     ("dataflow.offspecular.modules.load_he3_analyzer_collection", "load_he3_module"),
     ("dataflow.offspecular.modules.append_polarization_matrix", "append_polarization_matrix_module"),
@@ -44,7 +45,7 @@ module_imports = [
     ("dataflow.offspecular.modules.collapse_data", "collapse_data_module"),
     ("dataflow.calc", ["run_template", "get_plottable", "calc_single"]),
     ("dataflow.core", ["Data", "Instrument", "Template", "register_instrument"]),
-    ("reduction.offspecular.filters", ["LoadICPData", "LoadICPMany", "LoadAsterixRawHDF", "LoadAsterixMany", "LoadAsterixSpectrum", "Autogrid", "Combine", "Subtract", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "CollapseData", "WiggleCorrection", "SmoothData", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz"]),
+    ("reduction.offspecular.filters", ["LoadICPData", "LoadICPMany", "LoadAsterixRawHDF", "LoadAsterixMany", "LoadAsterixSpectrum", "Autogrid", "Combine", "Subtract", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "CollapseData", "WiggleCorrection", "SmoothData", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz", "TwothetaToQ"]),
     ("reduction.offspecular.he3analyzer", "He3AnalyzerCollection"),
     ("reduction.offspecular.FilterableMetaArray", "FilterableMetaArray"),
 ]
@@ -354,9 +355,9 @@ def tof_lambda_action(input=[], wl_over_tof=1.9050372144288577e-5, **kwargs):
 tof_to_wavelength = tof_lambda_module(id='ospec.tof_lambda', datatype=OSPEC_DATA, version='1.0', action=tof_lambda_action, filterModule=AsterixTOFToWavelength)
 
 # Pixels to two theta module
-def pixels_two_theta_action(input=[], pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6, **kwargs):
+def pixels_two_theta_action(input=[], pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6, ax_name='xpixel', **kwargs):
     print "converting pixels to two theta"
-    result = PixelsToTwotheta().apply(input, pixels_per_degree=pixels_per_degree, qzero_pixel=qzero_pixel, instr_resolution=instr_resolution)
+    result = PixelsToTwotheta().apply(input, pixels_per_degree=pixels_per_degree, qzero_pixel=qzero_pixel, instr_resolution=instr_resolution, ax_name=ax_name)
     return dict(output=result)
 pixels_two_theta = pixels_two_theta_module(id='ospec.twotheta', datatype=OSPEC_DATA, version='1.0', action=pixels_two_theta_action, filterModule=PixelsToTwotheta)
 
@@ -385,6 +386,13 @@ def theta_two_theta_qxqz_action(input=[], output_grid=None, wavelength=5.0, qxmi
     result = ThetaTwothetaToQxQz().apply(input, grid, wavelength, qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)
     return dict(output=result)
 theta_two_theta_qxqz = theta_two_theta_qxqz_module(id='ospec.th_tth_qxqz', datatype=OSPEC_DATA, version='1.0', action=theta_two_theta_qxqz_action)
+
+# Twotheta to q module
+def twotheta_q_action(input=[], wavelength=5.0, ax_name='twotheta', **kwargs):
+    print "converting twotheta to q"
+    result = TwothetaToQ().apply(input, wavelength, ax_name)
+    return dict(output=result)
+twotheta_q = twotheta_q_module(id='ospec.tth_q', datatype=OSPEC_DATA, version='1.0', action=twotheta_q_action)
 
 def empty_qxqz_grid_action(qxmin= -0.003, qxmax=0.003, qxbins=201, qzmin=0.0, qzmax=0.1, qzbins=201, **kwargs):
     print "creating an empty QxQz grid"
@@ -460,7 +468,7 @@ ANDR = Instrument(id='ncnr.ospec.andr',
                  name='andr',
                  archive=config.NCNR_DATA + '/andr',
                  menu=[('Input', [load, load_he3, load_stamp, save]),
-                       ('Reduction', [autogrid, combine, subtract, offset, wiggle, smooth, pixels_two_theta, theta_two_theta_qxqz, empty_qxqz, mask_data, slice_data, collapse_data, normalize_to_monitor]),
+                       ('Reduction', [autogrid, combine, subtract, offset, wiggle, smooth, pixels_two_theta, theta_two_theta_qxqz, twotheta_q, empty_qxqz, mask_data, slice_data, collapse_data, normalize_to_monitor]),
                        ('Polarization reduction', [timestamp, append_polarization, combine_polarized, correct_polarized]),
                        ],
                  requires=[config.JSCRIPT + '/ospecplot.js'],

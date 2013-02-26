@@ -1,4 +1,4 @@
-from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin, allclose, zeros_like, linalg, dot, arctan2, float64, histogram2d, sum, sqrt, loadtxt, searchsorted, NaN
+from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin, allclose, zeros_like, linalg, dot, arctan2, float64, histogram2d, sum, sqrt, loadtxt, searchsorted, NaN, logical_not
 import numpy
 from numpy.ma import MaskedArray
 import os, simplejson, datetime, sys, types, xml.dom.minidom
@@ -305,7 +305,7 @@ class MaskData(Filter2D):
         print dataslice
         mask[dataslice] = True # set the masked portions to False
         if invert_mask:
-            mask *= -1            
+            mask = logical_not(mask)            
         new_data = MetaArray(data.view(ndarray).copy(), info=data.infoCopy())
         new_data[mask] = 0
         return new_data
@@ -744,16 +744,20 @@ class PixelsToTwotheta(Filter2D):
     
     @autoApplyToList
     @updateCreationStory 
-    def apply(self, data, pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6):
+    def apply(self, data, pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6, ax_name='xpixel'):
         print " inside PixelsToTwoTheta "
+        pixels_per_degree = float(pixels_per_degree) # coerce, in case it was an integer
+        qzero_pixel = float(qzero_pixel) 
+        instr_resolution = float(instr_resolution)
+        
         new_info = data.infoCopy()
-        det_angle = new_info[-1].pop('det_angle') # read and get rid of it!
+        det_angle = new_info[-1].get('det_angle', None)
         # det_angle should be a vector of the same length as the other axis (usually theta)
         # or else just a float, in which case the detector is not moving!
         ndim = len(new_info) - 2 # last two entries in info are for metadata
-        xpixel_axis = next((i for i in xrange(len(new_info)-2) if new_info[i]['name'] == 'xpixel'), None)
-        if xpixel_axis < 0:
-            raise ValueError("error: no xpixel axis in this dataset")
+        pixel_axis = next((i for i in xrange(len(new_info)-2) if new_info[i]['name'] == ax_name), None)
+        if pixel_axis < 0:
+            raise ValueError("error: no %s axis in this dataset" % (ax_name,))
             
         if hasattr(det_angle, 'max'):
             det_angle_max = det_angle.max()
@@ -761,29 +765,37 @@ class PixelsToTwotheta(Filter2D):
         else: # we have a number
             det_angle_max = det_angle_min = det_angle
             
-        if ndim == 1 or ((det_angle_max - det_angle_min) < instr_resolution):
-            #then the detector is fixed: just change the values in 'xpixel' axis vector to twotheta
+        if ((det_angle_max - det_angle_min) < instr_resolution) or ndim == 1 or ax_name != 'xpixel':
+            #then the detector is fixed and we just change the values in 'xpixel' axis vector to twotheta
+            # or the axis to be converted is y, which doesn't move in angle.
             print "doing the simple switch of axis values..."
             
-            data_slices = [slice(None, None, 1), slice(None, None, 1)]
-            data_slices[xpixel_axis] = slice(None, None, -1)
+            #data_slices = [slice(None, None, 1), slice(None, None, 1)]
+            #data_slices[pixel_axis] = slice(None, None, -1)
             
-            new_info[xpixel_axis]['name'] = 'twotheta'
-            twotheta_motor = det_angle_min
-            pixels = new_info[xpixel_axis]['values']
-            twoth = -1.0 * (pixels - qzero_pixel) / pixels_per_degree + twotheta_motor
-            new_info[xpixel_axis]['values'] = twoth[::-1] # reverse: twotheta increases as pixels decrease
-            new_info[xpixel_axis]['units'] = 'degrees'
-            new_array = (data.view(ndarray).copy())[data_slices]
+            if ax_name == 'xpixel':
+                twotheta_motor = det_angle_min
+                new_info[pixel_axis]['name'] = 'twotheta'
+            else:
+                twotheta_motor = 0.0 # we don't have a y-motor!
+                new_info[pixel_axis]['name'] = 'twotheta_y'
+                
+            pixels = new_info[pixel_axis]['values']
+            twoth = (pixels - qzero_pixel) / pixels_per_degree + twotheta_motor
+            #new_info[pixel_axis]['values'] = twoth[::-1] # reverse: twotheta increases as pixels decrease
+            new_info[pixel_axis]['values'] = twoth
+            new_info[pixel_axis]['units'] = 'degrees'
+            #new_array = (data.view(ndarray).copy())[data_slices]
+            new_array = (data.view(ndarray).copy())
             new_data = MetaArray(new_array, info=new_info)
         
         else:
             # the detector is moving - have to rebin the dataset to contain all values of twoth
             # this is silly but have to set other axis!
-            other_axis = (1 if xpixel_axis == 0 else 0)
+            other_axis = (1 if pixel_axis == 0 else 0)
             other_vector = new_info[other_axis]['values']
             other_spacing = other_vector[1] - other_vector[0]
-            pixels = new_info[xpixel_axis]['values']
+            pixels = new_info[pixel_axis]['values']
             twoth = -1.0 * (pixels - qzero_pixel) / pixels_per_degree
             twoth = twoth[::-1] # reverse
             twoth_min = det_angle_min + twoth.min()
@@ -794,11 +806,11 @@ class PixelsToTwotheta(Filter2D):
             output_twoth_bin_edges = arange(twoth_min - dpp, twoth_max + dpp, dpp)
             output_twoth = output_twoth_bin_edges[:-1]
             other_bin_edges = linspace(other_vector[0], other_vector[-1] + other_spacing, len(other_vector) + 1)
-            new_info[xpixel_axis]['name'] = 'twotheta' # getting rid of pixel units: substitute twoth
-            new_info[xpixel_axis]['values'] = output_twoth
-            new_info[xpixel_axis]['units'] = 'degrees'
+            new_info[pixel_axis]['name'] = 'twotheta' # getting rid of pixel units: substitute twoth
+            new_info[pixel_axis]['values'] = output_twoth
+            new_info[pixel_axis]['units'] = 'degrees'
             output_shape = [0,0,0]
-            output_shape[xpixel_axis] = len(output_twoth)
+            output_shape[pixel_axis] = len(output_twoth)
             output_shape[other_axis] = len(other_vector)
             output_shape[2] = data.shape[2] # number of columns is unchanged!
             new_data = MetaArray(tuple(output_shape), info=new_info) # create the output data object!
@@ -815,7 +827,7 @@ class PixelsToTwotheta(Filter2D):
                 #data_cols = ['counts', 'pixels', 'monitor', 'count_time']
                 cols = new_info[-2]['cols']
                 
-                input_slice[xpixel_axis] = slice(i, i+1)
+                input_slice[pixel_axis] = slice(i, i+1)
                 for col in range(len(cols)):
                     input_slice = [slice(None, None), slice(None, None), col]
                     input_slice[other_axis] = i
@@ -1231,24 +1243,26 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
     if not PolState in lookup.values():
         PolState = ''
     #datalen = file_obj.detector.counts.shape[0]
-    if ndims >= 2:    
+    if ndims == 2:    
         xpixels = file_obj.detector.counts.shape[1]
-    if ndims >= 3:
+    elif ndims >= 3:
         frames = file_obj.detector.counts.shape[0]
-        ypixels = file_obj.detector.counts.shape[2]
+        ypixels = file_obj.detector.counts.shape[1]
+        xpixels = file_obj.detector.counts.shape[2]
         
     creation_story = "LoadICPData('{fn}', path='{p}', auto_PolState={aPS}, PolState='{PS}'".format(fn=filename, p=path, aPS=auto_PolState, PS=PolState)
 
-# doesn't really matter; changing so that each keyword (whether it took the default value
-# provided or not) will be defined
-#    if not PolState == '':
-#        creation_story += ", PolState='{0}'".format(PolState)
+    # doesn't really matter; changing so that each keyword (whether it took the default value
+    # provided or not) will be defined
+    #    if not PolState == '':
+    #        creation_story += ", PolState='{0}'".format(PolState)
     creation_story += ")" 
     
-    info = []
+    
     if ndims == 2: # one of the dimensions has been collapsed.
-        info.append({"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x })
+        info = []     
         info.append({"name": "xpixel", "units": "pixels", "values": range(xpixels) })
+        info.append({"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x })
         info.extend([
                 {"name": "Measurements", "cols": [
                         {"name": "counts"},
@@ -1264,7 +1278,7 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
         if ndims == 2:
             mon.shape += (1,) # broadcast the monitor over the other dimension
             count_time.shape += (1,)
-        data_array[..., 0] = file_obj.detector.counts
+        data_array[..., 0] = file_obj.detector.counts.swapaxes(0,1)
         data_array[..., 1] = 1
         data_array[..., 2] = mon
         data_array[..., 3] = count_time
@@ -1272,7 +1286,7 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
         data = MetaArray(data_array, dtype='float', info=info)
         data.friendly_name = friendly_name # goes away on dumps/loads... just for initial object.
         
-    if ndims == 3: # then it's an unsummed collection of detector shots.  Should be one sample and detector angle per frame
+    elif ndims == 3: # then it's an unsummed collection of detector shots.  Should be one sample and detector angle per frame
         infos = []
         data = []
         for i in range(frames):
@@ -1293,7 +1307,7 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
             data_array = zeros((xpixels, ypixels, 4))
             mon = file_obj.monitor.counts[i]
             count_time = file_obj.monitor.count_time[i]
-            data_array[..., 0] = file_obj.detector.counts[i]
+            data_array[..., 0] = file_obj.detector.counts[i].swapaxes(0,1)
             data_array[..., 1] = 1
             data_array[..., 2] = mon
             data_array[..., 3] = count_time
@@ -1613,6 +1627,41 @@ class TwothetaLambdaToQxQz(Filter2D):
         output_grid._info[-1] = data._info[-1].copy()
         output_grid._info[-1]['CreationStory'] = new_creation_story
         return output_grid
+
+class TwothetaToQ(Filter2D):
+    """ Figures out the Q values of an axis.
+    """
+    
+    @autoApplyToList
+    @updateCreationStory 
+    def apply(self, data, wavelength=5.0, ax_name='twotheta'):
+        print " inside TwoThetaToQ "
+        wavelength = float(wavelength)
+        
+        new_info = data.infoCopy()
+        ndim = len(new_info) - 2 # last two entries in info are for metadata
+        twotheta_axis = next((i for i in xrange(len(new_info)-2) if new_info[i]['name'] == ax_name), None)
+        if twotheta_axis < 0:
+            raise ValueError("error: no %s axis in this dataset" % (ax_name,))
+  
+        print "doing the simple switch of axis values..."
+        
+        if ax_name == 'twotheta':
+            new_info[twotheta_axis]['name'] = 'qx'
+        else:
+            new_info[twotheta_axis]['name'] = 'qy'
+            
+        twotheta = new_info[twotheta_axis]['values']
+        q = 4.0*pi/wavelength * sin((twotheta/2.0) * pi/180.0) 
+        #new_info[pixel_axis]['values'] = twoth[::-1] # reverse: twotheta increases as pixels decrease
+        new_info[twotheta_axis]['values'] = q
+        new_info[twotheta_axis]['units'] = 'inv. Angstroms'
+        #new_array = (data.view(ndarray).copy())[data_slices]
+        new_array = (data.view(ndarray).copy())
+        new_data = MetaArray(new_array, info=new_info)
+        
+        return new_data
+   
               
 class ThetaTwothetaToQxQz(Filter2D):
     """ Figures out the Qx, Qz values of each datapoint

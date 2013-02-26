@@ -53,6 +53,13 @@ def pixels_two_theta_module(id=None, datatype=None, action=None,
             "label": "instrument resolution",
             "name": "instr_resolution",
             "value": 1e-6,
+        },
+        "ax_name": {
+            "type": "List",
+            "label": "Name of pixel axis",
+            "name": "ax_name",
+            "value": 'xpixel',
+            "choices": ['xpixel', 'ypixel']
         }
     }
 
