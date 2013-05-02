@@ -266,7 +266,8 @@ subtract = subtract_module(id='ospec.subtract', datatype=OSPEC_DATA, version='1.
 # Offset module
 def offset_action(input=[], offsets={}, **kwargs):
     print "offsetting"
-    return dict(output=CoordinateOffset().apply(input, offsets=offsets))
+    offsets_dict = {offsets['axis_name']['value'] : offsets['offset']['value']}
+    return dict(output=CoordinateOffset().apply(input, offsets=offsets_dict))
 offset = offset_module(id='ospec.offset', datatype=OSPEC_DATA, version='1.0', action=offset_action)
 
 # Correct spectrum module
@@ -355,7 +356,7 @@ def tof_lambda_action(input=[], wl_over_tof=1.9050372144288577e-5, **kwargs):
 tof_to_wavelength = tof_lambda_module(id='ospec.tof_lambda', datatype=OSPEC_DATA, version='1.0', action=tof_lambda_action, filterModule=AsterixTOFToWavelength)
 
 # Pixels to two theta module
-def pixels_two_theta_action(input=[], pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6, ax_name='xpixel', **kwargs):
+def pixels_two_theta_action(input=[], pixels_per_degree=52.8, qzero_pixel=358, instr_resolution=1e-6, ax_name='xpixel', **kwargs):
     print "converting pixels to two theta"
     result = PixelsToTwotheta().apply(input, pixels_per_degree=pixels_per_degree, qzero_pixel=qzero_pixel, instr_resolution=instr_resolution, ax_name=ax_name)
     return dict(output=result)

@@ -93,9 +93,10 @@ class FilterableMetaArray(MetaArray):
         print data_cols
         x = self._info[0]['values'].tolist()
         xlabel = self._info[0]['name']
+        title = self._info[-1].get('friendly_name', "1d data")
         plottable_data = {
             'type': '1d',
-            'title': '1d Data',
+            'title': title,
             'options': {'series': []},
             'clear_existing': False,
             'data': []

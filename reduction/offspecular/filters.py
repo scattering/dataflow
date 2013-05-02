@@ -1,4 +1,4 @@
-from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin, allclose, zeros_like, linalg, dot, arctan2, float64, histogram2d, sum, sqrt, loadtxt, searchsorted, NaN, logical_not
+from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin, allclose, zeros_like, linalg, dot, arctan2, float64, histogram2d, sum, sqrt, loadtxt, searchsorted, NaN, logical_not, fliplr, flipud
 import numpy
 from numpy.ma import MaskedArray
 import os, simplejson, datetime, sys, types, xml.dom.minidom
@@ -1243,7 +1243,8 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
     if not PolState in lookup.values():
         PolState = ''
     #datalen = file_obj.detector.counts.shape[0]
-    if ndims == 2:    
+    if ndims == 2:
+        ypixels = file_obj.detector.counts.shape[0]
         xpixels = file_obj.detector.counts.shape[1]
     elif ndims >= 3:
         frames = file_obj.detector.counts.shape[0]
@@ -1261,7 +1262,7 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
     
     if ndims == 2: # one of the dimensions has been collapsed.
         info = []     
-        info.append({"name": "xpixel", "units": "pixels", "values": range(xpixels) })
+        info.append({"name": "xpixel", "units": "pixels", "values": range(xpixels) }) # reverse order
         info.append({"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x })
         info.extend([
                 {"name": "Measurements", "cols": [
@@ -1272,13 +1273,14 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
                 {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date, "friendly_name": friendly_name,
                  "CreationStory":creation_story, "path":path, "det_angle":file_obj.detector.angle_x}]
             )
-        data_array = zeros(dims + (4,))
+        data_array = zeros((xpixels, ypixels, 4))
         mon = file_obj.monitor.counts
         count_time = file_obj.monitor.count_time
         if ndims == 2:
-            mon.shape += (1,) # broadcast the monitor over the other dimension
-            count_time.shape += (1,)
-        data_array[..., 0] = file_obj.detector.counts.swapaxes(0,1)
+            mon.shape = (1,) + mon.shape # broadcast the monitor over the other dimension
+            count_time.shape = (1,) + count_time.shape
+        data_array[..., 0] = flipud(file_obj.detector.counts.swapaxes(0,1))
+        #data_array[..., 0] = file_obj.detector.counts
         data_array[..., 1] = 1
         data_array[..., 2] = mon
         data_array[..., 3] = count_time
@@ -1694,11 +1696,23 @@ class ThetaTwothetaToQxQz(Filter2D):
             outgrid_info[2] = deepcopy(data._info[2]) # take column number and names from dataset
             output_grid = MetaArray(zeros((output_grid.shape[0], output_grid.shape[1], data.shape[2])), info=outgrid_info)
         
+        theta_axis = data._getAxis('theta')
+        twotheta_axis = data._getAxis('twotheta')
+        
+        #theta_axis = next((i for i in xrange(len(old_info)-2) if old_info[i]['name'] == 'theta'), None)
+        #twotheta_axis = next((i for i in xrange(len(old_info)-2) if old_info[i]['name'] == 'twotheta'), None)
+        
         qLength = 2.0 * pi / wavelength
         th_array = data.axisValues('theta').copy()
-        th_array.shape = th_array.shape + (1,)
         twotheta_array = data.axisValues('twotheta').copy()
-        twotheta_array.shape = (1,) + twotheta_array.shape
+        
+        if theta_axis < twotheta_axis: # then theta is first: add a dimension at the end
+            th_array.shape = th_array.shape + (1,)
+            twotheta_array.shape = (1,) + twotheta_array.shape
+        else:
+            twotheta_array.shape = twotheta_array.shape + (1,)
+            th_array.shape = (1,) + th_array.shape
+            
         tilt_array = th_array - (twotheta_array / 2.0)
         qxOut = 2.0 * qLength * sin((pi / 180.0) * (twotheta_array / 2.0)) * sin(pi * tilt_array / 180.0)
         qzOut = 2.0 * qLength * sin((pi / 180.0) * (twotheta_array / 2.0)) * cos(pi * tilt_array / 180.0)

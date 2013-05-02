@@ -19,7 +19,7 @@ def autoApplyToList(apply):
             return apply(data, *args, **kwargs)
     return newfunc
 
-def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
+def LoadICPData(filename, path=None, auto_PolState=False, PolState='', friendly_name=""):
     """ 
     loads a data file into a MetaArray and returns that.
     Checks to see if data being loaded is 2D; if not, quits
@@ -55,7 +55,7 @@ def LoadICPData(filename, path=None, auto_PolState=False, PolState=''):
                     {"name": "pixels"},
                     {"name": "monitor"},
                     {"name": "count_time"}]},
-            {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date,
+            {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date, "friendly_name": friendly_name,
              "CreationStory":creation_story, "path":path}]
     data_array = zeros((datalen, 4))
     mon = file_obj.monitor.counts
