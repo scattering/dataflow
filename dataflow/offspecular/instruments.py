@@ -45,7 +45,7 @@ module_imports = [
     ("dataflow.offspecular.modules.collapse_data", "collapse_data_module"),
     ("dataflow.calc", ["run_template", "get_plottable", "calc_single"]),
     ("dataflow.core", ["Data", "Instrument", "Template", "register_instrument"]),
-    ("reduction.offspecular.filters", ["LoadICPData", "LoadICPMany", "LoadAsterixRawHDF", "LoadAsterixMany", "LoadAsterixSpectrum", "Autogrid", "Combine", "Subtract", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "CollapseData", "WiggleCorrection", "SmoothData", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz", "TwothetaToQ"]),
+    ("reduction.offspecular.filters", ["LoadICPData", "LoadICPMany", "LoadUXDData", "LoadUXDMany", "LoadAsterixRawHDF", "LoadAsterixMany", "LoadAsterixSpectrum", "Autogrid", "Combine", "Subtract", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "CollapseData", "WiggleCorrection", "SmoothData", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz", "TwothetaToQ"]),
     ("reduction.offspecular.he3analyzer", "He3AnalyzerCollection"),
     ("reduction.offspecular.FilterableMetaArray", "FilterableMetaArray"),
 ]
@@ -96,7 +96,10 @@ def get_friendly_name(fh):
     return fh
 
 OSPEC_DATA = 'ospec.data2d'
-data2d = Data(OSPEC_DATA, FilterableMetaArray, loaders=[{'function':LoadICPMany, 'id':'LoadICPData'}, {'function':LoadAsterixMany, 'id':'LoadAsterix'}])
+data2d = Data(OSPEC_DATA, FilterableMetaArray, loaders=[
+    {'function':LoadICPMany, 'id':'LoadICPData'}, 
+    {'function':LoadAsterixMany, 'id':'LoadAsterix'},
+    {'function':LoadUXDMany, 'id': 'LoadUXD'}])
 #ast_data2d = Data('ospec.asterix.data2d', FilterableMetaArray, loaders=[{'function':LoadAsterixMany, 'id':'LoadAsterix'}])
 OSPEC_DATA_HE3 = OSPEC_DATA + '.he3'
 datahe3 = Data(OSPEC_DATA_HE3, He3AnalyzerCollection, loaders=[{'function':He3AnalyzerCollection, 'id':'LoadHe3'}])
@@ -156,6 +159,29 @@ def _load_data(name, auto_PolState, PolState):
     friendly_name = get_friendly_name(fileName)
     return LoadICPData(fileName, friendly_name=friendly_name, path=dirName, auto_PolState=auto_PolState, PolState=PolState)
 
+# Load UXD module
+def load_uxd_action(input=[], files=[], intent='', **kwargs):
+    print "loading", files
+    
+    result = []
+    for i, f in enumerate(files):
+        subresult = _load_uxd_data(f)
+        if type(subresult) == types.ListType:
+            result.extend(subresult)
+        else:
+            result.append(subresult)
+    for subresult in input:
+        if type(subresult) == types.ListType:
+            result.extend(subresult)
+        else:
+            result.append(subresult)
+    #result = [_load_data(f, auto_PolState, PolStates.get(get_friendly_name(os.path.split(f)[-1]), '')) for f in files] # not bundles
+    return dict(output=result)
+
+def _load_uxd_data(name):
+    (dirName, fileName) = os.path.split(name)
+    friendly_name = get_friendly_name(fileName)
+    return LoadUXDData(fileName, friendly_name=friendly_name, path=dirName)
 
 def load_asterix_action(input=[], files=[], **kwargs):
     result = []
@@ -214,6 +240,8 @@ load = load_module(id='ospec.load', datatype=OSPEC_DATA,
                    #action=load_action, 
                    #fields=OrderedDict({'files': {}, 'autochain-loader':autochain_loader_field, 'auto_PolState': auto_PolState_field, 'PolStates': PolStates_field}), 
                    filterModule=LoadICPData)
+
+load_uxd = load_module(id='ospec.uxd.load', datatype=OSPEC_DATA, version='1.0', action=load_uxd_action, filterModule = LoadUXDData)
 
 #load_asterix = load_asterix_module(id='ospec.asterix.load', datatype=OSPEC_DATA,
 #                   version='1.0', action=load_asterix_action, filterModule=LoadAsterixRawHDF)
