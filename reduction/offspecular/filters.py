@@ -1252,7 +1252,7 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
         ypixels = file_obj.detector.counts.shape[1]
         xpixels = file_obj.detector.counts.shape[2]
         
-    creation_story = "LoadICPData('{fn}', path='{p}', auto_PolState={aPS}, PolState='{PS}'".format(fn=filename, p=path, aPS=auto_PolState, PS=PolState)
+    creation_story = "LoadICPData('{fn}', path='{p}', auto_PolState={aPS}, PolState='{PS}')".format(fn=filename, p=path, aPS=auto_PolState, PS=PolState)
 
     # doesn't really matter; changing so that each keyword (whether it took the default value
     # provided or not) will be defined
@@ -1454,13 +1454,13 @@ def LoadUXDData(filename, path="", friendly_name=""):
 
     info = [
         {"name": "theta", "units": "degrees", "values": data_theta_array}, 
-        {"name": "two_theta", "units": "degrees", "values": two_theta_array}]
+        {"name": "twotheta", "units": "degrees", "values": two_theta_array}]
     info.append({"name": "Measurements", "cols": [
                         {"name": "counts"},
                         {"name": "pixels"},
                         {"name": "monitor"},
                         {"name": "count_time"}]})
-    info.append({"filename": filename, "friendly_name": friendly_name, "path":path})
+    info.append({"filename": filename, "friendly_name": friendly_name, "path":path, "CreationStory": ""})
 
     data = MetaArray(data_array, dtype='float', info=info)    
     return data
