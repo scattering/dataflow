@@ -1325,8 +1325,11 @@ def LoadUXDData(filename, path="", friendly_name=""):
     ###################
     # By André Guzmán #
     ###################
+
+    #This program assumes that the step sizes of all Rocking Curves are the same
+    #I do not know what will happen if they are not (I've never tried) - but the result will probably not be pretty
     
-    ############# FOR USE WITH DATAFLOW #################################
+    ############# Variables #################################
     #Read from file header (applies to all ranges)
     wavelength = 0
 
@@ -1340,7 +1343,7 @@ def LoadUXDData(filename, path="", friendly_name=""):
     count_time_array = [] #Count times go here
 
     #Range variables
-    #Range Constants (values that don't change within a range, but do change between ranges
+    #Range Constants (values that don't change within a range, but do change between ranges)
     curr_range = 0 #determines which range is being read
     prev_step_time = 0
     step_time = 0
@@ -1352,7 +1355,8 @@ def LoadUXDData(filename, path="", friendly_name=""):
     theta = 0
     range_counts_array = []
     range_theta_array = []
-    ############# END USE WITH DATAFLOW #################################
+    ############# END Variables #################################
+
     file_obj = open(os.path.join(path, filename), 'r')
     np = numpy
     
@@ -1385,7 +1389,7 @@ def LoadUXDData(filename, path="", friendly_name=""):
                 range_theta_array = []
         elif line.count("_STEPTIME") != 0:
             nums = line.split(" = ")
-            step_time = float(nums[1].strip()) - prev_step_time
+            step_time = float(nums[1].strip()) - prev_step_time #Step time increments for some reason, this fixes that
             prev_step_time = float(nums[1].strip())
             count_time_array.append(step_time)
         elif line.count("_STEPSIZE") != 0:
@@ -1405,24 +1409,34 @@ def LoadUXDData(filename, path="", friendly_name=""):
 
             if slit == "in":
                 detector_slit = True
-                monitor_array.append(0.01)
+                monitor_array.append(1)
             else:
                 detector_slit = False
-                monitor_array.append(1)
+                monitor_array.append(0.01)
         else:
             two = 1 + 1
             #This really doesn't need to be here (at all), but I like IF statements that end in ELSEs
 
+    #For Loop skips over the last range (which might be important), so its added here
+    if curr_range != 1:
+        # Adding arrays to other arrays and resetting them
+        counts_array.append(range_counts_array)
+        theta_array.append(range_theta_array)
+
+        range_counts_array = []
+        range_theta_array = []
+        
+    #Now that we're done with reading the file, its time to set up the MetaArray
     file_obj.close() # We're done with the file now
 
     for i in range(curr_range):
         pixels_array.append(1)
 
     theta_range = theta_array[-1][-1] - theta_array[0][0]
-    theta_elements = int(theta_range / step_size) + 1 # Assumes the step sizes of all the ranges are the same
+    theta_elements = int(theta_range / step_size + 0.5) + 1 # Assumes the step sizes of all the ranges are the same
 
     data_array = np.zeros((theta_elements, curr_range, 4))
-    data_theta_array = []
+    data_theta_array = [] #Rhyming was totally intentional
 
     theta_incr = theta_array[0][0] # This is a bad name for this variable
     for i in range(theta_elements):
@@ -1430,10 +1444,10 @@ def LoadUXDData(filename, path="", friendly_name=""):
         theta_incr += step_size
 
     for i in range(len(counts_array)):
-        start = int((theta_array[i][0] - data_theta_array[0])/step_size)
-        stop = int(start + ((theta_array[i][-1] - theta_array[i][0])/step_size) + .5) #+ 1
+        start = int((theta_array[i][0] - data_theta_array[0])/step_size + 0.5) #Add 0.5 for rounding - the int() function does strange things to floats
+        stop = int(int(start + ((theta_array[i][-1] - theta_array[i][0])/step_size) + .5) + 1) #Add 1 because arrays that go from 0 to N have N+1 elements
 
-        data_array[start:stop, i, 0] = counts_array[i][:-1] # This omits the last element - it only works when I do this (change)
+        data_array[start:stop, i, 0] = counts_array[i]
         data_array[start:stop, i, 1] = pixels_array[i]
         data_array[start:stop, i, 2] = monitor_array[i]
         data_array[start:stop, i, 3] = count_time_array[i]
