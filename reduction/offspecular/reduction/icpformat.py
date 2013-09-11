@@ -382,6 +382,7 @@ class ICP(object):
         an array of detector values x scan points.
         '''
         values, detector = readdata(file)
+        print self.columnnames, values.shape
         self.column = ColumnSet()
         for (c, v) in zip(self.columnnames, values.T):
             setattr(self.column, c, v)

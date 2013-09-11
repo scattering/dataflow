@@ -107,8 +107,12 @@ class SansData(object):
             'z':  [data],
             'title': self.metadata['run.filename']+': ' + self.metadata['sample.labl'],
             'metadata': self.metadata,
-            'fixAspect': True,
-            'aspectRatio': 1.0,
+            'options': {
+                'fixedAspect': {
+                    'fixAspect': True,
+                    'aspectRatio': 1.0
+                }
+            },
             'dims': {
                 'xmax': 128,
                 'xmin': 0.0, 
@@ -133,11 +137,15 @@ class SansData(object):
         return pickle.loads(str)
 class plot1D(object):
     """plot1D object is used to plot a 1D graph (after averaging)"""
-    def __init__(self,Q = None, I = None): 
+    def __init__(self,Q = None, I = None, metadata=None): 
         self.Q = Q
         self.I = I
+        if metadata is None: 
+            metadata = {}
+        self.metadata = metadata
+        
     def get_plottable(self): 
-
+        """
         plottable_data = {
             'type': 'nd',
             'title': '1D Sans Data',
@@ -163,6 +171,20 @@ class plot1D(object):
                     },
                 ]
             };
+        """
+        plottable_data = {
+            'type': '1d',
+            'title': self.metadata['run.filename']+': ' + self.metadata['sample.labl'],
+            'metadata': self.metadata,
+            'clear_existing': False,
+            'data': [[[x,y] for x,y in zip(self.Q, self.I)]],
+            'options': {
+                'axes': {
+                    'xaxis': {'label': 'Q'},
+                    'yaxis': {'label': 'I'}
+                }
+            }
+        }
         out = simplejson.dumps(plottable_data,sort_keys=True, indent=2)
         return out
     
@@ -594,7 +616,8 @@ def annular_av(sansdata):
         I.append(norm_integrated_intensity)#not multiplying by step anymore
     Q = Q.tolist()
     I = (np.array(I)).tolist()
-    plot1 = plot1D(Q,I)
+    metadata = deepcopy(sansdata.metadata)
+    plot1 = plot1D(Q,I,metadata)
     print "Q is : ", Q
     print "I is : ", I
     Qlog = np.log10(Q).tolist()
