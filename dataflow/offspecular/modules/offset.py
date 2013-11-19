@@ -39,14 +39,14 @@ def offset_module(id=None, datatype=None, action=None,
             "type":"Object", # maps a name to the offset
             "label": "Offset amount",
             "name": "offsets",
-            "value": {'axis1': {
-                    "type": "float",
-                    "label": "Axis 1 offset", 
-                    "value": 0.0
+            "value": {'axis_name': {
+                    "type": "string",
+                    "label": "Axis name", 
+                    "value": ""
                 }, 
-                "axis2": { 
+                "offset": { 
                     "type": "float",
-                    "label": "Axis 2 offset",
+                    "label": "offset",
                     "value": 0.0
                 }
             }

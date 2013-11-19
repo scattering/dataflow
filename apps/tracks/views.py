@@ -304,8 +304,8 @@ def getBinaryData(request):
     #import numpy
     #data = numpy.random.rand(1000,1000).astype(numpy.float32).tostring()
     #binary_fp = data['binary_fp']
-    print "getting data:", binary_fp
-    print 'server.exists(binary_fp):', server.exists(binary_fp), server.keys()
+    #print "getting data:", binary_fp
+    #print 'server.exists(binary_fp):', server.exists(binary_fp), server.keys()
     data = ''
     if server.exists(binary_fp):
         data = server.lrange(binary_fp, 0, -1)[0]
