@@ -218,12 +218,13 @@ class Filter2D:
             return
         return data
  
+from functools import wraps
 def updateCreationStory(apply):
     """ 
     decorator for 'apply' method - it updates the Creation Story
     for each filter application.
     """
-    
+    @wraps(apply)
     def newfunc(self, data, *args, **kwargs):
         name = self.__class__.__name__
         new_args = "".join([', {arg}'.format(arg=arg) for arg in args])
@@ -242,6 +243,7 @@ def updateCreationStory(apply):
         #return new_data
         return result
     return newfunc
+
  
 def autoApplyToList(apply):
     """ 
@@ -249,6 +251,7 @@ def autoApplyToList(apply):
     as the first argument, applies the filter to each item one at a time.
     """
     
+    @wraps(apply)
     def newfunc(self, data, *args, **kwargs):
         if type(data) is types.ListType:
             result = []
@@ -746,6 +749,13 @@ class PixelsToTwotheta(Filter2D):
     @autoApplyToList
     @updateCreationStory 
     def apply(self, data, pixels_per_degree=80.0, qzero_pixel=309, instr_resolution=1e-6, ax_name='xpixel'):
+        """\
+            input array has axes theta and pixels:
+            output array has axes theta and twotheta.
+            
+            Pixel-to-angle conversion is arithmetic (pixels-per-degree=constant)
+            output is rebinned to fit in a rectangular array if detector angle 
+            is not fixed. """
         print " inside PixelsToTwoTheta "
         pixels_per_degree = float(pixels_per_degree) # coerce, in case it was an integer
         qzero_pixel = float(qzero_pixel) 
@@ -828,13 +838,13 @@ class PixelsToTwotheta(Filter2D):
                 #data_cols = ['counts', 'pixels', 'monitor', 'count_time']
                 cols = new_info[-2]['cols']
                 
-                input_slice[pixel_axis] = slice(i, i+1)
                 for col in range(len(cols)):
                     input_slice = [slice(None, None), slice(None, None), col]
+                    #input_slice[pixel_axis] = slice(i, i+1)
                     input_slice[other_axis] = i
                     array_to_rebin = data_in[input_slice]
                     new_array = reb.rebin(input_twoth_bin_edges, array_to_rebin, output_twoth_bin_edges)
-                    new_data[input_slice] = new_array
+                    new_data.view(ndarray)[input_slice] = new_array
             
 #        th_vector = data.axisValues('theta')
 #        th_spacing = th_vector[1] - th_vector[0]
