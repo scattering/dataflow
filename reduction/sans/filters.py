@@ -48,6 +48,9 @@ import pickle
 PIXEL_SIZE_X_CM=.508
 PIXEL_SIZE_Y_CM=.508
 
+#the bottom-right pixel has an intensity which is a mistake in the live data.
+IGNORE_BOTTOMRIGHT_PIXEL = True # bottom right pixel is at end of first row of xdata
+
 class SansData(object):
     """SansData object used for storing values from a sample file (not div/mask).               
        Stores the array of data as a Measurement object (detailed in uncertainty.py)
@@ -101,7 +104,17 @@ class SansData(object):
         #return self.__str__()
     def get_plottable(self): 
         data = self.data.x.tolist()
-        zmin = self.data.x[self.data.x > 1e-10].min()
+        if not (np.abs(self.data.x) > 1e-10).any():
+            zmin = 0.0
+            zmax = 1.0
+        else: 
+            zmin = self.data.x[self.data.x > 1e-10].min()
+            if IGNORE_BOTTOMRIGHT_PIXEL:
+                datamask = np.ones(self.data.x.shape, dtype='bool')
+                datamask[0,-1] = False
+                zmax = self.data.x[datamask].max()
+            else:
+                zmax = self.data.x.max()
         plottable_data = {
             'type': '2d',
             'z':  [data],
@@ -121,7 +134,7 @@ class SansData(object):
                 'xdim': 128,
                 'ydim': 128,
                 'zmin': zmin,
-                'zmax': self.data.x.max(),
+                'zmax': zmax,
                 },
             'xlabel': 'X',
             'ylabel': 'Y',
