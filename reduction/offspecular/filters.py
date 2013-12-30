@@ -1226,14 +1226,14 @@ def LoadAsterixSpectrum(filename, friendly_name="", path=None):
 def LoadICPMany(filedescriptors):
     result = []
     for fd in filedescriptors:
-        new_data = LoadICPData(fd['filename'], friendly_name=fd['friendly_name'])
+        new_data = LoadICPData(fd.pop('filename'), **fd)
         if type(new_data) is types.ListType:
             result.extend(new_data)
         else:
             result.append(new_data)
     return result        
 
-def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolState=''):
+def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolState='', flip=True, transpose=True, **kw):
     """ 
     loads a data file into a MetaArray and returns that.
     Checks to see if data being loaded is 2D; if not, quits
@@ -1268,7 +1268,7 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
     # provided or not) will be defined
     #    if not PolState == '':
     #        creation_story += ", PolState='{0}'".format(PolState)
-    creation_story += ")" 
+    # creation_story += ")" 
     
     
     if ndims == 2: # one of the dimensions has been collapsed.
@@ -1290,7 +1290,10 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
         if ndims == 2:
             mon.shape = (1,) + mon.shape # broadcast the monitor over the other dimension
             count_time.shape = (1,) + count_time.shape
-        data_array[..., 0] = flipud(file_obj.detector.counts.swapaxes(0,1))
+        counts = file_obj.detector.counts
+        if transpose == True: counts = counts.swapaxes(0,1)
+        if flip == True: counts = flipud(counts)
+        data_array[..., 0] = counts
         #data_array[..., 0] = file_obj.detector.counts
         data_array[..., 1] = 1
         data_array[..., 2] = mon
@@ -1320,7 +1323,10 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
             data_array = zeros((xpixels, ypixels, 4))
             mon = file_obj.monitor.counts[i]
             count_time = file_obj.monitor.count_time[i]
-            data_array[..., 0] = file_obj.detector.counts[i].swapaxes(0,1)
+            counts = file_obj.detector.counts
+            if transpose == True: counts = counts.swapaxes(0,1)
+            if flip == True: counts = flipud(counts) 
+            data_array[..., 0] = counts
             data_array[..., 1] = 1
             data_array[..., 2] = mon
             data_array[..., 3] = count_time
