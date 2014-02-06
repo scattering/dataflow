@@ -48,7 +48,7 @@ The following parameters are needed for the NG71reflectometer::
 
     # Detector response is uniform below 15000 counts/s.  The efficiency
     # curve above 15000 has not been measured.
-    config.saturation = (numpy.array([[1,15000,0]]),'')
+    config.saturation = (np.array([[1,15000,0]]),'')
 
     config.detector_distance = (36*25.4, '') # mm
     config.psd_width = (20, '') # mm

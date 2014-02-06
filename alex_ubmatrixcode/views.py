@@ -3,23 +3,22 @@
 #7/22/10 - Alex Yee added in new downloadangles method.
 
 import os
+import zipfile
+from django.utils import simplejson as json
+
 from django.db.models.signals import post_save, post_delete
-from multiprocessing import Queue
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
-import simplejson
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
+from django import forms
+
 from WRed.file_parsing.file_operator import *
 from WRed.file_parsing.file_read import *
 from WRed.fitting import *
 from WRed.file_parsing.file_to_json import *
 from WRed.display.models import *
 from WRed.runcalc import *
-from django import forms
-import zipfile
-
-import datetime
 
 '''def concat_data(*args):
     print 'concating...'
@@ -81,7 +80,7 @@ def json_file_display(request, idNum):
         data = get_object_or_404(DataFile, id = idNum)
         md5 = data.md5
         all_objects = displayfile('db/' + md5 + '.file')
-        data = simplejson.dumps(all_objects)
+        data = json.dumps(all_objects)
         return HttpResponse(data)
     else:
         print 'Not authenticated!'
@@ -125,7 +124,7 @@ def json_all_files(request):
     variables.insert(2,minv)
     for row in variables[1:]:
         row.extend(['N/A']*(len(variables[0]) - len(row)))
-    return HttpResponse(simplejson.dumps(variables))
+    return HttpResponse(json.dumps(variables))
 
 @login_required
 def json_pipelines(request):
@@ -133,7 +132,7 @@ def json_pipelines(request):
     json = []
     for p in pipelines:
         json.append({'name': p.name, 'pipeline' :p.pipeline})
-    return HttpResponse(simplejson.dumps(json))
+    return HttpResponse(json.dumps(json))
     
 @login_required
 def save_pipeline(request):
@@ -149,7 +148,7 @@ def save_pipeline(request):
             p = Pipeline(proposal_id = request.user.username, name = request.POST['name'], pipeline = request.POST['pipeline'])
             p.save()
             json['success'] = True
-    return HttpResponse(simplejson.dumps(json))
+    return HttpResponse(json.dumps(json))
     
 #Handles POST requests to upload an input file for angleCalculator.js   
 def upload_file_angleCalc(request):
@@ -180,7 +179,7 @@ def upload_file_angleCalc(request):
         return HttpResponse('method != POST')
         
     #returns a dictionary with 'data' = dictionary with 'array' = array of dictionaries created from uploadInputFile method.
-    return HttpResponse(simplejson.dumps(json))
+    return HttpResponse(json.dumps(json))
     
 #Handles GET requests to download a save file for angleCalculator.js
 def download_file_angleCalc(request):
@@ -215,7 +214,7 @@ def upload_file(request):
     else:
 
         return HttpResponse('Get Outta Here!')
-    return HttpResponse(simplejson.dumps(json))
+    return HttpResponse(json.dumps(json))
     
 #Handles POST requests to upload live files (files that may be updated or changed later)
 def upload_file_live(request):
@@ -238,7 +237,7 @@ def upload_file_live(request):
     else:
 
         return HttpResponse('Get Outta Here!')
-    return HttpResponse(simplejson.dumps(json))
+    return HttpResponse(json.dumps(json))
 #handles POST requests to delete files from the database
 @login_required
 def delete_file(request):
@@ -250,7 +249,7 @@ def delete_file(request):
     }
     if request.method == 'POST':
         form = DeleteFileForm(request.POST, request.FILES)
-        ids = simplejson.loads(request.POST['ids'])
+        ids = json.loads(request.POST['ids'])
         for i in ids:
             rFile = DataFile.objects.get(id = i)
             print form.is_valid() , request.user.is_authenticated() , request.user.username == str(rFile.proposal_id) , request.user.is_superuser
@@ -263,7 +262,7 @@ def delete_file(request):
                 print 'invalid'
     else:
         return HttpResponse('Go Away!')
-    return HttpResponse(simplejson.dumps(json))
+    return HttpResponse(json.dumps(json))
 @login_required
 def all_files(request):
     return render_to_response('all_files.html')
@@ -314,8 +313,8 @@ def evaluate(request):
             for a in eq[1:]:
                 parsed_eq += ' ' + a
             print parsed_eq
-            return HttpResponse(simplejson.dumps(displaystring(eval(parsed_eq).__str__())))
-    return HttpResponse(simplejson.dumps(json))
+            return HttpResponse(json.dumps(displaystring(eval(parsed_eq).__str__())))
+    return HttpResponse(json.dumps(json))
 @login_required
 def evaluate_and_save(request):
     json = {
@@ -343,8 +342,8 @@ def evaluate_and_save(request):
             eval(parsed_eq + '.write("db/temp_eval")')
             addfile('db/temp_eval',request.GET['file_name'], request.user.username,False)
             json['success'] = True
-            return HttpResponse(simplejson.dumps(json))
-    return HttpResponse(simplejson.dumps(json))
+            return HttpResponse(json.dumps(json))
+    return HttpResponse(json.dumps(json))
 
 @login_required
 def view_file(request, idNum):
@@ -371,7 +370,7 @@ def download(request):
 def batch_download(request):
     if request.method == 'GET':
         form = DownloadBatchForm(request.GET)
-        file_ids = simplejson.loads(request.GET['ids'])
+        file_ids = json.loads(request.GET['ids'])
         valid = form.is_valid()
         for i in file_ids:
             if request.user.is_authenticated() and (request.user.username == str(DataFile.objects.get(id = i).proposal_id) or request.user.is_superuser):

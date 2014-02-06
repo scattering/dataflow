@@ -1,7 +1,9 @@
-from numpy import ndarray, zeros, logical_and, sum
 import os, types
+
+from numpy import ndarray, zeros, logical_and, sum
+
 from ..offspecular.FilterableMetaArray import FilterableMetaArray as MetaArray
-from reduction.formats import load
+from .reduction.formats import load
 
 def autoApplyToList(apply):
     """ 

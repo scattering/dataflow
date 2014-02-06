@@ -1,11 +1,11 @@
 from __future__ import division
-import sys
-from math import degrees, radians, sin, cos
+from math import radians, sin, cos
+from django.utils import simplejson as json
 
 
 import numpy as np
-
 from bumps.parameter import Parameter, varying
+
 from reduction.tripleaxis import rebin2
 
 def plot(X,Y,theory,data,err):
@@ -112,7 +112,6 @@ class Peaks(object):
         plot(self.X, self.Y, self.theory(), self.data, self.err)
 
     def save(self, basename):
-        import json
         pars = [(p.name,p.value) for p in varying(self.parameters())]
         out = json.dumps(dict(theory=self.theory().tolist(),
                               data=self.data.tolist(),

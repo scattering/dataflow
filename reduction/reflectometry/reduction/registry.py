@@ -159,12 +159,12 @@ def test():
     # Make sure the case of all loaders failing is correct
     try:  reg.load('hello.cx2')
     except CxError: pass # correct failure
-    else: raise AssertError,"Incorrect error on load failure"
+    else: raise AssertionError("Incorrect error on load failure")
     # Make sure the case of no loaders fails correctly
     try: reg.load('hello.missing')
     except ValueError,msg:
         assert str(msg)=="Unknown file type for hello.missing",'Message: <%s>'%(msg)
-    else: raise AssertError,"No error raised for missing extension"
+    else: raise AssertionError("No error raised for missing extension")
     assert reg.formats() == ['new_cx']
     assert reg.extensions() == ['.cx','.cx.gz','.cx1','.cx1.gz','.cx2','.gz']
     # make sure that it supports multiple '.' in filename

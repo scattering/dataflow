@@ -1,13 +1,11 @@
 import sys
-import h5py
 import os
-from numpy import savetxt, max, min
 import zipfile
 import tempfile
-import simplejson
-import copy
+from django.utils import simplejson as json
 
-DEBUG = False
+from numpy import savetxt, max, min
+import h5py
 
 file_in = sys.argv[1]
 file_out = file_in + '.zip'
@@ -50,10 +48,10 @@ def to_zipfile(obj, zipfile, path=''):
             if value.dtype.kind in formats:
                 fd, fn = tempfile.mkstemp()
                 os.close(fd) # to be opened by name
-                if DEBUG: print fname, value.dtype.kind
+                #print fname, value.dtype.kind
                 if len(value.shape) > 2:
                     with open(fn, 'w') as f:
-                        simplejson.dump(value.tolist(), f)
+                        json.dump(value.tolist(), f)
                 else:
                     savetxt(fn, value, delimiter='\t', fmt=formats[value.dtype.kind])
                 zipfile.write(fn, fname)
@@ -69,13 +67,12 @@ def to_zip(hdfname, zipname='data.zip'):
     fd, fn = tempfile.mkstemp()
     os.close(fd) # to be opened by name
     with open(fn, 'w') as f:
-        simplejson.dump(metadata, f, indent='  ')
+        json.dump(metadata, f, indent='  ')
     z.write(fn, '.metadata')
     os.remove(fn)
     z.close()
 
 if __name__ == '__main__':
-    import sys
     file_in = sys.argv[1]
     file_out = file_in + '.zip'
     to_zip(file_in, file_out)

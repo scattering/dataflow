@@ -17,9 +17,9 @@ for huge arrays.
 
 from __future__ import division
 
-import numpy
-import err1d
-from formatnum import format_uncertainty
+import numpy as np
+from . import err1d
+from .formatnum import format_uncertainty
 
 __all__ = ['Measurement']
 
@@ -34,11 +34,11 @@ class Measurement(object):
             if self.x==None and other.x==None:
                 xs=None
             else:
-                xs=numpy.hstack((self.x,other.x))
+                xs=np.hstack((self.x,other.x))
             if self.variance==None and other.variance==None:
                 variances=None
             else:
-                variances=numpy.hstack((self.variance,other.variance))
+                variances=np.hstack((self.variance,other.variance))
             self.x=xs
             self.variance=variances
     def join_channels(self,other):
@@ -48,17 +48,17 @@ class Measurement(object):
             if self.x==None and other.x==None:
                 xs=None
             else:
-                xs=numpy.vstack((self.x,other.x))
+                xs=np.vstack((self.x,other.x))
             if self.variance==None and other.variance==None:
                 variances=None            
             else:
-                variances=numpy.vstack((self.variance,other.variance))
+                variances=np.vstack((self.variance,other.variance))
             self.x=xs
             self.variance=variances
     def _getdx(self): 
         if self.variance==None:
             return None
-        return numpy.sqrt(self.variance)
+        return np.sqrt(self.variance)
     def _setdx(self,dx):
         # Direct operation
         #    variance = dx**2
@@ -88,9 +88,9 @@ class Measurement(object):
         self.variance[key] = value.variance
     def __delitem__(self, key):
         if self.x!=None:
-            self.x=numpy.delete(self.x,key,0)
+            self.x=np.delete(self.x,key,0)
         if self.variance!=None:
-            self.variance=numpy.delete(self.variance,key,0)
+            self.variance=np.delete(self.variance,key,0)
     #def __iter__(self): pass # Not sure we need iter
 
     # Normal operations: may be of mixed type
@@ -131,7 +131,7 @@ class Measurement(object):
         if isinstance(other,Measurement):
             if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
                 return Measurement(*err1d.div(self.x,self.variance,other.x,other.variance))
-            elif type(self)==numpy.ndarray:
+            elif type(self)==np.ndarray:
                 return Measurement(self/other.x, self.variance/other.x**2)
             else:
                 return Measurement(self.x/other.x, self.x/other.x**2)  #maybe revisit this--we claim that other is a measurement, but if the variance is None, then what does it mean to divide by this--the current solution is practical.
@@ -229,17 +229,17 @@ class Measurement(object):
     def __pos__(self):
         return self
     def __abs__(self):
-        return Measurement(numpy.abs(self.x),self.variance)
+        return Measurement(np.abs(self.x),self.variance)
 
     def __str__(self):
-        #return str(self.x)+" +/- "+str(numpy.sqrt(self.variance))
-        if numpy.isscalar(self.x):
+        #return str(self.x)+" +/- "+str(np.sqrt(self.variance))
+        if np.isscalar(self.x):
             if self.variance==None:
                 return format_uncertainty(self.x,self.variance)
             else:
-                return format_uncertainty(self.x,numpy.sqrt(self.variance))
+                return format_uncertainty(self.x,np.sqrt(self.variance))
         else:
-            return [format_uncertainty(v,dv) for v,dv in zip(self.x,numpy.sqrt(self.variance))]
+            return [format_uncertainty(v,dv) for v,dv in zip(self.x,np.sqrt(self.variance))]
     def __repr__(self):
         return "Measurement(%s,%s)"%(str(self.x),str(self.variance))
 
@@ -289,41 +289,41 @@ class Measurement(object):
         if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
             return Measurement(*err1d.sqrt(self.x,self.variance))
         else:
-            return Measurement(numpy.sqrt(self.x),None)
+            return Measurement(np.sqrt(self.x),None)
 
     def exp(self):
         if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
             return Measurement(*err1d.exp(self.x,self.variance))
         else:
-            return Measurement(numpy.exp(self.x),None)
+            return Measurement(np.exp(self.x),None)
     
     def arcsin(self):
         if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
             return Measurement(*err1d.arcsin(self.x,self.variance))
         else:
-            return Measurement(numpy.arcsin(self.x),None)
+            return Measurement(np.arcsin(self.x),None)
         
     def arctan(self):
         if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
             return Measurement(*err1d.arctan(self.x,self.variance))
         else:
-            return Measurement(numpy.arctan(self.x),None)
+            return Measurement(np.arctan(self.x),None)
     def tan(self):
         if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
             return Measurement(*err1d.tan(self.x,self.variance))
         else:
-            return Measurement(numpy.tan(self.x),None)
+            return Measurement(np.tan(self.x),None)
     def cos(self):
         if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
             return Measurement(*err1d.cos(self.x,self.variance))
         else:
-            return Measurement(numpy.cos(self.x),None)
+            return Measurement(np.cos(self.x),None)
     
     def sin(self):
         if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
             return Measurement(*err1d.sin(self.x,self.variance))
         else:
-            return Measurement(numpy.sin(self.x),None)
+            return Measurement(np.sin(self.x),None)
 
 def log(val): return self.log()
 def exp(val): return self.exp()
@@ -409,14 +409,14 @@ def test():
 
     # =============== vector operations ================
     # Slicing
-    z = Measurement(numpy.array([1,2,3,4,5]),numpy.array([2,1,2,3,2]))
+    z = Measurement(np.array([1,2,3,4,5]),np.array([2,1,2,3,2]))
     assert z[2].x == 3 and z[2].variance == 2
     assert (z[2:4].x == [3,4]).all()
     assert (z[2:4].variance == [2,3]).all()
-    z[2:4] = Measurement(numpy.array([8,7]),numpy.array([4,5]))
+    z[2:4] = Measurement(np.array([8,7]),np.array([4,5]))
     assert z[2].x == 8 and z[2].variance == 4
-    A = Measurement(numpy.array([a.x]*2),numpy.array([a.variance]*2))
-    B = Measurement(numpy.array([b.x]*2),numpy.array([b.variance]*2))
+    A = Measurement(np.array([a.x]*2),np.array([a.variance]*2))
+    B = Measurement(np.array([b.x]*2),np.array([b.variance]*2))
 
     # TODO complete tests of copy and inplace operations for vectors and slices.
 

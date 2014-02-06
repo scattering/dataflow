@@ -1,15 +1,16 @@
 """
 Example to show how to create and run a reduction routine.
 """
-import os, sys, math
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import os, math
+from pprint import pprint
+
+from numpy.random import random
+
 from dataflow import config
 from dataflow.calc import run_template
-from dataflow.core import Module, Datatype, Instrument, Template, register_instrument
+from dataflow.core import Module, Data, Instrument, Template, register_instrument
 from dataflow.modules.load import load_module
 from dataflow.modules.save import save_module
-from numpy.random import random
-from pprint import pprint
 
 # ====== Define the module =======
 
@@ -156,9 +157,9 @@ def load_data(name):
 
 # ========== Data and instrument definitions ========
 
-rowan1d = Datatype(id=ROWAN_DATA,
-                  name='1-D Rowan Data',
-                  plot='rowanplot')
+rowan1d = Data(id=ROWAN_DATA,
+               name='1-D Rowan Data',
+               plot='rowanplot')
 # it has three modules: load, save, and rand
 # when the instrument is registered, these modules will also be registered
 ROWAN26 = Instrument(id='ncnr.rowan26',

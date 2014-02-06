@@ -10,7 +10,7 @@ integers, so be sure to create them with floating point inputs.
 
 
 from __future__ import division  # Get true division
-import numpy
+import numpy as np
 
 def div(X,varX, Y,varY):
     """Division with error propagation"""
@@ -56,13 +56,13 @@ def add(X,varX, Y,varY):
 
 def exp(X,varX):
     """Exponentiation with error propagation"""
-    Z = numpy.exp(X)
+    Z = np.exp(X)
     varZ = varX * Z**2
     return Z,varZ
 
 def log(X,varX):
     """Logarithm with error propagation"""
-    Z = numpy.log(X)
+    Z = np.log(X)
     varZ = varX / X**2
     return Z,varZ
 
@@ -72,32 +72,32 @@ def sqrt(X,varX):
 
 def arcsin(X,varX):
     """arcsin with error propagation"""
-    Z=numpy.arcsin(X)
+    Z=np.arcsin(X)
     varZ=varX/(1-varX)  #recall that the variance is squared  #oddly, this one can diverge!!!
     return Z,varZ
 
 def arctan(X,varX):
     """arctan with error propagation"""
-    Z=numpy.arctan(X)
+    Z=np.arctan(X)
     varZ=varX/(1+varX)**2  #recall that the variance is squared 
     return Z,varZ
 
 def tan(X,varX):
     """tan with error propagation"""
-    Z=numpy.tan(X)
-    varZ=varX/numpy.cos(numpy.sqrt(varX))**4
+    Z=np.tan(X)
+    varZ=varX/np.cos(np.sqrt(varX))**4
     return Z,varZ
 
 def sin(X,varX):
     """sin with error propagation"""
-    Z=numpy.sin(X)
-    varZ=varX*numpy.cos(numpy.sqrt(varX))**2
+    Z=np.sin(X)
+    varZ=varX*np.cos(np.sqrt(varX))**2
     return Z,varZ
 
 def cos(X,varX):
     """cos with error propagation"""
-    Z=numpy.cos(X)
-    varZ=varX*numpy.sin(numpy.sqrt(varX))**2
+    Z=np.cos(X)
+    varZ=varX*np.sin(np.sqrt(varX))**2
     return Z,varZ
 
 # Confirm this formula before using it

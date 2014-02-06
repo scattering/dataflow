@@ -1,51 +1,25 @@
 """
 SANS reduction modules
 """
-import os, sys, math, simplejson
-import numpy as np
-dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(dir)
-from pprint import pprint
+import os, sys
+from django.utils import simplejson as json
 
+from reduction.sans.filters import *
 from .. import config
 from .. import wireit
-from ..calc import run_template
 from ..core import Data, Instrument, Template, register_instrument
 from ..modules.load import load_module
 from ..modules.save import save_module
-from ...reduction.sans.filters import *
-from ..SANS.convertq import convertq_module
-from ..SANS.correct_detector_efficiency import correct_detector_efficiency_module
-from ..SANS.monitor_normalize import monitor_normalize_module
-from ..SANS.correct_background import correct_background_module
-from ..SANS.generate_transmission import generate_transmission_module
-from ..SANS.initial_correction import initial_correction_module
-from ..SANS.correct_solid_angle import correct_solid_angle_module
-from ..SANS.convert_qxqy import convert_qxqy_module
-from ..SANS.annular_av import annular_av_module
-from ..SANS.absolute_scaling import absolute_scaling_module
-
-#from ... import ROOT_URL
-
-#print 'repo', ROOT_URL.REPO_ROOT
-#print 'home', ROOT_URL.HOMEDIR
-
-#from dataflow import config
-#from dataflow.calc import run_template
-#from dataflow.core import Datatype, Instrument, Template, register_instrument
-#from dataflow.modules.load import load_module
-#from dataflow.modules.save import save_module
-#from reduction.sans.filters import *
-#from dataflow.SANS.convertq import convertq_module
-#from dataflow.SANS.correct_detector_efficiency import correct_detector_efficiency_module
-#from dataflow.SANS.monitor_normalize import monitor_normalize_module
-#from dataflow.SANS.correct_background import correct_background_module
-#from dataflow.SANS.generate_transmission import generate_transmission_module
-#from dataflow.SANS.initial_correction import initial_correction_module
-#from dataflow.SANS.correct_solid_angle import correct_solid_angle_module
-#from dataflow.SANS.convert_qxqy import convert_qxqy_module
-#from dataflow.SANS.annular_av import annular_av_module
-#from dataflow.SANS.absolute_scaling import absolute_scaling_module
+from .convertq import convertq_module
+from .correct_detector_efficiency import correct_detector_efficiency_module
+from .monitor_normalize import monitor_normalize_module
+from .correct_background import correct_background_module
+from .generate_transmission import generate_transmission_module
+from .initial_correction import initial_correction_module
+from .correct_solid_angle import correct_solid_angle_module
+from .convert_qxqy import convert_qxqy_module
+from .annular_av import annular_av_module
+from .absolute_scaling import absolute_scaling_module
 
 #Transmissions
 Tsam = 0
@@ -254,8 +228,8 @@ def TESTING():
                         wires=wires,
                         instrument=SANS_INS.id,
                         )
-    print simplejson.dumps(wireit.template_to_wireit_diagram(template))
-    #print simplejson.dumps(wireit.instrument_to_wireit_language(SANS_INS))
+    print json.dumps(wireit.template_to_wireit_diagram(template))
+    #print json.dumps(wireit.instrument_to_wireit_language(SANS_INS))
     #result = run_template(template, config)
     #print result
     #return result

@@ -1,6 +1,8 @@
 # Django settings for dataflow project.
 import os,sys
-#import ROOT_URL
+import logging
+
+import apps.keygen
 
 if sys.platform=='win32':
     #HOMEDIR=r'c:\dataflow_new'
@@ -144,7 +146,7 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'ey*kta(3^@_f2u-t9t-w9@q75k$!!=p$_d)g9l)$dvzb)2l8q$'
+SECRET_KEY = apps.keygen.get_key("~/.dataflow")
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -212,7 +214,6 @@ INSTALLED_APPS = (
 # the site admins on every HTTP 500 error.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
-import logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

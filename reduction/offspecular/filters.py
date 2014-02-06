@@ -1,18 +1,23 @@
 # -*- coding: latin-1 -*-
-from numpy import cos, pi, cumsum, arange, ndarray, ones, zeros, array, newaxis, linspace, empty, resize, sin, allclose, zeros_like, linalg, dot, arctan2, float64, histogram2d, sum, sqrt, loadtxt, searchsorted, NaN, logical_not, fliplr, flipud
-import numpy
-from numpy.ma import MaskedArray
-import os, simplejson, datetime, sys, types, xml.dom.minidom
+import os, datetime, sys, types
 from copy import deepcopy
-from scipy import signal
-
-from FilterableMetaArray import FilterableMetaArray as MetaArray
-from he3analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
-from reduction.formats import load
-import reduction.rebin as reb
-import h5py
 import tempfile
 import subprocess
+from functools import wraps
+
+from numpy import (cos, pi, cumsum, arange, ndarray, ones, zeros, newaxis,
+    linspace, empty, resize, sin, allclose, zeros_like, linalg, dot, arctan2,
+    float64, histogram2d, sum, sqrt, loadtxt, searchsorted, NaN, logical_not,
+    fliplr, flipud)
+from numpy.ma import MaskedArray
+from scipy import signal
+import h5py
+
+from reduction.formats import load
+import reduction.rebin as reb
+
+from .FilterableMetaArray import FilterableMetaArray as MetaArray
+from .he3analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
 
 class Supervisor():
     """ class to hold rebinned_data objects and increment their reference count """
@@ -218,7 +223,6 @@ class Filter2D:
             return
         return data
  
-from functools import wraps
 def updateCreationStory(apply):
     """ 
     decorator for 'apply' method - it updates the Creation Story
@@ -534,8 +538,8 @@ class SmoothData(Filter2D):
         if window == 'flat': #moving average
             kernel=ones(width,'d')
         else:
-            #w=eval('numpy.'+window+'(window_len)')
-            kernel = getattr(numpy, window)(width)
+            #w=eval('np.'+window+'(window_len)')
+            kernel = getattr(np, window)(width)
             
         ia_size = list(src_data.shape) # intermediate array initialization
         ia_size[axis] += 2*(width-1)
@@ -582,7 +586,7 @@ class SmoothData(Filter2D):
         
         return new_data
 
-        #y=numpy.convolve(w/w.sum(),s,mode='same')
+        #y=np.convolve(w/w.sum(),s,mode='same')
         #return y[window_len-1:-window_len+1]
 
 class AsterixPixelsToTwotheta(Filter2D):
@@ -1339,7 +1343,7 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
 def LoadUXDData(filename, path="", friendly_name=""):
     """ Load two-dimensional mesh scans from Bruker x-ray files """
     ###################
-    # By AndrÃ© GuzmÃ¡n #
+    # By André Guzmán #
     ###################
 
     #This program assumes that the step sizes of all Rocking Curves are the same
@@ -1374,8 +1378,7 @@ def LoadUXDData(filename, path="", friendly_name=""):
     ############# END Variables #################################
 
     file_obj = open(os.path.join(path, filename), 'r')
-    np = numpy
-    
+
     for lines in file_obj:
         line = lines.strip()
 
@@ -2255,7 +2258,7 @@ class Algebra(Filter2D):
         #make a list of safe functions 
         safe_list = ['math', 'acos', 'asin', 'atan', 'atan2', 'ceil', 'cos', 'cosh', 'degrees', 'e', 'exp', 'fabs', 'floor', 'fmod', 'frexp', 'hypot', 'ldexp', 'log', 'log10', 'modf', 'pi', 'pow', 'radians', 'sin', 'sinh', 'sqrt', 'tan', 'tanh','newaxis'] 
         #use the list to filter the local namespace 
-        safe_dict = dict([ (k, numpy.__dict__.get(k, None)) for k in safe_list ])
+        safe_dict = dict([ (k, np.__dict__.get(k, None)) for k in safe_list ])
         return safe_dict
         
     def add_to_namespace(self, data, prefix, namespace, automask=True):

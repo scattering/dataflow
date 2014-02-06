@@ -1,9 +1,8 @@
 import sys
-import re
 import numpy as np
-import readncnr5 
-import scriptutil as SU
-from Ppeaks import Data
+from . import readncnr5
+from . import scriptutil as SU
+from .Ppeaks import Data
 
 
 def read_data(mydirectory,myfilebase,myend):
@@ -36,6 +35,7 @@ class ColormapMask(Colormap):
         self._set_extremes()
 
 def plot(data, sigma=0.002):
+    import pylab
     step = 0.0002
     sigma = 0.0009
     #Hr = (0.48,0.52) if dataset[4] not in 'tu' else (-0.52,-0.48)
@@ -53,8 +53,7 @@ def plot(data, sigma=0.002):
         stencil = np.exp(-((Hi-HM)**2 + (Ki-KM)**2)/(2*sigma**2))
         IM += stencil*Ii
         MM += stencil*Mi
-    import pylab
-    from matplotlib.colors import Colormap
+
     pylab.subplot(121, aspect='equal')
     pylab.cla()
     pylab.pcolormesh(Hm,Km,50000*IM/(MM+1),edgecolors='None')

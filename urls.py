@@ -1,5 +1,5 @@
 
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls import patterns, include, url
 #from tracks.views import xhr_test, mytest, home
 
 # Uncomment the next two lines to enable the admin:
@@ -7,10 +7,9 @@ from django.contrib import admin
 admin.autodiscover()
 
 from django.conf import settings
-REPO_ROOT=settings.REPO_ROOT
 
 
-urlpatterns = patterns(REPO_ROOT + '.apps.tracks.views',
+urlpatterns = patterns(settings.REPO_ROOT + '.apps.tracks.views',
     ('^hello/$', 'xhr_test'),
     ('^test/$', 'mytest'),
     #('^login/$', 'django.contrib.auth.views.login'),
@@ -76,6 +75,6 @@ urlpatterns += patterns('',
                         url(r'^admin/', include(admin.site.urls)),
                         (r'', include('registration.urls')),
                         (r'^profiles/', include('profiles.urls')),
-                        (r'', REPO_ROOT + '.apps.tracks.views.home'),
+                        (r'', settings.REPO_ROOT + '.apps.tracks.views.home'),
 
                         )

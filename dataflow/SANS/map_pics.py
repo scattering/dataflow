@@ -1,12 +1,10 @@
-import struct
-import sys,os
+import os
 
 def map_pics(key):
-
     """
-Generate the mapping between files and their roles
-"""
-   
+    Generate the mapping between files and their roles
+    """
+    raise NotImplementedError("map_pics needs path to static resources")
     datadir=os.path.join(os.path.dirname(os.path.abspath(__file__)),'static/img/SANS')
     filedict={'initial':os.path.join(datadir,'initial_correction_image.png'),
               'deadtime':os.path.join(datadir,'deadtime.png'),

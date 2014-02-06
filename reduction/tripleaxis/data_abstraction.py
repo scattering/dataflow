@@ -1,35 +1,22 @@
 import numpy as np
-import uncertainty, err1d
-import sys, os
-#import readncnr4 as readncnr
-import readncnr5 as readncnr #readncnr5 is configured for min/max for get_metadata()
-import readchalk as readchalk
-import readhfir as readhfir
+import os
+import copy, pickle
+from django.utils import simplejson as json
 
-from formatnum import format_uncertainty
-import copy, simplejson, pickle
-from mpfit import mpfit
-from bumps.rebin import rebin2d
 from bumps.rebin import bin_edges, rebin
-
 import bumps
-import subprocess
-import rebin2
 
-#from dataflow import regular_gridding
-#from ...dataflow import wireit
+from . import uncertainty, err1d
+#from . import readncnr4 as readncnr
+from . import readncnr5 as readncnr #readncnr5 is configured for min/max for get_metadata()
+from . import readchalk as readchalk
+from . import readhfir as readhfir
+from . import rebin2
 
-LOCAL=True
+from .formatnum import format_uncertainty
+from .mpfit import mpfit
 
-if not LOCAL:
-    #for use in larger project
-    from ... import regular_gridding
-if LOCAL:
-    #for use in local testing
-    
-    from matplotlib import pylab
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
-    from dataflow import regular_gridding
+from ..common import regular_gridding
 eps = 1e-8
 
 """
@@ -990,7 +977,7 @@ class TripleAxis(object):
             }
         #self.xaxis = ''
         #self.yaxis = ''
-        return simplejson.dumps(plottable_data)
+        return json.dumps(plottable_data)
     
     def get_csv(self):
         if len(self.shape) == 3:
@@ -1054,7 +1041,7 @@ class TripleAxis(object):
                 for field in value:
                     fieldlist.append(field.name)
                     
-        return simplejson.dumps(fieldlist)
+        return json.dumps(fieldlist)
     
     
     
@@ -2333,6 +2320,7 @@ def hfir_filereader(filename):
 
 
 if __name__ == "__main__":       
+    import pylab
     if 0:
         #spin = filereader('spins data/bamno059.ng5')
         #spin2 = filereader('spins data/bamno060.ng5')
@@ -2457,7 +2445,7 @@ if __name__ == "__main__":
         #test1= pickle.loads(test)
 
         #plotobj=bt7.get_plottable()
-        #plotobj=simplejson.dumps(plotobj)
+        #plotobj=json.dumps(plotobj)
         temp = join(bt7, bt7)
         bt7.normalize_monitor(90000)
         #print 'detailed balance done'
@@ -2620,7 +2608,6 @@ if __name__ == "__main__":
     
     
     if 0:
-        import bumps
         from bumps.fitters import FIT_OPTIONS, FitDriver, DreamFit, StepMonitor, ConsoleMonitor
         import bumps.modelfn, bumps.fitproblem
         fn = lambda chi,phi,omega1,omega2: np.linalg.norm(self.scatteringEquations([chi,phi,omega1,omega2], h1p, h2p,q1,q2))

@@ -6,9 +6,12 @@ calculates the row of the NT matrix that corresponds to each datapoint
 from ... import config
 from ...core import Module
 
-def append_polarization_matrix_module(id=None, datatype=None, cell_datatype=None, action=None,
-                version='0.0', fields={},
-                description="Append polarization matrix", xtype=None):
+
+def append_polarization_matrix_module(id=None, datatype=None,
+                                      cell_datatype=None, action=None,
+                                      version='0.0', fields={},
+                                      description="Append polarization matrix",
+                                      xtype=None):
     """
     Return a module for appending polarization matrices
     """

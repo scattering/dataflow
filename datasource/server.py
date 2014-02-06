@@ -17,11 +17,12 @@ DATASTORE = '/tmp'
 INSTRUMENTS = ['BT7','ANDR']
 
 import os, sys
-import logging
-import json
+import pickle
+
 import flask
 from flask import send_from_directory
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
+import werkzeug
 
 app = flask.Flask(__name__)
 

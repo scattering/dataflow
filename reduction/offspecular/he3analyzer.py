@@ -1,8 +1,9 @@
-from numpy import exp, zeros, float64, vectorize, array, where, empty, linalg
 import datetime, time
+import os, pickle
+from django.utils import simplejson as json
+
+from numpy import exp, zeros, array, empty
 import wx, wx.calendar
-import simplejson, os, pickle
-#from ...dataflow.core import Data
 
 class He3Analyzer:
     """ an object that contains information about a particular 3He cell, 
@@ -65,7 +66,7 @@ class He3Analyzer:
     
     def __repr__(self):
         repr = self.__class__.__name__ + '('
-        repr += simplejson.dumps(self.params, sort_keys=True, indent=4)
+        repr += json.dumps(self.params, sort_keys=True, indent=4)
         repr += ')'
         return repr
     
@@ -259,7 +260,7 @@ class He3AnalyzerCollection():
     def AddFromFile(self, filename='he3cells.json'):
         # function to load up all existing stored He3Cell parameters
         full_fn = os.path.join(self.path, filename)        
-        all_cells_params = simplejson.load(open(full_fn, 'r'))
+        all_cells_params = json.load(open(full_fn, 'r'))
         # file should contain a list of dictionaries, one for each cell
         cells = []
         for cell_params in all_cells_params:
@@ -270,7 +271,7 @@ class He3AnalyzerCollection():
     def Save(self, filename='he3cells.json'):
         all_cells_params = [cell.params for cell in self.cells]
         full_fn = os.path.join(self.path, filename) 
-        simplejson.dump(all_cells_params, open(full_fn, 'w'), sort_keys=True, indent=4)
+        json.dump(all_cells_params, open(full_fn, 'w'), sort_keys=True, indent=4)
     
     def AddNew(self, params=None, autosave=True):
         params_out = He3Analyzer.default_params.copy()
@@ -338,16 +339,16 @@ class He3AnalyzerCollection():
         #raise NotImplementedError("Write a loads method for He3AnalyzerCollection")
     
     def get_plottable(self):
-        return simplejson.dumps({})
+        return json.dumps({})
         #raise NotImplementedError("Write a get_plottable method for He3AnalyzerCollection")
-    
+
 class wxHe3AnalyzerCollection(He3AnalyzerCollection):
     """ version with wx GUI interaction for AddNew and getActiveCell """
     
     def AddNew(self, params=None, autosave=True):
         params_out = He3Analyzer.default_params.copy()
         params_out.update(params)
-        dlg = get_cell_params_dialog(None, -1, 'Get New Cell Parameters', params_out)
+        dlg = CellParamsDialog(None, -1, 'Get New Cell Parameters', params_out)
         if not dlg.ShowModal() == wx.ID_OK:
             dlg.Destroy()
             return #cancel button pushed
@@ -378,7 +379,7 @@ class wxHe3AnalyzerCollection(He3AnalyzerCollection):
             dlg.Destroy()
             self.AddNew(params={"t0_str":ref_datetime.ctime()})
 
-class get_cell_params_dialog(wx.Dialog):
+class CellParamsDialog(wx.Dialog):
     def __init__(self, parent, id, title, params):
         wx.Dialog.__init__(self, parent, wx.ID_ANY, title, size=(600, 400), style=wx.DEFAULT_DIALOG_STYLE | wx.NO_FULL_REPAINT_ON_RESIZE)
         

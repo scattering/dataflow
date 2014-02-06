@@ -1,13 +1,11 @@
-import numpy as N
-from matplotlib.mlab import griddata
-import matplotlib
-import matplotlib.cbook
-import matplotlib.pyplot as plt
+import numpy as np
 from numpy.random import uniform
+from matplotlib.mlab import griddata
+import matplotlib.pyplot as plt
 
 def edges(C):
     E = 0.5*(C[:-1]+C[1:])
-    return N.hstack((C[0]-2*(E[0]-C[0]), E, C[-1]+2*(C[-1]-E[-1])))
+    return np.hstack((C[0]-2*(E[0]-C[0]), E, C[-1]+2*(C[-1]-E[-1])))
 
 
 def regularlyGrid(xarr, yarr, zarr, xstart=None, xfinal=None, xstep=None, ystart=None, yfinal=None, ystep=None):
@@ -26,21 +24,19 @@ def regularlyGrid(xarr, yarr, zarr, xstart=None, xfinal=None, xstep=None, ystart
     if ystep == None:
         ystep = 1.0 * (yfinal - ystart) / len(yarr)
 
-    xi = N.arange(xstart, xfinal, xstep)
-    yi = N.arange(ystart, yfinal, ystep)
-    '''
-	Programming note:
-		linspace does (start, final, how many steps)
-		arange does (start, final, step)
-	'''
+    xi = np.arange(xstart, xfinal, xstep)
+    yi = np.arange(ystart, yfinal, ystep)
+    # Programming note:
+	#	linspace does (start, final, how many steps)
+	#	arange does (start, final, step)
 
     # grid the data.
-    print len(xarr), len(yarr), len(zarr), len(xi), len(yi)
+    #print "gridding", len(xarr), len(yarr), len(zarr), len(xi), len(yi)
 
     xarr,yarr,zarr=remove_duplicates(xarr,yarr,zarr)
     zi = griddata(xarr, yarr, zarr, xi, yi)
 
-    print "done gridding"
+    #print "done gridding"
     return xi, yi, zi
 
 def remove_duplicates(xarr, yarr, zarr):
@@ -93,9 +89,9 @@ def remove_duplicates(xarr, yarr, zarr):
     rows_to_be_removed.reverse() #duplicate rows to be removed indices in reverse order now
 
     for k in rows_to_be_removed:
-        xarr = N.delete(xarr,k,0)
-        yarr = N.delete(yarr,k,0)
-        zarr = N.delete(zarr,k,0)
+        xarr = np.delete(xarr,k,0)
+        yarr = np.delete(yarr,k,0)
+        zarr = np.delete(zarr,k,0)
 
     #update primary detector dimension
     return xarr,yarr,zarr
@@ -121,11 +117,11 @@ def regularlyGridRandom():
     npts = 1000
     x = uniform(-3, 3, npts)
     y = uniform(-3, 3, npts)
-    z = x * N.exp(-x ** 2 - y ** 2)
+    z = x * np.exp(-x ** 2 - y ** 2)
 
     # define grid.
-    xi = N.arange(-3.1, 3.1, 0.05)
-    yi = N.arange(-3.1, 3.1, 0.05)
+    xi = np.arange(-3.1, 3.1, 0.05)
+    yi = np.arange(-3.1, 3.1, 0.05)
 
     # grid the data.
     zi = griddata(x, y, z, xi, yi)
@@ -152,11 +148,11 @@ def pcolorRandom():
     npts = 100
     x = uniform(-3, 3, npts)
     y = uniform(-3, 3, npts)
-    z = x * N.exp(-x ** 2 - y ** 2)
+    z = x * np.exp(-x ** 2 - y ** 2)
 
     # define grid.
-    xi = N.arange(-3.1, 3.1, 0.05)
-    yi = N.arange(-3.1, 3.1, 0.05)
+    xi = np.arange(-3.1, 3.1, 0.05)
+    yi = np.arange(-3.1, 3.1, 0.05)
 
     # grid the data.
     zi = griddata(x, y, z, xi, yi)

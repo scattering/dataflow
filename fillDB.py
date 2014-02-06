@@ -1,4 +1,4 @@
-from apps.tracks.models import *
+from apps.tracks.models import Instrument, Facility
 from django.contrib.sites.models import RequestSite
 from django.contrib.sites.models import Site
     

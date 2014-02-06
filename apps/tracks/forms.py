@@ -1,5 +1,5 @@
 from django import forms
-from models import *
+from .models import *
 
 
 # language_choices should be the same as instrument_class_choices

@@ -1,4 +1,3 @@
-#import numpy as N
 threshold=1e-6
 
 

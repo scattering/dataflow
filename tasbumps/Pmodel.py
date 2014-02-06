@@ -1,15 +1,14 @@
 import sys
-import re
+
 import numpy as np
-import readncnr5 
-import scriptutil as SU
-import bumps
+
 from bumps.fitters import FIT_OPTIONS, FitDriver, DreamFit, StepMonitor, ConsoleMonitor
-import bumps.modelfn, bumps.fitproblem
-from Ppeaks import Peaks, Gaussian, Background, Data
 from bumps.names import Parameter, FitProblem
 from bumps import pmath
 
+from . import readncnr5
+from . import scriptutil as SU
+from .Ppeaks import Peaks, Gaussian, Background, Data
 
 def read_data(mydirectory,myfilebase,myend):
     myfilebaseglob=myfilebase+'*.'+myend

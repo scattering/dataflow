@@ -1,62 +1,34 @@
 """
 Triple Axis Spectrometer reduction and analysis modules
 """
-import math, os, sys, types
+import os, sys
 
-if 1:
-    from ...reduction.tripleaxis import data_abstraction
-    from ..calc import run_template
-    from .. import wireit
-    from ... import ROOT_URL
-    from django.utils import simplejson
-    import numpy
+from django.utils import simplejson as json
+
+from reduction.tripleaxis import data_abstraction
+
+from ..calc import run_template
+from .. import wireit
+
+from .. import config
+from ..core import Instrument, Data, Template, register_instrument
     
-    from .. import config
-    from ..core import Instrument, Data, Template, register_instrument
-    
-    #from dataflow.dataflow.modules.load import load_module
-    from .modules.tas_join import join_module
-    from .modules.tas_subtract import subtract_module
-    from ..modules.save import save_module
-    from ..modules.load import load_module
-    from .modules.tas_extract import extract_module
-    from .modules.loadchalk import load_chalk_module
-    from .modules.tas_normalize_monitor import normalize_monitor_module
-    from .modules.tas_detailed_balance import detailed_balance_module
-    from .modules.tas_monitor_correction import monitor_correction_module
-    from .modules.tas_volume_correction import volume_correction_module
-    from ...apps.tracks.models import File
-    from ...apps.tracks.models import Facility
-
-
-if 0:
-    #direct imports for use individually (ie running this file)
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
-    from dataflow.reduction.tripleaxis import data_abstraction
-    from dataflow.dataflow.calc import run_template
-    from dataflow.dataflow import wireit
-    from dataflow import ROOT_URL
-    from django.utils import simplejson
-    
-    import numpy
-    from dataflow.dataflow import config
-    from dataflow.dataflow.core import Instrument, Data, Template, register_instrument
-
-    from dataflow.dataflow.tas.modules.tas_join import join_module
-    from dataflow.dataflow.tas.modules.tas_subtractimport import subtract_module
-    from dataflow.dataflow.modules.save import save_module
-    from dataflow.dataflow.modules.load import load_module
-    from dataflow.dataflow.tas.modules.tas_normalize_monitor import normalize_monitor_module
-    from dataflow.dataflow.tas.modules.tas_detailed_balance import detailed_balance_module
-    from dataflow.dataflow.tas.modules.tas_monitor_correction import monitor_correction_module
-    from dataflow.dataflow.tas.modules.tas_volume_correction import volume_correction_module
-    from dataflow.apps.tracks.models import File
-    #from dataflow.apps.tracks.models import File
+from .modules.tas_join import join_module
+from .modules.tas_subtract import subtract_module
+from ..modules.save import save_module
+from ..modules.load import load_module
+from .modules.tas_extract import extract_module
+from .modules.loadchalk import load_chalk_module
+from .modules.tas_normalize_monitor import normalize_monitor_module
+from .modules.tas_detailed_balance import detailed_balance_module
+from .modules.tas_monitor_correction import monitor_correction_module
+from .modules.tas_volume_correction import volume_correction_module
 
 TAS_DATA = 'data1d.tas'
 xtype = 'AutosizeImageContainer'
-data1d = Data(TAS_DATA, data_abstraction.TripleAxis, loaders=[{'function':data_abstraction.autoloader, 'id':'loadTAS'}, 
-                                                              {'function':data_abstraction.chalk_autoloader, 'id':'loadChalkRiver'}])
+data1d = Data(TAS_DATA, data_abstraction.TripleAxis,
+              loaders=[{'function':data_abstraction.autoloader, 'id':'loadTAS'},
+                       {'function':data_abstraction.chalk_autoloader, 'id':'loadChalkRiver'}])
 
 # Reduction operations may refer to data from other objects, but may not
 # modify it.  Instead of modifying, first copy the data and then work on
@@ -87,10 +59,11 @@ data1d = Data(TAS_DATA, data_abstraction.TripleAxis, loaders=[{'function':data_a
 
 
 # === Component binding ===
-def get_friendly_name(fh):
-    from ...apps.tracks.models import File
-    return File.objects.get(name=str(fh)).friendly_name
 '''
+def get_friendly_name(fh):
+    from apps.tracks.models import File
+    return File.objects.get(name=str(fh)).friendly_name
+
 def _load_data(name):
     (dirName, fileName) = os.path.split(name)
     friendlyName = get_friendly_name(fileName)
@@ -116,7 +89,7 @@ def load_action(files=[], intent=None, position=None, xtype=None, **kwargs):
 # that will not exist on a typical machine (i.e. /home/brendan...)
 #
 # the replacement above is an adaptation of the loader code in 
-# dataflow/dataflow/offspecular/instruments.py
+# dataflow.offspecular.instruments
 ################################################################################
 
 load = load_module(id='tas.load', datatype=TAS_DATA, version='1.0')
@@ -398,8 +371,10 @@ if 1:
 
 
 if 0:
+    import reduction.tripleaxis
+    DATA_ROOT = os.path.dirname(reduction.tripleaxis.__file__)
     modules = [
-        dict(module="tas.load", position=(10, 150), config={'files':[ROOT_URL.HOMEDIR[:-12] + 'reduction/tripleaxis/EscanQQ7HorNSF91831.bt7']}),
+        dict(module="tas.load", position=(10, 150), config={'files':os.path.join(DATA_ROOT,'EscanQQ7HorNSF91831.bt7')}),
         dict(module="tas.normalize_monitor", position=(270, 20), config={'target_monitor': 165000}),
         dict(module="tas.detailed_balance", position=(270, 120), config={}),
         dict(module="tas.monitor_correction", position=(270, 220), config={'instrument_name':'TAS'}),
@@ -466,7 +441,6 @@ def TAS_RUN():
 
 if __name__ == "__main__":
     #hi=TAS_RUN()
-    print 'template: ', simplejson.dumps(wireit.template_to_wireit_diagram(template))
-    #print ROOT_URL.REPO_ROOT, ROOT_URL.HOMEDIR
-    print 'language', simplejson.dumps(wireit.instrument_to_wireit_language(TAS))
+    print 'template: ', json.dumps(wireit.template_to_wireit_diagram(template))
+    print 'language', json.dumps(wireit.instrument_to_wireit_language(TAS))
     print "done"

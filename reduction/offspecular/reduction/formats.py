@@ -262,4 +262,5 @@ def test():
     assert loadmeta(cg1file).name == 'psdca022.cg1'
     assert available() == ['NCNR NG-1', 'NCNR NG-7', 'NeXus'], available()
 
-if __name__ == "__main__": test()
+if __name__ == "__main__":
+    test()

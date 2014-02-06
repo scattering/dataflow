@@ -3,16 +3,15 @@ Load data sets.
 """
 
 import tarfile
+import os
+
 from .. import config
 from ...apps.tracks.models import File
 from ..core import Module
-from ..core import lookup_module, lookup_datatype
-import os, gzip
+from ..core import lookup_datatype
 
 def load_action(files=[], **kwargs):
     print "loading saved results"
-    #import tarfile
-    #from ...apps.tracks.models import File
     result = []
     for fn in files:
         print 'fn: ', fn

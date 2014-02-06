@@ -89,10 +89,10 @@ __all__ = ['ReflData']
 import datetime
 import weakref
 
-import numpy
-from numpy import inf, pi, sin, cos, arcsin, arctan2, sqrt
+import numpy as np
+from numpy import inf, arctan2, sqrt
 
-from qxqz import ABL_to_QxQz
+from .qxqz import ABL_to_QxQz
 
 # TODO: attribute documentation and units should be integrated with the
 # TODO: definition of the attributes.  Value attributes should support
@@ -398,7 +398,7 @@ class Detector(object):
 
     def _solid_angle(self):
         """Detector solid angle [x,y] (radians)"""
-        return 2 * arctan2(numpy.asarray(self.size) / 2., self.distance)
+        return 2 * arctan2(np.asarray(self.size) / 2., self.distance)
     solid_angle = property(_solid_angle, doc=_solid_angle.__doc__)
 
 
@@ -825,14 +825,14 @@ class Reader(ReflData):
         if ny == 1:
             self.zx = counts[zlo:zhi + 1, :]
         else:
-            xy = numpy.zeros((nx, ny), dtype='float32')
-            zx = numpy.zeros((nq, nx), dtype='float32')
+            xy = np.zeros((nx, ny), dtype='float32')
+            zx = np.zeros((nq, nx), dtype='float32')
             self.framerange = Limits() # Keep track of total range
             for i in range(zlo, zhi):
                 v = self.frame(i)
                 self.framerange.add(v, dv=sqrt(v))
                 xy += v
-                zx[i - zlo, :] = numpy.sum(v[:, ylo:yhi], axis=1)
+                zx[i - zlo, :] = np.sum(v[:, ylo:yhi], axis=1)
             self.xy = xy
             self.zx = zx
 
@@ -862,7 +862,7 @@ def shadow(f, beamstop, frame):
 
     Currently this function returns no shadow.
     """
-    mask = numpy.ones(self.detector.shape, 'int8')
+    mask = np.ones(self.detector.shape, 'int8')
     if beamstop.ispresent:
         # calculate location of the beamstop centre relative to
         # the detector.

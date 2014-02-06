@@ -4,7 +4,7 @@ Does initial correction
 
 from .. import config
 from ..core import Module
-from ..SANS.map_pics import map_pics
+
 def initial_correction_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, **kwargs):
     """(SAM-BGD)-[tsam/temp](EMP-BGD)"""

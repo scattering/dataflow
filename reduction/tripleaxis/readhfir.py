@@ -1,13 +1,6 @@
-import numpy as np
-#import pylab
-import datetime
-from time import mktime
-#import mx.DateTime
-import writebt7
-import re
-import scanparser
 import os
-from copy import deepcopy
+
+import numpy as np
 
 translate_dict = {}
 

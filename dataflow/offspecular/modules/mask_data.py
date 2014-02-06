@@ -4,7 +4,7 @@ Clear part of the data
 
 from ... import config
 from ...core import Module
-try: 
+try:
     from collections import OrderedDict
 except:
     from ...ordered_dict import OrderedDict
@@ -83,7 +83,7 @@ def mask_data_module(id=None, datatype=None, action=None,
                   fields=fields,
                   action=action,
                   filterModule=filterModule,
-                  xtype=xtype
+                  xtype=xtype,
                   )
     module.LABEL_WIDTH = 150
     return module

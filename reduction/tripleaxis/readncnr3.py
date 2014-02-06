@@ -1,13 +1,11 @@
-import numpy as N
-#import pylab
 import datetime
 from time import mktime
-#import mx.DateTime
-import writebt7
 import re
-import scanparser3 as scanparser
 import os
 
+import numpy as np
+
+from . import scanparser3 as scanparser
 
 months={'jan':1,'feb':2,'mar':3,'apr':4,'may':5,'jun':6,'jul':7,'aug':8,'sep':9,'oct':10,'nov':11,'dec':12}
 
@@ -316,7 +314,7 @@ class datareader:
                 tokenized=get_tokenized_line(myfile)
                 self.columndict={}
                 self.columnlist=[]
-                for i in N.arange(len(tokenized)):
+                for i in np.arange(len(tokenized)):
                         field=tokenized[i].lower()
                         if field=='Q(x)'.lower():
                                 field='Qx'.lower()
@@ -388,7 +386,7 @@ class datareader:
                 self.columnlist=[]
                 self.timestamp_flag=True
                 #originally set the timestamp flag to True, if it turns out that there is not timestamp in the file, then create one using the time field
-                for i in N.arange(1,len(tokenized)):
+                for i in np.arange(1,len(tokenized)):
                         field=tokenized[i]
                         if field=='QX':
                                 field='Qx'.lower()
@@ -606,7 +604,7 @@ class datareader:
                                 try:
                                         lines=int(self.lines)
                                 except:
-                                        lines=N.Inf
+                                        lines=np.Inf
                                 while 1:
                                         lineStr = myfile.readline()
                                         if not(lineStr):
@@ -641,7 +639,7 @@ class datareader:
 
 
 
-        def readbuffer(self,myfilestr,lines=N.Inf):
+        def readbuffer(self,myfilestr,lines=np.Inf):
                 self.myfilestr=myfilestr
                 self.lines=lines
                 myfile = open(myfilestr, 'r')
@@ -734,54 +732,54 @@ class Data:
                 step=motor['step']
                 start=motor['start']
                 if step==0.0:
-                        res=start*N.ones((1,self.npts),'d')
+                        res=start*np.ones((1,self.npts),'d')
                 else:
-                        res=N.arange(start,motor['end'],step)
+                        res=np.arange(start,motor['end'],step)
                 return res
         def gen_motor2_arr(self):
                 motor=self.get_motor2()
                 step=motor['step']
                 start=motor['start']
                 if step==0.0:
-                        res=start*N.ones((1,self.npts),'d')
+                        res=start*np.ones((1,self.npts),'d')
                 else:
-                        res=N.arange(start,motor['end'],step)
+                        res=np.arange(start,motor['end'],step)
                 return res
         def gen_motor3_arr(self):
                 motor=self.get_motor3()
                 step=motor['step']
                 start=motor['start']
                 if step==0.0:
-                        res=start*N.ones((1,self.npts),'d')
+                        res=start*np.ones((1,self.npts),'d')
                 else:
-                        res=N.arange(start,motor['end'],step)
+                        res=np.arange(start,motor['end'],step)
                 return res
         def gen_motor4_arr(self):
                 motor=self.get_motor4()
                 step=motor['step']
                 start=motor['start']
                 if step==0.0:
-                        res=start*N.ones((1,self.npts),'d')
+                        res=start*np.ones((1,self.npts),'d')
                 else:
-                        res=N.arange(start,motor['end'],step)
+                        res=np.arange(start,motor['end'],step)
                 return res
         def gen_motor5_arr(self):
                 motor=self.get_motor5()
                 step=motor['step']
                 start=motor['start']
                 if step==0.0:
-                        res=start*N.ones((1,self.npts),'d')
+                        res=start*np.ones((1,self.npts),'d')
                 else:
-                        res=N.arange(start,motor['end'],step)
+                        res=np.arange(start,motor['end'],step)
                 return res
         def gen_motor6_arr(self):
                 motor=self.get_motor6()
                 step=motor['step']
                 start=motor['start']
                 if step==0.0:
-                        res=start*N.ones((1,self.npts),'d')
+                        res=start*np.ones((1,self.npts),'d')
                 else:
-                        res=N.arange(start,motor['end'],step)
+                        res=np.arange(start,motor['end'],step)
                 return res
 
 

@@ -4,7 +4,6 @@ Correct Detector Sensitivity With .DIV file
 
 from .. import config
 from ..core import Module
-from ..SANS.map_pics import map_pics
 
 def correct_detector_sensitivity_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, **kwargs):

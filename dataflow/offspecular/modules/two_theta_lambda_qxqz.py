@@ -4,7 +4,7 @@ Module to convert two theta to QxQz
 
 from ... import config
 from ...core import Module
-try: 
+try:
     from collections import OrderedDict
 except:
     from ...ordered_dict import OrderedDict

@@ -1,27 +1,13 @@
-#!/usr/bin/env python
-
-import struct
-import sys,os
-import vaxutils
-import data
+import os
 from copy import deepcopy,copy
-import numpy as np
-from numpy import array
-import math
-#from matplotlib import pyplot as plt
-from uncertainty import Measurement
-import json
-from draw_annulus_aa import annular_mask_antialiased
-import datetime as date
-import time
-#from numpy import ndarray, amin, amax, alen, array, fromstring
-import simplejson, datetime
-#from dataflow.core import Data
-#print 'PATH', os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-#from ...dataflow.core import Data 
-from cStringIO import StringIO
 import pickle
+from django.utils import simplejson as json
+
+import numpy as np
+from uncertainty import Measurement
+
+from . import data
+from .draw_annulus_aa import annular_mask_antialiased
 
 #I will have a general philosophy that filters do not have side effects. That is,
 #they do not change the state of their inputs. So, we will always work on copies
@@ -140,7 +126,7 @@ class SansData(object):
             'ylabel': 'Y',
             'zlabel': 'Intensity (I)',
             };
-        out = simplejson.dumps(plottable_data,sort_keys=True)
+        out = json.dumps(plottable_data,sort_keys=True)
         return out
     
     def dumps(self):
@@ -198,7 +184,7 @@ class plot1D(object):
                 }
             }
         }
-        out = simplejson.dumps(plottable_data,sort_keys=True, indent=2)
+        out = json.dumps(plottable_data,sort_keys=True, indent=2)
         return out
     
     def dumps(self):
@@ -235,7 +221,7 @@ class div(object):
             'ylabel': 'Y',
             'zlabel': 'Intensity (I)',
             };
-        out = simplejson.dumps(plottable_data,sort_keys=True, indent=2)
+        out = json.dumps(plottable_data,sort_keys=True, indent=2)
         return out
     
     def dumps(self):
@@ -744,7 +730,35 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument,coord_left,coord_right): #
     #------------------------------------
     return ABS
 
-def chain_corrections():
+def map_files(key):
+    """
+    Generate the mapping between files and their roles
+    """
+
+    datadir=os.path.join(os.path.dirname(__file__),'ncnr_sample_data')
+    filedict={'empty_1m':os.path.join(datadir,'SILIC001.SA3_SRK_S101'),
+              'empty_4m':os.path.join(datadir,'SILIC002.SA3_SRK_S102'),
+              'empty_cell_1m':os.path.join(datadir,'SILIC003.SA3_SRK_S103'),
+              'blocked_1m':os.path.join(datadir,'SILIC004.SA3_SRK_S104'),
+              'trans_empty_cell_4m':os.path.join(datadir,'SILIC005.SA3_SRK_S105'),
+              'trans_sample_4m':os.path.join(datadir,'SILIC006.SA3_SRK_S106'),
+              'blocked_4m':os.path.join(datadir,'SILIC007.SA3_SRK_S107'),
+              'empty_cell_4m':os.path.join(datadir,'SILIC008.SA3_SRK_S108'),
+              'sample_1m':os.path.join(datadir,'SILIC009.SA3_SRK_S109'),
+              'sample_4m':os.path.join(datadir,'SILIC010.SA3_SRK_S110'),
+              'mask':os.path.join(datadir,'DEFAULT.MASK'),
+              'div':os.path.join(datadir,'PLEX_2NOV2007_NG3.DIV'),
+              'NG7':os.path.join(datadir,'NG7.dat'),
+              'NG3':os.path.join(datadir,'NG3.dat'),
+              'save':os.path.join(datadir, 'sans_saved.txt'),
+              }
+    return filedict[key]
+
+
+
+# ========= Demo code ==========
+
+def chain_corrections_demo():
     """a sample chain of corrections"""
     
     #read the files
@@ -893,36 +907,8 @@ def chain_corrections():
     print AVG
     
 
-def map_files(key):
-    """
-    Generate the mapping between files and their roles
-    """
-    
-    datadir=os.path.join(os.path.dirname(__file__),'ncnr_sample_data')
-    filedict={'empty_1m':os.path.join(datadir,'SILIC001.SA3_SRK_S101'),
-              'empty_4m':os.path.join(datadir,'SILIC002.SA3_SRK_S102'),
-              'empty_cell_1m':os.path.join(datadir,'SILIC003.SA3_SRK_S103'),
-              'blocked_1m':os.path.join(datadir,'SILIC004.SA3_SRK_S104'),
-              'trans_empty_cell_4m':os.path.join(datadir,'SILIC005.SA3_SRK_S105'),
-              'trans_sample_4m':os.path.join(datadir,'SILIC006.SA3_SRK_S106'),
-              'blocked_4m':os.path.join(datadir,'SILIC007.SA3_SRK_S107'),
-              'empty_cell_4m':os.path.join(datadir,'SILIC008.SA3_SRK_S108'),
-              'sample_1m':os.path.join(datadir,'SILIC009.SA3_SRK_S109'),
-              'sample_4m':os.path.join(datadir,'SILIC010.SA3_SRK_S110'),
-              'mask':os.path.join(datadir,'DEFAULT.MASK'),
-              'div':os.path.join(datadir,'PLEX_2NOV2007_NG3.DIV'),
-              'NG7':os.path.join(datadir,'NG7.dat'),
-              'NG3':os.path.join(datadir,'NG3.dat'),
-              'save':os.path.join(datadir, 'sans_saved.txt'),
-              }
-    return filedict[key]
-              
-    
-    
-
-
 if __name__ == '__main__':
-    chain_corrections()
+    chain_corrections_demo()
     if 0:
         for key, value in metadata.iteritems():
             print key,value
@@ -930,7 +916,4 @@ if __name__ == '__main__':
         
       
         attenuation=metadata['run.atten 7.0']
-    
-    
-    
     

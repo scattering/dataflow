@@ -1,9 +1,8 @@
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from django.utils import simplejson as json
 
 from pprint import pprint
-import json
 
 def ppjson(s): return json.dumps(json.loads(s), sort_keys=True, indent=2)
 

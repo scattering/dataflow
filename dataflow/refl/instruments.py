@@ -12,15 +12,15 @@ from .modules.footprintmodule import footprint_module
 from .modules.backgroundmodule import background_module
 from .modules.normalizemodule import normalize_module
 from .modules.normalizetimemodule import normalize_time_module
-#from dataflow.reduction.reflectometry.filters import FootprintCorrection
-#from ...reduction.offspecular.FilterableMetaArray import FilterableMetaArray
-#from ...reduction.offspecular.filters import LoadICPMany, LoadICPData
-from ...reduction.reflectometry.FilterableMetaArray import FilterableMetaArray
-from ...reduction.reflectometry.filters import LoadICPMany, LoadICPData
-from ...reduction.reflectometry.filters import FootprintCorrection
-from ...reduction.reflectometry.filters import BackgroundSubtraction
-from ...reduction.reflectometry.filters import NormalizeToMonitor
-from ...reduction.reflectometry.filters import NormalizeToTime
+#from .filters import FootprintCorrection
+from reduction.reflectometry.FilterableMetaArray import FilterableMetaArray
+from reduction.reflectometry.filters import LoadICPMany, LoadICPData
+from reduction.reflectometry.filters import FootprintCorrection
+from reduction.reflectometry.filters import BackgroundSubtraction
+from reduction.reflectometry.filters import NormalizeToMonitor
+from reduction.reflectometry.filters import NormalizeToTime
+#from reduction.offspecular.FilterableMetaArray import FilterableMetaArray
+#from reduction.offspecular.filters import LoadICPMany, LoadICPData
 
 #def join_action(input=None):
 #    print "combining", input

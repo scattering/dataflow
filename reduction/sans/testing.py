@@ -1,8 +1,5 @@
-import numpy as N
 from matplotlib import pyplot as plt
-from data import readNCNRData
-from data import readNCNRSensitivity
-from uncertainty import Measurement
+from .data import readNCNRData
 from ReductionCode import convertMonitor
 
 

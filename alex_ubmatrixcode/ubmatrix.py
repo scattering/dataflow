@@ -4,109 +4,109 @@ Author: Alex Yee
 Edit History
     See Research Journal
 '''
-import sys
-import numpy as N 
+import numpy as np
+from numpy import degrees, radians, sin, cos, arcsin, arccos, arctan2
 #import scipy
 #import scipy.optimize
 from openopt import NLSP
 
 def star(a,b,c,alpha,beta,gamma):
    "Calculate unit cell volume, reciprocal cell volume, reciprocal lattice parameters"
-   alpha=N.radians(alpha)
-   beta=N.radians(beta)
-   gamma=N.radians(gamma)
+   alpha=radians(alpha)
+   beta=radians(beta)
+   gamma=radians(gamma)
    V=2*a*b*c*\
-   N.sqrt(N.sin((alpha+beta+gamma)/2)*\
-           N.sin((-alpha+beta+gamma)/2)*\
-           N.sin((alpha-beta+gamma)/2)*\
-           N.sin((alpha+beta-gamma)/2))
-   Vstar=(2*N.pi)**3/V;
-   astar=2*N.pi*b*c*N.sin(alpha)/V
-   bstar=2*N.pi*a*c*N.sin(beta)/V
-   cstar=2*N.pi*b*a*N.sin(gamma)/V
-   alphastar=N.arccos((N.cos(beta)*N.cos(gamma)-\
-                            N.cos(alpha))/ \
-                           (N.sin(beta)*N.sin(gamma)))
-   betastar= N.arccos((N.cos(alpha)*N.cos(gamma)-\
-                            N.cos(beta))/ \
-                           (N.sin(alpha)*N.sin(gamma)))
-   gammastar=N.arccos((N.cos(alpha)*N.cos(beta)-\
-                            N.cos(gamma))/ \
-                           (N.sin(alpha)*N.sin(beta)))
+   sqrt(sin((alpha+beta+gamma)/2)*\
+           sin((-alpha+beta+gamma)/2)*\
+           sin((alpha-beta+gamma)/2)*\
+           sin((alpha+beta-gamma)/2))
+   Vstar=(2*pi)**3/V;
+   astar=2*pi*b*c*sin(alpha)/V
+   bstar=2*pi*a*c*sin(beta)/V
+   cstar=2*pi*b*a*sin(gamma)/V
+   alphastar=arccos((cos(beta)*cos(gamma)-\
+                            cos(alpha))/ \
+                           (sin(beta)*sin(gamma)))
+   betastar= arccos((cos(alpha)*cos(gamma)-\
+                            cos(beta))/ \
+                           (sin(alpha)*sin(gamma)))
+   gammastar=arccos((cos(alpha)*cos(beta)-\
+                            cos(gamma))/ \
+                           (sin(alpha)*sin(beta)))
    V=V
-   alphastar=N.degrees(alphastar)
-   betastar=N.degrees(betastar)
-   gammastar=N.degrees(gammastar)
+   alphastar=degrees(alphastar)
+   betastar=degrees(betastar)
+   gammastar=degrees(gammastar)
    return astar,bstar,cstar,alphastar,betastar,gammastar
 
 def calcB(astar,bstar,cstar,alphastar,betastar,gammastar,c, alpha):
    "Calculates the B matrix using the crystal dimensions calculated in the 'star' method"
-   alphastar = N.radians(alphastar)
-   betastar = N.radians(betastar)
-   gammastar = N.radians(gammastar)
-   alpha = N.radians(alpha)
+   alphastar = radians(alphastar)
+   betastar = radians(betastar)
+   gammastar = radians(gammastar)
+   alpha = radians(alpha)
    
-   Bmatrix=N.array([[astar, bstar*N.cos(gammastar), cstar*N.cos(betastar)],
-                    [0, bstar*N.sin(gammastar), -cstar*N.sin(betastar)*N.cos(alpha)],
+   Bmatrix=np.array([[astar, bstar*cos(gammastar), cstar*cos(betastar)],
+                    [0, bstar*sin(gammastar), -cstar*sin(betastar)*cos(alpha)],
                     [0, 0, cstar]],'Float64') #check the third element
-   #"cstarN.sin(betastar)*N.sin(alpha)" for third element is equivalent
+   #"cstar sin(betastar)*sin(alpha)" for third element is equivalent
    return Bmatrix
 
 def calcU(h1, k1, l1, h2, k2, l2, omega1, chi1, phi1, omega2, chi2, phi2, Bmatrix):
    "Calculates the UB matrix using 2 sets of observations (h#, k#, l#) and their respective angle measurements in degrees (omega#, chi#, phi#)"
    #Convertiung angles given in degrees to radians
-   omega1 = N.radians(omega1)
-   chi1 = N.radians(chi1)
-   phi1 = N.radians(phi1)
-   omega2 = N.radians(omega2)
-   chi2 = N.radians(chi2)
-   phi2 = N.radians(phi2)
+   omega1 = radians(omega1)
+   chi1 = radians(chi1)
+   phi1 = radians(phi1)
+   omega2 = radians(omega2)
+   chi2 = radians(chi2)
+   phi2 = radians(phi2)
    
-   hmatrix1 = N.array([h1, k1, l1])
-   hmatrix2 = N.array([h2, k2, l2])
-   h1c = N.dot(Bmatrix, hmatrix1) 
-   h2c = N.dot(Bmatrix, hmatrix2)
-   h3c = N.cross(h1c, h2c)
+   hmatrix1 = array([h1, k1, l1])
+   hmatrix2 = array([h2, k2, l2])
+   h1c = np.dot(Bmatrix, hmatrix1)
+   h2c = np.dot(Bmatrix, hmatrix2)
+   h3c = np.cross(h1c, h2c)
    
    ''' Making the orthogonal unit-vectors t#c:
    t1c is parallel to h1c
    t3c is orthogonal to both t1c and t2c, and thus is parallel to h3c
    t2c must be orthogonal to both t1c and t2c
    '''
-   t1c = h1c / N.sqrt(N.power(h1c[0], 2) + N.power(h1c[1], 2) + N.power(h1c[2], 2))
-   t3c = h3c / N.sqrt(N.power(h3c[0], 2) + N.power(h3c[1], 2) + N.power(h3c[2], 2))
-   t2c = N.cross(t3c, t1c)
-   Tc = N.array([t1c, t2c, t3c]).T
-   #realU=N.array([[ -5.28548868e-01,   8.65056241e-17,  -6.63562568e-16],
+   t1c = h1c / sqrt(h1c[0]**2 + h1c[1]**2 + h1c[2]**2)
+   t3c = h3c / sqrt(h3c[0]**2 + h3c[1]**2 + h3c[2]**2)
+   t2c = np.cross(t3c, t1c)
+   Tc = np.array([t1c, t2c, t3c]).T
+   #realU=np.array([[ -5.28548868e-01,   8.65056241e-17,  -6.63562568e-16],
    #               [ -0.00000000e+00,   4.86909792e-01,   2.90030482e-16],
    #               [  0.00000000e+00,   0.00000000e+00,  -1.26048191e-01]])
    
    #calculating u_phi 
-   u1p = N.array([N.cos(omega1)*N.cos(chi1)*N.cos(phi1) - N.sin(omega1)*N.sin(phi1),
-                N.cos(omega1)*N.cos(chi1)*N.sin(phi1) + N.sin(omega1)*N.cos(phi1),
-                N.cos(omega1)*N.sin(chi1)],'Float64')
-   u2p = N.array([N.cos(omega2)*N.cos(chi2)*N.cos(phi2) - N.sin(omega2)*N.sin(phi2),
-                N.cos(omega2)*N.cos(chi2)*N.sin(phi2) + N.sin(omega2)*N.cos(phi2),
-                N.cos(omega2)*N.sin(chi2)],'Float64')
-   u3p = N.cross(u1p, u2p)
+   u1p = np.array([cos(omega1)*cos(chi1)*cos(phi1) - sin(omega1)*sin(phi1),
+                cos(omega1)*cos(chi1)*sin(phi1) + sin(omega1)*cos(phi1),
+                cos(omega1)*sin(chi1)],'Float64')
+   u2p = np.array([cos(omega2)*cos(chi2)*cos(phi2) - sin(omega2)*sin(phi2),
+                cos(omega2)*cos(chi2)*sin(phi2) + sin(omega2)*cos(phi2),
+                cos(omega2)*sin(chi2)],'Float64')
+   u3p = np.cross(u1p, u2p)
    
    ''' Making orthogonal unit-vectors t#p
    Tp should be exactaly superimposed on Tc
    t#p is created the same way t#c was, except using u#p instead of h#c
    '''
-   t1p = u1p / N.sqrt(u1p[0]**2 + u1p[1]**2 + u1p[2]**2)
-   t3p = u3p / N.sqrt(u3p[0]**2 + u3p[1]**2 + u3p[2]**2)
-   t2p = N.cross(t3p, t1p)
-   Tp = N.array([t1p, t2p, t3p],'Float64').T
+   t1p = u1p / sqrt(u1p[0]**2 + u1p[1]**2 + u1p[2]**2)
+   t3p = u3p / sqrt(u3p[0]**2 + u3p[1]**2 + u3p[2]**2)
+   t2p = np.cross(t3p, t1p)
+   Tp = np.array([t1p, t2p, t3p],'Float64').T
    
    #calculating the UB matrix
-   Umatrix = N.dot(Tp, Tc.T) 
-   #UBmatrix = N.dot(Umatrix, Bmatrix)
+   Umatrix = np.dot(Tp, Tc.T)
+   #UBmatrix = np.dot(Umatrix, Bmatrix)
    return Umatrix 
    
 def calcUB (*args):
     Umatrix = calcU(*args)
-    UBmatrix = N.dot(Umatrix, args[-1])
+    UBmatrix = np.dot(Umatrix, args[-1])
     return UBmatrix
 
   
@@ -131,19 +131,19 @@ def calcRefineUB(observations, wavelength):
         sys.stderr.write('i %3.4f \n'%(observations[i]['phi'],))
         '''
         
-        theta = N.radians(observations[i]['theta'])
-        chi = N.radians(observations[i]['chi'])
-        phi = N.radians(observations[i]['phi'])
-        twotheta = N.radians(observations[i]['twotheta'])
+        theta = radians(observations[i]['theta'])
+        chi = radians(observations[i]['chi'])
+        phi = radians(observations[i]['phi'])
+        twotheta = radians(observations[i]['twotheta'])
         omega = theta - twotheta/2.0
         
-        u1p = N.cos(omega)*N.cos(chi)*N.cos(phi) - N.sin(omega)*N.sin(phi)
-        u2p = N.cos(omega)*N.cos(chi)*N.sin(phi) + N.sin(omega)*N.cos(phi)
-        u3p = N.cos(omega)*N.sin(chi)
+        u1p = cos(omega)*cos(chi)*cos(phi) - sin(omega)*sin(phi)
+        u2p = cos(omega)*cos(chi)*sin(phi) + sin(omega)*cos(phi)
+        u3p = cos(omega)*sin(chi)
         
-        uv1p = 2.0*N.sin(twotheta/2) / wavelength * u1p
-        uv2p = 2.0*N.sin(twotheta/2) / wavelength * u2p
-        uv3p = 2.0*N.sin(twotheta/2) / wavelength * u3p
+        uv1p = 2.0*sin(twotheta/2) / wavelength * u1p
+        uv2p = 2.0*sin(twotheta/2) / wavelength * u2p
+        uv3p = 2.0*sin(twotheta/2) / wavelength * u3p
 
         Uv.append(uv1p)
         Uv.append(uv2p)
@@ -194,9 +194,9 @@ def UBRefinementEquations(x, h, Uv):
    for i in range(0, len(h)):
         #sys.stderr.write('i %d\n'%(i,))
         #sys.stdout.write('i %d\n'%(i,))
-        outvec.append(N.dot(UB[0], h[i]) - Uv[3*i])
-        outvec.append(N.dot(UB[1], h[i]) - Uv[3*i + 1])
-        outvec.append(N.dot(UB[2], h[i]) - Uv[3*i + 2])   
+        outvec.append(np.dot(UB[0], h[i]) - Uv[3*i])
+        outvec.append(np.dot(UB[1], h[i]) - Uv[3*i + 1])
+        outvec.append(np.dot(UB[2], h[i]) - Uv[3*i + 2])
         
    return outvec
    
@@ -208,16 +208,16 @@ def UBRefinementEquations(x, h, Uv):
 # **************************** START - METHOD FOR OBTAINING LATTICE PARAMETERS FROM UB ****************************
 def calculateLatticeParameters(UBmatrix):
 
-    G = N.linalg.inv(N.dot(UBmatrix.T, UBmatrix))
+    G = np.linalg.inv(np.dot(UBmatrix.T, UBmatrix))
     
-    abc = N.sqrt(N.diag(G))
+    abc = sqrt(np.diag(G))
     a = abc[0]
     b = abc[1]
     c = abc[2]
     
-    alpha = N.degrees(N.arccos(G[1, 2]/b/c))
-    beta = N.degrees(N.arccos(G[0, 2]/a/c))
-    gamma = N.degrees(N.arccos(G[0, 1]/a/b))
+    alpha = degrees(arccos(G[1, 2]/b/c))
+    beta = degrees(arccos(G[0, 2]/a/c))
+    gamma = degrees(arccos(G[0, 1]/a/b))
     
     latticeParameters = {'a': a, 'b': b, 'c': c, 'alpha': alpha, 'beta': beta, 'gamma': gamma}
     return latticeParameters
@@ -226,7 +226,7 @@ def calculateLatticeParameters(UBmatrix):
 def calcTwoTheta(h, stars, wavelength):
     "Calculates the twotheta value for a vector h with lattice parameters given. Useful for finding observed reflections."
     q = calcq (h[0], h[1], h[2], stars)
-    twotheta = N.degrees(2 * N.arcsin(wavelength * q / 4 / N.pi))
+    twotheta = degrees(2 * arcsin(wavelength * q / 4 / pi))
     return twotheta
     
 
@@ -235,16 +235,16 @@ def calcTwoTheta(h, stars, wavelength):
 def calcIdealAngles(h, UBmatrix, Bmatrix, wavelength, stars):
    "Calculates the remaining angles with omega given as 0"
    "Returns (twotheta, theta, omega, chi, phi)"
-   '''myUBmatrix=N.array([[ -0.8495486120866541,0.8646150711829229,-1.055554030805845],
+   '''myUBmatrix=np.array([[ -0.8495486120866541,0.8646150711829229,-1.055554030805845],
                      [-0.7090402876860106,0.7826211792587279,1.211714627203656],
                      [1.165768160358335,1.106088263216144,-0.03224481098900243]],'Float64')
    '''
-   hp = N.dot(UBmatrix, h)
-   phi = N.degrees(N.arctan2(hp[1], hp[0]))
-   chi = N.degrees(N.arctan2(hp[2], N.sqrt(hp[0]**2 + hp[1]**2)))
+   hp = np.dot(UBmatrix, h)
+   phi = degrees(arctan2(hp[1], hp[0]))
+   chi = degrees(arctan2(hp[2], sqrt(hp[0]**2 + hp[1]**2)))
       
    q = calcq (h[0], h[1], h[2], stars)
-   twotheta = N.degrees(2 * N.arcsin(wavelength * q / 4 / N.pi))
+   twotheta = degrees(2 * arcsin(wavelength * q / 4 / pi))
    theta = twotheta / 2
    omega = 0
       
@@ -262,14 +262,14 @@ def calcIdealAngles2 (desiredh, chi, phi, UBmatrix, wavelength, stars):
    "Calculates the twotheta, theta, and omega values for a desired h vector. Uses chi and phi from calcScatteringPlane."
    #Accepts the desired h vector, chi, phi, the UB matrix, the wavelength, and the stars dictionary
    
-   desiredhp = N.dot(UBmatrix, desiredh)
+   desiredhp = np.dot(UBmatrix, desiredh)
    
    #Old code (scipy.optimize.fsolve) produced inaccurate results with far-off estimates
    #solutions = scipy.optimize.fsolve(equations, x0, args=(h1p, h2p, wavelength)) 
 
    q = calcq (desiredh[0], desiredh[1], desiredh[2], stars)
 
-   twotheta = 2.0 * N.arcsin(wavelength * q / 4.0 / N.pi)
+   twotheta = 2.0 * arcsin(wavelength * q / 4.0 / pi)
     
    x0 = [0.0]
    p = NLSP(secondequations, x0, args=(desiredhp, chi, phi, wavelength, twotheta))
@@ -282,7 +282,7 @@ def calcIdealAngles2 (desiredh, chi, phi, UBmatrix, wavelength, stars):
     
     
    solutions = [twotheta, theta, omega]
-   return N.degrees(solutions) #% 360
+   return degrees(solutions) #% 360
    #returns an array of 3 angles [twotheta, theta, omega]
    
    
@@ -290,20 +290,20 @@ def calcIdealAngles2 (desiredh, chi, phi, UBmatrix, wavelength, stars):
 def calcScatteringPlane (h1, h2, UBmatrix, wavelength,stars):
    "Calculates the chi and phi for the scattering plane defined by h1 and h2. Used with calcIdealAngles2."
    #Accepts two scattering plane vectors, h1 and h2, the UB matrix, and the wavelength
-   h1p = N.dot(UBmatrix, h1)
-   h2p = N.dot(UBmatrix, h2)
+   h1p = np.dot(UBmatrix, h1)
+   h2p = np.dot(UBmatrix, h2)
    
    x0 = [0.0, 0.0, 0.0, 0.0]
    
    q = calcq (h1[0], h1[1], h1[2], stars)
-   twotheta1 = 2.0 * N.arcsin(wavelength * q / 4.0 / N.pi)
+   twotheta1 = 2.0 * arcsin(wavelength * q / 4.0 / pi)
    q = calcq (h2[0], h2[1], h2[2], stars)
-   twotheta2 = 2.0 * N.arcsin(wavelength * q / 4.0 / N.pi)
+   twotheta2 = 2.0 * arcsin(wavelength * q / 4.0 / pi)
    
    p0 = NLSP(scatteringEquations, x0, args=(h1p, h2p, wavelength, twotheta1, twotheta2))
    r0 = p0.solve('nlp:ralg')
-   chi = N.degrees(r0.xf[0]) #xf is the final array, xf[0] = chi
-   phi = N.degrees(r0.xf[1]) #                       xf[1] = phi
+   chi = degrees(r0.xf[0]) #xf is the final array, xf[0] = chi
+   phi = degrees(r0.xf[1]) #                       xf[1] = phi
    
    return chi, phi
    
@@ -318,12 +318,12 @@ def scatteringEquations(x, h1p, h2p, wavelength,tth1,tth2):
    theta1 = tth1/2
    theta2 = tth2/2
 
-   outvec=[h1p[0] - 2.0/wavelength * N.sin(theta1) * (N.cos(omega1)*N.cos(chi)*N.cos(phi) - N.sin(omega1)*N.sin(phi)),
-           h1p[1] - 2.0/wavelength * N.sin(theta1) * (N.cos(omega1)*N.cos(chi)*N.sin(phi) + N.sin(omega1)*N.cos(phi)),
-           h1p[2] - 2.0/wavelength * N.sin(theta1) * N.cos(omega1)*N.sin(chi),
-           h2p[0] - 2.0/wavelength * N.sin(theta2) * (N.cos(omega2)*N.cos(chi)*N.cos(phi) - N.sin(omega2)*N.sin(phi)),
-           h2p[1] - 2.0/wavelength * N.sin(theta2) * (N.cos(omega2)*N.cos(chi)*N.sin(phi) + N.sin(omega2)*N.cos(phi)),
-           h2p[2] - 2.0/wavelength * N.sin(theta2) * N.cos(omega2)*N.sin(chi)]  
+   outvec=[h1p[0] - 2.0/wavelength * sin(theta1) * (cos(omega1)*cos(chi)*cos(phi) - sin(omega1)*sin(phi)),
+           h1p[1] - 2.0/wavelength * sin(theta1) * (cos(omega1)*cos(chi)*sin(phi) + sin(omega1)*cos(phi)),
+           h1p[2] - 2.0/wavelength * sin(theta1) * cos(omega1)*sin(chi),
+           h2p[0] - 2.0/wavelength * sin(theta2) * (cos(omega2)*cos(chi)*cos(phi) - sin(omega2)*sin(phi)),
+           h2p[1] - 2.0/wavelength * sin(theta2) * (cos(omega2)*cos(chi)*sin(phi) + sin(omega2)*cos(phi)),
+           h2p[2] - 2.0/wavelength * sin(theta2) * cos(omega2)*sin(chi)]
    return outvec
    
    
@@ -333,9 +333,9 @@ def secondequations(x, hp, chi, phi, wavelength,tth):
    #omega = x[1]
    omega=x[0]
    theta=tth/2
-   outvec=[hp[0] - 2.0/wavelength * N.sin(theta) * (N.cos(omega)*N.cos(chi)*N.cos(phi) - N.sin(omega)*N.sin(phi)),
-           hp[1] - 2.0/wavelength * N.sin(theta) * (N.cos(omega)*N.cos(chi)*N.sin(phi) + N.sin(omega)*N.cos(phi)),
-           hp[2] - 2.0/wavelength * N.sin(theta) * N.cos(omega)*N.sin(chi)]
+   outvec=[hp[0] - 2.0/wavelength * sin(theta) * (cos(omega)*cos(chi)*cos(phi) - sin(omega)*sin(phi)),
+           hp[1] - 2.0/wavelength * sin(theta) * (cos(omega)*cos(chi)*sin(phi) + sin(omega)*cos(phi)),
+           hp[2] - 2.0/wavelength * sin(theta) * cos(omega)*sin(chi)]
    return outvec
 
 # *********************************** END - calculations for scattering plane mode  *********************************** 
@@ -345,18 +345,18 @@ def secondequations(x, hp, chi, phi, wavelength,tth):
 def calcIdealAngles3 (h, UBmatrix, wavelength, phi, stars):
    "Calculates the chi and theta for a desired vector h in the fixed phi mode."
    #Accepts ta desired vector h, the UB matrix, the wavelength, and the fixed phi
-   hp = N.dot(UBmatrix, h)
+   hp = np.dot(UBmatrix, h)
    q = calcq (h[0], h[1], h[2], stars)
-   twotheta = 2 * N.arcsin(wavelength * q / 4 / N.pi)
+   twotheta = 2 * arcsin(wavelength * q / 4 / pi)
    
    x0 = [0.0, 0.0]
    p0 = NLSP(phiEquations, x0, args=(hp, wavelength, phi,twotheta))
    r0 = p0.solve('nlp:ralg')
    
    #r0.xf is the final array   
-   twotheta=N.degrees(twotheta)
-   chi = N.degrees(r0.xf[0])    # xf[0] = chi
-   omega = N.degrees(r0.xf[1])  # xf[1] = omega
+   twotheta=degrees(twotheta)
+   chi = degrees(r0.xf[0])    # xf[0] = chi
+   omega = degrees(r0.xf[1])  # xf[1] = omega
    theta = twotheta/2.0 + omega
 
    
@@ -368,9 +368,9 @@ def phiEquations(x, h1p, wavelength, phi,tth):
    chi = x[0]
    omega1 = x[1]
    theta1=tth/2
-   outvec=[h1p[0] - 2.0/wavelength * N.sin(theta1) * (N.cos(omega1)*N.cos(chi)*N.cos(phi) - N.sin(omega1)*N.sin(phi)),
-           h1p[1] - 2.0/wavelength * N.sin(theta1) * (N.cos(omega1)*N.cos(chi)*N.sin(phi) + N.sin(omega1)*N.cos(phi)),
-           h1p[2] - 2.0/wavelength * N.sin(theta1) * N.cos(omega1)*N.sin(chi)]
+   outvec=[h1p[0] - 2.0/wavelength * sin(theta1) * (cos(omega1)*cos(chi)*cos(phi) - sin(omega1)*sin(phi)),
+           h1p[1] - 2.0/wavelength * sin(theta1) * (cos(omega1)*cos(chi)*sin(phi) + sin(omega1)*cos(phi)),
+           h1p[2] - 2.0/wavelength * sin(theta1) * cos(omega1)*sin(chi)]
           
    return outvec
 
@@ -391,18 +391,18 @@ def scalar(x1, y1, z1, x2, y2, z2, stars):
    a = stars['astar']
    b = stars['bstar']
    c = stars['cstar']
-   alpha = N.radians(stars['alphastar'])
-   beta = N.radians(stars['betastar'])
-   gamma = N.radians(stars['gammastar'])
+   alpha = radians(stars['alphastar'])
+   beta = radians(stars['betastar'])
+   gamma = radians(stars['gammastar'])
 
-   s=x1*x2*a**2+y1*y2*b**2+z1*z2*c**2+(x1*y2+x2*y1)*a*b*N.cos(gamma)+(x1*z2+x2*z1)*a*c*N.cos(beta)+(z1*y2+z2*y1)*c*b*N.cos(alpha)
+   s=x1*x2*a**2+y1*y2*b**2+z1*z2*c**2+(x1*y2+x2*y1)*a*b*cos(gamma)+(x1*z2+x2*z1)*a*c*cos(beta)+(z1*y2+z2*y1)*c*b*cos(alpha)
    return s
 
 
 def modvec(x, y, z, stars):
    "Calculates modulus of a vector defined by its fraction cell coordinates"
    "or Miller indexes"
-   m=N.sqrt(scalar(x, y, z, x, y, z, stars))
+   m=sqrt(scalar(x, y, z, x, y, z, stars))
    return m
 
 
@@ -448,7 +448,7 @@ def UBtestrun():
    UB=calcUB(h1, k1, l1, h2, k2, l2, omega1, chi1, phi1, omega2, chi2, phi2, Bmatrix)
    stars_dict = dict(zip(('astar','bstar','cstar','alphastar','betastar','gammastar'),
                          stars))
-   onehkl = lambda i: calcIdealAngles(N.array(i,'Float64'), UB,Bmatrix, 2.35916, stars_dict)
+   onehkl = lambda i: calcIdealAngles(np.array(i,'Float64'), UB,Bmatrix, 2.35916, stars_dict)
    allhkl = lambda hkl: [onehkl(i) for i in hkl]
    #h, UBmatrix, Bmatrix, wavelength, stars
    hv1=[1,0,0]
@@ -463,7 +463,6 @@ def UBtestrun():
 
 
 if __name__=="__main__":
-   pi=N.pi
    a=2*pi; b=2*pi; c=2*pi
    alpha=90; beta=90; gamma=90
    recip=star(a,b,c,alpha,beta,gamma)

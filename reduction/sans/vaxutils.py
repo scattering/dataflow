@@ -1,5 +1,3 @@
-#!`/usr/bin/which python`
-
 from struct import unpack
 
 def R4toFloat(vaxasstring):

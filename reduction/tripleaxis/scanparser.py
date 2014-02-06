@@ -1,4 +1,5 @@
-import numpy as N
+import numpy as np
+
 threshold=1e-6
 class scanparser:
     def __init__(self,scanstr):
@@ -31,7 +32,7 @@ class scanparser:
                     start=float(toks[0])
                     step=float(toks[1])
                     stop=start+(npts-1)*step
-                    prange[field]['step']=N.absolute(step)
+                    prange[field]['step']=np.absolute(step)
                     prange[field]['start']=min(start,stop)
                     prange[field]['stop']=max(start,stop)
 
@@ -42,7 +43,7 @@ class scanparser:
                 #print 'center',center
                 start=center-float(step)*(npts-1)/2
                 stop=center+float(step)*(npts-1)/2
-                prange[field]['step']=N.absolute(step)
+                prange[field]['step']=np.absolute(step)
                 prange[field]['start']=min(start,stop)
                 prange[field]['stop']=max(start,stop)
         if 1:
@@ -56,12 +57,12 @@ class scanparser:
                     if toks[-1]=='s':
                         #print 'start stop'
                         start=toks[0].split('~')
-                        start=N.array(start).astype('Float64')
+                        start=np.array(start).astype('Float64')
                         prange['qx']['start']=start[0]
                         prange['qy']['start']=start[1]
                         prange['qz']['start']=start[2]
                         stop=toks[1].split('~')
-                        stop=N.array(stop).astype('Float64')
+                        stop=np.array(stop).astype('Float64')
                         prange['qx']['stop']=stop[0]
                         prange['qy']['stop']=stop[1]
                         prange['qz']['stop']=stop[2]
@@ -77,9 +78,9 @@ class scanparser:
                     elif toks[-1]=='i':
                         #print 'initial step'
                         start=toks[0].split('~')
-                        start=N.array(start).astype('Float64')
+                        start=np.array(start).astype('Float64')
                         step=toks[1].split('~')
-                        step=N.array(step).astype('Float64')
+                        step=np.array(step).astype('Float64')
                         stop=start+(npts-1)*step
                         prange['qx']['start']=start[0]
                         prange['qy']['start']=start[1]
@@ -94,9 +95,9 @@ class scanparser:
                     center=toks[0].split('~')
                     #print 'center step'
                     #print 'center',center
-                    center=N.array(center).astype('Float64')
+                    center=np.array(center).astype('Float64')
                     step=toks[1].split('~')
-                    step=N.array(step).astype('Float64')
+                    step=np.array(step).astype('Float64')
                     start=center-(npts-1)/2*step
                     stop=center+(npts-1)/2*step
                     prange['qx']['start']=start[0]
@@ -162,7 +163,7 @@ class scanparser:
                 for key,value in ranges.iteritems():
                     self.ranges[key]=value
                     #print 'key',key,'value',value
-                    if N.absolute(value['step'])>threshold:
+                    if np.absolute(value['step'])>threshold:
                         self.varying.append(key)
             return self.varying
 

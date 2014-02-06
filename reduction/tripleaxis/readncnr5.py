@@ -1,15 +1,12 @@
-
-import numpy as N
-#import pylab
 import datetime
 from time import mktime
-#import mx.DateTime
-import writebt7
 import re
-import scanparser3 as scanparser
 import os
-#from ...apps.tracks.models import File
 
+import numpy as np
+
+from . import writebt7
+from . import scanparser3 as scanparser
 
 months={'jan':1,'feb':2,'mar':3,'apr':4,'may':5,'jun':6,'jul':7,'aug':8,'sep':9,'oct':10,'nov':11,'dec':12}
 
@@ -190,10 +187,10 @@ class datareader(object):
                 #collimations=[] #in stream order
 
                 #self.metadata={}
-                self.data['premonocoll']=float(tokenized[0])*N.ones(self.metadata['pts_planned'],'Float64')
-                self.data['postmonocoll']=float(tokenized[1])*N.ones(self.metadata['pts_planned'],'Float64')
-                self.data['preanacoll']=float(tokenized[2])*N.ones(self.metadata['pts_planned'],'Float64')
-                self.data['postanacoll']=float(tokenized[3])*N.ones(self.metadata['pts_planned'],'Float64')
+                self.data['premonocoll']=float(tokenized[0])*np.ones(self.metadata['pts_planned'],'Float64')
+                self.data['postmonocoll']=float(tokenized[1])*np.ones(self.metadata['pts_planned'],'Float64')
+                self.data['preanacoll']=float(tokenized[2])*np.ones(self.metadata['pts_planned'],'Float64')
+                self.data['postanacoll']=float(tokenized[3])*np.ones(self.metadata['pts_planned'],'Float64')
                 #collimations.append(float(tokenized[1]))
                 #collimations.append(float(tokenized[2]))
                 #collimations.append(float(tokenized[3]))
@@ -237,10 +234,10 @@ class datareader(object):
 
 
              
-                self.data['premonocoll']=float(tokenized[0])*N.ones(self.metadata['pts_planned'],'Float64')
-                self.data['postmonocoll']=float(tokenized[1])*N.ones(self.metadata['pts_planned'],'Float64')
-                self.data['preanacoll']=float(tokenized[2])*N.ones(self.metadata['pts_planned'],'Float64')
-                self.data['postanacoll']=float(tokenized[3])*N.ones(self.metadata['pts_planned'],'Float64')
+                self.data['premonocoll']=float(tokenized[0])*np.ones(self.metadata['pts_planned'],'Float64')
+                self.data['postmonocoll']=float(tokenized[1])*np.ones(self.metadata['pts_planned'],'Float64')
+                self.data['preanacoll']=float(tokenized[2])*np.ones(self.metadata['pts_planned'],'Float64')
+                self.data['postanacoll']=float(tokenized[3])*np.ones(self.metadata['pts_planned'],'Float64')
 
             
                 self.metadata['mosaic_monochromator']=float(tokenized[4])
@@ -316,7 +313,7 @@ class datareader(object):
                 tokenized=get_tokenized_line(myfile)
                 self.columndict={}
                 self.columnlist=[]
-                for i in N.arange(len(tokenized)):
+                for i in np.arange(len(tokenized)):
                         field=tokenized[i].lower()
                         if field=='Q(x)'.lower():
                                 field = 'h' #field='Qx'.lower()
@@ -396,7 +393,7 @@ class datareader(object):
                 self.columnlist=[]
                 self.timestamp_flag=True
                 #originally set the timestamp flag to True, if it turns out that there is not timestamp in the file, then create one using the time field
-                for i in N.arange(1,len(tokenized)):
+                for i in np.arange(1,len(tokenized)):
                         field=tokenized[i]
                         if field=='QX':
                                 field = 'h' #field='Qx'.lower()
@@ -613,7 +610,7 @@ class datareader(object):
                                 try:
                                         lines=int(self.lines)
                                 except:
-                                        lines=N.Inf
+                                        lines=np.Inf
                                 while 1:
                                         lineStr = myfile.readline()
                                         if not(lineStr):
@@ -671,7 +668,7 @@ class datareader(object):
                                 
                 return
 
-        def readbuffer(self,myfilestr,lines=N.Inf,myfriendlyfilestr=None):
+        def readbuffer(self,myfilestr,lines=np.Inf,myfriendlyfilestr=None):
                 if 0:
                         self.myfilestr = myfilestr
                         print self.myfilestr
@@ -787,54 +784,54 @@ class Data(object):
                 step=motor['step']
                 start=motor['start']
                 if step==0.0:
-                        res=start*N.ones((1,self.npts),'d')
+                        res=start*np.ones((1,self.npts),'d')
                 else:
-                        res=N.arange(start,motor['end'],step)
+                        res=np.arange(start,motor['end'],step)
                 return res
         def gen_motor2_arr(self):
                 motor=self.get_motor2()
                 step=motor['step']
                 start=motor['start']
                 if step==0.0:
-                        res=start*N.ones((1,self.npts),'d')
+                        res=start*np.ones((1,self.npts),'d')
                 else:
-                        res=N.arange(start,motor['end'],step)
+                        res=np.arange(start,motor['end'],step)
                 return res
         def gen_motor3_arr(self):
                 motor=self.get_motor3()
                 step=motor['step']
                 start=motor['start']
                 if step==0.0:
-                        res=start*N.ones((1,self.npts),'d')
+                        res=start*np.ones((1,self.npts),'d')
                 else:
-                        res=N.arange(start,motor['end'],step)
+                        res=np.arange(start,motor['end'],step)
                 return res
         def gen_motor4_arr(self):
                 motor=self.get_motor4()
                 step=motor['step']
                 start=motor['start']
                 if step==0.0:
-                        res=start*N.ones((1,self.npts),'d')
+                        res=start*np.ones((1,self.npts),'d')
                 else:
-                        res=N.arange(start,motor['end'],step)
+                        res=np.arange(start,motor['end'],step)
                 return res
         def gen_motor5_arr(self):
                 motor=self.get_motor5()
                 step=motor['step']
                 start=motor['start']
                 if step==0.0:
-                        res=start*N.ones((1,self.npts),'d')
+                        res=start*np.ones((1,self.npts),'d')
                 else:
-                        res=N.arange(start,motor['end'],step)
+                        res=np.arange(start,motor['end'],step)
                 return res
         def gen_motor6_arr(self):
                 motor=self.get_motor6()
                 step=motor['step']
                 start=motor['start']
                 if step==0.0:
-                        res=start*N.ones((1,self.npts),'d')
+                        res=start*np.ones((1,self.npts),'d')
                 else:
-                        res=N.arange(start,motor['end'],step)
+                        res=np.arange(start,motor['end'],step)
                 return res
 
 

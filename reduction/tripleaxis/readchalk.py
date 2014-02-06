@@ -1,13 +1,7 @@
-import sys, os
-import re,copy
-import numpy as np
+import os
 import zipfile
-#from matplotlib import pylab
-from matplotlib.ticker import FormatStrFormatter
-import matplotlib.delaunay as D
-from matplotlib.ticker import NullFormatter, MultipleLocator,MaxNLocator, NullLocator
-#from scipy.signal.signaltools import convolve2d
 
+import numpy as np
 
 translate_dict = {}
 

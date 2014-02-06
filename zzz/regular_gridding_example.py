@@ -1,6 +1,6 @@
 #taken from http://www.scipy.org/Cookbook/Matplotlib/Gridding_irregularly_spaced_data
 
-import numpy as N
+import numpy as np
 from matplotlib.mlab import griddata
 import matplotlib.pyplot as plt
 import numpy.ma as ma
@@ -10,11 +10,11 @@ from numpy.random import uniform
 npts = 200
 x = uniform(-2, 2, npts)
 y = uniform(-2, 2, npts)
-z = x * N.exp(-x ** 2 - y ** 2)
+z = x * np.exp(-x ** 2 - y ** 2)
 
 # define grid.
-xi = N.linspace(-2.1, 2.1, 100)
-yi = N.linspace(-2.1, 2.1, 100)
+xi = np.linspace(-2.1, 2.1, 100)
+yi = np.linspace(-2.1, 2.1, 100)
 
 # grid the data.
 zi = griddata(x, y, z, xi, yi)

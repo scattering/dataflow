@@ -4,7 +4,7 @@ Return transmission based on bottom left and top right coordinates
 
 from .. import config
 from ..core import Module
-from ..SANS.map_pics import map_pics
+
 def generate_transmission_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, **kwargs):
     """Return transmission based on bottom left and top right coordinates"""

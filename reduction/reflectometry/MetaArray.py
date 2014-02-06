@@ -4,10 +4,9 @@
 ## Class for storing n-dimensional data sets with per-axis meta information
 ## Free for any kind of use.
 
-
-from numpy import ndarray, array, empty, fromstring, arange
-import datetime
 import types, copy
+
+from numpy import ndarray, array, empty, fromstring, concatenate
 
 def axis(name=None, cols=None, values=None, units=None):
   """Convenience function for generating axis descriptions when defining MetaArrays

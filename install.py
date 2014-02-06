@@ -3,7 +3,7 @@ import sys
 from subprocess import Popen, call
 
 # Please run sudo -s before this script.
-if __name__ == "__main__":
+def debian_install():
     apt_commands = ['ipython',
                   'git',
                   'git-doc',
@@ -67,4 +67,7 @@ if __name__ == "__main__":
 
 #NOTE: Also install matplotlib and download and install natgrid (https://github.com/matplotlib/natgrid)
 #PNOTE: psycopg2 might give you a bit of trouble
+
+if __name__ == "__main__":
+    debian_install()
 

@@ -1,16 +1,17 @@
-import numpy as N
-import pylab
 import copy
+
+import numpy as np
+from numpy import pi
+import pylab
 import scipy.interpolate as interpolate
-pi=N.pi
 
 def gauss(x,p):
     #Area center width Bak
-    area=p[0]/N.sqrt(2*pi)/p[2]
+    area=p[0]/np.sqrt(2*pi)/p[2]
     x0=p[1]
     width=p[2]
     background=p[3]
-    y=background+area*N.exp(-(0.5*(x-x0)*(x-x0)/width/width))
+    y=background+area*np.exp(-(0.5*(x-x0)*(x-x0)/width/width))
     return y
 
 def monitor_normalize(ylist,yerrlist,monlist,monitor=None):
@@ -24,10 +25,10 @@ def monitor_normalize(ylist,yerrlist,monlist,monitor=None):
     """
     mon0=monlist[0]
     if monitor!=None:
-        mon0=N.float64(monitor)
-    y_in=N.array([],'float64')
-    yerr_in=N.array([],'float64')
-    mon_in=N.array(monlist,'float64')
+        mon0=np.float64(monitor)
+    y_in=np.array([],'float64')
+    yerr_in=np.array([],'float64')
+    mon_in=np.array(monlist,'float64')
     correction=mon0/mon_in #assumes that none of the monitor rates given is 0
     #make sure that we're not changing the original data
     y_out=copy.deepcopy(ylist)
@@ -41,17 +42,17 @@ def monitor_normalize(ylist,yerrlist,monlist,monitor=None):
 def simple_combine(xlist,ylist,yerrlist,monlist,monitor=None,method=None,eps=None,step=None):
     mon0=monlist[0]
     if monitor!=None:
-        mon0=N.float64(monitor)
-    x_in=N.array([],'float64')
-    y_in=N.array([],'float64')
-    yerr_in=N.array([],'float64')
+        mon0=np.float64(monitor)
+    x_in=np.array([],'float64')
+    y_in=np.array([],'float64')
+    yerr_in=np.array([],'float64')
     ylist_corrected,yerrlist_corrected=monitor_normalize(ylist,yerrlist,monlist,monitor=monitor)
     #assumes that xlist,ylist,yerrlist,monlist are all the same size)
     i2=0
     for i in range(len(ylist)):
-        x_in=N.concatenate((x_in,N.array(xlist[i],'float64')))
-        y_in=N.concatenate((y_in,N.array(ylist_corrected[i],'float64')))
-        yerr_in=N.concatenate((yerr_in,N.array(yerrlist_corrected[i],'float64')))
+        x_in=np.concatenate((x_in,np.array(xlist[i],'float64')))
+        y_in=np.concatenate((y_in,np.array(ylist_corrected[i],'float64')))
+        yerr_in=np.concatenate((yerr_in,np.array(yerrlist_corrected[i],'float64')))
 
         #While it would be convenient to check for zero steps, I think predictability is better than convenience
         #So, in that case, the user should specify the stepsize that they want!!!
@@ -62,8 +63,8 @@ def simple_combine(xlist,ylist,yerrlist,monlist,monitor=None,method=None,eps=Non
         currmin=xlist[i].min()
         currmax=xlist[i].max()
         if xlist[i].shape[0]>1:
-            diffs=N.diff(xlist[i])
-            currmin_step=N.absolute(diffs.min())
+            diffs=np.diff(xlist[i])
+            currmin_step=np.absolute(diffs.min())
             if i2==0:
                 min_step=currmin_step
                 i2=i2+1
@@ -77,8 +78,8 @@ def simple_combine(xlist,ylist,yerrlist,monlist,monitor=None,method=None,eps=Non
 
     #I think this is the correct way to determine the minimum step size
     if x_in.shape[0]>1:
-        diffs=N.diff(x_in)
-        currmin_step=N.absolute(diffs)
+        diffs=np.diff(x_in)
+        currmin_step=np.absolute(diffs)
         min_step=currmin_step[currmin_step>0]
         min_step=currmin_step.min()
     #print 'min_step',min_step
@@ -102,7 +103,7 @@ def simple_combine(xlist,ylist,yerrlist,monlist,monitor=None,method=None,eps=Non
         i=0; iright=1
         curr_y=y_in[0]
         curr_yerrsq=yerr_in[0]*yerr_in[0]
-        xlen=N.shape(x_in)[0]
+        xlen=np.shape(x_in)[0]
         count=1
         while i<xlen:
             curr_x=x_in[i]
@@ -114,7 +115,7 @@ def simple_combine(xlist,ylist,yerrlist,monlist,monitor=None,method=None,eps=Non
                 else:
                     x_out.append(curr_x) #ok, we've reached the end of a run
                     y_out.append(curr_y/count)
-                    yerr_out.append(N.sqrt(curr_yerrsq)/count) #normalize back to original monitor
+                    yerr_out.append(np.sqrt(curr_yerrsq)/count) #normalize back to original monitor
                     curr_y=y_in[i+1]
                     curr_yerrsq=yerr_in[i+1]*yerr_in[i+1]
                     count=1.0
@@ -122,7 +123,7 @@ def simple_combine(xlist,ylist,yerrlist,monlist,monitor=None,method=None,eps=Non
                 x_out.append(curr_x) #deal with the endpoint
                 y_out.append(curr_y/count)
                 print 'count',count
-                yerr_out.append(N.sqrt(curr_yerrsq)/count) #normalize back to original monitor
+                yerr_out.append(np.sqrt(curr_yerrsq)/count) #normalize back to original monitor
                 count=1.0
 
             i=i+1
@@ -132,9 +133,9 @@ def simple_combine(xlist,ylist,yerrlist,monlist,monitor=None,method=None,eps=Non
         print 'xmin ',xmin
         print 'xmax ',xmax
         print 'step ',step
-        x_out=N.arange(xmin,xmax,step,'float64')
-        y_out=N.zeros(x_out.shape,'float64')
-        yerr_out=N.zeros(x_out.shape,'float64')
+        x_out=np.arange(xmin,xmax,step,'float64')
+        y_out=np.zeros(x_out.shape,'float64')
+        yerr_out=np.zeros(x_out.shape,'float64')
         count=0
         for i in range(len(ylist)):
             yinterpolater=interpolate.interp1d(xlist[i],ylist_corrected[i],fill_value=0.0,kind='linear',copy=True,bounds_error=False)
@@ -144,11 +145,11 @@ def simple_combine(xlist,ylist,yerrlist,monlist,monitor=None,method=None,eps=Non
             y_out=y_out+y_interpolated
             yerr_outsq=yerr_out+yerr_interpolatedsq
             count=count+1
-        yerr_out=N.sqrt(yerr_outsq)/count
+        yerr_out=np.sqrt(yerr_outsq)/count
         y_out=y_out/count
-    x_out=N.array(x_out,'float64')
-    y_out=N.array(y_out,'float64')
-    yerr_out=N.array(yerr_out,'float64')
+    x_out=np.array(x_out,'float64')
+    y_out=np.array(y_out,'float64')
+    yerr_out=np.array(yerr_out,'float64')
     return x_out,y_out,yerr_out
 
 def print_arr(arrlist):
@@ -161,20 +162,20 @@ def print_arr(arrlist):
 
 if __name__=='__main__':
     step=0.1
-    x1=N.arange(-2,2+step,step)
+    x1=np.arange(-2,2+step,step)
     center=0
     width=1.0
-    area=1.0e3*N.sqrt(2*pi)/width
+    area=1.0e3*np.sqrt(2*pi)/width
     background=0.0
     monlist=[200,200]
     p1=[area,center,width,background]
     y1=gauss(x1,p1)
-    y1err=N.sqrt(y1)
+    y1err=np.sqrt(y1)
     step=2*step/4
-    x2=N.arange(-2,2+step,step)
+    x2=np.arange(-2,2+step,step)
     p2=[area*monlist[1]/monlist[0],center,width,background]
     y2=gauss(x2,p2)
-    y2err=N.sqrt(y2)
+    y2err=np.sqrt(y2)
     #print 'orig'
     #print 'one'
     #print_arr([x1,y1])
@@ -188,7 +189,7 @@ if __name__=='__main__':
         y1interpolater=interpolate.interp1d(x1,y1,fill_value=0.0,kind='linear',copy=True)
         y1_interpolated=y1interpolater(x2)
         y1errinterpolater=interpolate.interp1d(x1,y1err*y1err,fill_value=0.0,kind='linear',copy=True)
-        y1err_interpolated=N.sqrt(y1errinterpolater(x2))
+        y1err_interpolated=np.sqrt(y1errinterpolater(x2))
         print y1err_interpolated
         fig=pylab.figure(figsize=(8,8))
         fig.add_subplot(1,2,1)

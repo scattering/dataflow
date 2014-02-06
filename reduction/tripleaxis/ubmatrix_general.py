@@ -4,13 +4,9 @@ Original Author: Alex Yee
 Current Author:  William Ratcliff
 
 '''
-import sys
 import numpy as np
-#import scipy
-#import scipy.optimize
 
 from openopt import SNLE
-#import multiprocessing as NLSP
 
 
 #TODO:

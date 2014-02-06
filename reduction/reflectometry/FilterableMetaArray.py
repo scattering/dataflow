@@ -1,8 +1,9 @@
-from MetaArray import MetaArray
-from numpy import ndarray, amin, amax, alen, array, fromstring, float, float64, float32, ones, empty, newaxis, savetxt, sqrt, mod
-import copy, simplejson, datetime
-#from ...dataflow.core import Data
 from cStringIO import StringIO
+from django.utils import simplejson as json
+
+from numpy import ndarray, fromstring, float32, ones, empty, newaxis, savetxt, sqrt
+
+from .MetaArray import MetaArray
 
 class FilterableMetaArray(MetaArray):
     def __new__(*args, **kwargs):
@@ -11,7 +12,7 @@ class FilterableMetaArray(MetaArray):
         return subarr
     
     def filter(self, filtername, *args, **kwargs):
-        import filters
+        from . import filters
         return filters.__getattribute__(filtername)().apply(self, *args, **kwargs)
 
     
@@ -106,7 +107,7 @@ class FilterableMetaArray(MetaArray):
             plottable_data['data'].append(series_data)
             plottable_data['options']['series'].append({'label': col})
             
-        return simplejson.dumps(plottable_data,sort_keys=True, indent=2)
+        return json.dumps(plottable_data,sort_keys=True, indent=2)
         
     def get_plottable_nd(self, binary_fp=None):
         colors = ['Blue', 'Red', 'Green', 'Yellow']
@@ -148,7 +149,7 @@ class FilterableMetaArray(MetaArray):
             plottable_data['ordery'].append(ordery)
             plottable_data['series'][0]['data'][col] = series_y
             
-        return simplejson.dumps(plottable_data,sort_keys=True, indent=2)
+        return json.dumps(plottable_data,sort_keys=True, indent=2)
             
     def get_plottable_2d(self, binary_fp=None):
         # grab the first counts col:
@@ -200,7 +201,7 @@ class FilterableMetaArray(MetaArray):
                         xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, 
                         transform=transform) )
             
-            result.append(simplejson.dumps(dump, sort_keys=True, indent=2))
+            result.append(json.dumps(dump, sort_keys=True, indent=2))
         return ",".join(result)
     
     def get_plottable_binary(self):
@@ -286,5 +287,5 @@ class FilterableMetaArray(MetaArray):
 #        title = 'AND/R data' # That's creative enough, right?
 #        type = '2d_image'
 #        dump = dict(type=type, z=z, title=title, dims=dims, xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
-#        res = simplejson.dumps(dump, sort_keys=True)
+#        res = json.dumps(dump, sort_keys=True)
 #        return res

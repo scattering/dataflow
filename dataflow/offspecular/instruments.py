@@ -1,87 +1,55 @@
 """
 Offspecular reflectometry reduction modules
 """
-import os, sys, simplejson, pickle, types
+import os, sys, pickle, types
+from django.utils import simplejson as json
+#try: from collections import OrderedDict
+#except ImportError: from dataflow.ordered_dict import OrderedDict
 
-# left here for testing purposes
-# python uses __name__ for relative imports so I cannot use
-# the ... in place of dataflow when testing
-TESTING = 0
-SERVER = 0
-# modules = [ (source, module), ... ]
-module_imports = [
-    #("dataflow.wireit", ["template_to_wireit_diagram", "instrument_to_wireit_language"]),
-    ("dataflow", "config"),
-    ("dataflow.ordered_dict", "OrderedDict"),
-    ("dataflow.modules.load", "load_module"),
-    #("dataflow.modules.load_saved", "load_saved_module"),
-    ("dataflow.offspecular.modules.load_asterix", "load_asterix_module"),
-    ("dataflow.offspecular.modules.load_asterix_spectrum", "load_asterix_spectrum_module"),
-    ("dataflow.modules.save", "save_module"),
-    ("dataflow.offspecular.modules.normalize_to_monitor", "normalize_to_monitor_module"),
-    ("dataflow.offspecular.modules.asterix_correct_spectrum", "asterix_correct_spectrum_module"),
-    ("dataflow.offspecular.modules.combine", "combine_module"),
-    ("dataflow.offspecular.modules.subtract", "subtract_module"),
-    ("dataflow.offspecular.modules.autogrid", "autogrid_module"),
-    ("dataflow.offspecular.modules.offset", "offset_module"),
-    ("dataflow.offspecular.modules.wiggle", "wiggle_module"),
-    ("dataflow.offspecular.modules.smooth", "smooth_module"),
-    ("dataflow.offspecular.modules.tof_lambda", "tof_lambda_module"),
-    ("dataflow.offspecular.modules.shift_data", "shift_data_module"), 
-    ("dataflow.offspecular.modules.pixels_two_theta", "pixels_two_theta_module"),
-    ("dataflow.offspecular.modules.asterix_pixels_two_theta", "asterix_pixels_two_theta_module"),
-    ("dataflow.offspecular.modules.theta_two_theta_qxqz", "theta_two_theta_qxqz_module"),
-    ("dataflow.offspecular.modules.twotheta_q", "twotheta_q_module"),
-    ("dataflow.offspecular.modules.two_theta_lambda_qxqz", "two_theta_lambda_qxqz_module"),
-    ("dataflow.offspecular.modules.load_he3_analyzer_collection", "load_he3_module"),
-    ("dataflow.offspecular.modules.append_polarization_matrix", "append_polarization_matrix_module"),
-    ("dataflow.offspecular.modules.combine_polarized", "combine_polarized_module"),
-    ("dataflow.offspecular.modules.polarization_correct", "polarization_correct_module"),
-    ("dataflow.offspecular.modules.timestamps", "timestamp_module"),
-    ("dataflow.offspecular.modules.load_timestamps", "load_timestamp_module"),
-    ("dataflow.offspecular.modules.empty_qxqz_grid", "empty_qxqz_grid_module"),
-    ("dataflow.offspecular.modules.mask_data", "mask_data_module"),
-    ("dataflow.offspecular.modules.slice_data", "slice_data_module"),
-    ("dataflow.offspecular.modules.collapse_data", "collapse_data_module"),
-    ("dataflow.calc", ["run_template", "get_plottable", "calc_single"]),
-    ("dataflow.core", ["Data", "Instrument", "Template", "register_instrument"]),
-    ("reduction.offspecular.filters", ["LoadICPData", "LoadICPMany", "LoadUXDData", "LoadUXDMany", "LoadAsterixRawHDF", "LoadAsterixMany", "LoadAsterixSpectrum", "Autogrid", "Combine", "Subtract", "CoordinateOffset", "AsterixShiftData", "MaskData", "SliceData", "CollapseData", "WiggleCorrection", "SmoothData", "NormalizeToMonitor", "AsterixCorrectSpectrum", "AsterixTOFToWavelength", "AsterixPixelsToTwotheta", "TwothetaLambdaToQxQz", "PixelsToTwotheta", "EmptyQxQzGridPolarized", "ThetaTwothetaToQxQz", "TwothetaToQ"]),
-    ("reduction.offspecular.he3analyzer", "He3AnalyzerCollection"),
-    ("reduction.offspecular.FilterableMetaArray", "FilterableMetaArray"),
-]
-if SERVER:
-    from DATAFLOW.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
-    root_import = "DATAFLOW."
-    
-elif TESTING:
-    dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    sys.path.append(dir)
-    from dataflow.dataflow.wireit import template_to_wireit_diagram, instrument_to_wireit_language
-    root_import = "dataflow."
-    
-else:
-    root_import = "..."
+from reduction.offspecular import filters
+from reduction.offspecular.he3analyzer import He3AnalyzerCollection
+from reduction.offspecular.FilterableMetaArray import FilterableMetaArray
 
-lib = {}
-dataflow = __import__("dataflow", level=3, globals=globals())
-
-for item in module_imports:
-    loc = item[0]
-    mods = item[1]
-    #print root_import + item[0], item[1]
-    if type(mods) != types.ListType:
-        mods = [mods]
-    for mod in mods:
-        #print root_import + item[0]
-        lib[mod] = getattr(__import__(item[0], level=3, globals=globals(), fromlist=[mod]), mod)
-        globals()[mod] = lib[mod]
-    #    exec("from %s import %s" % (root_import + loc, mod))
-    #__import__(root_import + item[0], globals=globals(), fromlist=item[1], level=-1)
+from .. import config
+#from ..wireit import template_to_wireit_diagram, instrument_to_wireit_language
+from ..modules.load import load_module
+#from ..modules.load_saved import load_saved_module
+from ..modules.save import save_module
+from ..calc import get_plottable
+from ..core import Data, Instrument, Template, register_instrument
+from ..wireit import template_to_wireit_diagram, instrument_to_wireit_language
+#from .modules.load_asterix import load_asterix_module
+from .modules.load_asterix_spectrum import load_asterix_spectrum_module
+from .modules.normalize_to_monitor import normalize_to_monitor_module
+from .modules.asterix_correct_spectrum import asterix_correct_spectrum_module
+from .modules.combine import combine_module
+from .modules.subtract import subtract_module
+from .modules.autogrid import autogrid_module
+from .modules.offset import offset_module
+from .modules.wiggle import wiggle_module
+from .modules.smooth import smooth_module
+from .modules.tof_lambda import tof_lambda_module
+from .modules.shift_data import shift_data_module
+from .modules.pixels_two_theta import pixels_two_theta_module
+from .modules.asterix_pixels_two_theta import asterix_pixels_two_theta_module
+from .modules.theta_two_theta_qxqz import theta_two_theta_qxqz_module
+from .modules.twotheta_q import twotheta_q_module
+from .modules.two_theta_lambda_qxqz import two_theta_lambda_qxqz_module
+from .modules.load_he3_analyzer_collection import load_he3_module
+from .modules.append_polarization_matrix import append_polarization_matrix_module
+from .modules.combine_polarized import combine_polarized_module
+from .modules.polarization_correct import polarization_correct_module
+from .modules.timestamps import timestamp_module
+from .modules.load_timestamps import load_timestamp_module
+from .modules.empty_qxqz_grid import empty_qxqz_grid_module
+from .modules.mask_data import mask_data_module
+from .modules.slice_data import slice_data_module
+from .modules.collapse_data import collapse_data_module
 
 
 class PlottableDict(dict):
     def get_plottable(self):
-        return simplejson.dumps({})
+        return json.dumps({})
     def dumps(self):
         return pickle.dumps(self)
     @classmethod
@@ -91,15 +59,15 @@ class PlottableDict(dict):
 use_File = True
 def get_friendly_name(fh):
     if use_File:
-        from ...apps.tracks.models import File
+        from apps.tracks.models import File
         return File.objects.get(name=str(fh)).friendly_name
     return fh
 
 OSPEC_DATA = 'ospec.data2d'
 data2d = Data(OSPEC_DATA, FilterableMetaArray, loaders=[
-    {'function':LoadICPMany, 'id':'LoadICPData'}, 
-    {'function':LoadAsterixMany, 'id':'LoadAsterix'},
-    {'function':LoadUXDMany, 'id': 'LoadUXD'}])
+    {'function':filters.LoadICPMany, 'id':'LoadICPData'},
+    {'function':filters.LoadAsterixMany, 'id':'LoadAsterix'},
+    {'function':filters.LoadUXDMany, 'id': 'LoadUXD'}])
 #ast_data2d = Data('ospec.asterix.data2d', FilterableMetaArray, loaders=[{'function':LoadAsterixMany, 'id':'LoadAsterix'}])
 OSPEC_DATA_HE3 = OSPEC_DATA + '.he3'
 datahe3 = Data(OSPEC_DATA_HE3, He3AnalyzerCollection, loaders=[{'function':He3AnalyzerCollection, 'id':'LoadHe3'}])
@@ -126,7 +94,7 @@ tar.close()
 def load_saved_action(results=[], intent='', **kwargs):
     print "loading saved results"
     import tarfile
-    from ...apps.tracks.models import File
+    from apps.tracks.models import File
     Fileobj = File.objects.get(name=str(fh))
     fn = Fileobj.name
     fp = Fileobj.location
@@ -157,7 +125,7 @@ def load_action(input=[], files=[], intent='', auto_PolState=False, PolStates=[]
 def _load_data(name, auto_PolState, PolState):
     (dirName, fileName) = os.path.split(name)
     friendly_name = get_friendly_name(fileName)
-    return LoadICPData(fileName, friendly_name=friendly_name, path=dirName, auto_PolState=auto_PolState, PolState=PolState)
+    return filters.LoadICPData(fileName, friendly_name=friendly_name, path=dirName, auto_PolState=auto_PolState, PolState=PolState)
 
 # Load UXD module
 def load_uxd_action(input=[], files=[], intent='', **kwargs):
@@ -181,7 +149,7 @@ def load_uxd_action(input=[], files=[], intent='', **kwargs):
 def _load_uxd_data(name):
     (dirName, fileName) = os.path.split(name)
     friendly_name = get_friendly_name(fileName)
-    return LoadUXDData(fileName, friendly_name=friendly_name, path=dirName)
+    return filters.LoadUXDData(fileName, friendly_name=friendly_name, path=dirName)
 
 def load_asterix_action(input=[], files=[], **kwargs):
     result = []
@@ -207,13 +175,13 @@ def _load_asterix_data(name):
         format = "HDF4"
     else: #h5
         format = "HDF5"
-    return LoadAsterixRawHDF(fileName, path=dirName, friendly_name=friendly_name, format=format )
+    return filters.LoadAsterixRawHDF(fileName, path=dirName, friendly_name=friendly_name, format=format )
     #return SuperLoadAsterixHDF(fileName, path=dirName, center_pixel=center_pixel, wl_over_tof=wl_over_tof, pixel_width_over_dist=pixel_width_over_dist, format=format )
 
 def load_asterix_spectrum_action(files=[], **kwargs):
     filename = files[0]
     (dirName, fileName) = os.path.split(filename)
-    return dict(output=[LoadAsterixSpectrum(filename, path=dirName)])
+    return dict(output=[filters.LoadAsterixSpectrum(filename, path=dirName)])
     
 auto_PolState_field = {
         "type":"boolean",
@@ -239,14 +207,14 @@ load = load_module(id='ospec.load', datatype=OSPEC_DATA,
                    version='1.0', 
                    #action=load_action, 
                    #fields=OrderedDict({'files': {}, 'autochain-loader':autochain_loader_field, 'auto_PolState': auto_PolState_field, 'PolStates': PolStates_field}), 
-                   filterModule=LoadICPData)
+                   filterModule=filters.LoadICPData)
 
-load_uxd = load_module(id='ospec.uxd.load', datatype=OSPEC_DATA, version='1.0', action=load_uxd_action, filterModule = LoadUXDData)
+load_uxd = load_module(id='ospec.uxd.load', datatype=OSPEC_DATA, version='1.0', action=load_uxd_action, filterModule = filters.LoadUXDData)
 
 #load_asterix = load_asterix_module(id='ospec.asterix.load', datatype=OSPEC_DATA,
 #                   version='1.0', action=load_asterix_action, filterModule=LoadAsterixRawHDF)
 load_asterix = load_module(id='ospec.asterix.load', datatype=OSPEC_DATA,
-                   version='1.0', action=load_asterix_action, fields={'autochain-loader':autochain_loader_field}, filterModule=LoadAsterixRawHDF)
+                   version='1.0', action=load_asterix_action, fields={'autochain-loader':autochain_loader_field}, filterModule=filters.LoadAsterixRawHDF)
                    
 load_asterix_spectrum = load_asterix_spectrum_module(id='ospec.asterix.load_spectrum', datatype=OSPEC_DATA,
                     version='1.0', action=load_asterix_spectrum_action)
@@ -272,7 +240,7 @@ save.image = config.IMAGES + config.ANDR_FOLDER + "save_image.png"
 # Autogrid module
 def autogrid_action(input=[], extra_grid_point=True, min_step=1e-10, **kwargs):
     print "gridding"
-    return dict(output=[Autogrid().apply(input, extra_grid_point=extra_grid_point, min_step=min_step)])
+    return dict(output=[filters.Autogrid().apply(input, extra_grid_point=extra_grid_point, min_step=min_step)])
 autogrid = autogrid_module(id='ospec.grid', datatype=OSPEC_DATA,
                    version='1.0', action=autogrid_action)
 
@@ -282,20 +250,20 @@ def combine_action(input_data=[], input_grid=None, **kwargs):
     output_grid = None
     if input_grid != None:
         output_grid = input_grid[0]
-    return dict(output=[Combine().apply(input_data, grid=output_grid)])
+    return dict(output=[filters.Combine().apply(input_data, grid=output_grid)])
 combine = combine_module(id='ospec.combine', datatype=OSPEC_DATA, version='1.0', action=combine_action)
 
 # Subtract module
 def subtract_action(minuend=[], subtrahend=None, **kwargs):
     print "subtracting"
-    return dict(output=Subtract().apply(minuend, subtrahend))
+    return dict(output=filters.Subtract().apply(minuend, subtrahend))
 subtract = subtract_module(id='ospec.subtract', datatype=OSPEC_DATA, version='1.0', action=subtract_action)
 
 # Offset module
 def offset_action(input=[], offsets={}, **kwargs):
     print "offsetting"
     offsets_dict = {offsets['axis_name']['value'] : offsets['offset']['value']}
-    return dict(output=CoordinateOffset().apply(input, offsets=offsets_dict))
+    return dict(output=filters.CoordinateOffset().apply(input, offsets=offsets_dict))
 offset = offset_module(id='ospec.offset', datatype=OSPEC_DATA, version='1.0', action=offset_action)
 
 # Correct spectrum module
@@ -303,24 +271,24 @@ def asterix_correct_spectrum_action(input=[], spectrum=[], **kwargs):
     print "correcting spectrum"
     # There should only be one entry into spectrum... more than that doesn't make sense
     # grabbing the first item from the spectrum list:
-    return dict(output=AsterixCorrectSpectrum().apply(input, spectrum=spectrum[0]))
+    return dict(output=filters.AsterixCorrectSpectrum().apply(input, spectrum=spectrum[0]))
 asterix_correct_spectrum = asterix_correct_spectrum_module(id='ospec.asterix.corr_spectrum', datatype=OSPEC_DATA, 
                                             version='1.0', action=asterix_correct_spectrum_action)
 
 # Shift data module
 def shift_action(input=[], edge_bin = 180, axis=0, **kwargs):
     print "shifting data"
-    return dict(output=AsterixShiftData().apply(input, edge_bin=edge_bin, axis=axis))
-shift_data = shift_data_module(id='ospec.asterix.shift', datatype=OSPEC_DATA, version='1.0', action=shift_action, filterModule=AsterixShiftData)
+    return dict(output=filters.AsterixShiftData().apply(input, edge_bin=edge_bin, axis=axis))
+shift_data = shift_data_module(id='ospec.asterix.shift', datatype=OSPEC_DATA, version='1.0', action=shift_action, filterModule=filters.AsterixShiftData)
 
 # Normalize to Monitor module
 def normalize_to_monitor_action(input=[], **kwargs):
     print "normalizing to monitor"
-    return_val = dict(output=NormalizeToMonitor().apply(input))
+    return_val = dict(output=filters.NormalizeToMonitor().apply(input))
     print return_val
     return return_val
     
-normalize_to_monitor = normalize_to_monitor_module(id='ospec.normalize_monitor', datatype=OSPEC_DATA, version='1.0', action=normalize_to_monitor_action, filterModule=NormalizeToMonitor)
+normalize_to_monitor = normalize_to_monitor_module(id='ospec.normalize_monitor', datatype=OSPEC_DATA, version='1.0', action=normalize_to_monitor_action, filterModule=filters.NormalizeToMonitor)
 
 # smooth module
 window_field = {'name': 'window', 'type': 'List', 'value': 0, 'choices': ['hanning', 'hamming', 'boxcar']}
@@ -328,13 +296,13 @@ window_field = {'name': 'window', 'type': 'List', 'value': 0, 'choices': ['hanni
 # Mask module
 def mask_action(input=[], xmin="0", xmax="", ymin="0", ymax="", invert_mask=False, **kwargs):
     print "masking"
-    return dict(output=MaskData().apply(input, xmin, xmax, ymin, ymax, invert_mask))
-mask_data = mask_data_module(id='ospec.mask', datatype=OSPEC_DATA, version='1.0', action=mask_action, filterModule=MaskData)
+    return dict(output=filters.MaskData().apply(input, xmin, xmax, ymin, ymax, invert_mask))
+mask_data = mask_data_module(id='ospec.mask', datatype=OSPEC_DATA, version='1.0', action=mask_action, filterModule=filters.MaskData)
 
 # Slice module
 def slice_action(input=[], xmin="", xmax="", ymin="", ymax="", **kwargs):
     print "slicing"
-    output = SliceData().apply(input, xmin, xmax, ymin, ymax)
+    output = filters.SliceData().apply(input, xmin, xmax, ymin, ymax)
     
     if type(input) == types.ListType:
         xslice = []
@@ -345,13 +313,13 @@ def slice_action(input=[], xmin="", xmax="", ymin="", ymax="", **kwargs):
     else:
         xslice, yslice = output
     return dict(output_x = xslice, output_y = yslice)
-slice_data = slice_data_module(id='ospec.slice', datatype=OSPEC_DATA, version='1.0', action=slice_action, filterModule=SliceData)
+slice_data = slice_data_module(id='ospec.slice', datatype=OSPEC_DATA, version='1.0', action=slice_action, filterModule=filters.SliceData)
 
 
 # Collapse module
 def collapse_action(input=[], **kwargs):
     print "collapsing"
-    output = CollapseData().apply(input)
+    output = filters.CollapseData().apply(input)
     
     if type(input) == types.ListType:
         xslice = []
@@ -362,46 +330,46 @@ def collapse_action(input=[], **kwargs):
     else:
         xslice, yslice = output
     return dict(output_x = xslice, output_y = yslice)
-collapse_data = collapse_data_module(id='ospec.collapse', datatype=OSPEC_DATA, version='1.0', action=collapse_action,filterModule=CollapseData) 
+collapse_data = collapse_data_module(id='ospec.collapse', datatype=OSPEC_DATA, version='1.0', action=collapse_action,filterModule=filters.CollapseData)
 
 # Wiggle module
 def wiggle_action(input=[], amp=0.14, **kwargs):
     print "wiggling"
-    return dict(output=WiggleCorrection().apply(input, amp=amp))
-wiggle = wiggle_module(id='ospec.wiggle', datatype=OSPEC_DATA, version='1.0', action=wiggle_action, filterModule=WiggleCorrection)
+    return dict(output=filters.WiggleCorrection().apply(input, amp=amp))
+wiggle = wiggle_module(id='ospec.wiggle', datatype=OSPEC_DATA, version='1.0', action=wiggle_action, filterModule=filters.WiggleCorrection)
 
 # smooth module
 window_field = {'name': 'window', 'type': 'List', 'value': 0, 'choices': ['hanning', 'hamming', 'boxcar']}
 def smooth_action(input=[], window='flat', window_len=5, axis=0, **kwargs):
     print "smoothing"
-    return dict(output=SmoothData().apply(input, window=window, width=window_len, axis=axis))
-smooth = smooth_module(id='ospec.smooth', datatype=OSPEC_DATA, version='1.0', action=smooth_action, filterModule=SmoothData)
+    return dict(output=filters.SmoothData().apply(input, window=window, width=window_len, axis=axis))
+smooth = smooth_module(id='ospec.smooth', datatype=OSPEC_DATA, version='1.0', action=smooth_action, filterModule=filters.SmoothData)
 
 # Time of Flight to wavelength module
 def tof_lambda_action(input=[], wl_over_tof=1.9050372144288577e-5, **kwargs):
     print "TOF to wavelength"
-    return dict(output=AsterixTOFToWavelength().apply(input, wl_over_tof=wl_over_tof))
-tof_to_wavelength = tof_lambda_module(id='ospec.tof_lambda', datatype=OSPEC_DATA, version='1.0', action=tof_lambda_action, filterModule=AsterixTOFToWavelength)
+    return dict(output=filters.AsterixTOFToWavelength().apply(input, wl_over_tof=wl_over_tof))
+tof_to_wavelength = tof_lambda_module(id='ospec.tof_lambda', datatype=OSPEC_DATA, version='1.0', action=tof_lambda_action, filterModule=filters.AsterixTOFToWavelength)
 
 # Pixels to two theta module
 def pixels_two_theta_action(input=[], pixels_per_degree=52.8, qzero_pixel=358, instr_resolution=1e-6, ax_name='xpixel', **kwargs):
     print "converting pixels to two theta"
-    result = PixelsToTwotheta().apply(input, pixels_per_degree=pixels_per_degree, qzero_pixel=qzero_pixel, instr_resolution=instr_resolution, ax_name=ax_name)
+    result = filters.PixelsToTwotheta().apply(input, pixels_per_degree=pixels_per_degree, qzero_pixel=qzero_pixel, instr_resolution=instr_resolution, ax_name=ax_name)
     return dict(output=result)
-pixels_two_theta = pixels_two_theta_module(id='ospec.twotheta', datatype=OSPEC_DATA, version='1.0', action=pixels_two_theta_action, filterModule=PixelsToTwotheta)
+pixels_two_theta = pixels_two_theta_module(id='ospec.twotheta', datatype=OSPEC_DATA, version='1.0', action=pixels_two_theta_action, filterModule=filters.PixelsToTwotheta)
 
 
 # Asterix Pixels to two theta module
 def asterix_pixels_two_theta_action(input=[], qzero_pixel = 145., twotheta_offset=0.0, pw_over_d=0.0003411385649, **kwargs):
     print "converting pixels to two theta (Asterix)"
-    result = AsterixPixelsToTwotheta().apply(input, pw_over_d=pw_over_d, qzero_pixel=qzero_pixel, twotheta_offset=twotheta_offset)
+    result = filters.AsterixPixelsToTwotheta().apply(input, pw_over_d=pw_over_d, qzero_pixel=qzero_pixel, twotheta_offset=twotheta_offset)
     return dict(output=result)
 asterix_pixels_two_theta = asterix_pixels_two_theta_module(id='ospec.asterix.twotheta', datatype=OSPEC_DATA, version='1.0', action=asterix_pixels_two_theta_action)
 
 # Two theta Lambda to qxqz module
 def two_theta_lambda_qxqz_action(input=[], theta=None, qxmin= -0.003, qxmax=0.003, qxbins=201, qzmin=0.0, qzmax=0.1, qzbins=201,**kwargs):
     print "converting two theta and lambda to qx and qz"
-    result = TwothetaLambdaToQxQz().apply(input, theta, qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)
+    result = filters.TwothetaLambdaToQxQz().apply(input, theta, qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)
     return dict(output=result)
 two_theta_lambda_qxqz = two_theta_lambda_qxqz_module(id='ospec.tth_wl_qxqz', datatype=OSPEC_DATA, version='1.0', action=two_theta_lambda_qxqz_action)
 
@@ -412,20 +380,20 @@ def theta_two_theta_qxqz_action(input=[], output_grid=None, wavelength=5.0, qxmi
     grid = None
     if output_grid != None:
         grid = output_grid[0]
-    result = ThetaTwothetaToQxQz().apply(input, grid, wavelength, qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)
+    result = filters.ThetaTwothetaToQxQz().apply(input, grid, wavelength, qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)
     return dict(output=result)
 theta_two_theta_qxqz = theta_two_theta_qxqz_module(id='ospec.th_tth_qxqz', datatype=OSPEC_DATA, version='1.0', action=theta_two_theta_qxqz_action)
 
 # Twotheta to q module
 def twotheta_q_action(input=[], wavelength=5.0, ax_name='twotheta', **kwargs):
     print "converting twotheta to q"
-    result = TwothetaToQ().apply(input, wavelength, ax_name)
+    result = filters.TwothetaToQ().apply(input, wavelength, ax_name)
     return dict(output=result)
 twotheta_q = twotheta_q_module(id='ospec.tth_q', datatype=OSPEC_DATA, version='1.0', action=twotheta_q_action)
 
 def empty_qxqz_grid_action(qxmin= -0.003, qxmax=0.003, qxbins=201, qzmin=0.0, qzmax=0.1, qzbins=201, **kwargs):
     print "creating an empty QxQz grid"
-    return dict(output=[EmptyQxQzGridPolarized(qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)])
+    return dict(output=[filters.EmptyQxQzGridPolarized(qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)])
 empty_qxqz = empty_qxqz_grid_module(id='ospec.emptyqxqz', datatype=OSPEC_DATA, version='1.0', action=empty_qxqz_grid_action)
 
 
@@ -445,14 +413,14 @@ load_he3 = load_he3_module(id='ospec.loadhe3', datatype=OSPEC_DATA_HE3,
 # Load timestamps
 def load_timestamp_action(files=[], **kwargs):
     print "loading timestamps", files
-    result = [PlottableDict(simplejson.load(open(f, 'r'))) for f in files]
+    result = [PlottableDict(json.load(open(f, 'r'))) for f in files]
     return dict(output=result)
 load_stamp = load_timestamp_module(id='ospec.loadstamp', datatype=OSPEC_DATA_TIMESTAMP,
                    version='1.0', action=load_timestamp_action)
 
 def LoadTimestamps(filename, friendly_name="", path=""):
     fn = os.path.join(dirName, filename)
-    return PlottableDict(simplejson.load(open(fn, 'r')))
+    return PlottableDict(json.load(open(fn, 'r')))
 
 datastamp.loaders.append({'function':LoadTimestamps, 'id':'LoadTimeStamps'})
     
@@ -462,7 +430,7 @@ def append_polarization_matrix_action(input=[], he3cell=None, **kwargs):
     he3analyzer = None
     if he3cell != None: # should always be true; he3cell is now required
         he3analyzer = he3cell[0]
-    return dict(output=AppendPolarizationMatrix().apply(input, he3cell=he3analyzer))
+    return dict(output=filters.AppendPolarizationMatrix().apply(input, he3cell=he3analyzer))
 append_polarization = append_polarization_matrix_module(id='ospec.append', datatype=OSPEC_DATA,
                     cell_datatype=OSPEC_DATA_HE3, version='1.0', action=append_polarization_matrix_action)
 
@@ -472,14 +440,14 @@ def combine_polarized_action(input=[], grid=None, **kwargs):
     output_grid = None
     if grid != None:
         output_grid = grid[0]
-    return dict(output=CombinePolarized().apply(input, grid=output_grid))
+    return dict(output=filters.CombinePolarized().apply(input, grid=output_grid))
 combine_polarized = combine_polarized_module(id='ospec.comb_polar', datatype=OSPEC_DATA,
                                              version='1.0', action=combine_polarized_action)
 
 # Polarization correction module
 def polarization_correct_action(input=[], assumptions=0, auto_assumptions=True, **kwargs):
     print "polarization correction"
-    return dict(output=PolarizationCorrect().apply(input, assumptions=assumptions, auto_assumptions=auto_assumptions)) 
+    return dict(output=filters.PolarizationCorrect().apply(input, assumptions=assumptions, auto_assumptions=auto_assumptions))
 correct_polarized = polarization_correct_module(id='ospec.corr_polar', datatype=OSPEC_DATA,
                                              version='1.0', action=polarization_correct_action)
 
@@ -488,7 +456,7 @@ def timestamp_action(input=[], stamps=None, override_existing=False, **kwargs):
     if stamps == None:
         sys.exit("No timestamps specified; exiting")
     timestamp_file = stamps[0] # only one timestamp
-    return dict(output=[InsertTimestamps().apply(datum, timestamp_file, override_existing=override_existing, filename=get_friendly_name(datum._info[-1]['filename'])) for datum in input])
+    return dict(output=[filters.InsertTimestamps().apply(datum, timestamp_file, override_existing=override_existing, filename=get_friendly_name(datum._info[-1]['filename'])) for datum in input])
 timestamp = timestamp_module(id='ospec.timestamp', datatype=OSPEC_DATA,
                              version='1.0', action=timestamp_action, stamp_datatype=OSPEC_DATA_TIMESTAMP)
 
@@ -515,12 +483,11 @@ ASTERIX = Instrument(id='lansce.ospec.asterix',
                  datatypes=[data2d],
                  )
                  
-instrmnts = [ANDR,ASTERIX]
-for instrument in instrmnts:
+for instrument in [ANDR, ASTERIX]:
     register_instrument(instrument)
     
 # Testing
-if __name__ == '__main__':
+def demo():
     polarized = False
     if not polarized:
         path, ext = dir + '/dataflow/sampledata/ANDR/sabc/Isabc20', '.cg1'
@@ -551,7 +518,7 @@ if __name__ == '__main__':
     else:
         path, ext = dir + '/dataflow/sampledata/ANDR/cshape_121609/Iremun00', ['.ca1', '.cb1']
         files = [path + str(i + 1) + extension for i in range(0, 9) for extension in ext if i != 2]
-        pols = simplejson.load(open(dir + '/dataflow/sampledata/ANDR/cshape_121609/file_catalog.json', 'r'))
+        pols = json.load(open(dir + '/dataflow/sampledata/ANDR/cshape_121609/file_catalog.json', 'r'))
         pol_states = dict((os.path.split(file)[-1], pols[os.path.split(file)[-1]]['polarization']) for file in files)
         modules = [
             dict(module="ospec.load", position=(50, 25),
@@ -585,7 +552,7 @@ if __name__ == '__main__':
                         )
     
     print template_to_wireit_diagram(template)
-    ins = simplejson.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
+    ins = json.dumps(instrument_to_wireit_language(ANDR), sort_keys=True, indent=2)
     with open(dir + '/dataflow/static/wireit_test/ANDRdefinition2.js', 'w') as f:
         f.write('var andr2 = ' + ins + ';')
         f.write("\n\nSaveContainer = function(opts, layer) {\
@@ -622,3 +589,6 @@ if __name__ == '__main__':
         for format in result:
             f.write(format + "\n")
     print "Done"
+
+if __name__ == '__main__':
+    demo()

@@ -1,2 +1,0 @@
-/www/lib/ was moved to /static/lib/ on Friday afternoon
-"id" is a reserved word--please change it within dataflow modules and template class definitions.

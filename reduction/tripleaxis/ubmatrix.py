@@ -4,13 +4,8 @@ Author: Alex Yee
 Edit History
     See Research Journal
 '''
-import sys
 import numpy as np
-#import scipy
-#import scipy.optimize
-
-from openopt import NLSP
-#import multiprocessing as NLSP
+#from openopt import NLSP
 
 
 def star(a,b,c,alpha,beta,gamma):
@@ -19,24 +14,20 @@ def star(a,b,c,alpha,beta,gamma):
     beta=np.radians(beta)
     gamma=np.radians(gamma)
     V=2*a*b*c*\
-        np.sqrt(np.sin((alpha+beta+gamma)/2)*\
-               np.sin((-alpha+beta+gamma)/2)*\
-               np.sin((alpha-beta+gamma)/2)*\
+        np.sqrt(np.sin((alpha+beta+gamma)/2)*
+               np.sin((-alpha+beta+gamma)/2)*
+               np.sin((alpha-beta+gamma)/2)*
                np.sin((alpha+beta-gamma)/2))
-    Vstar=(2*np.pi)**3/V;
+    #Vstar=(2*np.pi)**3/V
     astar=2*np.pi*b*c*np.sin(alpha)/V
     bstar=2*np.pi*a*c*np.sin(beta)/V
     cstar=2*np.pi*b*a*np.sin(gamma)/V
-    alphastar=np.arccos((np.cos(beta)*np.cos(gamma)-\
-                        np.cos(alpha))/ \
-                       (np.sin(beta)*np.sin(gamma)))
-    betastar= np.arccos((np.cos(alpha)*np.cos(gamma)-\
-                        np.cos(beta))/ \
-                       (np.sin(alpha)*np.sin(gamma)))
-    gammastar=np.arccos((np.cos(alpha)*np.cos(beta)-\
-                        np.cos(gamma))/ \
-                       (np.sin(alpha)*np.sin(beta)))
-    V=V
+    alphastar=np.arccos((np.cos(beta)*np.cos(gamma) - np.cos(alpha))
+                        / (np.sin(beta)*np.sin(gamma)))
+    betastar= np.arccos((np.cos(alpha)*np.cos(gamma) - np.cos(beta))
+                        / (np.sin(alpha)*np.sin(gamma)))
+    gammastar=np.arccos((np.cos(alpha)*np.cos(beta) - np.cos(gamma))
+                        /  (np.sin(alpha)*np.sin(beta)))
     alphastar=np.degrees(alphastar)
     betastar=np.degrees(betastar)
     gammastar=np.degrees(gammastar)
@@ -124,7 +115,7 @@ def calcRefineUB(observations, wavelength):
         h = [observations[i]['h'], observations[i]['k'], observations[i]['l']]
         hvectors.append(h)
 
-        '''
+        _ = '''
         sys.stderr.write('i %3.4f \n'%(observations[i]['h'],))
         sys.stderr.write('i %3.4f \n'%(observations[i]['k'],))
         sys.stderr.write('i %3.4f \n'%(observations[i]['l'],))
@@ -534,39 +525,42 @@ def calc_plane(p, h, k, l, normalize=True):
         c_arr.append(c)
     return a_arr, b_arr, c_arr
 
+def demo_UBtestrun():
+
+    pi=np.pi
+    a=2*pi; b=2*pi; c=2*pi
+    alpha=90; beta=90; gamma=90
+    recip=star(a,b,c,alpha,beta,gamma)
+    print recip
+    UBtestrun()
+    print('done!')
+
+def demo_calc_plane():
+    pi=np.pi
+    a=3.9091; b=3.9091; c=3.9091
+    alpha=90; beta=90; gamma=90
+    UBMatrix=np.array([[1.0025837,-1.255604,.0420678],
+                       [1.2563042,1.0021650,-.029173],
+                       [-.003439,.0510781,1.6065072]])
+    UBMatrix=np.array([1.00258371638,-1.25560446131,0.0420678730826,1.25630427793,1.00216507632,-0.0291735947875,-0.00343954412323,0.0510781177682,1.60650725893],'Float64')
+    UBMatrix=UBMatrix.reshape(3,3)
+    wavelength=2.37051
+    tth=np.radians(30.4466)
+    phi=np.radians(-12.3291)
+    omega=np.radians(129.993)
+    chi=np.radians(-67.5906)
+    hphi=calc_hphi(phi,omega,tth,chi,wavelength)
+    UBinv=np.linalg.inv(UBMatrix)
+    hcalc=2*pi*np.dot(UBinv,hphi)
+    print hcalc
+
+    p=[1,1,1,1,-1,0]
+    h=[1]
+    k=[1]
+    l=[1]
+    res=calc_plane(p,h,k,l,normalize=False)
+    print res
+
 if __name__=="__main__":
-    
-    if 1:
-        pi=np.pi
-        a=2*pi; b=2*pi; c=2*pi
-        alpha=90; beta=90; gamma=90
-        recip=star(a,b,c,alpha,beta,gamma)
-        print recip
-        UBtestrun()
-        print('done!')
-        
-    if 0:
-        pi=np.pi
-        a=3.9091; b=3.9091; c=3.9091
-        alpha=90; beta=90; gamma=90
-        UBMatrix=np.array([[1.0025837,-1.255604,.0420678],
-                          [1.2563042,1.0021650,-.029173],
-                          [-.003439,.0510781,1.6065072]])
-        UBMatrix=np.array([1.00258371638,-1.25560446131,0.0420678730826,1.25630427793,1.00216507632,-0.0291735947875,-0.00343954412323,0.0510781177682,1.60650725893],'Float64')
-        UBMatrix=UBMatrix.reshape(3,3)
-        wavelength=2.37051
-        tth=np.radians(30.4466)
-        phi=np.radians(-12.3291)
-        omega=np.radians(129.993)
-        chi=np.radians(-67.5906)
-        hphi=calc_hphi(phi,omega,tth,chi,wavelength)
-        UBinv=np.linalg.inv(UBMatrix)
-        hcalc=2*pi*np.dot(UBinv,hphi)
-        print hcalc
-        
-        p=[1,1,1,1,-1,0]
-        h=[1]
-        k=[1]
-        l=[1]
-        res=calc_plane(p,h,k,l,normalize=False)
-        print res
+    #demo_UBtestrun()
+    demo_calc_plane()

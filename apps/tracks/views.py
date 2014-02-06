@@ -1,63 +1,60 @@
 ## adds default objects to DB
-from ... import fillDB
+import os
+import hashlib
+import tempfile
+import cStringIO
+import gzip
+import hmac
+import copy
+from django.utils import simplejson as json
+import json as orderedjson # keeps order of OrderedDict on dumps!
 
+from numpy import NaN, array
+import numpy as np
+
+import redis
+server = redis.Redis("localhost")
+
+from django.conf import settings
 from django.shortcuts import render_to_response, render
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
-from django.utils import simplejson
-import json # keeps order of OrderedDict on dumps!
-from apps.tracks.forms import languageSelectForm, titleOnlyForm, experimentForm1, experimentForm2, titleOnlyFormExperiment
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger #paging for lists
 from django.core.exceptions import ObjectDoesNotExist
-import cStringIO, gzip
 from django.db import transaction
-import hashlib,os
-import types
-import tempfile
 from django.core.mail import send_mail
-
-## models
 from django.contrib.auth.models import User 
 from django.contrib.auth import authenticate, login
-from models import * #add models by name
 
-
-from ...apps.fileview import testftp
-
-from ...dataflow import wireit
-from ...dataflow.core import lookup_module, lookup_datatype
-from ...dataflow.calc import run_template
-from ...dataflow.calc import calc_single, fingerprint_template, get_plottable, get_csv
-from ...dataflow.offspecular.instruments import ANDR, ASTERIX
+from dataflow import wireit
+from dataflow.core import lookup_module, lookup_datatype
+from dataflow.calc import calc_single, fingerprint_template, get_plottable, get_csv
+from dataflow.offspecular.instruments import ANDR, ASTERIX
 print "ANDR imported: ", ANDR.id
-#from ...dataflow.offspecular.instruments import ASTERIX
 print "ASTERIX imported: ", ASTERIX.id
-from ...dataflow.SANS.novelinstruments import SANS_NG3
+from dataflow.SANS.novelinstruments import SANS_NG3
 print "SANS imported: ", SANS_NG3.id
-from ...dataflow.tas.instruments import TAS as TAS_INS
+from dataflow.tas.instruments import TAS as TAS_INS
 print "TAS imported: ", TAS_INS.id
-from ...dataflow.refl.instruments import PBR as PBR_INS
+from dataflow.refl.instruments import PBR as PBR_INS
 print "PBR imported: ", PBR_INS.id
 
 # For reading in files and their metadata in the EditExperiment page
-from ...reduction.tripleaxis.data_abstraction import ncnr_filereader
-from ...reduction.tripleaxis.data_abstraction import chalk_filereader
-from ...reduction.tripleaxis.data_abstraction import hfir_filereader
-from ...reduction.tripleaxis.data_abstraction import TripleAxis
-from ...dataflow import wireit
+from reduction.tripleaxis.data_abstraction import ncnr_filereader
+from reduction.tripleaxis.data_abstraction import chalk_filereader
+from reduction.tripleaxis.data_abstraction import hfir_filereader
+from reduction.tripleaxis.data_abstraction import TripleAxis
 
 # Used for segment interactor calculations
-from ...reduction.common import linegen
+from reduction.common import linegen
 
-import random
-from numpy import NaN
-from numpy import array
-import numpy as np
-import hmac
+from . import ftpview
+from .models import * #add models by name
+from .forms import languageSelectForm, titleOnlyForm, experimentForm1, experimentForm2, titleOnlyFormExperiment
 
-from django.conf import settings
+
 FILES_DIR=settings.FILES_DIR
 
 def xhr_test(request):
@@ -97,42 +94,43 @@ def testTable(request):
 
 def return_data(request):
     dataArray=[['file name','database id','sha1','x','y','z'],[NaN,NaN,NaN,10,10,10],[NaN,NaN,NaN,-10,-10,-10],['file3','1','sh1','1,9','2,3','3,4'],['file2','1','sh2','4,5','2,3','5,5']]    
-    return HttpResponse(simplejson.dumps(dataArray))
+    return HttpResponse(json.dumps(dataArray))
 
 def email_collaborator(request):
     """ Sends an email to a collaborator to give them access to a project via a link"""
-    if request.POST.has_key('project_id') and \
-       request.POST.has_key('collaborator_email') and \
-       request.POST.has_key('user_id'):
-        from django.template.loader import render_to_string
-        from django.contrib.sites.models import RequestSite
-        from django.contrib.sites.models import Site        
+    if not (request.POST.has_key('project_id') 
+            and request.POST.has_key('collaborator_email')
+            and request.POST.has_key('user_id')):
+        return
+    from django.template.loader import render_to_string
+    from django.contrib.sites.models import RequestSite
+    from django.contrib.sites.models import Site        
+    
+    # getting the site
+    if Site._meta.installed:
+        site = Site.objects.get_current()
+    else:
+        site = RequestSite(request)
+    project = Project.objects.get(id=request.POST['project_id'])
+    user = User.objects.get(id=request.POST['user_id'])
+    user_name = user.get_full_name()
+    if len(user_name) < 1:
+        user_name = user.email #if the user hasn't provided a name, use their email
         
-        # getting the site
-        if Site._meta.installed:
-            site = Site.objects.get_current()
-        else:
-            site = RequestSite(request)
-        project = Project.objects.get(id=request.POST['project_id'])
-        user = User.objects.get(id=request.POST['user_id'])
-        user_name = user.get_full_name()
-        if len(user_name) < 1:
-            user_name = user.email #if the user hasn't provided a name, use their email
-            
-        ctx_dict = {'email_activation_key': request.POST['collaborator_email'] + ';' + project.activation_key, 
-                    'site': site, 
-                    'user': user_name,
-                    'project_activate': 'apps.tracks.views.add_collaborator'}
-        subject = render_to_string('registration/collaborate/activation_email_subject.txt', ctx_dict)
-        
-        # Email subject *must not* contain newlines
-        subject = ''.join(subject.splitlines())
-        
-        message = render_to_string('registration/collaborate/activation_email.txt', ctx_dict)
-        
-        #user.email_user(subject, message, settings.DEFAULT_FROM_EMAIL)
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [request.POST['collaborator_email']])
-        return HttpResponse('OK')
+    ctx_dict = {'email_activation_key': request.POST['collaborator_email'] + ';' + project.activation_key, 
+                'site': site, 
+                'user': user_name,
+                'project_activate': 'apps.tracks.views.add_collaborator'}
+    subject = render_to_string('registration/collaborate/activation_email_subject.txt', ctx_dict)
+    
+    # Email subject *must not* contain newlines
+    subject = ''.join(subject.splitlines())
+    
+    message = render_to_string('registration/collaborate/activation_email.txt', ctx_dict)
+    
+    #user.email_user(subject, message, settings.DEFAULT_FROM_EMAIL)
+    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [request.POST['collaborator_email']])
+    return HttpResponse('OK')
         
 
 #def add_collaborator(request, email_address, activation_key):
@@ -187,9 +185,9 @@ def calculate_segment_interactor(request):
     #try:
     point1 = (float(request.GET['x1']), float(request.GET['y1']))
     point2 = (float(request.GET['x2']), float(request.GET['y2']))
-    xarr = array(simplejson.loads(request.GET['xarr']))
-    yarr = array(simplejson.loads(request.GET['yarr']))
-    zarr = array(simplejson.loads(request.GET['zarr']))
+    xarr = array(json.loads(request.GET['xarr']))
+    yarr = array(json.loads(request.GET['yarr']))
+    zarr = array(json.loads(request.GET['zarr']))
     
     myline = linegen.line_interp(point1, point2, divisions=5)
     xout, yout, zout = myline.interp(xarr, yarr, zarr)
@@ -197,7 +195,7 @@ def calculate_segment_interactor(request):
     line_y = myline.line_y
     
     zout[np.isnan(zout)] = 0.
-    return HttpResponse(simplejson.dumps({'line_x': line_x.tolist(), 'line_y': line_y.tolist(), 'zout': zout.tolist()}))
+    return HttpResponse(json.dumps({'line_x': line_x.tolist(), 'line_y': line_y.tolist(), 'zout': zout.tolist()}))
     #except:
     #    pass
 
@@ -289,20 +287,15 @@ def return_metadata(experiment_id):
     dataObject.insert(0, maxvals)
     dataObject.insert(0, fileheaders)
     
-    #return HttpResponse(simplejson.dumps(dataObject))
-    return simplejson.dumps(dataObject)
-
-import redis
-server = redis.Redis("localhost")
-
+    #return HttpResponse(json.dumps(dataObject))
+    return json.dumps(dataObject)
 
 #def return_loaded_file(request):
     
 
 def getBinaryData(request):
     binary_fp = request.POST['binary_fp']
-    #import numpy
-    #data = numpy.random.rand(1000,1000).astype(numpy.float32).tostring()
+    #data = np.random.rand(1000,1000).astype(np.float32).tostring()
     #binary_fp = data['binary_fp']
     #print "getting data:", binary_fp
     #print 'server.exists(binary_fp):', server.exists(binary_fp), server.keys()
@@ -348,7 +341,7 @@ def getFTPdirectories(request):
             directory = request.GET['directory']
         else:
             directory = '/'
-        return HttpResponse(simplejson.dumps(testftp.runFTP(address, directory, username=username, password=password)))
+        return HttpResponse(json.dumps(ftpview.runFTP(address, directory, username=username, password=password)))
     
     return HttpResponse('Improper request')
 
@@ -392,27 +385,27 @@ print 'instrument_class_by_language:', instrument_class_by_language
 def listWirings(request):
     context = RequestContext(request)
     print 'I am loading'
-    data = simplejson.loads(request.POST['data'])
+    data = json.loads(request.POST['data'])
     instr = Instrument.objects.get(instrument_class = data['language'])
     wirings = [] # start from scratch
     default_templates = instr.Templates.all()
     for t in default_templates:
-        wirings.append(simplejson.loads(t.Representation))
+        wirings.append(json.loads(t.Representation))
 
     experiment_templates = Experiment.objects.get(id=data['experiment_id']).templates.all()
     for t in experiment_templates:
-        wirings.append(simplejson.loads(t.Representation))
+        wirings.append(json.loads(t.Representation))
 
-    return HttpResponse(simplejson.dumps(wirings)) 
+    return HttpResponse(json.dumps(wirings)) 
 
-#    return HttpResponse(simplejson.dumps(a)) #andr vs bt7 testing
+#    return HttpResponse(json.dumps(a)) #andr vs bt7 testing
 
 #@csrf_exempt 
 def saveWiring(request):
     #context = RequestContext(request)
     print 'I am saving'
     print request.POST
-    postData = simplejson.loads(request.POST['data'])
+    postData = json.loads(request.POST['data'])
     new_wiring = postData['new_wiring']
     # this stores the wires in a simple list, in memory on the django server.
     # replace this with a call to storing the wiring in a real database.
@@ -425,25 +418,25 @@ def saveWiring(request):
         if user.is_staff:
             instr = Instrument.objects.get(instrument_class = new_wiring['language'])
             if len(instr.Templates.filter(Title=new_wiring['name'])) > 0:
-                reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'this name exists, please use another'}))
+                reply = HttpResponse(json.dumps({'save': 'failure', 'errorStr': 'this name exists, please use another'}))
                 reply.status_code = 500
                 return reply
-            temp = instr.Templates.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring))
+            temp = instr.Templates.create(Title=new_wiring['name'], Representation=json.dumps(new_wiring))
             temp.user.add(request.user)
         else:
-            reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'you are not staff!'}))
+            reply = HttpResponse(json.dumps({'save': 'failure', 'errorStr': 'you are not staff!'}))
             reply.status_code = 500
             return reply
     else:
         if len(Template.objects.filter(Title=new_wiring['name'])) > 0:
-            reply = HttpResponse(simplejson.dumps({'save': 'failure', 'errorStr': 'This name exists, please use another.'}))
+            reply = HttpResponse(json.dumps({'save': 'failure', 'errorStr': 'This name exists, please use another.'}))
             reply.status_code = 500
             return reply
-        temp = Template.objects.create(Title=new_wiring['name'], Representation=simplejson.dumps(new_wiring))
+        temp = Template.objects.create(Title=new_wiring['name'], Representation=json.dumps(new_wiring))
         temp.user.add(request.user)
     # this puts the Template into the pool of existing Templates.
     #wirings_list.append(new_wiring)
-    return HttpResponse(simplejson.dumps({'save':'successful'})) #, context_instance=context
+    return HttpResponse(json.dumps({'save':'successful'})) #, context_instance=context
 
 def get_filepath_by_hash(fh):
     return os.path.join(File.objects.get(name=str(fh)).location,str(fh))
@@ -459,7 +452,7 @@ def get_filepath_by_hash(fh):
 
 def old_getCSV(data):
     print 'IN RUN REDUCTION: getting CSV'
-    data = simplejson.loads(request.POST['data'])
+    data = json.loads(request.POST['data'])
     print 'IN RUN REDUCTION: getting CSV'
     config = {}
     bad_headers = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
@@ -492,8 +485,8 @@ def old_getCSV(data):
         # configuration for template is embedded
         print "getting result"
         result = get_csv(template, config, nodenum, terminal_id)[0]
-        #response = HttpResponse(simplejson.dumps({'redis_key': result}))
-    #print simplejson.dumps({'redis_key': result[0][:800]})
+        #response = HttpResponse(json.dumps({'redis_key': result}))
+    #print json.dumps({'redis_key': result[0][:800]})
     outfilename = data.get('outfilename', 'data.csv')
     response = HttpResponse(result, mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=%s' % (outfilename,)
@@ -504,7 +497,7 @@ def old_getCSV(data):
             
 #@csrf_exempt 
 def setupReduction(data):
-    #data = simplejson.loads(request.POST['data'])
+    #data = json.loads(request.POST['data'])
     #import pprint
     print 'IN RUN REDUCTION'
     #pprint.pprint( data )
@@ -519,7 +512,6 @@ def setupReduction(data):
         current_reduct = groups.get(active_group, {})
         for key, value in current_reduct.items():
             if key == 'files' and current_reduct.get('autochain-loader', {}).get('value', False) == True:
-                import copy
                 new_moduleId = len(data['modules'])
                 for f in value['value']:
                     new_config = copy.deepcopy(current_reduct)
@@ -590,7 +582,7 @@ def setupReduction(data):
 #            #return HttpResponse(JSON_result) #, context_instance=context
       
 def runReduction(request):
-    data = simplejson.loads(request.POST['data'])
+    data = json.loads(request.POST['data'])
     template, config, nodenum, terminal_id = setupReduction(data)
     print "template:", template
     print "config:", config
@@ -614,10 +606,15 @@ def runReduction(request):
     return response
 
 def saveData(request):
-    # takes a request to run a reduction, then stashes the result in 
-    # the filesystem as a tarfile with SHA1 as filename.
+    """
+    takes a request to run a reduction, then stashes the result in 
+    the filesystem as a tarfile with SHA1 as filename.
+    """
+    import tarfile
+    import StringIO
+
     location = FILES_DIR
-    data = simplejson.loads(request.POST['data'])
+    data = json.loads(request.POST['data'])
     toReduce = data['toReduce']
     template, config, nodenum, terminal_id = setupReduction(toReduce)
     result = calc_single(template, config, nodenum, terminal_id)
@@ -631,8 +628,6 @@ def saveData(request):
     filename = sha1.hexdigest()
     file_path = os.path.join(FILES_DIR, filename)
     
-    import tarfile
-    import StringIO
     tar = tarfile.open(file_path,"w:gz")
     
     for i, data_str in enumerate(result_strs):
@@ -677,7 +672,7 @@ def saveData(request):
     return HttpResponse('OK');
     
 def getCSV(request):
-    data = simplejson.loads(request.POST['data'])
+    data = json.loads(request.POST['data'])
     template, config, nodenum, terminal_id = setupReduction(data)
     
     result = ""
@@ -694,7 +689,7 @@ def getCSV(request):
     return response 
 
 def filesExist(request):
-    data = simplejson.loads(request.POST['data'])
+    data = json.loads(request.POST['data'])
     if data.has_key('filehashes'):
         filehashes = data['filehashes']
         existences = {}
@@ -704,7 +699,7 @@ def filesExist(request):
             else: file_exists = False
             existences[filehash] = file_exists
         print existences
-    return HttpResponse(simplejson.dumps(existences))
+    return HttpResponse(json.dumps(existences))
 
 
 def uploadFTPFiles(request):
@@ -717,11 +712,11 @@ def uploadFTPFiles(request):
        request.POST.has_key('password') and request.POST.has_key('experiment_id') and \
        request.POST.has_key('instrument_class') and request.POST.has_key('loader_id') and \
        request.POST.has_key('filepaths'):
-        filepaths = simplejson.loads(request.POST['filepaths']) #given as a string of a list
+        filepaths = json.loads(request.POST['filepaths']) #given as a string of a list
         username = request.POST['username']
         password = request.POST['password']
         
-        file_descriptors = testftp.getFiles(request.POST['address'], filepaths, username=username, password=password)
+        file_descriptors = ftpview.getFiles(request.POST['address'], filepaths, username=username, password=password)
         experiment_id = request.POST['experiment_id']
         instrument_class = request.POST['instrument_class']
         loader_id = request.POST['loader_id']
@@ -770,6 +765,9 @@ def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
     
     Returns: nothing
     """    
+    import tarfile
+    import StringIO
+
     try:
         experiment = Experiment.objects.get(id=experiment_id)
     except:
@@ -805,8 +803,6 @@ def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
             filename = s_sha1.hexdigest()
             new_files = File.objects.filter(name=filename)
             
-            import tarfile
-            import StringIO
             string = StringIO.StringIO()
             string.write(serialized)
             string.seek(0)
@@ -900,24 +896,24 @@ def call_appropriate_filereader(filestr, friendly_name=None, fileExt=None):
 ###### BT7 TESTING
 #    register_instrument(BT7)
 #    instruments.init_data()
-#    template = wireit.wireit_diagram_to_template(simplejson.loads(str(request.POST['data'])), BT7)
+#    template = wireit.wireit_diagram_to_template(json.loads(str(request.POST['data'])), BT7)
     #   a = run_template(template, [{'files': ['f1.bt7', 'f2.bt7']}, {'align': ['A3']}, {'scale': 2.5}, {'ext': 'dat'}])
     #   print a    
     #   data = [[random.random(), random.random()] for i in range(10)]
     #   c = {'reduction':'successful', 'data': data}
-    #   return HttpResponse(simplejson.dumps(a))
+    #   return HttpResponse(json.dumps(a))
 
 ###### ANDR TESTING
 #    register_instrument(ANDR)
 #    print "DONE REGISTERING"
-#    template = wireit.wireit_diagram_to_template(simplejson.loads(str(request.POST['data'])), ANDR)
+#    template = wireit.wireit_diagram_to_template(json.loads(str(request.POST['data'])), ANDR)
 #    template = wireit.wireit_diagram_to_template(offspec[0], ANDR)
 #    print template
 #    print "RUNNING"
 #    a = run_template(template, [d['config'] for d in template.modules])
 #    print "DONE RUNNING"
 #    print a
-#    return HttpResponse(simplejson.dumps(a))
+#    return HttpResponse(json.dumps(a))
 
 
 ######## 
@@ -943,8 +939,8 @@ def return_files_metadata(request):
         file_keys = [[fl.name, fl.friendly_name] for fl in file_list]
         file_metadata = return_metadata(experiment_id)
         result = {'file_keys': file_keys, 'file_metadata': file_metadata}
-        return HttpResponse(simplejson.dumps(result))    
-        #return simplejson.dumps(file_keys),return_metadata(experiment_id) 
+        return HttpResponse(json.dumps(result))    
+        #return json.dumps(file_keys),return_metadata(experiment_id) 
 
 #@csrf_exempt 
 def displayEditor(request):
@@ -961,16 +957,16 @@ def displayEditor(request):
             file_list = []
             experiment_id = -1
         file_keys = [[fl.name, fl.friendly_name] for fl in file_list]
-        file_context['file_keys'] = simplejson.dumps(file_keys)
+        file_context['file_keys'] = json.dumps(file_keys)
         file_context['file_metadata'] = return_metadata(experiment_id)
         language_name = request.POST['language']
         file_context['language_name'] = language_name
         file_context['experiment_id'] = experiment_id
-        # not using simplejson here because for some reason the old version of simplejson on danse
+        # not using json here because for some reason the old version of json on danse
         # does not respect key order for OrderedDict.
     
         #try:
-        file_context['language_actual'] = json.dumps(wireit.instrument_to_wireit_language(instrument_class_by_language[language_name]))
+        file_context['language_actual'] = orderedjson.dumps(wireit.instrument_to_wireit_language(instrument_class_by_language[language_name]))
 
         '''        
         except:
@@ -1010,9 +1006,9 @@ def myProjects(request):
     elif request.POST.has_key('new_project'):
         newproj = Project.objects.create(Title=request.POST['new_project'])
         # importing secret key here only to minimize its visibility...
-        from ...settings import SECRET_KEY
+        from apps.keygen import get_key
         msg = str(newproj.Title) + ';' + str(newproj.id) #creating activation_key based on project Title and id
-        newproj.activation_key = hmac.new(SECRET_KEY, msg, hashlib.sha1).hexdigest()
+        newproj.activation_key = hmac.new(get_key(), msg, hashlib.sha1).hexdigest()
         newproj.save()
         newproj.users.add(request.user)
     project_list = Project.objects.filter(users=request.user)

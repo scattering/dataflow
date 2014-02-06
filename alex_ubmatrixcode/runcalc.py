@@ -5,11 +5,8 @@ Edit History
     See Research Journal
 '''
 
-import os,sys
-import simplejson
-import numpy as N
 import csv #(Commma Separated Values)
-import datetime
+from django.utils import simplejson as json
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import auth
@@ -17,10 +14,13 @@ from django.contrib.auth.decorators import login_required
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist
 
+import numpy as np
+from numpy import radians
+
 from Alex.ubmatrix import *
 
 def runcalcTheta(request):
-    requestObject = simplejson.loads(request.POST.keys()[0])
+    requestObject = json.loads(request.POST.keys()[0])
     data = requestObject['data']
     
     astar, bstar, cstar, alphastar, betastar, gammastar = star(data[0]['a'], data[0]['b'], data[0]['c'], data[0]['alpha'], data[0]['beta'], data[0]['gamma'])
@@ -31,7 +31,7 @@ def runcalcTheta(request):
         twotheta = calcTwoTheta([data[i]['h'], data[i]['k'], data[i]['l']], stars, data[0]['wavelength'])
         twothetaarr.append({'twotheta': twotheta})
         
-    return HttpResponse(simplejson.dumps(twothetaarr))
+    return HttpResponse(json.dumps(twothetaarr))
     
 
 def runcalc1(request):
@@ -39,7 +39,7 @@ def runcalc1(request):
     
     #Strangely, data is sent as a dictionary, where all data is the key and the dictionary's value is random characters.
     #Therefore, extracting data from dictionary key
-    requestObject = simplejson.loads(request.POST.keys()[0]) 
+    requestObject = json.loads(request.POST.keys()[0]) 
     data = requestObject['data']
     
     #CALCULATING THE B MATRIX AND STARS DICTIONARY
@@ -57,13 +57,13 @@ def runcalc1(request):
         angles = {'twotheta': twotheta, 'theta':theta, 'omega': omega,'chi':chi, 'phi': phi}
         response.append(angles)
 
-    return HttpResponse(simplejson.dumps(response))
+    return HttpResponse(json.dumps(response))
 
 
 
 def runcalc2(request):
     "Calculations for Scattering Plane mode"
-    requestObject = simplejson.loads(request.POST.keys()[0])
+    requestObject = json.loads(request.POST.keys()[0])
     data = requestObject['data']
     
     #CALCULATING THE B MATRIX AND STARS DICTIONARY
@@ -83,7 +83,7 @@ def runcalc2(request):
         
         inPlane = isInPlane([data[0]['h1'], data[0]['k1'], data[0]['l1']], [data[0]['h2'], data[0]['k2'], data[0]['l2']], [data[i]['h'], data[i]['k'], data[i]['l']])
         if inPlane:
-            twotheta, theta, omega = calcIdealAngles2([data[i]['h'], data[i]['k'], data[i]['l']], N.radians(chi), N.radians(phi), UBmatrix, wavelength, stars)
+            twotheta, theta, omega = calcIdealAngles2([data[i]['h'], data[i]['k'], data[i]['l']], radians(chi), radians(phi), UBmatrix, wavelength, stars)
             angles = {'inPlane': inPlane, 'twotheta': twotheta, 'theta':theta, 'omega': omega,'chi':chi, 'phi': phi}
             response.append(angles)
             
@@ -91,13 +91,13 @@ def runcalc2(request):
             errormessage = 'Error'
             response.append(errormessage)
 
-    return HttpResponse(simplejson.dumps(response))
+    return HttpResponse(json.dumps(response))
     
     
     
 def runcalc3(request):
     "Calculations for Phi Fixed mode"
-    requestObject = simplejson.loads(request.POST.keys()[0])
+    requestObject = json.loads(request.POST.keys()[0])
     data = requestObject['data']
     
     #CALCULATING THE B MATRIX AND STARS DICTIONARY
@@ -108,11 +108,11 @@ def runcalc3(request):
     
     #rest of the calculations
     for i in range(1, len(data)):
-        twotheta, theta, omega, chi = calcIdealAngles3([data[i]['h'], data[i]['k'], data[i]['l']], UBmatrix, data[0]['wavelength'], N.radians(data[0]['phi']), stars)
+        twotheta, theta, omega, chi = calcIdealAngles3([data[i]['h'], data[i]['k'], data[i]['l']], UBmatrix, data[0]['wavelength'], radians(data[0]['phi']), stars)
         angles = {'twotheta': twotheta, 'theta':theta, 'omega': omega,'chi':chi, 'phi': data[0]['phi']}
         response.append(angles)
 
-    return HttpResponse(simplejson.dumps(response))
+    return HttpResponse(json.dumps(response))
     
     
     
@@ -144,7 +144,7 @@ def calculateBStar (a, b, c, alpha, beta, gamma):
     
 def calculateUB(request):
     "Calculates the UB matrix and returns it to the frontend"
-    requestObject = simplejson.loads(request.POST.keys()[0]) 
+    requestObject = json.loads(request.POST.keys()[0]) 
     data = requestObject['data']
     a, b, c, alpha, beta, gamma, h1, k1, l1, twotheta1, theta1, chi1, phi1, h2, k2, l2, twotheta2, theta2, chi2, phi2 = float(data[2]['a']), float(data[2]['b']), float(data[2]['c']), float(data[2]['alpha']), float(data[2]['beta']), float(data[2]['gamma']), float(data[0]['h']), float(data[0]['k']), float(data[0]['l']), float(data[0]['twotheta']), float(data[0]['theta']), float(data[0]['chi']), float(data[0]['phi']), float(data[1]['h']), float(data[1]['k']), float(data[1]['l']), float(data[1]['twotheta']), float(data[1]['theta']), float(data[1]['chi']), float(data[1]['phi'])
 
@@ -166,13 +166,13 @@ def calculateUB(request):
     #storing the B and UB matricies in the Django cache
     return HttpResponse([UBmatrix[0][0],', ', UBmatrix[0][1],', ', UBmatrix[0][2],', ', UBmatrix[1][0],', ', UBmatrix[1][1],', ', UBmatrix[1][2],', ', UBmatrix[2][0],', ', UBmatrix[2][1],', ', UBmatrix[2][2]])
     
-    #return HttpResponse(simplejson.dumps(UBmatrix)) #not working atm
+    #return HttpResponse(json.dumps(UBmatrix)) #not working atm
     #return HttpResponse(UBmatrix)
     
 
 def refineUB(request):
     "Calculates the refined UB matrix and returns it to the frontend"
-    requestObject = simplejson.loads(request.POST.keys()[0]) 
+    requestObject = json.loads(request.POST.keys()[0]) 
     data = requestObject['data']
     
     observations = []
@@ -185,10 +185,10 @@ def refineUB(request):
         
         
 def getLatticeParameters (request):
-    requestObject = simplejson.loads(request.POST.keys()[0]) 
+    requestObject = json.loads(request.POST.keys()[0]) 
     UBmatrix = requestObject['UBmatrix']
-    UBmatrix = N.array(UBmatrix)
-    #UBmatrix = N.array(UBmatrix).reshape((3,3)) #converting into 3x3 no longer necessary
+    UBmatrix = np.array(UBmatrix)
+    #UBmatrix = np.array(UBmatrix).reshape((3,3)) #converting into 3x3 no longer necessary
     paramsDict = calculateLatticeParameters(UBmatrix)
     return HttpResponse([paramsDict])
     
@@ -196,7 +196,7 @@ def getLatticeParameters (request):
 def makeSaveFile (request):
     "Saves the current data in a text file named 'savedata.txt', overwriting the previous text file so there is minimal data storage. Then lets user download the file."
     
-    requestObject = simplejson.loads(request.POST.keys()[0]) 
+    requestObject = json.loads(request.POST.keys()[0]) 
     data = requestObject['data']
     
     #today =  datetime.datetime.now().date()

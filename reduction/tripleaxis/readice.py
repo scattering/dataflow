@@ -1,13 +1,11 @@
-import numpy as N
-#import pylab
-import datetime,time
-from time import mktime
-#import mx.DateTime
-import writebt7
 import re
-import scanparser
+import datetime
+from time import mktime
 import os
 
+import numpy as np
+
+from . import scanparser
 
 months={'jan':1,'feb':2,'mar':3,'apr':4,'may':5,'jun':6,'jul':7,'aug':8,'sep':9,'oct':10,'nov':11,'dec':12}
 
@@ -296,7 +294,7 @@ class datareader(object):
                                 try:
                                         lines=int(self.lines)
                                 except:
-                                        lines=N.Inf
+                                        lines=np.Inf
                                 while 1:
                                         lineStr = myfile.readline()
                                         if not(lineStr):
@@ -327,11 +325,11 @@ class datareader(object):
         def numpyize(self):
                 for field in self.data.__dict__.keys():
                         if type(self.data[field][0])==type(float):
-                                self.data[field]=N.array(self.data[field],'Float64')
+                                self.data[field]=np.array(self.data[field],'Float64')
                         else:
-                                self.data[field]=N.array(self.data[field])
+                                self.data[field]=np.array(self.data[field])
 
-        def readbuffer(self,myfilestr,lines=N.Inf):
+        def readbuffer(self,myfilestr,lines=np.Inf):
                 self.myfilestr=myfilestr
                 self.lines=lines
                 myfile = open(myfilestr, 'r')

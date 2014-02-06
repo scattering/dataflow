@@ -4,13 +4,15 @@ Run a reduction workflow.
 The function run_template
 """
 
-import sys
-from pprint import pprint
+import sys, os
 from inspect import getsource
-from .core import lookup_module, lookup_datatype
-import hashlib, redis, types, os
+import hashlib, types
 from copy import deepcopy
-import numpy
+
+import redis
+import numpy as np
+
+from .core import lookup_module, lookup_datatype
 
 if not sys.platform=='win32':
     os.system("redis-server") # ensure redis is running
@@ -341,7 +343,7 @@ def convert_to_plottable(result):
     return [data.get_plottable() for data in result]
     
 def convert_to_csv(result):
-    if numpy.all([hasattr(data, 'get_csv') for data in result]):
+    if np.all([hasattr(data, 'get_csv') for data in result]):
         print "Starting CSV converter"
         print len(result)
         return [data.get_csv() for data in result]

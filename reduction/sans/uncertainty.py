@@ -17,9 +17,10 @@ for huge arrays.
 
 from __future__ import division
 
-import numpy
-import err1d
-from formatnum import format_uncertainty
+import numpy as np
+
+from . import err1d
+from .formatnum import format_uncertainty
 
 __all__ = ['Measurement']
 
@@ -27,7 +28,7 @@ __all__ = ['Measurement']
 # TODO: C implementation of *,/,**?
 class Measurement(object):
     # Make standard deviation available
-    def _getdx(self): return numpy.sqrt(self.variance)
+    def _getdx(self): return np.sqrt(self.variance)
     def _setdx(self,dx):
         # Direct operation
         #    variance = dx**2
@@ -144,15 +145,15 @@ class Measurement(object):
     def __pos__(self):
         return self
     def __abs__(self):
-        return Measurement(numpy.abs(self.x),self.variance)
+        return Measurement(np.abs(self.x),self.variance)
 
     def __str__(self):
         #return str(self.x)+" +/- "+str(numpy.sqrt(self.variance))
-        if numpy.isscalar(self.x):
-            return format_uncertainty(self.x,numpy.sqrt(self.variance))
+        if np.isscalar(self.x):
+            return format_uncertainty(self.x,np.sqrt(self.variance))
         else:
             return [format_uncertainty(v,dv)
-                    for v,dv in zip(self.x,numpy.sqrt(self.variance))]
+                    for v,dv in zip(self.x,np.sqrt(self.variance))]
     def __repr__(self):
         return "Measurement(%s,%s)"%(str(self.x),str(self.variance))
 
@@ -287,14 +288,14 @@ def test():
 
     # =============== vector operations ================
     # Slicing
-    z = Measurement(numpy.array([1,2,3,4,5]),numpy.array([2,1,2,3,2]))
+    z = Measurement(np.array([1,2,3,4,5]),np.array([2,1,2,3,2]))
     assert z[2].x == 3 and z[2].variance == 2
     assert (z[2:4].x == [3,4]).all()
     assert (z[2:4].variance == [2,3]).all()
-    z[2:4] = Measurement(numpy.array([8,7]),numpy.array([4,5]))
+    z[2:4] = Measurement(np.array([8,7]),np.array([4,5]))
     assert z[2].x == 8 and z[2].variance == 4
-    A = Measurement(numpy.array([a.x]*2),numpy.array([a.variance]*2))
-    B = Measurement(numpy.array([b.x]*2),numpy.array([b.variance]*2))
+    A = Measurement(np.array([a.x]*2),np.array([a.variance]*2))
+    B = Measurement(np.array([b.x]*2),np.array([b.variance]*2))
 
     # TODO complete tests of copy and inplace operations for vectors and slices.
 

@@ -1,7 +1,7 @@
 """
 1-D and 2-D rebinning code.
 """
-import numpy, struct,platform
+import numpy as np
 
 #if struct.calcsize("P") * 8 == 64 or platform.architecture()[0]=='64bit':
 #    import _reduction
@@ -37,15 +37,15 @@ def rebin(x, I, xo, Io=None, dtype=numpy.float64):
     """
     # Coerce axes to float arrays
     x, xo = _input(x, dtype='d'), _input(xo, dtype='d')
-    shape_in = numpy.array([x.shape[0] - 1])
-    shape_out = numpy.array([xo.shape[0] - 1])
+    shape_in = np.array([x.shape[0] - 1])
+    shape_out = np.array([xo.shape[0] - 1])
 
     # Coerce counts to correct type and check shape
     if dtype is None:
         try:
             dtype = I.dtype
         except AttributeError:
-            dtype = numpy.float64
+            dtype = np.float64
     I = _input(I, dtype=dtype)
     if shape_in != I.shape:
         raise TypeError("input array incorrect shape %s" % I.shape)
@@ -101,13 +101,13 @@ def rebin2d(x, y, I, xo, yo, Io=None, dtype=None):
     """
     # Coerce axes to float arrays
     x, y, xo, yo = [_input(v, dtype='d') for v in (x, y, xo, yo)]
-    shape_in = numpy.array([x.shape[0] - 1, y.shape[0] - 1])
-    shape_out = numpy.array([xo.shape[0] - 1, yo.shape[0] - 1])
+    shape_in = np.array([x.shape[0] - 1, y.shape[0] - 1])
+    shape_out = np.array([xo.shape[0] - 1, yo.shape[0] - 1])
 
     # Coerce counts to correct type and check shape
     if dtype is None:
         try: dtype = I.dtype
-        except AttributeError: dtype = numpy.float64
+        except AttributeError: dtype = np.float64
     I = _input(I, dtype=dtype)
     if (shape_in != I.shape).any():
         raise TypeError("input array incorrect shape %s" % str(I.shape))
@@ -129,7 +129,7 @@ def _input(v, dtype='d'):
     Force v to be a contiguous array of the correct type, avoiding copies
     if possible.
     """
-    return numpy.ascontiguousarray(v, dtype=dtype)
+    return np.ascontiguousarray(v, dtype=dtype)
 
 def _output(v, shape, dtype=numpy.float64):
     """
@@ -137,9 +137,9 @@ def _output(v, shape, dtype=numpy.float64):
     returned array, reusing an existing array if possible.
     """
     if v is None:
-        return numpy.empty(shape, dtype=dtype)
-    if not (isinstance(v, numpy.ndarray)
-            and v.dtype == numpy.dtype(dtype)
+        return np.empty(shape, dtype=dtype)
+    if not (isinstance(v, np.ndarray)
+            and v.dtype == np.dtype(dtype)
             and (v.shape == shape).all()
             and v.flags.contiguous):
         raise TypeError("output vector must be contiguous %s of size %s"
@@ -154,7 +154,7 @@ def _check1d(from_bins, val, to_bins, target):
     for (f, F) in [(from_bins, val), (from_bins[::-1], val[::-1])]:
         for (t, T) in [(to_bins, target), (to_bins[::-1], target[::-1])]:
             result = rebin(f, F, t)
-            assert numpy.linalg.norm(T - result) < 1e-14, \
+            assert np.linalg.norm(T - result) < 1e-14, \
                 "rebin failed for %s->%s %s" % (f, t, result)
 
 def _test1d():
@@ -183,25 +183,25 @@ def _test1d():
 
 def _check2d(x, y, z, xo, yo, zo):
     result = rebin2d(x, y, z, xo, yo)
-    target = numpy.array(zo, dtype=result.dtype)
-    assert numpy.linalg.norm(target - result) < 1e-14, \
+    target = np.array(zo, dtype=result.dtype)
+    assert np.linalg.norm(target - result) < 1e-14, \
         "rebin2d failed for %s,%s->%s,%s\n%s\n%s\n%s" % (x, y, z, xo, yo, zo)
 
 def _uniform_test(x, y):
-    z = numpy.array([y], 'd') * numpy.array([x], 'd').T
-    xedges = numpy.concatenate([(0,), numpy.cumsum(x)])
-    yedges = numpy.concatenate([(0,), numpy.cumsum(y)])
-    nx = numpy.round(xedges[-1])
-    ny = numpy.round(yedges[-1])
-    ox = numpy.arange(nx + 1)
-    oy = numpy.arange(ny + 1)
-    target = numpy.ones([nx, ny], 'd')
+    z = np.array([y], 'd') * np.array([x], 'd').T
+    xedges = np.concatenate([(0,), np.cumsum(x)])
+    yedges = np.concatenate([(0,), np.cumsum(y)])
+    nx = np.round(xedges[-1])
+    ny = np.round(yedges[-1])
+    ox = np.arange(nx + 1)
+    oy = np.arange(ny + 1)
+    target = np.ones([nx, ny], 'd')
     _check2d(xedges, yedges, z, ox, oy, target)
 
 def _test2d():
     x, y, I = [0, 3, 5, 7], [0, 1, 3], [[3, 6], [2, 4], [2, 4]]
     xo, yo, Io = range(8), range(4), [[1] * 3] * 7
-    x, y, I, xo, yo, Io = [numpy.array(A, 'd') for A in [x, y, I, xo, yo, Io]]
+    x, y, I, xo, yo, Io = [np.array(A, 'd') for A in [x, y, I, xo, yo, Io]]
 
     # Try various types and orders on a non-square matrix
     _check2d(x, y, I, xo, yo, Io)
@@ -219,9 +219,9 @@ def _test2d():
              [0.5, 1.5, 2.5], [0.5, 1.5, 2.5], [[1] * 2] * 2)
     for dtype in ['uint8', 'uint16', 'uint32', 'float32', 'float64']:
         _check2d([0, 1, 2, 3, 4], [0, 1, 2, 3, 4],
-                 numpy.array([[1] * 4] * 4, dtype=dtype),
+                 np.array([[1] * 4] * 4, dtype=dtype),
                  [-2, -1, 2, 5, 6], [-2, -1, 2, 5, 6],
-                 numpy.array([[0, 0, 0, 0], [0, 4, 4, 0], [0, 4, 4, 0], [0, 0, 0, 0]],
+                 np.array([[0, 0, 0, 0], [0, 4, 4, 0], [0, 4, 4, 0], [0, 0, 0, 0]],
                              dtype=dtype)
                  )
     # non-square test

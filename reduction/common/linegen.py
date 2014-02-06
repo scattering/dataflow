@@ -1,5 +1,5 @@
 import pylab
-import numpy as N
+import numpy as np
 #import scipy.sandbox.delaunay as D
 import matplotlib.delaunay as D
 
@@ -9,47 +9,47 @@ class locator:
         self.y=y
         return
     def inside(self,xt,yt):
-        inds=N.array([])
+        inds=np.array([])
         for i in range(xt.shape[0]):
-            indx=N.where(self.x==xt[i])[0]
-            indy=N.where(self.y==yt[i])[0]
-            ind=N.intersect1d(indx,indy)
-            inds=N.concatenate((inds,ind))
-        return N.ravel(inds)
+            indx=np.where(self.x==xt[i])[0]
+            indy=np.where(self.y==yt[i])[0]
+            ind=np.intersect1d(indx,indy)
+            inds=np.concatenate((inds,ind))
+        return np.ravel(inds)
 
 
 class linegen:
     def __init__(self,point1,point2):
         self.point1=point1
         self.point2=point2 
-        self.x1=N.float(self.point1[0])
-        self.y1=N.float(self.point1[1])
-        self.x2=N.float(self.point2[0])
-        self.y2=N.float(self.point2[1])
+        self.x1=np.float(self.point1[0])
+        self.y1=np.float(self.point1[1])
+        self.x2=np.float(self.point2[0])
+        self.y2=np.float(self.point2[1])
         self.calc_slope()
         return
     
     def calc_slope(self):
         if self.x2==self.x1:
-            self.slope=N.inf
-            self.intercept=N.nan
+            self.slope=np.inf
+            self.intercept=np.nan
         else:
             self.slope=(self.y2-self.y1)/(self.x2-self.x1)
             self.intercept=self.y1-self.slope*self.x1
         return
 
     def vertical_line(self,step=.1):
-        y=N.arange(min(self.y2,self.y1),max(self.y1,self.y2)+step,step)
-        x=self.x1*N.ones(y.shape)
+        y=np.arange(min(self.y2,self.y1),max(self.y1,self.y2)+step,step)
+        x=self.x1*np.ones(y.shape)
         return x,y
     
     def gen_line(self,divisions=10):
-        if self.slope==N.inf:
-            step=N.absolute(self.y2-self.y1)/divisions
+        if self.slope==np.inf:
+            step=np.absolute(self.y2-self.y1)/divisions
             x,y=self.vertical_line(step)
         else:
-            step=N.absolute(self.x2-self.x1)/divisions
-            x=N.arange(min(self.x2,self.x1),max(self.x1,self.x2)+step,step)
+            step=np.absolute(self.x2-self.x1)/divisions
+            x=np.arange(min(self.x2,self.x1),max(self.x1,self.x2)+step,step)
             y=self.slope*x+self.intercept
         return x,y
 
@@ -81,10 +81,10 @@ class line_interp:
         
         tri = D.Triangulation(x,y)
         interp = tri.nn_interpolator(z)
-        xi=N.copy(x)
-        yi=N.copy(y)
-        xi=N.concatenate((xi,self.line_x))
-        yi=N.concatenate((yi,self.line_y))
+        xi=np.copy(x)
+        yi=np.copy(y)
+        xi=np.concatenate((xi,self.line_x))
+        yi=np.concatenate((yi,self.line_y))
         zi = interp(xi,yi)
         mylocator=locator(xi,yi)
         inds=mylocator.inside(self.line_x,self.line_y)
@@ -93,15 +93,15 @@ class line_interp:
         outzi=zi[inds.astype(int)]
         return outxi,outyi,outzi
 
-if __name__=="__main__":
+def demo():
     point1=(-2,-2)
     point2=(2,2)
     step=0.01
-    xi,yi=N.mgrid[-2:2+step:step,-2:2+step:step]
-    zi=N.exp(-xi*xi-yi*yi)
-    x=N.reshape(xi,(1,xi.shape[0]*xi.shape[1])).ravel()
-    y=N.reshape(yi,(1,yi.shape[0]*yi.shape[1])).ravel()
-    z=N.reshape(zi,(1,zi.shape[0]*zi.shape[1])).ravel()
+    xi,yi=np.mgrid[-2:2+step:step,-2:2+step:step]
+    zi=np.exp(-xi*xi-yi*yi)
+    x=np.reshape(xi,(1,xi.shape[0]*xi.shape[1])).ravel()
+    y=np.reshape(yi,(1,yi.shape[0]*yi.shape[1])).ravel()
+    z=np.reshape(zi,(1,zi.shape[0]*zi.shape[1])).ravel()
     pylab.pcolormesh(xi,yi,zi,shading='interp',cmap=pylab.cm.jet)
     myline=line_interp(point1,point2,divisions=50)
     xout,yout,zout=myline.interp(x,y,z)
@@ -110,4 +110,7 @@ if __name__=="__main__":
     fig2=pylab.figure(figsize=(8,8))
     pylab.plot(xout,zout,'s')
     pylab.show()
-    
+
+
+if __name__=="__main__":
+    demo()

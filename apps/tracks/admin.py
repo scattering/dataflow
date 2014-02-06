@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from models import Project
-from models import Experiment
+from .models import Project
+from .models import Experiment
 
 #NOTE: class not used currently...
 class ProjectAdmin(admin.ModelAdmin):

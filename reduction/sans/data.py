@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
-import struct
-import sys
-import vaxutils
-import numpy
-import math
 import os
+import struct
+import math
+
+import numpy as np
 #from matplotlib import pyplot as plt
+
+from . import vaxutils
 
 def readNCNRSensitivity(inputfile):
     
@@ -21,7 +22,7 @@ def readNCNRSensitivity(inputfile):
     print len(data[516:])
     (rawdatastring,) = struct.unpack(dataformatstring,data[516:])
     
-    detdata = numpy.empty(16384)
+    detdata = np.empty(16384)
     
     a = 0
     offset = 0
@@ -36,9 +37,9 @@ def readNCNRSensitivity(inputfile):
         offset += 2
         
         for kk in range(510):
-	        detdata[a] = vaxutils.R4toFloat(rawdatastring[offset:offset+4])
-	        a += 1
-	        offset += 4
+            detdata[a] = vaxutils.R4toFloat(rawdatastring[offset:offset+4])
+            a += 1
+            offset += 4
         
         offset += 2
     
@@ -186,9 +187,9 @@ def readNCNRData(inputfile, file_obj=None):
         metadata[k] = vaxutils.R4toFloat(v)
     
     dataformatstring = '<16401h'
-    rawdata = numpy.array(struct.unpack(dataformatstring,data[514:]))
+    rawdata = np.array(struct.unpack(dataformatstring,data[514:]))
     
-    detdata = numpy.empty(16384)
+    detdata = np.empty(16384)
     
     ii=0
     skip=0

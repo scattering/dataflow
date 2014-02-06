@@ -1,10 +1,10 @@
-from ftplib import FTP
-from FTPfileclass import FTPfile
-from django.utils import simplejson
-import sys
 import ast
 import tempfile
+from ftplib import FTP
 
+from django.utils import simplejson
+
+from .FTPfileclass import FTPfile
 
 ##need to think about how to do this recursion (probably first create some sort of 
 ## a straightforward python object and then convert it into json, rather than trying to
@@ -13,8 +13,8 @@ import tempfile
 #ftp.login()
 #ftp.cwd('pub')		
 
-id_counter = 0;
-ftp = None; #default initialization. ftp initialized in runMe()
+id_counter = 0
+ftp = None #default initialization. ftp initialized in runMe()
 
 finalString = '['
 
