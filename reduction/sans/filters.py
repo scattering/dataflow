@@ -4,8 +4,9 @@ import pickle
 from django.utils import simplejson as json
 
 import numpy as np
-from uncertainty import Measurement
 
+from ..common.uncertainty import Measurement
+from ..common import err1d
 from . import data
 from .draw_annulus_aa import annular_mask_antialiased
 
@@ -909,11 +910,4 @@ def chain_corrections_demo():
 
 if __name__ == '__main__':
     chain_corrections_demo()
-    if 0:
-        for key, value in metadata.iteritems():
-            print key,value
-        print metadata
-        
-      
-        attenuation=metadata['run.atten 7.0']
-    
+

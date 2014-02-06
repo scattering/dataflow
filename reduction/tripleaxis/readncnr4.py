@@ -657,7 +657,7 @@ class datareader(object):
                         print self.myfilestr
                         self.lines=lines
                         myfile = open(myfilestr, 'r')
-                        self.instrument=os.path.splitext(filestr)[1].split('.')[1].lower()
+                        self.instrument=os.path.splitext(myfile)[1].split('.')[1].lower()
                 if 1:
                         self.lines=lines
                         myfile = open(myfilestr, 'r')

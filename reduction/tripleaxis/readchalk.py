@@ -210,7 +210,7 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None, unziped=None):
             # read an empty line
             tokenized=['']
             continue
-        '''
+        _ = '''
         # no longer permitting a certain number of runs to be read; now read whole file
         if tokenized[0] == 'run':
             curr_run = curr_run + 1
@@ -366,7 +366,7 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None, unziped=None):
                             if currpoint == firstPoint:
                                 #first time through, determine channel
                                 #WARNING: assumes that the channel will NOT change during a run
-                                '''
+                                _ = '''
                                 #NOT USED --> .aof file missing dbvf and sbvf
                                 if fileExt == '.aof':
                                     # .aof code to check tokenized[-2 through -1]: dbhf, sbhf
@@ -380,7 +380,7 @@ def readaof(myfilestr, orient1, orient2, preread_data_list=None, unziped=None):
                                         channel = 'mp'
                                     elif dbhf > 0 and sbhf > 0:
                                         channel = 'mm'
-                                  '''                                
+                                '''
                                 if fileExt == '.acf':
                                     # .acf code to check tokenized[1 through 4]: DBHF, DBVF, SBHF, SBVF
                                     is_db_mfield_on = (float(tokenized[1]) or float(tokenized[2]))

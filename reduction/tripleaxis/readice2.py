@@ -636,6 +636,7 @@ class datareader(object):
 
         def readbuffer(self,myfilestr,lines=np.Inf):
                 if 0:
+                        from dataflow.core import File
                         self.myfilestr= File.objects.get(name=myfilestr.split('/')[-1]).friendly_name
                         #self.myfilestr = myfilestr
                         print self.myfilestr

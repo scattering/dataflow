@@ -630,7 +630,7 @@ class datareader(object):
                                                                         timedelta=datetime.timedelta(seconds=float(tokenized[i]))
                                                                         self.columndict['timestamp'].append(mktime((timeobj+timedelta).timetuple()))
                                                                         timeobj=timeobj+timedelta
-                                                                update_extrema(field, float(tokenized[i]))
+                                                                self.update_extrema(field, float(tokenized[i]))
                                                                 self.columndict[field].append(float(tokenized[i]))
                                                         except ValueError:
                                                                 #update_extrema(self, field, tokenized[i]) # is it appropriate for non-number fields?

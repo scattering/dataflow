@@ -1,5 +1,7 @@
 import numpy as np
 
+from .data_abstraction import Detector
+
 
 def remove_duplicates_optimized(tas, distinct, not_distinct):
     """Removes the duplicate data rows from TripleAxis object tas whose distinct fields (columns)
@@ -41,7 +43,7 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
                 for index in indexlist: # O(n)
                     tuples.append((field.measurement[index].x, index))
                 tuples.sort() # O(nlogn) hopefully
-                
+
                 samelist = False     
                 dups = []
                 for i in range(0, len(tuples)-1):
@@ -59,7 +61,7 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
                             j += 1 # increment j
                             dups = [] # reset dups to be empty
                         samelist = False                            
-                    		    
+
     print len(indices)
     print indices
     if not first and len(indices) < 1:
@@ -97,7 +99,7 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
                                 samelist = True
                                 index += 1 #increment the index
                             else:
-                                indices[index].append(xtuples[i+1][1])
+                                indices[index].append(tuples[i+1][1])
                         else:
                             samelist = False
                 first = False
@@ -110,40 +112,40 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
                         tuples.append((field.measurement[index].x, index))
                     tuples.sort() # O(nlogn) hopefully
 
-		    samelist = False     
-		    dups = []
-		    for i in range(0, len(tuples)-1):
+                    samelist = False
+                    dups = []
+                    for i in range(0, len(tuples)-1):
                         if tuples[i][0] == None or tuples[i+1][0] == None or type(tuples[i][0]) == str \
-			   or type(tuples[i][0]) == np.string_ or not hasattr(field, 'window'): 
-			    if tuples[i+1][0] == tuples[i][0]: # if values are same (duplicates)
-				if not samelist: 
-				    #create dups --> list of duplicate indices
-				    dups.append(tuples[i][1])
-				    dups.append(tuples[i+1][1]) 
-				    samelist = True
-				else:
-				    dups.append(tuples[i+1][1])
-			    else:
-				if len(dups) > 0: # if there is a list of duplicates, add them to indices
-				    indices.insert(j, dups)
-				    j += 1 # increment j
-				    dups = [] # reset dups to be empty
-				samelist = False  
+                           or type(tuples[i][0]) == np.string_ or not hasattr(field, 'window'):
+                            if tuples[i+1][0] == tuples[i][0]: # if values are same (duplicates)
+                                if not samelist:
+                                    #create dups --> list of duplicate indices
+                                    dups.append(tuples[i][1])
+                                    dups.append(tuples[i+1][1])
+                                    samelist = True
+                                else:
+                                    dups.append(tuples[i+1][1])
+                            else:
+                                if len(dups) > 0: # if there is a list of duplicates, add them to indices
+                                    indices.insert(j, dups)
+                                    j += 1 # increment j
+                                    dups = [] # reset dups to be empty
+                                samelist = False
                         else:
                             if tuples[i+1][0] - tuples[i][0] > field.window: # if values are different enough
-				if not samelist: 
-				    #create dups --> list of duplicate indices
-				    dups.append(tuples[i][1])
-				    dups.append(tuples[i+1][1]) 
-				    samelist = True
-				else:
-				    dups.append(tuples[i+1][1])
-			    else:
-				if len(dups) > 0: # if there is a list of duplicates, add them to indices
-				    indices.insert(j, dups)
-				    j += 1 # increment j
-				    dups = [] # reset dups to be empty
-				samelist = False  				
+                                if not samelist:
+                                    #create dups --> list of duplicate indices
+                                    dups.append(tuples[i][1])
+                                    dups.append(tuples[i+1][1])
+                                    samelist = True
+                                else:
+                                    dups.append(tuples[i+1][1])
+                            else:
+                                if len(dups) > 0: # if there is a list of duplicates, add them to indices
+                                    indices.insert(j, dups)
+                                    j += 1 # increment j
+                                    dups = [] # reset dups to be empty
+                                samelist = False
 
 
     # AVERAGING DETECTORS
@@ -189,7 +191,7 @@ def remove_2D_duplicates(ex, ey, x, y):
     xtuples = []
     indices = []    # list of lists of all duplicate indices based on x values
     duplicateindices = []
-    
+
     for i in range(0, len(x)):
         xtuples.append((x[i], i)) #appending tuples pairing value with index 
         #duplicateindices.append(i) # will be a list [0,1,2,...,len(x)-1]
@@ -248,7 +250,7 @@ if __name__ == "__main__":
     remove_2D_duplicates(.1, .1, x, y)
     print x
     print y
-    ''' testing code
+    _ = ''' testing code
 
     x = [[1, 2, 3], [4, 5, 6]]
     for a in x:
@@ -260,6 +262,4 @@ if __name__ == "__main__":
     print x
     '''
 
-
-   
 

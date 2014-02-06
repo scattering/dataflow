@@ -13,7 +13,7 @@ def construct_translate_dict():
     #translate_dict['detector'] = 
     #translate_dict['monitor'] = 
 
-    '''
+    _ = '''
     #??? what are these fields???
     translate_dict['mcu'] = 
     translate_dict['focal_length'] = 

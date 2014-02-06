@@ -1,22 +1,23 @@
-import numpy as np
 import os
 import copy, pickle
+from cStringIO import StringIO
 from django.utils import simplejson as json
 
+import numpy as np
 from bumps.rebin import bin_edges, rebin
 import bumps
 
-from . import uncertainty, err1d
+from ..common import uncertainty, err1d
+from ..common.formatnum import format_uncertainty
+from .mpfit import mpfit
+
 #from . import readncnr4 as readncnr
 from . import readncnr5 as readncnr #readncnr5 is configured for min/max for get_metadata()
 from . import readchalk as readchalk
 from . import readhfir as readhfir
 from . import rebin2
 
-from .formatnum import format_uncertainty
-from .mpfit import mpfit
 
-from ..common import regular_gridding
 eps = 1e-8
 
 """
@@ -326,25 +327,21 @@ class Component(object):
     def __ixor__(self, other): return NotImplemented
     def __ior__(self, other): return NotImplemented
 
-    def __invert__(self): return NotImplmented  # For ~x
-    def __complex__(self): return NotImplmented
-    def __int__(self): return NotImplmented
-    def __long__(self): return NotImplmented
-    def __float__(self): return NotImplmented
-    def __oct__(self): return NotImplmented
-    def __hex__(self): return NotImplmented
-    def __index__(self): return NotImplmented
-    def __coerce__(self): return NotImplmented
+    def __invert__(self): return NotImplemented  # For ~x
+    def __complex__(self): return NotImplemented
+    def __int__(self): return NotImplemented
+    def __long__(self): return NotImplemented
+    def __float__(self): return NotImplemented
+    def __oct__(self): return NotImplemented
+    def __hex__(self): return NotImplemented
+    def __index__(self): return NotImplemented
+    def __coerce__(self): return NotImplemented
 
     def log(self):
         return uncertainty.Measurement(*err1d.log(self.x, self.variance))
 
     def exp(self):
         return uncertainty.Measurement(*err1d.exp(self.x, self.variance))
-
-    def log(val): return self.log()
-    def exp(val): return self.exp()
-
 
 def err_check(values, err):
     if err == None:
@@ -847,7 +844,7 @@ class TripleAxis(object):
                         print key + '.' + self.yaxis 
                 except:
                     pass
-            '''
+            _ = '''
             xstart = xarr.min()
             xfinal = xarr.max()
             xstep = 1.0 * (xfinal - xstart) / len(xarr)
@@ -982,20 +979,20 @@ class TripleAxis(object):
     def get_csv(self):
         if len(self.shape) == 3:
             num_cols = self.shape[2]
-            new_array = empty((self.shape[0] * self.shape[1], num_cols + 2))
-            new_array[:,0] = (self._info[0]['values'][:,newaxis] * ones((self.shape[0], self.shape[1]))).ravel()
-            new_array[:,1] = (self._info[1]['values'][newaxis,:] * ones((self.shape[0], self.shape[1]))).ravel()
+            new_array = np.empty((self.shape[0] * self.shape[1], num_cols + 2))
+            new_array[:,0] = (self._info[0]['values'][:,np.newaxis] * np.ones((self.shape[0], self.shape[1]))).ravel()
+            new_array[:,1] = (self._info[1]['values'][np.newaxis,:] * np.ones((self.shape[0], self.shape[1]))).ravel()
             data_names = []
             data_names.append(self._info[0]['name']) # xlabel
             data_names.append(self._info[1]['name']) # ylabel
             
             for i in range(num_cols):
-                new_array[:,i+2] = self[:,:,i].view(ndarray).ravel()
+                new_array[:,i+2] = self[:,:,i].view(np.ndarray).ravel()
                 data_names.append(self._info[2]['cols'][i]['name'])
             
             outstr = StringIO()
             outstr.write('#' + '\t'.join(data_names) + '\n')
-            savetxt(outstr, new_array, delimiter='\t', newline='\n')
+            np.savetxt(outstr, new_array, delimiter='\t', newline='\n')
             
             outstr.seek(0)
             return_val = outstr.read()
@@ -1005,18 +1002,18 @@ class TripleAxis(object):
     
         elif len(self.shape) == 2:
             num_cols = self.shape[1]
-            new_array = empty((self.shape[0], num_cols + 1))
+            new_array = np.empty((self.shape[0], num_cols + 1))
             new_array[:,0] = (self._info[0]['values'])
             data_names = []
             data_names.append(self._info[0]['name']) # xlabel
             
             for i in range(num_cols):
-                new_array[:,i+1] = self[:,i].view(ndarray)
+                new_array[:,i+1] = self[:,i].view(np.ndarray)
                 data_names.append(self._info[1]['cols'][i]['name'])
             
             outstr = StringIO()
             outstr.write('#' + '\t'.join(data_names) + '\n')
-            savetxt(outstr, new_array, delimiter='\t')
+            np.savetxt(outstr, new_array, delimiter='\t')
             
             outstr.seek(0)
             return_val = outstr.read()
@@ -1980,7 +1977,7 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
                                 samelist = True
                                 index += 1 #increment the index
                             else:
-                                indices[index].append(xtuples[i+1][1])
+                                indices[index].append(tuples[i+1][1])
                         else:
                             samelist = False
                 first = False
@@ -2529,7 +2526,7 @@ if __name__ == "__main__":
         
         print tas.get_metadata()
         instrument = join(taslist)        
-        tas = hfir_filereader(myfilestr)
+        #tas = hfir_filereader(myfilestr)
         
         print 'read hfir'
         
@@ -2608,7 +2605,8 @@ if __name__ == "__main__":
     
     
     if 0:
-        from bumps.fitters import FIT_OPTIONS, FitDriver, DreamFit, StepMonitor, ConsoleMonitor
+        _ = """
+        from bumps.fitters import FitDriver, DreamFit
         import bumps.modelfn, bumps.fitproblem
         fn = lambda chi,phi,omega1,omega2: np.linalg.norm(self.scatteringEquations([chi,phi,omega1,omega2], h1p, h2p,q1,q2))
         print fn(chi=45, phi=72.4, omega1=-90, omega2=0)
@@ -2622,4 +2620,5 @@ if __name__ == "__main__":
         fitdriver = FitDriver(DreamFit, problem=problem, burn=1000)
         best, fbest = fitdriver.fit()
         print best, fbest
-        print 'done'        
+        print 'done'
+        """

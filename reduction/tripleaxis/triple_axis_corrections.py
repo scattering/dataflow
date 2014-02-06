@@ -81,7 +81,7 @@ def resolution_volume_correction(data):
     #TODO - CHECK - taken from the IDL
     # resCor = Norm/(cot(A6/2)*Ef^1.5)
     # where Norm = Ei^1.5 * cot(asin(!pi/(0.69472*dA*sqrt(Ei))))
-    '''
+    _ = '''
     for i in len(data.get(Ei))
         thetaA = N.radians(data.get(a6)[i]/2.0)
         arg = asin(N.pi/(0.69472*dA*sqrt(double(data.get(Ei)[i]))))
