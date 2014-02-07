@@ -50,7 +50,8 @@ from reduction.common import linegen
 
 from . import ftpview
 from .models import * #add models by name
-from .forms import languageSelectForm, titleOnlyForm, experimentForm1, experimentForm2, titleOnlyFormExperiment
+from .forms import (languageSelectForm, titleOnlyForm, experimentForm1,
+                    experimentForm2, titleOnlyFormExperiment)
 
 cache = redis_cache()
 
@@ -92,7 +93,10 @@ def testTable(request):
     return render(request,'testTable.html')
 
 def return_data(request):
-    dataArray=[['file name','database id','sha1','x','y','z'],[NaN,NaN,NaN,10,10,10],[NaN,NaN,NaN,-10,-10,-10],['file3','1','sh1','1,9','2,3','3,4'],['file2','1','sh2','4,5','2,3','5,5']]    
+    dataArray = [['file name', 'database id', 'sha1', 'x', 'y', 'z'],
+                 [NaN, NaN, NaN, 10, 10, 10], [NaN, NaN, NaN, -10, -10, -10],
+                 ['file3', '1', 'sh1', '1,9', '2,3', '3,4'],
+                 ['file2', '1', 'sh2', '4,5', '2,3', '5,5']]
     return HttpResponse(json.dumps(dataArray))
 
 def email_collaborator(request):
@@ -194,7 +198,9 @@ def calculate_segment_interactor(request):
     line_y = myline.line_y
     
     zout[np.isnan(zout)] = 0.
-    return HttpResponse(json.dumps({'line_x': line_x.tolist(), 'line_y': line_y.tolist(), 'zout': zout.tolist()}))
+    return HttpResponse(json.dumps({'line_x': line_x.tolist(),
+                                    'line_y': line_y.tolist(),
+                                    'zout': zout.tolist()}))
     #except:
     #    pass
 
@@ -204,17 +210,29 @@ def return_metadata(experiment_id):
     
     Creating a dataObject to be passed to moduleSimpleConfigForm.js
     dataObject will have the following mappings (key : value_description):
-        headerlist : List of headers. Indices correspond to column indices in metadata.
-                     e.g. ['Available Files', 'h_min', 'h_max', ...]. 
-        metadata : 2D lists of metadata columns. A file and all of its metadata shares the same
-                   row index in this 2D list. By default, filenames are located in the first
-                   column (i.e. metadata[0]).
-                   e.g. [['file001', 'file002', ...], [0, 0.1, 0.2,...], [1.0, 1.1, 1.2,...], ...]
+
+        headerlist : List of headers.  Indices correspond to column indices
+        in  metadata.
+        E.g.::
+
+            ['Available Files', 'h_min', 'h_max', ...].
+
+        metadata : 2D lists of metadata columns.  A file and all of its
+        metadata  shares the same row index in this  2D list. By default,
+        filenames are located in the first column  (i.e. metadata[0]).
+        E.g.::
+
+           [ ['file001', 'file002', ...], [0, 0.1, 0.2,...],
+             [1.0, 1.1, 1.2,...], ... ]
                    
-    This format is used to obtain min of min's and max of max's. NO LONGER USED FOR dataObject.
+    This format is used to obtain min of min's and max of max's.
+    NO LONGER USED FOR dataObject.
         
-        dataObject : a 2D array of in the form: [[fileheaders...], [min of min's...], 
-                                                 [max of max's...],[row1 values], [row2 values],...]
+        dataObject : a 2D array.
+        E.g.::
+
+            [ [fileheaders...],  [min of min's...],
+              [max of max's...], [row1 values], [row2 values], ... ]
     """
     #if request.GET.has_key(u'experiment_id'):
     #experiment_id = request.GET[u'experiment_id']
@@ -311,7 +329,8 @@ def getBinaryData(request):
 def home(request):
     context = RequestContext(request)
     site_list = ['/editor/', '/login/', '/myProjects/', '/interactors/']
-    return render_to_response('tracer_testingforWireit/home.html', locals(), context_instance=context)
+    return render_to_response('tracer_testingforWireit/home.html',
+                              locals(), context_instance=context)
 
 ##################
 #### file loading testing
@@ -332,7 +351,8 @@ store = [{
     }]
 
 def getFTPdirectories(request):
-    if request.GET.has_key('address') and request.GET.has_key('username') and request.GET.has_key('password'):
+    if (request.GET.has_key('address') and request.GET.has_key('username')
+        and request.GET.has_key('password')):
         address = request.GET['address']
         username = request.GET['username']
         password = request.GET['password']
@@ -340,8 +360,10 @@ def getFTPdirectories(request):
             directory = request.GET['directory']
         else:
             directory = '/'
-        return HttpResponse(json.dumps(ftpview.runFTP(address, directory, username=username, password=password)))
-    
+        result = ftpview.runFTP(address, directory, username=username,
+                                password=password)
+        return HttpResponse(json.dumps(result))
+
     return HttpResponse('Improper request')
 
 
@@ -417,21 +439,26 @@ def saveWiring(request):
         if user.is_staff:
             instr = Instrument.objects.get(instrument_class = new_wiring['language'])
             if len(instr.Templates.filter(Title=new_wiring['name'])) > 0:
-                reply = HttpResponse(json.dumps({'save': 'failure', 'errorStr': 'this name exists, please use another'}))
+                result = {'save': 'failure', 'errorStr': 'this name exists, please use another'}
+                reply = HttpResponse(json.dumps(result))
                 reply.status_code = 500
                 return reply
-            temp = instr.Templates.create(Title=new_wiring['name'], Representation=json.dumps(new_wiring))
+            temp = instr.Templates.create(Title=new_wiring['name'],
+                                          Representation=json.dumps(new_wiring))
             temp.user.add(request.user)
         else:
-            reply = HttpResponse(json.dumps({'save': 'failure', 'errorStr': 'you are not staff!'}))
+            result = {'save': 'failure', 'errorStr': 'you are not staff!'}
+            reply = HttpResponse(json.dumps(result))
             reply.status_code = 500
             return reply
     else:
         if len(Template.objects.filter(Title=new_wiring['name'])) > 0:
-            reply = HttpResponse(json.dumps({'save': 'failure', 'errorStr': 'This name exists, please use another.'}))
+            result = {'save': 'failure', 'errorStr': 'This name exists, please use another.'}
+            reply = HttpResponse(json.dumps(result))
             reply.status_code = 500
             return reply
-        temp = Template.objects.create(Title=new_wiring['name'], Representation=json.dumps(new_wiring))
+        temp = Template.objects.create(Title=new_wiring['name'],
+                                       Representation=json.dumps(new_wiring))
         temp.user.add(request.user)
     # this puts the Template into the pool of existing Templates.
     #wirings_list.append(new_wiring)
@@ -454,7 +481,8 @@ def old_getCSV(request, data):
     data = json.loads(request.POST['data'])
     print 'IN RUN REDUCTION: getting CSV'
     config = {}
-    bad_headers = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
+    bad_headers = ["files", "position", "xtype", "width",
+                   "terminals", "height", "title", "image", "icon"]
     active_group =str(int(data['group'])) # all keys are strings!
     for i, m in enumerate(data['modules']):
         conf = {}
@@ -501,7 +529,8 @@ def setupReduction(data):
     print 'IN RUN REDUCTION'
     #pprint.pprint( data )
     config = {}
-    bad_headers = ["files", "position", "xtype", "width", "terminals", "height", "title", "image", "icon", "fields"]
+    bad_headers = ["files", "position", "xtype", "width", "terminals",
+                   "height", "title", "image", "icon", "fields"]
     active_group =str(int(data['group'])) # all keys are strings!
     for i in range(len(data['modules'])):
         m = data['modules'][i]
@@ -517,7 +546,10 @@ def setupReduction(data):
                     #new_config.pop('files')
                     new_config['files']['value'] = [f]
                     new_config['autochain-loader']['value'] = False
-                    data['modules'].append({'name': m['name'], 'config': {'position': [], 'groups': { active_group : new_config}}})
+                    new_mod = {'name': m['name'],
+                               'config': {'position': [],
+                                          'groups': { active_group : new_config}}}
+                    data['modules'].append(new_mod)
                     new_wire = {'src': {'moduleId': new_moduleId, 'terminal': 'output'},
                                 'tgt': {'moduleId': i, 'terminal': 'input'}}
                     data['wires'].append(new_wire)
@@ -660,7 +692,9 @@ def saveData(request):
     if len(new_files) > 0:
         new_file = new_files[0]
     else:
-        new_file = File.objects.create(friendly_name=dataname, name=filename, template_representation=new_wiring, datatype=datatype, location=location)
+        new_file = File.objects.create(friendly_name=dataname, name=filename,
+                                       template_representation=new_wiring,
+                                       datatype=datatype, location=location)
     
     for dobj in result:
         add_metadata_to_file(new_file, dobj)
@@ -707,15 +741,19 @@ def uploadFTPFiles(request):
     and paths to the files to get (``filepaths``), the files will be retrieved from
     the ``address`` via FTP and uploaded.
     """
-    if request.POST.has_key('address') and request.POST.has_key('username') and \
-       request.POST.has_key('password') and request.POST.has_key('experiment_id') and \
-       request.POST.has_key('instrument_class') and request.POST.has_key('loader_id') and \
-       request.POST.has_key('filepaths'):
+    if (request.POST.has_key('address')
+        and request.POST.has_key('username')
+        and request.POST.has_key('password')
+        and request.POST.has_key( 'experiment_id')
+        and request.POST.has_key('instrument_class')
+        and request.POST.has_key( 'loader_id')
+        and request.POST.has_key('filepaths')):
         filepaths = json.loads(request.POST['filepaths']) #given as a string of a list
         username = request.POST['username']
         password = request.POST['password']
         
-        file_descriptors = ftpview.getFiles(request.POST['address'], filepaths, username=username, password=password)
+        file_descriptors = ftpview.getFiles(request.POST['address'], filepaths,
+                                            username=username, password=password)
         experiment_id = request.POST['experiment_id']
         instrument_class = request.POST['instrument_class']
         loader_id = request.POST['loader_id']
@@ -820,7 +858,10 @@ def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
             if len(new_files) > 0:
                 new_file = new_files[0]
             else:
-                new_file = File.objects.create(name=s_sha1.hexdigest(), friendly_name=friendly_name, location=location, datatype=datatype_id)
+                new_file = File.objects.create(name=s_sha1.hexdigest(),
+                                               friendly_name=friendly_name,
+                                               location=location,
+                                               datatype=datatype_id)
                 add_metadata_to_file(new_file, dobj)
                 
             if experiment is not None:
@@ -837,13 +878,17 @@ def add_metadata_to_file(new_file, instrument):
     extrema = instrument.get_extrema()
     for key in extrema.keys():
         # Assumes that all keys (ie field headers) are strings/chars       
-        new_metadata = Metadata.objects.create(Myfile=new_file, Key=key + '_min', Value=extrema[key][0])
+        new_metadata = Metadata.objects.create(Myfile=new_file,
+                                               Key=key + '_min',
+                                               Value=extrema[key][0])
         new_file.metadata.add(new_metadata)
-        new_metadata = Metadata.objects.create(Myfile=new_file, Key=key + '_max', Value=extrema[key][1])
+        new_metadata = Metadata.objects.create(Myfile=new_file,
+                                               Key=key + '_max',
+                                               Value=extrema[key][1])
         new_file.metadata.add(new_metadata)
         
         
-        """
+        _ = """
         # finds the unique location of this key in the database if it was previously loaded.
         # sorts on the file's unique hash then key value. Does this for both min and max.
         existing_metadata = Metadata.objects.filter(Myfile=new_file.name).filter(Key=keymin)
@@ -852,7 +897,8 @@ def add_metadata_to_file(new_file, instrument):
             # if there is a metadata object in the database already, update its value
             existing_metadata[0].Value = extrema[key][0]
         else:
-            new_metadata_min = Metadata.objects.create(Myfile=new_file, Key=keymin, Value=extrema[key][0])
+            new_metadata_min = Metadata.objects.create(Myfile=new_file,
+                Key=keymin, Value=extrema[key][0])
             new_file.metadata.add(new_metadata_min)
         keymax = key + '_max'
         existing_metadata = files.filter(Key=keymax)
@@ -860,7 +906,8 @@ def add_metadata_to_file(new_file, instrument):
             # if there is a metadata object in the database already, update its value
             existing_metadata[0].Value = extrema[key][1]                    
         else:
-            new_metadata_max = Metadata.objects.create(Myfile=new_file, Key=keymax, Value=extrema[key][1])
+            new_metadata_max = Metadata.objects.create(Myfile=new_file,
+                Key=keymax, Value=extrema[key][1])
             new_file.metadata.add(new_metadata_max)
         """
     
@@ -882,7 +929,8 @@ def call_appropriate_filereader(filestr, friendly_name=None, fileExt=None):
             try:
                 fileExt = os.path.splitext(filestr)[1].lower()
             except:
-                #in the event that there is no extension (ie only a hash was provided), fileExt remains None
+                # in the event that there is no extension (ie only a hash
+                # was provided), fileExt remains None
                 pass
             
     if fileExt in ['.bt2', '.bt4', '.bt7', '.bt9', '.ng5']:
@@ -965,7 +1013,8 @@ def displayEditor(request):
         # does not respect key order for OrderedDict.
     
         #try:
-        file_context['language_actual'] = orderedjson.dumps(wireit.instrument_to_wireit_language(instrument_class_by_language[language_name]))
+        lang = wireit.instrument_to_wireit_language(instrument_class_by_language[language_name])
+        file_context['language_actual'] = orderedjson.dumps(lang)
 
         _ = '''
         except:
@@ -1038,7 +1087,7 @@ def editProject(request, project_id):
         new_exp = Experiment.objects.create(ProposalNum=request.POST['new_experiment'],
                                             project=Project.objects.get(id=project_id))
         new_exp.users.add(request.user)
-        '''
+        _ = '''
         # No longer using instrument name when creating an experiment! Only instrument_class matters.
         # This segment was replaced by the instrument class 'if' segment below.
         if request.POST.has_key('instrument_name'):
@@ -1094,7 +1143,9 @@ def editExperiment(request, experiment_id):
             if len(new_files) > 0:
                 new_file = new_files[0]
             else:
-                new_file = File.objects.create(name=file_sha1.hexdigest(), friendly_name=f.name, location=FILES_DIR)
+                new_file = File.objects.create(name=file_sha1.hexdigest(),
+                                               friendly_name=f.name,
+                                               location=FILES_DIR)
             experiment.Files.add(new_file)
     if request.POST.has_key('instrument_name'):
         if request.POST['instrument_name']:
@@ -1141,7 +1192,9 @@ def editExperiment(request, experiment_id):
         loaders.extend([l['id'] for l in dt.loaders])
     form2 = experimentForm2(USER=request.user, experiment=experiment, loaders = loaders )
     #print form2.fields['new_templates'].length
-    return render_to_response('userProjects/editExperiment.html', { 'form1':form1, 'form2': form2, 'experiment':experiment, }, context_instance=context)
+    return render_to_response('userProjects/editExperiment.html',
+                              { 'form1':form1, 'form2': form2, 'experiment':experiment, },
+                              context_instance=context)
 
 @login_required
 def uploadFilesForm(request):
