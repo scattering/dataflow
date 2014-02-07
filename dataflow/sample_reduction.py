@@ -7,7 +7,7 @@ from pprint import pprint
 from numpy.random import random
 
 from . import config
-from .calc import run_template
+from .calc import run_template, memory_cache
 from .core import Module, Instrument, Data, Template, register_instrument
 from .modules.load import load_module
 from .modules.save import save_module
@@ -202,7 +202,7 @@ template = Template(name='test rowan',
                     instrument=ROWAN26.id,
                     )
 # the actual call to perform the reduction
-result = run_template(template, config)
+result = run_template(template, config, memory_cache())
 pprint(result)
 
 # (testing, andy)

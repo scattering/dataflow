@@ -13,7 +13,6 @@ from apps.tracks.models import File
 
 from .. import wireit
 from .. import config
-from ..calc import run_template
 from ..core import Data, Instrument, Template, register_instrument
 from ..modules.load import load_module
 from ..modules.save import save_module
@@ -228,15 +227,13 @@ for instrument in instruments:
 
 # Testing
 def demo():
+    from ..calc import run_template, memory_cache
     #global fileList
     fileList = [red.map_files('sample_4m'), red.map_files('empty_cell_4m'),
-                red.map_files('empty_4m'), map_files('trans_sample_4m'),
-                map_files('trans_empty_cell_4m'), map_files('blocked_4m'),
-                map_files('div')]
-    #fileList = ["/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC010.SA3_SRK_S110","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC008.SA3_SRK_S108","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC002.SA3_SRK_S102","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC006.SA3_SRK_S106","/home/elakian/dataflow/reduction/sans/ncnr_sample_data/SILIC005.SA3_SRK_S105"]
-    for instrument in instruments:
-        register_instrument(instrument)
-	
+                red.map_files('empty_4m'), red.map_files('trans_sample_4m'),
+                red.map_files('trans_empty_cell_4m'), red.map_files('blocked_4m'),
+                red.map_files('div')]
+
     modules = [
         #Sample 0
            #files hard coded for now
@@ -335,21 +332,22 @@ def demo():
                         description='example sans data',
                         modules=modules,
                         wires=wires,
-                        instrument=SANS_INS.id,
+                        instrument=SANS_NG3.id,
                         )
     #f = open("/home/elakian/tem.txt","w")
     #f.write("Template: ")
     #f.write( json.dumps(wireit.template_to_wireit_diagram(template)))
     #f.write("\n")
     #f.write("Lang: ")
-    #f.write(json.dumps(wireit.instrument_to_wireit_language(SANS_INS)))
+    #f.write(json.dumps(wireit.instrument_to_wireit_language(SANS_NG3)))
     #f.close()
     print 'TEMPLATE', json.dumps(wireit.template_to_wireit_diagram(template))
     #print 'RAW_INSTRUMENT: ', wireit.instrument_to_wireit_language(SANS_INS)
-    print 'LANGUAGE', json.dumps(wireit.instrument_to_wireit_language(SANS_INS))
+    print 'LANGUAGE', json.dumps(wireit.instrument_to_wireit_language(SANS_NG3))
 
-    run_template(template, config)
-    #get_plottable(template,config,14,'OneD')
+    cache = memory_cache()
+    run_template(template, config, cache)
+    #get_plottable(template,config,14,'OneD', cache)
     #result = get_plottable(template, config, 14, 'OneD')
     
     #datadir=os.path.join(os.path.dirname(__file__),'ncnr_sample_data')

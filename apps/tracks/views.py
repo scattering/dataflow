@@ -1,19 +1,17 @@
 ## adds default objects to DB
 import os
 import hashlib
-import tempfile
 import cStringIO
 import gzip
 import hmac
 import copy
+import tempfile
 from django.utils import simplejson as json
 import json as orderedjson # keeps order of OrderedDict on dumps!
 
 from numpy import NaN, array
 import numpy as np
 
-import redis
-server = redis.Redis("localhost")
 
 from django.conf import settings
 from django.shortcuts import render_to_response, render
@@ -30,7 +28,7 @@ from django.contrib.auth import authenticate, login
 
 from dataflow import wireit
 from dataflow.core import lookup_module, lookup_datatype
-from dataflow.calc import calc_single, fingerprint_template, get_plottable, get_csv
+from dataflow.calc import redis_cache, calc_single, get_plottable, get_csv
 from dataflow.offspecular.instruments import ANDR, ASTERIX
 print "ANDR imported: ", ANDR.id
 print "ASTERIX imported: ", ASTERIX.id
@@ -54,6 +52,7 @@ from . import ftpview
 from .models import * #add models by name
 from .forms import languageSelectForm, titleOnlyForm, experimentForm1, experimentForm2, titleOnlyFormExperiment
 
+cache = redis_cache()
 
 FILES_DIR=settings.FILES_DIR
 
@@ -298,10 +297,10 @@ def getBinaryData(request):
     #data = np.random.rand(1000,1000).astype(np.float32).tostring()
     #binary_fp = data['binary_fp']
     #print "getting data:", binary_fp
-    #print 'server.exists(binary_fp):', server.exists(binary_fp), server.keys()
+    #print 'cache.exists(binary_fp):', cache.exists(binary_fp), cache.keys()
     data = ''
-    if server.exists(binary_fp):
-        data = server.lrange(binary_fp, 0, -1)[0]
+    if cache.exists(binary_fp):
+        data = cache.lrange(binary_fp, 0, -1)[0]
         print "sending data:", binary_fp
     
     response = HttpResponse(data, mimetype='application/octet-stream')
@@ -445,12 +444,12 @@ def get_filepath_by_hash(fh):
 
 #@csrf_exempt
 #def getFromRedis(hashval):
-#    result = server.lrange(hashval, 0, -1)
+#    result = cache.lrange(hashval, 0, -1)
 #    response = HttpResponse(result[0], mimetype='text/csv')
 #    response['Content-Disposition'] = 'attachment; filename=somefilename.csv'
 #    return response
 
-def old_getCSV(data):
+def old_getCSV(request, data):
     print 'IN RUN REDUCTION: getting CSV'
     data = json.loads(request.POST['data'])
     print 'IN RUN REDUCTION: getting CSV'
@@ -484,7 +483,7 @@ def old_getCSV(data):
         template = wireit.wireit_diagram_to_template(data, instrument)
         # configuration for template is embedded
         print "getting result"
-        result = get_csv(template, config, nodenum, terminal_id)[0]
+        result = get_csv(template, config, nodenum, terminal_id, cache)[0]
         #response = HttpResponse(json.dumps({'redis_key': result}))
     #print json.dumps({'redis_key': result[0][:800]})
     outfilename = data.get('outfilename', 'data.csv')
@@ -588,7 +587,7 @@ def runReduction(request):
     print "config:", config
     print "terminal_id:", terminal_id
     
-    result = get_plottable(template, config, nodenum, terminal_id)
+    result = get_plottable(template, config, nodenum, terminal_id, cache)
     
     JSON_result = '[' + ','.join(result) + ']'
     # result is a list of plottable items (JSON strings) - need to concatenate them
@@ -617,7 +616,7 @@ def saveData(request):
     data = json.loads(request.POST['data'])
     toReduce = data['toReduce']
     template, config, nodenum, terminal_id = setupReduction(toReduce)
-    result = calc_single(template, config, nodenum, terminal_id)
+    result = calc_single(template, config, nodenum, terminal_id, cache)
     result_strs = []
     sha1 = hashlib.new('sha1')
     for dataset in result:
@@ -676,7 +675,7 @@ def getCSV(request):
     template, config, nodenum, terminal_id = setupReduction(data)
     
     result = ""
-    result_list = get_csv(template, config, nodenum, terminal_id)
+    result_list = get_csv(template, config, nodenum, terminal_id, cache)
     for i, r in enumerate(result_list):
         result += "#" * 80 + "\n"
         result += "# data set %d" % (i,) + "\n"
@@ -785,8 +784,8 @@ def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
     try:
         for fd in file_descriptors:
             os.remove(fd['filename'])
-    except WindowsError:
-        print 'windows ack!'
+    except OSError as exc:
+        print 'views.uploadFilesAux',exc
         #os.remove issues
 
     for dobj in dataObjects:
@@ -968,14 +967,15 @@ def displayEditor(request):
         #try:
         file_context['language_actual'] = orderedjson.dumps(wireit.instrument_to_wireit_language(instrument_class_by_language[language_name]))
 
-        '''        
+        _ = '''
         except:
             #TODO 6/11/2012 - this redirects --> need to convert into popup if possible!
             reply = HttpResponse('Remember to save changes first!')
             reply.status_code = 500
             return reply
         '''
-        return render_to_response('tracer_testingforWireit/editor.html', file_context, context_instance=context)
+        return render_to_response('tracer_testingforWireit/editor.html',
+                                  file_context, context_instance=context)
     else:
         return HttpResponseRedirect('/editor/langSelect/')
 
@@ -985,9 +985,11 @@ def languageSelect(request):
     context = RequestContext(request)
     if request.POST.has_key('instruments'):
         return render_to_response('tracer_testingforWireit/editorRedirect.html',
-                                  {'lang':request.POST['instruments']}, context_instance=context)
+                                  {'lang':request.POST['instruments']},
+                                  context_instance=context)
     form = languageSelectForm()
-    return render_to_response('tracer_testingforWireit/languageSelect.html', {'form':form}, context_instance=context)
+    return render_to_response('tracer_testingforWireit/languageSelect.html',
+                              {'form':form}, context_instance=context)
 
 
 ###########
@@ -1023,7 +1025,9 @@ def myProjects(request):
     except EmptyPage:
         projects = paginator.page(paginator.num_pages)
     form = titleOnlyForm()
-    return render_to_response('userProjects/displayProjects.html', {'projects':projects, 'form':form}, context_instance=context)
+    return render_to_response('userProjects/displayProjects.html',
+                              {'projects':projects, 'form':form},
+                              context_instance=context)
 
 @login_required
 def editProject(request, project_id):
@@ -1031,7 +1035,8 @@ def editProject(request, project_id):
         experiment_id = request.POST['experiment_id']
         Experiment.objects.get(id=experiment_id).delete() 
     elif request.POST.has_key('new_experiment'):
-        new_exp = Experiment.objects.create(ProposalNum=request.POST['new_experiment'], project=Project.objects.get(id=project_id))
+        new_exp = Experiment.objects.create(ProposalNum=request.POST['new_experiment'],
+                                            project=Project.objects.get(id=project_id))
         new_exp.users.add(request.user)
         '''
         # No longer using instrument name when creating an experiment! Only instrument_class matters.
@@ -1066,7 +1071,9 @@ def editProject(request, project_id):
     except EmptyPage:
         experiments = paginator.page(paginator.num_pages)
     form = titleOnlyFormExperiment()
-    return render_to_response('userProjects/editProject.html', {'project':project, 'form':form, 'experiments':experiments}, context_instance=context) 
+    return render_to_response('userProjects/editProject.html',
+                              {'project':project, 'form':form, 'experiments':experiments},
+                              context_instance=context)
 
 @login_required 
 def editExperiment(request, experiment_id):
@@ -1080,7 +1087,7 @@ def editExperiment(request, experiment_id):
             #file_sha1 = hashlib.sha1()
             #for line in f.read():
             #    file_sha1.update(line)
-            write_here = TEMP_DIR + file_sha1.hexdigest()
+            write_here = tempfile.gettempdir() + file_sha1.hexdigest()
             open(write_here, 'w').write(file_contents)
             
             new_files = File.objects.filter(name=file_sha1.hexdigest())

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Example to show how to create and run a reduction routine.
 """
@@ -7,7 +8,7 @@ from pprint import pprint
 from numpy.random import random
 
 from dataflow import config
-from dataflow.calc import run_template
+from dataflow.calc import run_template, memory_cache
 from dataflow.core import Module, Data, Instrument, Template, register_instrument
 from dataflow.modules.load import load_module
 from dataflow.modules.save import save_module
@@ -203,7 +204,7 @@ template = Template(name='test rowan',
                     instrument=ROWAN26.id,
                     )
 # the actual call to perform the reduction
-result = run_template(template, config)
+result = run_template(template, config, memory_cache())
 pprint(result)
 
 # (testing, andy)

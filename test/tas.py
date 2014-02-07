@@ -14,7 +14,7 @@ from dataflow.wireit import (instrument_to_wireit_language,
                            template_list,
                            )
 from dataflow.core import Template, register_instrument
-from dataflow.calc import run_template
+from dataflow.calc import run_template, memory_cache
 
 register_instrument(BT7)
 
@@ -59,7 +59,7 @@ pprint(t.wires)
 
 # run the reductions
 print "== calc"
-result = run_template(template, config)
+result = run_template(template, config, memory_cache())
 pprint(result)
 
 

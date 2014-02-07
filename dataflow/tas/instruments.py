@@ -7,7 +7,6 @@ from django.utils import simplejson as json
 
 from reduction.tripleaxis import data_abstraction
 
-from ..calc import run_template
 from .. import wireit
 
 from .. import config
@@ -427,8 +426,9 @@ if 1:
 # the actual call to perform the reduction
 
 def TAS_RUN():
-    result = run_template(template, config)
-    '''
+    from ..calc import memory_cache, run_template
+    result = run_template(template, config, cache=memory_cache())
+    _ = '''
     print 'in TAS'
     for key, value in result.iteritems():
 	for i in range(len(value['output'])):

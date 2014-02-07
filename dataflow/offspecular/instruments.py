@@ -15,7 +15,6 @@ from .. import config
 from ..modules.load import load_module
 #from ..modules.load_saved import load_saved_module
 from ..modules.save import save_module
-from ..calc import get_plottable
 from ..core import Data, Instrument, Template, register_instrument
 from ..wireit import template_to_wireit_diagram, instrument_to_wireit_language
 #from .modules.load_asterix import load_asterix_module
@@ -488,6 +487,7 @@ for instrument in [ANDR, ASTERIX]:
     
 # Testing
 def demo():
+    from ..calc import get_plottable, memory_cache
     polarized = False
     if not polarized:
         path, ext = dir + '/dataflow/sampledata/ANDR/sabc/Isabc20', '.cg1'
@@ -577,7 +577,7 @@ def demo():
     
     nodenum = template.order()[-2]
     terminal = 'output'
-    result = get_plottable(template, config, nodenum, terminal)
+    result = get_plottable(template, config, nodenum, terminal, memory_cache())
     #print "Writing to files"
     #for nodenum, plottable in result.items():
     #    for terminal_id, plot in plottable.items():
