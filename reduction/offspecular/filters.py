@@ -5,6 +5,7 @@ import tempfile
 import subprocess
 from functools import wraps
 
+import numpy as np
 from numpy import (cos, pi, cumsum, arange, ndarray, ones, zeros, newaxis,
     linspace, empty, resize, sin, allclose, zeros_like, linalg, dot, arctan2,
     float64, histogram2d, sum, sqrt, loadtxt, searchsorted, NaN, logical_not,
@@ -13,8 +14,8 @@ from numpy.ma import MaskedArray
 from scipy import signal
 import h5py
 
-from reduction.formats import load
-import reduction.rebin as reb
+from ..reflectometry.reduction.formats import load
+from ..reflectometry.reduction import rebin as reb
 
 from .FilterableMetaArray import FilterableMetaArray as MetaArray
 from .he3analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
@@ -1719,7 +1720,7 @@ class CombinePolarized(Filter2D):
             combined_datasets.append(csingle)
         # we end up with a dictionary set of datasets (e.g. {"++": data1, "--": data2} )
         
-        return   d_datasets
+        return combined_datasets
 
 class TwothetaLambdaToQxQz(Filter2D):
     """ Figures out the Qx, Qz values of each datapoint

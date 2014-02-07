@@ -2,6 +2,7 @@ import datetime, time
 import os, pickle
 from django.utils import simplejson as json
 
+import numpy as np
 from numpy import exp, zeros, array, empty
 import wx, wx.calendar
 
@@ -103,7 +104,7 @@ class He3Analyzer:
         T = empty(aligned.shape)
         P = self.getPolarization(t)
         T[aligned] = self.T0 * exp(-(1.0 - P) * self.sigmanl)
-        T[logical_not(aligned)] = self.T0 * exp(-(1.0 + P) * self.sigmanl)
+        T[~aligned] = self.T0 * exp(-(1.0 + P) * self.sigmanl)
         return T
         
     def getNumberIncident(self, aligned=True, flipper_on=False):
@@ -123,10 +124,10 @@ class He3Analyzer:
     def getNumberIncidentVec(self, front_spin_up=[True], flipper_on=[False]):
         """ corrects for the polarization efficiency of the front-end components (not time-dependent) """
         N = empty(front_spin_up.shape)
-        N[logical_and(front_spin_up, flipper_on)] = (1.0 - self.Pf * self.Psm) / 2.0
-        N[logical_and(front_spin_up, logical_not(flipper_on))] = (1.0 + self.Psm) / 2.0
-        N[logical_and(logical_not(front_spin_up), flipper_on)] = (1.0 + self.Pf * self.Psm) / 2.0
-        N[logical_and(logical_not(front_spin_up), logical_not(flipper_on))] = (1.0 - self.Psm) / 2.0
+        N[front_spin_up&flipper_on] = (1.0 - self.Pf * self.Psm) / 2.0
+        N[front_spin_up&~flipper_on] = (1.0 + self.Psm) / 2.0
+        N[~front_spin_up&flipper_on] = (1.0 + self.Pf * self.Psm) / 2.0
+        N[~(front_spin_up|flipper_on)] = (1.0 - self.Psm) / 2.0
         return N
 
     def getNTMatrix(self, t):
@@ -168,7 +169,7 @@ class He3Analyzer:
         #[True, False, False, True],
         #[False, True, True, False]
         #])
-        back_aligned = logical_or(logical_and(back_spin_up, He3_up), logical_and(logical_not(back_spin_up),  logical_not(He3_up)))
+        back_aligned = (back_spin_up&He3_up)|(~back_spin_up&~He3_up)
         
         N = self.getNumberIncidentVec(front_spin_up, flipper_on)
         T = self.getTransmissionVec(t, back_aligned)
@@ -186,7 +187,7 @@ class He3Analyzer:
         back_spin_up = array([
         [True, False, False, True]
         ])
-        back_aligned = logical_or(logical_and(back_spin_up, He3_up), logical_and(logical_not(back_spin_up),  logical_not(He3_up)))
+        back_aligned = (back_spin_up&He3_up) | (~back_spin_up&~He3_up)
         
         N = self.getNumberIncidentVec(front_spin_up, flipper_on)
         T = self.getTransmissionVec(t, back_aligned)
@@ -224,12 +225,12 @@ class He3Analyzer:
         [False, False, False, False]
         ])
         
-        back_aligned = logical_or(logical_and(back_spin_up, He3_up), logical_and(logical_not(back_spin_up),  logical_not(He3_up)))
+        back_aligned = (back_spin_up&He3_up) | (~back_spin_up&~He3_up)
         
         N = self.getNumberIncidentVec(front_spin_up, flipper_on)
         T = self.getTransmissionVec(t, back_aligned)
         NT = zeros((4, 4))
-        mask = logical_and((flipper_on == flipper_on_select), (He3_up == He3_up_select))
+        mask = (flipper_on==flipper_on_select) & (He3_up==He3_up_select)
         print mask
         NT[mask] = (N * T)[mask]
 

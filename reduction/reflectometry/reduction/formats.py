@@ -126,7 +126,7 @@ Currently available formats are returned from::
 """
 
 import os.path
-from registry import ExtensionRegistry
+from ...common.registry import ExtensionRegistry
 __all__ = ['loadmeta', 'load', 'datadir']
 
 datadir = os.path.join(os.path.dirname(__file__), 'examples')

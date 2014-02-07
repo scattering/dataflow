@@ -5,8 +5,8 @@
 ## Free for any kind of use.
 
 
-from numpy import ndarray, array, empty, fromstring, arange
-import datetime
+import numpy as np
+from numpy import ndarray, array, empty, fromstring
 import types, copy
 
 def axis(name=None, cols=None, values=None, units=None):
@@ -228,7 +228,7 @@ class MetaArray(ndarray):
     ## make sure _info is copied locally before modifying it!
     
     axis = self._interpretAxis(axis)
-    return MetaArray(concatenate(self, val, axis), info=self._info)
+    return MetaArray(np.concatenate(self, val, axis), info=self._info)
   
   def infoCopy(self):
     """Return a deep copy of the axis meta info for this object"""

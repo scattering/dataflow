@@ -331,9 +331,9 @@ class MetaArray(ndarray):
       ax = self._info[i]
     return ax
     
-    def __repr__(self):
-        return "%s\n    axis info: %s" % (ndarray.__repr__(self), str(self._info))
+  def __repr__(self):
+    return "%s\n    axis info: %s" % (ndarray.__repr__(self), str(self._info))
 
-    def __str__(self):
-        return self.__repr__()
+  def __str__(self):
+    return self.__repr__()
 
