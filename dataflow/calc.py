@@ -8,6 +8,7 @@ import sys, os
 from inspect import getsource
 import hashlib, types
 from copy import deepcopy
+import json
 
 import numpy as np
 
@@ -335,6 +336,86 @@ def finger_print(module, args, nodenum, inputs_fp):
         fp += terminal_id + input_fp
     fp = hashlib.sha1(fp).hexdigest()
     return fp
+
+
+# ===== Test support ===
+def verify_examples(source_file, tests, target_dir=None):
+    """
+    Run a set of templates, comparing the results against previous results.
+
+    *source_file* should be *__file__*, which is the name of the lookup_module
+    containing the test templates.
+
+    *tests* is a list of tuples *(filename, (template, config))* where
+    *filename* is  the name of the file containing the expected results
+    from running *(template, config)*.  For example::
+
+        verify_examples(__file__, tests=[
+            ('bt7_example.test', (bt7_template, bt7_config)),
+            ])
+
+    *target_dir* is the directory which contains the expected result from
+    running the template with the given configuration.  If it is not given,
+    then it defaults to the "tests" subdirectory of the directory containing
+    *source_file*.
+
+    For each test, the expected results should be found in *target_dir/filename*
+    If this file doesn't exist then the actual results will be stored and the
+    test will pass.  If the file does exist, then the expected results are
+    loaded and compared to the actual results.  New test results should be
+    added/updated in the instrument repository.
+
+    Raises *AssertionError* if any tests fail, indicating which files contain
+    the expected result and the actual result.
+    """
+    import tempfile
+    import os
+    from os.path import join, exists, dirname
+
+    # create a cache handler
+    cache = memory_cache()
+
+    # Allow __file__ to be used as the target_dir for storing target results
+    # in the "tests" subdirectory of the instrument definition.
+    if target_dir is None:
+        target_dir = join(dirname(source_file), "tests")
+    errors = []
+    for (filename, (template, config)) in tests:
+        print("checking %s"%filename)
+        actual = run_template(template, config, cache)
+        target_path = join(target_dir, filename)
+        actual_path = join(tempfile.gettempdir(),filename)
+        if not exists(target_path):
+            if not exists(dirname(target_path)):
+                os.makedirs(dirname(target_path))
+            json.dump(target_path, actual)
+        else:
+            target = json.load(target_path)
+            if not actual == target:
+                if not exists(dirname(actual_path)):
+                    os.makedirs(dirname(actual_path))
+                json.dump(actual_path, actual)
+                errors.append("  %r does not match target %r"
+                              % (actual_path, target_path))
+    if errors:
+        errors.insert(0, "When testing %r:"%source_file)
+        raise AssertionError("\n".join(errors))
+
+def run_example(template, config):
+    from . import wireit
+
+    print 'template: ', json.dumps(wireit.template_to_wireit_diagram(template), indent=2)
+    print 'config: ', json.dumps(config, indent=2)
+
+    result = run_template(template, config, cache=memory_cache())
+
+    print 'result: ', result
+    #for key, value in result.items():
+    #    for output in value['output']:
+    #        if not isinstance(output, dict):
+    #            print key, 'plot: ', output.get_plottable()
+    #            pass
+
 
 # new methods that keep everything ordered
 def full_sort_dict(dict):

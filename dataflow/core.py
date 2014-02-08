@@ -9,13 +9,14 @@ from django.utils import simplejson as json
 from . import config
 from .deps import processing_order
 
-_registry = {}
-_registry_data = {}
+_instrument_registry = []
+_module_registry = {}
+_data_registry = {}
 def register_instrument(instrument):
     """
     Add a new instrument to the server.
     """
-    config.INSTRUMENTS.append(instrument.id)
+    _instrument_registry.append(instrument.id)
     for m in instrument.modules:
         register_module(m)
     for d in instrument.datatypes:
@@ -25,24 +26,24 @@ def register_module(module):
     """
     Register a new calculation module.
     """
-    if module.id in _registry and module != _registry[module.id]:
+    if module.id in _module_registry and module != _module_registry[module.id]:
         return
         #raise TypeError("Module already registered")
-    _registry[module.id] = module
+    _module_registry[module.id] = module
     
 def lookup_module(id):
     """
     Lookup a module in the registry.
     """
-    return _registry[id]
+    return _module_registry[id]
 
 def register_datatype(datatype):
-    if datatype.id in _registry_data and datatype != _registry_data[datatype.id]:
+    if datatype.id in _data_registry and datatype != _data_registry[datatype.id]:
         raise TypeError("Datatype already registered")
-    _registry_data[datatype.id] = datatype
+    _data_registry[datatype.id] = datatype
 
 def lookup_datatype(id):
-    return _registry_data[id]
+    return _data_registry[id]
 
 class Module(object):
     """

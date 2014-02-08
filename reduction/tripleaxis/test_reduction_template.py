@@ -13,9 +13,9 @@ from dataflow.core import Module, Data, Instrument, Template, register_instrumen
 from dataflow.modules.load import load_module
 from dataflow.modules.save import save_module
 
-# ====== Define the module =======
+# ====== Define the modules =======
 
-def tripleaxis_module(id=None, datatype=None, action=None,
+def random_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
     """Module for adding random values to a dataset"""
 
@@ -132,7 +132,7 @@ save_ext = {
 }
 save = save_module(id='rowan.save', datatype=ROWAN_DATA,
                    version='1.0', action=save_action,
-                   fields=[save_ext])
+                   fields=save_ext)
 
 # ========== Fake data store =============
 FILES = {}
@@ -158,9 +158,8 @@ def load_data(name):
 
 # ========== Data and instrument definitions ========
 
-rowan1d = Data(id=ROWAN_DATA,
-               name='1-D Rowan Data',
-               plot='rowanplot')
+# TODO: sort out data file handlers
+rowan1d = Data(id=ROWAN_DATA, cls=object) #, name='1-D Rowan Data', plot='rowanplot')
 # it has three modules: load, save, and rand
 # when the instrument is registered, these modules will also be registered
 ROWAN26 = Instrument(id='ncnr.rowan26',

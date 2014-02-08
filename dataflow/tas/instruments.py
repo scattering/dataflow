@@ -2,12 +2,11 @@
 Triple Axis Spectrometer reduction and analysis modules
 """
 import os, sys
+import types
 
 from django.utils import simplejson as json
 
 from reduction.tripleaxis import data_abstraction
-
-from .. import wireit
 
 from .. import config
 from ..core import Instrument, Data, Template, register_instrument
@@ -58,15 +57,14 @@ data1d = Data(TAS_DATA, data_abstraction.TripleAxis,
 
 
 # === Component binding ===
-'''
 def get_friendly_name(fh):
     from apps.tracks.models import File
     return File.objects.get(name=str(fh)).friendly_name
 
 def _load_data(name):
-    (dirName, fileName) = os.path.split(name)
-    friendlyName = get_friendly_name(fileName)
-    return data_abstraction.filereader(name, friendly_name=friendlyName)
+    #(dirName, fileName) = os.path.split(name)
+    #friendlyName = get_friendly_name(fileName)
+    return data_abstraction.filereader(name, friendly_name=os.path.basename(name))
 
 def load_action(files=[], intent=None, position=None, xtype=None, **kwargs):
     """ was set up to load ONLY 1 file... might work for bundles now """
@@ -79,7 +77,6 @@ def load_action(files=[], intent=None, position=None, xtype=None, **kwargs):
         else:
             result.append(subresult)
     return dict(output=result)
-'''
 ################################################################################
 # NOTE: 02/03/2012 bbm
 # this is what was in "load_action" before
@@ -91,7 +88,8 @@ def load_action(files=[], intent=None, position=None, xtype=None, **kwargs):
 # dataflow.offspecular.instruments
 ################################################################################
 
-load = load_module(id='tas.load', datatype=TAS_DATA, version='1.0')
+load = load_module(id='tas.load', datatype=TAS_DATA, version='1.0',
+                   action=load_action)
 
 '''
 def _load_chalk_data(aof_filename, orient1, orient2, acf_filename=None):
@@ -191,11 +189,12 @@ def save_action(input, ext=None, xtype=None, position=None, **kwargs):
 
 def _save_one(input, ext):
     #TODO - make a real save... this is a dummy
-    outname = input['name']
+    outname = input.meta_data.filename
+    # TODO: if ext is None, then infile will be overwritten
     if ext is not None:
         outname = ".".join([os.path.splitext(outname)[0], ext])
-    print "saving", input['name'], 'as', outname
-    save_data(input, name=outname)
+    print "saving", input.meta_data.filename, 'as', outname
+    #save_data(input, name=outname)
     
 fields = {'ext': {
     "type":"string",
@@ -320,7 +319,7 @@ def monitor_correction_action(input, instrument_name, **kwargs):
     for tasinstrument in input:
         tasinstrument.xaxis = ''
         tasinstrument.yaxis = ''
-        tasinstrument.harmonic_monitor_correction()
+        tasinstrument.harmonic_monitor_correction(instrument_name)
     return dict(ouput=input)
 
 def volume_correction_action(input, **kwargs):
@@ -361,34 +360,32 @@ TAS = Instrument(id='ncnr.tas',
                  datatypes=[data1d],
                  )
 
-
-# Return a list of triple axis instruments
-if 1:
-    instruments = [TAS]
-    for instrument in instruments:
+# Register the list of triple axis instruments
+for instrument in [TAS]:
         register_instrument(instrument)
 
 
-if 0:
+# ==== Example reductions ====
+def bt7_example():
     import reduction.tripleaxis
     DATA_ROOT = os.path.dirname(reduction.tripleaxis.__file__)
     modules = [
-        dict(module="tas.load", position=(10, 150), config={'files':os.path.join(DATA_ROOT,'EscanQQ7HorNSF91831.bt7')}),
+        dict(module="tas.load", position=(10, 150), config={'files':[os.path.join(DATA_ROOT,'EscanQQ7HorNSF91831.bt7')]}),
         dict(module="tas.normalize_monitor", position=(270, 20), config={'target_monitor': 165000}),
         dict(module="tas.detailed_balance", position=(270, 120), config={}),
-        dict(module="tas.monitor_correction", position=(270, 220), config={'instrument_name':'TAS'}),
+        dict(module="tas.monitor_correction", position=(270, 220), config={'instrument_name':'BT7'}),
         dict(module="tas.volume_correction", position=(270, 320), config={}),
         dict(module="tas.save", position=(500, 150), config={}),
     ]
     wires = [
         dict(source=[0, 'output'], target=[1, 'input']),
-        dict(source=[1, 'output'], target=[5, 'input']),
+        #dict(source=[1, 'output'], target=[5, 'input']),
         
         dict(source=[0, 'output'], target=[2, 'input']),
-        dict(source=[2, 'output'], target=[5, 'input']),
+        #dict(source=[2, 'output'], target=[5, 'input']),
         
         dict(source=[0, 'output'], target=[3, 'input']),
-        dict(source=[3, 'output'], target=[5, 'input']),
+        #dict(source=[3, 'output'], target=[5, 'input']),
         
         dict(source=[0, 'output'], target=[4, 'input']),
         dict(source=[4, 'output'], target=[5, 'input']),
@@ -401,8 +398,9 @@ if 0:
                         wires=wires,
                         instrument=TAS.id,
                         )
+    return template, config
 
-if 1:
+def spins_example():
     #for loading spins files 59-71 for plotting
     modules = [
         dict(module="tas.load", position=(10, 40), config={}),
@@ -421,26 +419,22 @@ if 1:
                         wires=wires,
                         instrument=TAS.id,
                         )
+    return template, config
 
+def test():
+    from ..calc import verify_examples
+    tests = [
+        ('bt7.out', bt7_example()),
+        ('spins.out', spins_example()),
+    ]
+    verify_examples(__file__, tests)
 
-# the actual call to perform the reduction
-
-def TAS_RUN():
-    from ..calc import memory_cache, run_template
-    result = run_template(template, config, cache=memory_cache())
-    _ = '''
-    print 'in TAS'
-    for key, value in result.iteritems():
-	for i in range(len(value['output'])):
-		if not type(value['output'][i])==type({}):
-        		value['output'][i] = value['output'][i].get_plottable()
-    print result
-    '''
-    return result
-
+def demo():
+    from .. import wireit
+    from ..calc import run_example
+    print 'language', json.dumps(wireit.instrument_to_wireit_language(TAS), indent=2)
+    run_example(*bt7_example())
+    #run_example(*spins_example())
 
 if __name__ == "__main__":
-    #hi=TAS_RUN()
-    print 'template: ', json.dumps(wireit.template_to_wireit_diagram(template))
-    print 'language', json.dumps(wireit.instrument_to_wireit_language(TAS))
-    print "done"
+    demo()

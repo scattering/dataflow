@@ -1,9 +1,10 @@
 
-INSTRUMENTS = ['ncnr.tas']
+# TODO: move web related materials out of data flow
+# web site configuration
 MEDIA = "/media/"
-#IMAGES = MEDIA + "images/"  # URI to root of image directory
-IMAGES = "../../static/img/" # different location
-ANDR_FOLDER = "offspecular/"
+#IMAGES = MEDIA + "images/"
+IMAGES = "/static/img/"
+ANDR_FOLDER = "offspecular"
 JSCRIPT = MEDIA + "scripts/"
 NCNR_DATA = "http://www.ncnr.nist.gov/data/"
 

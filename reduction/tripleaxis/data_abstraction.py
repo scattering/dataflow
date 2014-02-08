@@ -5,7 +5,6 @@ from django.utils import simplejson as json
 
 import numpy as np
 from bumps.rebin import bin_edges, rebin
-import bumps
 
 from ..common import uncertainty, err1d
 from ..common.formatnum import format_uncertainty
@@ -553,7 +552,7 @@ class MagneticField(object):
     def __init__(self):
         self.magnetic_field = SampleEnvironment('magnetic_field', values=None, err=None, units='Tesla', isDistinct=True,
                                                 isInterpolatable=True)
-    '''    
+    _ = '''
     def __iter__(self):
         for key, value in self.__dict__.iteritems():
             yield value
@@ -758,8 +757,9 @@ class TripleAxis(object):
         
     def detailed_balance(self):
         beta_times_temp = 11.6
-        beta = beta_times_temp / self.temperature.temperature
-        E = self.physical_motors.e
+        #beta = beta_times_temp / self.temperature.temperature
+        beta = 0 # TODO: temperature.temperature is empty
+        E = self.physical_motors.e.measurement
         for detector in self.detectors:
             detector.measurement = detector.measurement * np.exp(-beta * E / 2)
         return
@@ -781,7 +781,10 @@ class TripleAxis(object):
         #Use for constant-Q scans with fixed scattering energy, Ef.
         #CURRENTLY: Assumes Ef is fixed under constant-Q scan; could implement check later
 
-        coefficients = establish_correction_coefficients('monitor_correction_coordinates.txt')
+        # TODO: allow resource files outside of source tree
+        coord_file = os.path.join(os.path.dirname(__file__),
+                                  'monitor_correction_coordinates.txt')
+        coefficients = establish_correction_coefficients(coord_file)
         M = coefficients[instrument_name]
         for i in range(0, len(M)):
             M[i] = float(M[i])
@@ -801,7 +804,7 @@ class TripleAxis(object):
         argument = np.arcsin(np.pi / (.69472 * self.analyzer.dspacing * np.sqrt(self.physical_motors.ei.measurement)))
         norm = (self.physical_motors.ei.measurement ** 1.5) / np.tan(argument)
         rescor = norm * np.tan(theta_analyzer) / self.physical_motors.ef.measurement ** 1.5
-        for detector in bt7.detectors:
+        for detector in self.detectors:
             detector.measurement = detector.measurement * rescor
         return
 
@@ -974,7 +977,11 @@ class TripleAxis(object):
             }
         #self.xaxis = ''
         #self.yaxis = ''
-        return json.dumps(plottable_data)
+        # TODO: plottable should not contain Measurement
+        def expand_json(o):
+            return o.x if isinstance(o,uncertainty.Measurement) else TypeError
+
+        return json.dumps(plottable_data, default=expand_json)
     
     def get_csv(self):
         if len(self.shape) == 3:
@@ -1078,7 +1085,7 @@ class TripleAxis(object):
             map_field(self.physical_motors, 'h', h)
             map_field(self.physical_motors, 'k', k)
             map_field(self.physical_motors, 'l', l)
-    
+
     
 # ****************************************************************************************************************************************************
 # ***************************************************************** TRANSLATION METHODS **************************************************************
@@ -1507,32 +1514,6 @@ def translate_metadata(tas, dataset):
 
     map_motors(translate_dict, tas, tas.meta_data, dataset)
     tas.friendly_name = tas.meta_data.filename
-    #ap_motors(translate_dict,tas.meta_data,dataset)
-
-    #self.meta_data.epoch=dataset.metadata.epoch
-    #self.meta_data.counting_standard=dataset.metadata.count_type
-    #self.meta_data.filename=dataset.metadata.filename
-    #self.meta_data.fixed_eief=dataset.metadata.efixed
-    #self.meta_data.fixed_energy=dataset.metadata.ef
-    #self.meta_data.experiment_comment=dataset.metadata.exptcomment
-    #self.meta_data.comment=dataset.metadata.comment
-    #self.meta_data.date=dataset.metadata.?
-    #self.meta_data.experiment_id=dataset.metadata.experiment_id
-    #self.meta_data.fixed_devices=dataset.metadata.fixed_devices
-    #self.meta_data.scanned_variables=dataset.metadata.varying
-    #self.meta_data.ice_version=dataset.metadata.ice
-    #self.meta_data.ice_repository_info=dataset.metadata.?
-    #self.meta_data.instrument_name=dataset.metadata.instrument
-    #self.meta_data.filebase =dataset.metadata.filebase
-    #self.meta_data.fileseq_number=dataset.metadata.fileseq_number
-    #self.meta_data.experiment_name=dataset.metadata.exptname
-    #self.meta_data.experiment_participants=dataset.metadata.exptparticipants
-    #self.meta_data.experiment_details=dataset.metadata.exptdetails
-    #self.meta_data.desired_detector=dataset.metadata.signal
-    #self.meta_data.ranges=dataset.metadata.ranges
-    #self.meta_data.user=dataset.metadata.user
-    #self.meta_data.scan_description=dataset.metadata.scan_description
-    #self.meta_data.desired_npoints=dataset.metadata.npoints
 
 def translate_detectors(tas, dataset):
     try:
@@ -2077,7 +2058,7 @@ def normalize_monitor(tas_list, monitor=None):
         
     for tas in tas_list_ptr:
         monitor_scalar = uncertainty.Measurement(tas.time.monitor.measurement.x / monitor, 0.0)
-        if not monitor_scalar.x == 1:
+        if not np.all(monitor_scalar.x == 1):
             for detector in tas.detectors:
                 detector.measurement = detector.measurement * monitor_scalar
 
