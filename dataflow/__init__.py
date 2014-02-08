@@ -37,4 +37,4 @@ is tied to the wireit API.  Instead we need to serialize templates
 explicitly before storing them in the database.
 """
 
-__version__ = "0.1"
+__version__ = "0.2"
