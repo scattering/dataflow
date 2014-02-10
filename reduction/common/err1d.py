@@ -100,26 +100,17 @@ def cos(X,varX):
     varZ=varX*np.sin(np.sqrt(varX))**2
     return Z,varZ
 
-# Confirm this formula before using it
-# def pow(X,varX, Y,varY):
-#    Z = X**Y
-#    varZ = (Y**2 * varX/X**2 + varY * numpy.log(X)**2) * Z**2
-#    return Z,varZ
-#
+def pow(X,varX, Y,varY):
+    """x**y with error propagation"""
+    Z = X**Y
+    varZ = ((Y/X)**2 * varX + np.log(X)**2 * varY) * Z**2
+    return Z,varZ
 
-def pow(X,varX,n):
-    """X**n with error propagation"""
-    # Direct algorithm
-    #   Z = X**n
-    #   varZ = n*n * varX/X**2 * Z**2
-    # Indirect algorithm to minimize intermediates
+def constpow(X,varX, n):
+    """x**n for constant n with error propagation"""
     Z = X**n
-    varZ = varX/X
-    varZ /= X
-    varZ *= Z
-    varZ *= Z
-    varZ *= n**2
-    return Z, varZ
+    varZ = n**2 * varX/X**2 * Z**2
+    return Z,varZ
 
 def div_inplace(X,varX, Y,varY):
     """In-place division with error propagation"""
@@ -165,16 +156,31 @@ def add_inplace(X,varX, Y,varY):
     varX += varY
     return X,varX
 
-def pow_inplace(X,varX,n):
-    """In-place X**n with error propagation"""
+def pow_inplace(X,varX, Y,varY):
+    """In-place X**Y with error propagation"""
+    varX /= X
+    varX /= X
+    varX *= Y
+    varX *= Y     # varX now has varX (Y/X)**2
+    T = np.log(X)
+    T *= T
+    T *= varY     # T now was varY log(X)**2
+    varX += T     # varX now has varX (Y/X)**2 + varY log(X)**2
+    X **= Y       # X now has Z = X**Y
+    varX *= X
+    varX *= X     # varX now has (varX (Y/X)**2 + varY log(X)**2) Z**2
+    return X,varX
+
+def constpow_inplace(X,varX,n):
+    """In-place X**n for constant n with error propagation"""
     # Direct algorithm
     #   Z = X**n
-    #   varZ = abs(n) * varX/X**2 * Z**2
+    #   varZ = n**2 * varX/X**2 * Z**2
     # Indirect algorithm to minimize intermediates
     varX /= X
     varX /= X     # varX now has varX/X**2
+    varX *= n**2  # varX now has varZ
     X **= n       # X now has Z = X**n
     varX *= X
     varX *= X     # varX now has varX/X**2 * Z**2
-    varX *= n**2  # varX now has varZ
     return X,varX

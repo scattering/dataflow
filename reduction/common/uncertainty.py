@@ -27,37 +27,21 @@ __all__ = ['Measurement']
 # TODO: C implementation of *,/,**?
 class Measurement(object):
     # Make standard deviation available
-    def join(self,other):
-        if isinstance(other,Measurement):
-            #self=Measurement([self.x,other.x],[self.dx,other.dx])
-            #Should I set up checks so a None and a None combine to a single None?
-            if self.x==None and other.x==None:
-                xs=None
-            else:
-                xs=np.hstack((self.x,other.x))
-            if self.variance==None and other.variance==None:
-                variances=None
-            else:
-                variances=np.hstack((self.variance,other.variance))
-            self.x=xs
-            self.variance=variances
-    def join_channels(self,other):
-        if isinstance(other,Measurement):
-            #self=Measurement([self.x,other.x],[self.dx,other.dx])
-            #Should I set up checks so a None and a None combine to a single None?
-            if self.x==None and other.x==None:
-                xs=None
-            else:
-                xs=np.vstack((self.x,other.x))
-            if self.variance==None and other.variance==None:
-                variances=None            
-            else:
-                variances=np.vstack((self.variance,other.variance))
-            self.x=xs
-            self.variance=variances
-    def _getdx(self): 
-        if self.variance==None:
-            return None
+    def hstack(self,other):
+        x1,v1 = _valvar(self)
+        x2,v2 = _valvar(other)
+        if np.isscalar(v2) and not np.isscalar(x2):
+            v2 = np.ones_like(x2)*v2
+        self.x = np.hstack((x1,x2))
+        self.variance = np.hstack((v1,v2))
+    def vstack(self,other):
+        x1,v1 = _valvar(self)
+        x2,v2 = _valvar(other)
+        if np.isscalar(v2) and not np.isscalar(x2):
+            v2 = np.ones_like(x2)*v2
+        self.x = np.vstack((x1,x2))
+        self.variance = np.hstack((v1,v2))
+    def _getdx(self):
         return np.sqrt(self.variance)
     def _setdx(self,dx):
         # Direct operation
@@ -68,154 +52,95 @@ class Measurement(object):
     dx = property(_getdx,_setdx,doc="standard deviation")
 
     # Constructor
-    def __init__(self, x, variance=None):
+    def __init__(self, x, variance=0):
+        if np.isscalar(variance) and not np.isscalar(x):
+            temporary = variance
+            variance = np.empty_like(x)
+            variance[:] = temporary
         self.x, self.variance = x, variance
 
     # Numpy array slicing operations
     def __len__(self):
         return len(self.x)
-    def __getitem__(self,key):
-        if self.variance==None and self.x==None:
-            return self
-        elif self.variance==None:
-            return Measurement(self.x[key],self.variance)
-        elif self.x==None:
-            return Measurement(self.x,self.variance[key])
-        else:
-            return Measurement(self.x[key],self.variance[key])
-    def __setitem__(self,key,value):
+    def __getitem__(self, key):
+        return Measurement(self.x[key], self.variance[key])
+    def __setitem__(self, key, value):
         self.x[key] = value.x
         self.variance[key] = value.variance
     def __delitem__(self, key):
-        if self.x!=None:
-            self.x=np.delete(self.x,key,0)
-        if self.variance!=None:
-            self.variance=np.delete(self.variance,key,0)
+        self.x=np.delete(self.x,key,0)
+        self.variance=np.delete(self.variance,key,0)
     #def __iter__(self): pass # Not sure we need iter
 
     # Normal operations: may be of mixed type
     def __add__(self, other):
-        if isinstance(other,Measurement):
-            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-                return Measurement(*err1d.add(self.x,self.variance,other.x,other.variance))
-            else:
-                return Measurement(self.x+other.x,None)
-        else:
-            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-                return Measurement(self.x+other, self.variance+0) # Force copy
-            else:
-                return Measurement(self.x+other,None)
+        x1,v1 = _valvar(self)
+        x2,v2 = _valvar(other)
+        return Measurement(*err1d.add(x1,v1,x2,v2))
     def __sub__(self, other):
-        if isinstance(other,Measurement):
-            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-                return Measurement(*err1d.sub(self.x,self.variance,other.x,other.variance))
-            else:
-                return Measurement(self.x-other.x,None)
-        else:
-            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-                return Measurement(self.x-other.x, self.variance+0) # Force copy
-            else:
-                return Measurement(self.x-other, None)
+        x1,v1 = _valvar(self)
+        x2,v2 = _valvar(other)
+        return Measurement(*err1d.sub(x1,v1,x2,v2))
     def __mul__(self, other):
-        if isinstance(other,Measurement):
-            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-                return Measurement(*err1d.mul(self.x,self.variance,other.x,other.variance))
-            else:
-                return Measurement(self.x*other.x,None)
-        else:
-            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-                return Measurement(self.x*other, self.variance*other**2)
-            else:
-                return Measurement(self.x*other, None)
+        x1,v1 = _valvar(self)
+        x2,v2 = _valvar(other)
+        return Measurement(*err1d.mul(x1,v1,x2,v2))
     def __truediv__(self, other):
-        if isinstance(other,Measurement):
-            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-                return Measurement(*err1d.div(self.x,self.variance,other.x,other.variance))
-            elif type(self)==np.ndarray:
-                return Measurement(self/other.x, self.variance/other.x**2)
-            else:
-                return Measurement(self.x/other.x, self.x/other.x**2)  #maybe revisit this--we claim that other is a measurement, but if the variance is None, then what does it mean to divide by this--the current solution is practical.
-        else:
-            if not self.variance is None:
-                return Measurement(self.x/other, self.variance/other**2)
-            else:
-                return Measurement(self.x/other,None)
-          #  if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-          #      return Measurement(self.x/other, self.variance/other**2)
-          #  else:  The above covered the case for rdiv
-          #      return Measurement(self.x/other,self.variance/np.sqrt(other))
+        x1,v1 = _valvar(self)
+        x2,v2 = _valvar(other)
+        return Measurement(*err1d.div(x1,v1,x2,v2))
     def __pow__(self, other):
-        if isinstance(other,Measurement):
-            # Haven't calcuated variance in (a+/-da) ** (b+/-db)
-            return NotImplemented
-        else:
-            if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-                return Measurement(*err1d.pow(self.x,self.variance,other))
-            else:
-                return Measurement(pow(self.x,other),None)
+        x1,v1 = _valvar(self)
+        x2,v2 = _valvar(other)
+        return Measurement(*err1d.pow(x1,v1,x2,v2))
 
-    # Reverse operations
+   # Reverse operations
     def __radd__(self, other):
-        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-            return Measurement(self.x+other, self.variance+0) # Force copy
-        else:
-            return Measurement(self.x+other,None)
+        x1,v1 = _valvar(other)
+        x2,v2 = _valvar(self)
+        return Measurement(*err1d.add(x1,v1,x2,v2))
     def __rsub__(self, other):
-        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-            return Measurement(other-self.x, self.variance+0)
-        else:
-            return Measurement(other-self.x,None)
+        x1,v1 = _valvar(other)
+        x2,v2 = _valvar(self)
+        return Measurement(*err1d.sub(x1,v1,x2,v2))
     def __rmul__(self, other):
-        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-            return Measurement(self.x*other, self.variance*other**2)
-        else:
-            return Measurement(self.x*other, None)
+        x1,v1 = _valvar(other)
+        x2,v2 = _valvar(self)
+        return Measurement(*err1d.mul(x1,v1,x2,v2))
     def __rtruediv__(self, other):
-        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-            x,variance = err1d.pow(self.x,self.variance,-1)
-            return Measurement(other/self.x,variance*other**2)
-        else:
-            return Measurement(other/self.x,None)
-    def __rpow__(self, other): return NotImplemented
+        x1,v1 = _valvar(other)
+        x2,v2 = _valvar(self)
+        return Measurement(*err1d.div(x1,v1,x2,v2))
+    def __rpow__(self, other):
+        x1,v1 = _valvar(other)
+        x2,v2 = _valvar(self)
+        return Measurement(*err1d.pow(x1,v1,x2,v2))
 
     # In-place operations: may be of mixed type
     def __iadd__(self, other):
-        if isinstance(other,Measurement):
-            self.x,self.variance \
-                = err1d.add_inplace(self.x,self.variance,other.x,other.variance)
-        else:
-            self.x+=other
+        x1,v1 = _valvar(self)
+        x2,v2 = _valvar(other)
+        self.x,self.variance = err1d.add_inplace(x1,v1, x2,v2)
         return self
     def __isub__(self, other):
-        if isinstance(other,Measurement):
-            self.x,self.variance \
-                = err1d.sub_inplace(self.x,self.variance,other.x,other.variance)
-        else:
-            self.x-=other
+        x1,v1 = _valvar(self)
+        x2,v2 = _valvar(other)
+        self.x,self.variance = err1d.sub_inplace(x1,v1, x2,v2)
         return self
     def __imul__(self, other):
-        if isinstance(other,Measurement):
-            self.x, self.variance \
-                = err1d.mul_inplace(self.x,self.variance,other.x,other.variance)
-        else:
-            self.x *= other
-            self.variance *= other**2
+        x1,v1 = _valvar(self)
+        x2,v2 = _valvar(other)
+        self.x,self.variance = err1d.mul_inplace(x1,v1, x2,v2)
         return self
     def __itruediv__(self, other):
-        if isinstance(other,Measurement):
-            self.x,self.variance \
-                = err1d.div_inplace(self.x,self.variance,other.x,other.variance)
-        else:
-            self.x /= other
-            self.variance /= other**2
+        x1,v1 = _valvar(self)
+        x2,v2 = _valvar(other)
+        self.x,self.variance = err1d.div_inplace(x1,v1, x2,v2)
         return self
     def __ipow__(self, other):
-        if isinstance(other,Measurement):
-            # Haven't calcuated variance in (a+/-da) ** (b+/-db)
-            return NotImplemented
-        else:
-            self.x,self.variance = err1d.pow_inplace(self.x, self.variance, other)
-        return self
+        x1,v1 = _valvar(self)
+        x2,v2 = _valvar(other)
+        self.x,self.variance = err1d.pow_inplace(x1,v1, x2,v2)
 
     # Use true division instead of integer division
     def __div__(self, other): return self.__truediv__(other)
@@ -229,15 +154,12 @@ class Measurement(object):
     def __pos__(self):
         return self
     def __abs__(self):
-        return Measurement(np.abs(self.x),self.variance)
+        return Measurement(abs(self.x),self.variance)
 
     def __str__(self):
         #return str(self.x)+" +/- "+str(np.sqrt(self.variance))
         if np.isscalar(self.x):
-            if self.variance==None:
-                return format_uncertainty(self.x,self.variance)
-            else:
-                return format_uncertainty(self.x,np.sqrt(self.variance))
+            return format_uncertainty(self.x,np.sqrt(self.variance))
         else:
             return [format_uncertainty(v,dv) for v,dv in zip(self.x,np.sqrt(self.variance))]
     def __repr__(self):
@@ -284,49 +206,29 @@ class Measurement(object):
 
     def log(self):
         return Measurement(*err1d.log(self.x,self.variance))
-    
     def sqrt(self):
-        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-            return Measurement(*err1d.sqrt(self.x,self.variance))
-        else:
-            return Measurement(np.sqrt(self.x),None)
-
+        return Measurement(*err1d.sqrt(self.x,self.variance))
     def exp(self):
-        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-            return Measurement(*err1d.exp(self.x,self.variance))
-        else:
-            return Measurement(np.exp(self.x),None)
-    
+        return Measurement(*err1d.exp(self.x,self.variance))
     def arcsin(self):
-        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-            return Measurement(*err1d.arcsin(self.x,self.variance))
-        else:
-            return Measurement(np.arcsin(self.x),None)
-        
+        return Measurement(*err1d.arcsin(self.x,self.variance))
+    def arccos(self):
+        return Measurement(*err1d.arcsin(self.x,self.variance))
     def arctan(self):
-        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-            return Measurement(*err1d.arctan(self.x,self.variance))
-        else:
-            return Measurement(np.arctan(self.x),None)
-    def tan(self):
-        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-            return Measurement(*err1d.tan(self.x,self.variance))
-        else:
-            return Measurement(np.tan(self.x),None)
-    def cos(self):
-        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-            return Measurement(*err1d.cos(self.x,self.variance))
-        else:
-            return Measurement(np.cos(self.x),None)
-    
+        return Measurement(*err1d.arctan(self.x,self.variance))
     def sin(self):
-        if (not self.variance is None) and hasattr(other,'variance') and not other.variance is None:
-            return Measurement(*err1d.sin(self.x,self.variance))
-        else:
-            return Measurement(np.sin(self.x),None)
+        return Measurement(*err1d.sin(self.x,self.variance))
+    def tan(self):
+        return Measurement(*err1d.tan(self.x,self.variance))
+    def cos(self):
+        return Measurement(*err1d.cos(self.x,self.variance))
 
-def log(val): return self.log()
-def exp(val): return self.exp()
+
+def _valvar(obj):
+    try:
+        return obj.x, getattr(obj, 'variance', 0)
+    except KeyError:
+        return obj, 0
 
 def test():
     a = Measurement(5,3)
@@ -334,6 +236,7 @@ def test():
 
     # Scalar operations
     z = a+4
+    print z,z.variance
     assert z.x == 5+4 and z.variance == 3
     z = a-4
     assert z.x == 5-4 and z.variance == 3

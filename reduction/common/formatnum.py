@@ -13,7 +13,7 @@ def format_uncertainty(value,uncertainty):
     The returned string uses only the number of digits warranted by the
     uncertainty in the measurement.
     """
-    if uncertainty == None:
+    if not uncertainty:
         return "%g"%value
 
     # Process sign

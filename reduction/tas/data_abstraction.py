@@ -1826,17 +1826,17 @@ def join(tas_list):
                 for field in value:
                     if field.name == 'primary_detector':
                         obj = getattr(tas2, key)
-                        field.measurement.join(getattr(obj, field.name).measurement)
+                        field.measurement.hstack(getattr(obj, field.name).measurement)
                         field.dimension[0] = field.dimension[0] + getattr(obj, field.name).dimension[0]
                     else:
                         obj = getattr(tas2, key)
-                        field.measurement.join_channels(getattr(obj, field.name).measurement)
+                        field.measurement.vstack(getattr(obj, field.name).measurement)
             elif key.find('blade') >= 0:
                 #TODO: how should we handle joining when both TAS objects have unequal #blades?
                 obj = getattr(tas2, key)
                 i = 0
                 for blade in value.blades:
-                    blade.measurement.join(obj.blades[i].measurement)
+                    blade.measurement.hstack(obj.blades[i].measurement)
                     i += 1
                     if blade.isDistinct:
                         distinct.append(blade)
@@ -1845,7 +1845,7 @@ def join(tas_list):
             else:
                 for field in value:
                     obj = getattr(tas2, key)
-                    field.measurement.join(getattr(obj, field.name).measurement)
+                    field.measurement.hstack(getattr(obj, field.name).measurement)
                     if field.isDistinct:
                         distinct.append(field)
                     else:
@@ -2154,13 +2154,13 @@ def sort_all_fields(tas, independent_measurements):
                     new_measurement = field.measurement[indices_order[0]]
                     for i in range(1, num_rows):
                         # put rows in the order defined by indices_order
-                        new_measurement.join(field.measurement[indices_order[i]])
+                        new_measurement.hstack(field.measurement[indices_order[i]])
                     field = new_measurement 
                 else:
                     new_measurement = field.measurement[indices_order[0]]
                     for i in range(1, num_rows):
                         # put rows in the order defined by indices_order
-                        new_measurement.join_channels(field.measurement[indices_order[i]])
+                        new_measurement.vstack(field.measurement[indices_order[i]])
                     field = new_measurement
             '''
         # for now, ignore joining blades
@@ -2177,7 +2177,7 @@ def sort_all_fields(tas, independent_measurements):
                         new_measurement = field.measurement[indices_order[0]]
                         for i in range(1, num_rows):
                             # put rows in the order defined by indices_order
-                            new_measurement.join(field.measurement[indices_order[i]])
+                            new_measurement.hstack(field.measurement[indices_order[i]])
                         field = new_measurement                         
                 except:
                     # if field doesn't have proper number of columns, don't sort
