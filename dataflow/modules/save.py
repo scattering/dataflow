@@ -28,19 +28,19 @@ def save_module(id=None, datatype=None, action=None,
     ]
 
     fields['intent'] = {
-        "type":"string",
-        "label":"Intent",
+        "type": "string",
+        "label": "Intent",
         "name": "intent",
-        "value": '',
+        "value": "",
     }
-    
+
     fields['ext'] = {
-    "type":"string",
-    "label": "Save extension",
-    "name": "ext",
-    "value": "",
+        "type":"string",
+        "label": "Save extension",
+        "name": "ext",
+        "value": "",
     }
-    
+
     # Combine everything into a module.
     module = Module(id=id,
                   name='Save',

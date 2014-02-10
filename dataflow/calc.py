@@ -8,6 +8,7 @@ import sys, os
 from inspect import getsource
 import hashlib, types
 from copy import deepcopy
+import contextlib
 
 import numpy as np
 
@@ -83,10 +84,9 @@ def run_template(template, config, cache):
                       for k, v in inputs.items())
         
         # Include configuration information
-        configuration = {}
-        configuration.update(node.get('config', {}))
-        configuration.update(config.get(nodenum, {}))
-        kwargs.update(configuration)
+        node_config= node.get('config', {})
+        node_config.update(config[nodenum])
+        kwargs.update(node_config)
         
         # Fingerprinting
         fp = name_fingerprint(fingerprints[nodenum])
@@ -161,10 +161,9 @@ def calc_single(template, config, nodenum, terminal_id, cache):
                 kwargs[target_id] = source_data
         
         # Include configuration information
-        configuration = {}
-        configuration.update(node.get('config', {}))
-        configuration.update(config.get(nodenum, {}))
-        kwargs.update(configuration)
+        node_config = node.get('config', {})
+        node_config.update(config[nodenum])
+        kwargs.update(node_config)
         calc_value = module.action(**kwargs)
         # pushing the value of all the outputs for this node to cache, 
         # even though only one was asked for
@@ -256,16 +255,16 @@ def fingerprint_template(template, config):
         #inputs = _map_inputs(module, wires)
         
         # Include configuration information
-        configuration = {}
+        node_config= {}
         # let's not grab config information from the node... like position.
         # only taking configuration defined for this group number.
         #configuration.update(node.get('config', {}))
-        configuration.update(config.get(nodenum, {}))
-        print "configuration for fingerprint:", configuration
+        node_config.update(config[nodenum])
+        print "configuration for fingerprint:", node_config
         
         # Fingerprinting
-        fp = finger_print(module, configuration, index, inputs_fp) # terminals included
-        print nodenum, module, configuration, index, inputs_fp, fp
+        fp = finger_print(module, node_config, index, inputs_fp) # terminals included
+        print nodenum, module, node_config, index, inputs_fp, fp
         fingerprints[nodenum] = fp
         index += 1
     return fingerprints
@@ -338,7 +337,22 @@ def finger_print(module, args, nodenum, inputs_fp):
 
 
 # ===== Test support ===
-def verify_examples(source_file, tests, target_dir=None):
+@contextlib.contextmanager
+def push_seed(seed=None):
+    """
+    Set a temporary seed to the numpy random number generator, restoring it
+    at the end of the context.
+    """
+    from numpy.random import get_state, set_state, seed as set_seed
+    if seed is not None:
+        state = get_state()
+        set_seed(seed)
+        yield
+        set_state(state)
+    else:
+        yield
+
+def verify_examples(source_file, tests, target_dir=None, seed=1):
     """
     Run a set of templates, comparing the results against previous results.
 
@@ -357,6 +371,12 @@ def verify_examples(source_file, tests, target_dir=None):
     running the template with the given configuration.  If it is not given,
     then it defaults to the "tests" subdirectory of the directory containing
     *source_file*.
+
+    *seed* is the numpy random number generator (RNG) seed to use for the test.
+    Before running each test, the RNG state is captured, the seed is set,
+    the test is run, and the state is restored.  This allows you to run an
+    individual example with :func:`run_example` and get the same result.
+    *seed* defaults to 1.
 
     For each test, the expected results should be found in *target_dir/filename*
     If this file doesn't exist then the actual results will be stored and the
@@ -382,35 +402,41 @@ def verify_examples(source_file, tests, target_dir=None):
     errors = []
     for (filename, (template, config)) in tests:
         print("checking %s"%filename)
-        actual = run_template(template, config, cache)
+        with push_seed(seed):
+            actual = run_template(template, config, cache)
         target_path = join(target_dir, filename)
         actual_path = join(tempfile.gettempdir(),filename)
         if not exists(target_path):
             if not exists(dirname(target_path)):
                 os.makedirs(dirname(target_path))
-            json.dump(target_path, actual)
+            with open(target_path, 'wb') as fid:
+                json.dump(actual, fid, sort_keys=True)
         else:
-            target = json.load(target_path)
+            with open(target_path, 'rb') as fid:
+                target = json.load(fid)
             if not actual == target:
                 if not exists(dirname(actual_path)):
                     os.makedirs(dirname(actual_path))
-                json.dump(actual_path, actual)
+                with open(actual_path, 'wb') as fid:
+                    json.dump(actual, fid, sort_keys=True)
                 errors.append("  %r does not match target %r"
                               % (actual_path, target_path))
     if errors:
         errors.insert(0, "When testing %r:"%source_file)
         raise AssertionError("\n".join(errors))
 
-def run_example(template, config):
+def run_example(template, config, seed=None):
     import json
     from . import wireit
 
-    print 'template: ', json.dumps(wireit.template_to_wireit_diagram(template), indent=2)
-    print 'config: ', json.dumps(config, indent=2)
+    print 'template: ', json.dumps(wireit.template_to_wireit_diagram(template),
+                                   sort_keys=True, indent=2)
+    print 'config: ', json.dumps(config, sort_keys=True, indent=2)
 
-    result = run_template(template, config, cache=memory_cache())
+    with push_seed(seed):
+        result = run_template(template, config, cache=memory_cache())
 
-    print 'result: ', json.dumps(result,indent=2)
+    print 'result: ', json.dumps(result,sort_keys=True, indent=2)
     for key, value in result.items():
         for output in value.get('output',[]):
             if not isinstance(output, dict):

@@ -4,6 +4,8 @@ Core class definitions
 from collections import deque
 import inspect
 
+import sys; print >>sys.stderr,"\n".join(sys.path)
+
 from django.utils import simplejson as json
 
 from . import config
@@ -136,7 +138,7 @@ class Module(object):
         self.name = name
         self.description = description
         self.icon = icon
-        self.fields = fields
+        self.fields = fields if fields is not None else {}
         self.terminals = terminals
         self.action = action
         self.xtype = xtype
@@ -358,18 +360,18 @@ class Data(object):
         return obj
     
     def __getstate__(self):
-        return "1.0", __dict__
+        return "1.0", self.__dict__
     
     def __setstate__(self, state):
         version, state = state
         self.__dict__ = state
         
     def get_plottable(self):
-        return json.dumps({})
-    
+        return self.dumps()
+
     def dumps(self):
-        return ""
-    
+        return json.dumps(self.__dict__)
+
     @classmethod
     def loads(cls, str):
         return Data(str, Data)

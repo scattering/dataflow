@@ -1,18 +1,34 @@
 """
-Example to show how to create and run a reduction routine.
+Example to show how to create and run a dataflow reduction routine.
 """
 import os, math
-from pprint import pprint
+import json
 
 from numpy.random import random
 
-from . import config
-from .calc import run_template, memory_cache
-from .core import Module, Instrument, Data, Template, register_instrument
-from .modules.load import load_module
-from .modules.save import save_module
+from dataflow import config
+from dataflow.core import Module, Instrument, Data, Template, register_instrument
+from dataflow.modules.load import load_module
+from dataflow.modules.save import save_module
 
-# ====== Define the module =======
+# ========== Data definition ========
+
+
+# the data id; used for datatype of modules and instrument
+ROWAN_DATA = 'data1d.rowan'
+
+class RowanData(object):
+    def __init__(self, **kw):
+        self.__dict__ = kw
+    def dumps(self):
+        return json.dumps(self.__dict__)
+    def get_plottable(self):
+        return self.dumps()
+
+rowan1d = Data(id=ROWAN_DATA, cls=RowanData,
+               loaders=[])
+
+# ====== Define a new module =======
 
 def random_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[]):
@@ -71,23 +87,20 @@ def random_module(id=None, datatype=None, action=None,
 
 # ======== Define the action and declare the module =======
 
-# the data id; used for datatype of modules and instrument
-ROWAN_DATA = 'data1d.rowan'
-
 # helper methods
 # as stated before, this module adds random values to the data:
 # transformed_data - data| <= |max_change|
 def _offset(max_change):
     return (1 if random() >= .5 else -1) * random()*(max_change + 1)
 def _data_randomize(data, max_change):
-    x = [v + _offset(max_change) for v in data['x']]
-    y = [v + _offset(max_change) for v in data['y']]
-    dy = [v + _offset(max_change) for v in data['dy']]
-    mon = [v + _offset(max_change) for v in data['monitor']]
-    basename = data['name']
+    x = [v + _offset(max_change) for v in data.x]
+    y = [v + _offset(max_change) for v in data.y]
+    dy = [v + _offset(max_change) for v in data.dy]
+    mon = [v + _offset(max_change) for v in data.monitor]
+    basename = data.name
     outname = os.path.splitext(basename)[0] + '.random'
     result = {'name': outname, 'x': x, 'y': y, 'dy': dy, 'monitor': mon}
-    return result
+    return RowanData(**result)
 
 # the actual "action" for the rand module
 def random_action(input=None, max_change=None):
@@ -102,7 +115,7 @@ def random_action(input=None, max_change=None):
 rand = random_module(id='rowan.random', datatype=ROWAN_DATA,
                      version='1.0', action=random_action)
 
-# ======== Other modules ==========
+# ======== Actions for standard modules ==========
 
 def load_action(files=None, intent=None):
     """Loads files for data manipulation"""
@@ -117,21 +130,13 @@ def save_action(input=None, ext=None):
     for f in input: _save_one(f, ext)
     return {}
 def _save_one(input, ext):
-    outname = input['name']
+    outname = input.name
     if ext is not None:
         outname = ".".join([os.path.splitext(outname)[0], ext])
-    print "saving", input['name'], 'as', outname
+    print "saving", input.name, 'as', outname
     save_data(input, name=outname)
-# the 'ext'ension field; there's no use in saving fields though (hopefully there will be a need later?)
-save_ext = {
-    "type":"[string]",
-    "label": "Save extension",
-    "name": "ext",
-    "value": "",
-}
 save = save_module(id='rowan.save', datatype=ROWAN_DATA,
-                   version='1.0', action=save_action,
-                   fields=[save_ext])
+                   version='1.0', action=save_action)
 
 # ========== Fake data store =============
 FILES = {}
@@ -149,17 +154,13 @@ def init_data():
           }
     f1['dy'] = [math.sqrt(v) for v in f1['y']]
     f2['dy'] = [math.sqrt(v) for v in f2['y']]
-    for f in f1, f2: FILES[f['name']] = f
+    for f in f1, f2: FILES[f['name']] = RowanData(**f)
 def save_data(data, name):
     FILES[name] = data
 def load_data(name):
     return FILES.get(name, None)
 
-# ========== Data and instrument definitions ========
-
-rowan1d = Data(id=ROWAN_DATA,
-               name='1-D Rowan Data',
-               loaders=[])
+# ========== Instrument definition ========
 # it has three modules: load, save, and rand
 # when the instrument is registered, these modules will also be registered
 ROWAN26 = Instrument(id='ncnr.rowan26',
@@ -178,40 +179,44 @@ for instrument in instruments:
 
 
 # ========== Run the reductions =========
-modules = [
-    dict(module="rowan.load", position=(5, 20),
-         config={'files': ['f1.rowan26'], 'intent': 'signal'}),
-    dict(module="rowan.random", position=(160, 20), config={'max_change': 50}),
-    dict(module="rowan.save", position=(280, 40), config={'ext': 'dat'}),
-    ]
-wires = [
-    dict(source=[0, 'output'], target=[1, 'input']),
-    dict(source=[1, 'output'], target=[2, 'input']),
-    ]
-# I'm unsure why config is needed currently if nothing needs to be supplied
-# However, it does need to be the same length as the modules list
-config = [
-    {},
-    {},
-    {},
-    ]
-template = Template(name='test rowan',
-                    description='example ROWAN diagram',
-                    modules=modules,
-                    wires=wires,
-                    instrument=ROWAN26.id,
-                    )
-# the actual call to perform the reduction
-result = run_template(template, config, memory_cache())
-pprint(result)
+def sample_diagram():
+    modules = [
+        dict(module="rowan.load", position=(5, 20),
+             config={'files': ['f1.rowan26'], 'intent': 'signal'}),
+        dict(module="rowan.random", position=(160, 20), config={'max_change': 50}),
+        dict(module="rowan.save", position=(280, 40), config={'ext': 'dat'}),
+        ]
+    wires = [
+        dict(source=[0, 'output'], target=[1, 'input']),
+        dict(source=[1, 'output'], target=[2, 'input']),
+        ]
+    # I'm unsure why config is needed currently if nothing needs to be supplied
+    # However, it does need to be the same length as the modules list
+    config = [
+        {},
+        {},
+        {},
+        ]
+    template = Template(name='test rowan',
+                        description='example ROWAN diagram',
+                        modules=modules,
+                        wires=wires,
+                        instrument=ROWAN26.id,
+                        )
 
-# (testing, andy)
-# ========= Convert the instrument definition to WireIt language =========
-#from dataflow.wireit import instrument_to_wireit_language as wlang
-#from dataflow.wireit import template_to_wireit_diagram as wdiag
+    return template, config
 
-#print "LANGUAGE:"
-#print wlang(ROWAN26)
-#print
-#print "DIAGRAM:"
-#print wdiag(template)
+def test():
+    from dataflow import calc
+    calc.verify_examples(__file__,
+                         [('sample.test', sample_diagram())],
+                         )
+
+if __name__ == "__main__":
+    import json
+    from dataflow import calc
+    from dataflow.wireit import instrument_to_wireit_language as wlang
+    print("=== Language ===")
+    json.dumps(wlang(ROWAN26), indent=2)
+    calc.run_example(*sample_diagram())
+
