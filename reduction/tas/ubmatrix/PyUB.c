@@ -322,7 +322,7 @@ static PyObject * PyUB_SetReflection(tas * self, PyObject * args, PyObject *kwds
   double ei, ef,ki,kf,q2;
   int whichrefl;
   double raddeg = PI / 180.0;
-  ei = ef = ki = kf;
+  //ei = ef = ki = kf;
   if (!PyArg_ParseTupleAndKeywords(args,kwds,"iddddddddd",kwlist,
 				   &whichrefl,&ei,&ef,
 				   &(refl.qe.qh),&(refl.qe.qk),&(refl.qe.ql),
@@ -415,15 +415,15 @@ static PyMethodDef PyUB_methods[] = {
 
 static PyTypeObject PyUBType = {
   PyObject_HEAD_INIT(NULL)
-  tp_name:      "PyUB",
-  tp_basicsize: sizeof(tas),
-  tp_dealloc:   (destructor) PyUB_dealloc,
-  tp_flags:     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-  tp_doc:       "$Id: PyUB.c,v 1.3 2006/04/11 13:14:04 nickm Exp $",
-  tp_methods:   PyUB_methods,
-  tp_members:   PyUB_members,
-  tp_init:      (initproc) PyUB_init,
-  tp_new:       PyUB_new,
+  .tp_name=      "PyUB",
+  .tp_basicsize= sizeof(tas),
+  .tp_dealloc=   (destructor) PyUB_dealloc,
+  .tp_flags=     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
+  .tp_doc=       "$Id: PyUB.c,v 1.3 2006/04/11 13:14:04 nickm Exp $",
+  .tp_methods=   PyUB_methods,
+  .tp_members=   PyUB_members,
+  .tp_init=      (initproc) PyUB_init,
+  .tp_new=       PyUB_new,
 };
 
 static PyMethodDef module_methods[] = {

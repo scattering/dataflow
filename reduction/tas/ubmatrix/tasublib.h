@@ -10,7 +10,7 @@
 #ifndef TASUBLIB
 #define TASUBLIB
 #include "cell.h"
-#include "c:\ubmatrix\matrix\matrix.h"
+#include "matrix/matrix.h"
 /*================= error codes =====================================*/
 #define ENERGYTOBIG -700
 #define BADSYNC     -701  /* mono/analyzer out of sync: 2*theta != two_theta*/

@@ -1,9 +1,6 @@
 ~*
 *.swp
 *.pyc
-*/*.pyc
-*/*/*.pyc
-*/*/*/*.pyc
 django-profiles
 django-registration
 OOSuite
@@ -23,4 +20,4 @@ OOSuite
 *.html~
 settings.py
 testdb*
-
+reduction/tas/ubmatrix/build

@@ -187,8 +187,7 @@ MATRIX calcPlaneNormal(tasReflection r1, tasReflection r2){
 MATRIX calcTasUBFromTwoReflections(lattice cell, tasReflection r1,
 				   tasReflection r2, int *errorCode){
   MATRIX B, HT, UT, U, UB, HTT  ;
-  MATRIX u1, u2, h1, h2, planeNormal;
-  double ud[3];
+  MATRIX u1, u2, h1, h2;
   int status;
 
   *errorCode = 1;
@@ -340,7 +339,7 @@ static MATRIX tasReflectionToQC(tasQEPosition r, MATRIX UB){
 /*----------------------------------------------------------------------------*/
 static MATRIX buildRMatrix(MATRIX UB, MATRIX planeNormal,
 				     tasQEPosition qe, int *errorCode){
-  MATRIX U1V, U2V, TV, TVINV, M;
+  MATRIX U1V, U2V, TV, TVINV;
   
   
   *errorCode = 1;
@@ -500,7 +499,6 @@ int calcTasQH(MATRIX UB, tasAngles angles, ptasQEPosition qe){
 int calcAllTasAngles(ptasMachine machine, tasQEPosition qe,
 		      ptasAngles angles){
   int status;
-  tasReflection r;
 
   status = maCalcTwoTheta(machine->monochromator,qe.ki, 
 			  &angles->monochromator_two_theta);
@@ -541,7 +539,6 @@ int calcTasPowderAngles(ptasMachine machine, tasQEPosition qe,
 			ptasAngles angles){
   double cos2t;
   int status;
-  tasReflection r;
 
   status = maCalcTwoTheta(machine->monochromator,qe.ki, 
 			  &angles->monochromator_two_theta);
@@ -568,8 +565,6 @@ int calcTasPowderAngles(ptasMachine machine, tasQEPosition qe,
 int calcTasPowderPosition(ptasMachine machine, tasAngles angles, 
 			  ptasQEPosition qe){
   
-  int status;
-
   qe->ki = maCalcK(machine->monochromator,angles.monochromator_two_theta);
   qe->kf = maCalcK(machine->analyzer,angles.analyzer_two_theta);
 
@@ -672,5 +667,6 @@ double getTasPar(tasQEPosition qe, int tasVar){
     break;
   default:
     assert(0);
+    return 0.0; // suppress compiler warning about return from non-void function
   }
 }

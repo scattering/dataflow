@@ -8,7 +8,7 @@
  */
 #ifndef SICSCELL
 #define SICSCELL
-#include "c:\ubmatrix\matrix\matrix.h"
+#include "matrix/matrix.h"
 
 /**
  * error codes

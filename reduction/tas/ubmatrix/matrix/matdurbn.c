@@ -40,7 +40,7 @@
 MATRIX mat_durbin( R )
 MATRIX R;
 {
-	int	i, i1, j, ji, p, n;
+	int	i, i1, j, ji, p;
 	MATRIX	W, E, K, A, X;
 
 	p = MatRow(R) - 1;

@@ -20,7 +20,7 @@
 #ifdef	__TURBOC__
 #include <alloc.h>
 #else
-#include <malloc.h>
+#include <stdlib.h>
 #endif
 
 #include "matrix.h"
@@ -39,8 +39,7 @@ MATRIX mat_inv( a )
 MATRIX a;
 {
 	MATRIX	A, B, C, P;
-	int	i, j, n;
-	double	temp;
+	int	i, n;
 
 	n = MatCol(a);
 	A = mat_copy(a);

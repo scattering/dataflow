@@ -20,7 +20,7 @@
 #ifdef	__TURBOC__
 #include <alloc.h>
 #else
-#include <malloc.h>
+#include <stdlib.h>
 #endif
 
 #include "matrix.h"
@@ -163,8 +163,7 @@ MATRIX mat_lsolve( a, b )
 MATRIX a, b;
 {
 	MATRIX	A, B, X, P;
-	int	i, n;
-	double	temp;
+	int	n;
 
 	n = MatCol(a);
 	A = mat_copy(a);

@@ -20,7 +20,7 @@
 #ifdef	__TURBOC__
 #include <alloc.h>
 #else
-#include <malloc.h>
+#include <stdlib.h>
 #endif
 
 #include "matrix.h"
@@ -29,7 +29,7 @@ MATRIX	_mat_creat( row, col )
 int row, col;
 {
 	MATBODY	*mat;
-	int 	i, j;
+	int 	i;
 
 	if ((mat = (MATBODY *)malloc( sizeof(MATHEAD) + sizeof(double *) * row)) == NULL)
 		return (mat_error( MAT_MALLOC ));

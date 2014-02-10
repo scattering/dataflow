@@ -14,6 +14,8 @@
 
 #ifndef SHUMATRIX
 #define SHUMATRIX
+
+#include <stdio.h>
 /*
 *-----------------------------------------------------------------------------
 *	internal matrix structure
