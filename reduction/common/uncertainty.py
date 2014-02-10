@@ -227,7 +227,7 @@ class Measurement(object):
 def _valvar(obj):
     try:
         return obj.x, getattr(obj, 'variance', 0)
-    except KeyError:
+    except AttributeError:
         return obj, 0
 
 def test():
