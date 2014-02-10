@@ -405,20 +405,21 @@ def verify_examples(source_file, tests, target_dir=None, seed=1):
         with push_seed(seed):
             actual = run_template(template, config, cache)
         target_path = join(target_dir, filename)
-        actual_path = join(tempfile.gettempdir(),filename)
+        actual_str = json.dumps(actual, sort_keys=True)
         if not exists(target_path):
             if not exists(dirname(target_path)):
                 os.makedirs(dirname(target_path))
             with open(target_path, 'wb') as fid:
-                json.dump(actual, fid, sort_keys=True)
+                fid.write(actual_str)
         else:
             with open(target_path, 'rb') as fid:
-                target = json.load(fid)
-            if not actual == target:
+                target_str = fid.read()
+            if not actual_str == target_str:
                 if not exists(dirname(actual_path)):
                     os.makedirs(dirname(actual_path))
+                actual_path = join(tempfile.gettempdir(),filename)
                 with open(actual_path, 'wb') as fid:
-                    json.dump(actual, fid, sort_keys=True)
+                    fid.write(actual_str)
                 errors.append("  %r does not match target %r"
                               % (actual_path, target_path))
     if errors:
