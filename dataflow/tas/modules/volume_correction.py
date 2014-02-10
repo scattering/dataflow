@@ -2,8 +2,12 @@
 For TripleAxis, volume correction
 """
 
+from reduction.tas import data_abstraction
+
 from ... import config
 from ...core import Module
+
+from ..datatypes import TAS_DATA, xtype
 
 def volume_correction_module(id=None, datatype=None, action=None,
                              version='0.0', fields={},
@@ -52,3 +56,18 @@ def volume_correction_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+
+def volume_correction_action(input, **kwargs):
+    for tasinstrument in input:
+        tasinstrument.xaxis = ''
+        tasinstrument.yaxis = ''
+        tasinstrument.resolution_volume_correction()
+    return dict(output=input)
+
+
+
+volume_correction = volume_correction_module(id='tas.volume_correction', datatype=TAS_DATA,
+                                            version='1.0', action=volume_correction_action, xtype=xtype,
+                                            filterModule=data_abstraction.TripleAxis.resolution_volume_correction)
+

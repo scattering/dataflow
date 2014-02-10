@@ -5,7 +5,7 @@ For TripleAxis, rebin
 from ... import config
 from ...core import Module
 
-def normalize_monitor_module(id=None, datatype=None, action=None,
+def rebin_module(id=None, datatype=None, action=None,
                              version='0.0', fields={},
                              description="Rebin TripleAxis data for plotting. ", **kwargs):
     """
@@ -13,8 +13,8 @@ def normalize_monitor_module(id=None, datatype=None, action=None,
     """
 
     icon = {
-        'URI': config.IMAGES + 'TAS/monitor_normalization.png',   #TODO make new icon
-        'image': config.IMAGES + 'TAS/monitor_normalization.png', #TODO make new icon
+        'URI': config.IMAGES + 'TAS/rebin.png',   #TODO make new icon
+        'image': config.IMAGES + 'TAS/rebin.png', #TODO make new icon
         'width': 'auto', 
         'terminals': {
             'input': (-12, 16, -1, 0),

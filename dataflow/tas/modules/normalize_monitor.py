@@ -2,8 +2,12 @@
 For TripleAxis, normalize monitor
 """
 
+from reduction.tas import data_abstraction
+
 from ... import config
 from ...core import Module
+
+from ..datatypes import TAS_DATA, xtype
 
 def normalize_monitor_module(id=None, datatype=None, action=None,
                              version='0.0', fields={},
@@ -58,3 +62,14 @@ def normalize_monitor_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+
+def normalize_monitor_action(input, target_monitor=None, **kwargs):
+    #Requires the target monitor value
+    data_abstraction.normalize_monitor(input, target_monitor)
+    return dict(output=input)
+
+
+normalize_monitor = normalize_monitor_module(id='tas.normalize_monitor', datatype=TAS_DATA,
+                                            version='1.0', action=normalize_monitor_action, xtype=xtype,
+                                            filterModule=data_abstraction.TripleAxis.normalize_monitor)

@@ -6,6 +6,8 @@ from a list of loaded TripleAxis objects.
 from ... import config
 from ...core import Module
 
+from ..datatypes import TAS_DATA
+
 def extract_module(id=None, datatype=None, action=None,
                 version='0.0', fields={},
                 description="Extract specific datasets", **kwargs):
@@ -60,3 +62,13 @@ def extract_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+def extract_action(input, data_objects=[], **kwargs):
+    """ isolates/extracts the given list of objects """
+    print "extracting", data_objects
+
+    return dict(output=data_objects)
+
+
+extract = extract_module(id='tas.extract', datatype=TAS_DATA,
+                         version='1.0', action=extract_action, fields=None)

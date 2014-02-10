@@ -1,9 +1,12 @@
 """
 For TripleAxis, detailed balance
 """
+from reduction.tas import data_abstraction
 
 from ... import config
 from ...core import Module
+
+from ..datatypes import TAS_DATA, xtype
 
 def detailed_balance_module(id=None, datatype=None, action=None,
                              version='0.0', fields={},
@@ -51,3 +54,16 @@ def detailed_balance_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+
+def detailed_balance_action(input, **kwargs):
+    for tasinstrument in input:
+        tasinstrument.xaxis = ''
+        tasinstrument.yaxis = ''
+        tasinstrument.detailed_balance()
+    return dict(output=input)
+
+
+detailed_balance = detailed_balance_module(id='tas.detailed_balance', datatype=TAS_DATA,
+                                           version='1.0', action=detailed_balance_action, xtype=xtype,
+                                           filterModule=data_abstraction.TripleAxis.detailed_balance)

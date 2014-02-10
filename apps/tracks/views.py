@@ -40,10 +40,10 @@ from dataflow.refl.instruments import PBR as PBR_INS
 print "PBR imported: ", PBR_INS.id
 
 # For reading in files and their metadata in the EditExperiment page
-from reduction.tripleaxis.data_abstraction import ncnr_filereader
-from reduction.tripleaxis.data_abstraction import chalk_filereader
-from reduction.tripleaxis.data_abstraction import hfir_filereader
-from reduction.tripleaxis.data_abstraction import TripleAxis
+from reduction.tas.data_abstraction import ncnr_filereader
+from reduction.tas.data_abstraction import chalk_filereader
+from reduction.tas.data_abstraction import hfir_filereader
+from reduction.tas.data_abstraction import TripleAxis
 
 # Used for segment interactor calculations
 from reduction.common import linegen

@@ -6,7 +6,7 @@ from django.utils import simplejson as json
 import numpy as np
 from bumps.parameter import Parameter, varying
 
-from reduction.tripleaxis import rebin2
+from reduction.tas import rebin2
 
 def plot(X,Y,theory,data,err):
     import pylab

@@ -2,8 +2,12 @@
 For TripleAxis, monitor correction
 """
 
+from reduction.tas import data_abstraction
+
 from ... import config
 from ...core import Module
+
+from ..datatypes import TAS_DATA, xtype
 
 def monitor_correction_module(id=None, datatype=None, action=None,
                              version='0.0', fields={},
@@ -58,3 +62,18 @@ def monitor_correction_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+
+def monitor_correction_action(input, instrument_name, **kwargs):
+    #Requires instrument name, e.g. 'BT7'.
+    #Check monitor_correction_coordinates.txt for available instruments
+    for tasinstrument in input:
+        tasinstrument.xaxis = ''
+        tasinstrument.yaxis = ''
+        tasinstrument.harmonic_monitor_correction(instrument_name)
+    return dict(ouput=input)
+
+
+monitor_correction = monitor_correction_module(id='tas.monitor_correction', datatype=TAS_DATA,
+                                               version='1.0', action=monitor_correction_action, xtype=xtype,
+                                               filterModule=data_abstraction.TripleAxis.harmonic_monitor_correction)

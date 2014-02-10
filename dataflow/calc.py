@@ -8,7 +8,6 @@ import sys, os
 from inspect import getsource
 import hashlib, types
 from copy import deepcopy
-import json
 
 import numpy as np
 
@@ -370,6 +369,7 @@ def verify_examples(source_file, tests, target_dir=None):
     """
     import tempfile
     import os
+    import json
     from os.path import join, exists, dirname
 
     # create a cache handler
@@ -402,6 +402,7 @@ def verify_examples(source_file, tests, target_dir=None):
         raise AssertionError("\n".join(errors))
 
 def run_example(template, config):
+    import json
     from . import wireit
 
     print 'template: ', json.dumps(wireit.template_to_wireit_diagram(template), indent=2)
@@ -409,12 +410,12 @@ def run_example(template, config):
 
     result = run_template(template, config, cache=memory_cache())
 
-    print 'result: ', result
-    #for key, value in result.items():
-    #    for output in value['output']:
-    #        if not isinstance(output, dict):
-    #            print key, 'plot: ', output.get_plottable()
-    #            pass
+    print 'result: ', json.dumps(result,indent=2)
+    for key, value in result.items():
+        for output in value.get('output',[]):
+            if not isinstance(output, dict):
+                #print key, 'plot: ', output.get_plottable()
+                pass
 
 
 # new methods that keep everything ordered

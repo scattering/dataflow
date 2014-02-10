@@ -2,8 +2,12 @@
 For TripleAxis, subtract
 """
 
+from reduction.tas import data_abstraction
+
 from ... import config
 from ...core import Module
+
+from ..datatypes import TAS_DATA, xtype
 
 def subtract_module(id=None, datatype=None, action=None,
                              version='0.0', fields={},
@@ -66,3 +70,22 @@ def subtract_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+
+def subtract_action(signal, background, scan_variable=None, **kwargs):
+    print "SUBTRACTING"
+    try:
+        scan_var = kwargs['fields']['scan_variable']['value']
+    except:
+        pass
+    subtractedtas = data_abstraction.subtract(signal, background, independent_variable=scan_variable)
+
+    # Could always set up x/y axes here based on the independent variable
+
+    return dict(output=[subtractedtas])
+
+
+subtract = subtract_module(id='tas.subtract', datatype=TAS_DATA, version='1.0',
+                           action=subtract_action, xtype=xtype, filterModule=data_abstraction.subtract)
+
+
