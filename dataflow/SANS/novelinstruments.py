@@ -9,8 +9,6 @@ from django.utils import simplejson as json
 #from reduction.sans.filters import div
 import reduction.sans.filters as red
 
-from apps.tracks.models import File
-
 from .. import wireit
 from .. import config
 from ..core import Data, Instrument, Template, register_instrument
@@ -60,6 +58,7 @@ def load_action(files=[], intent='', **kwargs):
     print "Result: ", result
     return dict(output=result)
 def _load_data(name):
+    from apps.tracks.models import File
     print name
     friendly_name = File.objects.get(name=name.split('/')[-1]).friendly_name
     if os.path.splitext(friendly_name)[1] == ".DIV":
@@ -165,7 +164,7 @@ def correct_detector_sensitivity_action(COR, DIV_in, **kwargs):
 correct_det_sens = correct_detector_sensitivity_module(
     id='sans.correct_detector_sensitivity', datatype=SANS_DATA, version='1.0',
     action=correct_detector_sensitivity_action, xtype=xtype,
-    filterModule=correct_detector_sensitivity)
+    filterModule=red.correct_detector_sensitivity)
 
 
 def convert_qxqy_action():
@@ -189,7 +188,7 @@ def absolute_scaling_action(DIV, empty, sensitivity, ins_name='',
 absolute = absolute_scaling_module(id='sans.absolute_scaling',
                                    datatype=SANS_DATA, version='1.0',
                                    action=absolute_scaling_action, xtype=xtype,
-                                   filterModule=absolute_scaling)
+                                   filterModule=red.absolute_scaling)
 
 def annular_av_action(ABS, **kwargs):
     correct = red.convert_q(ABS[0])
@@ -199,7 +198,7 @@ def annular_av_action(ABS, **kwargs):
     return dict(OneD=result)
 annul_av = annular_av_module(id='sans.annular_av', datatype=SANS_DATA,
                              version='1.0', action=annular_av_action,
-                             xtype=xtype, filterModule=annular_av)
+                             xtype=xtype, filterModule=red.annular_av)
 
 def correct_background_action(input=None, **kwargs):
     result = [red.correct_background(bundle[-1], bundle[0]) for bundle in input]
@@ -208,7 +207,7 @@ correct_back = correct_background_module(id='sans.correct_background',
                                          datatype=SANS_DATA, version='1.0',
                                          action=correct_background_action,
                                          xtype=xtype,
-                                         filterModule=correct_background)
+                                         filterModule=red.correct_background)
 
 #Instrument definitions
 SANS_NG3 = Instrument(id='ncnr.sans.ins',

@@ -46,6 +46,7 @@ class SansData(object):
        Tsam and Temp are just used for storage across modules (in wireit)
     """
     def __init__(self,data=None,metadata=None,q=None,qx=None,qy=None,theta=None,Tsam=None,Temp=None):
+        if data is None: data = []
         self.data=Measurement(data,data)
         self.metadata=metadata
         self.q=q #There are many places where q was not set, i think i fixed most, but there might be more; be wary
@@ -58,34 +59,70 @@ class SansData(object):
     # Note that I have not defined an inplace subtraction
     def __sub__(self,other):
         if isinstance(other,SansData):
-            return SansData(self.data-other.data,deepcopy(self.metadata),q=copy(self.q),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+            return SansData(self.data - other.data, deepcopy(self.metadata),
+                            q=copy(self.q), qx=copy(self.qx), qy=copy(self.qy),
+                            theta=copy(self.theta))
         else:
-            return SansData(data=self.data-other,metadata=deepcopy(self.metadata),q=copy(self.q),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+            return SansData(data=self.data - other,
+                            metadata=deepcopy(self.metadata), q=copy(self.q),
+                            qx=copy(self.qx), qy=copy(self.qy),
+                            theta=copy(self.theta))
     #Actual subtraction
     def __sub1__(self,other):
         if isinstance(other,SansData):
-            return SansData(self.data.x-other.data.x,deepcopy(self.metadata),q=copy(self.q),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+            return SansData(self.data.x - other.data.x, deepcopy(self.metadata),
+                            q=copy(self.q), qx=copy(self.qx), qy=copy(self.qy),
+                            theta=copy(self.theta))
         else:
-            return SansData(data=self.data.x-other.data.x,metadata=deepcopy(self.metadata),q=copy(self.q),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+            return SansData(data=self.data.x - other.data.x,
+                            metadata=deepcopy(self.metadata), q=copy(self.q),
+                            qx=copy(self.qx), qy=copy(self.qy),
+                            theta=copy(self.theta))
     def __add__(self,other):
         if isinstance(other,SansData):
-            return SansData(self.data.x+other.data.x,deepcopy(self.metadata),q=copy(self.q),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+            return SansData(self.data.x + other.data.x, deepcopy(self.metadata),
+                            q=copy(self.q), qx=copy(self.qx), qy=copy(self.qy),
+                            theta=copy(self.theta))
         else:
-            return SansData(data=self.data.x+other.data.x,metadata=deepcopy(self.metadata),q=copy(self.q),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+            return SansData(data=self.data.x + other.data.x,
+                            metadata=deepcopy(self.metadata), q=copy(self.q),
+                            qx=copy(self.qx), qy=copy(self.qy),
+                            theta=copy(self.theta))
+
     def __rsub__(self, other):
-        return SansData(data=other-self.data, metadata=deepcopy(self.metadata),q=copy(self.q),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
-    def __truediv__(self,other):
-        if isinstance(other,SansData):
-            return SansData(Measurement(*err1d.div(self.data.x,self.data.variance,other.data.x,other.data.variance)).x,deepcopy(self.metadata),q=copy(self.q),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+        return SansData(data=other - self.data,
+                        metadata=deepcopy(self.metadata), q=copy(self.q),
+                        qx=copy(self.qx), qy=copy(self.qy),
+                        theta=copy(self.theta))
+
+    def __truediv__(self, other):
+        if isinstance(other, SansData):
+            return SansData(Measurement(
+                *err1d.div(self.data.x, self.data.variance, other.data.x,
+                           other.data.variance)).x, deepcopy(self.metadata),
+                            q=copy(self.q), qx=copy(self.qx), qy=copy(self.qy),
+                            theta=copy(self.theta))
         else:
-            return SansData(data=Measurement(self.data.x/other, self.data.variance/other**2).x,metadata=deepcopy(self.metadata),q=copy(self.q),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
-    def __mul__(self,other):
-        if isinstance(other,SansData):
-            return SansData(Measurement(*err1d.mul(self.data.x,self.data.variance,other.data.x,other.data.variance)).x,deepcopy(self.metadata),q=copy(self.q),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
+            return SansData(data=Measurement(self.data.x / other,
+                                             self.data.variance / other ** 2).x,
+                            metadata=deepcopy(self.metadata), q=copy(self.q),
+                            qx=copy(self.qx), qy=copy(self.qy),
+                            theta=copy(self.theta))
+
+    def __mul__(self, other):
+        if isinstance(other, SansData):
+            return SansData(Measurement(
+                *err1d.mul(self.data.x, self.data.variance, other.data.x,
+                           other.data.variance)).x, deepcopy(self.metadata),
+                            q=copy(self.q), qx=copy(self.qx), qy=copy(self.qy),
+                            theta=copy(self.theta))
         else:
-            return SansData(data = self.data.__mul__(other).x,metadata=deepcopy(self.metadata),q=copy(self.q),qx=copy(self.qx),qy=copy(self.qy),theta=copy(self.theta))
-        
-    #def __str__(self):
+            return SansData(data=self.data.__mul__(other).x,
+                            metadata=deepcopy(self.metadata), q=copy(self.q),
+                            qx=copy(self.qx), qy=copy(self.qy),
+                            theta=copy(self.theta))
+
+            #def __str__(self):
         #return self.data.x.__str__()
     #def __repr__(self):
         #return self.__str__()
@@ -577,7 +614,8 @@ def convert_qxqy(sansdata):
     
 def annular_av(sansdata):
     """Using annular averging, it converts data to 1D (Q vs. I) """
-    #annular_mask_antialiased(shape, center, inner_radius, outer_radius, background_value=0.0, mask_value=1.0, oversampling=8)
+    # annular_mask_antialiased(shape, center, inner_radius, outer_radius,
+    # background_value=0.0, mask_value=1.0, oversampling=8)
     
     #x0=sansdata.metadata['det.beamx'] #should be close to 64
     #y0=sansdata.metadata['det.beamy'] #should be close to 64
@@ -631,10 +669,14 @@ def annular_av(sansdata):
     #plt.show()
     #sys.exit()
     return plot1
-    
-def absolute_scaling(sample,empty,DIV,Tsam,instrument,coord_left,coord_right): #data (that is going through reduction),empty beam, div, Transmission of the sample,instrument(NG3.NG5,NG7)
-    """Converts to an absolute intensity scale """
-   #ALL from metadata
+
+# data (that is going through reduction),empty beam, div, Transmission of
+# the sample,instrument(NG3.NG5,NG7)
+def absolute_scaling(sample,empty,DIV,Tsam,instrument,coord_left,coord_right):
+    """
+    Converts to an absolute intensity scale
+    """
+    #ALL from metadata
     detCnt = empty.metadata['run.detcnt']
     countTime = empty.metadata['run.ctime']
     monCnt = empty.metadata['run.moncnt']
@@ -655,7 +697,8 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument,coord_left,coord_right): #
     #Need attenTrans - AttenuationFactor - need to know whether NG3, NG5 or NG7 (acctStr)
     
     
-    #-----------------Reading in array from NG7 and NG5 .dat files (can be changed to .txt) which contain attenuation factors----------
+    # Reading in array from NG7 and NG5 .dat files  (can be changed to .txt)
+    # which contain attenuation factors
     #file = open("NG7.txt", "w") #w = write
     #file.write(repr(a))
     #file.close()
