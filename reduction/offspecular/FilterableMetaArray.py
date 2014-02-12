@@ -183,19 +183,19 @@ class FilterableMetaArray(MetaArray):
             lowest = 1e-10
             non_zeros = array_out[array_out > lowest]
             if len(non_zeros) > 0:
-                dims['zmin'] = non_zeros.min()
-                dims['zmax'] = non_zeros.max()
+                dims['zmin'] = float(non_zeros.min())
+                dims['zmax'] = float(non_zeros.max())
             else:
-                dims['zmin'] = lowest
-                dims['zmax'] = lowest
+                dims['zmin'] = float(lowest)
+                dims['zmax'] = float(lowest)
                 
             #dims['zmin'] = array_out.min()
             #dims['zmax'] = array_out.max()
             axis = ['x', 'y']
             for index, label in enumerate(axis):
                 arr = self._info[index]['values']
-                dims[axis[index] + 'min'] = arr.min()
-                dims[axis[index] + 'max'] = arr.max()
+                dims[axis[index] + 'min'] = float(arr.min())
+                dims[axis[index] + 'max'] = float(arr.max())
                 dims[axis[index] + 'dim'] = len(arr)
             xlabel = self._info[0]['name']
             ylabel = self._info[1]['name']
@@ -207,8 +207,7 @@ class FilterableMetaArray(MetaArray):
             dump.update( dict(type=plot_type, z=z, title=title, dims=dims, 
                         xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, 
                         transform=transform) )
-            
-            result.append(json.dumps(dump, sort_keys=True, indent=2))
+            result.append(json.dumps(dump, sort_keys=True))
         return ",".join(result)
     
     def get_plottable_binary(self):

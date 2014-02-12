@@ -1,6 +1,7 @@
 # -*- coding: latin-1 -*-
 import os, datetime, sys, types
 from copy import deepcopy
+import dateutil.parser
 import tempfile
 import subprocess
 from functools import wraps
@@ -18,6 +19,8 @@ from ..reflectometry.reduction.formats import load
 from ..reflectometry.reduction import rebin as reb
 
 from .FilterableMetaArray import FilterableMetaArray as MetaArray
+
+DEBUG=False
 
 class Supervisor():
     """ class to hold rebinned_data objects and increment their reference count """
@@ -811,8 +814,8 @@ class PixelsToTwotheta(Filter2D):
             other_vector = new_info[other_axis]['values']
             other_spacing = other_vector[1] - other_vector[0]
             pixels = new_info[pixel_axis]['values']
-            twoth = -1.0 * (pixels - qzero_pixel) / pixels_per_degree
-            twoth = twoth[::-1] # reverse
+            twoth = (pixels - qzero_pixel) / pixels_per_degree
+            #twoth = twoth[::-1] # reverse
             twoth_min = det_angle_min + twoth.min()
             twoth_max = det_angle_max + twoth.max()
             twoth_max_edge = twoth_max + 1.0 / pixels_per_degree
@@ -931,7 +934,7 @@ class Autogrid(Filter2D):
         absolute_max = []
         absolute_min = []
         for dim in range(dims):
-            dim_stepsize = dim_step[dim].max()
+            dim_stepsize = dim_step[dim].min()
             if dim_stepsize < min_step:
                 dim_stepsize = min_step
             final_stepsizes.append(dim_stepsize)
@@ -1237,6 +1240,149 @@ def LoadICPMany(filedescriptors):
             result.append(new_data)
     return result        
 
+DETECTOR_ACTIVE = (320, 340)
+
+def LoadMAGIKPSD(filename, path="", friendly_name="", collapse_y=True, auto_PolState=False, PolState='', flip=True, transpose=True, **kw):
+    """ 
+    loads a data file into a MetaArray and returns that.
+    Checks to see if data being loaded is 2D; if not, quits
+    
+    Need to rebin and regrid if the detector is moving...
+    """
+    lookup = {"DOWN_DOWN":"_down_down", "UP_DOWN":"_up_down", "DOWN_UP":"_down_up", "UP_UP":"_up_up", "entry": ""}
+    file_obj = h5py.File(filename)
+    file_obj = h5py.File(os.path.join(path, filename))
+    
+    #if not (len(file_obj.detector.counts.shape) == 2):
+        # not a 2D object!
+    #    return
+    for entryname in file_obj:
+        entry = file_obj[entryname]
+        active_slice = slice(None, DETECTOR_ACTIVE[0], DETECTOR_ACTIVE[1])
+        counts_value = entry['DAS_logs']['areaDetector']['counts'].value[:, :DETECTOR_ACTIVE[0], :DETECTOR_ACTIVE[1]]
+        dims = counts_value.shape
+        print dims
+        ndims = len(dims)
+        if auto_PolState:
+            PolState = lookup.get(entryname, "")
+        # force PolState to a regularized version:
+        if not PolState in lookup.values():
+            PolState = ''
+        #datalen = file_obj.detector.counts.shape[0]
+        if ndims == 2:
+            if DEBUG: print "2d"
+            ypixels = dims[0]
+            xpixels = dims[1]
+        elif ndims >= 3:
+            if DEBUG: print "3d"
+            frames = dims[0]
+            xpixels = dims[1]
+            ypixels = dims[2]
+        
+        creation_story = "LoadMAGIKPSD('{fn}', path='{p}')".format(fn=filename, p=path, aPS=auto_PolState, PS=PolState)
+
+        # doesn't really matter; changing so that each keyword (whether it took the default value
+        # provided or not) will be defined
+        #    if not PolState == '':
+        #        creation_story += ", PolState='{0}'".format(PolState)
+        # creation_story += ")" 
+    
+    
+        if ndims == 2: # one of the dimensions has been collapsed.
+            info = []     
+            info.append({"name": "xpixel", "units": "pixels", "values": arange(xpixels) }) # reverse order
+            info.append({"name": "theta", "units": "degrees", "values": entry['DAS_logs']['sampleAngle']['softPosition'].value })
+            info.extend([
+                    {"name": "Measurements", "cols": [
+                            {"name": "counts"},
+                            {"name": "pixels"},
+                            {"name": "monitor"},
+                            {"name": "count_time"}]},
+                    {"PolState": PolState, "filename": filename, "start_datetime": dateutil.parser.parse(file_obj.attrs.get('file_time')), "friendly_name": friendly_name,
+                     "CreationStory":creation_story, "path":path, "det_angle":entry['DAS_logs']['detectorAngle']['softPosition'].value}]
+                )
+            data_array = zeros((xpixels, ypixels, 4))
+            mon =  entry['DAS_logs']['counter']['liveMonitor'].value
+            count_time = entry['DAS_logs']['counter']['liveTime'].value
+            if ndims == 2:
+                mon.shape = (1,) + mon.shape # broadcast the monitor over the other dimension
+                count_time.shape = (1,) + count_time.shape
+            counts = counts_value
+            if transpose == True: counts = counts.swapaxes(0,1)
+            if flip == True: counts = flipud(counts)
+            data_array[..., 0] = counts
+            #data_array[..., 0] = file_obj.detector.counts
+            data_array[..., 1] = 1
+            data_array[..., 2] = mon
+            data_array[..., 3] = count_time
+            # data_array[:,:,4]... I wish!!!  Have to do by hand.
+            data = MetaArray(data_array, dtype='float', info=info)
+            data.friendly_name = friendly_name # goes away on dumps/loads... just for initial object.
+        
+        elif ndims == 3: # then it's an unsummed collection of detector shots.  Should be one sample and detector angle per frame
+            if collapse_y == True:
+                info = []     
+                info.append({"name": "xpixel", "units": "pixels", "values": arange(xpixels) }) # reverse order
+                info.append({"name": "theta", "units": "degrees", "values": entry['DAS_logs']['sampleAngle']['softPosition'].value })
+                info.extend([
+                        {"name": "Measurements", "cols": [
+                                {"name": "counts"},
+                                {"name": "pixels"},
+                                {"name": "monitor"},
+                                {"name": "count_time"}]},
+                        {"PolState": PolState, "filename": filename, "start_datetime": dateutil.parser.parse(file_obj.attrs.get('file_time')), "friendly_name": friendly_name,
+                         "CreationStory":creation_story, "path":path, "det_angle":entry['DAS_logs']['detectorAngle']['softPosition'].value}]
+                    )
+                data_array = zeros((xpixels, frames, 4))
+                mon =  entry['DAS_logs']['counter']['liveMonitor'].value
+                count_time = entry['DAS_logs']['counter']['liveTime'].value
+                if ndims == 3:
+                    mon.shape = (1,) + mon.shape # broadcast the monitor over the other dimension
+                    count_time.shape = (1,) + count_time.shape
+                counts = np.sum(counts_value, axis=2)
+                if transpose == True: counts = counts.swapaxes(0,1)
+                if flip == True: counts = flipud(counts)
+                data_array[..., 0] = counts
+                #data_array[..., 0] = file_obj.detector.counts
+                data_array[..., 1] = 1
+                data_array[..., 2] = mon
+                data_array[..., 3] = count_time
+                # data_array[:,:,4]... I wish!!!  Have to do by hand.
+                data = MetaArray(data_array, dtype='float', info=info)
+                data.friendly_name = friendly_name # goes away on dumps/loads... just for initial object.
+            else: # make separate frames           
+                infos = []
+                data = []
+                for i in range(frames):
+                    samp_angle = file_obj.sample.angle_x[i]
+                    det_angle = file_obj.detector.angle_x[i]
+                    info = []
+                    info.append({"name": "xpixel", "units": "pixels", "values": range(xpixels) })
+                    info.append({"name": "ypixel", "units": "pixels", "values": range(ypixels) })
+                    info.extend([
+                        {"name": "Measurements", "cols": [
+                                {"name": "counts"},
+                                {"name": "pixels"},
+                                {"name": "monitor"},
+                                {"name": "count_time"}]},
+                        {"PolState": PolState, "filename": filename, "start_datetime": file_obj.date, "friendly_name": friendly_name,
+                         "CreationStory":creation_story, "path":path, "samp_angle": samp_angle, "det_angle": det_angle}]
+                    )
+                    data_array = zeros((xpixels, ypixels, 4))
+                    mon = file_obj.monitor.counts[i]
+                    count_time = file_obj.monitor.count_time[i]
+                    counts = file_obj.detector.counts[i]
+                    if flip == True: counts = flipud(counts) 
+                    data_array[..., 0] = counts
+                    data_array[..., 1] = 1
+                    data_array[..., 2] = mon
+                    data_array[..., 3] = count_time
+                    # data_array[:,:,4]... I wish!!!  Have to do by hand.
+                    subdata = MetaArray(data_array, dtype='float', info=info)
+                    subdata.friendly_name = friendly_name + ("_%d" % i) # goes away on dumps/loads... just for initial object.
+                    data.append(subdata)
+    return data 
+
 def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolState='', flip=True, transpose=True, **kw):
     """ 
     loads a data file into a MetaArray and returns that.
@@ -1259,9 +1405,11 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
         PolState = ''
     #datalen = file_obj.detector.counts.shape[0]
     if ndims == 2:
+        if DEBUG: print "2d"
         ypixels = file_obj.detector.counts.shape[0]
         xpixels = file_obj.detector.counts.shape[1]
     elif ndims >= 3:
+        if DEBUG: print "3d"
         frames = file_obj.detector.counts.shape[0]
         ypixels = file_obj.detector.counts.shape[1]
         xpixels = file_obj.detector.counts.shape[2]
@@ -1277,7 +1425,7 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
     
     if ndims == 2: # one of the dimensions has been collapsed.
         info = []     
-        info.append({"name": "xpixel", "units": "pixels", "values": range(xpixels) }) # reverse order
+        info.append({"name": "xpixel", "units": "pixels", "values": arange(xpixels) }) # reverse order
         info.append({"name": "theta", "units": "degrees", "values": file_obj.sample.angle_x })
         info.extend([
                 {"name": "Measurements", "cols": [
@@ -1327,8 +1475,7 @@ def LoadICPData(filename, path="", friendly_name="", auto_PolState=False, PolSta
             data_array = zeros((xpixels, ypixels, 4))
             mon = file_obj.monitor.counts[i]
             count_time = file_obj.monitor.count_time[i]
-            counts = file_obj.detector.counts
-            if transpose == True: counts = counts.swapaxes(0,1)
+            counts = file_obj.detector.counts[i]
             if flip == True: counts = flipud(counts) 
             data_array[..., 0] = counts
             data_array[..., 1] = 1
