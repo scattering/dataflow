@@ -113,7 +113,7 @@ def nose(trees, args=[], docext='.rst', docpath='.'):
         if not '/' in t and not '.' in t:
             nose_args.append('--cover-package='+t)
     # Clear the coverage data before the first test
-    if _FIRST_TEST: nose_args += ['cover-erase']
+    if _FIRST_TEST: nose_args += ['--cover-erase']
     if docext:
         nose_args += [
             '--with-doctest', '--doctest-extension=%s'%docext,

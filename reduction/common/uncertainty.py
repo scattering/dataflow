@@ -32,32 +32,28 @@ class Measurement(object):
         x2,v2 = _valvar(other)
         if np.isscalar(v2) and not np.isscalar(x2):
             v2 = np.ones_like(x2)*v2
-        self.x = np.hstack((x1,x2))
-        self.variance = np.hstack((v1,v2))
+        return Measurement(np.hstack((x1,x2)), np.hstack((v1,v2)))
     def vstack(self,other):
         x1,v1 = _valvar(self)
         x2,v2 = _valvar(other)
         if np.isscalar(v2) and not np.isscalar(x2):
             v2 = np.ones_like(x2)*v2
-        self.x = np.vstack((x1,x2))
-        self.variance = np.hstack((v1,v2))
-    def _getdx(self):
-        return np.sqrt(self.variance)
-    def _setdx(self,dx):
-        # Direct operation
-        #    variance = dx**2
-        # Indirect operation to avoid temporaries
-        self.variance[:] = dx
-        self.variance **= 2
-    dx = property(_getdx,_setdx,doc="standard deviation")
+        return Measurement(np.vstack((x1,x2)), np.vstack((v1,v2)))
+    @property
+    def x(self): return self._x
+    @property
+    def variance(self): return self._variance
+    @property
+    def dx(self): return np.sqrt(self.variance)
+    #@dx.setter
+    #def dx(self,dx): self._variance = dx**2
 
     # Constructor
     def __init__(self, x, variance=0):
+        if variance is None: raise ValueError("variance is None")
         if np.isscalar(variance) and not np.isscalar(x):
-            temporary = variance
-            variance = np.empty_like(x)
-            variance[:] = temporary
-        self.x, self.variance = x, variance
+            variance = variance * np.ones_like(x)
+        self._x, self._variance = x, variance
 
     # Numpy array slicing operations
     def __len__(self):
@@ -65,11 +61,13 @@ class Measurement(object):
     def __getitem__(self, key):
         return Measurement(self.x[key], self.variance[key])
     def __setitem__(self, key, value):
-        self.x[key] = value.x
-        self.variance[key] = value.variance
+        x1,v1 = _valvar(self)
+        x2,v2 = _valvar(value)
+        x1[key] = x2
+        v1[key] = v2
     def __delitem__(self, key):
-        self.x=np.delete(self.x,key,0)
-        self.variance=np.delete(self.variance,key,0)
+        self._x = np.delete(self.x,key,0)
+        self._variance = np.delete(self.variance,key,0)
     #def __iter__(self): pass # Not sure we need iter
 
     # Normal operations: may be of mixed type
@@ -120,27 +118,28 @@ class Measurement(object):
     def __iadd__(self, other):
         x1,v1 = _valvar(self)
         x2,v2 = _valvar(other)
-        self.x,self.variance = err1d.add_inplace(x1,v1, x2,v2)
+        self._x,self._variance = err1d.add_inplace(x1,v1, x2,v2)
         return self
     def __isub__(self, other):
         x1,v1 = _valvar(self)
         x2,v2 = _valvar(other)
-        self.x,self.variance = err1d.sub_inplace(x1,v1, x2,v2)
+        self._x,self._variance = err1d.sub_inplace(x1,v1, x2,v2)
         return self
     def __imul__(self, other):
         x1,v1 = _valvar(self)
         x2,v2 = _valvar(other)
-        self.x,self.variance = err1d.mul_inplace(x1,v1, x2,v2)
+        self._x,self._variance = err1d.mul_inplace(x1,v1, x2,v2)
         return self
     def __itruediv__(self, other):
         x1,v1 = _valvar(self)
         x2,v2 = _valvar(other)
-        self.x,self.variance = err1d.div_inplace(x1,v1, x2,v2)
+        self._x,self._variance = err1d.div_inplace(x1,v1, x2,v2)
         return self
     def __ipow__(self, other):
         x1,v1 = _valvar(self)
         x2,v2 = _valvar(other)
-        self.x,self.variance = err1d.pow_inplace(x1,v1, x2,v2)
+        self._x,self._variance = err1d.pow_inplace(x1,v1, x2,v2)
+        return self
 
     # Use true division instead of integer division
     def __div__(self, other): return self.__truediv__(other)
@@ -161,7 +160,10 @@ class Measurement(object):
         if np.isscalar(self.x):
             return format_uncertainty(self.x,np.sqrt(self.variance))
         else:
-            return [format_uncertainty(v,dv) for v,dv in zip(self.x,np.sqrt(self.variance))]
+            parts = [str(Measurement(v,dv))
+                     for v,dv in zip(self.x,np.sqrt(self.variance))]
+            joined_parts = ", ".join(parts)
+            return "".join(("[",joined_parts,"]"))
     def __repr__(self):
         return "Measurement(%s,%s)"%(str(self.x),str(self.variance))
 
@@ -236,7 +238,6 @@ def test():
 
     # Scalar operations
     z = a+4
-    print z,z.variance
     assert z.x == 5+4 and z.variance == 3
     z = a-4
     assert z.x == 5-4 and z.variance == 3
@@ -293,6 +294,7 @@ def test():
     # Power operations
     y = a+0; y **= 4
     z = a**4
+    print y,z
     assert y.x == z.x and abs(y.variance-z.variance) < 1e-15
 
     # Binary operations

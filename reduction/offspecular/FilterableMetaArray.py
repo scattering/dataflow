@@ -4,7 +4,6 @@ from django.utils import simplejson as json
 from numpy import ndarray, array, fromstring, float32, ones, empty, newaxis, savetxt, sqrt
 
 from .MetaArray import MetaArray
-from . import filters
 
 class FilterableMetaArray(MetaArray):
     def __new__(*args, **kwargs):
@@ -13,6 +12,7 @@ class FilterableMetaArray(MetaArray):
         return subarr
     
     def filter(self, filtername, *args, **kwargs):
+        from . import filters
         return filters.__getattribute__(filtername)().apply(self, *args, **kwargs)
 
     

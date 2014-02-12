@@ -68,7 +68,7 @@ def log(X,varX):
 
 def sqrt(X,varX):
     """Sqrt with error propagation"""
-    return pow(X,varX,0.5)
+    return pow(X,varX,0.5,0)
 
 def arcsin(X,varX):
     """arcsin with error propagation"""
@@ -103,7 +103,7 @@ def cos(X,varX):
 def pow(X,varX, Y,varY):
     """x**y with error propagation"""
     Z = X**Y
-    varZ = ((Y/X)**2 * varX + np.log(X)**2 * varY) * Z**2
+    varZ = ((Y*Z/X)**2 * varX + (np.log(X)*Z)**2 * varY)
     return Z,varZ
 
 def constpow(X,varX, n):

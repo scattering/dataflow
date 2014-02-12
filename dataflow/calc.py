@@ -9,6 +9,7 @@ from inspect import getsource
 import hashlib, types
 from copy import deepcopy
 import contextlib
+import logging
 
 import numpy as np
 
@@ -69,7 +70,8 @@ def run_template(template, config, cache):
         module_id = node['module'] # template.modules[node]
         module = lookup_module(module_id)
         inputs = _map_inputs(module, wires)
-        
+        #logging.debug("inputs %s"%inputs)
+
         parents = template.get_parents(nodenum)
         # this is a list of wires that terminate on this module
         inputs_fp = []
@@ -78,34 +80,46 @@ def run_template(template, config, cache):
             target_nodenum, target_terminal_id = wire['target']
             input_fp = fingerprints[source_nodenum]
             inputs_fp.append([target_terminal_id, input_fp])
-            
+
         # substitute values for inputs
-        kwargs = dict((k, _lookup_results(all_results, v)) 
-                      for k, v in inputs.items())
-        
+        input_args = dict((k, _lookup_results(all_results, v))
+                          for k, v in inputs.items())
+        #logging.debug("inputs again %s"%inputs)
+        #logging.debug("updated inputs %s"%input_args)
+
         # Include configuration information
-        node_config= node.get('config', {})
-        node_config.update(config[nodenum])
-        kwargs.update(node_config)
-        
+        node_config= node.get('config', {})  # Template defaults
+        node_config.update(config[nodenum])  # Instance arguments
+        config_str = ", ".join("%s=%s"%(k,v) for k,v in sorted(node_config.items()))
+        wires = ", ".join("%s:%s"%(k,v) for k,v in sorted(inputs.items()))
+        if wires: config_str = "%s with %s"%(config_str, wires)
+        node_config.update(input_args)
+        #logging.debug("config %s"%node_config)
+
         # Fingerprinting
         fp = name_fingerprint(fingerprints[nodenum])
-        
+
+
         # Overwrite even if there was already the same reduction?
         if cache.exists(fp):# or module.name == 'Save':
+            logging.info("retrieving %s: %s %s"%(nodenum, module_id, config_str))
             result = {}
             for terminal in module.terminals:
                 if terminal['use'] == 'out':
                     cls = lookup_datatype(terminal['datatype']).cls
                     terminal_fp = name_terminal(fp, terminal['id'])
-                    result[terminal['id']] = [cls.loads(str) for str in cache.lrange(terminal_fp, 0, -1)]
+                    result[terminal['id']] = [cls.loads(s)
+                                              for s in cache.lrange(terminal_fp, 0, -1)]
         else:
-            result = module.action(**kwargs)
+            logging.info("executing %s: %s %s"%(nodenum, module_id, config_str))
+            result = module.action(**node_config)
+            logging.debug("result %s"%str(result))
             for terminal_id, res in result.items():
                 terminal_fp = name_terminal(fp, terminal_id)
                 for data in res:
                     cache.rpush(terminal_fp, data.dumps())
-            cache.set(fp, fp) # used for checking if the calculation exists; could wrap this whole thing with loop of output terminals
+            cache.set(fp, fp) # used for checking if the calculation exists;
+            # could wrap this whole thing with loop of output terminals
         all_results[nodenum] = result
     # retrieve plottable results
     ans = {}
@@ -118,8 +132,8 @@ def run_template(template, config, cache):
                 plottable[terminal_id] = cache.lrange(terminal_fp, 0, -1)
             else:
                 plottable[terminal_id] = convert_to_plottable(arr)
-                for str in plottable[terminal_id]:
-                    cache.rpush(terminal_fp, str)
+                for s in plottable[terminal_id]:
+                    cache.rpush(terminal_fp, s)
         ans[nodenum] = plottable
     return ans
 
@@ -141,7 +155,7 @@ def calc_single(template, config, nodenum, terminal_id, cache):
     if cache.exists(terminal_fp):
         print "retrieving cached value: " + terminal_fp
         cls = lookup_datatype(terminal['datatype']).cls
-        result = [cls.loads(str) for str in cache.lrange(terminal_fp, 0, -1)]
+        result = [cls.loads(s) for s in cache.lrange(terminal_fp, 0, -1)]
     else:
         # get inputs from parents
         print "no cached calc value: calculating..."
@@ -260,24 +274,23 @@ def fingerprint_template(template, config):
         # only taking configuration defined for this group number.
         #configuration.update(node.get('config', {}))
         node_config.update(config[nodenum])
-        print "configuration for fingerprint:", node_config
+        #print "configuration for fingerprint:", node_config
         
         # Fingerprinting
         fp = finger_print(module, node_config, index, inputs_fp) # terminals included
-        print nodenum, module, node_config, index, inputs_fp, fp
+        #print nodenum, module, node_config, index, inputs_fp, fp
         fingerprints[nodenum] = fp
         index += 1
     return fingerprints
 
 def _lookup_results(result, s):
-    # Hack to figure out if we have a bundle.  Fix this!
-    try:
-        return [result[n][t] for n, t in s]
-    except:
-        try:
-            return result[s[0]][s[1]]
-        except:
-            return None
+    try: node = result[s[0]]
+    except KeyError: raise KeyError("Could not find results for node %s"%s[0])
+    except TypeError:
+        return [result[n][t] for n,t in s]
+    try: return node[s[1]]
+    except KeyError: raise KeyError("Could not find terminal %r in %r for node %s"
+                                    %(s[1],node.keys(),s[0]))
 
 
 def _map_inputs(module, wires):
@@ -415,9 +428,9 @@ def verify_examples(source_file, tests, target_dir=None, seed=1):
             with open(target_path, 'rb') as fid:
                 target_str = fid.read()
             if not actual_str == target_str:
+                actual_path = join(tempfile.gettempdir(),filename)
                 if not exists(dirname(actual_path)):
                     os.makedirs(dirname(actual_path))
-                actual_path = join(tempfile.gettempdir(),filename)
                 with open(actual_path, 'wb') as fid:
                     fid.write(actual_str)
                 errors.append("  %r does not match target %r"
@@ -426,18 +439,20 @@ def verify_examples(source_file, tests, target_dir=None, seed=1):
         errors.insert(0, "When testing %r:"%source_file)
         raise AssertionError("\n".join(errors))
 
-def run_example(template, config, seed=None):
+def run_example(template, config, seed=None, verbose=False):
     import json
-    from . import wireit
 
-    print 'template: ', json.dumps(wireit.template_to_wireit_diagram(template),
-                                   sort_keys=True, indent=2)
-    print 'config: ', json.dumps(config, sort_keys=True, indent=2)
+    if verbose:
+        from . import wireit
+        print 'template: ', json.dumps(wireit.template_to_wireit_diagram(template),
+                                       sort_keys=True, indent=2)
+        print 'config: ', json.dumps(config, sort_keys=True, indent=2)
 
     with push_seed(seed):
         result = run_template(template, config, cache=memory_cache())
 
-    print 'result: ', json.dumps(result,sort_keys=True, indent=2)
+    if verbose:
+        print 'result: ', json.dumps(result,sort_keys=True, indent=2)
     for key, value in result.items():
         for output in value.get('output',[]):
             if not isinstance(output, dict):
@@ -478,16 +493,15 @@ def format_ordered(value):
         return value
 
 def convert_to_plottable(result):
-    print "Starting new converter"
+    #print "Starting new converter"
     return [data.get_plottable() for data in result]
     
 def convert_to_csv(result):
     if np.all([hasattr(data, 'get_csv') for data in result]):
-        print "Starting CSV converter"
-        print len(result)
+        #print "Starting CSV converter"
         return [data.get_csv() for data in result]
     else:
-        print "No CSV converter available for this datatype"
+        #print "No CSV converter available for this datatype"
         return [""]
     
 def name_fingerprint(fp):

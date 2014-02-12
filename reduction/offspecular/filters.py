@@ -18,7 +18,6 @@ from ..reflectometry.reduction.formats import load
 from ..reflectometry.reduction import rebin as reb
 
 from .FilterableMetaArray import FilterableMetaArray as MetaArray
-from .he3analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
 
 class Supervisor():
     """ class to hold rebinned_data objects and increment their reference count """
@@ -1537,6 +1536,7 @@ class AppendPolarizationMatrix(Filter2D):
         """ can use He3AnalyzerCollection in place of He3Analyzer...
         then calls to getNTRow(t) get automatically routed to the correct cell object
         """
+        from .he3analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
         #cell = self.supervisor.He3_cells[str(inData.cell_id)] # link to the cell object
         if he3cell == None:
             print "where is the He cell?"

@@ -33,7 +33,7 @@ def join_module(id=None, datatype=None, action=None,
              use='in',
              description='Data parts',
              required=False,
-             multiple=True,
+             multiple=False,
              ),
         dict(id='output',
              datatype=datatype,
@@ -98,7 +98,7 @@ def join_action(input, xaxis='', yaxis='', num_bins=0, xstep=None, ystep=None, *
     # and it is probably best if every filter just operates on and returns
     # bundles, which I do in this example.
 
-    print "JOINING"
+    #print "JOINING",input
     try:
         xaxis = kwargs['fields']['xaxis']['value']
         yaxis = kwargs['fields']['yaxis']['value']

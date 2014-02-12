@@ -79,28 +79,28 @@ def bt7_example():
     import reduction.tas
     DATA_ROOT = os.path.dirname(reduction.tas.__file__)
     modules = [
-        dict(module="tas.load", position=(10, 150), config={'files':[os.path.join(DATA_ROOT,'EscanQQ7HorNSF91831.bt7')]}),
-        dict(module="tas.normalize_monitor", position=(270, 20), config={'target_monitor': 165000}),
+        dict(module="tas.load", position=(10, 150), config={}),
+        dict(module="tas.normalize_monitor", position=(270, 20), config={}),
         dict(module="tas.detailed_balance", position=(270, 120), config={}),
-        dict(module="tas.monitor_correction", position=(270, 220), config={'instrument_name':'BT7'}),
+        dict(module="tas.monitor_correction", position=(270, 220),
+             config={'instrument_name':'BT7'}),
         dict(module="tas.volume_correction", position=(270, 320), config={}),
         dict(module="tas.save", position=(500, 150), config={}),
     ]
     wires = [
         dict(source=[0, 'output'], target=[1, 'input']),
-        #dict(source=[1, 'output'], target=[5, 'input']),
-        
-        dict(source=[0, 'output'], target=[2, 'input']),
-        #dict(source=[2, 'output'], target=[5, 'input']),
-        
-        dict(source=[0, 'output'], target=[3, 'input']),
-        #dict(source=[3, 'output'], target=[5, 'input']),
-        
-        dict(source=[0, 'output'], target=[4, 'input']),
+        dict(source=[1, 'output'], target=[2, 'input']),
+        dict(source=[2, 'output'], target=[3, 'input']),
+        dict(source=[3, 'output'], target=[4, 'input']),
         dict(source=[4, 'output'], target=[5, 'input']),
     ]
-    config = {}
-    
+
+    config = [
+        {'files':[os.path.join(DATA_ROOT,'EscanQQ7HorNSF91831.bt7')]},
+        {'target_monitor': 165000},
+        {}, {}, {}, {},
+    ]
+
     template = Template(name='test reduction presentation',
                         description='example reduction diagram',
                         modules=modules,
@@ -120,8 +120,8 @@ def spins_example():
         dict(source=[0, 'output'], target=[1, 'input']),
         dict(source=[1, 'output'], target=[2, 'input']),
     ]
-    config = {}
-    
+    config = [{}]*3
+
     template = Template(name='test reduction presentation',
                         description='example reduction diagram',
                         modules=modules,
@@ -134,15 +134,16 @@ def test():
     from ..calc import verify_examples
     tests = [
         ('bt7.out', bt7_example()),
-        ('spins.out', spins_example()),
+        #('spins.out', spins_example()),
     ]
     verify_examples(__file__, tests)
 
 def demo():
+    import logging; logging.basicConfig(level=logging.DEBUG)
     from .. import wireit
     from ..calc import run_example
-    print 'language', json.dumps(wireit.instrument_to_wireit_language(TAS), indent=2)
-    run_example(*bt7_example())
+    #print 'language', json.dumps(wireit.instrument_to_wireit_language(TAS), indent=2)
+    run_example(*bt7_example(), verbose=False)
     #run_example(*spins_example())
 
 if __name__ == "__main__":

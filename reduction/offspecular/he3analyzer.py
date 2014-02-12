@@ -2,9 +2,7 @@ import datetime, time
 import os, pickle
 from django.utils import simplejson as json
 
-import numpy as np
 from numpy import exp, zeros, array, empty
-import wx, wx.calendar
 
 class He3Analyzer:
     """ an object that contains information about a particular 3He cell, 
@@ -343,6 +341,8 @@ class He3AnalyzerCollection():
         return json.dumps({})
         #raise NotImplementedError("Write a get_plottable method for He3AnalyzerCollection")
 
+_ = '''
+import wx, wx.calendar
 class wxHe3AnalyzerCollection(He3AnalyzerCollection):
     """ version with wx GUI interaction for AddNew and getActiveCell """
     
@@ -544,4 +544,4 @@ class CellParamsDialog(wx.Dialog):
     def onExit(self, event):
         self.Close(True)
     
-    
+'''

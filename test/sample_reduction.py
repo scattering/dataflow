@@ -3,6 +3,7 @@ Example to show how to create and run a dataflow reduction routine.
 """
 import os, math
 import json
+import logging
 
 from numpy.random import random
 
@@ -105,7 +106,7 @@ def _data_randomize(data, max_change):
 # the actual "action" for the rand module
 def random_action(input=None, max_change=None):
     """Action that adds or subtracts random values under a given limit."""
-    print "randomize <=", max_change
+    #print "randomize <=", max_change
     flat = []
     # operate on a bundle rather than individual input
     # because the multiple field is True
@@ -119,7 +120,7 @@ rand = random_module(id='rowan.random', datatype=ROWAN_DATA,
 
 def load_action(files=None, intent=None):
     """Loads files for data manipulation"""
-    print "loading", files
+    #print "loading", files
     result = [load_data(f) for f in files]
     return dict(output=result)
 load = load_module(id='rowan.load', datatype=ROWAN_DATA,
@@ -133,7 +134,7 @@ def _save_one(input, ext):
     outname = input.name
     if ext is not None:
         outname = ".".join([os.path.splitext(outname)[0], ext])
-    print "saving", input.name, 'as', outname
+    logging.info("saving %r as %r"%(input.name, outname))
     save_data(input, name=outname)
 save = save_module(id='rowan.save', datatype=ROWAN_DATA,
                    version='1.0', action=save_action)
@@ -213,10 +214,10 @@ def test():
                          )
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     import json
     from dataflow import calc
     from dataflow.wireit import instrument_to_wireit_language as wlang
-    print("=== Language ===")
-    json.dumps(wlang(ROWAN26), indent=2)
+    #print "=== Language ===\n", json.dumps(wlang(ROWAN26), indent=2)
     calc.run_example(*sample_diagram())
 

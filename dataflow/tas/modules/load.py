@@ -64,7 +64,8 @@ def _load_data(name):
 
 def load_action(files=[], intent=None, position=None, xtype=None, **kwargs):
     """ was set up to load ONLY 1 file... might work for bundles now """
-    print "loading", files
+    #print "loading", files
+    if not files: raise ValueError("No TAS files to load")
     result = []
     for i, f in enumerate(files):
         subresult = _load_data(f)

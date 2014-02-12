@@ -71,7 +71,7 @@ def monitor_correction_action(input, instrument_name, **kwargs):
         tasinstrument.xaxis = ''
         tasinstrument.yaxis = ''
         tasinstrument.harmonic_monitor_correction(instrument_name)
-    return dict(ouput=input)
+    return dict(output=input)
 
 
 monitor_correction = monitor_correction_module(id='tas.monitor_correction', datatype=TAS_DATA,

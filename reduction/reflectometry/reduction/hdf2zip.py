@@ -2,28 +2,20 @@ import sys
 import os
 import zipfile
 import tempfile
-from django.utils import simplejson as json
+import json
 
 from numpy import savetxt, max, min
 import h5py
 
-file_in = sys.argv[1]
-file_out = file_in + '.zip'
-
-def make_dir(path):
-    os.mkdir(path)
-
-join_path = os.path.join
-
 def make_metadata(obj, path=''):
     metadata = {}
     for key in obj.keys():
-        new_path = join_path(path, key)
+        new_path = os.path.join(path, key)
         newitem = dict(obj[key].attrs)
         if isinstance(obj[key], h5py.Group):
             newitem['members'] = make_metadata(obj[key], new_path)
         else:
-            fname = join_path(path, key+'.dat')
+            fname = os.path.join(path, key+'.dat')
             if max(obj[key].shape) <= 1:
                 newitem['value'] = obj[key].value.tolist()
         metadata[key] = newitem
@@ -31,11 +23,11 @@ def make_metadata(obj, path=''):
 
 def to_zipfile(obj, zipfile, path=''):
     for key in obj.keys():
-        new_path = join_path(path, key)
+        new_path = os.path.join(path, key)
         if isinstance(obj[key], h5py.Group):
             to_zipfile(obj[key], zipfile, new_path)
         else:
-            fname = join_path(path, key+'.dat')
+            fname = os.path.join(path, key+'.dat')
             # some members are empty... skip them.
             if sum(obj[key].shape) == 0:
                 continue

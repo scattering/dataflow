@@ -15,12 +15,7 @@ import numpy as np
 
 # Try using precompiled matrix loader
 try:
-    if struct.calcsize("P") * 8 == 64:
-        import _reduction
-        reductionpkg = _reduction
-    else:
-        import reduction32bit._reduction # 32 bit
-        reductionpkg = reduction32bit._reduction
+    from reflred import _reduction
     def parsematrix(s, shape=None, linenum=0):
         """
         Parse a string into a matrix.  Provide a shape parameter if you
@@ -29,14 +24,14 @@ try:
         if shape != None:
             # Have an existing block, so we know what size to allocate
             z = np.empty(shape, 'i')
-            i, j = reductionpkg.str2imat(s, z)
+            i, j = _reduction.str2imat(s, z)
             if i * j != z.size:
                 raise IOError, "Inconsistent dims at line %d" % linenum
         else:
             # No existing block.  Worst case is 2 bytes per int.
             n = int(len(s) / 2 + 1)
             z = np.empty(n, 'i')
-            i, j = reductionpkg.str2imat(s, z)
+            i, j = _reduction.str2imat(s, z)
             # Keep the actual size
             if i == 1 or j == 1:
                 z = z[:i * j].reshape(i * j)
@@ -584,7 +579,7 @@ def data(filename):
 def message(text): pass
 def question(text): return True
 
-def copy_test():
+def copy_demo():
     if len(sys.argv) < 2:
         print "usage: python icpformat.py file"
         sys.exit()
@@ -641,4 +636,4 @@ def plot_demo():
 if __name__ == '__main__':
     plot_demo()
     #demo()
-    #copy_test()
+    #copy_demo()

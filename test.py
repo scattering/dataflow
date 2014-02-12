@@ -17,4 +17,5 @@ del sys.path[0]
 
 # rh.build()  # uncomment if program has compiled components
 rh.build('reduction/tas/ubmatrix')
-rh.nose(['reduction', 'dataflow', 'test/sample_reduction.py'])
+rh.build('../reduction') # reflectometry reduction
+rh.nose(['reduction', 'dataflow', 'test/sample_reduction.py'], docext=None)

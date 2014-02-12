@@ -109,25 +109,21 @@ class Component(object):
     accessed from measurement.x, measurement.dx
     """
 
-    def _getx(self): return self.measurement.x
+    def _getx(self):
+        return self.measurement.x
     def _setx(self, x): 
         self.measurement.x = x
-    def _get_variance(self): return self.measurement.variance
+    def _get_variance(self):
+        return self.measurement.variance
     def _set_variance(self, variance):
         self.measurement.variance = variance
-    def _getdx(self): 
-        if self.variance == None:
-            return self.variance
-        return np.sqrt(self.variance)                
+    def _getdx(self):
+        return self.measurement.dx
     def _setdx(self, dx):
-        # Direct operation
-        #    variance = dx**2
-        # Indirect operation to avoid temporaries
-        self.variance[:] = dx
-        self.variance **= 2
-    x = property(_getx, _setx, doc='value')
-    variance = property(_get_variance, _set_variance, doc='variance')
-    dx = property(_getdx, _setdx, doc="standard deviation")
+        self.measurment.dx = dx
+    #x = property(_getx, _setx, doc='value')
+    #variance = property(_get_variance, _set_variance, doc='variance')
+    #dx = property(_getdx, _setdx, doc="standard deviation")
 
     #Out of laziness, I am defining properties of x, variance, and dx, but these only effect
     #the measurement objects attributes.  However, people should do operations on the motor object
@@ -138,216 +134,33 @@ class Component(object):
         self.units = units
         #self.values=data
         #self.err=err
-        self.measurement = uncertainty.Measurement(values, err ** 2)
+        self.measurement = uncertainty.Measurement(values, err**2)
     # np array slicing operations
     def __len__(self):
-        return len(self.x)
-    def __getitem__(self, key):
-        if self.variance:
-            return uncertainty.Measurement(self.x[key], self.variance[key])
-        else:
-            return uncertainty.Measurement(self.x[key], None)
-
-    def __setitem__(self, key, value):
-        self.x[key] = value.x
-        self.variance[key] = value.variance
-    def __delitem__(self, key):
-        del self.x[key]
-        del self.variance[key]
-    #def __iter__(self): pass # Not sure we need iter
-
-    # Normal operations: may be of mixed type
-    #def __add__(self, other):
-        #if isinstance(other,uncertainty.Measurement):
-            #return uncertainty.Measurement(*err1d.add(self.x,self.variance,other.x,other.variance))
-        #else:
-            #return uncertainty.Measurement(self.x+other, self.variance+0) # Force copy
-    #def __sub__(self, other):
-        #if isinstance(other,uncertainty.Measurement):
-            #return uncertainty.Measurement(*err1d.sub(self.x,self.variance,other.x,other.variance))
-        #else:
-            #return uncertainty.Measurement(self.x-other, self.variance+0) # Force copy
-    #def __mul__(self, other):
-        #if isinstance(other,uncertainty.Measurement):
-            #if (not self.variance is None) and not (other.variance is None):
-                #return uncertainty.Measurement(*err1d.mul(self.x,self.variance,other.x,other.variance))
-            #else:
-                #return uncertainty.Measurement(self.x*other.x,None)
-        #else:
-            #if (not self.variance is None) and not (other.variance is None):
-                #return uncertainty.Measurement(self.x*other, self.variance*other**2)
-            #else:
-                #return uncertainty.Measurement(self.x*other.x,None)
-    #def __truediv__(self, other):
-        #if isinstance(other,uncertainty.Measurement):
-            #if (not self.variance is None) and not (other.variance is None):
-                #return uncertainty.Measurement(*err1d.div(self.x,self.variance,other.x,other.variance))
-            #else:
-                #return uncertainty.Measurement(self.x/other.x,None)
-        #else:
-            #if (not self.variance is None) and not (other.variance is None):
-                #return uncertainty.Measurement(self.x/other, self.variance/other**2)
-            #else:
-                #return uncertainty.Measurement(self.x/other, None)
-
-    #def __pow__(self, other):
-        #if isinstance(other,uncertainty.Measurement):
-            ## Haven't calcuated variance in (a+/-da) ** (b+/-db)
-            #return NotImplemented
-        #else:
-            #if (not self.variance is None) and not (other.variance is None):
-                #return uncertainty.Measurement(*err1d.pow(self.x,self.variance,other))
-            #else:
-                #return uncertainty.Measurement(self.x**other,None)
-
-    ## Reverse operations
-    #def __radd__(self, other):
-        #return uncertainty.Measurement(self.x+other, self.variance+0) # Force copy
-    #def __rsub__(self, other):
-        #return uncertainty.Measurement(other-self.x, self.variance+0)
-    #def __rmul__(self, other):
-        #if (not self.variance is None) and not (other.variance is None):
-            #return uncertainty.Measurement(self.x*other, self.variance*other**2)
-        #else:
-            #return uncertainty.Measurement(self.x*other, None)
-    #def __rtruediv__(self, other):
-        #x,variance = err1d.pow(self.x,self.variance,-1)
-        #return uncertainty.Measurement(x*other,variance*other**2)
-    #def __rpow__(self, other): return NotImplemented
-
-    ## In-place operations: may be of mixed type
-    #def __iadd__(self, other):
-        #if isinstance(other,uncertainty.Measurement):
-            #self.x,self.variance \
-                #= err1d.add_inplace(self.x,self.variance,other.x,other.variance)
-        #else:
-            #self.x+=other
-        #return self
-    #def __isub__(self, other):
-        #if isinstance(other,uncertainty.Measurement):
-            #self.x,self.variance \
-                #= err1d.sub_inplace(self.x,self.variance,other.x,other.variance)
-        #else:
-            #self.x-=other
-        #return self
-    #def __imul__(self, other):
-        #if isinstance(other,uncertainty.Measurement):
-            #self.x, self.variance \
-                #= err1d.mul_inplace(self.x,self.variance,other.x,other.variance)
-        #else:
-            #self.x *= other
-            #self.variance *= other**2
-        #return self
-    #def __itruediv__(self, other):
-        #if isinstance(other,uncertainty.Measurement):
-            #self.x,self.variance \
-                #= err1d.div_inplace(self.x,self.variance,other.x,other.variance)
-        #else:
-            #self.x /= other
-            #self.variance /= other**2
-        #return self
-    #def __ipow__(self, other):
-        #if isinstance(other,uncertainty.Measurement):
-            ## Haven't calcuated variance in (a+/-da) ** (b+/-db)
-            #return NotImplemented
-        #else:
-            #self.x,self.variance = err1d.pow_inplace(self.x, self.variance, other)
-        #return self
-
-    ## Use true division instead of integer division
-    #def __div__(self, other): return self.__truediv__(other)
-    #def __rdiv__(self, other): return self.__rtruediv__(other)
-    #def __idiv__(self, other): return self.__itruediv__(other)
-
-
-    ## Unary ops
-    #def __neg__(self):
-        #return uncertainty.Measurement(-self.x,self.variance)
-    #def __pos__(self):
-        #return self
-    #def __abs__(self):
-        #return uncertainty.Measurement(np.abs(self.x),self.variance)
-
+        return len(self.measurement)
+    #def __getitem__(self, key):
+    #    return self.measurement[key]
+    #def __setitem__(self, key, value):
+    #    self.measurement[key] = value
+    #def __delitem__(self, key):
+    #    del self.measurement[key]
     def __str__(self):
+        return str(self.measurment)
         #return str(self.x)+" +/- "+str(np.sqrt(self.variance))
-        if np.isscalar(self.x):
-            return format_uncertainty(self.x, np.sqrt(self.variance))
-        else:
-            Nx = self.x.shape[0]
-            try:
-                Ny = self.x.shape[1]
-            except IndexError:
-                Ny = 1
-            res = []
-            if len(self.x.shape) == 3:
-                for ny in range(Ny):
-                    for nx in range(Nx):
-                        res.append([format_uncertainty(v, dv) for v, dv in zip(self.x[:, nx, ny], np.sqrt(self.variance[:, nx, ny]))])
-            else:
-                for nx in range(Nx):
-                    if not self.variance is None:
-                        res.append([format_uncertainty(v, dv) for v, dv in zip(self.x, None)])
-                    else:
-                        for nx in range(Nx):
-                            res.append(format_uncertainty(self.x[nx], None))                                                
-
-            return np.array(res).T.__repr__()
     def __repr__(self):
-        return "Measurement(%s,%s)" % (str(self.x), str(self.variance))
+        return repr(self.measurement)
 
-    # Not implemented
-    def __floordiv__(self, other): return NotImplemented
-    def __mod__(self, other): return NotImplemented
-    def __divmod__(self, other): return NotImplemented
-    def __mod__(self, other): return NotImplemented
-    def __lshift__(self, other): return NotImplemented
-    def __rshift__(self, other): return NotImplemented
-    def __and__(self, other): return NotImplemented
-    def __xor__(self, other): return NotImplemented
-    def __or__(self, other): return NotImplemented
 
-    def __rfloordiv__(self, other): return NotImplemented
-    def __rmod__(self, other): return NotImplemented
-    def __rdivmod__(self, other): return NotImplemented
-    def __rmod__(self, other): return NotImplemented
-    def __rlshift__(self, other): return NotImplemented
-    def __rrshift__(self, other): return NotImplemented
-    def __rand__(self, other): return NotImplemented
-    def __rxor__(self, other): return NotImplemented
-    def __ror__(self, other): return NotImplemented
+    #def log(self):
+    #    return uncertainty.Measurement(*err1d.log(self.x, self.variance))
 
-    def __ifloordiv__(self, other): return NotImplemented
-    def __imod__(self, other): return NotImplemented
-    def __idivmod__(self, other): return NotImplemented
-    def __imod__(self, other): return NotImplemented
-    def __ilshift__(self, other): return NotImplemented
-    def __irshift__(self, other): return NotImplemented
-    def __iand__(self, other): return NotImplemented
-    def __ixor__(self, other): return NotImplemented
-    def __ior__(self, other): return NotImplemented
-
-    def __invert__(self): return NotImplemented  # For ~x
-    def __complex__(self): return NotImplemented
-    def __int__(self): return NotImplemented
-    def __long__(self): return NotImplemented
-    def __float__(self): return NotImplemented
-    def __oct__(self): return NotImplemented
-    def __hex__(self): return NotImplemented
-    def __index__(self): return NotImplemented
-    def __coerce__(self): return NotImplemented
-
-    def log(self):
-        return uncertainty.Measurement(*err1d.log(self.x, self.variance))
-
-    def exp(self):
-        return uncertainty.Measurement(*err1d.exp(self.x, self.variance))
+    #def exp(self):
+    #    return uncertainty.Measurement(*err1d.exp(self.x, self.variance))
 
 def err_check(values, err):
-    if err == None:
-        measurement = uncertainty.Measurement(values, err)
-    else:
-        measurement = uncertainty.Measurement(values, err ** 2)
-    return measurement
+    if err == None: err = 0
+    if values == None: values = []
+    return uncertainty.Measurement(values, err)
 
 
 class Motor(Component):
@@ -776,6 +589,7 @@ class TripleAxis(object):
             #for i in range(0,len(detector.measurement.x)):
             #        detector.measurement[i]=detector.measurement[i]*mon0[i]/monitor
         return
+
     def harmonic_monitor_correction(self, instrument_name):
         """Multiplies the monitor correction through all of the detectors in the Detector_Sets."""
         #Use for constant-Q scans with fixed scattering energy, Ef.
@@ -785,14 +599,11 @@ class TripleAxis(object):
         coord_file = os.path.join(os.path.dirname(__file__),
                                   'monitor_correction_coordinates.txt')
         coefficients = establish_correction_coefficients(coord_file)
-        M = coefficients[instrument_name]
-        for i in range(0, len(M)):
-            M[i] = float(M[i])
-        #TODO - Throw error if there's an improper instrument_name given
+        M = [float(v) for v in coefficients[instrument_name]]
+        Ei = self.physical_motors.ei.measurement
+        correction = ((((M[4]*Ei + M[3]) * Ei + M[2]) * Ei + M[1]) * Ei + M[0])
         for detector in self.detectors:
-            Eii = self.physical_motors.ei.measurement
-            detector.measurement = detector.measurement * (M[0] + M[1] * Eii + M[2] * Eii ** 2 + M[3] * Eii ** 3 + M[4] * Eii ** 4)
-        return
+            detector.measurement *= correction
 
     def resolution_volume_correction(self):
         """Correct constant Q-scans with fixed incident energy, Ei, for the fact that the resolution volume changes
@@ -827,24 +638,24 @@ class TripleAxis(object):
         ordery = []
         data = {}
         plottable_data = {}
-        print repr(self.xaxis) + " " + repr(self.yaxis) + " " + repr(self.num_bins) + \
-              repr(self.xstep) + " " + repr(self.ystep)
-        print self.__dict__.keys()
+        #print repr(self.xaxis) + " " + repr(self.yaxis) + " " + repr(self.num_bins) + \
+        #      repr(self.xstep) + " " + repr(self.ystep)
+        #print self.__dict__.keys()
         if self.xaxis != '' and self.yaxis != '':
-            print "2d plotting"
+            #print "2d plotting"
             xarr = None
             yarr = None
             for key, value in self.__dict__.iteritems():
                 try:
                     if xarr == None:
                         xarr = getattr(value, self.xaxis).measurement.x
-                        print key + '.' + self.xaxis
+                        #print key + '.' + self.xaxis
                 except:
                     pass
                 try:
                     if yarr == None:
                         yarr = getattr(value, self.yaxis).measurement.x
-                        print key + '.' + self.yaxis 
+                        #print key + '.' + self.yaxis
                 except:
                     pass
             _ = '''
@@ -854,7 +665,7 @@ class TripleAxis(object):
             ystart = yarr.min()
             yfinal = yarr.max()
             ystep  = 1.0 * (yfinal - ystart) / len(yarr)
-            print "done with steps"
+            #print "done with steps"
 
             xi = np.arange(xstart, xfinal, xstep)
             yi = np.arange(ystart, yfinal, ystep)
@@ -896,11 +707,11 @@ class TripleAxis(object):
                 'ylabel': self.yaxis,
                 'zlabel': 'Intensity (I)',
             }
-            print plottable_data['dims']
-            print "done plotting"
+            #print plottable_data['dims']
+            #print "done plotting"
 
         else:
-            print "nd plotting"
+            #print "nd plotting"
             has_null_first = True
             for key, value in self.__dict__.iteritems():
                 if key == 'detectors':
@@ -936,7 +747,7 @@ class TripleAxis(object):
                     #ignoring these data fields for plotting
                     pass	
                 else:
-                    print value
+                    #print value
                     for field in value:
                         if has_null_first and not field.measurement.x == None:
                             orderx.insert(0, {'key': field.name, 'label': field.name})
@@ -1335,44 +1146,34 @@ def translate_physical_motors(tas, dataset):
     translate_dict['e'] = 'e'
     map_motors(translate_dict, tas, tas.physical_motors, dataset)
     #map_motors(translate_dict,bt7.physical_motors,dataset)
-    
-    try:
-        if dataset.metadata['efixed'] == 'ei':
-            tas.physical_motors.ei.measurement.x = np.ones(np.array(dataset.data['e']).shape) * dataset.metadata['ei']
-            tas.physical_motors.ei.measurement.variance = None
-            tas.physical_motors.ef = tas.physical_motors.ei.measurement - tas.physical_motors.e.measurement
-            #our convention is that Ei=Ef+delta_E (aka omega)
-        else:
-            tas.physical_motors.ef.measurement.x = np.ones(np.array(dataset.data['e']).shape) * dataset.metadata['ef']
-            tas.physical_motors.ef.measurement.variance = None
-            tas.physical_motors.ei.measurement.x = tas.physical_motors.ef.measurement.x + tas.physical_motors.e.measurement.x  #punt for now, later should figure out what to do if variance is None
-    except:
-        pass
-    try:
-        Ei = tas.physical_motors.ei.measurement
-        Ef = tas.physical_motors.ef.measurement
-        A4 = tas.primary_motors.sample_two_theta.measurement
-        Qsquared = (Ei + Ef - 2 * (Ei * Ef).sqrt()*(A4 / 2).cos()) / 2.072
-        Q = Qsquared.sqrt()
-        tas.physical_motors.q.measurement = Q
-    except:
-        #Some data files, e.g. summer school spins files, do not have a1-a6
-        pass
-    try:
-        o1temp = tas.sample.orientation.orient1
-        o2temp = tas.sample.orientation.orient2
-        o1 = np.array([o1temp['h'], o1temp['k'], o1temp['l']])
-        o2 = np.array([o2temp['h'], o2temp['k'], o2temp['l']])
-        o1, o2, o3 = make_orthonormal(o1, o2)
 
-        setattr(tas.physical_motors.orient1, 'value', o1)
-        setattr(tas.physical_motors.orient2, 'value', o2)
-        setattr(tas.physical_motors.orient3, 'value', o3)
-        #TODO - make 'fancy' names for these?
-        #setattr(bt7.physical_motors.orient3, 'name', '110')
+    deltaE = np.asarray(dataset.data['e'],'d')
+    #our convention is that Ei=Ef+delta_E (aka omega)
+    if dataset.metadata['efixed'] == 'ei':
+        Ei = uncertainty.Measurement(np.ones_like(deltaE) * dataset.metadata['ei'])
+        Ef = Ei - deltaE
+    else:
+        Ef = uncertainty.Measurement(np.ones_like(deltaE) * dataset.metadata['ef'])
+        Ei = Ef + deltaE
+    tas.physical_motors.ei.measurement = Ei
+    tas.physical_motors.ef.measurement = Ef
+    A4 = tas.primary_motors.sample_two_theta.measurement
+    Qsquared = (Ei + Ef - 2 * (Ei * Ef).sqrt()*(A4 / 2).cos()) / 2.072
+    Q = Qsquared.sqrt()
+    tas.physical_motors.q.measurement = Q
 
-    except:
-        pass
+    o1temp = tas.sample.orientation.orient1
+    o2temp = tas.sample.orientation.orient2
+    o1 = np.array([o1temp['h'], o1temp['k'], o1temp['l']])
+    o2 = np.array([o2temp['h'], o2temp['k'], o2temp['l']])
+    o1, o2, o3 = make_orthonormal(o1, o2)
+
+    setattr(tas.physical_motors.orient1, 'value', o1)
+    setattr(tas.physical_motors.orient2, 'value', o2)
+    setattr(tas.physical_motors.orient3, 'value', o3)
+    #TODO - make 'fancy' names for these?
+    #setattr(bt7.physical_motors.orient3, 'name', '110')
+
     #translate_dict['h']='h'
     #translate_dict['k']='k'
     #translate_dict['l']='l'
@@ -1516,18 +1317,15 @@ def translate_metadata(tas, dataset):
     tas.friendly_name = tas.meta_data.filename
 
 def translate_detectors(tas, dataset):
-    try:
-        tas.detectors.primary_detector.measurement.x = np.array(dataset.data['detector'], 'Float64')
-        tas.detectors.primary_detector.measurement.variance = np.array(dataset.data['detector'], 'Float64')
-    except:
-        tas.detectors.primary_detector.measurement.x = np.array(dataset.data['counts'], 'Float64')
-        tas.detectors.primary_detector.measurement.variance = np.array(dataset.data['counts'], 'Float64')	
 
-    tas.detectors.primary_detector.dimension = [len(tas.detectors.primary_detector.measurement.x), 1]
-    try:
-        tas.detectors.detector_mode = dataset.metadata['analyzerdetectormode']
-    except:
-        pass
+    try: x = dataset.data['detector']
+    except: x = data.data['counts']
+    x = np.asarray(x,'d')
+    v = x[:]
+    tas.detectors.primary_detector.measurement = uncertainty.Measurement(x,v)
+    tas.detectors.primary_detector.dimension = [len(tas.detectors.primary_detector.measurement), 1]
+    try: tas.detectors.detector_mode = dataset.metadata['analyzerdetectormode']
+    except: tas.detectors.detector_mode = 'unknown'
 
 
     #later, I should do something clever to determine how many detectors are in the file,
@@ -1538,30 +1336,20 @@ def translate_detectors(tas, dataset):
     #detectors do NOT have a 'summed_counts' attribute currently.
     if dataset.metadata.has_key('analyzersdgroup') and not dataset.metadata['analyzersdgroup'] == None:
         set_detector(tas, dataset, 'single_detector', 'analyzersdgroup')
-        #bt7.detectors.single_detector.summed_counts.measurement.x=dataset.data['singledet']
-        #bt7.detectors.single_detector.summed_counts.measurement.variance=dataset.data['singledet']
 
     if dataset.metadata.has_key('analyzerdoordetectorgroup') and not dataset.metadata['analyzerdoordetectorgroup'] == None:
         set_detector(tas, dataset, 'door_detector', 'analyzerdoordetectorgroup')
-        #bt7.detectors.single_detector.summed_counts.measurement.x=bt7.detectors.door_detector.x.sum(axis=1)#None #dataset.data['doordet']  #Not sure why this one doesn't show up???
-        #bt7.detectors.single_detector.summed_counts.measurement.variance=bt7.detectors.door_detector.x.sum(axis=1)#None #dataset.data['doordet']  #Not sure why this one doesn't show up???
 
     if dataset.metadata.has_key('analyzerddgroup') and not dataset.metadata['analyzerddgroup'] == None:
         set_detector(tas, dataset, 'diffraction_detector', 'analyzerddgroup')
-        #bt7.detectors.diffraction_detector.summed_counts.measurement.x=dataset.data['diffdet']
-        #bt7.detectors.diffraction_detector.summed_counts.measurement.variance=dataset.data['diffdet']
 
     if dataset.metadata.has_key('analyzerpsdgroup') and not dataset.metadata['analyzerpsdgroup'] == None:
         set_detector(tas, dataset, 'position_sensitive_detector', 'analyzerpsdgroup')
-        #if hasattr(bt7.detectors,'position_sensitive_detector'):
-            #bt7.detectors.position_sensitive_detector.summed_counts.measurement.x=dataset.data['psdet']
-            #bt7.detectors.position_sensitive_detector.summed_counts.measurement.variance=dataset.data['psdet']
 
 
 
 
 def set_detector(tas, dataset, detector_name, data_name):                        
-    analyzergroup = dataset.metadata[data_name]
     setattr(tas.detectors, detector_name, Detector(detector_name))
 
     dim = dataset.metadata['analyzersdgroup']
@@ -1575,17 +1363,15 @@ def set_detector(tas, dataset, detector_name, data_name):
         npts = 0
     Nx = getattr(getattr(tas.detectors, detector_name), 'dimension')[0]
     Ny = getattr(getattr(tas.detectors, detector_name), 'dimension')[1]
-    data = np.empty((npts, Nx, Ny), 'Float64')
+    data = np.empty((npts, Nx, Ny), 'd')
     #put all the data in data array which is npts x Nx x Ny, in this case, Ny=1 since our detectors are 1D
     #We have to do some defensive programming here.  It turns out that even though the metadata states that the PSD may be present,
     #There may be no data associated with it.....
     if dataset.data.has_key(dataset.metadata[data_name][0]):
         for nx in range(Nx):
             curr_detector = dataset.metadata[data_name][nx]
-            data[:, nx, 0] = np.array(dataset.data[curr_detector], 'Float64')
-
-        setattr(getattr(tas.detectors, detector_name).measurement, 'x', np.copy(data))
-        setattr(getattr(tas.detectors, detector_name).measurement, 'variance', np.copy(data))
+            data[:, nx, 0] = np.array(dataset.data[curr_detector], 'd')
+        getattr(tas.detectors, detector_name).measurement = uncertainty.Measurement(data[:],data[:])
     else:
         delattr(tas.detectors, detector_name)  #We were lied to by ICE and this detector isn't really present...
 
@@ -1637,31 +1423,19 @@ def map_motors(translate_dict, tas, target_field, dataset):
     #key --> on bt7
     #value --> input, i.e. the field in dataset.data or dataset.metadata
     for key, value in translate_dict.iteritems():
-        if dataset.data.has_key(value):
+        if value in dataset.data:
+            try: value=np.asarray(dataset.data[value],'d')
+            except ValueError: pass
             if hasattr(target_field, key) and isinstance(getattr(target_field, key), Motor):
-                try:
-                    getattr(target_field, key).measurement.x = np.array(dataset.data[value], 'Float64')
-                    getattr(target_field, key).measurement.variance = None
-                except:
-                    getattr(target_field, key).measurement.x = np.array(dataset.data[value])  #These may be "IN", or "OUT", or "N/A"
-                    getattr(target_field, key).measurement.variance = None
+                 getattr(target_field, key).measurement = uncertainty.Measurement(value)
             else:
-                try:
-                    setattr(target_field, key, Motor(key, values=np.array(dataset.data[value], 'Float64'),
-                                                     err=None,
-                                                     units=None,
-                                                     isDistinct=True,
-                                                     isInterpolatable=True))
-                except:
-                    setattr(target_field, key, Motor(key, values=dataset.data[value],
-                                                     err=None,
-                                                     units=None,
-                                                     isDistinct=True,
-                                                     isInterpolatable=True))
-        elif dataset.metadata.has_key(value):
+                 setattr(target_field, key,
+                         Motor(key, values=value, err=None, units="",
+                               isDistinct=True, isInterpolatable=True))
+        elif value in dataset.metadata:
             if hasattr(target_field, key) and isinstance(getattr(target_field, key), Motor):
-                getattr(target_field, key).measurement.x = dataset.metadata[value] #do we need try escape logic here?
-                getattr(target_field, key).measurement.variance = None
+                getattr(target_field, key).measurement \
+                    = uncertainty.Measurement(dataset.metadata[value]) #do we need try escape logic here?
             else:
                 setattr(target_field, key, dataset.metadata[value])               
 
@@ -1675,25 +1449,11 @@ def map_field(target_field, key, value):
     value:        value to set target_field.key to. e.g. np.array([0, 1, 2, 1, 4])
     """
     if hasattr(target_field, key) and isinstance(getattr(target_field, key), Motor):
-        try:
-            getattr(target_field, key).measurement.x = np.array(value, 'Float64')
-            getattr(target_field, key).measurement.variance = None
-        except:
-            getattr(target_field, key).measurement.x = np.array(value) 
-            getattr(target_field, key).measurement.variance = None
+        getattr(target_field, key).measurement = uncertainty.Measurmement(np.array(value))
     else:
-        try:
-            setattr(target_field, key, Motor(key, values=np.array(value, 'Float64'),
-                                             err=None,
-                                             units=None,
-                                             isDistinct=True,
-                                             isInterpolatable=True))
-        except:
-            setattr(target_field, key, Motor(key, values=value,
-                                             err=None,
-                                             units=None,
-                                             isDistinct=True,
-                                             isInterpolatable=True))
+        setattr(target_field, key,
+                Motor(key, values=np.array(value), err=None, units=None,
+                      isDistinct=True, isInterpolatable=True))
 
 
 def establish_correction_coefficients(filename):
@@ -1812,6 +1572,7 @@ def join(tas_list):
     """
     #average all similar points
     #put all detectors on the same monitor, assumed that the first monitor is desired throughout
+    print tas_list
     normalize_monitor(tas_list)
     joinedtas = tas_list[0]
     distinct = []
@@ -2034,11 +1795,11 @@ def remove_duplicates_optimized(tas, distinct, not_distinct):
         else:
             for field in value:
                 for k in rows_to_be_removed:
-                    print field.name
+                    #print field.name
                     field.measurement.__delitem__(k) #removes duplicate row from this field (column)
 
     #update primary detector dimension
-    newtas.detectors.primary_detector.dimension = [len(newtas.detectors.primary_detector.measurement.x), 1]
+    newtas.detectors.primary_detector.dimension = [len(newtas.detectors.primary_detector.measurement), 1]
     return newtas
 
 # **********************************************************
@@ -2051,6 +1812,7 @@ def normalize_monitor(tas_list, monitor=None):
     or on the first TripleAxis's monitor if none is specified
     """
     if not monitor:
+        print tas_list
         monitor = tas_list[0].time.monitor.measurement.x
         tas_list_ptr = tas_list[1:] #no need to normalize the first one
     else:
@@ -2363,7 +2125,7 @@ if __name__ == "__main__":
         data = np.array([rebin(bin_edges(si.physical_motors.e.x),si.detectors.primary_detector.x,e) for si in spins_list])
         #pylab.pcolormesh(h,e,data)
         #pylab.show()
-        h_in = np.asarray([si.physical_motors.h.x[0] for si in spins_list])
+        h_in = np.asarray([si.physical_motors.h.x[0] for si in spins_list], 'd')
         idx = np.argsort(h_in)
         h_in = h_in[idx]
         data = data[idx,:]
