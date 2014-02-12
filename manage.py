@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-import imp, sys, os
+import sys, os
 from django.core.management import execute_from_command_line
 
-#try:
-#   imp.find_module('settings') # Assumed to be in the current directory.
-#except ImportError:
-#    sys.stderr.write("Error: Can't find the file 'settings.py' in the directory containing %r. It appears you've customized things.\nYou'll have to run django-admin.py, passing it your settings module.\n" % __file__)
-#    sys.exit(1)
-
+sys.dont_write_bytecode = True
 # put the current directory on the path
-sys.path.insert(0, os.path.dirname(settings.__file__))
-import settings
+sys.path.insert(0, os.path.dirname(__file__))
 
+# Make sure UB matrix calculator is compiled
+import run_helper as rh
+rh.build('reduction/tas/ubmatrix')
+
+# Run django
+import settings
 if __name__ == "__main__":
-    execute_from_command_line(settings)
+    execute_from_command_line(sys.argv)

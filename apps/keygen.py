@@ -1,5 +1,6 @@
 import os
 from os.path import expanduser
+import stat
 
 from django.utils.crypto import get_random_string
 
@@ -19,8 +20,8 @@ def get_key(keyfile):
 
     # Read key file, even if it was just generated, but only when the file
     # is readable only by the user.
-    stat = os.stat(keyfile)
-    if stat.st_mode != (os.stat.S_IRUSR&os.stat.S_IWUSR):
+    mode = os.stat(keyfile).st_mode
+    if mode == stat.S_IRUSR|stat.S_IWUSR:
         raise IOError("Keyfile %r is readable by others"%keyfile)
     with open(keyfile) as fid:
         return fid.read().strip()
