@@ -91,7 +91,8 @@ def join_module(id=None, datatype=None, action=None,
 
 
 
-def join_action(input, xaxis='', yaxis='', num_bins=0, xstep=None, ystep=None, **kwargs):
+def join_action(input, xaxis='', yaxis='', num_bins=0, xstep=None, ystep=None,
+                fields={}, **kwargs):
     # This is confusing because load returns a bundle and join, which can
     # link to multiple loads, has a list of bundles.  So flatten this list.
     # The confusion between bundles and items will bother us continuously,
@@ -99,23 +100,20 @@ def join_action(input, xaxis='', yaxis='', num_bins=0, xstep=None, ystep=None, *
     # bundles, which I do in this example.
 
     #print "JOINING",input
-    try:
-        xaxis = kwargs['fields']['xaxis']['value']
-        yaxis = kwargs['fields']['yaxis']['value']
-        num_bins = kwargs['fields']['num_bins']['value']
-        xstep = kwargs['fields']['xstep']['value']
-        ystep = kwargs['fields']['ystep']['value']
-    except:
-        pass
+
     #for now, we will work on joining arbitrary inputs instead of two at a time...
     #This will hopefully work on bundles, instead of doing things pairwise...
     joinedtas = data_abstraction.join(input)
 
-    joinedtas.xaxis = xaxis
-    joinedtas.yaxis = yaxis
-    joinedtas.num_bins = num_bins
-    joinedtas.xstep = xstep
-    joinedtas.ystep = ystep
+    # convert extract fields['name']['value'] to fields['name']
+    fields = dict((k,v['value']) for k,v in fields.items())
+    # assign joinedtas attributes from fields if present, otherwise from
+    # direct function parameters
+    joinedtas.xaxis = fields.get('xaxis',xaxis)
+    joinedtas.yaxis = fields.get('yaxis',yaxis)
+    joinedtas.num_bins = fields.get('num_bins',num_bins)
+    joinedtas.xstep = fields.get('xstep',xstep)
+    joinedtas.ystep = fields.get('ystep',ystep)
     return dict(output=[joinedtas])
 
 

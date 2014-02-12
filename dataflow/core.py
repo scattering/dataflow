@@ -11,6 +11,8 @@ from django.utils import simplejson as json
 from . import config
 from .deps import processing_order
 
+TEMPLATE_VERSION = '1.0'
+
 _instrument_registry = []
 _module_registry = {}
 _data_registry = {}
@@ -29,8 +31,7 @@ def register_module(module):
     Register a new calculation module.
     """
     if module.id in _module_registry and module != _module_registry[module.id]:
-        return
-        #raise TypeError("Module already registered")
+        raise TypeError("Module already registered")
     _module_registry[module.id] = module
     
 def lookup_module(id):
@@ -53,35 +54,27 @@ class Module(object):
 
     A computation is represented as a set of modules connected by wires.
 
-    Attributes
-    ----------
+    *id* : string
+        Module identifier. By convention this will be a dotted structure
+        '<operation>.<instrument class>.<instrument>', with instrument
+        optional for generic operations.
 
-    id : string
+    *version* : string
+        Version number of the code which implements the filter calculation.
+        If the calculation changes, the version number should be incremented.
 
-    Module identifier. By convention this will be a dotted structure
-    '<operation>.<instrument class>.<instrument>', with instrument
-    optional for generic operations.
+    *name* : string
+        The display name of the module. This may appear in the user interface
+        in addition to any pictorial representation of the module. Usually it
+        is just the name of the operation. By convention, it should have
+        every word capitalized, with spaces between words.
 
-    version : string
+    *description* : string
+        A tooltip shown when hovering over the icon
 
-    Version number of the code which implements the filter calculation.
-    If the calculation changes, the version number should be incremented.
-
-    name : string
-
-    The display name of the module. This may appear in the user interface
-    in addition to any pictorial representation of the module. Usually it
-    is just the name of the operation. By convention, it should have
-    every word capitalized, with spaces between words.
-
-    description : string
-
-    A tooltip shown when hovering over the icon
-
-    icon : { URI: string, terminals: { string: [x,y,i,j] } }
-
-    Image representing the module, or none if the module should be
-    represented by name.
+    *icon* : { URI: string, terminals: { string: [x,y,i,j] } }
+        Image representing the module, or none if the module should be
+        represented by name.
 
     The terminal locations are identified by:
 
@@ -94,42 +87,44 @@ class Module(object):
     direction of the wire as it first leaves the terminal;
     default is straight out
 
-    fields : Form
-
-    An inputEx form defining the constants needed for the module. For
-    example, an attenuator will have an attenuation scalar. Field
-    names must be distinct from terminal names.
+    *fields* : Form
+        An inputEx form defining the constants needed for the module. For
+        example, an attenuator will have an attenuation scalar. Field
+        names must be distinct from terminal names.
 
     terminals : [Terminal]
+        List module inputs and outputs.
 
-    List module inputs and outputs.
+        *id* : string
+            name of the variable associated with the data
 
-    id : string
-    name of the variable associated with the data
-    datatype : string
-    name of the datatype associated with the data, with the
-    output of one module needing to match the input of the
-    next. Using a hierarchical type system, such as
-    data1d.refl, we can attach to generic modules like scaling
-    as well as specific modules like footprint correction. By
-    defining the type of data that flows through the terminal
-    we can highlight valid connections automatically.
+        *datatype* : string
+            name of the datatype associated with the data, with the
+            output of one module needing to match the input of the
+            next. Using a hierarchical type system, such as
+            data1d.refl, we can attach to generic modules like scaling
+            as well as specific modules like footprint correction. By
+            defining the type of data that flows through the terminal
+            we can highlight valid connections automatically.
 
-    use : string | "in|out"
-    whether this is an input parameter or an output parameter
-    description : string
-    A tooltip shown when hovering over the terminal; defaults
-    to datatype name
-    required : boolean
-    true if an input is required; ignored on output terminals.
-    multiple : boolean
-    true if multiple inputs are accepted; ignored on output
-    terminals.
+        *use* : string | "in|out"
+            whether this is an input parameter or an output parameter
 
-    xtype : string
-    name of the xtype to be used for this container.
-    Common ones include WireIt.Container, WireIt.ImageContainer
-    and the locally-defined AutosizeImageContainer (see lang_common.js)
+        *description* : string
+            A tooltip shown when hovering over the terminal; defaults
+            to datatype name
+
+        *required* : boolean
+            true if an input is required; ignored on output terminals.
+
+        *multiple* : boolean
+            true if multiple inputs are accepted; ignored on output
+            terminals.
+
+    *xtype* : string
+        name of the xtype to be used for this container.
+        Common ones include WireIt.Container, WireIt.ImageContainer
+        and the locally-defined AutosizeImageContainer (see lang_common.js)
     """
     def __init__(self, id, version, name, description, icon=None,
                  terminals=None, fields=None, action=None, xtype=None, filterModule=None):
@@ -167,43 +162,40 @@ class Template(object):
     """
     A template captures the computational workflow as a wiring diagram.
 
-    Attributes
-    ----------
+    *name* : string
+        String identifier for the template
 
-    name : string
-    String identifier for the template
+    *description* : string
+        Extended description to be displayed as help to the template user.
 
-    version : string
+    *modules* : [TemplateModule]
+        Modules used in the template
 
-    Version number of the template
+        *module* : string
+            module id for template node
 
-    description : string
-    Extended description to be displayed as help to the template user.
-    instrument : string
-    Instrument to which the template applies
+        *version* : string
+            version number of the module
 
-    modules : [TemplateModule]
+        *config* : { field: value }
+            initial values for the fields
 
-    Modules used in the template
-    module : string
-    module id for template node
+        *position* : [int,int]
+            location of the module on the canvas.
 
-    version : string
+    *wires* : [TemplateWire]
+        Wires connecting the modules
 
-    version number of the module
+        *source* : [int, string]
+            module id in template and terminal name in module
+        *target* : [int, string]
+            module id in template and terminal name in module
 
-    config : map
-    initial values for the fields
-    position : [int,int]
-    location of the module on the canvas.
+    *instrument* : string
+        Instrument to which the template applies
 
-    wires : [TemplateWire]
-
-    Wires connecting the modules
-    source : [int, string]
-    module id in template and terminal name in module
-    target : [int, string]
-    module id in template and terminal name in module
+    *version*
+        Template version number
     """
     def __init__(self, name, description, modules, wires, instrument,
                  version='0.0'):
@@ -233,13 +225,13 @@ class Template(object):
         """
         Version aware pickler. Returns (version, state)
         """
-        return '1.0', self.__dict__
+        return TEMPLATE_VERSION, self.__dict__
     def __setstate__(self, state):
         """
         Version aware unpickler. Expects (version, state)
         """
         version, state = state
-        if version != '1.0':
+        if version != TEMPLATE_VERSION:
             raise TypeError('Template definition mismatch')
         self.__dict__ = state
         
@@ -376,56 +368,3 @@ class Data(object):
     def loads(cls, str):
         return Data(str, Data)
 
-
-# ============= Parent traversal =============
-class Node(object):
-    """
-    Base node
-
-    A diagram is created by connecting nodes with wires.
-    parents : [Node]
-    List of parents that this node has
-    params : dictionary
-    Somehow matches a parameter to its current value,
-    which will be compared to the previous value as found
-    in the database.
-    """
-    def __init__(self, parents, params):
-        self.parents = parents
-        self.params = params
-        
-    def searchDirty(self):
-        queue = deque([self])
-        while queue:
-            node = queue.popleft()
-            if node.isDirty():
-                return True
-            for parent in node.parents:
-                queue.append(parent)
-        return False
-        
-    def isDirty(self):
-        # Use inspect or __code__ for introspection?
-        return self.params != self._get_inputs()
-    
-    def _get_inputs(self):
-        # Get data from database
-        #pass
-        data = {'maternal grandpa':{'id':'maternal grandpa'},
-                'maternal grandma':{'id':'maternal grandma'},
-                'mom':{'id':'mom'},
-                'paternal grandpa':{'id':'paternal grandpa'},
-                'paternal grandma':{'id':'paternal grandma'},
-                'dad':{'id':'dad'},
-                'son':{'id':'son'}, }
-        return data.get(self.params['id'], {})
-    
-if __name__ == '__main__':
-    head = Node([Node([Node([], {'id':'maternal grandpa'}),
-                       Node([], {'id':'maternal grandma'})],
-                      {'id':'mom'}),
-                 Node([Node([], {'id':'paternal grandpa'}),
-                       Node([], {'id':'paternal grandma'})],
-                      {'id':'dad'})],
-                {'id':'son'})
-    print "Dirty" if head.searchDirty() else "Clean"

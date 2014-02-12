@@ -21,9 +21,6 @@ class MemoryCache(object):
 
     Use this for running tests without having to start up the redis server.
     """
-    @staticmethod
-    def Redis(host):
-        return MemoryCache()
     def __init__(self):
         self.cache = {}
     def exists(self, key):
@@ -239,7 +236,7 @@ def get_csv(template, config, nodenum, terminal_id, cache):
     fp = all_fp[nodenum]
     csv_fp = name_terminal(name_csv(fp), terminal_id)
     if cache.exists(csv_fp):
-        print "retrieving cached value: " + csv_fp
+        # print "retrieving cached value: " + csv_fp
         csv = cache.lrange(csv_fp, 0, -1)
     else:
         data = calc_single(template, config, nodenum, terminal_id, cache)
@@ -348,10 +345,47 @@ def finger_print(module, args, nodenum, inputs_fp):
     fp = hashlib.sha1(fp).hexdigest()
     return fp
 
+# new methods that keep everything ordered
+def format_ordered(value):
+    value_type = type(value)
+    if isinstance(value, dict):
+        return list((k,format_ordered(v)) for k,v in sorted(value.items()))
+    elif isinstance(value, list):
+        return [format_ordered(v) for v in value]
+    elif isinstance(value, tuple):
+        return tuple(format_ordered(v) for v in value)
+    elif callable(value):
+        return getsource(value)
+    elif hasattr(value, '__dict__'):
+        return format_ordered(value.__dict__)
+    else:
+        return value
+
+def convert_to_plottable(result):
+    #print "Starting new converter"
+    return [data.get_plottable() for data in result]
+    
+def convert_to_csv(result):
+    if np.all([hasattr(data, 'get_csv') for data in result]):
+        #print "Starting CSV converter"
+        return [data.get_csv() for data in result]
+    else:
+        #print "No CSV converter available for this datatype"
+        return [""]
+    
+def name_fingerprint(fp):
+    return "Fingerprint:" + fp
+def name_plottable(fp):
+    return "Plottable:" + fp
+def name_csv(fp):
+    return "CSV:" + fp
+def name_terminal(fp, terminal_id):
+    return fp + ":" + terminal_id
+
 
 # ===== Test support ===
 @contextlib.contextmanager
-def push_seed(seed=None):
+def push_seed(seed=None): # pragma no cover
     """
     Set a temporary seed to the numpy random number generator, restoring it
     at the end of the context.
@@ -365,7 +399,7 @@ def push_seed(seed=None):
     else:
         yield
 
-def verify_examples(source_file, tests, target_dir=None, seed=1):
+def verify_examples(source_file, tests, target_dir=None, seed=1): # pragma no cover
     """
     Run a set of templates, comparing the results against previous results.
 
@@ -435,11 +469,11 @@ def verify_examples(source_file, tests, target_dir=None, seed=1):
                     fid.write(actual_str)
                 errors.append("  %r does not match target %r"
                               % (actual_path, target_path))
-    if errors:
+    if errors: # pragma no cover
         errors.insert(0, "When testing %r:"%source_file)
         raise AssertionError("\n".join(errors))
 
-def run_example(template, config, seed=None, verbose=False):
+def run_example(template, config, seed=None, verbose=False): # pragma no cover
     import json
 
     if verbose:
@@ -459,56 +493,27 @@ def run_example(template, config, seed=None, verbose=False):
                 #print key, 'plot: ', output.get_plottable()
                 pass
 
+# internal tests
+def test_ordered():
+    udict,odict = {'x':2,'a':3}, [('a',3),('x',2)]
+    def ufn(a): return a
+    class A(object):
+        def __init__(self):
+            self.x, self.a = 2,3
+    class A2:
+        def __init__(self):
+            self.x, self.a = 2,3
+    pairs = [
+        (udict,odict),
+        ({'first':udict,'second':'ple'}, [('first',odict), ('second','ple')]),
+        ([1,udict,3], [1,odict,3]),
+        ((1,udict,3), (1,odict,3)),
+        (ufn, "    def ufn(a): return a\n"),
+        (A(), odict),
+        (A2(), odict),
+        ]
 
-# new methods that keep everything ordered
-def full_sort_dict(dict):
-    items = dict.items()
-    items.sort()
-    for index, (key, value) in enumerate(items):
-        items[index] = key, format_ordered(value)
-    return items
-def full_sort_arr(arr):
-    for index, value in enumerate(arr):
-        arr[index] = format_ordered(value)
-    return arr
-def full_sort_tuple(tuple):
-    for index, value in enumerate(tuple):
-        tuple = tuple_assignment(tuple, index, format_ordered(value))
-    return tuple
-def tuple_assignment(tuple, index, item):
-    return tuple[:index] + (item,) + tuple[index + 1:]
-def format_ordered(value):
-    value_type = type(value)
-    if value_type is types.DictType:
-        return full_sort_dict(value)
-    elif value_type is types.ListType:
-        return full_sort_arr(value)
-    elif value_type is types.TupleType:
-        return full_sort_tuple(value)
-    elif value_type is types.InstanceType:
-        return full_sort_dict(deepcopy(value.__dict__()))
-    elif value_type is types.FunctionType:
-        return getsource(value)
-    else:
-        return value
-
-def convert_to_plottable(result):
-    #print "Starting new converter"
-    return [data.get_plottable() for data in result]
-    
-def convert_to_csv(result):
-    if np.all([hasattr(data, 'get_csv') for data in result]):
-        #print "Starting CSV converter"
-        return [data.get_csv() for data in result]
-    else:
-        #print "No CSV converter available for this datatype"
-        return [""]
-    
-def name_fingerprint(fp):
-    return "Fingerprint:" + fp
-def name_plottable(fp):
-    return "Plottable:" + fp
-def name_csv(fp):
-    return "CSV:" + fp
-def name_terminal(fp, terminal_id):
-    return fp + ":" + terminal_id
+    for u,o in pairs:
+        actual = format_ordered(u)
+        print "%s => %s =? %s"%(str(u),actual,o)
+        assert actual == o

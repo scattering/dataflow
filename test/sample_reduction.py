@@ -213,6 +213,16 @@ def test():
                          [('sample.test', sample_diagram())],
                          )
 
+def test_template_copy():
+    """
+    handy place to test copy constructors for dataflow core
+    """
+    import copy
+    template,config = sample_diagram()
+    copy.copy(template)
+    copy.copy(config)
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     import json
