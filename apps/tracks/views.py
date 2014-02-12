@@ -32,7 +32,7 @@ from dataflow.calc import redis_cache, calc_single, get_plottable, get_csv
 from dataflow.offspecular.instruments import ANDR, ASTERIX
 print "ANDR imported: ", ANDR.id
 print "ASTERIX imported: ", ASTERIX.id
-from dataflow.SANS.novelinstruments import SANS_NG3
+from dataflow.sans.novelinstruments import SANS_NG3
 print "SANS imported: ", SANS_NG3.id
 from dataflow.tas.instruments import TAS as TAS_INS
 print "TAS imported: ", TAS_INS.id
