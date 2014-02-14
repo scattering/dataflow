@@ -12,13 +12,11 @@ import json as orderedjson # keeps order of OrderedDict on dumps!
 from numpy import NaN, array
 import numpy as np
 
-
 from django.conf import settings
 from django.shortcuts import render_to_response, render
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger #paging for lists
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -28,7 +26,8 @@ from django.contrib.auth import authenticate, login
 
 from dataflow import wireit
 from dataflow.core import lookup_module, lookup_datatype
-from dataflow.calc import redis_cache, calc_single, get_plottable, get_csv
+from dataflow.calc import calc_single, get_plottable, get_csv
+from dataflow.cache import CACHE_MANAGER
 from dataflow.offspecular.instruments import ANDR, ASTERIX
 print "ANDR imported: ", ANDR.id
 print "ASTERIX imported: ", ASTERIX.id
@@ -53,23 +52,8 @@ from .models import * #add models by name
 from .forms import (languageSelectForm, titleOnlyForm, experimentForm1,
                     experimentForm2, titleOnlyFormExperiment)
 
-cache = redis_cache()
-
-FILES_DIR=settings.FILES_DIR
-
-def xhr_test(request):
-    if request.is_ajax():
-        if request.method == 'GET':
-            message = "This is an XHR GET request"
-        elif request.method == 'POST':
-            message = "This is an XHR POST request"
-            # Here we can access the POST data
-            print request.POST
-        else:
-            message = "No XHR"
-    else:
-        message = "What is this, WSGI?"
-    return HttpResponse(message)
+DATA_DIR=settings.DATA_DIR
+CACHE_MANAGER.use_redis(settings.REDIS_HOST)
 
 def showInteractors(request):
     return render_to_response('interactors.html')
@@ -91,6 +75,18 @@ def uploadtest(request):
 
 def testTable(request):
     return render(request,'testTable.html')
+
+def xhr_test(request):
+    if request.is_ajax():
+        if request.method == 'GET':
+            message = "This is an XHR GET request"
+        elif request.method == 'POST':
+            message = "This is an XHR POST request"
+        else:
+            message = "No XHR"
+    else:
+        message = "What is this, WSGI?"
+    return HttpResponse(message)
 
 def return_data(request):
     dataArray = [['file name', 'database id', 'sha1', 'x', 'y', 'z'],
@@ -158,7 +154,7 @@ def add_collaborator(request, email_activation_key=None):
             
         if len(collaborators) > 0:
             projects[0].users.add(collaborators[0]) #adds user to project
-            return HttpResponseRedirect('/myProjects/')
+            return HttpResponseRedirect('/projects/')
         else:
             random_pass=User.objects.make_random_password(10)
             collaborator = User.objects.create(username=email_address,
@@ -177,7 +173,7 @@ def add_collaborator(request, email_activation_key=None):
             #send_mail(r'Welcome to DrNeutron!', message, settings.DEFAULT_FROM_EMAIL, [email_address])
             #We want redirect to http://www.drneutron.org/password/reset/confirm/yourhashhere/
             
-            return HttpResponseRedirect('/myProjects/')
+            return HttpResponseRedirect('/projects/')
             #return HttpResponseRedirect(profile/edit)
     else:
         # no project with this activation_key exists (project could have been deleted)
@@ -315,10 +311,10 @@ def getBinaryData(request):
     #data = np.random.rand(1000,1000).astype(np.float32).tostring()
     #binary_fp = data['binary_fp']
     #print "getting data:", binary_fp
-    #print 'cache.exists(binary_fp):', cache.exists(binary_fp), cache.keys()
+    #print 'cache().exists(binary_fp):', cache().exists(binary_fp), cache().keys()
     data = ''
-    if cache.exists(binary_fp):
-        data = cache.lrange(binary_fp, 0, -1)[0]
+    if CACHE_MANAGER.cache.exists(binary_fp):
+        data = CACHE_MANAGER.cache.lrange(binary_fp, 0, -1)[0]
         print "sending data:", binary_fp
     
     response = HttpResponse(data, mimetype='application/octet-stream')
@@ -328,7 +324,7 @@ def getBinaryData(request):
 
 def home(request):
     context = RequestContext(request)
-    site_list = ['/editor/', '/login/', '/myProjects/', '/interactors/']
+    site_list = ['/editor/', '/login/', '/projects/', '/interactors/']
     return render_to_response('tracer_testingforWireit/home.html',
                               locals(), context_instance=context)
 
@@ -400,9 +396,8 @@ for instr in [ANDR, SANS_NG3, TAS_INS, ASTERIX, PBR_INS]:
     instrument_class_by_language[instr.name] = instr
 
 #instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX }
-print 'instrument_class_by_language:', instrument_class_by_language
+print 'instruments:', instrument_class_by_language.keys()
 
-#@csrf_exempt 
 def listWirings(request):
     context = RequestContext(request)
     print 'I am loading'
@@ -421,7 +416,6 @@ def listWirings(request):
 
 #    return HttpResponse(json.dumps(a)) #andr vs bt7 testing
 
-#@csrf_exempt 
 def saveWiring(request):
     #context = RequestContext(request)
     print 'I am saving'
@@ -469,9 +463,8 @@ def get_filepath_by_hash(fh):
 
 
 
-#@csrf_exempt
 #def getFromRedis(hashval):
-#    result = cache.lrange(hashval, 0, -1)
+#    result = cache_manager.cache.lrange(hashval, 0, -1)
 #    response = HttpResponse(result[0], mimetype='text/csv')
 #    response['Content-Disposition'] = 'attachment; filename=somefilename.csv'
 #    return response
@@ -511,7 +504,7 @@ def old_getCSV(request, data):
         template = wireit.wireit_diagram_to_template(data, instrument)
         # configuration for template is embedded
         print "getting result"
-        result = get_csv(template, config, nodenum, terminal_id, cache)[0]
+        result = get_csv(template, config, nodenum, terminal_id)[0]
         #response = HttpResponse(json.dumps({'redis_key': result}))
     #print json.dumps({'redis_key': result[0][:800]})
     outfilename = data.get('outfilename', 'data.csv')
@@ -522,7 +515,6 @@ def old_getCSV(request, data):
 
 
             
-#@csrf_exempt 
 def setupReduction(data):
     #data = json.loads(request.POST['data'])
     #import pprint
@@ -619,7 +611,7 @@ def runReduction(request):
     print "config:", config
     print "terminal_id:", terminal_id
     
-    result = get_plottable(template, config, nodenum, terminal_id, cache)
+    result = get_plottable(template, config, nodenum, terminal_id)
     
     JSON_result = '[' + ','.join(result) + ']'
     # result is a list of plottable items (JSON strings) - need to concatenate them
@@ -644,11 +636,10 @@ def saveData(request):
     import tarfile
     import StringIO
 
-    location = FILES_DIR
     data = json.loads(request.POST['data'])
     toReduce = data['toReduce']
     template, config, nodenum, terminal_id = setupReduction(toReduce)
-    result = calc_single(template, config, nodenum, terminal_id, cache)
+    result = calc_single(template, config, nodenum, terminal_id)
     result_strs = []
     sha1 = hashlib.new('sha1')
     for dataset in result:
@@ -657,7 +648,7 @@ def saveData(request):
         result_strs.append(data_str)
         
     filename = sha1.hexdigest()
-    file_path = os.path.join(FILES_DIR, filename)
+    file_path = os.path.join(DATA_DIR, filename)
     
     tar = tarfile.open(file_path,"w:gz")
     
@@ -694,7 +685,7 @@ def saveData(request):
     else:
         new_file = File.objects.create(friendly_name=dataname, name=filename,
                                        template_representation=new_wiring,
-                                       datatype=datatype, location=location)
+                                       datatype=datatype, location=DATA_DIR)
     
     for dobj in result:
         add_metadata_to_file(new_file, dobj)
@@ -709,7 +700,7 @@ def getCSV(request):
     template, config, nodenum, terminal_id = setupReduction(data)
     
     result = ""
-    result_list = get_csv(template, config, nodenum, terminal_id, cache)
+    result_list = get_csv(template, config, nodenum, terminal_id)
     for i, r in enumerate(result_list):
         result += "#" * 80 + "\n"
         result += "# data set %d" % (i,) + "\n"
@@ -780,7 +771,7 @@ def uploadFiles(request):
             file_contents = f.read()
             file_sha1 = hashlib.sha1(file_contents)
 
-            #write_here = os.path.join(location,file_sha1.hexdigest())
+            #write_here = os.path.join(FILES_DIR,file_sha1.hexdigest())
             #open(write_here, 'w').write(file_data)
             tmp_file, tmp_path = tempfile.mkstemp()
             open(tmp_path, 'wb').write(file_contents)
@@ -809,7 +800,6 @@ def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
         experiment = Experiment.objects.get(id=experiment_id)
     except:
         experiment = None #in the event the id does not match an experiment
-    location = FILES_DIR
     loader_function = None
     datatype_id = None
     for dt in instrument_class_by_language[instrument_class].datatypes:
@@ -844,7 +834,7 @@ def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
             string.write(serialized)
             string.seek(0)
     
-            file_path = os.path.join(FILES_DIR, filename)
+            file_path = os.path.join(DATA_DIR, filename)
             tar = tarfile.open(file_path,"w:gz")
             info = tarfile.TarInfo(name=friendly_name)
             info.size=len(string.buf)
@@ -852,7 +842,7 @@ def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
             tar.close()
             #dataname = data.get('dataname', 'saved_data')
             
-            #write_here = os.path.join(location, s_sha1.hexdigest())
+            #write_here = os.path.join(FILES_DIR, s_sha1.hexdigest())
             #gzip.open(write_here, 'wb').write(serialized) 
             
             if len(new_files) > 0:
@@ -860,7 +850,7 @@ def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
             else:
                 new_file = File.objects.create(name=s_sha1.hexdigest(),
                                                friendly_name=friendly_name,
-                                               location=location,
+                                               location=DATA_DIR,
                                                datatype=datatype_id)
                 add_metadata_to_file(new_file, dobj)
                 
@@ -989,11 +979,10 @@ def return_files_metadata(request):
         return HttpResponse(json.dumps(result))    
         #return json.dumps(file_keys),return_metadata(experiment_id) 
 
-#@csrf_exempt 
 def displayEditor(request):
     context = RequestContext(request)
     file_context = {}
-    print request.POST.has_key('language')
+    print "displayEditor", request.POST.has_key('language')
     if request.POST.has_key('language'):
         if request.POST.has_key('experiment_id'):
             experiment = Experiment.objects.get(id=request.POST['experiment_id'])
@@ -1028,7 +1017,6 @@ def displayEditor(request):
     else:
         return HttpResponseRedirect('/editor/langSelect/')
 
-#@csrf_exempt 
 # this is now deprecated - because languages are sent directly in displayEditor
 def languageSelect(request):
     context = RequestContext(request)
@@ -1042,9 +1030,9 @@ def languageSelect(request):
 
 
 ###########
-## Views for users, redirects to MyProjects page from login. Then continues logically from there.
+## Views for users, redirects to projects page from login. Then continues logically from there.
 @login_required
-def myProjects(request):
+def projects(request):
     context = RequestContext(request)
     #Using an elif setup to save a bit of time since only one button (to delete or add project)
     # can be clicked for one request.
@@ -1145,7 +1133,7 @@ def editExperiment(request, experiment_id):
             else:
                 new_file = File.objects.create(name=file_sha1.hexdigest(),
                                                friendly_name=f.name,
-                                               location=FILES_DIR)
+                                               location=DATA_DIR)
             experiment.Files.add(new_file)
     if request.POST.has_key('instrument_name'):
         if request.POST['instrument_name']:

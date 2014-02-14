@@ -10,6 +10,7 @@
 	</head>
 	<body onload="load()">
 		<form name="editor" method="post" action="..">
+            {% csrf_token %}
 			<input type="hidden" name="language" value={{ lang }} />
 		</form>
 	</body>

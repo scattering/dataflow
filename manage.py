@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 import sys, os
-from django.core.management import execute_from_command_line
 
-sys.dont_write_bytecode = True
 # put the current directory on the path
-sys.path.insert(0, os.path.dirname(__file__))
+path=os.path.dirname(__file__)
+sys.path.insert(0, path)
 
-# Make sure UB matrix calculator is compiled
+# Make sure UB matrix calculator is compiled and on the path
+sys.dont_write_bytecode = True
 import run_helper as rh
-rh.build('reduction/tas/ubmatrix')
 
 # Run django
-import settings
 if __name__ == "__main__":
+    rh.build('reduction/tas/ubmatrix')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "apps.settings")
+    from django.core.management import execute_from_command_line
     execute_from_command_line(sys.argv)

@@ -13,41 +13,10 @@ import logging
 
 import numpy as np
 
+from .cache import CACHE_MANAGER
 from .core import lookup_module, lookup_datatype
 
-class MemoryCache(object):
-    """
-    In memory cache with redis interface.
-
-    Use this for running tests without having to start up the redis server.
-    """
-    def __init__(self):
-        self.cache = {}
-    def exists(self, key):
-        return key in self.cache
-    def keys(self):
-        return self.cache.keys()
-    def set(self, key, value):
-        self.cache[key] = value
-    def rpush(self, key, value):
-        self.cache.setdefault(key,[]).append(value)
-    def lrange(self, key, low, high):
-        return self.cache[key][low:high]
-
-def redis_cache(host="localhost"):
-    import redis
-    # ensure redis is running
-    if host == "localhost" and not sys.platform == 'win32':
-        os.system("redis-server")
-    cache = redis.Redis(host)
-    #if not hasattr(cache, 'rpush'): cache.rpush = cache.push
-    return cache
-
-def memory_cache():
-    return MemoryCache()
-
-
-def run_template(template, config, cache):
+def run_template(template, config):
     """
     Evaluate the template using the configured values.
 
@@ -59,6 +28,7 @@ def run_template(template, config, cache):
     Note: this version keeps all intermediates, and so isn't suitable for
     large data sets.
     """
+    cache = CACHE_MANAGER.cache
     all_results = {}
     fingerprints = fingerprint_template(template, config)
     for nodenum, wires in template:
@@ -134,10 +104,11 @@ def run_template(template, config, cache):
         ans[nodenum] = plottable
     return ans
 
-def calc_single(template, config, nodenum, terminal_id, cache):
+def calc_single(template, config, nodenum, terminal_id):
     """ Calculate fingerprint of terminal in question - if it exists in the cache,
         get it.  Otherwise, calculate from scratch (retrieving parent values recursively) """
     # Find the modules
+    cache = CACHE_MANAGER.cache
     node = template.modules[nodenum]
     module_id = node['module'] # template.modules[node]
     module = lookup_module(module_id)
@@ -162,7 +133,7 @@ def calc_single(template, config, nodenum, terminal_id, cache):
         for wire in parents:
             source_nodenum, source_terminal_id = wire['source']
             source_data = calc_single(template, config, source_nodenum,
-                                      source_terminal_id, cache)
+                                      source_terminal_id)
             target_id = wire['target'][1]
             if target_id in kwargs:
                 # this explicitly assumes all data is a list
@@ -186,8 +157,9 @@ def calc_single(template, config, nodenum, terminal_id, cache):
     print "result calculated: ", fp
     return result
 
-def get_plottable(template, config, nodenum, terminal_id, cache):
+def get_plottable(template, config, nodenum, terminal_id):
     # Find the modules
+    cache = CACHE_MANAGER.cache
     node = template.modules[nodenum]
     module_id = node['module'] # template.modules[node]
     module = lookup_module(module_id)
@@ -202,7 +174,7 @@ def get_plottable(template, config, nodenum, terminal_id, cache):
         plottable = cache.lrange(plottable_fp, 0, -1)
     else:
         print "no cached plottable: calculating..."
-        data = calc_single(template, config, nodenum, terminal_id, cache)
+        data = calc_single(template, config, nodenum, terminal_id)
         plottable = []
         binary_data = []
         for dnum, datum in enumerate(data):
@@ -225,8 +197,9 @@ def get_plottable(template, config, nodenum, terminal_id, cache):
     return plottable
 
 
-def get_csv(template, config, nodenum, terminal_id, cache):
+def get_csv(template, config, nodenum, terminal_id):
     # Find the modules
+    cache = CACHE_MANAGER.cache
     node = template.modules[nodenum]
     module_id = node['module'] # template.modules[node]
     module = lookup_module(module_id)
@@ -239,7 +212,7 @@ def get_csv(template, config, nodenum, terminal_id, cache):
         # print "retrieving cached value: " + csv_fp
         csv = cache.lrange(csv_fp, 0, -1)
     else:
-        data = calc_single(template, config, nodenum, terminal_id, cache)
+        data = calc_single(template, config, nodenum, terminal_id)
         csv = convert_to_csv(data)
         for item in csv:
             cache.rpush(csv_fp, item)
@@ -439,8 +412,7 @@ def verify_examples(source_file, tests, target_dir=None, seed=1): # pragma no co
     import json
     from os.path import join, exists, dirname
 
-    # create a cache handler
-    cache = memory_cache()
+    # No cache, so default to memory cache
 
     # Allow __file__ to be used as the target_dir for storing target results
     # in the "tests" subdirectory of the instrument definition.

@@ -1,3 +1,7 @@
+.matplotlib
+active_settings.py
+debug_settings.py
+
 ~*
 *.swp
 *.pyc
@@ -7,6 +11,7 @@ OOSuite
 .coverage
 .project
 .pydevproject
+.mplconfig
 .wpr
 .wpu
 *.wpr
@@ -18,6 +23,5 @@ OOSuite
 *.tex~
 *.js~
 *.html~
-settings.py
 testdb*
 reduction/tas/ubmatrix/build
