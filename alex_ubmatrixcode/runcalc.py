@@ -6,7 +6,7 @@ Edit History
 '''
 
 import csv #(Commma Separated Values)
-from django.utils import simplejson as json
+import json
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import auth

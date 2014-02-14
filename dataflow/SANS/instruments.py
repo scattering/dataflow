@@ -2,7 +2,7 @@
 SANS reduction modules
 """
 import os, sys
-from django.utils import simplejson as json
+import json
 
 from reduction.sans.filters import *
 from .. import config

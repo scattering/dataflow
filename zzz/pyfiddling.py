@@ -1,5 +1,5 @@
-#import json
-from django.utils import simplejson as json
+import json
+#from django.utils import simplejson as json
 
 a = open('../www/diagram/BT7example.json','r')
 

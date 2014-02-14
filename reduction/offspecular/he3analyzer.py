@@ -1,6 +1,6 @@
 import datetime, time
 import os, pickle
-from django.utils import simplejson as json
+import json
 
 from numpy import exp, zeros, array, empty
 

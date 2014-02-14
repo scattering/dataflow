@@ -3,8 +3,7 @@ Triple Axis Spectrometer reduction and analysis modules
 """
 import os, sys
 import types
-
-from django.utils import simplejson as json
+import json
 
 from reduction.tas import data_abstraction
 

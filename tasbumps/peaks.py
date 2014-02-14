@@ -1,7 +1,6 @@
 from __future__ import division
 from math import radians, sin, cos
-from django.utils import simplejson as json
-
+import json
 
 import numpy as np
 from bumps.parameter import Parameter, varying

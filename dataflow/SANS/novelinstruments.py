@@ -2,7 +2,7 @@
 SANS reduction modules
 """
 import os
-from django.utils import simplejson as json
+import json
 
 #from reduction.sans.filters import SansData
 #from reduction.sans.filters import plot1D

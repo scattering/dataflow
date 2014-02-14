@@ -1,8 +1,7 @@
 import ast
 import tempfile
 from ftplib import FTP
-
-from django.utils import simplejson
+import json
 
 from apps.fileview.FTPfileclass import FTPfile
 

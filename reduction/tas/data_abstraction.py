@@ -1,7 +1,7 @@
 import os
 import copy, pickle
 from cStringIO import StringIO
-from django.utils import simplejson as json
+import json
 
 import numpy as np
 from bumps.rebin import bin_edges, rebin

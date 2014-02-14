@@ -1,5 +1,5 @@
 from cStringIO import StringIO
-from django.utils import simplejson as json
+import json
 
 from numpy import ndarray, array, fromstring, float32, ones, empty, newaxis, savetxt, sqrt
 

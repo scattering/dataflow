@@ -6,7 +6,7 @@ import gzip
 import hmac
 import copy
 import tempfile
-from django.utils import simplejson as json
+import json
 import json as orderedjson # keeps order of OrderedDict on dumps!
 
 from numpy import NaN, array

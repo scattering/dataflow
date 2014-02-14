@@ -2,7 +2,7 @@
 Offspecular reflectometry reduction modules
 """
 import os, sys, pickle, types
-from django.utils import simplejson as json
+import json
 #try: from collections import OrderedDict
 #except ImportError: from dataflow.ordered_dict import OrderedDict
 

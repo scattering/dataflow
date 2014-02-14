@@ -20,7 +20,7 @@ The following functions are available:
 """
 __all__ = ['dumps', 'loads']
 
-from django.utils import simplejson as json
+import json
 
 from . import core
 

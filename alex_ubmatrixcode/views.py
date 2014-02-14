@@ -4,7 +4,7 @@
 
 import os
 import zipfile
-from django.utils import simplejson as json
+import json
 
 from django.db.models.signals import post_save, post_delete
 from django.http import HttpResponse, HttpResponseRedirect, Http404

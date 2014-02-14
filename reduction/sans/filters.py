@@ -1,7 +1,7 @@
 import os
 from copy import deepcopy,copy
 import pickle
-from django.utils import simplejson as json
+import json
 
 import numpy as np
 

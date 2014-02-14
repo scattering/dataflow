@@ -1,10 +1,7 @@
 import os
 import sys
-from django.utils import simplejson as json
-
+import json
 from pprint import pprint
-
-def ppjson(s): return json.dumps(json.loads(s), sort_keys=True, indent=2)
 
 from dataflow.tas.instruments import BT7
 from dataflow.wireit import (instrument_to_wireit_language,
@@ -15,6 +12,8 @@ from dataflow.wireit import (instrument_to_wireit_language,
                            )
 from dataflow.core import Template, register_instrument
 from dataflow.calc import run_template, memory_cache
+
+def ppjson(s): return json.dumps(json.loads(s), sort_keys=True, indent=2)
 
 register_instrument(BT7)
 

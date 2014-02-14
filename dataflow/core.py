@@ -3,10 +3,7 @@ Core class definitions
 """
 from collections import deque
 import inspect
-
-#import sys; print >>sys.stderr,"\n".join(sys.path)
-
-from django.utils import simplejson as json
+import json
 
 from . import config
 from .deps import processing_order
