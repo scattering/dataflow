@@ -226,7 +226,7 @@ for instrument in instruments:
 
 # Testing
 def demo():
-    from ..calc import run_template, memory_cache
+    from ..calc import run_template
     #global fileList
     fileList = [red.map_files('sample_4m'), red.map_files('empty_cell_4m'),
                 red.map_files('empty_4m'), red.map_files('trans_sample_4m'),
@@ -344,8 +344,7 @@ def demo():
     #print 'RAW_INSTRUMENT: ', wireit.instrument_to_wireit_language(SANS_INS)
     print 'LANGUAGE', json.dumps(wireit.instrument_to_wireit_language(SANS_NG3))
 
-    cache = memory_cache()
-    run_template(template, config, cache)
+    run_template(template, config)
     #get_plottable(template,config,14,'OneD', cache)
     #result = get_plottable(template, config, 14, 'OneD')
     

@@ -11,7 +11,7 @@ from dataflow.wireit import (instrument_to_wireit_language,
                            template_list,
                            )
 from dataflow.core import Template, register_instrument
-from dataflow.calc import run_template, memory_cache
+from dataflow.calc import run_template
 
 def ppjson(s): return json.dumps(json.loads(s), sort_keys=True, indent=2)
 
@@ -58,7 +58,7 @@ pprint(t.wires)
 
 # run the reductions
 print "== calc"
-result = run_template(template, config, memory_cache())
+result = run_template(template, config)
 pprint(result)
 
 

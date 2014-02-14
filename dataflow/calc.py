@@ -422,7 +422,7 @@ def verify_examples(source_file, tests, target_dir=None, seed=1): # pragma no co
     for (filename, (template, config)) in tests:
         print("checking %s"%filename)
         with push_seed(seed):
-            actual = run_template(template, config, cache)
+            actual = run_template(template, config)
         target_path = join(target_dir, filename)
         actual_str = json.dumps(actual, sort_keys=True)
         if not exists(target_path):
@@ -455,7 +455,7 @@ def run_example(template, config, seed=None, verbose=False): # pragma no cover
         print 'config: ', json.dumps(config, sort_keys=True, indent=2)
 
     with push_seed(seed):
-        result = run_template(template, config, cache=memory_cache())
+        result = run_template(template, config)
 
     if verbose:
         print 'result: ', json.dumps(result,sort_keys=True, indent=2)
