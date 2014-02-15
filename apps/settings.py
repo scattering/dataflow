@@ -1,8 +1,14 @@
 # Django settings for dataflow project.
 #
-# Private settings are stored ROOT/private.py
-# Copy ROOT/private_template.py to private.py and enter site-specific details.
-# Server secret key is
+# Local settings are stored ROOT/private_settings.py (for deployment) or
+# ROOT/debug_settings.py (for debugging).  Copy ROOT/private_template.py
+# over these files to override the settings.
+#
+# The default path when debugging is /tmp/APPNAME on unix-like systems, or
+# c:\APPNAME-debug on windows.  The deployed system may use the standard
+# unix directories /var/log, /var/cache and /var/lib, or it may use
+#
+# The server secret key for encrypted data is stored in secret.txt
 import os,sys
 import stat
 
@@ -25,9 +31,11 @@ CACHE_DIR = os.path.join(data_root, 'cache')
 LOG_FILE = os.path.join(data_root, 'error.log')
 SECRET_KEY_FILE = os.path.join(data_root, 'secret.txt')
 os.environ['MPLCONFIGDIR'] = os.path.join(ROOT, '.matplotlib/')
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DATABASES = {'default': dict(ENGINE='django.db.backends.sqlite3',
                              NAME=os.path.join(data_root, 'user.db'))}
 REDIS_HOST = 'localhost'
+ALLOWED_HOSTS = ['localhost']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -78,11 +86,7 @@ LOGGING = {
 # *****************************************************************************
 # =============================================================================
 
-LOGIN_REDIRECT_URL = '../projects/'
 
-ACCOUNT_ACTIVATION_DAYS = 2
-
-AUTH_PROFILE_MODULE = 'tracks.Userprofile'
 
 ROOT_URLCONF = 'apps.urls'
 
@@ -147,9 +151,6 @@ TEMPLATE_LOADERS = (
 )
 
 
-## for django.contrib.auth
-#LOGIN_URL = '/login/'
-
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -181,7 +182,30 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+
+    # Account management
+    'userena',
+    'guardian',
+    'easy_thumbnails',
 )
+
+# Account management settings, with userena and guardian
+# See: http://docs.django-userena.org/en/latest/settings.html
+AUTHENTICATION_BACKENDS = (
+    'userena.backends.UserenaAuthenticationBackend',
+    'guardian.backends.ObjectPermissionBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+ANONYMOUS_USER_ID = -1
+AUTH_PROFILE_MODULE = 'tracks.UserProfile'
+LOGIN_URL = '/accounts/signin/'
+LOGOUT_URL = '/accounts/signout/'
+LOGIN_REDIRECT_URL = '/accounts/%(username)s/'
+USERENA_ACTIVATION_DAYS = 2
+USERENA_WITHOUT_USERNAMES = True
+# Also requires email backend
+
+
 
 # =============================================================================
 # *****************************************************************************
@@ -189,13 +213,20 @@ INSTALLED_APPS = (
 # *****************************************************************************
 # =============================================================================
 
-PRIVATE_FILE = os.path.abspath(os.path.join(ROOT, 'private.py'))
-if not DEBUG and os.path.exists(PRIVATE_FILE):
+PRIVATE_FILE = 'debug_settings.py' if DEBUG else 'private_settings.py'
+PRIVATE_FILE = os.path.abspath(os.path.join(ROOT, PRIVATE_FILE))
+if os.path.exists(PRIVATE_FILE):
     mode = os.stat(PRIVATE_FILE).st_mode
-    if mode == stat.S_IRUSR|stat.S_IWUSR:
-        raise IOError("%r is readable by group/others"%PRIVATE_FILE)
-    from private import *
-    del mode, sys.modules['private']
+    #print "mode %o %o"%(mode,stat.S_IRUSR|stat.S_IWUSR)
+    if mode&0o777 != stat.S_IRUSR|stat.S_IWUSR:
+        print "Halt. %r is readable by group/others"%PRIVATE_FILE
+        sys.exit()
+    if DEBUG:
+        from debug_settings import *
+        del mode, sys.modules['debug_settings']
+    else:
+        from private_settings import *
+        del mode, sys.modules['private_settings']
     LOGGING['handlers']['file']['filename'] = LOG_FILE
 del PRIVATE_FILE
 

@@ -25,6 +25,7 @@ LOG_FILE = os.path.expanduser('/var/log/%s'%APPNAME)
 SECRET_KEY_FILE = os.path.expanduser('~/.%s/secret.txt'%APPNAME)
 os.environ['MPLCONFIGDIR'] = os.path.join(CACHE_DIR, '.matplotlib/')
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'accounts@drneutron.org'
@@ -49,5 +50,7 @@ DB = dict(ENGINE='django.db.backends.postgresql_pyscopg2',
 DATABASES = { 'default': DB }
 
 REDIS_HOST = 'localhost'
+
+ALLOWED_HOSTS = ['.drneutron.org']
 
 TIME_ZONE = 'America/New_York'

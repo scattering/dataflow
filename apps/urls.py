@@ -7,10 +7,13 @@ from django.contrib import admin
 admin.autodiscover()
 
 
-urlpatterns = patterns('apps.tracks.views',
+urlpatterns = patterns(
+    'apps.tracks.views',
+    ('^accounts/', include('userena.urls')),
+    #('^login/$', 'django.contrib.auth.views.login'),
+
     ('^hello/$', 'xhr_test'),
     ('^test/$', 'mytest'),
-    #('^login/$', 'django.contrib.auth.views.login'),
     ('^listWirings/$', 'listWirings'),
     ('^interactors/$', 'showInteractors'),
     ('^plotWindow/$', 'showPlotWindow'),

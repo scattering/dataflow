@@ -120,12 +120,12 @@ def email_collaborator(request):
                 'site': site, 
                 'user': user_name,
                 'project_activate': 'apps.tracks.views.add_collaborator'}
-    subject = render_to_string('registration/collaborate/activation_email_subject.txt', ctx_dict)
+    subject = render_to_string('collaborate/activation_email_subject.txt', ctx_dict)
     
     # Email subject *must not* contain newlines
     subject = ''.join(subject.splitlines())
     
-    message = render_to_string('registration/collaborate/activation_email.txt', ctx_dict)
+    message = render_to_string('collaborate/activation_email.txt', ctx_dict)
     
     #user.email_user(subject, message, settings.DEFAULT_FROM_EMAIL)
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [request.POST['collaborator_email']])

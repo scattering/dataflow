@@ -1,5 +1,7 @@
 from django.db import models
+from django.utils.translation import ugettext as _T
 from django.contrib.auth.models import User #, Permission
+from userena.models import UserenaBaseProfile
 
 # Create your models here.
 
@@ -11,9 +13,16 @@ class Test(models.Model):
 
 # class User     is provided by contrib.auth
 
-class Userprofile(models.Model):
-    user = models.ManyToManyField(User)
-    userdisplay = models.CharField(max_length=300)
+#class Userprofile(models.Model):
+#    user = models.ManyToManyField(User)
+#    userdisplay = models.CharField(max_length=300)
+
+class UserProfile(UserenaBaseProfile):
+    user = models.OneToOneField(User,
+                                unique=True,
+                                verbose_name=_T('user'),
+                                related_name='my_profile',
+                                )
 
 # class Permission     is provided by contrib.auth
 

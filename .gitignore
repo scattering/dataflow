@@ -1,17 +1,14 @@
 .matplotlib
-active_settings.py
+private_settings.py
 debug_settings.py
+
+.coverage
 
 ~*
 *.swp
 *.pyc
-django-profiles
-django-registration
-OOSuite
-.coverage
 .project
 .pydevproject
-.mplconfig
 .wpr
 .wpu
 *.wpr
@@ -23,5 +20,4 @@ OOSuite
 *.tex~
 *.js~
 *.html~
-testdb*
-reduction/tas/ubmatrix/build
+zzz/ubmatrix/build
