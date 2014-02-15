@@ -1,5 +1,5 @@
 
-// Requires interactors_nonprototype.js
+// Requires interactors.js
 // Requires interactors_plugin_base.js
 
 (function($){

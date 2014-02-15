@@ -4,7 +4,7 @@
 // # 10/14/2011                                #
 // #############################################
 
-// ## requires interactors_nonprototype.js 
+// ## requires interactors.js
 
 (function($) {
     function toArray(obj) {

@@ -6,7 +6,7 @@
 // # 10/13/2011                                #
 // #############################################
 
-// ## requires interactors_nonprototype.js 
+// ## requires interactors.js
 
 (function($) {
     var dist = $.jqplot.dist;
