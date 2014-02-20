@@ -1,3 +1,4 @@
+import os
 import types
 
 from reduction.offspecular import filters
@@ -7,12 +8,13 @@ from ...modules.load import load_module
 from ..datatypes import OSPEC_DATA, get_friendly_name
 
 # Load module
-def load_action(input=[], files=[], intent='', auto_PolState=False, PolStates=[], **kwargs):
-    print "loading", files
+def load_action(input=[], files=[], intent='', auto_PolState=False, PolStates={}, **kwargs):
+    #print "loading", files, PolStates
 
     result = []
-    for i, f in enumerate(files):
-        subresult = _load_data(f, auto_PolState, (PolStates[i] if i<len(PolStates) else ""))
+    for f in files:
+        polstate = PolStates.get(os.path.basename(f),"")
+        subresult = _load_data(f, auto_PolState, polstate)
         if type(subresult) == types.ListType:
             result.extend(subresult)
         else:
@@ -52,7 +54,7 @@ PolStates_field = {
 
 load = load_module(id='ospec.load', datatype=OSPEC_DATA,
                    version='1.0',
-                   #action=load_action,
+                   action=load_action,
                    #fields=OrderedDict({'files': {}, 'autochain-loader':autochain_loader_field, 'auto_PolState': auto_PolState_field, 'PolStates': PolStates_field}),
                    filterModule=filters.LoadICPData)
 

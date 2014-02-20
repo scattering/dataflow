@@ -80,7 +80,7 @@ def run_template(template, config):
         else:
             logging.info("executing %s: %s %s"%(nodenum, module_id, config_str))
             result = module.action(**node_config)
-            logging.debug("result %s"%str(result))
+            #logging.debug("result %s"%str(result))
             for terminal_id, res in result.items():
                 terminal_fp = name_terminal(fp, terminal_id)
                 for data in res:
@@ -372,7 +372,7 @@ def push_seed(seed=None): # pragma no cover
     else:
         yield
 
-def verify_examples(source_file, tests, target_dir=None, seed=1): # pragma no cover
+def verify_examples(source_file, tests, target_dir, seed=1): # pragma no cover
     """
     Run a set of templates, comparing the results against previous results.
 
@@ -411,13 +411,10 @@ def verify_examples(source_file, tests, target_dir=None, seed=1): # pragma no co
     import os
     import json
     from os.path import join, exists, dirname
+    import logging; logging.basicConfig(level=logging.WARNING)
 
     # No cache, so default to memory cache
 
-    # Allow __file__ to be used as the target_dir for storing target results
-    # in the "tests" subdirectory of the instrument definition.
-    if target_dir is None:
-        target_dir = join(dirname(source_file), "tests")
     errors = []
     for (filename, (template, config)) in tests:
         print("checking %s"%filename)
@@ -442,7 +439,6 @@ def verify_examples(source_file, tests, target_dir=None, seed=1): # pragma no co
                 errors.append("  %r does not match target %r"
                               % (actual_path, target_path))
     if errors: # pragma no cover
-        errors.insert(0, "When testing %r:"%source_file)
         raise AssertionError("\n".join(errors))
 
 def run_example(template, config, seed=None, verbose=False): # pragma no cover

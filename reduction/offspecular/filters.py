@@ -203,7 +203,9 @@ class Filter2D:
     def check_labels(self, data):
         validated = True
         labelsets = self.valid_column_labels
+        print "labelsets",labelsets
         info = data.infoCopy()
+        print "info",info
         for labelset in labelsets:
             for col, label in zip(info, labelset):
                 if not col["name"] == label:
@@ -211,19 +213,20 @@ class Filter2D:
         return validated
     
     def validate(self, data):
+        print "validating"
         validated = True
-        if not type(data) == MetaArray:
+        if not isinstance(data, MetaArray):
             print "not MetaArray"
             return False #short-circuit
         if not len(data.shape) == 3:
             print "# coordinate dims not equal 2"
-            return False 
+            return False
+        print "checking labels"
         return self.check_labels(data)
     
     def apply(self, data):
         if not self.validate(data):
-            print "error in data type"
-            return
+            raise ValueError("error in data type %r"%str(type(data)))
         return data
  
 def updateCreationStory(apply):
@@ -463,12 +466,11 @@ class WiggleCorrection(Filter2D):
         """ Data is MetaArray (for now) with axis values + labels
         Output is the same """
         if not self.validate(data):
-            print "error in data type"
-            return
-        
+            raise ValueError("unexpected data in wiggle correction %r"%type(data))
+
         num_xpixels = len(data.axisValues('xpixel'))
         if not (num_xpixels == 608):
-            print "this correction is only defined for Brookhaven detector!"
+            raise ValueError("this correction is only defined for Brookhaven detector!")
         xpixel = data.axisValues('xpixel')
         #arange(num_xpixels + 1, 'float')
         widthCorrection, pixelCorrection = self.correctionFromPixel(xpixel, amp)

@@ -166,7 +166,6 @@ def load_data(name):
 # when the instrument is registered, these modules will also be registered
 ROWAN26 = Instrument(id='ncnr.rowan26',
                  name='NCNR ROWAN26',
-                 archive=config.NCNR_DATA + '/rowan26',
                  menu=[('Input', [load, save]),
                        ('Reduction', [rand])
                        ],
@@ -211,6 +210,7 @@ def test():
     from dataflow import calc
     calc.verify_examples(__file__,
                          [('sample.test', sample_diagram())],
+                         'test/dataflow_results'
                          )
 
 def test_template_copy():

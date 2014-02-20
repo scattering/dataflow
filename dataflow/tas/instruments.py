@@ -134,7 +134,7 @@ def test():
         ('bt7.out', bt7_example()),
         #('spins.out', spins_example()),
     ]
-    verify_examples(__file__, tests)
+    verify_examples(__file__, tests, 'test/dataflow_results')
 
 def demo():
     import logging; logging.basicConfig(level=logging.DEBUG)

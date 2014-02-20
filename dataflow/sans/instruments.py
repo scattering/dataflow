@@ -40,7 +40,7 @@ reduction = [
     correct_detector_efficiency,
     ]
 #Instrument definitions
-SANS_NG3 = Instrument(id='ncnr.sans.ins',
+SANS = Instrument(id='ncnr.sans',
                  name='sans',
                  menu=[('Input', [load, save]),
                        ('Reduction', reduction),
@@ -49,7 +49,7 @@ SANS_NG3 = Instrument(id='ncnr.sans.ins',
                  datatypes=[data2d],
                  )
                  
-instruments = [SANS_NG3]
+instruments = [SANS]
 for instrument in instruments:
     register_instrument(instrument)
 
@@ -165,7 +165,7 @@ def sans_example():
 
 def test():
     from ..calc import verify_examples
-    verify_examples(__file__, [('sans.out', sans_example())])
+    verify_examples(__file__, [('sans.out', sans_example())],'test/dataflow_results')
 
 def demo():
     from ..calc import run_example

@@ -103,7 +103,7 @@ input = [load, save] # places Load and Save module options in one list
 #reduction = [join, scale, subtract, normalize, footprint, polcor]
 reduction = [footprint, background, normalize, normalize_time]
 
-refl = Instrument(id='ncnr.refl', # creates instrument with module option lists 'Input' and 'Reduction'
+REFL = Instrument(id='ncnr.refl', # creates instrument with module option lists 'Input' and 'Reduction'
                  name='refl',
                  menu=[  # takes 'input' and 'reduction' lists and places both in menu for PBR instrument
                        ('Input', input),
@@ -113,6 +113,5 @@ refl = Instrument(id='ncnr.refl', # creates instrument with module option lists 
                  datatypes=[data1d],
                  )
 
-instruments = [refl]
-for instrument in instruments:
+for instrument in [REFL]:
         register_instrument(instrument) # instrument is registered

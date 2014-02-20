@@ -50,7 +50,7 @@ from .datatypes import data2d, datahe3, datastamp
 # ======== Polarization modules ===========
 
 #Instrument definitions
-ANDR = Instrument(id='ncnr.ospec',
+OSPEC = Instrument(id='ncnr.ospec',
                  name='ospec',
                  menu=[('Input', [load, load_he3, load_timestamp, save]),
                        ('Reduction', [autogrid, combine, subtract, offset, wiggle, smooth, pixels_two_theta, theta_two_theta_qxqz, twotheta_q, empty_qxqz_grid, mask_data, slice_data, collapse_data, normalize_to_monitor]),
@@ -70,14 +70,16 @@ ASTERIX = Instrument(id='lansce.ospec.asterix',
                  datatypes=[data2d],
                  )
                  
-for instrument in [ANDR, ASTERIX]:
+for instrument in [OSPEC, ASTERIX]:
     register_instrument(instrument)
 
 
 # ======= example diagrams ========
 def nonpolarized_sample():
-    path, ext = dir + '/dataflow/sampledata/ANDR/sabc/Isabc20', '.cg1'
-    files = [path + str(i + 1).zfill(2) + ext for i in range(1, 12)]
+    from os.path import join, dirname
+
+    ROOT = join(dirname(dirname(dirname(__file__))),'sampledata','ANDR','sabc')
+    files = [join(ROOT,'Isabc2%03d.cg1'%i) for i in range(1, 13)]
     modules = [
         dict(module="ospec.load", position=(50, 50),
              config={'files': files, 'intent': 'signal'}),
@@ -111,21 +113,23 @@ def nonpolarized_sample():
     return template, config
 
 def polarized_sample():
-    path, ext = dir + '/dataflow/sampledata/ANDR/cshape_121609/Iremun00', ['.ca1', '.cb1']
+    from os.path import join, split, dirname
+    ROOT = join(dirname(dirname(dirname(__file__))),'sampledata','ANDR','cshape_121609')
+    path, ext = os.path.join(ROOT,'Iremun00'), ['.ca1', '.cb1']
     files = [path + str(i + 1) + extension for i in range(0, 9) for extension in ext if i != 2]
-    pols = json.load(open(dir + '/dataflow/sampledata/ANDR/cshape_121609/file_catalog.json', 'r'))
-    pol_states = dict((os.path.split(file)[-1], pols[os.path.split(file)[-1]]['polarization']) for file in files)
+    pols = json.load(open(join(ROOT, 'file_catalog.json'), 'r'))
+    pol_states = dict((split(file)[-1], pols[split(file)[-1]]['polarization']) for file in files)
     modules = [
         dict(module="ospec.load", position=(50, 25),
              config={'files': files, 'intent': 'signal', 'PolStates':pol_states}),
         dict(module="ospec.timestamp", position=(100, 125), config={}),
-        dict(module="ospec.loadhe3", position=(50, 375), config={'files':[dir + '/dataflow/sampledata/ANDR/cshape_121609/He3Cells.json']}),
+        dict(module="ospec.loadhe3", position=(50, 375), config={'files':[join(ROOT,'He3Cells.json')]}),
         dict(module="ospec.save", position=(700, 175), config={'ext': 'dat'}),
         dict(module="ospec.comb_polar", position=(450, 180), config={}),
         dict(module="ospec.append", position=(300, 225), config={}),
         dict(module="ospec.corr_polar", position=(570, 125), config={}),
         dict(module="ospec.grid", position=(350, 375), config={}),
-        dict(module="ospec.loadstamp", position=(50, 250), config={'files':[dir + '/dataflow/sampledata/ANDR/cshape_121609/end_times.json']}),
+        dict(module="ospec.loadstamp", position=(50, 250), config={'files':[join(ROOT, 'end_times.json')]}),
     ]
     wires = [
         dict(source=[0, 'output'], target=[1, 'input']),
@@ -151,18 +155,18 @@ def polarized_sample():
 def test():
     from ..calc import verify_examples
     tests = [
-        ('pol.out', polarized_sample()),
-        ('nonpol.out', nonpolarized_sample()),
+        # TODO: enable offspecular tests
+        #('pol.out', polarized_sample()),
+        #('nonpol.out', nonpolarized_sample()),
     ]
-    verify_examples(__file__, tests)
+    verify_examples(__file__, tests, 'test/dataflow_results')
 
 def demo():
-    import logging; logging.basicConfig(level=logging.DEBUG)
-    from .. import wireit
+    #import logging; logging.basicConfig(level=logging.DEBUG)
     from ..calc import run_example
+    #from .. import wireit
     #print 'language', json.dumps(wireit.instrument_to_wireit_language(TAS), indent=2)
     run_example(*polarized_sample(), verbose=False)
-    #run_example(*spins_example())
 
 if __name__ == "__main__":
     demo()

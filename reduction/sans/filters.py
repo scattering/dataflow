@@ -282,9 +282,9 @@ Given a SansData object, normalize the data to the provided monitor
 """
     
     monitor=sansdata.metadata['run.moncnt']
-    result=sansdata.data.x*mon0/monitor
+    result=sansdata.data*mon0/monitor
     res=SansData()
-    res.data.x=result
+    res.data=result
     res.metadata=deepcopy(sansdata.metadata)
     #added res.q
     res.q=copy(sansdata.q)
@@ -332,7 +332,7 @@ correct for the fact that the detector is flat and the eswald sphere is curved.
     
     result=sansdata.data.x*(np.cos(theta)**3)
     res=SansData()
-    res.data.x=result
+    res.data=sansdata.data * (np.cos(theta)**3)
     res.metadata=deepcopy(sansdata.metadata)
     #adding res.q
     res.q=copy(sansdata.q)
@@ -378,7 +378,7 @@ def correct_detector_efficiency(sansdata):
     ff = np.exp(-stAl/np.cos(theta))*(1-np.exp(-stHe/np.cos(theta))) / ( np.exp(-stAl)*(1-np.exp(-stHe)) )
 
     res=SansData()
-    res.data.x=sansdata.data.x/ff
+    res.data=sansdata.data/ff
     #if not sansdata.data.variance==None:
             #res.data.variance=sansdata.data.variance/ff
 
@@ -449,7 +449,7 @@ def correct_dead_time(sansdata,deadtime=3.4e-6):
     dscale = 1/(1-deadtime*(np.sum(sansdata.data.x)/sansdata.metadata["run.rtime"]))
     
     result = SansData()
-    result.data.x = sansdata.data.x*dscale
+    result.data = sansdata.data*dscale
     result.metadata=deepcopy(sansdata.metadata)
     result.q = copy(sansdata.q)
     result.qx = copy(sansdata.qx)
@@ -702,9 +702,11 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument,coord_left,coord_right):
     #file = open("NG7.txt", "w") #w = write
     #file.write(repr(a))
     #file.close()
-    
+
+    #TODO: move calibration files somewhere sane
     #2011-07-25 19:32:04 - Date in UTC of creation
     file = open(map_files("NG7"),"r") # r = read
+    array = np.array
     f = eval(file.read())
     file.close()
     NG7 = f
@@ -779,7 +781,8 @@ def map_files(key):
     Generate the mapping between files and their roles
     """
 
-    datadir=os.path.join(os.path.dirname(__file__),'ncnr_sample_data')
+    ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    datadir=os.path.join(ROOT, 'sampledata', 'SANS')
     filedict={'empty_1m':os.path.join(datadir,'SILIC001.SA3_SRK_S101'),
               'empty_4m':os.path.join(datadir,'SILIC002.SA3_SRK_S102'),
               'empty_cell_1m':os.path.join(datadir,'SILIC003.SA3_SRK_S103'),
@@ -802,7 +805,7 @@ def map_files(key):
 
 # ========= Demo code ==========
 
-def chain_corrections_demo():
+def chain_corrections_test():
     """a sample chain of corrections"""
     
     #read the files
@@ -901,7 +904,8 @@ def chain_corrections_demo():
     #Dsam = CAL.metadata['sample.thk']
     
     #Have to pass un-normalized, as loaded, data file here for empty.
-    ABS = absolute_scaling(CAL,empty_4m,sensitivity,Tsam,'NG3')
+
+    ABS = absolute_scaling(CAL,empty_4m,sensitivity,Tsam,'NG3',(55,53),(74,72))
     print "ABS: "
     print ABS
     
@@ -952,5 +956,5 @@ def chain_corrections_demo():
     
 
 if __name__ == '__main__':
-    chain_corrections_demo()
+    chain_corrections_test()
 

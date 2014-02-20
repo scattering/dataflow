@@ -16,7 +16,7 @@ class PlottableDict(dict):
     def loads(cls, str):
         return pickle.loads(str)
 
-use_File = True
+use_File = False
 def get_friendly_name(fh):
     if use_File:
         from apps.tracks.models import ResultFile
