@@ -2,12 +2,16 @@
 Module to convert two theta to QxQz
 """
 
+from reduction.offspecular import filters
+
 from ... import config
 from ...core import Module
 try: 
     from collections import OrderedDict
 except:
     from ...ordered_dict import OrderedDict
+
+from ..datatypes import OSPEC_DATA
 
 def twotheta_q_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, xtype=None, **kwargs):
@@ -67,3 +71,11 @@ def twotheta_q_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+
+# Twotheta to q module
+def twotheta_q_action(input=[], wavelength=5.0, ax_name='twotheta', **kwargs):
+    print "converting twotheta to q"
+    result = filters.TwothetaToQ().apply(input, wavelength, ax_name)
+    return dict(output=result)
+twotheta_q = twotheta_q_module(id='ospec.tth_q', datatype=OSPEC_DATA, version='1.0', action=twotheta_q_action)

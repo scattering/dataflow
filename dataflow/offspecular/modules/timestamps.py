@@ -2,9 +2,12 @@
 Get the timestamps from the source file directory listing
 and interpolate between the start time and the end time.
 """
+from reduction.offspecular import filters
 
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA, OSPEC_DATA_TIMESTAMP, get_friendly_name
 
 def timestamp_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[], stamp_datatype=None, xtype=None):
@@ -65,3 +68,13 @@ def timestamp_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+
+def timestamp_action(input=[], stamps=None, override_existing=False, **kwargs):
+    print "stamping times"
+    if stamps == None:
+        raise ValueError("No timestamps specified")
+    timestamp_file = stamps[0] # only one timestamp
+    return dict(output=[filters.InsertTimestamps().apply(datum, timestamp_file, override_existing=override_existing, filename=get_friendly_name(datum._info[-1]['filename'])) for datum in input])
+timestamp = timestamp_module(id='ospec.timestamp', datatype=OSPEC_DATA,
+                             version='1.0', action=timestamp_action, stamp_datatype=OSPEC_DATA_TIMESTAMP)

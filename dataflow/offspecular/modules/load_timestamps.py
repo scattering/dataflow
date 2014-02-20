@@ -1,9 +1,12 @@
 """
 Load a timestamp file (strictly just a json object)
 """
+import json
 
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA_TIMESTAMP, PlottableDict
 
 def load_timestamp_module(id=None, datatype=None, action=None,
                 version='0.0', fields={}, xtype=None):
@@ -46,3 +49,11 @@ def load_timestamp_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+# Load timestamps
+def load_timestamp_action(files=[], **kwargs):
+    print "loading timestamps", files
+    result = [PlottableDict(json.load(open(f, 'r'))) for f in files]
+    return dict(output=result)
+load_timestamp = load_timestamp_module(id='ospec.loadstamp', datatype=OSPEC_DATA_TIMESTAMP,
+                                   version='1.0', action=load_timestamp_action)

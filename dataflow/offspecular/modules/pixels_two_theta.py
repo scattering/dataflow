@@ -1,9 +1,12 @@
 """
 Module to convert pixels to two theta
 """
+from reduction.offspecular import filters
 
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def pixels_two_theta_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[], xtype=None, **kwargs):
@@ -77,3 +80,11 @@ def pixels_two_theta_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+# Pixels to two theta module
+def pixels_two_theta_action(input=[], pixels_per_degree=52.8, qzero_pixel=358, instr_resolution=1e-6, ax_name='xpixel', **kwargs):
+    print "converting pixels to two theta"
+    result = filters.PixelsToTwotheta().apply(input, pixels_per_degree=pixels_per_degree, qzero_pixel=qzero_pixel, instr_resolution=instr_resolution, ax_name=ax_name)
+    return dict(output=result)
+pixels_two_theta = pixels_two_theta_module(id='ospec.twotheta', datatype=OSPEC_DATA, version='1.0', action=pixels_two_theta_action, filterModule=filters.PixelsToTwotheta)
+

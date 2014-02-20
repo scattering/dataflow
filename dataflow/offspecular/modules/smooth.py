@@ -2,8 +2,12 @@
 Smooth data along one axis
 """
 
+from reduction.offspecular import filters
+
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def smooth_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[], xtype=None, **kwargs):
@@ -70,3 +74,10 @@ def smooth_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+# smooth module
+window_field = {'name': 'window', 'type': 'List', 'value': 0, 'choices': ['hanning', 'hamming', 'boxcar']}
+def smooth_action(input=[], window='flat', window_len=5, axis=0, **kwargs):
+    print "smoothing"
+    return dict(output=filters.SmoothData().apply(input, window=window, width=window_len, axis=axis))
+smooth = smooth_module(id='ospec.smooth', datatype=OSPEC_DATA, version='1.0', action=smooth_action, filterModule=filters.SmoothData)

@@ -1,9 +1,12 @@
 """
 Normalize counts columns to monitor
 """
+from reduction.offspecular import filters
 
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def normalize_to_monitor_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[], xtype=None, **kwargs):
@@ -53,3 +56,13 @@ def normalize_to_monitor_module(id=None, datatype=None, action=None,
                   )
     module.LABEL_WIDTH = 80
     return module
+
+
+# Normalize to Monitor module
+def normalize_to_monitor_action(input=[], **kwargs):
+    print "normalizing to monitor"
+    return_val = dict(output=filters.NormalizeToMonitor().apply(input))
+    print return_val
+    return return_val
+
+normalize_to_monitor = normalize_to_monitor_module(id='ospec.normalize_monitor', datatype=OSPEC_DATA, version='1.0', action=normalize_to_monitor_action, filterModule=filters.NormalizeToMonitor)

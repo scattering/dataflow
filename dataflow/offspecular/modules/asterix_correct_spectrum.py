@@ -2,8 +2,12 @@
 Module to correct Asterix raw data by spectrum
 """
 
+from reduction.offspecular import filters
+
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def asterix_correct_spectrum_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, xtype=None, **kwargs):
@@ -58,3 +62,13 @@ def asterix_correct_spectrum_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+# Correct spectrum module
+def asterix_correct_spectrum_action(input=[], spectrum=[], **kwargs):
+    print "correcting spectrum"
+    # There should only be one entry into spectrum... more than that doesn't make sense
+    # grabbing the first item from the spectrum list:
+    return dict(output=filters.AsterixCorrectSpectrum().apply(input, spectrum=spectrum[0]))
+asterix_correct_spectrum = asterix_correct_spectrum_module(id='ospec.asterix.corr_spectrum', datatype=OSPEC_DATA,
+                                                           version='1.0', action=asterix_correct_spectrum_action)
+

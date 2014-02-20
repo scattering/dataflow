@@ -2,8 +2,12 @@
 Wiggle correction
 """
 
+from reduction.offspecular import filters
+
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def wiggle_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, xtype=None, **kwargs):
@@ -55,3 +59,9 @@ def wiggle_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+# Wiggle module
+def wiggle_action(input=[], amp=0.14, **kwargs):
+    print "wiggling"
+    return dict(output=filters.WiggleCorrection().apply(input, amp=amp))
+wiggle = wiggle_module(id='ospec.wiggle', datatype=OSPEC_DATA, version='1.0', action=wiggle_action, filterModule=filters.WiggleCorrection)

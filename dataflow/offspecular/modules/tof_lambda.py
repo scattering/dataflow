@@ -2,8 +2,12 @@
 Module to convert time of flight to wavelength
 """
 
+from reduction.offspecular import filters
+
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def tof_lambda_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[], xtype=None, **kwargs):
@@ -61,3 +65,9 @@ def tof_lambda_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+# Time of Flight to wavelength module
+def tof_lambda_action(input=[], wl_over_tof=1.9050372144288577e-5, **kwargs):
+    print "TOF to wavelength"
+    return dict(output=filters.AsterixTOFToWavelength().apply(input, wl_over_tof=wl_over_tof))
+tof_lambda = tof_lambda_module(id='ospec.tof_lambda', datatype=OSPEC_DATA, version='1.0', action=tof_lambda_action, filterModule=filters.AsterixTOFToWavelength)

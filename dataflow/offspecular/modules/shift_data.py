@@ -2,8 +2,12 @@
 Module to convert time of flight to wavelength
 """
 
+from reduction.offspecular import filters
+
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def shift_data_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[], xtype=None, **kwargs):
@@ -67,3 +71,10 @@ def shift_data_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+# Shift data module
+def shift_action(input=[], edge_bin = 180, axis=0, **kwargs):
+    print "shifting data"
+    return dict(output=filters.AsterixShiftData().apply(input, edge_bin=edge_bin, axis=axis))
+shift_data = shift_data_module(id='ospec.asterix.shift', datatype=OSPEC_DATA, version='1.0', action=shift_action, filterModule=filters.AsterixShiftData)
+

@@ -1,9 +1,12 @@
 """
 Create an empty qxqz grid
 """
+from reduction.offspecular import filters
 
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def empty_qxqz_grid_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[], xtype=None):
@@ -80,3 +83,10 @@ def empty_qxqz_grid_module(id=None, datatype=None, action=None,
                   )
     module.LABEL_WIDTH = 150
     return module
+
+def empty_qxqz_grid_action(qxmin= -0.003, qxmax=0.003, qxbins=201, qzmin=0.0, qzmax=0.1, qzbins=201, **kwargs):
+    print "creating an empty QxQz grid"
+    return dict(output=[filters.EmptyQxQzGridPolarized(qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)])
+empty_qxqz_grid = empty_qxqz_grid_module(id='ospec.emptyqxqz', datatype=OSPEC_DATA, version='1.0', action=empty_qxqz_grid_action)
+
+

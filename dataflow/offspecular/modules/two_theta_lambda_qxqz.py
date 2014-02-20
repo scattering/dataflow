@@ -2,12 +2,16 @@
 Module to convert two theta to QxQz
 """
 
+from reduction.offspecular import filters
+
 from ... import config
 from ...core import Module
 try:
     from collections import OrderedDict
 except:
     from ...ordered_dict import OrderedDict
+
+from ..datatypes import OSPEC_DATA
 
 def two_theta_lambda_qxqz_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, xtype=None, **kwargs):
@@ -104,3 +108,12 @@ def two_theta_lambda_qxqz_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+
+# Two theta Lambda to qxqz module
+def two_theta_lambda_qxqz_action(input=[], theta=None, qxmin= -0.003, qxmax=0.003, qxbins=201, qzmin=0.0, qzmax=0.1, qzbins=201,**kwargs):
+    print "converting two theta and lambda to qx and qz"
+    result = filters.TwothetaLambdaToQxQz().apply(input, theta, qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)
+    return dict(output=result)
+two_theta_lambda_qxqz = two_theta_lambda_qxqz_module(id='ospec.tth_wl_qxqz', datatype=OSPEC_DATA, version='1.0', action=two_theta_lambda_qxqz_action)
+

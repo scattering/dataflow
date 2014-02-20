@@ -1,9 +1,14 @@
 """
 Load an he3 analyzer collection
 """
+import os
+
+from reduction.offspecular.he3analyzer import He3AnalyzerCollection
 
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA_HE3
 
 def load_he3_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[], xtype=None):
@@ -55,3 +60,15 @@ def load_he3_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+
+# Load he3 module
+def load_he3_action(files=[], **kwargs):
+    print "loading he3", files
+    result = [_load_he3_data(f) for f in files]
+    return dict(output=result)
+def _load_he3_data(name):
+    (dirName, fileName) = os.path.split(name)
+    return He3AnalyzerCollection(filename=fileName, path=dirName)
+load_he3 = load_he3_module(id='ospec.loadhe3', datatype=OSPEC_DATA_HE3,
+                           version='1.0', action=load_he3_action)

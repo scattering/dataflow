@@ -2,8 +2,12 @@
 Subtract data sets
 """
 
+from reduction.offspecular import filters
+
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def subtract_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[],
@@ -58,3 +62,9 @@ def subtract_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+# Subtract module
+def subtract_action(minuend=[], subtrahend=None, **kwargs):
+    print "subtracting"
+    return dict(output=filters.Subtract().apply(minuend, subtrahend))
+subtract = subtract_module(id='ospec.subtract', datatype=OSPEC_DATA, version='1.0', action=subtract_action)

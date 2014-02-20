@@ -2,8 +2,12 @@
 Module to convert pixels to two theta
 """
 
+from reduction.offspecular import filters
+
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def asterix_pixels_two_theta_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[], xtype=None, **kwargs):
@@ -74,3 +78,10 @@ def asterix_pixels_two_theta_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+def asterix_pixels_two_theta_action(input=[], qzero_pixel = 145., twotheta_offset=0.0, pw_over_d=0.0003411385649, **kwargs):
+    print "converting pixels to two theta (Asterix)"
+    result = filters.AsterixPixelsToTwotheta().apply(input, pw_over_d=pw_over_d, qzero_pixel=qzero_pixel, twotheta_offset=twotheta_offset)
+    return dict(output=result)
+asterix_pixels_two_theta = asterix_pixels_two_theta_module(id='ospec.asterix.twotheta', datatype=OSPEC_DATA, version='1.0', action=asterix_pixels_two_theta_action)
+

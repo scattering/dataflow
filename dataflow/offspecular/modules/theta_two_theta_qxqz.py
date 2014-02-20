@@ -2,12 +2,16 @@
 Module to convert two theta to QxQz
 """
 
+from reduction.offspecular import filters
+
 from ... import config
 from ...core import Module
 try: 
     from collections import OrderedDict
 except:
     from ...ordered_dict import OrderedDict
+
+from ..datatypes import OSPEC_DATA
 
 def theta_two_theta_qxqz_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, xtype=None, **kwargs):
@@ -104,3 +108,14 @@ def theta_two_theta_qxqz_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+
+# Theta Two theta to qxqz module
+def theta_two_theta_qxqz_action(input=[], output_grid=None, wavelength=5.0, qxmin= -0.003, qxmax=0.003, qxbins=201, qzmin=0.0, qzmax=0.1, qzbins=201,**kwargs):
+    print "converting theta and two theta to qx and qz"
+    grid = None
+    if output_grid != None:
+        grid = output_grid[0]
+    result = filters.ThetaTwothetaToQxQz().apply(input, grid, wavelength, qxmin, qxmax, qxbins, qzmin, qzmax, qzbins)
+    return dict(output=result)
+theta_two_theta_qxqz = theta_two_theta_qxqz_module(id='ospec.th_tth_qxqz', datatype=OSPEC_DATA, version='1.0', action=theta_two_theta_qxqz_action)

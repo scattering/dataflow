@@ -2,8 +2,12 @@
 Grid data sets
 """
 
+from reduction.offspecular import filters
+
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def autogrid_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[],
@@ -66,3 +70,11 @@ def autogrid_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+# Autogrid module
+def autogrid_action(input=[], extra_grid_point=True, min_step=1e-10, **kwargs):
+    print "gridding"
+    return dict(output=[filters.Autogrid().apply(input, extra_grid_point=extra_grid_point, min_step=min_step)])
+autogrid = autogrid_module(id='ospec.grid', datatype=OSPEC_DATA,
+                           version='1.0', action=autogrid_action)
+

@@ -1,9 +1,12 @@
 """
 Shift data sets
 """
+from reduction.offspecular import filters
 
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def offset_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[], xtype=None):
@@ -66,3 +69,10 @@ def offset_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+# Offset module
+def offset_action(input=[], offsets={}, **kwargs):
+    print "offsetting"
+    offsets_dict = {offsets['axis_name']['value'] : offsets['offset']['value']}
+    return dict(output=filters.CoordinateOffset().apply(input, offsets=offsets_dict))
+offset = offset_module(id='ospec.offset', datatype=OSPEC_DATA, version='1.0', action=offset_action)

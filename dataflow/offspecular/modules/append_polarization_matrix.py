@@ -3,8 +3,12 @@ Takes a dataset with a defined polarization state (not None) and
 calculates the row of the NT matrix that corresponds to each datapoint
 """
 
+from reduction.offspecular import filters
+
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA, OSPEC_DATA_HE3
 
 
 def append_polarization_matrix_module(id=None, datatype=None,
@@ -62,3 +66,13 @@ def append_polarization_matrix_module(id=None, datatype=None,
                   )
 
     return module
+
+def append_polarization_matrix_action(input=[], he3cell=None, **kwargs):
+    print "appending polarization matrix"
+    he3analyzer = None
+    if he3cell != None: # should always be true; he3cell is now required
+        he3analyzer = he3cell[0]
+    return dict(output=filters.AppendPolarizationMatrix().apply(input, he3cell=he3analyzer))
+append_polarization_matrix = append_polarization_matrix_module(id='ospec.append', datatype=OSPEC_DATA,
+                                                        cell_datatype=OSPEC_DATA_HE3, version='1.0', action=append_polarization_matrix_action)
+

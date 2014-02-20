@@ -1,6 +1,7 @@
 """
 Clear part of the data
 """
+from reduction.offspecular import filters
 
 from ... import config
 from ...core import Module
@@ -8,6 +9,8 @@ try:
     from collections import OrderedDict
 except:
     from ...ordered_dict import OrderedDict
+
+from ..datatypes import OSPEC_DATA
 
 def mask_data_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[], xtype=None, filterModule=None):
@@ -87,3 +90,10 @@ def mask_data_module(id=None, datatype=None, action=None,
                   )
     module.LABEL_WIDTH = 150
     return module
+
+
+# Mask module
+def mask_action(input=[], xmin="0", xmax="", ymin="0", ymax="", invert_mask=False, **kwargs):
+    print "masking"
+    return dict(output=filters.MaskData().apply(input, xmin, xmax, ymin, ymax, invert_mask))
+mask_data = mask_data_module(id='ospec.mask', datatype=OSPEC_DATA, version='1.0', action=mask_action, filterModule=filters.MaskData)

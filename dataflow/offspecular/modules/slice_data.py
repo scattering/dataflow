@@ -1,6 +1,9 @@
 """
 Slice the data, according to internally defined mask
 """
+import types
+
+from reduction.offspecular import filters
 
 from ... import config
 from ...core import Module
@@ -8,6 +11,8 @@ try:
     from collections import OrderedDict
 except:
     from ...ordered_dict import OrderedDict
+
+from ..datatypes import OSPEC_DATA
 
 def slice_data_module(id=None, datatype=None, action=None,
                 version='0.0', fields={}, xtype=None, filterModule=None):
@@ -95,3 +100,19 @@ def slice_data_module(id=None, datatype=None, action=None,
                   )
     module.LABEL_WIDTH = 150
     return module
+
+# Slice module
+def slice_action(input=[], xmin="", xmax="", ymin="", ymax="", **kwargs):
+    print "slicing"
+    output = filters.SliceData().apply(input, xmin, xmax, ymin, ymax)
+
+    if type(input) == types.ListType:
+        xslice = []
+        yslice = []
+        for i in xrange(len(input)):
+            xslice.append(output[i][0])
+            yslice.append(output[i][1])
+    else:
+        xslice, yslice = output
+    return dict(output_x = xslice, output_y = yslice)
+slice_data = slice_data_module(id='ospec.slice', datatype=OSPEC_DATA, version='1.0', action=slice_action, filterModule=filters.SliceData)

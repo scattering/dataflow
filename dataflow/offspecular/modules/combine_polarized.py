@@ -1,9 +1,12 @@
 """
 Combine polarized data sets
 """
+from reduction.offspecular import filters
 
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def combine_polarized_module(id=None, datatype=None, action=None,
                 version='0.0', fields={},
@@ -58,3 +61,14 @@ def combine_polarized_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+# Combine polarized module
+def combine_polarized_action(input=[], grid=None, **kwargs):
+    print "combining polarized"
+    output_grid = None
+    if grid != None:
+        output_grid = grid[0]
+    return dict(output=filters.CombinePolarized().apply(input, grid=output_grid))
+combine_polarized = combine_polarized_module(id='ospec.comb_polar', datatype=OSPEC_DATA,
+                                             version='1.0', action=combine_polarized_action)
+

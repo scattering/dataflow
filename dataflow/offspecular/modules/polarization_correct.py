@@ -2,8 +2,12 @@
 Correct polarization
 """
 
+from reduction.offspecular import filters
+
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def polarization_correct_module(id=None, datatype=None, action=None,
                  version='0.0', fields=[], xtype=None, **kwargs):
@@ -62,3 +66,10 @@ def polarization_correct_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+# Polarization correction module
+def polarization_correct_action(input=[], assumptions=0, auto_assumptions=True, **kwargs):
+    print "polarization correction"
+    return dict(output=filters.PolarizationCorrect().apply(input, assumptions=assumptions, auto_assumptions=auto_assumptions))
+polarization_correct = polarization_correct_module(id='ospec.corr_polar', datatype=OSPEC_DATA,
+                                                version='1.0', action=polarization_correct_action)

@@ -1,9 +1,14 @@
 """
 Load spectrum data sets from Asterix.
 """
+import os
+
+from reduction.offspecular import filters
 
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def load_asterix_spectrum_module(id=None, datatype=None, action=None,
                 version='0.0', fields=[], xtype=None):
@@ -46,3 +51,11 @@ def load_asterix_spectrum_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+def load_asterix_spectrum_action(files=[], **kwargs):
+    filename = files[0]
+    (dirName, fileName) = os.path.split(filename)
+    return dict(output=[filters.LoadAsterixSpectrum(filename, path=dirName)])
+load_asterix_spectrum = load_asterix_spectrum_module(id='ospec.asterix.load_spectrum', datatype=OSPEC_DATA,
+                                                     version='1.0', action=load_asterix_spectrum_action)
+

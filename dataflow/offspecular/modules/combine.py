@@ -1,9 +1,12 @@
 """
 Combine data sets
 """
+from reduction.offspecular import filters
 
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def combine_module(id=None, datatype=None, action=None,
                 version='0.0', fields={},
@@ -59,3 +62,14 @@ def combine_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+
+# Combine module
+def combine_action(input_data=[], input_grid=None, **kwargs):
+    print "joining"
+    output_grid = None
+    if input_grid != None:
+        output_grid = input_grid[0]
+    return dict(output=[filters.Combine().apply(input_data, grid=output_grid)])
+combine = combine_module(id='ospec.combine', datatype=OSPEC_DATA, version='1.0', action=combine_action)
+

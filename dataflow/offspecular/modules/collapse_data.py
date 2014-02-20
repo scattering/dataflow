@@ -1,9 +1,14 @@
 """
 Collapse the data
 """
+import types
+
+from reduction.offspecular import filters
 
 from ... import config
 from ...core import Module
+
+from ..datatypes import OSPEC_DATA
 
 def collapse_data_module(id=None, datatype=None, action=None,
                 version='0.0', fields={}, xtype=None, **kwargs):
@@ -59,3 +64,21 @@ def collapse_data_module(id=None, datatype=None, action=None,
                   )
     module.LABEL_WIDTH = 80
     return module
+
+
+# Collapse module
+def collapse_action(input=[], **kwargs):
+    print "collapsing"
+    output = filters.CollapseData().apply(input)
+
+    if type(input) == types.ListType:
+        xslice = []
+        yslice = []
+        for i in xrange(len(input)):
+            xslice.append(output[i][0])
+            yslice.append(output[i][1])
+    else:
+        xslice, yslice = output
+    return dict(output_x = xslice, output_y = yslice)
+collapse_data = collapse_data_module(id='ospec.collapse', datatype=OSPEC_DATA, version='1.0', action=collapse_action,filterModule=filters.CollapseData)
+
