@@ -1,23 +1,26 @@
-.matplotlib
+# Local configuration info
 private_settings.py
 debug_settings.py
 
-.coverage
+# runtime files
+.matplotlib
 
-~*
-*.swp
-*.pyc
+# ide files (eclipse, pycharm)
 .project
 .pydevproject
-.wpr
-.wpu
-*.wpr
-*.wpu
-*.bbl
-*.aux
-*.blg
-*.log
-*.tex~
-*.js~
-*.html~
+.idea
+
+# editor files
+~*
+*~
+*.swp
+
+# build and test output
 zzz/ubmatrix/build
+.coverage
+*.pyc
+*.o
+*.so
+*.pyd
+*.dll
+*.dyld
