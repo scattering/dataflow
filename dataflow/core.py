@@ -53,12 +53,15 @@ class Module(object):
 
     *id* : string
         Module identifier. By convention this will be a dotted structure
-        '<operation>.<instrument class>.<instrument>', with instrument
-        optional for generic operations.
+        '<instrument class>.<operation>.<qualifier>', with qualifier optional.
+        For example, use "tas.load" for triple axis data and "sans.load" for
+        SANS data.  For NCNR SANS data format loaders, use "sans.load.ncnr".
 
     *version* : string
         Version number of the code which implements the filter calculation.
-        If the calculation changes, the version number should be incremented.
+        If any code in the supporting libraries changes in a way that will
+        affect the calculation results, the version number should be
+        incremented.  This includes bug fixes.
 
     *name* : string
         The display name of the module. This may appear in the user interface
@@ -263,19 +266,14 @@ class Instrument(object):
 
     datatypes : [Datatype]
     List of datatypes used by the instrument
-    archive : URI
-    Location of the data archive for the instrument. Archives must
-    implement an interface that allows data sets to be listed and
-    retrieved for a particular instrument/experiment.
     """
     def __init__(self, id, name=None, menu=None,
-                 datatypes=None, requires=None, archive=None, loaders=None):
+                 datatypes=None, requires=None, loaders=None):
         self.id = id
         self.name = name
         self.menu = menu
         self.datatypes = datatypes
         self.requires = requires
-        self.archive = archive
         self.loaders = loaders
 
         self.modules = []

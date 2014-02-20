@@ -58,7 +58,6 @@ from .datatypes import data1d
 # ==== Instrument definitions ====
 TAS = Instrument(id='ncnr.tas',
                  name='tas',
-                 archive=config.NCNR_DATA + '/tas',
                  menu=[('Input', [load, save]),
                        ('Reduction', [join, subtract, normalize_monitor,
                                       detailed_balance,

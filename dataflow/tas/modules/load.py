@@ -54,8 +54,8 @@ def load_module(id=None, datatype=None, action=None,
 
 # === Component binding ===
 def get_friendly_name(fh):
-    from apps.tracks.models import File
-    return File.objects.get(name=str(fh)).friendly_name
+    from apps.tracks.models import ResultFile
+    return ResultFile.objects.get(name=str(fh)).friendly_name
 
 def _load_data(name):
     #(dirName, fileName) = os.path.split(name)
