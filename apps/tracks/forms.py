@@ -2,7 +2,7 @@ from django import forms
 from .models import *
 
 
-# language_choices should be the same as instrument_class_choices
+# language_choices should be the same as instrument_type_choices
 language_choices = (
         ('sans', 'sans'),
         ('refl', 'refl'),
@@ -12,12 +12,12 @@ language_choices = (
         ('asterix', 'asterix'),
 )
 
-instrument_class_list = set()
+instrument_type_list = set()
 for i in Instrument.objects.all():
-        ins_class = str(i.instrument_class)
-        instrument_class_list.add(tuple([ins_class, ins_class]))
+        ins_class = str(i.instrument_type)
+        instrument_type_list.add(tuple([ins_class, ins_class]))
 
-instrument_class_choices = tuple(instrument_class_list)
+instrument_type_choices = tuple(instrument_type_list)
 
 class languageSelectForm(forms.Form):
         instruments = forms.ChoiceField(choices = language_choices)
@@ -28,7 +28,7 @@ class titleOnlyForm(forms.Form):
 class titleOnlyFormExperiment(forms.Form):
         #facility = forms.ModelChoiceField(queryset = Facility.objects.all(),empty_label=u"\u2013")
         facility = forms.ModelChoiceField(queryset = Facility.objects.all(),empty_label=u"\u2013")        
-        instrument_class = forms.ChoiceField(instrument_class_choices) #how to generate the choices
+        instrument_type = forms.ChoiceField(instrument_type_choices) #how to generate the choices
         #instrument_name = forms.ModelChoiceField(queryset=Instrument.objects.all(), empty_label=u"\u2013")
         new_experiment = forms.CharField(initial="00000000")    
 
@@ -36,7 +36,7 @@ class titleOnlyFormExperiment(forms.Form):
 class experimentForm1(forms.Form):
         facility = forms.ModelChoiceField(queryset = Facility.objects.all(),empty_label=u"\u2013")
         #facility = forms.ModelChoiceField(queryset = Facility.objects.all(),empty_label=u"\u2013")
-        instrument_class = forms.ChoiceField(instrument_class_choices) #how to generate the choices
+        instrument_type = forms.ChoiceField(instrument_type_choices) #how to generate the choices
         #instrument_name = forms.ModelChoiceField(queryset=Instrument.objects.all(), empty_label=u"\u2013")
 
 class experimentForm2(forms.Form):

@@ -237,7 +237,7 @@
                                 // window.opener is a reference to the window that opened this window
                                 // which is currently set up to be editExperiment.html
                                 var experiment_id = window.opener.experiment_id;
-                                var instrument_class = window.opener.instrument_class;
+                                var instrument_type = window.opener.instrument_type;
                                 var loader_id = window.opener.document.getElementById('loaderSelect').value;
                                 var griditems = grid_store.data.items;
                                 var filepaths = [];
@@ -252,7 +252,7 @@
                                                'username': FTPUsername,
                                                'password': FTPPassword,
                                                'experiment_id': experiment_id,
-                                               'instrument_class': instrument_class,
+                                               'instrument_type': instrument_type,
                                                'loader_id': loader_id,
                                                'filepaths': Ext.encode(filepaths)
                                         },

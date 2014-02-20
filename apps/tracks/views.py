@@ -28,15 +28,15 @@ from dataflow import wireit
 from dataflow.core import lookup_module, lookup_datatype
 from dataflow.calc import calc_single, get_plottable, get_csv
 from dataflow.cache import CACHE_MANAGER
-from dataflow.offspecular.instruments import ANDR, ASTERIX
-print "ANDR imported: ", ANDR.id
+from dataflow.offspecular.instruments import OSPEC, ASTERIX
+print "ANDR imported: ", OSPEC.id
 print "ASTERIX imported: ", ASTERIX.id
-from dataflow.sans.novelinstruments import SANS_NG3
-print "SANS imported: ", SANS_NG3.id
-from dataflow.tas.instruments import TAS as TAS_INS
-print "TAS imported: ", TAS_INS.id
-from dataflow.refl.instruments import PBR as PBR_INS
-print "PBR imported: ", PBR_INS.id
+from dataflow.sans.instruments import SANS
+print "SANS imported: ", SANS.id
+from dataflow.tas.instruments import TAS
+print "TAS imported: ", TAS.id
+from dataflow.refl.instruments import REFL
+print "PBR imported: ", REFL.id
 
 # For reading in files and their metadata in the EditExperiment page
 from reduction.tas.data_abstraction import ncnr_filereader
@@ -391,18 +391,18 @@ b = {'save':'successful'}
         # wireit.py, convert wireit_diagram to template
 # 
 
-instrument_class_by_language = {}
-for instr in [ANDR, SANS_NG3, TAS_INS, ASTERIX, PBR_INS]:
-    instrument_class_by_language[instr.name] = instr
+instrument_type_by_language = {}
+for instr in [OSPEC, SANS, TAS, ASTERIX, REFL]:
+    instrument_type_by_language[instr.name] = instr
 
 #instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX }
-print 'instruments:', instrument_class_by_language.keys()
+print 'instruments:', instrument_type_by_language.keys()
 
 def listWirings(request):
     context = RequestContext(request)
     print 'I am loading'
     data = json.loads(request.POST['data'])
-    instr = Instrument.objects.get(instrument_class = data['language'])
+    instr = Instrument.objects.get(instrument_type = data['language'])
     wirings = [] # start from scratch
     default_templates = instr.Templates.all()
     for t in default_templates:
@@ -431,7 +431,7 @@ def saveWiring(request):
     user = User.objects.get(username=request.user)
     if postData['saveToInstrument'] == True:
         if user.is_staff:
-            instr = Instrument.objects.get(instrument_class = new_wiring['language'])
+            instr = Instrument.objects.get(instrument_type = new_wiring['language'])
             if len(instr.Templates.filter(Title=new_wiring['name'])) > 0:
                 result = {'save': 'failure', 'errorStr': 'this name exists, please use another'}
                 reply = HttpResponse(json.dumps(result))
@@ -459,7 +459,7 @@ def saveWiring(request):
     return HttpResponse(json.dumps({'save':'successful'})) #, context_instance=context
 
 def get_filepath_by_hash(fh):
-    return os.path.join(File.objects.get(name=str(fh)).location,str(fh))
+    return os.path.join(ResultFile.objects.get(name=str(fh)).location,str(fh))
 
 
 
@@ -496,7 +496,7 @@ def old_getCSV(request, data):
     nodenum = int(data['clickedOn']['source']['moduleId'])
     print "calculating: terminal=%s, nodenum=%d" % (terminal_id, nodenum)
     language = data['language']
-    instrument = instrument_class_by_language.get(language, None)
+    instrument = instrument_type_by_language.get(language, None)
     #instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX}
     #instrument = instrument_by_language.get(language, None)
     result = ['{}']
@@ -570,7 +570,7 @@ def setupReduction(data):
     print "calculating: terminal=%s, nodenum=%d" % (terminal_id, nodenum)
     language = data['language']
     #instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX }
-    instrument = instrument_class_by_language.get(language, None)
+    instrument = instrument_type_by_language.get(language, None)
     #result = ['{}']
     if instrument is None:
         return
@@ -679,11 +679,11 @@ def saveData(request):
     new_wiring = data.get('new_wiring', '')
     dataname = data.get('dataname', 'saved_data')
     
-    new_files = File.objects.filter(name=filename)
+    new_files = ResultFile.objects.filter(name=filename)
     if len(new_files) > 0:
         new_file = new_files[0]
     else:
-        new_file = File.objects.create(friendly_name=dataname, name=filename,
+        new_file = ResultFile.objects.create(friendly_name=dataname, name=filename,
                                        template_representation=new_wiring,
                                        datatype=datatype, location=DATA_DIR)
     
@@ -718,7 +718,7 @@ def filesExist(request):
         filehashes = data['filehashes']
         existences = {}
         for filehash in filehashes:
-            existing_file = File.objects.filter(name=filehash)
+            existing_file = ResultFile.objects.filter(name=filehash)
             if len(existing_file) > 0: file_exists = True
             else: file_exists = False
             existences[filehash] = file_exists
@@ -728,7 +728,7 @@ def filesExist(request):
 
 def uploadFTPFiles(request):
     """
-    Given an FTP ``address``, ``experiment_id``, ``instrument_class``, ``loader_id``,
+    Given an FTP ``address``, ``experiment_id``, ``type``, ``loader_id``,
     and paths to the files to get (``filepaths``), the files will be retrieved from
     the ``address`` via FTP and uploaded.
     """
@@ -736,7 +736,7 @@ def uploadFTPFiles(request):
         and request.POST.has_key('username')
         and request.POST.has_key('password')
         and request.POST.has_key( 'experiment_id')
-        and request.POST.has_key('instrument_class')
+        and request.POST.has_key('type')
         and request.POST.has_key( 'loader_id')
         and request.POST.has_key('filepaths')):
         filepaths = json.loads(request.POST['filepaths']) #given as a string of a list
@@ -746,9 +746,9 @@ def uploadFTPFiles(request):
         file_descriptors = ftpview.getFiles(request.POST['address'], filepaths,
                                             username=username, password=password)
         experiment_id = request.POST['experiment_id']
-        instrument_class = request.POST['instrument_class']
+        instrument_type = request.POST['type']
         loader_id = request.POST['loader_id']
-        uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id) #upload the files
+        uploadFilesAux(file_descriptors, experiment_id, instrument_type, loader_id) #upload the files
     
     return HttpResponse('OK')
         
@@ -757,14 +757,14 @@ def uploadFiles(request):
     """
     Uploads files to Dataflow. To upload files, ``request`` must have:
         request.POST.FILES.FILES
-        request.POST.instrument_class
+        request.POST.type
         request.POST.experiment_id
         request.POST.loader_id
     """
     if request.FILES.has_key('FILES'):
-        #instrument_class = request.POST[u'instrument_class']
+        #instrument_type = request.POST[u'type']
         #instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX }
-        #instrument = instrument_class_by_language.get(instrument_class, None)
+        #instrument = instrument_type_by_language.get(instrument_type, None)
         file_data = request.FILES.getlist('FILES')
         file_descriptors = []
         for f in file_data:
@@ -778,14 +778,14 @@ def uploadFiles(request):
             file_descriptors.append({'filename': tmp_path, 'friendly_name': f.name})
         
     if file_descriptors: #only has file_descriptors if it has 'FILES' or 'FTP_FILES'
-        instrument_class = request.POST[u'instrument_class']    
+        instrument_type = request.POST[u'type']
         loader_id = request.POST[u'loader_id']
         experiment_id = request.POST[u'experiment_id']
-        uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
+        uploadFilesAux(file_descriptors, experiment_id, instrument_type, loader_id)
 
     return HttpResponse('OK') 
 
-def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id):
+def uploadFilesAux(file_descriptors, experiment_id, instrument_type, loader_id):
     """
     Uploads the files (as specified by ``file_descriptors``) to Dataflow. Additional
     parameters required as well. uploadFiles was extracted into this auxiliary method to
@@ -802,7 +802,7 @@ def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
         experiment = None #in the event the id does not match an experiment
     loader_function = None
     datatype_id = None
-    for dt in instrument_class_by_language[instrument_class].datatypes:
+    for dt in instrument_type_by_language[instrument_type].datatypes:
         for l in dt.loaders:
             if l['id'] == loader_id:
                 loader_function = l['function']
@@ -828,7 +828,7 @@ def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
             serialized = dobj.dumps()
             s_sha1 = hashlib.sha1(serialized)
             filename = s_sha1.hexdigest()
-            new_files = File.objects.filter(name=filename)
+            new_files = ResultFile.objects.filter(name=filename)
             
             string = StringIO.StringIO()
             string.write(serialized)
@@ -848,7 +848,7 @@ def uploadFilesAux(file_descriptors, experiment_id, instrument_class, loader_id)
             if len(new_files) > 0:
                 new_file = new_files[0]
             else:
-                new_file = File.objects.create(name=s_sha1.hexdigest(),
+                new_file = ResultFile.objects.create(name=s_sha1.hexdigest(),
                                                friendly_name=friendly_name,
                                                location=DATA_DIR,
                                                datatype=datatype_id)
@@ -868,11 +868,11 @@ def add_metadata_to_file(new_file, instrument):
     extrema = instrument.get_extrema()
     for key in extrema.keys():
         # Assumes that all keys (ie field headers) are strings/chars       
-        new_metadata = Metadata.objects.create(Myfile=new_file,
+        new_metadata = FileAttribute.objects.create(Myfile=new_file,
                                                Key=key + '_min',
                                                Value=extrema[key][0])
         new_file.metadata.add(new_metadata)
-        new_metadata = Metadata.objects.create(Myfile=new_file,
+        new_metadata = FileAttribute.objects.create(Myfile=new_file,
                                                Key=key + '_max',
                                                Value=extrema[key][1])
         new_file.metadata.add(new_metadata)
@@ -1002,7 +1002,7 @@ def displayEditor(request):
         # does not respect key order for OrderedDict.
     
         #try:
-        lang = wireit.instrument_to_wireit_language(instrument_class_by_language[language_name])
+        lang = wireit.instrument_to_wireit_language(instrument_type_by_language[language_name])
         file_context['language_actual'] = orderedjson.dumps(lang)
 
         _ = '''
@@ -1076,17 +1076,17 @@ def editProject(request, project_id):
                                             project=Project.objects.get(id=project_id))
         new_exp.users.add(request.user)
         _ = '''
-        # No longer using instrument name when creating an experiment! Only instrument_class matters.
+        # No longer using instrument name when creating an experiment! Only instrument_type matters.
         # This segment was replaced by the instrument class 'if' segment below.
         if request.POST.has_key('instrument_name'):
             if request.POST['instrument_name']:
                 instrument = Instrument.objects.get(id=request.POST['instrument_name'])
-                instrument_class = instrument.instrument_class
+                instrument_type = instrument.type
                 new_exp.instrument = instrument
                 new_exp.save()
         '''
-        if request.POST.has_key('instrument_class') and request.POST['instrument_class']:
-            new_exp.instrument = Instrument.objects.get(instrument_class=request.POST['instrument_class'])
+        if request.POST.has_key('type') and request.POST['type']:
+            new_exp.instrument = Instrument.objects.get(type=request.POST['type'])
             new_exp.save()
         if request.POST.has_key('facility'):
             if request.POST['facility']:
@@ -1127,18 +1127,18 @@ def editExperiment(request, experiment_id):
             write_here = tempfile.gettempdir() + file_sha1.hexdigest()
             open(write_here, 'w').write(file_contents)
             
-            new_files = File.objects.filter(name=file_sha1.hexdigest())
+            new_files = ResultFile.objects.filter(name=file_sha1.hexdigest())
             if len(new_files) > 0:
                 new_file = new_files[0]
             else:
-                new_file = File.objects.create(name=file_sha1.hexdigest(),
+                new_file = ResultFile.objects.create(name=file_sha1.hexdigest(),
                                                friendly_name=f.name,
                                                location=DATA_DIR)
             experiment.Files.add(new_file)
     if request.POST.has_key('instrument_name'):
         if request.POST['instrument_name']:
             instrument = Instrument.objects.get(id=request.POST['instrument_name'])
-            instrument_class = instrument.instrument_class
+            instrument_type = instrument.type
             experiment.instrument = instrument
             experiment.save()
     if request.POST.has_key('facility'):
@@ -1170,13 +1170,13 @@ def editExperiment(request, experiment_id):
     facility = experiment.facility
     instrument = experiment.instrument
     if instrument:
-        instrument_class = experiment.instrument.instrument_class
+        instrument_type = experiment.instrument.type
     else:
-        instrument_class = None
-    form1 = experimentForm1(initial={'facility':facility, 'instrument_class':instrument_class})
-    #form1 = experimentForm1(initial={'facility':facility, 'instrument_class':instrument_class, 'instrument_name':instrument, })
+        instrument_type = None
+    form1 = experimentForm1(initial={'facility':facility, 'type':instrument_type})
+    #form1 = experimentForm1(initial={'facility':facility, 'type':instrument_type, 'instrument_name':instrument, })
     loaders = []
-    for dt in instrument_class_by_language[instrument_class].datatypes:
+    for dt in instrument_type_by_language[instrument_type].datatypes:
         loaders.extend([l['id'] for l in dt.loaders])
     form2 = experimentForm2(USER=request.user, experiment=experiment, loaders = loaders )
     #print form2.fields['new_templates'].length

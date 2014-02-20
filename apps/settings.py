@@ -1,7 +1,7 @@
 # Django settings for dataflow project.
 #
 # Local settings are stored ROOT/private_settings.py (for deployment) or
-# ROOT/debug_settings.py (for debugging).  Copy ROOT/private_template.py
+# ROOT/debug_settings.py (for debugging).  Copy ROOT/settings_template.py
 # over these files to override the settings.
 #
 # The default path when debugging is /tmp/APPNAME on unix-like systems, or
@@ -34,6 +34,8 @@ os.environ['MPLCONFIGDIR'] = os.path.join(ROOT, '.matplotlib/')
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DATABASES = {'default': dict(ENGINE='django.db.backends.sqlite3',
                              NAME=os.path.join(data_root, 'user.db'))}
+SITE_NAME = 'tracks debug'
+SITE_DOMAIN = 'localhost:8000'
 REDIS_HOST = 'localhost'
 ALLOWED_HOSTS = ['localhost']
 

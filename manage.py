@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+"""
+Start the dataflow server.
+
+Starts the server in debug mode. Set "DJANGO_PRODUCTION=1" in os.environ to
+start in production mode.  This is done automatically in apps/wsgi.py.
+
+Use ./resetdb.sh to clear the debug database (resetdb.bat on windows).
+"""
 import sys, os
 
 # put the current directory on the path

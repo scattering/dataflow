@@ -47,7 +47,7 @@
     <script type="text/javascript">
 
         experiment_id = {{ experiment.id }};
-        instrument_class = "{{ experiment.instrument.instrument_class }}";
+        instrument_type = "{{ experiment.instrument.instrument_type }}";
         function getCookie(name) {
                 var cookieValue = null;
                 if (document.cookie && document.cookie != '') {
@@ -142,7 +142,7 @@
                     files:input.files,
                     
                     extra_data: {"experiment_id": experiment_id, 
-                                 "instrument_class": instrument_class,
+                                 "instrument_type": instrument_type,
                                  "loader_id": activeLoader},
                     
                     csrf_token: getCookie('csrftoken'),
@@ -190,7 +190,7 @@
 			<form action="/editor/" method="post" class="span-8 last">
                 {% csrf_token %}
                 <p style="padding-top: 0.8em;">
-    				<input type="hidden" name="language" value={{ experiment.instrument.instrument_class }} />
+    				<input type="hidden" name="language" value={{ experiment.instrument.instrument_type }} />
     				<input type="hidden" name="experiment_id" value={{ experiment.id }} />
 	                <input type="submit" value="Start reducing!" />
                 </p>
@@ -201,7 +201,7 @@
 		        <div class="hidden">
 			    <div id="information-col" class="span-7 last">
 			        <h2>Information</h2>
-			        <p><em>Instrument class: </em>{{ experiment.instrument.instrument_class }}</p>
+			        <p><em>Instrument class: </em>{{ experiment.instrument.instrument_type }}</p>
 			        <!--<table>
 				        {{ form1.as_table }}
 			        </table>
