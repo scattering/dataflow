@@ -1,9 +1,12 @@
 """
 Subtracts the Background from Sample (SAM-BGD)
 """
+import reduction.sans.filters as red
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
+
+from ..datatypes import SANS_DATA, xtype
 
 def correct_background_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, **kwargs):
@@ -45,4 +48,13 @@ def correct_background_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+def correct_background_action(input=None, **kwargs):
+    result = [red.correct_background(bundle[-1], bundle[0]) for bundle in input]
+    return dict(output=result)
+correct_background = correct_background_module(id='sans.correct_background',
+                                               datatype=SANS_DATA, version='1.0',
+                                               action=correct_background_action,
+                                               xtype=xtype,
+                                               filterModule=red.correct_background)
 

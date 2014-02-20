@@ -1,9 +1,11 @@
 """
 Deadtime Correction 
 """
+import reduction.sans.filters as red
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
+from ..datatypes import SANS_DATA, xtype
 
 def correct_dead_time_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, **kwargs):
@@ -99,3 +101,22 @@ def correct_dead_time_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+def correct_dead_time_action(sample_in, empty_cell_in, empty_in, blocked_in,
+                             deadtimeConstant=3.4e-6, **kwargs):
+    deadtimeConstant = float(deadtimeConstant)
+    lis = [sample_in[0], empty_cell_in[0], empty_in[0], blocked_in[0]]
+    print "List: ", lis
+    #Enter DeadTime parameter eventually
+    solidangle = [red.correct_solid_angle(f) for f in lis]
+    det_eff = [red.correct_detector_efficiency(f) for f in solidangle]
+    deadtime = [red.correct_dead_time(f, deadtimeConstant) for f in det_eff]
+    result = deadtime
+    return dict(sample_out=[result[0]], empty_cell_out=[result[1]],
+                empty_out=[result[2]], blocked_out=[result[3]])
+
+
+correct_dead_time = correct_dead_time_module(id='sans.correct_dead_time',
+                                    datatype=SANS_DATA, version='1.0',
+                                    action=correct_dead_time_action,
+                                    xtype=xtype)

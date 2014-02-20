@@ -1,9 +1,12 @@
 """
 Correct Detector Sensitivity With .DIV file
 """
+import reduction.sans.filters as red
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
+
+from ..datatypes import SANS_DATA, xtype
 
 def correct_detector_sensitivity_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, **kwargs):
@@ -59,3 +62,20 @@ def correct_detector_sensitivity_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+
+def correct_detector_sensitivity_action(COR, DIV_in, **kwargs):
+    lis = [COR[0], DIV_in[0]]
+    print "####################DIV#############"
+    print lis[1]
+    CORRECT = lis[0]
+    sensitivity = lis[-1]
+    DIVV = red.correct_detector_sensitivity(CORRECT, sensitivity)
+    DIVV.Tsam = COR[0].Tsam
+    result = DIVV
+    return dict(DIV_out=[result])
+correct_detector_sensitivity = correct_detector_sensitivity_module(
+    id='sans.correct_detector_sensitivity', datatype=SANS_DATA, version='1.0',
+    action=correct_detector_sensitivity_action, xtype=xtype,
+    filterModule=red.correct_detector_sensitivity)
+

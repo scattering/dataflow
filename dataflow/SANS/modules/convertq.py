@@ -1,9 +1,12 @@
 """
 Converts to Q
 """
+import reduction.sans.filters as red
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
+
+from ..datatypes import SANS_DATA, xtype
 
 def convertq_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, **kwargs):
@@ -45,3 +48,8 @@ def convertq_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+def convertq_action(input=None):
+    result = [red.convert_q(input[0][0])]
+    return dict(output=result)
+convertq = convertq_module(id='sans.convertq', datatype=SANS_DATA, version='1.0', action=convertq_action, xtype=xtype)

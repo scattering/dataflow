@@ -1,9 +1,12 @@
 """
 Make 1D Data through Annular Average
 """
+import reduction.sans.filters as red
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
+
+from ..datatypes import SANS_DATA, xtype
 
 def annular_av_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, **kwargs):
@@ -51,3 +54,15 @@ def annular_av_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+
+def annular_av_action(ABS, **kwargs):
+    correct = red.convert_q(ABS[0])
+    AVG = red.annular_av(correct)
+    result = [AVG]
+    print "Done Red"
+    return dict(OneD=result)
+annular_av = annular_av_module(id='sans.annular_av', datatype=SANS_DATA,
+                             version='1.0', action=annular_av_action,
+                             xtype=xtype, filterModule=red.annular_av)
+

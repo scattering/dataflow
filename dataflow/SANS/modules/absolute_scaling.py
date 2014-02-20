@@ -1,9 +1,12 @@
 """
 Absolute Scaling
 """
+import reduction.sans.filters as red
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
+
+from ..datatypes import SANS_DATA, xtype
 
 def absolute_scaling_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, **kwargs):
@@ -99,3 +102,18 @@ def absolute_scaling_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+
+def absolute_scaling_action(DIV, empty, sensitivity, ins_name='',
+                            bottomLeftCoord={}, topRightCoord={}, **kwargs):
+    #sample,empty,DIV,Tsam,instrument
+    coord_left = (int(bottomLeftCoord['X']), int(bottomLeftCoord['Y']))
+    coord_right = (int(topRightCoord['X']),  int(topRightCoord['Y']))
+    DIV, empty, sensitivity = DIV[0], empty[0], sensitivity[0]
+    ABS = red.absolute_scaling(DIV, empty, sensitivity, DIV.Tsam, ins_name, coord_left, coord_right)
+    return dict(ABS=[ABS])
+absolute_scaling = absolute_scaling_module(id='sans.absolute_scaling',
+                                   datatype=SANS_DATA, version='1.0',
+                                   action=absolute_scaling_action, xtype=xtype,
+                                   filterModule=red.absolute_scaling)
+

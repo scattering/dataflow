@@ -2,8 +2,8 @@
 Uses transmission and blocked bean file 
 """
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
 
 def correct_blocked_beam_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, **kwargs):

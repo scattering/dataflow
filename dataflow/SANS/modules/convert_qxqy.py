@@ -1,16 +1,19 @@
 """
-Correct Detector Efficiency With .DIV file
+Convert qx and qy, so that they can be plotted in javascript
 """
+import reduction.sans.filters as red
 
-from .. import config
-from ..core import Module
+from ... import config
+from ...core import Module
 
-def correct_detector_efficiency_module(id=None, datatype=None, action=None,
+from ..datatypes import SANS_DATA, xtype
+
+def convert_qxqy_module(id=None, datatype=None, action=None,
                  version='0.0', fields={}, **kwargs):
-    """Uses .DIV to peform division in reduction steps"""
+    """Convert qx and qy for javascript plotting"""
 
     icon = {
-        'URI': config.IMAGES + "correct_detector_efficiency.png",
+        'URI': config.IMAGES + "convert_qxqy.png",
         'terminals': {
             'input': (0, 10, -1, 0),
             'output': (20, 10, 1, 0),
@@ -34,7 +37,7 @@ def correct_detector_efficiency_module(id=None, datatype=None, action=None,
 
     # Combine everything into a module.
     module = Module(id=id,
-                  name='correct_detector_efficiency',
+                  name='convert_qxqy',
                   version=version,
                   description=action.__doc__,
                   icon=icon,
@@ -45,3 +48,15 @@ def correct_detector_efficiency_module(id=None, datatype=None, action=None,
                   )
 
     return module
+
+def convert_qxqy_action(input=None):
+    print "input: ", input
+    result, qx, qy = red.convert_qxqy(input[0][0])
+    print "Convertqxqy", result
+    return dict(output=[result])
+
+convert_qxqy = convert_qxqy_module(id='sans.convert_qxqy',
+                                   datatype=SANS_DATA, version='1.0',
+                                   action=convert_qxqy_action, xtype=xtype,
+                                   filterModule=red.convert_qxqy)
+
