@@ -19,10 +19,15 @@
 import os
 APPNAME="tracks"
 
+# Site name/domain will be plugged into the database on resetdb.sh.  To change
+# it you will need to set
+#
+SITE_NAME=""
+
 DATA_DIR = os.path.expanduser('/var/lib/%s'%APPNAME)
 CACHE_DIR = os.path.expanduser('/var/cache/%s'%APPNAME)
 LOG_FILE = os.path.expanduser('/var/log/%s'%APPNAME)
-SECRET_KEY_FILE = os.path.expanduser('~/.%s/secret.txt'%APPNAME)
+SECRET_KEY_FILE = os.path.join(DATA_DIR, 'secret.txt'%APPNAME)
 os.environ['MPLCONFIGDIR'] = os.path.join(CACHE_DIR, '.matplotlib/')
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -51,6 +56,8 @@ DATABASES = { 'default': DB }
 
 REDIS_HOST = 'localhost'
 
+SITE_NAME = "Dr. Neutron's Diet Tablets (for reduction)!"
+SITE_DOMAIN = 'www.drneutron.org'
 ALLOWED_HOSTS = ['.drneutron.org']
 
 TIME_ZONE = 'America/New_York'
