@@ -1,0 +1,19 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }} | {% trans 'tracks' %}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">{% trans 'tracks administration' %}</h1>
+{% endblock %}
+
+{% block userlinks %}
+        <span style="width: 5em">&nbsp;</span>
+        {% url 'django-admindocs-docroot' as docsroot %}
+        <a href="/projects/">Projects</a> &middot;
+        {% if docsroot %}<a href="{{ docsroot }}">Admin help</a> &middot; {% endif %}
+        <a href="/accounts/{{ user }}">Profile</a> &middot;
+        <a href="/accounts/signout/">Log out</a>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

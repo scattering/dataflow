@@ -108,6 +108,7 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
+# The userena package uses MEDIA_ROOT/mugshots to store mugshots
 MEDIA_ROOT = os.path.join(DATA_DIR,'media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
@@ -202,7 +203,8 @@ ANONYMOUS_USER_ID = -1
 AUTH_PROFILE_MODULE = 'tracks.UserProfile'
 LOGIN_URL = '/accounts/signin/'
 LOGOUT_URL = '/accounts/signout/'
-LOGIN_REDIRECT_URL = '/accounts/%(username)s/'
+LOGIN_REDIRECT_URL = '/'
+USERENA_SIGNIN_REDIRECT_URL = '/'
 USERENA_ACTIVATION_DAYS = 2
 USERENA_WITHOUT_USERNAMES = True
 # Also requires email backend

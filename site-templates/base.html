@@ -24,9 +24,12 @@
 	        <div style="text-align: right;">
 	        <a href="/">Home</a> &middot; 
             {% if user.is_authenticated %}
-            <a href="/projects/">projects</a> &middot; <a href="/accounts/signout/">Log out</a>
+                <a href="/projects/">Projects</a> &middot;
+                {% if user.is_active and user.is_staff %}<a href="/admin/">Admin</a> &middot;{% endif %}
+                <a href="/accounts/{{ user }}">Profile</a> &middot;
+                <a href="/accounts/signout/">Log out</a>
             {%else%}
-            <a href="/accounts/signin/">Log in</a> &middot; <a href="/accounts/signup/">Register</a>
+                <a href="/accounts/signin/">Log in</a> &middot; <a href="/accounts/signup/">Register</a>
             {% endif %}
             </div>
             <hr />
