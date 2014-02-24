@@ -17,6 +17,16 @@
             tbody tr:nth-child(2n) td, tbody tr.even td,
             ul li:nth-child(2n), ol li:nth-child(2n) { background: inherit; /* background: none repeat scroll 0 0 #F3F3F9; */ }
         </style>
+        <script type="text/javascript" src="/static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
+        <script type="text/javascript">
+function set_initial_focus() {
+  // TODO: may want to filter disabled fields
+  var input = $('form').find('input[type=text],textarea,select').filter(':visible:first');
+  input.focus().select();
+}
+window.onload = set_initial_focus;
+        </script>
+
         {% block head %}{% endblock %}
     </head>
 	<body>
