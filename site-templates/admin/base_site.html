@@ -9,6 +9,7 @@
 
 {% block userlinks %}
         <span style="width: 5em">&nbsp;</span>
+        <a href="/">Home</a> &middot;
         {% url 'django-admindocs-docroot' as docsroot %}
         <a href="/projects/">Projects</a> &middot;
         {% if docsroot %}<a href="{{ docsroot }}">Admin help</a> &middot; {% endif %}
