@@ -2,20 +2,37 @@
 from django.conf.urls import patterns, include, url
 #from tracks.views import xhr_test, mytest, home
 
-# Uncomment the next two lines to enable the admin:
-from django.contrib import admin
-admin.autodiscover()
+def allow_admin(baseurl='admin', docs=True):
+    """
+    Url patterns for admin access.
 
+    Call to add admin support to the app.
+    """
+    from django.contrib import admin
+    admin.autodiscover()
+    urls = []
+    if docs:
+        urls += patterns('', url(r'^%s/doc/'%baseurl, include('django.contrib.admindocs.urls')))
+    urls += patterns('', url('^%s/'%baseurl, admin.site.urls))
+    return urls
 
-urlpatterns = patterns(
+urlpatterns = []
+
+# Uncomment the following line for admin support.  Also need to uncomment
+# lines in settings.py
+urlpatterns += allow_admin(baseurl="admin", docs=True)
+
+# userena account access urls
+urlpatterns += patterns('', url(r'^accounts/', include('userena.urls')))
+
+# tracks application urls
+urlpatterns += patterns(
     'apps.tracks.views',
-    ('^accounts/', include('userena.urls')),
-    #('^login/$', 'django.contrib.auth.views.login'),
+    ('^$', 'home'),
+    ('^index.html$', 'home'),
 
-    ('^hello/$', 'xhr_test'),
-    ('^test/$', 'mytest'),
+
     ('^listWirings/$', 'listWirings'),
-    ('^interactors/$', 'showInteractors'),
     ('^plotWindow/$', 'showPlotWindow'),
     ('^sliceWindow/$', 'showSliceWindow'),
     ('^uploadFiles/$', 'uploadFiles'),
@@ -60,22 +77,5 @@ urlpatterns = patterns(
     ('^projects/editProject/\d+/editExperiment/(?P<experiment_id>\d+)', 'editExperiment'),
     ('^editProject/editExperiment/$', 'editExperiment'),
 
-
-    # Examples:
-    # url(r'^$', 'dataflow.views.home', name='home'),
-    # url(r'^dataflow/', include('dataflow.foo.urls')),
-
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
 )
 
-urlpatterns += patterns('',
-                        url(r'^admin/', include(admin.site.urls)),
-                        (r'', include('registration.urls')),
-                        #(r'^profiles/', include('profiles.urls')),
-                        (r'', 'apps.tracks.views.home'),
-
-                        )

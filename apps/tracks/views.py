@@ -55,9 +55,6 @@ from .forms import (languageSelectForm, titleOnlyForm, experimentForm1,
 DATA_DIR=settings.DATA_DIR
 CACHE_MANAGER.use_redis(settings.REDIS_HOST)
 
-def showInteractors(request):
-    return render_to_response('interactors.html')
-
 def showPlotWindow(request):
     return render_to_response('plotwindow.html')
 
@@ -67,26 +64,11 @@ def showFTPloader(request):
 def showSliceWindow(request):
     return render_to_response('slicewindow.html')
 
-def mytest(request):
-    return render_to_response('tracer_testingforWireit/xhr_temp.html')
-
 def uploadtest(request):
     return render_to_response('upload.html')
 
 def testTable(request):
     return render(request,'testTable.html')
-
-def xhr_test(request):
-    if request.is_ajax():
-        if request.method == 'GET':
-            message = "This is an XHR GET request"
-        elif request.method == 'POST':
-            message = "This is an XHR POST request"
-        else:
-            message = "No XHR"
-    else:
-        message = "What is this, WSGI?"
-    return HttpResponse(message)
 
 def return_data(request):
     dataArray = [['file name', 'database id', 'sha1', 'x', 'y', 'z'],
@@ -324,7 +306,7 @@ def getBinaryData(request):
 
 def home(request):
     context = RequestContext(request)
-    site_list = ['/editor/', '/login/', '/projects/', '/interactors/']
+    site_list = ['/editor/', '/projects/' ]
     return render_to_response('tracer_testingforWireit/home.html',
                               locals(), context_instance=context)
 
@@ -761,12 +743,12 @@ def uploadFiles(request):
         request.POST.experiment_id
         request.POST.loader_id
     """
+    file_descriptors = []
     if request.FILES.has_key('FILES'):
         #instrument_type = request.POST[u'type']
         #instrument_by_language = {'andr2': ANDR, 'andr':ANDR, 'sans':SANS_INS, 'tas':TAS_INS, 'asterix':ASTERIX }
         #instrument = instrument_type_by_language.get(instrument_type, None)
         file_data = request.FILES.getlist('FILES')
-        file_descriptors = []
         for f in file_data:
             file_contents = f.read()
             file_sha1 = hashlib.sha1(file_contents)

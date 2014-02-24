@@ -108,7 +108,7 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = os.path.join(DATA_DIR,'media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -180,10 +180,10 @@ INSTALLED_APPS = (
 
     'apps.tracks',
     'south',
-    # Uncomment the next line to enable the admin:
+    # Uncomment the next lines to enable the admin and admindocs.  Also need
+    # to uncomment admin support in urls.py
     'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    'django.contrib.admindocs',
 
     # Account management
     'userena',
