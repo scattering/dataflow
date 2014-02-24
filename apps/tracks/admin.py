@@ -1,13 +1,11 @@
-from django.contrib import admin
+from apps.common.autoadmin import register_all_models
+from . import models
 
-from .models import Project
-from .models import Experiment
+options = {
+    # 'Model': { 'option': value, ... },
+    'Facility': {'readonly': True},
+    'Instrument': {'readonly': True},
+}
 
-#NOTE: class not used currently...
-class ProjectAdmin(admin.ModelAdmin):
-    exclude = ('templateInstances',)
-    
-#admin.site.register(Project, ProjectAdmin)
+register_all_models(models, options)
 
-admin.site.register(Project)
-admin.site.register(Experiment)

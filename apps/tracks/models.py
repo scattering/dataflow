@@ -1,20 +1,7 @@
 from django.utils.translation import ugettext as _T
 from django.db import models
 from django.contrib.auth.models import User
-from userena.models import UserenaBaseProfile
 
-class UserProfile(UserenaBaseProfile):
-    """
-    User details such as home institution, etc., which we may wish to store
-    in addition to the user details such as name and email maintained by
-    django User.  The UserenaBaseProfile maintains the mug shot.  For now
-    we are not maintaining a user profile.
-    """
-    user = models.OneToOneField(User,
-                                unique=True,
-                                verbose_name=_T('user'),
-                                related_name='profile',
-                                )
 
 # SHA1 hash length for hashed values.
 HASH_LENGTH = 160
@@ -384,6 +371,8 @@ class Facility(models.Model):
     name.help_text = _T("Facility name.")
     data_server = models.CharField(max_length=200)
     data_server.help_text = _T("URL of the data server.")
+    class Meta:
+        verbose_name_plural = "facilities"
     def __unicode__(self):
         return self.name
 

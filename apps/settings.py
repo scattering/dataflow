@@ -180,6 +180,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'apps.tracks',
+    'apps.accounts',
     'south',
     # Uncomment the next lines to enable the admin and admindocs.  Also need
     # to uncomment admin support in urls.py
@@ -200,7 +201,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 ANONYMOUS_USER_ID = -1
-AUTH_PROFILE_MODULE = 'tracks.UserProfile'
+AUTH_PROFILE_MODULE = 'accounts.UserProfile'
 LOGIN_URL = '/accounts/signin/'
 #LOGIN_REDIRECT_URL = '/'
 #LOGOUT_URL = '/'
