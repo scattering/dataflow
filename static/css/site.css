@@ -1,0 +1,13 @@
+
+div#site-nav { text-align: right; }
+
+label { font-weight: inherit; }
+.hidden { overflow: hidden; }
+.colborder { margin-bottom: -100%; padding-bottom: 100%; }
+caption, td, th { padding-top: 0, padding-bottom: 0; }
+tbody tr:nth-child(2n) th, tbody tr.even th,
+tbody tr:nth-child(2n) td, tbody tr.even td,
+ul li:nth-child(2n), ol li:nth-child(2n) {
+    background: inherit;
+    /* background: none repeat scroll 0 0 #F3F3F9; */
+}

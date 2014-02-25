@@ -1,23 +1,21 @@
+{% load static from staticfiles %}
+{% static "css/blueprint/blueprint" as bp_css %}
+{% static "css/site.css" as site_css %}
+{% static "lib/jquery-min.js" as jquery %}
 <html>
     <head>
-        <title>{% block title %}{% endblock %}</title>
-        
+        <title>{% block title %}tracks{% endblock %}</title>
+
         <!-- Blueprint CSS -->
-        <link rel="stylesheet" href="/static/css/blueprint/blueprint/screen.css" type="text/css" media="screen, projection" />
-        <link rel="stylesheet" href="/static/css/blueprint/blueprint/print.css" type="text/css" media="print" />
-        <!--[if lt IE 8]><link rel="stylesheet" href="/static/css/blueprint/blueprint/ie.css" type="text/css" media="screen, projection" /><![endif]-->
-        <link rel="stylesheet" href="/static/css/blueprint/blueprint/plugins/fancy-type/screen.css" type="text/css" media="screen, projection" />
-        <style type="text/css">
-            body { font-size: 0.9em; }
-            label { font-weight: inherit; }
-            .hidden { overflow: hidden; }
-            .colborder { margin-bottom: -100%; padding-bottom: 100%; }
-            caption, td, th { padding-top: 0, padding-bottom: 0; }
-            tbody tr:nth-child(2n) th, tbody tr.even th,
-            tbody tr:nth-child(2n) td, tbody tr.even td,
-            ul li:nth-child(2n), ol li:nth-child(2n) { background: inherit; /* background: none repeat scroll 0 0 #F3F3F9; */ }
-        </style>
-        <script type="text/javascript" src="/static/lib/plotting/jqplot/jquery-1.5.1.js"></script>
+        <link rel="stylesheet" href="{{bp_css}}/screen.css" type="text/css" media="screen, projection" />
+        <link rel="stylesheet" href="{{bp_css}}/print.css" type="text/css" media="print" />
+        <!--[if lt IE 8]><link rel="stylesheet" href="{{bp_css}}/ie.css" type="text/css" media="screen, projection" /><![endif]-->
+        <link rel="stylesheet" href="{{bp_css}}/plugins/fancy-type/screen.css" type="text/css" media="screen, projection" />
+        <link rel="stylesheet" type="test/css" href="{{site_css}}" />
+
+        <script type="text/javascript" src="{{jquery}}" />
+
+
         <script type="text/javascript">
 function set_initial_focus() {
   // TODO: may want to filter disabled fields
@@ -31,20 +29,25 @@ window.onload = set_initial_focus;
     </head>
 	<body>
 	    <div class="container">
-	        <div style="text-align: right;">
-	        <a href="/">Home</a> &middot; 
-            {% if user.is_authenticated %}
-                <a href="/projects/">Projects</a> &middot;
-                {% if user.is_active and user.is_staff %}<a href="/admin/">Admin</a> &middot;{% endif %}
-                <a href="/accounts/{{ user }}">Profile</a> &middot;
-                <a href="/accounts/signout/">Log out</a>
-            {%else%}
-                <a href="/accounts/signin/">Log in</a> &middot; <a href="/accounts/signup/">Register</a>
-            {% endif %}
+            <div id="user-state">
+
             </div>
+	        <div id="site-nav">{% block site-nav %}
+                <a href="/">Home</a> &middot;
+                {% for url,label in nav_pages %}
+                    <a href="{{url}}">{{label|capfirst}}</a> &middot;
+                {% endfor %}
+                {% if user.is_authenticated %}
+                    <a href="/projects/">Projects</a> &middot;
+                    {% if user.is_active and user.is_staff %}<a href="/admin/">Admin</a> &middot;{% endif %}
+                    <a href="/accounts/{{ user }}">Profile</a> &middot;
+                    <a href="/accounts/signout/">Log out</a>
+                {%else%}
+                    <a href="/accounts/signin/">Log in</a> &middot; <a href="/accounts/signup/">Register</a>
+                {% endif %}
+            {% endblock %}</div>
             <hr />
-		    {% block content %}
-		    {% endblock %}
+		    {% block content %} {% endblock %}
 		</div>
 	</body>
 </html>
