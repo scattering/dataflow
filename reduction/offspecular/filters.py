@@ -8,8 +8,8 @@ from scipy import signal
 
 from FilterableMetaArray import FilterableMetaArray as MetaArray
 from he3analyzer import wxHe3AnalyzerCollection as He3AnalyzerCollection
-from reflred.formats import load
-from reflred import rebin as reb
+from reflred.reflred.formats import load
+from reflred.reflred import rebin as reb
 import h5py
 import dateutil.parser
 import tempfile

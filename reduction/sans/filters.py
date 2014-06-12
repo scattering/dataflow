@@ -280,7 +280,7 @@ correct for the fact that the detector is flat and the eswald sphere is curved.
     y0=sansdata.metadata['det.beamy'] #should be close to 64
     wavelength=sansdata.metadata['resolution.lmda']
     shape=sansdata.data.x.shape
-    print shape
+    #print shape
 # theta=np.empty(shape,'Float64')
 # q=np.empty(shape,'Float64')
     qx=np.empty(shape,'Float64')
@@ -454,10 +454,10 @@ Coords are taken with reference to bottom left of the image.
     I_in_beam=0.0
     I_empty_beam=0.0
     (xmax,ymax) = np.shape(in_beam.data.x)
-    print xmax,ymax
+    #print xmax,ymax
     #Vectorize this loop, it's quick, but could be quicker
     #test against this simple minded implementation
-    print ymax-coords_bottom_left[1],ymax-coords_upper_right[1]
+    #print ymax-coords_bottom_left[1],ymax-coords_upper_right[1]
     for x in range(coords_bottom_left[0],coords_upper_right[0]+1):
         for y in range(ymax-coords_upper_right[1],ymax-coords_bottom_left[1]+1):
             I_in_beam=I_in_beam+in_beam.data.x[x,y]
@@ -608,11 +608,11 @@ def annular_av(sansdata):
    
     # for now, we'll make the q-bins have the same width as a single pixel
     step = q_per_pixel
-    print "Step: ", step
+    #print "Step: ", step
     shape1 = (128,128)
     center = (sansdata.metadata['det.beamx'],sansdata.metadata['det.beamy'])
     Qmax = sansdata.q.max()
-    print "QMax: ",Qmax
+    #print "QMax: ",Qmax
     Q = np.arange(0,Qmax,step)
     #print "Q=",Q
     I = []
@@ -631,12 +631,12 @@ def annular_av(sansdata):
     I = (np.array(I)).tolist()
     metadata = deepcopy(sansdata.metadata)
     plot1 = plot1D(Q,I,metadata)
-    print "Q is : ", Q
-    print "I is : ", I
+    #print "Q is : ", Q
+    #print "I is : ", I
     Qlog = np.log10(Q).tolist()
     Ilog = np.log10(I).tolist()
-    print "Qlog: ", Qlog
-    print "Ilog: ", Ilog
+    #print "Qlog: ", Qlog
+    #print "Ilog: ", Ilog
     #plt.plot(Q,I,'ro')
     #plt.title('1D')
     #plt.xlabel('q(A^-1)')
@@ -657,13 +657,13 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument,coord_left,coord_right): #
         pixel/=10
     lambd = wavelength = empty.metadata['resolution.lmda']
     attenNo = empty.metadata['run.atten']
-    print "Pixel: ",pixel
-    print "Attetno: ",attenNo
-    print "Countime: ",countTime
-    print "monCnt: ", monCnt
-    print "sdd:", sdd
-    print "Lambda: ",lambd
-    print "detCount: ", detCnt
+    #print "Pixel: ",pixel
+    #print "Attetno: ",attenNo
+    #print "Countime: ",countTime
+    #print "monCnt: ", monCnt
+    #print "sdd:", sdd
+    #print "Lambda: ",lambd
+    #print "detCount: ", detCnt
     
     #Need attenTrans - AttenuationFactor - need to know whether NG3, NG5 or NG7 (acctStr)
     
@@ -698,7 +698,7 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument,coord_left,coord_right): #
     #-----------------------------
     #AJJ - array indexing issue here. But this is a hack anyway - need to interpolate wavelength values
     attenTrans = attenFact[instrument][attenNo][wavelength]
-    print "attenFact: ", attenTrans
+    #print "attenFact: ", attenTrans
     
     
     #-------------------------------------------------------------------------------------#
@@ -726,14 +726,14 @@ def absolute_scaling(sample,empty,DIV,Tsam,instrument,coord_left,coord_right): #
             summ = summ + data.data[x,y]
             sumlist.append(data.data[x,y])
     detCnt = summ
-    print "DETCNT: ",detCnt
+    #print "DETCNT: ",detCnt
 
    
     #------End Result-------#
     #This assumes that the data has *not* been normalized at all.
     #Thus either fix this or pass un-normalized data.
     kappa = detCnt/countTime/attenTrans*1.0e8/(monCnt/countTime)*(pixel/sdd)**2 #Correct Value: 6617.1
-    print "Kappa: ", kappa
+    #print "Kappa: ", kappa
                                                  
     #utc_datetime = date.datetime.utcnow()
     #print utc_datetime.strftime("%Y-%m-%d %H:%M:%S")
@@ -791,30 +791,30 @@ def chain_corrections():
                                                       coord_left,coord_right)
     transmission_empty_cell_4m_rat=generate_transmission(transmission_empty_cell_4m_norm,empty_4m_norm,
                                                       coord_left,coord_right)
-    print 'Sample transmission= {0} (IGOR Value = 0.724): '.format(transmission_sample_cell_4m_rat) #works now
-    print 'Empty Cell transmission= {0} (IGOR Value = 0.929): '.format(transmission_empty_cell_4m_rat)
+    #print 'Sample transmission= {0} (IGOR Value = 0.724): '.format(transmission_sample_cell_4m_rat) #works now
+    #print 'Empty Cell transmission= {0} (IGOR Value = 0.929): '.format(transmission_empty_cell_4m_rat)
     
     #Initial Correction
     SAM = sample_4m_norm
-    print SAM.data.x
+    #print SAM.data.x
     EMP = empty_cell_4m_norm
-    print "EMP: "
-    print EMP.data.x
+    #print "EMP: "
+    #print EMP.data.x
     BGD = blocked_beam_4m
-    print "BGD"
-    print BGD.data.x
+    #print "BGD"
+    #print BGD.data.x
     Tsam = transmission_sample_cell_4m_rat
     Temp = transmission_empty_cell_4m_rat
     COR1 = SAM.__sub1__(BGD)
-    print COR1.data.x
+    #print COR1.data.x
     COR2 = (EMP.__sub1__(BGD))
     COR3 = COR2.__mul__(Tsam/Temp)
-    print COR2.data.x
-    print COR3.data.x
+    #print COR2.data.x
+    #print COR3.data.x
     COR = COR1.__sub1__(COR3)
-    print "after initial correction: "
+    #print "after initial correction: "
     
-    print COR.data.x
+    #print COR.data.x
     
     ##Test initial correction
     #plt.figure()
@@ -844,8 +844,8 @@ def chain_corrections():
     
     #Have to pass un-normalized, as loaded, data file here for empty.
     ABS = absolute_scaling(CAL,empty_4m,sensitivity,Tsam,'NG3')
-    print "ABS: "
-    print ABS
+    #print "ABS: "
+    #print ABS
     
     #x,y = q_is_zero_at(CAL)
     #IZERO = CAL.data.x[x,y]
@@ -889,8 +889,8 @@ def chain_corrections():
     
     
     AVG = annular_av(ABSQ)
-    print sensitivity.data
-    print AVG
+    #print sensitivity.data
+    #print AVG
     
 
 def map_files(key):
