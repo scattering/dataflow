@@ -49,7 +49,7 @@ PIXEL_SIZE_X_CM=.508
 PIXEL_SIZE_Y_CM=.508
 
 #the bottom-right pixel has an intensity which is a mistake in the live data.
-IGNORE_BOTTOMRIGHT_PIXEL = True # bottom right pixel is at end of first row of xdata
+IGNORE_CORNER_PIXELS = True # for some reason, bad data showing up in the corners...
 
 class SansData(object):
     """SansData object used for storing values from a sample file (not div/mask).               
@@ -109,10 +109,10 @@ class SansData(object):
             zmax = 1.0
         else: 
             zmin = self.data.x[self.data.x > 1e-10].min()
-            if IGNORE_BOTTOMRIGHT_PIXEL:
-                datamask = np.ones(self.data.x.shape, dtype='bool')
-                datamask[0,-1] = False
-                zmax = self.data.x[datamask].max()
+            if IGNORE_CORNER_PIXELS == True:
+                mask = np.ones(self.data.x.shape, dtype='bool')
+                mask[0,0] = mask[-1,0] = mask[-1,-1] = mask[0,-1] = 0.0
+                zmax = self.data.x[mask].max()
             else:
                 zmax = self.data.x.max()
         plottable_data = {
@@ -622,6 +622,8 @@ def annular_av(sansdata):
         # outer radius is the q of the next bin, also converted to pixel dimensions:
         outer_r = (i + step) * (1.0/q_per_pixel)
         mask = annular_mask_antialiased(shape1,center,inner_r,outer_r)
+        if IGNORE_CORNER_PIXELS == True:
+            mask[0,0] = mask[-1,0] = mask[-1,-1] = mask[0,-1] = 0.0
         #print "Mask: ",mask
         norm_integrated_intensity = np.sum(mask*sansdata.data.x)
         if (norm_integrated_intensity != 0.0):
