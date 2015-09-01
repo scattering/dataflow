@@ -1,0 +1,11 @@
+{% extends "userena:userena/profile_detail.html" %}
+{% load i18n %}
+
+{% block title %}tracks profile{% endblock %}
+
+{% block profile_navigation_items %}
+    <li><a href="{% url 'userena_profile_edit' user.username %}">{% trans "Edit details" %}</a></li>
+    <li><a href="{% url 'userena_password_change' user.username %}">{% trans "Change password" %}</a></li>
+    <li><a href="{% url 'userena_email_change' user.username %}">{% trans "Change email" %}</a></li>
+{% endblock %}
+
