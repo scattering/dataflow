@@ -14,8 +14,8 @@ from numpy import (cos, pi, cumsum, arange, ndarray, ones, zeros, newaxis,
 from numpy.ma import MaskedArray
 from scipy import signal
 import h5py
-from bumps import rebin as reb
 
+from refl1d import rebin as reb
 from ..reflectometry.reduction.formats import load
 
 from .FilterableMetaArray import FilterableMetaArray as MetaArray

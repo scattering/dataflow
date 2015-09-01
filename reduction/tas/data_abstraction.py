@@ -4,7 +4,7 @@ from cStringIO import StringIO
 import json
 
 import numpy as np
-from bumps.rebin import bin_edges, rebin
+from refl1d.rebin import bin_edges, rebin
 
 from ..common import uncertainty, err1d
 from ..common.formatnum import format_uncertainty
