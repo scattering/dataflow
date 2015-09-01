@@ -12,6 +12,8 @@
 import os,sys
 import stat
 
+from django.conf import global_settings
+
 APPNAME = 'tracks'
 ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 DEBUG = 'DJANGO_PRODUCTION' not in os.environ
@@ -155,6 +157,9 @@ TEMPLATE_LOADERS = (
 )
 
 
+TEMPLATE_CONTEXT_PROCESSORS = global_settings.TEMPLATE_CONTEXT_PROCESSORS
+TEMPLATE_CONTEXT_PROCESSORS += ('apps.tracks.context_processors.assets',)
+
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -213,7 +218,6 @@ USERENA_WITHOUT_USERNAMES = True
 # Also requires email backend
 
 
-
 # =============================================================================
 # *****************************************************************************
 # Private settings
@@ -237,5 +241,5 @@ if os.path.exists(PRIVATE_FILE):
     LOGGING['handlers']['file']['filename'] = LOG_FILE
 del PRIVATE_FILE
 
-from apps.keygen import get_key
+from .keygen import get_key
 SECRET_KEY = get_key(SECRET_KEY_FILE)

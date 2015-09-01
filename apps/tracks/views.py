@@ -352,7 +352,7 @@ def displayFileLoad(request):
 sample_data = {
     'type': '2d',
     'z':  [ [1, 2], [3, 4] ],
-    'title': 'This is the title',
+    'name': 'This is the title',
     'dims': {
         'xmax': 1.0,
         'xmin': 0.0,
@@ -414,12 +414,12 @@ def saveWiring(request):
     if postData['saveToInstrument'] == True:
         if user.is_staff:
             instr = Instrument.objects.get(instrument_type = new_wiring['language'])
-            if len(instr.Templates.filter(Title=new_wiring['name'])) > 0:
+            if len(instr.Templates.filter(name=new_wiring['name'])) > 0:
                 result = {'save': 'failure', 'errorStr': 'this name exists, please use another'}
                 reply = HttpResponse(json.dumps(result))
                 reply.status_code = 500
                 return reply
-            temp = instr.Templates.create(Title=new_wiring['name'],
+            temp = instr.Templates.create(name=new_wiring['name'],
                                           Representation=json.dumps(new_wiring))
             temp.user.add(request.user)
         else:
@@ -428,12 +428,12 @@ def saveWiring(request):
             reply.status_code = 500
             return reply
     else:
-        if len(Template.objects.filter(Title=new_wiring['name'])) > 0:
+        if len(Template.objects.filter(name=new_wiring['name'])) > 0:
             result = {'save': 'failure', 'errorStr': 'This name exists, please use another.'}
             reply = HttpResponse(json.dumps(result))
             reply.status_code = 500
             return reply
-        temp = Template.objects.create(Title=new_wiring['name'],
+        temp = Template.objects.create(name=new_wiring['name'],
                                        Representation=json.dumps(new_wiring))
         temp.user.add(request.user)
     # this puts the Template into the pool of existing Templates.
@@ -1014,7 +1014,7 @@ def languageSelect(request):
 ###########
 ## Views for users, redirects to projects page from login. Then continues logically from there.
 @login_required
-def projects(request):
+def view_projects(request):
     context = RequestContext(request)
     #Using an elif setup to save a bit of time since only one button (to delete or add project)
     # can be clicked for one request.
@@ -1025,11 +1025,11 @@ def projects(request):
         #of 10, will make the next project_id 11 instead of reusing 7. Then if ids 8-11 were
         #deleted, then he next one made would be 7 again.
     elif request.POST.has_key('new_project'):
-        newproj = Project.objects.create(Title=request.POST['new_project'])
+        newproj = Project.objects.create(name=request.POST['new_project'])
         # importing secret key here only to minimize its visibility...
         from apps.keygen import get_key
-        msg = str(newproj.Title) + ';' + str(newproj.id) #creating activation_key based on project Title and id
-        newproj.activation_key = hmac.new(get_key(), msg, hashlib.sha1).hexdigest()
+        msg = str(newproj.name) + ';' + str(newproj.id) #creating activation_key based on project name and id
+        newproj.activation_key = hmac.new(get_key(settings.SECRET_KEY_FILE), msg, hashlib.sha1).hexdigest()
         newproj.save()
         newproj.users.add(request.user)
     project_list = Project.objects.filter(users=request.user)
@@ -1044,12 +1044,12 @@ def projects(request):
     except EmptyPage:
         projects = paginator.page(paginator.num_pages)
     form = titleOnlyForm()
-    return render_to_response('userProjects/displayProjects.html',
+    return render_to_response('tracks/view_projects.html',
                               {'projects':projects, 'form':form},
                               context_instance=context)
 
 @login_required
-def editProject(request, project_id):
+def edit_project(request, project_id):
     if request.POST.has_key('experiment_id'):
         experiment_id = request.POST['experiment_id']
         Experiment.objects.get(id=experiment_id).delete() 
@@ -1057,18 +1057,8 @@ def editProject(request, project_id):
         new_exp = Experiment.objects.create(ProposalNum=request.POST['new_experiment'],
                                             project=Project.objects.get(id=project_id))
         new_exp.users.add(request.user)
-        _ = '''
-        # No longer using instrument name when creating an experiment! Only instrument_type matters.
-        # This segment was replaced by the instrument class 'if' segment below.
-        if request.POST.has_key('instrument_name'):
-            if request.POST['instrument_name']:
-                instrument = Instrument.objects.get(id=request.POST['instrument_name'])
-                instrument_type = instrument.type
-                new_exp.instrument = instrument
-                new_exp.save()
-        '''
-        if request.POST.has_key('type') and request.POST['type']:
-            new_exp.instrument = Instrument.objects.get(type=request.POST['type'])
+        if request.POST.has_key('instrument') and request.POST['instrument']:
+            new_exp.instrument = Instrument.objects.get(type=request.POST['instrument'])
             new_exp.save()
         if request.POST.has_key('facility'):
             if request.POST['facility']:
@@ -1078,11 +1068,9 @@ def editProject(request, project_id):
     context = RequestContext(request)
     project = Project.objects.get(id=project_id)
     experiment_list = project.experiment_set.all() #experiment_list = project.experiments.all()
-    
+
     paginator = Paginator(experiment_list, 10)
-    page = request.GET.get('page')
-    if page == None:
-        page = 1
+    page = request.GET.get('page', 1)
     try:
         experiments = paginator.page(page)
     except PageNotAnInteger:
@@ -1090,12 +1078,12 @@ def editProject(request, project_id):
     except EmptyPage:
         experiments = paginator.page(paginator.num_pages)
     form = titleOnlyFormExperiment()
-    return render_to_response('userProjects/editProject.html',
+    return render_to_response('tracks/edit_project.html',
                               {'project':project, 'form':form, 'experiments':experiments},
                               context_instance=context)
 
 @login_required 
-def editExperiment(request, experiment_id):
+def edit_experiment(request, experiment_id):
     print request.POST
     experiment = Experiment.objects.get(id=experiment_id)
     if request.FILES.has_key('new_files'):
@@ -1120,7 +1108,7 @@ def editExperiment(request, experiment_id):
     if request.POST.has_key('instrument_name'):
         if request.POST['instrument_name']:
             instrument = Instrument.objects.get(id=request.POST['instrument_name'])
-            instrument_type = instrument.type
+            instrument_type = instrument.language.key
             experiment.instrument = instrument
             experiment.save()
     if request.POST.has_key('facility'):
@@ -1152,7 +1140,7 @@ def editExperiment(request, experiment_id):
     facility = experiment.facility
     instrument = experiment.instrument
     if instrument:
-        instrument_type = experiment.instrument.type
+        instrument_type = experiment.instrument.language.key
     else:
         instrument_type = None
     form1 = experimentForm1(initial={'facility':facility, 'type':instrument_type})

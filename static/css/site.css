@@ -1,5 +1,15 @@
+body { font-size: 12pt; }
 
-div#site-nav { text-align: right; }
+div#site-nav-bar {
+    text-align: right;
+    float: right;
+    display: inline;
+}
+
+div#site-state-bar {
+    text-align: left;
+    display: inline;
+}
 
 label { font-weight: inherit; }
 .hidden { overflow: hidden; }

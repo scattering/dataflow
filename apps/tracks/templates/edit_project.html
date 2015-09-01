@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Edit project{% endblock %}
+{% block head %}
+    {{ TRACKS_EXTJS }}
+{% endblock %}
+
+{% block content %}
+		    <h1 class="alt">{{project}}</h1>
+		    <hr />
+		    <form action="." method="POST">
+			    {% csrf_token %}
+		        <ul>
+        		{% for experiment in experiments.object_list %}
+            	    <li><input type="button" id="{{experiment.id}}" value="X" onclick="deleteExperiment('{{experiment}}', {{experiment.id}}, {{project.id}}, {% url 'tracks.edit_project' {{project.id}})" />
+                        <a href="{% url tracks.edit_experiment {{experiment.id}} %}">{{ experiment }}</a> ( {{ experiment.instrument.instrument_class }} )
+                    </li>
+        		{% endfor %}
+            	<li>{{ form.as_table }} <input type="submit" value="Create experiment" /></li>
+        		</ul>
+			</form>
+		    <p class="pagination">
+			    <span class="step-links">{% if experiments.has_previous %}<a href="?page={{ experiments.previous_page_number }}">previous</a> {% endif %}<span class="current">Page {{ experiments.number }} of {{ experiments.paginator.num_pages }}</span>{% if experiments.has_next %} <a href="?page={{ experiments.next_page_number }}">next</a>{% endif %}</span>
+	        </p>
+{% endblock %}

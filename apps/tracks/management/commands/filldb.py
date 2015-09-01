@@ -10,23 +10,29 @@ class Command(BaseCommand):
         set_default_admin_user()
 
 FACILITIES = {
-    'NCNR': {
-        'ncnr.tas': dict(bt4='BT-4', bt7='BT-7', macs='MACS', ng5='spins'),
-        'ncnr.refl': dict(ngd='PBR', cgd='Magik', ng7='NG-7',
-                          ng1='NG-1', cg1='AND/R', # Old instruments
-        ),
-        'ncnr.ospec': dict(ngd='PBR offspecular', cgd='Magik offspecular',
-                          ng1='NG-1 offspecular', cg1='AND/R offspecular', # Old instruments
-        ),
-        'ncnr.sans': dict(ng3sans='NG-3 SANS', ng7sans='NG-7 SANS',
-                          ngbsans='NG-B SANS'),
-    },
+    'NCNR': [
+        ('ncnr.tas', 'NCNR Triple Axis',
+         dict(bt4='BT-4', bt7='BT-7', macs='MACS', ng5='spins')),
+        ('ncnr.refl', 'NCNR Reflectometry',
+         dict(ngd='PBR', cgd='Magik', ng7='NG-7',
+              ng1='NG-1', cg1='AND/R', # Old instruments
+              )),
+         ('ncnr.ospec', 'NCNR Offspecular Reflectometry',
+          dict(ngd='PBR offspecular', cgd='Magik offspecular',
+               ng1='NG-1 offspecular', cg1='AND/R offspecular', # Old instruments
+               )),
+         ('ncnr.sans', 'NCNR sans',
+          dict(ng3sans='NG-3 SANS', ng7sans='NG-7 SANS',
+               ngbsans='NG-B SANS')),
+    ],
     #'HFIR':{},
     #'Chalk River': {},
-    'LANSCE': {
-        'lansce.ospec.asterix': dict(asterix='Asterix'),
-    },
+    'LANSCE': [
+        ('lansce.ospec.asterix', 'LANSCE Reflectometry',
+         dict(asterix='Asterix')),
+    ],
 }
+
 
 def set_default_admin_user():
     from django.conf import settings
@@ -47,13 +53,14 @@ def set_default_admin_user():
 
 
 def set_instruments():
-    from apps.tracks.models import Instrument, Facility
+    from apps.tracks.models import Language, Instrument, Facility
 
     for facility_name,instrument_group in FACILITIES.items():
         facility = Facility.objects.create(name=facility_name)
-        for itype,instruments in instrument_group.items():
+        for key,name,instruments in instrument_group:
+            language = Language.objects.create(name=name, key=key)
             for beamline,name in instruments.items():
-                Instrument.objects.create(name=name, instrument_type=itype,
+                Instrument.objects.create(name=name, language=language,
                                           facility=facility,
                                           beamline=beamline)
     # Need to plug in initial templates and calibration files

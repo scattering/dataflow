@@ -23,7 +23,8 @@ urlpatterns = []
 urlpatterns += allow_admin(baseurl="admin", docs=True)
 
 # userena account access urls
-urlpatterns += patterns('', url(r'^accounts/', include('userena.urls')))
+#urlpatterns += url(r'^accounts/', include('userena.urls'))
+#urlpatterns += url(r'^tracks/', include('tracks.urls'))
 
 # tracks application urls
 urlpatterns += patterns(
@@ -70,12 +71,6 @@ urlpatterns += patterns(
     # File loader display urls (testing, 7/6)
     ('^loadFiles/$', 'displayFileLoad'),
     ('^saveUpdate/$', 'return_files_metadata'),
-
-    # user projects/experiments/instruments/files interactions
-    ('^projects/$', 'projects'),
-    ('^projects/editProject/(?P<project_id>\d+)/$', 'editProject'),
-    ('^projects/editProject/\d+/editExperiment/(?P<experiment_id>\d+)', 'editExperiment'),
-    ('^editProject/editExperiment/$', 'editExperiment'),
 
 )
 

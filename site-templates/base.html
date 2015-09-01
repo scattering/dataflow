@@ -2,6 +2,8 @@
 {% static "css/blueprint/blueprint" as bp_css %}
 {% static "css/site.css" as site_css %}
 {% static "lib/jquery-min.js" as jquery %}
+{% static "lib/site.js" as site_js %}
+{% static "lib/ext/ext-all.js" as ext_js %}
 <html>
     <head>
         <title>{% block title %}tracks{% endblock %}</title>
@@ -14,25 +16,20 @@
         <link rel="stylesheet" type="test/css" href="{{site_css}}" />
 
         <script type="text/javascript" src="{{jquery}}" />
-
+        <script type="text/javascript" src="{{site_js}}" />
 
         <script type="text/javascript">
-function set_initial_focus() {
-  // TODO: may want to filter disabled fields
-  var input = $('form').find('input[type=text],textarea,select').filter(':visible:first');
-  input.focus().select();
-}
-window.onload = set_initial_focus;
+            window.onload = site.set_initial_focus;
         </script>
 
         {% block head %}{% endblock %}
     </head>
 	<body>
 	    <div class="container">
-            <div id="user-state">
-
+            <div id="site-state-bar">
+                Project: {{tracks.project}}
             </div>
-	        <div id="site-nav">{% block site-nav %}
+	        <div id="site-nav-bar">{% block site-nav %}
                 <a href="/">Home</a> &middot;
                 {% for url,label in nav_pages %}
                     <a href="{{url}}">{{label|capfirst}}</a> &middot;

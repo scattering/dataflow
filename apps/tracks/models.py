@@ -3,8 +3,10 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-# SHA1 hash length for hashed values.
-HASH_LENGTH = 160
+# Field sizes for various fields
+HASH_LENGTH = 160 # SHA1 hash
+DATATYPE_LENGTH = 20 # dataflow type id
+INTENT_LENGTH = 20 # dataflow intent id
 
 # Note: hashes for JSON data need to use sorted_keys=True for reproducibility
 #   import json, hashlib
@@ -12,6 +14,11 @@ HASH_LENGTH = 160
 #   hash = hashlib.sha1(json_data).hexdigest()
 # This is available in javascript using the canonical-json package:
 #     https://www.npmjs.org/package/canonical-json
+
+class TrackState(models.Model):
+    user = models.OneToOneField(User)
+    project = models.ForeignKey('Project')
+    experiment = models.ForeignKey('Experiment')
 
 class File(models.Model):
     """
@@ -41,15 +48,6 @@ class File(models.Model):
     timestamp = models.DateTimeField(auto_now_add=False)
     timestamp.help_text = _T("Measurement time. For reduced files, this is the latest measurement time.")
     # data = FileField?
-
-class FilePlot(models.Model):
-    """
-    File thumbnails can be useful for rapid data selection/display.
-    """
-    file = models.OneToOneField('File')
-    file.help_text = _T('File that is plotted')
-    #thumbnail = ImageField?
-    #data = jqplot spec
 
 class FileCache(models.Model):
     """
@@ -176,20 +174,16 @@ class ResultFile(models.Model):
     """
     file = models.OneToOneField('File', null=True)
     file.help_text = _T("Resulting data")
-    hash = models.CharField(max_length=HASH_LENGTH, primary_key=True)
-    hash.help_text = _T("Unique hash for the computation input.")
-    state = models.TextField()
-    state.help_text = _T("JSON representation of the computation.  This will contain keys for node, version, config and inputs")
-    datatype = models.CharField(max_length=300)
+    datatype = models.CharField(max_length=40)
     datatype.help_text = _T("Data type name.  The data type determines how the data can be viewed and processed.")
-    name = models.CharField(max_length=60)
-    name.help_text = _T("Display name for the results file.")
+    config_hash = models.CharField(max_length=HASH_LENGTH, primary_key=True)
+    config_hash.help_text = _T("Unique hash for the computation result, depending only on node id, inputs and configuration.")
     computation = models.ForeignKey('Computation', null=True)
     computation.help_text = _T("Data flow computation that produced the file.")
-    node = models.IntegerField()
-    node.help_text = _T("Computation node which produced the output.")
-    index = models.IntegerField()
-    index.help_text = _T("Output index for the computation node.")
+    node_index = models.IntegerField()
+    node_index.help_text = _T("Location of the node in the dataflow.")
+    output_index = models.IntegerField()
+    output_index.help_text = _T("Output index for the computation node.")
     def __unicode__(self):
         return self.name
 
@@ -210,14 +204,15 @@ class Computation(models.Model):
     hash = models.CharField(max_length=HASH_LENGTH, primary_key=True)
     hash.help_text = _T("Unique hash for the template + configuration used for the computation.")
     # template lifetime is independent of computation lifetime
-    template = models.ForeignKey('Template', null=True, on_delete=models.SET_NULL)
-    template.help_text = _T("Reference to the named template.  This may be different from the applied template if the named template is updated after it is applied.  Check the applied template hash against the named template hash to decide.")
-    dataflow_hash = models.CharField(max_length=HASH_LENGTH)
-    dataflow_hash.help_text = _T("Unique hash for the flow graph.")
     dataflow = models.TextField()
     dataflow.help_text = _T("JSON representation of the flow graph representing the computation.")
     configuration = models.TextField()
     configuration.help_text = _T("JSON representation of the parameters for each element of the flow graph.")
+
+    template = models.ForeignKey('Template', null=True, on_delete=models.SET_NULL)
+    template.help_text = _T("Reference to the named template.  This may be different from the applied template if the named template is updated after it is applied.  Check the applied template hash against the named template hash to decide.")
+    dataflow_hash = models.CharField(max_length=HASH_LENGTH)
+    dataflow_hash.help_text = _T("Unique hash for the flow graph.")
 
 
 class Template(models.Model):
@@ -255,12 +250,12 @@ class Template(models.Model):
     """
     name = models.CharField(max_length=50)
     name.help_text = _T("Name of the template")
-    instrument = models.ForeignKey('Instrument', null=True)
-    instrument.help_text = _T("Templates are specific to each instrument.")
-    dataflow_hash = models.CharField(max_length=HASH_LENGTH)
-    dataflow_hash.help_text = _T("Unique hash for the flow graph.")
+    language = models.ForeignKey('Language', null=True)
+    language.help_text = _T("Processing language used in the template.")
     dataflow = models.TextField()
     dataflow.help_text = _T("JSON representation of the flow graph representing the computation.")
+    dataflow_hash = models.CharField(max_length=HASH_LENGTH)
+    dataflow_hash.help_text = _T("Unique hash for the flow graph.")
     #class Meta:
     #    unique_together = ('name','instrument')
     def __unicode__(self):
@@ -302,14 +297,23 @@ class Project(models.Model):
     name.help_text = _T("Name of the project.")
     users = models.ManyToManyField(User, related_name='users')
     users.help_text = _T("Users who can see the project")
-    path = models.CharField(max_length=300, unique=True)
-    path.help_text = _T("Path to the project")
+    #path = models.CharField(max_length=300, unique=True)
+    #path.help_text = _T("Path to the project")
     def __unicode__(self):
         return self.name
 
+class Language(models.Model):
+    """
+    The dataflow compunent model.
+    """
+    name = models.CharField(max_length=50)
+    name.help_text = _T("Dataflow model name")
+    key = models.CharField(max_length=50)
+    key.help_text = _T("ID used to identify the language in a template.")
+
 class Instrument(models.Model):
     """
-    The instrument
+    The instrument.
     """
     name = models.CharField(max_length=50)
     name.help_text = _T("Name of the instrument")
@@ -317,10 +321,11 @@ class Instrument(models.Model):
     facility.help_text = _T("Instrument location")
     beamline = models.CharField(max_length=10)
     beamline.help_text = _T("Beamline ID for data retrieval")
-    instrument_type = models.CharField(max_length=50)
-    instrument_type.help_text = _T("Dataflow model")
-    #templates = models.ManyToManyField('Template', null=True)
-    #templates.help_text = _T("Standard reduction templates for the instrument")
+    language = models.ForeignKey('Language')
+    language.help_text = _T("Dataflow model used to process instrument data")
+    # Maybe templates belong with the language rather than the instrument?
+    templates = models.ManyToManyField('Template', null=True)
+    templates.help_text = _T("Standard reduction templates for the instrument")
 
     def __unicode__(self):
         return self.name
