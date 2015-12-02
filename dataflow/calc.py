@@ -13,7 +13,7 @@ from copy import deepcopy
 import numpy
 
 if not sys.platform=='win32':
-    os.system("redis-server") # ensure redis is running
+    os.system("nohup redis-server > /dev/null 2>&1 &") # ensure redis is running
 server = redis.Redis("localhost")
 #if not hasattr(server, 'rpush'): server.rpush = server.push
 
@@ -208,6 +208,7 @@ def fingerprint_template(template, config):
     the dict of fingerprints (one per output terminal) """    
     fingerprints = {}
     index = 0
+    config = deepcopy(config)
     for nodenum, wires in template:
         # Find the modules
         node = template.modules[nodenum]

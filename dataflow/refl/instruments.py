@@ -105,7 +105,7 @@ reduction = [footprint, background, normalize, normalize_time]
 
 PBR = Instrument(id='ncnr.refl.pbr', # creates instrument with module option lists 'Input' and 'Reduction'
                  name='refl',
-                 archive='http://www.ncnr/nist.gov/data/pbr',
+                 archive='http://ncnr.nist.gov/pub/ncnrdata/ngd',
                  menu=[  # takes 'input' and 'reduction' lists and places both in menu for PBR instrument
                        ('Input', input),
                        ('Reduction', reduction),
