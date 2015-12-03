@@ -13,7 +13,7 @@ from copy import deepcopy
 import numpy
 
 if not sys.platform=='win32':
-    os.system("nohup redis-server > /dev/null 2>&1 &") # ensure redis is running
+    os.system("nohup redis-server --maxmemory 4gb --maxmemory-policy allkeys-lru > /dev/null 2>&1 &") # ensure redis is running
 server = redis.Redis("localhost")
 #if not hasattr(server, 'rpush'): server.rpush = server.push
 
