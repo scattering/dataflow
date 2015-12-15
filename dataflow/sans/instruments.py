@@ -158,7 +158,7 @@ def sans_example():
                         description='example sans data',
                         modules=modules,
                         wires=wires,
-                        instrument=SANS_NG3.id,
+                        instrument=SANS.id,
                         )
 
     return template, config

@@ -4,17 +4,17 @@ Run a reduction workflow.
 The function run_template
 """
 
-import sys, os
-from inspect import getsource
-import hashlib, types
-from copy import deepcopy
+import hashlib
 import contextlib
+from inspect import getsource
+from copy import deepcopy
 import logging
 
 import numpy as np
 
-from .cache import CACHE_MANAGER
+from .cache import get_cache
 from .core import lookup_module, lookup_datatype
+
 
 def run_template(template, config):
     """
@@ -28,13 +28,14 @@ def run_template(template, config):
     Note: this version keeps all intermediates, and so isn't suitable for
     large data sets.
     """
-    cache = CACHE_MANAGER.cache
+    cache = get_cache()
+
     all_results = {}
     fingerprints = fingerprint_template(template, config)
     for nodenum, wires in template:
         # Find the modules
         node = template.modules[nodenum]
-        module_id = node['module'] # template.modules[node]
+        module_id = node['module']  # template.modules[node]
         module = lookup_module(module_id)
         inputs = _map_inputs(module, wires)
         #logging.debug("inputs %s"%inputs)
@@ -53,22 +54,22 @@ def run_template(template, config):
                           for k, v in inputs.items())
         #logging.debug("inputs again %s"%inputs)
         #logging.debug("updated inputs %s"%input_args)
+        #logging.debug("config %s"%node_config)
 
         # Include configuration information
-        node_config= node.get('config', {})  # Template defaults
+        node_config = node.get('config', {})  # Template defaults
         node_config.update(config[nodenum])  # Instance arguments
+        node_config.update(input_args)
+
         config_str = ", ".join("%s=%s"%(k,v) for k,v in sorted(node_config.items()))
         wires = ", ".join("%s:%s"%(k,v) for k,v in sorted(inputs.items()))
         if wires: config_str = "%s with %s"%(config_str, wires)
-        node_config.update(input_args)
-        #logging.debug("config %s"%node_config)
 
         # Fingerprinting
         fp = name_fingerprint(fingerprints[nodenum])
 
-
         # Overwrite even if there was already the same reduction?
-        if cache.exists(fp):# or module.name == 'Save':
+        if cache.exists(fp):  # or module.name == 'Save':
             logging.info("retrieving %s: %s %s"%(nodenum, module_id, config_str))
             result = {}
             for terminal in module.terminals:
@@ -76,7 +77,7 @@ def run_template(template, config):
                     cls = lookup_datatype(terminal['datatype']).cls
                     terminal_fp = name_terminal(fp, terminal['id'])
                     result[terminal['id']] = [cls.loads(s)
-                                              for s in cache.lrange(terminal_fp, 0, -1)]
+                            for s in cache.lrange(terminal_fp, 0, -1)]
         else:
             logging.info("executing %s: %s %s"%(nodenum, module_id, config_str))
             result = module.action(**node_config)
@@ -85,8 +86,8 @@ def run_template(template, config):
                 terminal_fp = name_terminal(fp, terminal_id)
                 for data in res:
                     cache.rpush(terminal_fp, data.dumps())
-            cache.set(fp, fp) # used for checking if the calculation exists;
-            # could wrap this whole thing with loop of output terminals
+            cache.set(fp, fp)  # used for checking if the calculation exists;
+            # could wrap this whole thing with loop over output terminals
         all_results[nodenum] = result
     # retrieve plottable results
     ans = {}
@@ -105,10 +106,16 @@ def run_template(template, config):
     return ans
 
 def calc_single(template, config, nodenum, terminal_id):
-    """ Calculate fingerprint of terminal in question - if it exists in the cache,
-        get it.  Otherwise, calculate from scratch (retrieving parent values recursively) """
+    """
+    Return the value for a terminal.
+
+    If the terminal fingerprint is already in the cache, retrieve it and
+    return the associated value.  If not, then compute the value for the
+    terminal and place it in the cache.
+    """
+    cache = get_cache()
+
     # Find the modules
-    cache = CACHE_MANAGER.cache
     node = template.modules[nodenum]
     module_id = node['module'] # template.modules[node]
     module = lookup_module(module_id)
@@ -129,24 +136,25 @@ def calc_single(template, config, nodenum, terminal_id):
         print "no cached calc value: calculating..."
         parents = template.get_parents(nodenum)
         # this is a list of wires that terminate on this module
-        kwargs = {}
+        input_args = {}
         for wire in parents:
             source_nodenum, source_terminal_id = wire['source']
             source_data = calc_single(template, config, source_nodenum,
                                       source_terminal_id)
             target_id = wire['target'][1]
-            if target_id in kwargs:
+            if target_id in input_args:
                 # this explicitly assumes all data is a list
                 # so that we can concatenate multiple inputs
-                kwargs[target_id] += source_data
+                input_args[target_id] += source_data
             else:
-                kwargs[target_id] = source_data
+                input_args[target_id] = source_data
         
         # Include configuration information
-        node_config = node.get('config', {})
-        node_config.update(config[nodenum])
-        kwargs.update(node_config)
-        calc_value = module.action(**kwargs)
+        node_config = node.get('config', {})  # Template defaults
+        node_config.update(config[nodenum])  # Instance arguments
+        node_config.update(input_args)
+
+        calc_value = module.action(**node_config)
         # pushing the value of all the outputs for this node to cache, 
         # even though only one was asked for
         for terminal_name, arr in calc_value.items():
@@ -158,8 +166,9 @@ def calc_single(template, config, nodenum, terminal_id):
     return result
 
 def get_plottable(template, config, nodenum, terminal_id):
+    cache = get_cache()
+
     # Find the modules
-    cache = CACHE_MANAGER.cache
     node = template.modules[nodenum]
     module_id = node['module'] # template.modules[node]
     module = lookup_module(module_id)
@@ -198,8 +207,9 @@ def get_plottable(template, config, nodenum, terminal_id):
 
 
 def get_csv(template, config, nodenum, terminal_id):
+    cache = get_cache()
+
     # Find the modules
-    cache = CACHE_MANAGER.cache
     node = template.modules[nodenum]
     module_id = node['module'] # template.modules[node]
     module = lookup_module(module_id)
@@ -247,20 +257,30 @@ def fingerprint_template(template, config):
         #print "configuration for fingerprint:", node_config
         
         # Fingerprinting
-        fp = finger_print(module, node_config, index, inputs_fp) # terminals included
+        fp = finger_print(module, node_config, index, inputs_fp)  # terminals included
         #print nodenum, module, node_config, index, inputs_fp, fp
         fingerprints[nodenum] = fp
         index += 1
     return fingerprints
 
 def _lookup_results(result, s):
-    try: node = result[s[0]]
-    except KeyError: raise KeyError("Could not find results for node %s"%s[0])
+    # Hack to figure out if we have a bundle.  Fix this!
+    try:
+        return [_lookup_results(result, (node_name, terminal))
+                for node_name, terminal in s]
     except TypeError:
-        return [result[n][t] for n,t in s]
-    try: return node[s[1]]
-    except KeyError: raise KeyError("Could not find terminal %r in %r for node %s"
-                                    %(s[1],node.keys(),s[0]))
+        pass
+
+    node_name, terminal = s
+    try:
+        node = result[node_name]
+    except KeyError:
+        raise KeyError("Could not find node %s"%node_name)
+    try:
+        return node[terminal]
+    except KeyError:
+        raise KeyError("Could not find terminal %r in %r for node %s"
+                       % (terminal, node.keys(), node_name))
 
 
 def _map_inputs(module, wires):
@@ -304,33 +324,32 @@ def finger_print(module, args, nodenum, inputs_fp):
     """
     Create a unique sha1 hash for a module based on its attributes and inputs.
     """
-    d = format_ordered(deepcopy(module.__dict__))
-    fp = str(d)
+    d = _format_ordered(deepcopy(module.__dict__))
+    parts = [str(d)]
     bad_args = ["position", "xtype", "width", "terminals", "height", "title", "image", "icon"]
     new_args = dict((arg, value) for arg, value in args.items() if arg not in bad_args)
-    new_args = format_ordered(new_args)
-    fp += str(new_args) # all arguments for the given module
-    # actually, I don't think it matters what order it's in! - bbm
+    new_args = _format_ordered(new_args)
+    parts.append(str(new_args)) # all arguments for the given module
+    # [actually, I don't think it matters what order it's in! - bbm]
+    # [how can sha1 not be order dependent?? - pak]
     #fp += str(nodenum) # node number in template order
-    for item in inputs_fp:
-        terminal_id, input_fp = item
-        fp += terminal_id + input_fp
-    fp = hashlib.sha1(fp).hexdigest()
+    parts.extend(part for item in inputs_fp for part in item)
+
+    fp = hashlib.sha1("".join(parts)).hexdigest()
     return fp
 
 # new methods that keep everything ordered
-def format_ordered(value):
-    value_type = type(value)
+def _format_ordered(value):
     if isinstance(value, dict):
-        return list((k,format_ordered(v)) for k,v in sorted(value.items()))
+        return list((k, _format_ordered(v)) for k, v in sorted(value.items()))
     elif isinstance(value, list):
-        return [format_ordered(v) for v in value]
+        return [_format_ordered(v) for v in value]
     elif isinstance(value, tuple):
-        return tuple(format_ordered(v) for v in value)
+        return tuple(_format_ordered(v) for v in value)
     elif callable(value):
         return getsource(value)
     elif hasattr(value, '__dict__'):
-        return format_ordered(value.__dict__)
+        return [value.__class__.__name__, _format_ordered(value.__dict__)]
     else:
         return value
 
@@ -361,16 +380,14 @@ def name_terminal(fp, terminal_id):
 def push_seed(seed=None): # pragma no cover
     """
     Set a temporary seed to the numpy random number generator, restoring it
-    at the end of the context.
+    at the end of the context.  If seed is None, then get a seed from
+    /dev/urandom (or the windows analogue).
     """
     from numpy.random import get_state, set_state, seed as set_seed
-    if seed is not None:
-        state = get_state()
-        set_seed(seed)
-        yield
-        set_state(state)
-    else:
-        yield
+    state = get_state()
+    set_seed(seed)
+    yield
+    set_state(state)
 
 def verify_examples(source_file, tests, target_dir, seed=1): # pragma no cover
     """
@@ -477,11 +494,11 @@ def test_ordered():
         ([1,udict,3], [1,odict,3]),
         ((1,udict,3), (1,odict,3)),
         (ufn, "    def ufn(a): return a\n"),
-        (A(), odict),
-        (A2(), odict),
+        (A(), ['A', odict]),
+        (A2(), ['A2', odict]),
         ]
 
     for u,o in pairs:
-        actual = format_ordered(u)
-        print "%s => %s =? %s"%(str(u),actual,o)
+        actual = _format_ordered(u)
+        print "%s => %r =? %r"%(str(u),actual,o)
         assert actual == o

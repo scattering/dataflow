@@ -5,7 +5,6 @@ from collections import deque
 import inspect
 import json
 
-from . import config
 from .deps import processing_order
 
 TEMPLATE_VERSION = '1.0'
@@ -72,27 +71,28 @@ class Module(object):
     *description* : string
         A tooltip shown when hovering over the icon
 
-    *icon* : { URI: string, terminals: { string: [x,y,i,j] } }
+    *icon* : { URI: string, terminals: { *id*: [*x*,*y*,*i*,*j*] } }
         Image representing the module, or none if the module should be
         represented by name.
 
-    The terminal locations are identified by:
+        The terminal locations are identified by:
 
-    id : string
-    name of the terminal
-    position : [int, int]
-    (x,y) location of terminal within icon
+            *id* : string
+                name of the terminal
 
-    direction : [int, int]
-    direction of the wire as it first leaves the terminal;
-    default is straight out
+            *position* : [int, int]
+                (x,y) location of terminal within icon
+
+            *direction* : [int, int]
+                direction of the wire as it first leaves the terminal;
+                default is straight out
 
     *fields* : Form
         An inputEx form defining the constants needed for the module. For
         example, an attenuator will have an attenuation scalar. Field
         names must be distinct from terminal names.
 
-    terminals : [Terminal]
+    *terminals* : [Terminal]
         List module inputs and outputs.
 
         *id* : string
@@ -188,17 +188,18 @@ class Template(object):
 
         *source* : [int, string]
             module id in template and terminal name in module
+
         *target* : [int, string]
             module id in template and terminal name in module
 
     *instrument* : string
         Instrument to which the template applies
 
-    *version*
+    *version* : string
         Template version number
     """
-    def __init__(self, name, description, modules, wires, instrument,
-                 version='0.0'):
+    def __init__(self, name=None, description=None, modules=None, wires=None,
+                 instrument="", version=TEMPLATE_VERSION):
         self.name = name
         self.description = description
         self.modules = modules
@@ -248,32 +249,33 @@ class Instrument(object):
     An instrument is a set of modules and standard templates to be used
     for reduction
 
-    Attributes
-    ----------
+    *id* : string
+        Instrument identifier. By convention this will be a dotted
+        structure '<facility>.<instrument class>.<instrument>'
 
-    id : string
+    *name* : string
+        The display name of the instrument
 
-    Instrument identifier. By convention this will be a dotted
-    structure '<facility>.<instrument class>.<instrument>'
+    *menu* : [(string, [Module, ...]), ...]
+        Modules available. Modules are organized into groups of related
+        operations, such as Input, Reduce, Analyze, ...
 
-    name : string
+    *datatypes* : [Datatype]
+        List of datatypes used by the instrument
 
-    The display name of the instrument
-
-    menu : [(string, [Module, ...]), ...]
-    Modules available. Modules are organized into groups of related
-    operations, such as Input, Reduce, Analyze, ...
-
-    datatypes : [Datatype]
-    List of datatypes used by the instrument
+    *archive* : URI
+        Location of the data archive for the instrument. Archives must
+        implement an interface that allows data sets to be listed and
+        retrieved for a particular instrument/experiment.
     """
     def __init__(self, id, name=None, menu=None,
-                 datatypes=None, requires=None, loaders=None):
+                 datatypes=None, requires=None, archive=None, loaders=None):
         self.id = id
         self.name = name
         self.menu = menu
         self.datatypes = datatypes
         self.requires = requires
+        self.archive = archive
         self.loaders = loaders
 
         self.modules = []
@@ -306,38 +308,36 @@ class Data(object):
     """
     Data objects represent the information flowing over a wire.
 
-    Attributes
-    ----------
+    *name* : string
+        User visible identifier for the data. Usually this is file name.
 
-    name : string
-    User visible identifier for the data. Usually this is file name.
+    *datatype* : string
+        Type of the data. This determines how the data may be plotted
+        and filtered.
 
-    datatype : string
-    Type of the data. This determines how the data may be plotted
-    and filtered.
-    intent : string
-    What role the data is intended for, such as 'background' for
-    data that is used for background subtraction.
+    *intent* : string
+        What role the data is intended for, such as 'background' for
+        data that is used for background subtraction.
 
-    dataid : string
-    Key to the data. The data itself can be stored and retrieved by key.
+    *dataid* : string
+        Key to the data. The data itself can be stored and retrieved by key.
 
-    history : list
+    *history* : list
+        History is the set of modules used to create the data. Each module
+        is identified by the module id, its version number and the module
+        configuration used for this data set. For input terminals, the
+        configuration will be {string: [int,...]} identifying
+        the connection between nodes in the history list for each input.
 
-    History is the set of modules used to create the data. Each module
-    is identified by the module id, its version number and the module
-    configuration used for this data set. For input terminals, the
-    configuration will be {string: [int,...]} identifying
-    the connection between nodes in the history list for each input.
+    *module* : string
 
-    module : string
+    *version* : string
 
-    version : string
+    *inputs* : { <input terminal name> : [(<hist iindex>, <output terminal>), ...] }
 
-    inputs : { <input terminal name> : [(<hist iindex>, <output terminal>), ...] }
+    *config* : { <field name> : value, ... }
 
-    config : { <field name> : value, ... }
-    dataid : string
+    *dataid* : string
     """
     def __new__(subtype, id, cls, loaders=[]):
         obj = object.__new__(subtype)
@@ -363,3 +363,58 @@ class Data(object):
     def loads(cls, str):
         return Data(str, Data)
 
+
+# ============= Parent traversal =============
+class Node(object):
+    """
+    Base node
+
+    A diagram is created by connecting nodes with wires.
+
+    *parents* : [Node]
+        List of parents that this node has
+
+    *params* : dictionary
+        Somehow matches a parameter to its current value,
+        which will be compared to the previous value as found
+        in the database.
+    """
+    def __init__(self, parents, params):
+        self.parents = parents
+        self.params = params
+
+    def searchDirty(self):
+        queue = deque([self])
+        while queue:
+            node = queue.popleft()
+            if node.isDirty():
+                return True
+            for parent in node.parents:
+                queue.append(parent)
+        return False
+
+    def isDirty(self):
+        # Use inspect or __code__ for introspection?
+        return self.params != self._get_inputs()
+
+    def _get_inputs(self):
+        # Get data from database
+        #pass
+        data = {'maternal grandpa':{'id':'maternal grandpa'},
+                'maternal grandma':{'id':'maternal grandma'},
+                'mom':{'id':'mom'},
+                'paternal grandpa':{'id':'paternal grandpa'},
+                'paternal grandma':{'id':'paternal grandma'},
+                'dad':{'id':'dad'},
+                'son':{'id':'son'}, }
+        return data.get(self.params['id'], {})
+
+if __name__ == '__main__':
+    head = Node([Node([Node([], {'id':'maternal grandpa'}),
+                       Node([], {'id':'maternal grandma'})],
+                      {'id':'mom'}),
+                 Node([Node([], {'id':'paternal grandpa'}),
+                       Node([], {'id':'paternal grandma'})],
+                      {'id':'dad'})],
+                {'id':'son'})
+    print "Dirty" if head.searchDirty() else "Clean"
