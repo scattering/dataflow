@@ -38,7 +38,7 @@ class MemoryCache:
         else:
             self.cache[key].append(value)
     def lrange(self, key, low, high):
-        return self.cache[key][low:high]
+        return self.cache[key][low:(high+1 if high != -1 else None)]
 
 
 def memory_cache():
