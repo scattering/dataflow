@@ -1,7 +1,7 @@
-import unitest
+import unittest
 import regular_gridding
 
-class RegularGriddingTestCase(unitest.TestCase):
+class RegularGriddingTestCase(unittest.TestCase):
 
 	#Do any setup if necessary. Run a takedown after tests if a setup was used.
 	#def setup(self):
